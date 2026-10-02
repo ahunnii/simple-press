@@ -127,6 +127,9 @@ function VideoUploadFormFieldInner({
     objectUrl ??
     (hasFile ? null : libraryUrl) ??
     (showExisting ? (existingPreviewUrl ?? null) : null);
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = label ? <span className="sr-only">: {label}</span> : null;
 
   const triggerFileInput = useCallback(() => {
     if (disabled) return;
@@ -199,7 +202,7 @@ function VideoUploadFormFieldInner({
                 variant="ghost"
                 size="icon"
                 disabled={disabled}
-                aria-label="Remove video"
+                aria-label={label ? `Remove video: ${label}` : "Remove video"}
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => {
                   setRemovedExisting(true);
@@ -228,6 +231,7 @@ function VideoUploadFormFieldInner({
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   {previewUrl ? "Replace video" : "Choose video"}
+                  {nameSuffix}
                   <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
@@ -264,6 +268,7 @@ function VideoUploadFormFieldInner({
             >
               <Upload className="mr-2 h-4 w-4" />
               {previewUrl ? "Replace video" : "Choose video"}
+              {nameSuffix}
             </Button>
           )}
           <div
@@ -290,6 +295,7 @@ function VideoUploadFormFieldInner({
             onClick={triggerFileInput}
           >
             Drag and drop a video here, or click to browse
+            {nameSuffix}
           </div>
         </div>
       </FormControl>

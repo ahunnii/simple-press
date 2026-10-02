@@ -284,7 +284,7 @@ export function OwnerTestimonialDialog({
                         type="button"
                         variant="destructive"
                         size="icon"
-                        aria-label="Remove photo"
+                        aria-label={`Remove photo ${i + 1}`}
                         className="absolute top-1 right-1 h-6 w-6"
                         onClick={() =>
                           field.onChange(field.value.filter((_, j) => j !== i))

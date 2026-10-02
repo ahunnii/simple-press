@@ -292,6 +292,33 @@ const router: Router = {
         };
       },
     }),
+    // Media Library bulk uploads get their own `library-` key prefix. That
+    // prefix is what protects them from the automatic "delete if unreferenced"
+    // cleanup (product/gallery removal, `upload.discardUploads`): an image the
+    // owner put in the library on purpose stays until they explicitly delete it
+    // from the Media Library (`isLibraryOwnedKey` in src/lib/media/usage.ts).
+    libraryImages: route({
+      fileTypes: ["image/*"],
+      multipleFiles: true,
+      // Keep in sync with ROUTE_MAX_FILES.libraryImages (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.libraryImages,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
+
+      onBeforeUpload: async ({ req }) => {
+        const { business } = await requireBusinessManager(req);
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            const ext = safeRasterImageExt(file.name);
+            const key = uniqueKey(business.id, "library", ext);
+            return {
+              key,
+              metadata: { pathname: keyToPublicUrl(key) },
+            };
+          },
+        };
+      },
+    }),
     // Editor-note attachments (screenshots / phone photos sent to the platform
     // operator). Kept under the business prefix so `upload.discardUploads` can
     // clean up failed sends; the `editor-notes/` segment hides them from the

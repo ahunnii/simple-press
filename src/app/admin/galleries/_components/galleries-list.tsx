@@ -497,7 +497,7 @@ export function GalleriesList({
                     ? "This permanently deletes the gallery. This action cannot be undone."
                     : `This permanently deletes the gallery and its ${deletingImageCount} ${
                         deletingImageCount === 1 ? "image" : "images"
-                      }, including the stored files. This action cannot be undone.`}
+                      }. Image files are deleted too, unless they’re saved in your Media Library or used elsewhere on your store. This action cannot be undone.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

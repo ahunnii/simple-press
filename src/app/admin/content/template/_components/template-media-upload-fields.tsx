@@ -64,6 +64,10 @@ type TemplateImageUploadFieldProps = {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  /** Names this field in the upload/remove controls' accessible names
+   *  (e.g. "Remove image: Hero image") when the visible label is rendered by
+   *  the caller instead of `label`. Defaults to `label`. */
+  accessibleName?: string;
   description?: string;
   disabled?: boolean;
   /** Show a "Choose from library" button next to the upload UI. Only pass
@@ -76,6 +80,7 @@ export function TemplateImageUploadField({
   value,
   onChange,
   label,
+  accessibleName,
   description,
   disabled,
   mediaLibraryEnabled,
@@ -163,6 +168,12 @@ export function TemplateImageUploadField({
 
   const isUploading = uploader.isPending;
   const isBusy = isUploading || isPreparing;
+  const fieldName = accessibleName ?? label;
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = fieldName ? (
+    <span className="sr-only">: {fieldName}</span>
+  ) : null;
 
   return (
     <div className="space-y-2">
@@ -210,7 +221,9 @@ export function TemplateImageUploadField({
               variant="ghost"
               size="icon"
               disabled={disabled ?? isBusy}
-              aria-label="Remove image"
+              aria-label={
+                fieldName ? `Remove image: ${fieldName}` : "Remove image"
+              }
               className="text-muted-foreground hover:text-destructive shrink-0 pointer-coarse:h-11 pointer-coarse:w-11"
               onClick={handleRemove}
             >
@@ -249,6 +262,7 @@ export function TemplateImageUploadField({
                   <>
                     <Upload className="mr-2 h-4 w-4" />
                     {previewUrl ? "Replace image" : "Choose image"}
+                    {nameSuffix}
                     <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
                   </>
                 )}
@@ -305,6 +319,7 @@ export function TemplateImageUploadField({
               <>
                 <Upload className="mr-2 h-4 w-4" />
                 {previewUrl ? "Replace image" : "Choose image"}
+                {nameSuffix}
               </>
             )}
           </Button>
@@ -342,6 +357,7 @@ export function TemplateImageUploadField({
               : isCoarsePointer
                 ? "Tap to choose a photo"
                 : "Drag and drop an image here, or click to browse"}
+          {nameSuffix}
         </div>
       </div>
       {description && (
@@ -369,6 +385,10 @@ type TemplateVideoUploadFieldProps = {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  /** Names this field in the upload/remove controls' accessible names
+   *  (e.g. "Remove image: Hero image") when the visible label is rendered by
+   *  the caller instead of `label`. Defaults to `label`. */
+  accessibleName?: string;
   description?: string;
   disabled?: boolean;
   /** Show a "Choose from library" button next to the upload UI. Only pass
@@ -381,6 +401,7 @@ export function TemplateVideoUploadField({
   value,
   onChange,
   label,
+  accessibleName,
   description,
   disabled,
   mediaLibraryEnabled,
@@ -456,6 +477,12 @@ export function TemplateVideoUploadField({
   }, [onChange]);
 
   const isUploading = uploader.isPending;
+  const fieldName = accessibleName ?? label;
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = fieldName ? (
+    <span className="sr-only">: {fieldName}</span>
+  ) : null;
 
   return (
     <div className="space-y-2">
@@ -504,7 +531,9 @@ export function TemplateVideoUploadField({
               variant="ghost"
               size="icon"
               disabled={disabled ?? isUploading}
-              aria-label="Remove video"
+              aria-label={
+                fieldName ? `Remove video: ${fieldName}` : "Remove video"
+              }
               className="text-muted-foreground hover:text-destructive shrink-0"
               onClick={handleRemove}
             >
@@ -535,6 +564,7 @@ export function TemplateVideoUploadField({
                   <>
                     <Upload className="mr-2 h-4 w-4" />
                     {previewUrl ? "Replace video" : "Choose video"}
+                    {nameSuffix}
                     <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
                   </>
                 )}
@@ -583,6 +613,7 @@ export function TemplateVideoUploadField({
               <>
                 <Upload className="mr-2 h-4 w-4" />
                 {previewUrl ? "Replace video" : "Choose video"}
+                {nameSuffix}
               </>
             )}
           </Button>
@@ -614,6 +645,7 @@ export function TemplateVideoUploadField({
           onClick={triggerFileInput}
         >
           Drag and drop a video here, or click to browse (max 50MB)
+          {nameSuffix}
         </div>
       </div>
       {description && (

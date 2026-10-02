@@ -41,7 +41,7 @@ vi.mock("~/server/db", () => ({
 }));
 
 const { db } = await import("~/server/db");
-const { buildGalleryExternalUsage, buildUsedMediaIndex } =
+const { buildGalleryExternalUsage, buildUsedMediaIndex, isLibraryOwnedKey } =
   await import("./usage");
 const { keyToPublicUrl } = await import("~/lib/s3/url");
 const { SERVICE_TEMPLATE_FIELDS } = await import("~/lib/service-templates");
@@ -581,5 +581,25 @@ describe("buildGalleryExternalUsage", () => {
         where: { businessId: BUSINESS_ID, id: { in: ["gal_gone"] } },
       }),
     );
+  });
+});
+
+describe("isLibraryOwnedKey", () => {
+  it("is true for library- uploads under a business prefix", () => {
+    expect(isLibraryOwnedKey("biz/library-abc.webp")).toBe(true);
+  });
+
+  it("is false for other key families", () => {
+    expect(isLibraryOwnedKey("biz/image-abc.webp")).toBe(false);
+    expect(isLibraryOwnedKey("biz/gallery-abc.webp")).toBe(false);
+    expect(isLibraryOwnedKey("biz/logo.png")).toBe(false);
+  });
+
+  it("requires the business prefix (no slash means not ours)", () => {
+    expect(isLibraryOwnedKey("library-x.webp")).toBe(false);
+  });
+
+  it("only matches at the start of the suffix", () => {
+    expect(isLibraryOwnedKey("biz/image-library-abc.webp")).toBe(false);
   });
 });

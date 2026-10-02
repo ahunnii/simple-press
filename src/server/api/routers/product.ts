@@ -7,6 +7,7 @@ import type { ProductSortValue } from "~/lib/validators/product";
 import {
   buildUsedMediaIndex,
   isAlwaysInUseKey,
+  isLibraryOwnedKey,
   normalizeUrl,
 } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
@@ -67,6 +68,9 @@ import {
  *     here while that tenant is still using it.
  *  3. Logo/favicon fixed-key objects are never touched (`isAlwaysInUseKey`),
  *     matching the media router's hard protection.
+ *  4. Media Library uploads (`library-` keys, `isLibraryOwnedKey`) are never
+ *     touched — the owner uploaded them on purpose, so only the Media
+ *     Library's explicit delete may remove them.
  *
  * Non-storage URLs are skipped rather than handed to `deleteStoredObjects`,
  * which would only log an "unrecognised URL shape" error to Sentry.
@@ -106,6 +110,7 @@ async function deleteUnreferencedImageObjects(
     if (!key) return false; // external URL — not ours to delete
     if (!key.startsWith(`${businessId}/`)) return false; // another tenant's object
     if (isAlwaysInUseKey(key)) return false; // logo / favicon
+    if (isLibraryOwnedKey(key)) return false; // owner's library upload
     return (usageIndex.get(url) ?? []).length === 0;
   });
 

@@ -320,16 +320,16 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   const deleteImageMutation = api.gallery.deleteImage.useMutation({
     onSuccess: () => {
       toast.dismiss();
-      toast.success("Image deleted");
+      toast.success("Image removed");
       void utils.gallery.invalidate();
       router.refresh();
     },
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to delete image");
+      toast.error(error.message ?? "Failed to remove image");
     },
     onMutate: () => {
-      toast.loading("Deleting image...");
+      toast.loading("Removing image...");
     },
   });
 
@@ -1028,10 +1028,11 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                         strategy={rectSortingStrategy}
                       >
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-                          {images.map((image) => (
+                          {images.map((image, index) => (
                             <SortableImage
                               key={image.id}
                               image={image}
+                              index={index}
                               onDelete={handleDeleteImage}
                               onEdit={setEditingImage}
                             />
@@ -1482,7 +1483,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                     ? "This permanently deletes the gallery. This action cannot be undone."
                     : `This permanently deletes the gallery and its ${images.length} ${
                         images.length === 1 ? "image" : "images"
-                      }, including the stored files. This action cannot be undone.`}
+                      }. Image files are deleted too, unless they’re saved in your Media Library or used elsewhere on your store. This action cannot be undone.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -1525,9 +1526,10 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete image</AlertDialogTitle>
+            <AlertDialogTitle>Remove image from gallery?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this image? This action cannot be
+              The image file is deleted too, unless it’s saved in your Media
+              Library or used elsewhere on your store. This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -1535,15 +1537,16 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
             <AlertDialogCancel disabled={isDeletingImage}>
               Cancel
             </AlertDialogCancel>
+            {/* `variant`, NOT className — see the gallery delete dialog above. */}
             <AlertDialogAction
+              variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
                 confirmDeleteImage();
               }}
               disabled={isDeletingImage}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeletingImage ? "Deleting…" : "Delete"}
+              {isDeletingImage ? "Removing…" : "Remove"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

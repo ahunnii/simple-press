@@ -50,6 +50,7 @@ import {
   loadingToast,
 } from "../../_lib/admin-mutation-toast";
 import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
+import { MediaUploadButton } from "./media-upload-button";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,6 +75,9 @@ type Props = {
   /** Mirrors `media.bulkDelete`'s `ownerOnlyProcedure`, resolved server-side.
    *  False OMITS every bulk affordance — see the note above `bulkActions`. */
   canBulkDelete: boolean;
+  /** Whether the viewer may upload here (owner/manager/platform admin, own
+   *  business only) — gates the empty-state "Upload images" action. */
+  canUpload: boolean;
   /** Keys of every file matching the current filters, across all pages — or
    *  `null` when more than ADMIN_BULK_SELECTION_LIMIT match and
    *  `buildTablePage` declined to enumerate them. */
@@ -277,6 +281,7 @@ export function MediaLibraryClient({
   items,
   businessId,
   canBulkDelete,
+  canUpload,
   matchingIds,
   totalCount,
   totalPages,
@@ -464,15 +469,21 @@ export function MediaLibraryClient({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  // Absolute empty state — no files at all, so there is nothing to filter. No
-  // action: uploads happen where the media is used (product images, galleries,
-  // template fields), never from this page.
+  // Absolute empty state — no files at all, so there is nothing to filter.
+  // Uploads can start here (when the viewer may upload) as well as wherever
+  // media is used (product images, galleries, template fields). Files uploaded
+  // from this page are `library-` keys, kept until deleted from this page.
   if (totalFiles === 0) {
     return (
       <AdminEmpty
         icon={Images}
         title="No media uploaded yet"
-        description="Files will appear here once you upload images, videos, or other media to your store."
+        description={
+          canUpload
+            ? "Upload images here, or they'll appear as you add media to products, galleries, and pages."
+            : "Files will appear here once images, videos, or other media are added to products, galleries, and pages."
+        }
+        action={canUpload ? <MediaUploadButton /> : undefined}
       />
     );
   }

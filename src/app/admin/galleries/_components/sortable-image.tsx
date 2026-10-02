@@ -11,12 +11,13 @@ import { AdminThumb } from "../../_components/admin-thumb";
 
 type Props = {
   image: GalleryImage;
+  index: number;
   onDelete: (id: string) => void;
   onEdit: (image: GalleryImage) => void;
 };
 
 // Sortable Image Component
-export function SortableImage({ image, onDelete, onEdit }: Props) {
+export function SortableImage({ image, index, onDelete, onEdit }: Props) {
   const {
     attributes,
     listeners,
@@ -48,7 +49,7 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
       <div
         {...attributes}
         {...listeners}
-        aria-label="Drag to reorder"
+        aria-label={`Reorder image ${index + 1}`}
         className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
       >
         <GripVertical className="h-4 w-4 text-white" aria-hidden="true" />
@@ -58,7 +59,7 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
         <Button
           variant="secondary"
           size="sm"
-          aria-label="Edit image"
+          aria-label={`Edit image ${index + 1}`}
           onClick={() => onEdit(image)}
           className="h-8 w-8 p-0"
         >
@@ -68,7 +69,7 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
         <Button
           variant="destructive"
           size="sm"
-          aria-label="Delete image"
+          aria-label={`Remove image ${index + 1}`}
           onClick={() => onDelete(image.id)}
           className="h-8 w-8 p-0"
         >

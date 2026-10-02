@@ -17,6 +17,15 @@ describe("parseContents", () => {
     ]);
   });
 
+  it("classifies Media Library uploads as images", () => {
+    const objs = parseContents(
+      `<ListBucketResult>${contents("biz1/library-abc.webp")}</ListBucketResult>`,
+    );
+    expect(objs.map((o) => [o.key, o.kind])).toEqual([
+      ["biz1/library-abc.webp", "image"],
+    ]);
+  });
+
   it("skips editor-note attachments (not site media)", () => {
     const objs = parseContents(
       `<ListBucketResult>${contents("biz1/editor-notes/0123456789abcdef.jpg")}${contents("biz1/image-abc.png")}</ListBucketResult>`,

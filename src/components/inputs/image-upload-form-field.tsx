@@ -164,6 +164,9 @@ function ImageUploadFormFieldInner({
   const [isPreparing, setIsPreparing] = useState(false);
 
   const busy = disabled === true || isPreparing;
+  /** Hidden ": <field>" appended to the generic button text so several
+   *  media fields on one page don't announce identically. */
+  const nameSuffix = label ? <span className="sr-only">: {label}</span> : null;
 
   const triggerFileInput = useCallback(() => {
     if (busy) return;
@@ -272,7 +275,7 @@ function ImageUploadFormFieldInner({
                 variant="ghost"
                 size="icon"
                 disabled={busy}
-                aria-label="Remove image"
+                aria-label={label ? `Remove image: ${label}` : "Remove image"}
                 className="text-muted-foreground hover:text-destructive shrink-0"
                 onClick={() => {
                   setRemovedExisting(true);
@@ -308,6 +311,7 @@ function ImageUploadFormFieldInner({
                     <>
                       <Upload className="mr-2 h-4 w-4" />
                       {previewUrl ? "Replace image" : "Choose image"}
+                      {nameSuffix}
                       <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
                     </>
                   )}
@@ -353,6 +357,7 @@ function ImageUploadFormFieldInner({
                 <>
                   <Upload className="mr-2 h-4 w-4" />
                   {previewUrl ? "Replace image" : "Choose image"}
+                  {nameSuffix}
                 </>
               )}
             </Button>
@@ -415,6 +420,7 @@ function ImageUploadFormFieldInner({
             {isPreparing
               ? "Preparing photo…"
               : "Drag and drop an image here, or click to browse"}
+            {nameSuffix}
           </div>
         </div>
       </FormControl>

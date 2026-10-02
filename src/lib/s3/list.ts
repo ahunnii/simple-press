@@ -42,6 +42,7 @@ const MAX_PAGES = 50;
  *   favicon.…        → "favicon"
  *   video-…          → "video"
  *   image-…          → "image"
+ *   library-…        → "image" (Media Library bulk uploads)
  *   anything else    → "other"
  */
 function classifyKind(suffix: string): MediaKind {
@@ -51,6 +52,7 @@ function classifyKind(suffix: string): MediaKind {
   if (suffix.startsWith("favicon.")) return "favicon";
   if (suffix.startsWith("video-")) return "video";
   if (suffix.startsWith("image-")) return "image";
+  if (suffix.startsWith("library-")) return "image";
   return "other";
 }
 

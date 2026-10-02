@@ -6,6 +6,7 @@ import {
   buildGalleryExternalUsage,
   buildUsedMediaIndex,
   isAlwaysInUseKey,
+  isLibraryOwnedKey,
   normalizeUrl,
 } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
@@ -58,6 +59,8 @@ import {
  * would look unreferenced here), and logo/favicon fixed-key objects are never
  * touched (`isAlwaysInUseKey`, matching the media router's hard protection —
  * reachable here because MediaPicker can drop the logo into a gallery).
+ * Media Library uploads (`library-` keys, `isLibraryOwnedKey`) are likewise
+ * never touched: only the Media Library's explicit delete may remove them.
  *
  * Non-storage URLs are skipped rather than handed to `deleteStoredObjects`,
  * which would only log an "unrecognised URL shape" error to Sentry.
@@ -96,6 +99,7 @@ async function deleteUnreferencedGalleryObjects(
     if (!key) return false; // external URL — not ours to delete
     if (!key.startsWith(`${businessId}/`)) return false; // another tenant's object
     if (isAlwaysInUseKey(key)) return false; // logo / favicon
+    if (isLibraryOwnedKey(key)) return false; // owner's library upload
     return (usageIndex.get(url) ?? []).length === 0;
   });
 

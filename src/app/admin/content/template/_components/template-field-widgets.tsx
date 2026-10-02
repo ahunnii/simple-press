@@ -292,12 +292,14 @@ export function FieldInput({
       ) : field.type === "image" ? (
         <TemplateImageUploadField
           value={stringValue}
+          accessibleName={field.label}
           onChange={(nextValue) => onChange(nextValue)}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />
       ) : field.type === "video" ? (
         <TemplateVideoUploadField
           value={stringValue}
+          accessibleName={field.label}
           onChange={(nextValue) => onChange(nextValue)}
           mediaLibraryEnabled={mediaLibraryEnabled}
         />

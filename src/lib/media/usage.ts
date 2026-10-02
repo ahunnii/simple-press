@@ -80,6 +80,19 @@ export function isAlwaysInUseKey(key: string): boolean {
   return suffix.startsWith("logo.") || suffix.startsWith("favicon.");
 }
 
+/**
+ * Files uploaded straight to the Media Library (`libraryImages` route) are
+ * owner-curated: they're deliberately unreferenced until the owner picks them,
+ * so automatic "delete if unreferenced" cleanup must never remove them. They
+ * live until explicitly deleted from the Media Library.
+ */
+export function isLibraryOwnedKey(key: string): boolean {
+  // Key shape: {businessId}/library-{hex}.{ext}
+  const slashIdx = key.indexOf("/");
+  if (slashIdx < 0) return false;
+  return key.slice(slashIdx + 1).startsWith("library-");
+}
+
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
 type UsageMap = Map<string, MediaUsage[]>;
