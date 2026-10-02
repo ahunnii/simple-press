@@ -20,6 +20,12 @@ const additionalFieldsSchema = z
   })
   .optional();
 
+/**
+ * Max gallery images per product. Shared by the admin ImageUploader (client
+ * cap) and `product.syncImages` (server enforcement) so the two can't drift.
+ */
+export const MAX_PRODUCT_IMAGES = 10;
+
 export const productImageSchema = z.object({
   id: z.string().optional(),
   url: z.string().url("Enter a valid image URL"),

@@ -16,6 +16,7 @@ import {
   MAX_REQUESTED_PAGE,
 } from "~/lib/validators/admin-table";
 import {
+  MAX_PRODUCT_IMAGES,
   productBulkDeleteSchema,
   productBulkPublishSchema,
   productCreateSchema,
@@ -1028,7 +1029,12 @@ export const productRouter = createTRPCRouter({
     .input(
       z.object({
         productId: z.string(),
-        images: z.array(productImageSchema),
+        images: z
+          .array(productImageSchema)
+          .max(
+            MAX_PRODUCT_IMAGES,
+            `A product can have at most ${MAX_PRODUCT_IMAGES} images`,
+          ),
       }),
     )
     .mutation(async ({ ctx, input }) => {

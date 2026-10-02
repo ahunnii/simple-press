@@ -3,7 +3,11 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -188,7 +192,11 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Mission Banner */}
-      {isSectionVisible(themeSpecificFields, "happy-bamboo", "about.mission") && (
+      {isSectionVisible(
+        themeSpecificFields,
+        "happy-bamboo",
+        "about.mission",
+      ) && (
         <section
           className="py-12 md:py-16"
           {...sectionGroupAttr("about", "mission")}
@@ -213,8 +221,8 @@ export function HappyBambooAboutPage({
                   ) : (
                     <p className="text-lg leading-relaxed font-medium text-white md:text-xl">
                       Join us in our mission to make everyday moments healthier,
-                      cleaner and a lot more sustainable. Experience the softness
-                      and durability of our products, because{" "}
+                      cleaner and a lot more sustainable. Experience the
+                      softness and durability of our products, because{" "}
                       <span className="font-bold italic">
                         you deserve the best!
                       </span>
@@ -228,7 +236,11 @@ export function HappyBambooAboutPage({
       )}
 
       {/* Our Services Section */}
-      {isSectionVisible(themeSpecificFields, "happy-bamboo", "about.services") && (
+      {isSectionVisible(
+        themeSpecificFields,
+        "happy-bamboo",
+        "about.services",
+      ) && (
         <section
           className="bg-muted/50 py-20 md:py-32"
           {...sectionGroupAttr("about", "services")}
@@ -291,7 +303,7 @@ export function HappyBambooAboutPage({
         "about.bamboo",
       ) && (
         <section
-          className="py-20 md:py-32"
+          className="overflow-x-clip py-20 md:py-32"
           {...sectionGroupAttr("about", "bamboo")}
         >
           <div className="container mx-auto px-4">
@@ -358,9 +370,9 @@ export function HappyBambooAboutPage({
               <FadeIn
                 direction="right"
                 delay={0.3}
-                className="hidden lg:col-span-2 lg:block"
+                className="mx-auto w-full max-w-xl lg:col-span-2 lg:max-w-none"
               >
-                <div className="sticky top-24 space-y-4">
+                <div className="space-y-4 lg:sticky lg:top-24">
                   <div className="relative aspect-video overflow-hidden rounded-2xl">
                     <Image
                       src={
