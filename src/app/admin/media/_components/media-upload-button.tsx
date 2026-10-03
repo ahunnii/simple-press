@@ -58,19 +58,32 @@ type Props = {
   variant?: React.ComponentProps<typeof Button>["variant"];
   size?: React.ComponentProps<typeof Button>["size"];
   className?: string;
+  /**
+   * Platform hub only: upload into this business rather than the request
+   * host's, and refresh `platformMedia.list` instead of `media.list`. The
+   * upload route honors it for PLATFORM_ADMINs only.
+   */
+  businessId?: string;
 };
 
 /**
- * "Upload images" button + dialog for the Media Library page. Files go to the
- * `libraryImages` route (kept until deleted from this page). The dialog is a
- * SIBLING of the button, never inside a drop target — React events bubble
- * through portals.
+ * "Upload images" button + dialog for the Media Library page (shop admin and
+ * the platform hub). Files go to the `libraryImages` route (kept until deleted
+ * from the Media Library). The dialog is a SIBLING of the button, never inside
+ * a drop target — React events bubble through portals.
  */
-export function MediaUploadButton({ variant, size, className }: Props) {
+export function MediaUploadButton({
+  variant,
+  size,
+  className,
+  businessId,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
-  const { uploadImages, isPreparing, isUploading } =
-    useBatchedImageUpload("libraryImages");
+  const { uploadImages, isPreparing, isUploading } = useBatchedImageUpload(
+    "libraryImages",
+    { businessId },
+  );
 
   const [open, setOpen] = useState(false);
   // Spans the whole `uploadImages` call, including the gaps between batches.
@@ -140,7 +153,11 @@ export function MediaUploadButton({ variant, size, className }: Props) {
         const landed = urls.length;
 
         if (landed > 0) {
-          void utils.media.list.invalidate();
+          if (businessId) {
+            void utils.platformMedia.list.invalidate({ businessId });
+          } else {
+            void utils.media.list.invalidate();
+          }
           router.refresh();
         }
 

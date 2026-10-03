@@ -33,6 +33,9 @@ import { mediaRouter } from "./routers/media";
 import { orderRouter } from "./routers/order";
 import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
+import { platformBusinessRouter } from "./routers/platform-business";
+import { platformInvitesRouter } from "./routers/platform-invites";
+import { platformMediaRouter } from "./routers/platform-media";
 import { productRouter } from "./routers/product";
 import { quickbooksRouter } from "./routers/quickbooks";
 import { quoteCalculatorRouter } from "./routers/quote-calculator";
@@ -86,6 +89,9 @@ export const appRouter = createTRPCRouter({
   services: serviceRouter,
 
   platform: platformRouter,
+  platformBusiness: platformBusinessRouter,
+  platformInvites: platformInvitesRouter,
+  platformMedia: platformMediaRouter,
   contact: contactRouter,
   quickbooks: quickbooksRouter,
   invoice: invoiceRouter,

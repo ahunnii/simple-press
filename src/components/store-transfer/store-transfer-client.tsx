@@ -13,6 +13,16 @@ import {
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -38,17 +48,31 @@ interface ImportResult {
 
 interface Props {
   isPlatformAdmin: boolean;
+  /** Target a specific business (platform hub). Omit to use the host's. */
+  businessId?: string;
+  /** Display name of the target business, used in the import confirmation. */
+  businessName?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function StoreTransferClient({ isPlatformAdmin }: Props) {
+export function StoreTransferClient({
+  isPlatformAdmin,
+  businessId,
+  businessName,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const exportHref = businessId
+    ? `/api/admin/store-transfer/export?businessId=${encodeURIComponent(businessId)}`
+    : "/api/admin/store-transfer/export";
+  const targetLabel = businessName ?? "this store";
 
   // ─── File selection ──────────────────────────────────────────────────────
 
@@ -98,6 +122,7 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
     try {
       const body = new FormData();
       body.append("file", selectedFile);
+      if (businessId) body.append("businessId", businessId);
 
       const res = await fetch("/api/admin/store-transfer/import", {
         method: "POST",
@@ -107,8 +132,12 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
       if (!res.ok) {
         let message = `Import failed (${res.status})`;
         try {
-          const json = (await res.json()) as { message?: string };
-          if (json.message) message = json.message;
+          const json = (await res.json()) as {
+            error?: string;
+            message?: string;
+          };
+          const apiMessage = json.error ?? json.message;
+          if (apiMessage) message = apiMessage;
         } catch {
           // ignore parse errors
         }
@@ -172,7 +201,7 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
             </li>
           </ul>
 
-          {isPlatformAdmin && (
+          {isPlatformAdmin && !businessId && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
@@ -186,7 +215,7 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
           )}
 
           <Button asChild>
-            <a href="/api/admin/store-transfer/export" download>
+            <a href={exportHref} download>
               <Download className="mr-2 h-4 w-4" />
               Export store content
             </a>
@@ -277,7 +306,11 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
                   </p>
                 </div>
               </div>
-              <Button onClick={handleImport} disabled={isImporting} size="sm">
+              <Button
+                onClick={() => setConfirmOpen(true)}
+                disabled={isImporting}
+                size="sm"
+              >
                 {isImporting ? (
                   <>
                     <Loader2
@@ -295,6 +328,34 @@ export function StoreTransferClient({ isPlatformAdmin }: Props) {
               </Button>
             </div>
           )}
+
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Import into {targetLabel}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will import{" "}
+                  <strong>
+                    {selectedFile?.name ?? "the selected archive"}
+                  </strong>{" "}
+                  into <strong>{targetLabel}</strong>. Existing content that
+                  shares a slug or natural key will be overwritten. This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setConfirmOpen(false);
+                    void handleImport();
+                  }}
+                >
+                  Import
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* In-progress notice */}
           {isImporting && (

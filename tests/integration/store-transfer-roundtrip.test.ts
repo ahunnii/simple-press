@@ -5,8 +5,12 @@ import type {
   StoreTransferManifest,
   StoreTransferMediaEntry,
 } from "~/lib/store-transfer/types";
-import { contentAddressedKey, putStoredObject } from "~/lib/s3/put";
-import { keyToPublicUrl } from "~/lib/s3/url";
+import {
+  contentAddressedKey,
+  objectExists,
+  putStoredObject,
+} from "~/lib/s3/put";
+import { keyToPublicUrl, STORAGE_BASE } from "~/lib/s3/url";
 import { collectStoreContent } from "~/lib/store-transfer/export";
 import { importStoreBundle } from "~/lib/store-transfer/import";
 import { STORE_TRANSFER_FORMAT_VERSION } from "~/lib/store-transfer/types";
@@ -216,6 +220,7 @@ type BundleMedia = { key: string; bytes: Buffer; kind: "image" | "video" };
 async function buildZip(
   businessId: string,
   mediaFiles: BundleMedia[] = [],
+  storageBase = "https://storage.test/bucket/",
 ): Promise<Buffer> {
   const { manifestContent, templateId, businessSlug } =
     await collectStoreContent(businessId);
@@ -227,7 +232,7 @@ async function buildZip(
       businessId,
       businessSlug,
       templateId,
-      storageBase: "https://storage.test/bucket/",
+      storageBase,
     },
     media: mediaFiles.map(
       (m, i): StoreTransferMediaEntry => ({
@@ -252,6 +257,7 @@ describe("store transfer round-trip", () => {
   beforeEach(async () => {
     await resetDb();
     vi.mocked(putStoredObject).mockClear();
+    vi.mocked(objectExists).mockReset().mockResolvedValue(false);
   });
 
   it("exports never carry paymentMethods or loyalty-sourced codes", async () => {
@@ -560,5 +566,40 @@ describe("store transfer round-trip", () => {
       (page.content as { content: { attrs: { src: string } }[] }).content[0]
         ?.attrs.src,
     ).toBe(targetUrl(clip, ".mp4"));
+  });
+
+  it("re-importing a store's own export reuses its media in place", async () => {
+    const a = await createBusiness({ name: "Self Import" });
+    const flyer: BundleMedia = {
+      key: `${a.id}/image-flyer.jpg`,
+      bytes: Buffer.from("flyer-bytes"),
+      kind: "image",
+    };
+    const flyerUrl = keyToPublicUrl(flyer.key);
+    await db.business.update({
+      where: { id: a.id },
+      data: { maintenanceImage: flyerUrl },
+    });
+    // The original object is still in the bucket.
+    vi.mocked(objectExists).mockImplementation(
+      async (key) => key === flyer.key,
+    );
+
+    const result = await importStoreBundle({
+      targetBusinessId: a.id,
+      zipBuffer: await buildZip(a.id, [flyer], STORAGE_BASE),
+    });
+
+    expect(
+      result.warnings.filter((w) => !w.startsWith("Template changed")),
+    ).toEqual([]);
+    expect(vi.mocked(putStoredObject)).not.toHaveBeenCalled();
+    expect(result.mediaCount).toBe(0);
+    expect(result.mediaSkipped).toBe(1);
+    const aBiz = await db.business.findUniqueOrThrow({
+      where: { id: a.id },
+      select: { maintenanceImage: true },
+    });
+    expect(aBiz.maintenanceImage).toBe(flyerUrl);
   });
 });

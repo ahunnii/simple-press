@@ -93,6 +93,56 @@ async function requireBusinessManager(req: Request) {
   return { business, session };
 }
 
+/**
+ * Target business for a `libraryImages` upload.
+ *
+ * - No `clientMetadata.businessId` (every shop-admin upload): the HOST's
+ *   business, via `requireBusinessManager` — unchanged behavior.
+ * - `clientMetadata.businessId` present (the platform hub's Media Library,
+ *   served from `platform.*`, which has no host business): the caller must be
+ *   a signed-in PLATFORM_ADMIN (live DB read, never the cookie-cached role)
+ *   and the business must exist (any status). Anyone else is REJECTED, never
+ *   silently re-scoped to the host — client metadata is attacker-controlled,
+ *   so a non-admin naming a business must fail loudly.
+ *
+ * Only `libraryImages` honors the override; every other route stays
+ * host-only.
+ */
+async function resolveLibraryUploadBusiness(
+  req: Request,
+  clientMetadata: unknown,
+): Promise<{ businessId: string }> {
+  const requested =
+    typeof clientMetadata === "object" && clientMetadata !== null
+      ? (clientMetadata as { businessId?: unknown }).businessId
+      : undefined;
+
+  if (requested === undefined || requested === null || requested === "") {
+    const { business } = await requireBusinessManager(req);
+    return { businessId: business.id };
+  }
+
+  if (typeof requested !== "string") {
+    throw new RejectUpload("Invalid business.");
+  }
+
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) throw new RejectUpload("Not logged in!");
+  if (!(await isPlatformAdmin(session.user.id))) {
+    throw new RejectUpload(
+      "You do not have permission to upload to this business.",
+    );
+  }
+
+  const business = await db.business.findUnique({
+    where: { id: requested },
+    select: { id: true },
+  });
+  if (!business) throw new RejectUpload("Business not found!");
+
+  return { businessId: business.id };
+}
+
 // NOTE on metadata key casing: @better-upload/server lowercases every
 // objectInfo.metadata key before signing and before echoing object info back
 // to the client, so the wire key is always `pathname` regardless of what a
@@ -304,13 +354,18 @@ const router: Router = {
       maxFiles: ROUTE_MAX_FILES.libraryImages,
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
-      onBeforeUpload: async ({ req }) => {
-        const { business } = await requireBusinessManager(req);
+      // The one route a platform admin may point at another business (the
+      // hub's Media Library) — see `resolveLibraryUploadBusiness`.
+      onBeforeUpload: async ({ req, clientMetadata }) => {
+        const { businessId } = await resolveLibraryUploadBusiness(
+          req,
+          clientMetadata,
+        );
 
         return {
           generateObjectInfo: ({ file }) => {
             const ext = safeRasterImageExt(file.name);
-            const key = uniqueKey(business.id, "library", ext);
+            const key = uniqueKey(businessId, "library", ext);
             return {
               key,
               metadata: { pathname: keyToPublicUrl(key) },

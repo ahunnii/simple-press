@@ -8,8 +8,10 @@ import { toast } from "sonner";
 
 import type { BulkAction } from "../../_components/admin-bulk-bar";
 import type { AdminFilterDef } from "../../_components/admin-filters";
+import type { LoadingToastContext } from "../../_lib/admin-mutation-toast";
 import type { MediaItem } from "~/components/media/media-grid";
 import type { MediaUsageStatus } from "~/lib/validators/media";
+import type { RouterOutputs } from "~/trpc/react";
 import { ADMIN_BULK_DELETE_LIMIT } from "~/lib/validators/admin-table";
 import { api } from "~/trpc/react";
 import {
@@ -65,18 +67,33 @@ export type MediaRow = MediaItem & {
   usageStatus: MediaUsageStatus;
 };
 
+/**
+ * Which router the library talks to.
+ *
+ * - `shop` — `api.media.*` on a shop host; the server acts on the HOST's
+ *   business, so no id is sent.
+ * - `platform` — `api.platformMedia.*` from the platform hub; `businessId` is
+ *   sent with every call (the router re-checks PLATFORM_ADMIN + existence, and
+ *   the shared service ties every key to `${businessId}/`).
+ */
+export type MediaLibraryScope =
+  | { kind: "shop" }
+  | { kind: "platform"; businessId: string };
+
 type Props = {
   /** The current page's cards only — filtering/sorting/paging happen server-side. */
   items: MediaRow[];
-  /** The RESOLVED business the listing belongs to (a platform admin may be
-   *  viewing someone else's). Threaded into the per-card mutations exactly as
-   *  before this migration. */
-  businessId: string;
+  /** Router selection — see `MediaLibraryScope`. Fixed for the component's
+   *  lifetime (each page renders exactly one scope). */
+  scope: MediaLibraryScope;
+  /** The page's own path, for filter/pagination/"Clear filters" links —
+   *  `/admin/media` on a shop host, `/businesses/{id}/media` on the hub. */
+  basePath: string;
   /** Mirrors `media.bulkDelete`'s `ownerOnlyProcedure`, resolved server-side.
    *  False OMITS every bulk affordance — see the note above `bulkActions`. */
   canBulkDelete: boolean;
-  /** Whether the viewer may upload here (owner/manager/platform admin, own
-   *  business only) — gates the empty-state "Upload images" action. */
+  /** Whether the viewer may upload here (owner/manager/platform admin) —
+   *  gates the empty-state "Upload images" action. */
   canUpload: boolean;
   /** Keys of every file matching the current filters, across all pages — or
    *  `null` when more than ADMIN_BULK_SELECTION_LIMIT match and
@@ -91,7 +108,6 @@ type Props = {
   filters: AdminFilterDef[];
 };
 
-const BASE_PATH = "/admin/media";
 const ITEM_NOUN = { one: "file", many: "files" } as const;
 
 const nounFor = (count: number) =>
@@ -99,7 +115,41 @@ const nounFor = (count: number) =>
 
 // ─── Usage badge ──────────────────────────────────────────────────────────────
 
-function UsageBadge({ item }: { item: MediaRow }) {
+/** One usage line. `adminHref` is a SHOP-admin path (`/admin/...`), which only
+ *  resolves on the business's own host — on the platform hub it would 404, so
+ *  the hub (`linkUsages: false`) renders the same text unlinked. */
+function UsageEntry({
+  usage,
+  linkUsages,
+}: {
+  usage: MediaRow["usedBy"][number];
+  linkUsages: boolean;
+}) {
+  const label = (
+    <>
+      {usage.location}
+      {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
+    </>
+  );
+  return usage.adminHref && linkUsages ? (
+    <Link
+      href={usage.adminHref}
+      className="text-foreground font-medium underline-offset-2 hover:underline"
+    >
+      {label}
+    </Link>
+  ) : (
+    <span className="text-foreground">{label}</span>
+  );
+}
+
+function UsageBadge({
+  item,
+  linkUsages,
+}: {
+  item: MediaRow;
+  linkUsages: boolean;
+}) {
   const count = item.usedBy.length;
 
   if (item.usageStatus === "unused") {
@@ -136,20 +186,7 @@ function UsageBadge({ item }: { item: MediaRow }) {
           <ul className="space-y-1.5">
             {item.usedBy.map((usage, i) => (
               <li key={i} className="text-sm">
-                {usage.adminHref ? (
-                  <Link
-                    href={usage.adminHref}
-                    className="text-foreground font-medium underline-offset-2 hover:underline"
-                  >
-                    {usage.location}
-                    {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
-                  </Link>
-                ) : (
-                  <span className="text-foreground">
-                    {usage.location}
-                    {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
-                  </span>
-                )}
+                <UsageEntry usage={usage} linkUsages={linkUsages} />
               </li>
             ))}
           </ul>
@@ -177,20 +214,7 @@ function UsageBadge({ item }: { item: MediaRow }) {
         <ul className="space-y-1.5">
           {item.usedBy.map((usage, i) => (
             <li key={i} className="text-sm">
-              {usage.adminHref ? (
-                <Link
-                  href={usage.adminHref}
-                  className="text-foreground font-medium underline-offset-2 hover:underline"
-                >
-                  {usage.location}
-                  {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
-                </Link>
-              ) : (
-                <span className="text-foreground">
-                  {usage.location}
-                  {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
-                </span>
-              )}
+              <UsageEntry usage={usage} linkUsages={linkUsages} />
             </li>
           ))}
         </ul>
@@ -203,21 +227,30 @@ function UsageBadge({ item }: { item: MediaRow }) {
 
 function MediaCardActions({
   item,
-  businessId,
+  scope,
   onDeleteConfirm,
   isDeleting,
 }: {
   item: MediaRow;
-  businessId: string;
+  scope: MediaLibraryScope;
   onDeleteConfirm: (item: MediaRow) => void;
   isDeleting: boolean;
 }) {
   // Presigned URL, so it's a mutation rather than a query — never cached, always
   // freshly signed. The loading toast is the shared grammar: the id travels in
   // the mutation context so settling dismisses THIS toast, not every toast.
-  const downloadMutation = api.media.getDownloadUrl.useMutation({
+  //
+  // Both routers' hooks are ALWAYS called (unconditionally, same order every
+  // render) and `scope` picks which one `download` fires — so hook order can
+  // never depend on scope. An idle `useMutation` costs nothing: no request is
+  // made until `mutate`.
+  const downloadOptions = {
     onMutate: loadingToast("Preparing download…"),
-    onSuccess: ({ url }, _variables, context) => {
+    onSuccess: (
+      { url }: { url: string },
+      _variables: unknown,
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
       const a = document.createElement("a");
       a.href = url;
@@ -226,11 +259,26 @@ function MediaCardActions({
       a.click();
       document.body.removeChild(a);
     },
-    onError: (error, _variables, context) => {
+    onError: (
+      error: { message: string },
+      _variables: unknown,
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to generate download link");
     },
-  });
+  };
+  const shopDownload = api.media.getDownloadUrl.useMutation(downloadOptions);
+  const platformDownload =
+    api.platformMedia.getDownloadUrl.useMutation(downloadOptions);
+  const download = () => {
+    if (scope.kind === "platform") {
+      platformDownload.mutate({ key: item.key, businessId: scope.businessId });
+    } else {
+      shopDownload.mutate({ key: item.key });
+    }
+  };
+  const isDownloading = shopDownload.isPending || platformDownload.isPending;
 
   // Only an active-template (or non-template) usage blocks delete now —
   // inactive-template-only files are leftover content the owner can clean up
@@ -243,12 +291,12 @@ function MediaCardActions({
         variant="outline"
         size="sm"
         className="flex-1"
-        onClick={() => downloadMutation.mutate({ key: item.key, businessId })}
-        disabled={downloadMutation.isPending}
+        onClick={download}
+        disabled={isDownloading}
         aria-label={`Download ${item.filename}`}
       >
         <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-        {downloadMutation.isPending ? "Getting link…" : "Download"}
+        {isDownloading ? "Getting link…" : "Download"}
       </Button>
 
       <Button
@@ -279,7 +327,8 @@ function MediaCardActions({
 
 export function MediaLibraryClient({
   items,
-  businessId,
+  scope,
+  basePath,
   canBulkDelete,
   canUpload,
   matchingIds,
@@ -297,24 +346,13 @@ export function MediaLibraryClient({
   const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  /** Only present when a PLATFORM_ADMIN is viewing another business's library.
-   *  Passed to `bulkDelete` exactly as the per-card mutations pass their own
-   *  `businessId` — the router honours it only for platform admins. Read off
-   *  the URL rather than from the `businessId` prop so an ordinary owner's
-   *  request carries no `businessId` at all. */
-  const urlBusinessId = searchParams.get("businessId") ?? undefined;
-
-  /** The filtered-empty state's escape hatch. BASE_PATH alone would drop
-   *  `?businessId=` and kick a platform admin back to their OWN library. */
-  const clearFiltersHref = urlBusinessId
-    ? `${BASE_PATH}?businessId=${encodeURIComponent(urlBusinessId)}`
-    : BASE_PATH;
+  /** Usage `adminHref`s are shop-admin paths — only linkable on a shop host. */
+  const linkUsages = scope.kind === "shop";
 
   // ── Selection ──────────────────────────────────────────────────────────────
-  // `businessId` is part of the URL, so it is part of the hook's filter
-  // signature: a platform admin switching business clears the selection. That
-  // is correct — the keys selected in one business's library are meaningless
-  // in another's — so no special handling is needed here.
+  // On the hub the business is part of the PATH (`basePath`), so switching
+  // business remounts the page and starts a fresh selection — keys selected in
+  // one business's library are meaningless in another's.
   const {
     selectedIds,
     selectedCount,
@@ -342,21 +380,39 @@ export function MediaLibraryClient({
   // Every handler dismisses the specific loading toast it opened — see
   // dismissLoadingToast. A bare toast.dismiss() clears every toast on screen.
 
+  // Both routers' hooks are ALWAYS called and `scope` only picks which one a
+  // handler fires (see MediaCardActions) — hook order never depends on scope.
+  // `isPending` ORs the pair; the idle one is always false.
+
   const afterWrite = () => {
-    void utils.media.list.invalidate();
+    if (scope.kind === "platform") {
+      void utils.platformMedia.list.invalidate({
+        businessId: scope.businessId,
+      });
+    } else {
+      void utils.media.list.invalidate();
+    }
     router.refresh();
   };
 
-  const deleteMutation = api.media.delete.useMutation({
+  const deleteOptions = {
     onMutate: loadingToast("Deleting file…"),
-    onSuccess: (_data, variables, context) => {
+    onSuccess: (
+      _data: unknown,
+      variables: { key: string },
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
       toast.success("File deleted");
       pruneSelection([variables.key]);
       setDeleteTarget(null);
       afterWrite();
     },
-    onError: (error, _variables, context) => {
+    onError: (
+      error: { message: string },
+      _variables: unknown,
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
       // On CONFLICT the server's message names the places still referencing the
       // file — the only way the owner learns WHICH page blocked the delete when
@@ -364,11 +420,25 @@ export function MediaLibraryClient({
       // retry) is still one click away.
       toast.error(error.message ?? "Failed to delete file");
     },
-  });
+  };
+  const shopDelete = api.media.delete.useMutation(deleteOptions);
+  const platformDelete = api.platformMedia.delete.useMutation(deleteOptions);
+  const deleteFile = (key: string) => {
+    if (scope.kind === "platform") {
+      platformDelete.mutate({ key, businessId: scope.businessId });
+    } else {
+      shopDelete.mutate({ key });
+    }
+  };
+  const isDeletePending = shopDelete.isPending || platformDelete.isPending;
 
-  const bulkDeleteMutation = api.media.bulkDelete.useMutation({
+  const bulkDeleteOptions = {
     onMutate: loadingToast("Deleting files…"),
-    onSuccess: (data, variables, context) => {
+    onSuccess: (
+      data: RouterOutputs["media"]["bulkDelete"],
+      variables: { keys: string[] },
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
 
       const requested = variables.keys.length;
@@ -410,11 +480,20 @@ export function MediaLibraryClient({
       setBulkDeleteOpen(false);
       afterWrite();
     },
-    onError: (error, _variables, context) => {
+    onError: (
+      error: { message: string },
+      _variables: unknown,
+      context: LoadingToastContext | undefined,
+    ) => {
       dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to delete files");
     },
-  });
+  };
+  const shopBulkDelete = api.media.bulkDelete.useMutation(bulkDeleteOptions);
+  const platformBulkDelete =
+    api.platformMedia.bulkDelete.useMutation(bulkDeleteOptions);
+  const isBulkDeletePending =
+    shopBulkDelete.isPending || platformBulkDelete.isPending;
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -432,17 +511,18 @@ export function MediaLibraryClient({
     if (selectedCount === 0 || overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) {
       return;
     }
-    bulkDeleteMutation.mutate({
-      keys: [...selectedIds],
-      businessId: urlBusinessId,
-    });
+    const keys = [...selectedIds];
+    if (scope.kind === "platform") {
+      platformBulkDelete.mutate({ keys, businessId: scope.businessId });
+    } else {
+      shopBulkDelete.mutate({ keys });
+    }
   };
 
   // The per-card delete writes to rows the bulk bar can also be holding, so it
   // freezes the bar too. There is no undo mutation to include — an S3 delete is
   // irreversible, which is also why this page offers no Undo toast action.
-  const isBulkPending =
-    bulkDeleteMutation.isPending || deleteMutation.isPending;
+  const isBulkPending = isBulkDeletePending || isDeletePending;
 
   // Delete is the ONLY bulk action here, and `media.bulkDelete` is
   // `ownerOnlyProcedure` — so a MANAGER gets no bulk bar, and no card
@@ -462,7 +542,7 @@ export function MediaLibraryClient({
         if (overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) return;
         setBulkDeleteOpen(true);
       },
-      pending: bulkDeleteMutation.isPending,
+      pending: isBulkDeletePending,
       disabledReason: deleteCapReason,
     },
   ];
@@ -483,7 +563,15 @@ export function MediaLibraryClient({
             ? "Upload images here, or they'll appear as you add media to products, galleries, and pages."
             : "Files will appear here once images, videos, or other media are added to products, galleries, and pages."
         }
-        action={canUpload ? <MediaUploadButton /> : undefined}
+        action={
+          canUpload ? (
+            <MediaUploadButton
+              businessId={
+                scope.kind === "platform" ? scope.businessId : undefined
+              }
+            />
+          ) : undefined
+        }
       />
     );
   }
@@ -491,12 +579,10 @@ export function MediaLibraryClient({
   return (
     <>
       <AdminFilters
-        basePath={BASE_PATH}
+        basePath={basePath}
         searchPlaceholder="Search files…"
         // Names the fields actually matched. Searching by where a file is USED
         // is the non-obvious one — the placeholder has no room to say so.
-        // (AdminFilters copies the current URL params into every navigation, so
-        // `businessId` survives a filter change without special handling.)
         searchAriaLabel="Search media by file name, by the name of the product, gallery, or page where it's used, or by a general word like products or galleries"
         filters={filters}
         resultCount={totalCount}
@@ -533,7 +619,7 @@ export function MediaLibraryClient({
           filtered
           action={
             <Button variant="outline" asChild>
-              <Link href={clearFiltersHref}>Clear filters</Link>
+              <Link href={basePath}>Clear filters</Link>
             </Button>
           }
         />
@@ -625,7 +711,7 @@ export function MediaLibraryClient({
                         >
                           {item.filename}
                         </p>
-                        <UsageBadge item={item} />
+                        <UsageBadge item={item} linkUsages={linkUsages} />
                       </div>
 
                       <p className="text-muted-foreground mb-3 text-xs">
@@ -634,9 +720,9 @@ export function MediaLibraryClient({
 
                       <MediaCardActions
                         item={item}
-                        businessId={businessId}
+                        scope={scope}
                         onDeleteConfirm={setDeleteTarget}
-                        isDeleting={deleteMutation.isPending}
+                        isDeleting={isDeletePending}
                       />
                     </CardContent>
                   </Card>
@@ -650,7 +736,7 @@ export function MediaLibraryClient({
             totalPages={totalPages}
             totalCount={totalCount}
             pageSize={pageSize}
-            basePath={BASE_PATH}
+            basePath={basePath}
             itemNoun={ITEM_NOUN}
           />
         </>
@@ -687,7 +773,7 @@ export function MediaLibraryClient({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
+            <AlertDialogCancel disabled={isDeletePending}>
               Cancel
             </AlertDialogCancel>
             {/* `variant`, NOT className. AlertDialogAction wraps a `Button …
@@ -699,16 +785,11 @@ export function MediaLibraryClient({
               variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
-                if (deleteTarget) {
-                  deleteMutation.mutate({
-                    key: deleteTarget.key,
-                    businessId,
-                  });
-                }
+                if (deleteTarget) deleteFile(deleteTarget.key);
               }}
-              disabled={deleteMutation.isPending}
+              disabled={isDeletePending}
             >
-              {deleteMutation.isPending ? "Deleting…" : "Delete"}
+              {isDeletePending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -731,7 +812,7 @@ export function MediaLibraryClient({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
+            <AlertDialogCancel disabled={isBulkDeletePending}>
               Cancel
             </AlertDialogCancel>
             {/* See the note on the single-delete action: `variant`, not className. */}
@@ -741,9 +822,9 @@ export function MediaLibraryClient({
                 e.preventDefault();
                 handleBulkDelete();
               }}
-              disabled={bulkDeleteMutation.isPending}
+              disabled={isBulkDeletePending}
             >
-              {bulkDeleteMutation.isPending
+              {isBulkDeletePending
                 ? "Deleting…"
                 : `Delete ${selectedCount} ${nounFor(selectedCount)}`}
             </AlertDialogAction>

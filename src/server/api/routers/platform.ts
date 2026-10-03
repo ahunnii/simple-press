@@ -160,6 +160,10 @@ export const platformRouter = createTRPCRouter({
             status: true,
             ownerEmail: true,
             createdAt: true,
+            templateId: true,
+            domainStatus: true,
+            stripeAccountId: true,
+            stripeChargesEnabled: true,
             _count: {
               select: {
                 memberships: true,

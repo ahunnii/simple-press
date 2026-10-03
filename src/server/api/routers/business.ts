@@ -30,7 +30,6 @@ import {
   normalizeAreaServed,
 } from "~/lib/seo/local-presence";
 import { stripeClient } from "~/lib/stripe/client";
-import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
@@ -42,6 +41,7 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { setBusinessTemplate } from "~/server/business/template";
 
 /**
  * A structured-address column: absent stays absent (Prisma no-op), and a
@@ -1433,38 +1433,7 @@ export const businessRouter = createTRPCRouter({
         templateId: z.enum(TEMPLATES.map((t) => t.id) as [string, ...string[]]),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      const business = await ctx.db.business.findUnique({
-        where: { id: businessId },
-        select: { subdomain: true, templateId: true },
-      });
-      if (!business) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Business not found",
-        });
-      }
-
-      // Commercial templates are locked to their owning subdomain. Allow only
-      // templates available to this business (free templates + ones it owns),
-      // plus its currently-active template so an existing assignment is never
-      // lost. Never trust the client — re-validate ownership server-side.
-      const allowed =
-        input.templateId === business.templateId ||
-        isTemplateAvailableForSubdomain(input.templateId, business.subdomain);
-      if (!allowed) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This template is not available for your store.",
-        });
-      }
-
-      await ctx.db.business.update({
-        where: { id: businessId },
-        data: { templateId: input.templateId },
-      });
-      return { success: true };
-    }),
+    .mutation(({ ctx, input }) =>
+      setBusinessTemplate(ctx.db, ctx.businessId, input.templateId),
+    ),
 });

@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { CreateBusinessFormData } from "~/lib/validators/platform";
+import { TEMPLATES } from "~/lib/constants";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { slugify } from "~/lib/utils";
 import { createBusinessFormSchema } from "~/lib/validators/platform";
@@ -25,26 +26,6 @@ import {
 import { Form } from "~/components/ui/form";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
-
-const TEMPLATES = [
-  { id: "modern", label: "Modern" },
-  { id: "bamboo", label: "Bamboo" },
-  { id: "animated-bamboo", label: "Animated Bamboo" },
-  { id: "happy-bamboo", label: "Happy Bamboo" },
-  { id: "elegant", label: "Elegant" },
-  { id: "pollen", label: "Pollen" },
-  { id: "dark-trend", label: "Dark Trend" },
-  { id: "noise", label: "Noise" },
-  { id: "builders", label: "Builders" },
-  { id: "coop", label: "Coop" },
-  { id: "vii", label: "Skinbar VII" },
-  { id: "pink", label: "PinkArt" },
-  { id: "relocation", label: "Handy Relocations" },
-  { id: "wealth", label: "Detroit Community Wealth Fund" },
-  { id: "olive", label: "Olive Mode" },
-  { id: "dream", label: "Dream Your Theme" },
-  { id: "umsc", label: "Unique Monique" },
-];
 
 const defaultValues: CreateBusinessFormData = {
   name: "",
@@ -153,7 +134,7 @@ export function CreateBusinessButton() {
                 form={form}
                 name="templateId"
                 label="Template"
-                values={TEMPLATES.map((t) => ({ value: t.id, label: t.label }))}
+                values={TEMPLATES.map((t) => ({ value: t.id, label: t.name }))}
               />
               <InputFormField
                 form={form}

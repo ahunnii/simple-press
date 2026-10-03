@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Heart, Menu, ShoppingBag, UserRound } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingCart, UserRound } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -821,7 +821,7 @@ export function BambooHeader({
                 className="text-[var(--bam-gold-soft)] hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)]"
               >
                 <span className="relative" aria-hidden="true">
-                  <ShoppingBag className="size-5" />
+                  <ShoppingCart className="size-5" />
                   {itemCount > 0 && (
                     <span className="absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full bg-[var(--bam-gold-soft)] text-[10px] font-bold text-[var(--bam-forest-deep)]">
                       {itemCount}

@@ -4,10 +4,10 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { GenericFeatureDisabledPage } from "~/components/shared/generic-feature-disabled-page";
+import { StoreTransferClient } from "~/components/store-transfer/store-transfer-client";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
 import { TrailHeader } from "../../_components/trail-header";
-import { StoreTransferClient } from "./_components/store-transfer-client";
 import { WordPressExportClient } from "./_components/wordpress-export-client";
 
 export default async function DataSettingsPage() {

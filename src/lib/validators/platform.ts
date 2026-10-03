@@ -46,3 +46,27 @@ export const editMembershipFormSchema = z.object({
 });
 
 export type EditMembershipFormData = z.infer<typeof editMembershipFormSchema>;
+
+export const updateBusinessBasicsSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Business name is required")
+    .max(100, "Business name must be 100 characters or fewer"),
+  ownerEmail: z
+    .string()
+    .trim()
+    .min(1, "Owner email is required")
+    .email("Enter a valid email address"),
+  supportEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal(""))
+    .nullable(),
+});
+
+export type UpdateBusinessBasicsFormData = z.infer<
+  typeof updateBusinessBasicsSchema
+>;
