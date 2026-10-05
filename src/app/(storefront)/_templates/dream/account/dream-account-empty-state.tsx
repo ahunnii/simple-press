@@ -1,4 +1,5 @@
 import { DreamButton } from "../shared/dream-button";
+import { DreamMark } from "../shared/dream-mark";
 import { DreamReveal } from "../shared/dream-reveal";
 
 type Props = {
@@ -33,12 +34,7 @@ export function DreamAccountEmptyState({
               "linear-gradient(180deg, var(--dream-sky) 0%, var(--dream-sky-deep) 100%)",
           }}
         >
-          <img
-            src="/templates/dream/images/logo.webp"
-            alt=""
-            className="h-7 w-7 object-contain opacity-40"
-            draggable={false}
-          />
+          <DreamMark className="block h-7 w-7 opacity-40" />
         </div>
         <h2 className="m-0 [font-family:var(--font-dream-display)] text-[24px] text-[var(--dream-ink)]">
           {heading}

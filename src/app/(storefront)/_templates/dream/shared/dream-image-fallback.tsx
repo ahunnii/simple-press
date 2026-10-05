@@ -1,5 +1,7 @@
 import { cn } from "~/lib/utils";
 
+import { DreamMark } from "./dream-mark";
+
 type DreamImageFallbackProps = {
   className?: string;
   /** Optional short message shown under the mark (e.g. an empty-state note). */
@@ -31,13 +33,7 @@ export function DreamImageFallback({
   return (
     <div className={cn("dream-image-fallback", className)} data-tone={tone}>
       {tone === "warm" ? null : (
-        <img
-          src="/templates/dream/images/logo.webp"
-          alt=""
-          aria-hidden="true"
-          className="dream-image-fallback-mark"
-          draggable={false}
-        />
+        <DreamMark className="dream-image-fallback-mark" />
       )}
       {message ? (
         <p className="dream-image-fallback-message">{message}</p>

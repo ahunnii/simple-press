@@ -4,6 +4,8 @@ import { cn } from "~/lib/utils";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
 import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
 
+import { DreamMark } from "../shared/dream-mark";
+
 type Props = {
   name: string;
   coverImage: string | null;
@@ -63,13 +65,7 @@ export function DreamEventFlier({
         <span className="[font-family:var(--font-dream-display)] text-[44px] leading-[0.95] text-[var(--dream-ink)] sm:text-[76px]">
           {day}
         </span>
-        {/* eslint-disable-next-line @next/next/no-img-element -- decorative bundled mark, same raw <img> as DreamImageFallback */}
-        <img
-          src="/templates/dream/images/logo.webp"
-          alt=""
-          className="mt-3 hidden h-7 w-7 object-contain opacity-35 sm:block"
-          draggable={false}
-        />
+        <DreamMark className="mt-3 hidden h-7 w-7 opacity-35 sm:block" />
       </div>
     );
   }

@@ -1,6 +1,8 @@
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
+import { DreamMark } from "../shared/dream-mark";
+
 type Props = {
   heading: string;
   /** Field key whose value is exactly `heading` (live text in the editor). */
@@ -44,13 +46,7 @@ export function DreamOptionalEmptyState({
         aria-hidden="true"
         className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--dream-line)] bg-[var(--dream-paper)]"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- decorative bundled mark, same raw <img> as DreamImageFallback */}
-        <img
-          src="/templates/dream/images/logo.webp"
-          alt=""
-          className="h-8 w-8 object-contain opacity-40"
-          draggable={false}
-        />
+        <DreamMark className="block h-8 w-8 opacity-40" />
       </div>
       <h2
         className="max-w-[24ch] text-[clamp(26px,2.6vw,34px)] leading-[1.1]"
