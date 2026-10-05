@@ -145,7 +145,27 @@ const aboutStoryData: TemplateField[] = [
   },
 ];
 
-// ─── Consultation — heading + lede + 3 steps — hideable ────────────────────
+// ─── Consultation — heading + lede + step list — hideable ────────────────────
+
+/**
+ * Built-in consultation steps (`dream.about.consultation-steps`'s
+ * `defaultRows`) — the retired numbered `consultation-step-{1..3}-*` fields'
+ * old defaults, verbatim. Also the resolver's fallback.
+ */
+export const DREAM_CONSULTATION_STEPS_DEFAULT_ROWS: Record<string, string>[] = [
+  {
+    heading: "See the venue",
+    body: "Selest walks the space with you and starts sketching the shape of the day.",
+  },
+  {
+    heading: "Design the plan",
+    body: "Colors, draping, and rental pieces come together into one themed plan.",
+  },
+  {
+    heading: "Prepare the day",
+    body: "Everything is delivered, set, and styled before your first guest arrives.",
+  },
+];
 
 const aboutConsultationData: TemplateField[] = [
   {
@@ -170,67 +190,35 @@ const aboutConsultationData: TemplateField[] = [
       "A short conversation is all it takes to turn your occasion into a plan.",
   },
   {
-    key: "dream.about.consultation-step-1-heading",
-    label: "Step 1 heading",
-    description: "First consultation step's heading.",
-    type: "text",
-    page: "about",
-    group: "about.consultation",
-    gridColumn: "col-span-1",
-    defaultValue: "See the venue",
-  },
-  {
-    key: "dream.about.consultation-step-1-body",
-    label: "Step 1 body",
-    description: "First consultation step's body.",
-    type: "textarea",
+    key: "dream.about.consultation-steps",
+    label: "Steps",
+    description:
+      "The numbered steps beside the heading, in order. Add, remove, or drag to reorder.",
+    type: "list",
     page: "about",
     group: "about.consultation",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Selest walks the space with you and starts sketching the shape of the day.",
-  },
-  {
-    key: "dream.about.consultation-step-2-heading",
-    label: "Step 2 heading",
-    description: "Second consultation step's heading.",
-    type: "text",
-    page: "about",
-    group: "about.consultation",
-    gridColumn: "col-span-1",
-    defaultValue: "Design the plan",
-  },
-  {
-    key: "dream.about.consultation-step-2-body",
-    label: "Step 2 body",
-    description: "Second consultation step's body.",
-    type: "textarea",
-    page: "about",
-    group: "about.consultation",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Colors, draping, and rental pieces come together into one themed plan.",
-  },
-  {
-    key: "dream.about.consultation-step-3-heading",
-    label: "Step 3 heading",
-    description: "Third consultation step's heading.",
-    type: "text",
-    page: "about",
-    group: "about.consultation",
-    gridColumn: "col-span-1",
-    defaultValue: "Prepare the day",
-  },
-  {
-    key: "dream.about.consultation-step-3-body",
-    label: "Step 3 body",
-    description: "Third consultation step's body.",
-    type: "textarea",
-    page: "about",
-    group: "about.consultation",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Everything is delivered, set, and styled before your first guest arrives.",
+    minItems: 1,
+    maxItems: 6,
+    defaultsWhenEmpty: true,
+    itemLabel: "step",
+    summaryKey: "heading",
+    itemSchema: [
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        description: "Short heading for this step.",
+        placeholder: "e.g. See the venue",
+      },
+      {
+        key: "body",
+        label: "Description",
+        type: "textarea",
+        description: "A line or two describing this step.",
+      },
+    ],
+    defaultRows: DREAM_CONSULTATION_STEPS_DEFAULT_ROWS,
   },
 ];
 
@@ -240,7 +228,8 @@ const aboutQuoteData: TemplateField[] = [
   {
     key: "dream.about.quote-heading",
     label: "Heading",
-    description: "Plain part of this section's heading, before the highlighted words.",
+    description:
+      "Plain part of this section's heading, before the highlighted words.",
     type: "text",
     page: "about",
     group: "about.quote",
@@ -250,7 +239,8 @@ const aboutQuoteData: TemplateField[] = [
   {
     key: "dream.about.quote-accent",
     label: "Highlighted words",
-    description: 'Script-styled words that follow the heading (e.g. "Estimate Quote").',
+    description:
+      'Script-styled words that follow the heading (e.g. "Estimate Quote").',
     type: "text",
     page: "about",
     group: "about.quote",
@@ -317,7 +307,7 @@ export const dreamAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.consultation",
     title: "How the consultation works",
-    description: "Heading, intro, and the three consultation steps",
+    description: "Heading, intro, and the numbered consultation steps",
     icon: "📋",
     columns: 2,
   },
@@ -353,7 +343,7 @@ export const dreamAboutSections: TemplateSection[] = [
     id: "about.consultation",
     page: "about",
     title: "How the consultation works",
-    description: "Heading, intro, and three-step process",
+    description: "Heading, intro, and numbered steps",
     groupIds: ["about.consultation"],
     order: 2,
     hideable: true,

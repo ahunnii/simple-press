@@ -3,7 +3,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 /**
  * Full homepage build (design.md "Per-page section concepts › Homepage"):
- * hero (living sky), What We Do (three alternating lanes), Gallery, From
+ * hero (living sky), What We Do (alternating lanes), Gallery, From
  * idea to theme (process), and the Estimate Quote band. Five sections, in
  * design.md's render order.
  *
@@ -15,6 +15,47 @@ import type { TemplateSection } from "~/lib/template-sections";
  */
 
 // ─── Hero (not hideable) ────────────────────────────────────────────────────
+
+/**
+ * Built-in hero shelf rows (`dream.homepage.hero-shelf`'s `defaultRows`).
+ * Images are empty so each frame renders the warm fallback tile until the
+ * owner picks a photo. Declared here (not in the runtime resolver) so the
+ * resolver can import it without a circular import — see
+ * `dream-homepage-shelf.ts`. Alt sentences and captions are the retired
+ * numbered fields' old defaults, verbatim.
+ */
+export const DREAM_HERO_SHELF_DEFAULT_ROWS: Record<string, string>[] = [
+  {
+    image: "",
+    alt: "A white draped arbor set up outdoors by Selest",
+    caption: "Outdoor draping",
+  },
+  {
+    image: "",
+    alt: "A wall of pastel balloons styled by Selest",
+    caption: "Balloon wall",
+  },
+  {
+    image: "",
+    alt: "A tablescape with centerpieces styled by Selest",
+    caption: "Tablescape",
+  },
+  {
+    image: "",
+    alt: "White throne chairs framed by draping at a Selest event",
+    caption: "Throne chairs",
+  },
+  {
+    image: "",
+    alt: "A floral backdrop with candlelight styled by Selest",
+    caption: "Floral backdrop",
+  },
+  {
+    image: "",
+    alt: "A table dressed with balloons at a Selest event",
+    caption: "Balloon table",
+  },
+];
 
 const heroData: TemplateField[] = [
   {
@@ -101,206 +142,89 @@ const heroData: TemplateField[] = [
     defaultValue: "#what-we-do",
   },
   {
-    key: "dream.homepage.hero-shelf-photo-1",
-    label: "Shelf photo 1",
+    key: "dream.homepage.hero-shelf",
+    label: "Shelf photos",
     description:
-      "Photo 1 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
+      "The photos that drift slowly across the bottom of the hero. Add, remove, or drag to reorder. Frames cycle wide, tall, then square. On wide screens, photos repeat as needed to keep the strip full.",
+    type: "list",
     page: "homepage",
     group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-1-alt",
-    label: "Shelf photo 1 alt text",
-    description:
-      "Describes shelf photo 1 (the wide 3:2 frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "A white draped arbor set up outdoors by Selest",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-1-caption",
-    label: "Shelf photo 1 caption",
-    description:
-      "Short caption pill shown over shelf photo 1 (the wide 3:2 frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Outdoor draping",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-2",
-    label: "Shelf photo 2",
-    description:
-      "Photo 2 on the hero shelf — a tall 4:5 frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-2-alt",
-    label: "Shelf photo 2 alt text",
-    description:
-      "Describes shelf photo 2 (the tall 4:5 frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "A wall of pastel balloons styled by Selest",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-2-caption",
-    label: "Shelf photo 2 caption",
-    description:
-      "Short caption pill shown over shelf photo 2 (the tall 4:5 frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Balloon wall",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-3",
-    label: "Shelf photo 3",
-    description:
-      "Photo 3 on the hero shelf — a square frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-3-alt",
-    label: "Shelf photo 3 alt text",
-    description:
-      "Describes shelf photo 3 (the square frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "A tablescape with centerpieces styled by Selest",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-3-caption",
-    label: "Shelf photo 3 caption",
-    description:
-      "Short caption pill shown over shelf photo 3 (the square frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Tablescape",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-4",
-    label: "Shelf photo 4",
-    description:
-      "Photo 4 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-4-alt",
-    label: "Shelf photo 4 alt text",
-    description:
-      "Describes shelf photo 4 (the wide 3:2 frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "White throne chairs framed by draping at a Selest event",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-4-caption",
-    label: "Shelf photo 4 caption",
-    description:
-      "Short caption pill shown over shelf photo 4 (the wide 3:2 frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Throne chairs",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-5",
-    label: "Shelf photo 5",
-    description:
-      "Photo 5 on the hero shelf — a tall 4:5 frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-5-alt",
-    label: "Shelf photo 5 alt text",
-    description:
-      "Describes shelf photo 5 (the tall 4:5 frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "A floral backdrop with candlelight styled by Selest",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-5-caption",
-    label: "Shelf photo 5 caption",
-    description:
-      "Short caption pill shown over shelf photo 5 (the tall 4:5 frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Floral backdrop",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-6",
-    label: "Shelf photo 6",
-    description:
-      "Photo 6 on the hero shelf — a wide 3:2 frame. The shelf drifts slowly beneath the hero text.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-6-alt",
-    label: "Shelf photo 6 alt text",
-    description:
-      "Describes shelf photo 6 (the wide 3:2 frame) for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "A table dressed with balloons at a Selest event",
-  },
-  {
-    key: "dream.homepage.hero-shelf-photo-6-caption",
-    label: "Shelf photo 6 caption",
-    description:
-      "Short caption pill shown over shelf photo 6 (the wide 3:2 frame).",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "Balloon table",
+    gridColumn: "col-span-full",
+    minItems: 3,
+    maxItems: 12,
+    defaultsWhenEmpty: true,
+    itemLabel: "photo",
+    summaryKey: "caption",
+    itemSchema: [
+      {
+        key: "image",
+        label: "Photo",
+        type: "image",
+        description:
+          "The photo for this frame. Leave empty to show a soft placeholder tile.",
+      },
+      {
+        key: "caption",
+        label: "Label",
+        type: "text",
+        description: "Short label shown in a pill over the photo.",
+        placeholder: "e.g. Balloon wall",
+      },
+      {
+        key: "alt",
+        label: "Photo description",
+        type: "text",
+        optional: true,
+        description:
+          "Describe the photo for screen readers. Leave blank to use the label.",
+      },
+    ],
+    defaultRows: DREAM_HERO_SHELF_DEFAULT_ROWS,
   },
 ];
 
 // ─── What We Do (hideable) ──────────────────────────────────────────────────
+
+/**
+ * Built-in "What we do" rows (`dream.homepage.what-we-do-rows`'s
+ * `defaultRows`). Images are empty so each row renders the designed
+ * placeholder composition until the owner picks photos. Copy and alt
+ * sentences are the retired numbered `row-{1..3}-*` fields' old defaults,
+ * verbatim. Declared here (not in the resolver) to avoid a circular import —
+ * see `dream-homepage-what-we-do-rows.ts`.
+ */
+export const DREAM_WHAT_WE_DO_DEFAULT_ROWS: Record<string, string>[] = [
+  {
+    heading: "Event Decor",
+    body: "Selest builds the room around your occasion — backdrops, florals, and focal points designed to be photographed.",
+    linkLabel: "See Event Decor",
+    linkUrl: "/services",
+    image: "",
+    alt: "A fully styled event decor setup by Selest",
+    sideImage: "",
+    sideAlt: "Detail of an event decor accent piece",
+  },
+  {
+    heading: "Event Rentals",
+    body: "Chairs, linens, and statement furniture — rented and delivered so every seat matches the mood.",
+    linkLabel: "See Event Rentals",
+    linkUrl: "/services",
+    image: "",
+    alt: "Rental chairs and table settings styled by Selest",
+    sideImage: "",
+    sideAlt: "Detail of a rental linen and place setting",
+  },
+  {
+    heading: "Customized Draping",
+    body: "Fabric shaped around your space — ceilings, walls, and thrones draped to fit the theme exactly.",
+    linkLabel: "See Customized Draping",
+    linkUrl: "/services",
+    image: "",
+    alt: "A draped ceiling and throne chair styled by Selest",
+    sideImage: "",
+    sideAlt: "Detail of draped fabric along a wall",
+  },
+];
 
 const whatWeDoData: TemplateField[] = [
   {
@@ -325,247 +249,81 @@ const whatWeDoData: TemplateField[] = [
       "Three ways Selest brings a celebration together, from the room itself to the smallest detail.",
   },
   {
-    key: "dream.homepage.row-1-heading",
-    label: "Row 1 heading",
-    description: "Heading for the first of the three alternating rows.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Event Decor",
-  },
-  {
-    key: "dream.homepage.row-1-body",
-    label: "Row 1 body",
-    description: "Short paragraph for the first row.",
-    type: "textarea",
+    key: "dream.homepage.what-we-do-rows",
+    label: "Rows",
+    description:
+      "The alternating rows under the intro, each with a heading, a short paragraph, a link, and photos. Add, remove, or drag to reorder. Rows swap sides on wide screens, starting with the text on the left.",
+    type: "list",
     page: "homepage",
     group: "homepage.what-we-do",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Selest builds the room around your occasion — backdrops, florals, and focal points designed to be photographed.",
-  },
-  {
-    key: "dream.homepage.row-1-link-label",
-    label: "Row 1 link label",
-    description: "Label for the first row's link.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "See Event Decor",
-  },
-  {
-    key: "dream.homepage.row-1-link-url",
-    label: "Row 1 link",
-    description: "Where the first row's link points to.",
-    type: "url",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/services",
-  },
-  {
-    key: "dream.homepage.row-1-photo",
-    label: "Row 1 photo",
-    description: "Main photo for the first row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-1-photo-alt",
-    label: "Row 1 photo alt text",
-    description: "Describes the first row's main photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "A fully styled event decor setup by Selest",
-  },
-  {
-    key: "dream.homepage.row-1-side-photo",
-    label: "Row 1 side photo",
-    description: "Smaller companion photo for the first row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-1-side-photo-alt",
-    label: "Row 1 side photo alt text",
-    description: "Describes the first row's side photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Detail of an event decor accent piece",
-  },
-  {
-    key: "dream.homepage.row-2-heading",
-    label: "Row 2 heading",
-    description: "Heading for the second of the three alternating rows.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Event Rentals",
-  },
-  {
-    key: "dream.homepage.row-2-body",
-    label: "Row 2 body",
-    description: "Short paragraph for the second row.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Chairs, linens, and statement furniture — rented and delivered so every seat matches the mood.",
-  },
-  {
-    key: "dream.homepage.row-2-link-label",
-    label: "Row 2 link label",
-    description: "Label for the second row's link.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "See Event Rentals",
-  },
-  {
-    key: "dream.homepage.row-2-link-url",
-    label: "Row 2 link",
-    description: "Where the second row's link points to.",
-    type: "url",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/services",
-  },
-  {
-    key: "dream.homepage.row-2-photo",
-    label: "Row 2 photo",
-    description: "Main photo for the second row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-2-photo-alt",
-    label: "Row 2 photo alt text",
-    description: "Describes the second row's main photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Rental chairs and table settings styled by Selest",
-  },
-  {
-    key: "dream.homepage.row-2-side-photo",
-    label: "Row 2 side photo",
-    description: "Smaller companion photo for the second row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-2-side-photo-alt",
-    label: "Row 2 side photo alt text",
-    description: "Describes the second row's side photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Detail of a rental linen and place setting",
-  },
-  {
-    key: "dream.homepage.row-3-heading",
-    label: "Row 3 heading",
-    description: "Heading for the third of the three alternating rows.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Customized Draping",
-  },
-  {
-    key: "dream.homepage.row-3-body",
-    label: "Row 3 body",
-    description: "Short paragraph for the third row.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Fabric shaped around your space — ceilings, walls, and thrones draped to fit the theme exactly.",
-  },
-  {
-    key: "dream.homepage.row-3-link-label",
-    label: "Row 3 link label",
-    description: "Label for the third row's link.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "See Customized Draping",
-  },
-  {
-    key: "dream.homepage.row-3-link-url",
-    label: "Row 3 link",
-    description: "Where the third row's link points to.",
-    type: "url",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/services",
-  },
-  {
-    key: "dream.homepage.row-3-photo",
-    label: "Row 3 photo",
-    description: "Main photo for the third row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-3-photo-alt",
-    label: "Row 3 photo alt text",
-    description: "Describes the third row's main photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "A draped ceiling and throne chair styled by Selest",
-  },
-  {
-    key: "dream.homepage.row-3-side-photo",
-    label: "Row 3 side photo",
-    description: "Smaller companion photo for the third row.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream.homepage.row-3-side-photo-alt",
-    label: "Row 3 side photo alt text",
-    description: "Describes the third row's side photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.what-we-do",
-    gridColumn: "col-span-1",
-    defaultValue: "Detail of draped fabric along a wall",
+    minItems: 1,
+    maxItems: 6,
+    defaultsWhenEmpty: true,
+    itemLabel: "row",
+    summaryKey: "heading",
+    itemSchema: [
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        description: "Heading for this row.",
+        placeholder: "e.g. Event Decor",
+      },
+      {
+        key: "body",
+        label: "Paragraph",
+        type: "textarea",
+        description: "Short paragraph describing this part of what you do.",
+      },
+      {
+        key: "linkLabel",
+        label: "Link label",
+        type: "text",
+        optional: true,
+        description:
+          "Words for the link under the paragraph. Leave blank to hide the link.",
+        placeholder: "e.g. See Event Decor",
+      },
+      {
+        key: "linkUrl",
+        label: "Link",
+        type: "url",
+        optional: true,
+        description: "Where the link goes.",
+      },
+      {
+        key: "image",
+        label: "Main photo",
+        type: "image",
+        description:
+          "The large photo for this row. Leave empty to show a soft placeholder.",
+      },
+      {
+        key: "alt",
+        label: "Main photo description",
+        type: "text",
+        optional: true,
+        description:
+          "Describe the main photo for screen readers. Leave blank to use the heading.",
+      },
+      {
+        key: "sideImage",
+        label: "Side photo",
+        type: "image",
+        optional: true,
+        description: "A smaller companion photo that overlaps the main photo.",
+      },
+      {
+        key: "sideAlt",
+        label: "Side photo description",
+        type: "text",
+        optional: true,
+        description:
+          "Describe the side photo for screen readers. Leave blank if it is purely decorative.",
+      },
+    ],
+    defaultRows: DREAM_WHAT_WE_DO_DEFAULT_ROWS,
   },
 ];
 
@@ -628,6 +386,26 @@ const galleryData: TemplateField[] = [
 
 // ─── From idea to theme (hideable) ──────────────────────────────────────────
 
+/**
+ * Built-in "From idea to theme" steps (`dream.homepage.process-steps`'s
+ * `defaultRows`) — the retired numbered `process-step-{1..3}-*` fields' old
+ * defaults, verbatim. Also the resolver's fallback (`resolveDreamStepsList`).
+ */
+export const DREAM_PROCESS_STEPS_DEFAULT_ROWS: Record<string, string>[] = [
+  {
+    heading: "Share the occasion",
+    body: "Tell Selest the date, the space, and the feeling you want the day to have.",
+  },
+  {
+    heading: "Choose the decor path",
+    body: "Selest recommends the decor, rentals, and draping that fit your event and space.",
+  },
+  {
+    heading: "Build the look",
+    body: "The pieces come together on-site, styled and ready before your guests arrive.",
+  },
+];
+
 const processData: TemplateField[] = [
   {
     key: "dream.homepage.process-heading",
@@ -650,67 +428,35 @@ const processData: TemplateField[] = [
     defaultValue: "How a conversation with Selest becomes an event.",
   },
   {
-    key: "dream.homepage.process-step-1-heading",
-    label: "Step 1 heading",
-    description: "Heading for the first step.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.process",
-    gridColumn: "col-span-1",
-    defaultValue: "Share the occasion",
-  },
-  {
-    key: "dream.homepage.process-step-1-body",
-    label: "Step 1 body",
-    description: "Short line describing the first step.",
-    type: "textarea",
+    key: "dream.homepage.process-steps",
+    label: "Steps",
+    description:
+      "The numbered steps beside the heading, in order. Add, remove, or drag to reorder.",
+    type: "list",
     page: "homepage",
     group: "homepage.process",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Tell Selest the date, the space, and the feeling you want the day to have.",
-  },
-  {
-    key: "dream.homepage.process-step-2-heading",
-    label: "Step 2 heading",
-    description: "Heading for the second step.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.process",
-    gridColumn: "col-span-1",
-    defaultValue: "Choose the decor path",
-  },
-  {
-    key: "dream.homepage.process-step-2-body",
-    label: "Step 2 body",
-    description: "Short line describing the second step.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.process",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Selest recommends the decor, rentals, and draping that fit your event and space.",
-  },
-  {
-    key: "dream.homepage.process-step-3-heading",
-    label: "Step 3 heading",
-    description: "Heading for the third step.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.process",
-    gridColumn: "col-span-1",
-    defaultValue: "Build the look",
-  },
-  {
-    key: "dream.homepage.process-step-3-body",
-    label: "Step 3 body",
-    description: "Short line describing the third step.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.process",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "The pieces come together on-site, styled and ready before your guests arrive.",
+    minItems: 1,
+    maxItems: 6,
+    defaultsWhenEmpty: true,
+    itemLabel: "step",
+    summaryKey: "heading",
+    itemSchema: [
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        description: "Short heading for this step.",
+        placeholder: "e.g. Share the occasion",
+      },
+      {
+        key: "body",
+        label: "Description",
+        type: "textarea",
+        description: "A line or two describing this step.",
+      },
+    ],
+    defaultRows: DREAM_PROCESS_STEPS_DEFAULT_ROWS,
   },
 ];
 
@@ -833,7 +579,7 @@ export const dreamHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.what-we-do",
     title: "What we do",
     description:
-      "Heading, intro, and the three alternating decor, rentals, and draping rows.",
+      "Heading, intro, and the alternating rows for decor, rentals, and draping.",
     icon: "🪄",
     columns: 2,
   },
@@ -847,7 +593,7 @@ export const dreamHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.process",
     title: "From idea to theme",
-    description: "Heading, intro, and the three-step process.",
+    description: "Heading, intro, and the numbered steps.",
     icon: "🧭",
     columns: 2,
   },
@@ -877,7 +623,7 @@ export const dreamHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "What we do",
     description:
-      "Three alternating rows: Event Decor, Event Rentals, Customized Draping",
+      "Alternating rows: Event Decor, Event Rentals, Customized Draping",
     groupIds: ["homepage.what-we-do"],
     order: 1,
     hideable: true,
@@ -895,7 +641,7 @@ export const dreamHomepageSections: TemplateSection[] = [
     id: "homepage.process",
     page: "homepage",
     title: "From idea to theme",
-    description: "Three-step process from first message to styled event",
+    description: "Numbered steps from first message to styled event",
     groupIds: ["homepage.process"],
     order: 3,
     hideable: true,

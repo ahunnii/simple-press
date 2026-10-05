@@ -1,29 +1,32 @@
 import type { CSSProperties } from "react";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import type { DreamStepItem } from "./dream-steps-list";
+import { listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { DreamRevealGroup } from "./dream-reveal";
 
-type DreamStep = {
-  heading: string;
-  body: string;
-  headingFieldKey?: string;
-  bodyFieldKey?: string;
-};
-
 type DreamStepsProps = {
-  steps: DreamStep[];
+  steps: DreamStepItem[];
+  /**
+   * The list field these steps come from. Each `<li>` gets
+   * `listItemAttr(itemFieldKey, i)` so the visual editor can open that row.
+   */
+  itemFieldKey?: string;
   className?: string;
 };
 
 /**
- * Numbered 3-step list, numerals in Italiana `--dream-gold-ink` (design.md:
+ * Numbered step list (one row per step of an owner-editable list field), numerals in Italiana `--dream-gold-ink` (design.md:
  * "the sequence carries meaning" — the one place section numbers are
  * allowed per the craft floor). Used by homepage "From idea to theme",
  * about "Consultation", and the contact "What happens next" aside.
  */
-export function DreamSteps({ steps, className }: DreamStepsProps) {
+export function DreamSteps({
+  steps,
+  itemFieldKey,
+  className,
+}: DreamStepsProps) {
   return (
     <DreamRevealGroup className={cn("dream-steps", className)}>
       <ol className="dream-steps-list">
@@ -32,25 +35,14 @@ export function DreamSteps({ steps, className }: DreamStepsProps) {
             key={step.heading + i}
             className="dream-reveal-item dream-steps-item"
             style={{ "--i": Math.min(i, 7) } as CSSProperties}
+            {...(itemFieldKey ? listItemAttr(itemFieldKey, i) : {})}
           >
             <span className="dream-steps-num" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="dream-steps-text">
-              <h3
-                className="dream-steps-heading"
-                {...(step.headingFieldKey
-                  ? fieldAttr(step.headingFieldKey)
-                  : {})}
-              >
-                {step.heading}
-              </h3>
-              <p
-                className="dream-steps-body"
-                {...(step.bodyFieldKey ? fieldAttr(step.bodyFieldKey) : {})}
-              >
-                {step.body}
-              </p>
+              <h3 className="dream-steps-heading">{step.heading}</h3>
+              <p className="dream-steps-body">{step.body}</p>
             </div>
           </li>
         ))}

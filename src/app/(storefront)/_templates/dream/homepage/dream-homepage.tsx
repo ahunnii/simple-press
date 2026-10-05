@@ -13,12 +13,18 @@ import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { resolveFields } from "..";
 import { DREAM_CLOUD_PRESETS } from "../lib/cloud-presets";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
+import { resolveDreamStepsList } from "../shared/dream-steps-list";
 import { DreamHomepageGallery } from "./dream-homepage-gallery";
 import { DreamHomepageHero } from "./dream-homepage-hero";
 import { DreamHomepageProcess } from "./dream-homepage-process";
 import { toDreamQuoteChips } from "./dream-homepage-quote-chips";
+import { resolveDreamHeroShelf } from "./dream-homepage-shelf";
 import { DreamHomepageWhatWeDo } from "./dream-homepage-what-we-do";
+import { resolveDreamWhatWeDoRows } from "./dream-homepage-what-we-do-rows";
 import { DreamPopup } from "./dream-popup";
+import { DREAM_PROCESS_STEPS_DEFAULT_ROWS } from "./index";
+
+const DREAM_PROCESS_STEPS_KEY = "dream.homepage.process-steps";
 
 const FIELD_KEYS = [
   // Hero
@@ -30,51 +36,9 @@ const FIELD_KEYS = [
   "dream.homepage.hero-cta-url",
   "dream.homepage.hero-cta-secondary-label",
   "dream.homepage.hero-cta-secondary-url",
-  "dream.homepage.hero-shelf-photo-1",
-  "dream.homepage.hero-shelf-photo-1-alt",
-  "dream.homepage.hero-shelf-photo-1-caption",
-  "dream.homepage.hero-shelf-photo-2",
-  "dream.homepage.hero-shelf-photo-2-alt",
-  "dream.homepage.hero-shelf-photo-2-caption",
-  "dream.homepage.hero-shelf-photo-3",
-  "dream.homepage.hero-shelf-photo-3-alt",
-  "dream.homepage.hero-shelf-photo-3-caption",
-  "dream.homepage.hero-shelf-photo-4",
-  "dream.homepage.hero-shelf-photo-4-alt",
-  "dream.homepage.hero-shelf-photo-4-caption",
-  "dream.homepage.hero-shelf-photo-5",
-  "dream.homepage.hero-shelf-photo-5-alt",
-  "dream.homepage.hero-shelf-photo-5-caption",
-  "dream.homepage.hero-shelf-photo-6",
-  "dream.homepage.hero-shelf-photo-6-alt",
-  "dream.homepage.hero-shelf-photo-6-caption",
   // What We Do
   "dream.homepage.what-we-do-heading",
   "dream.homepage.what-we-do-lede",
-  "dream.homepage.row-1-heading",
-  "dream.homepage.row-1-body",
-  "dream.homepage.row-1-link-label",
-  "dream.homepage.row-1-link-url",
-  "dream.homepage.row-1-photo",
-  "dream.homepage.row-1-photo-alt",
-  "dream.homepage.row-1-side-photo",
-  "dream.homepage.row-1-side-photo-alt",
-  "dream.homepage.row-2-heading",
-  "dream.homepage.row-2-body",
-  "dream.homepage.row-2-link-label",
-  "dream.homepage.row-2-link-url",
-  "dream.homepage.row-2-photo",
-  "dream.homepage.row-2-photo-alt",
-  "dream.homepage.row-2-side-photo",
-  "dream.homepage.row-2-side-photo-alt",
-  "dream.homepage.row-3-heading",
-  "dream.homepage.row-3-body",
-  "dream.homepage.row-3-link-label",
-  "dream.homepage.row-3-link-url",
-  "dream.homepage.row-3-photo",
-  "dream.homepage.row-3-photo-alt",
-  "dream.homepage.row-3-side-photo",
-  "dream.homepage.row-3-side-photo-alt",
   // Gallery
   "dream.homepage.gallery-heading",
   "dream.homepage.gallery-lede",
@@ -84,12 +48,6 @@ const FIELD_KEYS = [
   // Process
   "dream.homepage.process-heading",
   "dream.homepage.process-lede",
-  "dream.homepage.process-step-1-heading",
-  "dream.homepage.process-step-1-body",
-  "dream.homepage.process-step-2-heading",
-  "dream.homepage.process-step-2-body",
-  "dream.homepage.process-step-3-heading",
-  "dream.homepage.process-step-3-body",
   // Quote band
   "dream.homepage.quote-heading",
   "dream.homepage.quote-accent",
@@ -166,9 +124,6 @@ export async function DreamHomepage({
 
   const heroCtaUrl = f["dream.homepage.hero-cta-url"] ?? "";
   const heroCtaSecondaryUrl = f["dream.homepage.hero-cta-secondary-url"] ?? "";
-  const row1LinkUrl = f["dream.homepage.row-1-link-url"] ?? "";
-  const row2LinkUrl = f["dream.homepage.row-2-link-url"] ?? "";
-  const row3LinkUrl = f["dream.homepage.row-3-link-url"] ?? "";
   const galleryEmptyLinkUrl = "/contact";
   const quoteCtaUrl = f["dream.homepage.quote-cta-url"] ?? "";
 
@@ -192,50 +147,7 @@ export async function DreamHomepage({
               f["dream.homepage.hero-cta-secondary-label"] ?? "",
             ctaSecondaryUrl: heroCtaSecondaryUrl,
             ctaSecondaryVisible: ctaVisible(heroCtaSecondaryUrl),
-            shelf: [
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-1"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-1-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-1-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-1-caption",
-              },
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-2"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-2-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-2-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-2-caption",
-              },
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-3"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-3-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-3-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-3-caption",
-              },
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-4"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-4-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-4-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-4-caption",
-              },
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-5"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-5-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-5-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-5-caption",
-              },
-              {
-                src:
-                  f["dream.homepage.hero-shelf-photo-6"] ?? "/placeholder.svg",
-                alt: f["dream.homepage.hero-shelf-photo-6-alt"] ?? "",
-                caption: f["dream.homepage.hero-shelf-photo-6-caption"] ?? "",
-                captionFieldKey: "dream.homepage.hero-shelf-photo-6-caption",
-              },
-            ],
+            shelf: resolveDreamHeroShelf(customFields),
           }}
         />
 
@@ -243,59 +155,11 @@ export async function DreamHomepage({
           <DreamHomepageWhatWeDo
             heading={f["dream.homepage.what-we-do-heading"] ?? ""}
             lede={f["dream.homepage.what-we-do-lede"] ?? ""}
-            rows={[
-              {
-                key: "row-1",
-                heading: f["dream.homepage.row-1-heading"] ?? "",
-                headingFieldKey: "dream.homepage.row-1-heading",
-                body: f["dream.homepage.row-1-body"] ?? "",
-                bodyFieldKey: "dream.homepage.row-1-body",
-                linkLabel: f["dream.homepage.row-1-link-label"] ?? "",
-                linkLabelFieldKey: "dream.homepage.row-1-link-label",
-                linkUrl: row1LinkUrl,
-                linkVisible: ctaVisible(row1LinkUrl),
-                photo: f["dream.homepage.row-1-photo"] ?? "/placeholder.svg",
-                photoAlt: f["dream.homepage.row-1-photo-alt"] ?? "",
-                sidePhoto:
-                  f["dream.homepage.row-1-side-photo"] ?? "/placeholder.svg",
-                sidePhotoAlt: f["dream.homepage.row-1-side-photo-alt"] ?? "",
-                variant: "text-image",
-              },
-              {
-                key: "row-2",
-                heading: f["dream.homepage.row-2-heading"] ?? "",
-                headingFieldKey: "dream.homepage.row-2-heading",
-                body: f["dream.homepage.row-2-body"] ?? "",
-                bodyFieldKey: "dream.homepage.row-2-body",
-                linkLabel: f["dream.homepage.row-2-link-label"] ?? "",
-                linkLabelFieldKey: "dream.homepage.row-2-link-label",
-                linkUrl: row2LinkUrl,
-                linkVisible: ctaVisible(row2LinkUrl),
-                photo: f["dream.homepage.row-2-photo"] ?? "/placeholder.svg",
-                photoAlt: f["dream.homepage.row-2-photo-alt"] ?? "",
-                sidePhoto:
-                  f["dream.homepage.row-2-side-photo"] ?? "/placeholder.svg",
-                sidePhotoAlt: f["dream.homepage.row-2-side-photo-alt"] ?? "",
-                variant: "image-text",
-              },
-              {
-                key: "row-3",
-                heading: f["dream.homepage.row-3-heading"] ?? "",
-                headingFieldKey: "dream.homepage.row-3-heading",
-                body: f["dream.homepage.row-3-body"] ?? "",
-                bodyFieldKey: "dream.homepage.row-3-body",
-                linkLabel: f["dream.homepage.row-3-link-label"] ?? "",
-                linkLabelFieldKey: "dream.homepage.row-3-link-label",
-                linkUrl: row3LinkUrl,
-                linkVisible: ctaVisible(row3LinkUrl),
-                photo: f["dream.homepage.row-3-photo"] ?? "/placeholder.svg",
-                photoAlt: f["dream.homepage.row-3-photo-alt"] ?? "",
-                sidePhoto:
-                  f["dream.homepage.row-3-side-photo"] ?? "/placeholder.svg",
-                sidePhotoAlt: f["dream.homepage.row-3-side-photo-alt"] ?? "",
-                variant: "text-image",
-              },
-            ]}
+            rows={resolveDreamWhatWeDoRows(customFields).map((row) => ({
+              ...row,
+              // B2.5: a link needs a label, and its route's flag must be on.
+              linkVisible: row.linkLabel !== "" && ctaVisible(row.linkUrl),
+            }))}
           />
         )}
 
@@ -315,20 +179,11 @@ export async function DreamHomepage({
           <DreamHomepageProcess
             heading={f["dream.homepage.process-heading"] ?? ""}
             lede={f["dream.homepage.process-lede"] ?? ""}
-            steps={[
-              {
-                heading: f["dream.homepage.process-step-1-heading"] ?? "",
-                body: f["dream.homepage.process-step-1-body"] ?? "",
-              },
-              {
-                heading: f["dream.homepage.process-step-2-heading"] ?? "",
-                body: f["dream.homepage.process-step-2-body"] ?? "",
-              },
-              {
-                heading: f["dream.homepage.process-step-3-heading"] ?? "",
-                body: f["dream.homepage.process-step-3-body"] ?? "",
-              },
-            ]}
+            steps={resolveDreamStepsList(
+              customFields,
+              DREAM_PROCESS_STEPS_KEY,
+              DREAM_PROCESS_STEPS_DEFAULT_ROWS,
+            )}
           />
         )}
 

@@ -1,20 +1,14 @@
+import type { DreamStepItem } from "../shared/dream-steps-list";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamSection } from "../shared/dream-section";
 import { DreamSteps } from "../shared/dream-steps";
 
-type Step = {
-  heading: string;
-  body: string;
-  headingFieldKey: string;
-  bodyFieldKey: string;
-};
-
 type Props = {
   heading: string;
   lede: string;
-  steps: Step[];
+  steps: DreamStepItem[];
 };
 
 /** "How the consultation works." — heading+lede left, `DreamSteps` right. Hideable. */
@@ -37,7 +31,10 @@ export function DreamAboutConsultation({ heading, lede, steps }: Props) {
             {lede}
           </p>
         </div>
-        <DreamSteps steps={steps} />
+        <DreamSteps
+          steps={steps}
+          itemFieldKey="dream.about.consultation-steps"
+        />
       </div>
     </DreamSection>
   );
