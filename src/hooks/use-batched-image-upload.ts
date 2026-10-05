@@ -77,6 +77,17 @@ async function mapWithConcurrency<T, R>(
 
 type Phase = "idle" | "preparing" | "uploading";
 
+export type UseBatchedImageUploadConfig = {
+  /**
+   * Upload into THIS business instead of the request host's. Only the
+   * `libraryImages` route honors it, and only for a PLATFORM_ADMIN (the
+   * platform hub's Media Library) — anyone else is rejected server-side, see
+   * `resolveLibraryUploadBusiness` in src/app/api/upload/route.ts. Omit
+   * everywhere else.
+   */
+  businessId?: string;
+};
+
 /**
  * Prep → size-gate → upload for many images, one route-sized batch at a time,
  * so a 50-photo drop never decodes all 50 at once or sends more than the
@@ -85,7 +96,9 @@ type Phase = "idle" | "preparing" | "uploading";
  */
 export function useBatchedImageUpload(
   route: BatchedImageUploadRoute,
+  config?: UseBatchedImageUploadConfig,
 ): UseBatchedImageUpload {
+  const targetBusinessId = config?.businessId;
   const batchSize = ROUTE_MAX_FILES[route] ?? DEFAULT_BATCH_SIZE;
 
   // Spans the whole `uploadImages` call — the upload hook's own `isPending`
@@ -138,7 +151,12 @@ export function useBatchedImageUpload(
           // caller's gallery order depends on ours.
           if (valid.length > 0) {
             setPhase("uploading");
-            const result = await uploadAsync(valid);
+            const result = await uploadAsync(
+              valid,
+              targetBusinessId
+                ? { metadata: { businessId: targetBusinessId } }
+                : undefined,
+            );
             const unmatched = [...result.files];
             for (const file of valid) {
               // Identity first; the name fallback consumes its match so two
@@ -166,7 +184,7 @@ export function useBatchedImageUpload(
 
       return { urls, failedNames, oversizedNames, aborted };
     },
-    [batchSize, uploadAsync],
+    [batchSize, uploadAsync, targetBusinessId],
   );
 
   return {

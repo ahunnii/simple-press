@@ -44,15 +44,6 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const business = await checkBusiness();
-  if (!business) {
-    return Response.json({ error: "Business not found" }, { status: 404 });
-  }
-
-  // ── Resolve target businessId ─────────────────────────────────────────────────
-
-  let targetBusinessId = business.id;
-
   // ── Size guard (content-length header is advisory but helps fast-reject large requests)
   const contentLength = req.headers.get("content-length");
   if (contentLength && parseInt(contentLength, 10) > MAX_UPLOAD_BYTES) {
@@ -76,7 +67,11 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // The caller may target another business via the businessId field
+  // ── Resolve target businessId ─────────────────────────────────────────────────
+  // The caller may target any business via the businessId field (the platform
+  // hub does this — it has no store host). Otherwise use the host's business.
+
+  let targetBusinessId: string;
   const inputBusinessId = form.get("businessId");
   if (typeof inputBusinessId === "string" && inputBusinessId.trim()) {
     // Verify the target business exists
@@ -91,6 +86,12 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
     targetBusinessId = targetBiz.id;
+  } else {
+    const business = await checkBusiness();
+    if (!business) {
+      return Response.json({ error: "Business not found" }, { status: 404 });
+    }
+    targetBusinessId = business.id;
   }
 
   const fileEntry = form.get("file");
@@ -125,8 +126,13 @@ export async function POST(req: Request): Promise<Response> {
     const message = err instanceof Error ? err.message : String(err);
     const isManifestError =
       message.includes("Invalid store transfer manifest") ||
-      message.includes("Unsupported format version") ||
-      message.includes("missing manifest.json");
+      message.includes("Invalid store transfer ZIP") ||
+      message.includes("Unsupported format version");
+
+    // A bad upload is a user error, not a bug — don't report it to Sentry.
+    if (isManifestError) {
+      return Response.json({ error: message }, { status: 400 });
+    }
 
     Sentry.captureException(err, {
       tags: {
@@ -134,10 +140,6 @@ export async function POST(req: Request): Promise<Response> {
         businessId: targetBusinessId,
       },
     });
-
-    if (isManifestError) {
-      return Response.json({ error: message }, { status: 400 });
-    }
 
     return Response.json(
       { error: "Import failed due to an unexpected error. Please try again." },

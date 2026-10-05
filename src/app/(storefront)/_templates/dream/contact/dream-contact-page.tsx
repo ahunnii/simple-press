@@ -6,8 +6,12 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { resolveFields } from "..";
 import { resolveDreamContactDetails } from "../shared/dream-contact-details";
 import { DreamPageHero } from "../shared/dream-page-hero";
+import { resolveDreamStepsList } from "../shared/dream-steps-list";
 import { DreamContactInfo } from "./dream-contact-info";
 import { DreamQuoteForm } from "./dream-quote-form";
+import { DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS } from "./index";
+
+const DREAM_FORM_NEXT_STEPS_KEY = "dream.contact.form-next-steps";
 
 const FIELD_KEYS = [
   "dream.contact.hero-heading",
@@ -20,12 +24,6 @@ const FIELD_KEYS = [
   "dream.contact.form-success-heading",
   "dream.contact.form-success-body",
   "dream.contact.form-next-heading",
-  "dream.contact.form-next-step-1-heading",
-  "dream.contact.form-next-step-1-body",
-  "dream.contact.form-next-step-2-heading",
-  "dream.contact.form-next-step-2-body",
-  "dream.contact.form-next-step-3-heading",
-  "dream.contact.form-next-step-3-body",
   "dream.contact.form-draping-label",
   "dream.contact.form-throne-label",
   "dream.contact.form-full-decor-label",
@@ -57,26 +55,11 @@ export function DreamContactPage({
     businessName,
   );
 
-  const nextSteps = [
-    {
-      heading: f["dream.contact.form-next-step-1-heading"] ?? "",
-      body: f["dream.contact.form-next-step-1-body"] ?? "",
-      headingFieldKey: "dream.contact.form-next-step-1-heading",
-      bodyFieldKey: "dream.contact.form-next-step-1-body",
-    },
-    {
-      heading: f["dream.contact.form-next-step-2-heading"] ?? "",
-      body: f["dream.contact.form-next-step-2-body"] ?? "",
-      headingFieldKey: "dream.contact.form-next-step-2-heading",
-      bodyFieldKey: "dream.contact.form-next-step-2-body",
-    },
-    {
-      heading: f["dream.contact.form-next-step-3-heading"] ?? "",
-      body: f["dream.contact.form-next-step-3-body"] ?? "",
-      headingFieldKey: "dream.contact.form-next-step-3-heading",
-      bodyFieldKey: "dream.contact.form-next-step-3-body",
-    },
-  ];
+  const nextSteps = resolveDreamStepsList(
+    customFields,
+    DREAM_FORM_NEXT_STEPS_KEY,
+    DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS,
+  );
 
   return (
     <div>

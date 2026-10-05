@@ -10941,10 +10941,21 @@ body:has(.pollen) {
   border: none;
 }
 
+/* DreamMark: the business logo (--dream-mark-url, set on the .dream root by
+   DreamLayout) or the bundled mark. Image only — no display/size here, so
+   unlayered specificity can't beat a call site's Tailwind `hidden`. */
+.dream .dream-mark {
+  background: var(
+      --dream-mark-url,
+      url("/templates/dream/images/logo-mark.webp")
+    )
+    center / contain no-repeat;
+}
+
 .dream .dream-image-fallback-mark {
+  display: block;
   width: 48px;
   height: 48px;
-  object-fit: contain;
   opacity: 0.35;
 }
 
@@ -11141,23 +11152,28 @@ body:has(.pollen) {
   background: radial-gradient(closest-side, var(--dream-veil), transparent);
 }
 
+/* Sized by height, not width: merchant logos range from square marks to
+   ~2.4:1 lockups (the Dream fallback), and a fixed height keeps the shelf's
+   fold budget the same whatever the aspect. max-width stops a very wide
+   logo overflowing on phones (it then scales down, keeping its ratio). */
 .dream .dream-hero-logo {
-  width: 220px;
-  max-width: 60vw;
-  height: auto;
+  height: 120px;
+  width: auto;
+  max-width: 80vw;
   object-fit: contain;
 }
 
 @media (min-width: 960px) {
-  /* 200px, not the pre-shelf 320px: measured, 320 pushes the shelf below
-     the 1440×900 fold. */
+  /* Measured ceiling at 1440×900 is ~188px before the shelf drops below
+     the fold; 160px leaves ~28px of slack. */
   .dream .dream-hero-logo {
-    width: 200px;
+    height: 160px;
+    max-width: 480px;
   }
 }
 
 /* Short desktop viewports (the 1280×800 / 1366×768 laptop class): the
-   200px logo + 200px shelf overshoot an 800px fold by ~75px, so step the
+   160px-tall logo + 200px shelf overshoot an 800px fold, so step the
    logo, the shelf frames, the shelf gap and the top padding down together — the shelf's
    bottom edge must sit inside the first viewport (design.md Hero §1:
    "rests on the hero floor", not "is cut by the fold"). The center stack's
@@ -11169,7 +11185,7 @@ body:has(.pollen) {
   }
 
   .dream .dream-hero-logo {
-    width: 160px;
+    height: 135px;
   }
 
   .dream .dream-hero-shelf {
@@ -11199,9 +11215,10 @@ body:has(.pollen) {
 
 /* ── Hero shelf — the drifting filmstrip on the hero floor ──
    Mobile: a plain horizontally scrollable row, full-bleed. Desktop
-   (≥960px): a transform-only marquee. The track holds the six frames
-   TWICE (the second copy is `.is-dup`, `aria-hidden`, and display:none
-   below 960px), so drifting it to `translateX(-50%)` — exactly one copy's
+   (≥960px): a transform-only marquee. The track holds the loop (the
+   owner's photos, padded to at least eight frames) TWICE; padding frames and
+   the second copy are `.is-dup`, `aria-hidden`, and display:none below
+   960px, so drifting the track to `translateX(-50%)` — exactly one copy's
    width — loops seamlessly. See `dream-homepage-hero.tsx`. */
 /* The balloon layer stops at the shelf's top edge (+ the shelf gap): the
    balloons start at bottom:-100px INSIDE this clipped box and fade in over
@@ -11282,7 +11299,10 @@ body:has(.pollen) {
   }
 
   .dream .dream-hero-shelf-track {
-    animation: dream-shelf-drift 60s linear infinite;
+    /* 10s per frame: the track's inline `--dream-shelf-count` is the loop
+       length, so the drift speed stays constant (6 frames = the original 60s). */
+    animation: dream-shelf-drift calc(var(--dream-shelf-count, 6) * 10s) linear
+      infinite;
   }
 
   .dream .dream-hero-shelf:hover .dream-hero-shelf-track {
@@ -11378,9 +11398,12 @@ body:has(.pollen) {
   margin: 0 auto;
 }
 
+/* Height-based like the homepage hero logo, so wide lockups don't shrink
+   to a sliver; ~60% of the homepage logo's height. */
 .dream .dream-page-hero-logo {
-  width: 140px;
-  height: auto;
+  height: 96px;
+  width: auto;
+  max-width: 80vw;
   object-fit: contain;
 }
 
@@ -12333,8 +12356,9 @@ body:has(.pollen) {
   }
 }
 
-/* Hero shelf marquee: one copy's width of travel. The track renders the six
-   frames twice, so -50% lands on an identical frame — no visible restart. */
+/* Hero shelf marquee: one copy's width of travel. The track renders the loop
+   (at least eight frames) twice, so -50% lands on an identical frame — no
+   visible restart. */
 @keyframes dream-shelf-drift {
   from {
     transform: translateX(0);

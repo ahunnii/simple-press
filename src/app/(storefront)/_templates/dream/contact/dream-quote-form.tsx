@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
+import type { DreamStepItem } from "../shared/dream-steps-list";
 import type {
   QuoteExtras,
   QuoteLabels,
@@ -35,13 +36,6 @@ import {
   EMPTY_QUOTE_EXTRAS,
 } from "./compose-quote-message";
 
-type Step = {
-  heading: string;
-  body: string;
-  headingFieldKey: string;
-  bodyFieldKey: string;
-};
-
 /**
  * Owner-editable wording for the three decor questions
  * (`dream.contact.form-draping-label` / `form-throne-label` /
@@ -62,7 +56,7 @@ type Props = {
   successHeading: string;
   successBody: string;
   nextHeading: string;
-  nextSteps: Step[];
+  nextSteps: DreamStepItem[];
   labels: QuoteFormLabels;
 };
 
@@ -645,7 +639,10 @@ export function DreamQuoteForm({
               {nextHeading}
             </DreamHeading>
             <div className="mt-6">
-              <DreamSteps steps={nextSteps} />
+              <DreamSteps
+                steps={nextSteps}
+                itemFieldKey="dream.contact.form-next-steps"
+              />
             </div>
           </div>
         </div>

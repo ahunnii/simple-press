@@ -11,6 +11,7 @@ import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
 import { DreamAmbientController } from "../shared/dream-ambient-controller";
+import { dreamMarkUrlVar } from "../shared/dream-mark";
 import { nonBlank } from "../shared/dream-non-blank";
 import { DreamFooter } from "./dream-footer";
 import { DreamHeader } from "./dream-header";
@@ -96,11 +97,18 @@ export async function DreamLayout({
   // safe no-op today and starts working automatically if a theme.ts is ever
   // added later.
   const themeVars = resolveThemeVars("dream", customFields);
+  // The uploaded logo stands in for the bundled mark on empty states and
+  // image fallbacks (`DreamMark`); unset → the CSS falls back to the bundle.
+  const markUrl = dreamMarkUrlVar(business.siteContent?.logoUrl);
 
   return (
     <div
       className={`${fontItaliana.variable} ${fontParisienne.variable} ${fontMulish.variable} dream flex min-h-screen flex-col`}
-      style={{ fontFamily: "var(--font-dream-body)", ...themeVars }}
+      style={{
+        fontFamily: "var(--font-dream-body)",
+        ...themeVars,
+        ...(markUrl ? { "--dream-mark-url": markUrl } : {}),
+      }}
     >
       {/* Skip link — always the first focusable element */}
       <a

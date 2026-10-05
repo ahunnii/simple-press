@@ -112,6 +112,12 @@ import {
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
+import {
+  effectiveVariantPricesCents,
+  formatMarginRange,
+  marginRange,
+  PricingHelper,
+} from "./pricing-helper";
 import { ProductFeaturesField } from "./product-features-field";
 import { ProductSubscriptionCard } from "./product-subscription-card";
 import { VariantManager } from "./variant-manager";
@@ -960,14 +966,29 @@ export function ProductForm({
 
   const watchedPrice = form.watch("price");
   const watchedCost = form.watch("cost");
-  const marginPercent =
-    variants.length === 0 &&
-    typeof watchedCost === "number" &&
-    watchedCost > 0 &&
-    typeof watchedPrice === "number" &&
-    watchedPrice > 0
-      ? Math.round(((watchedPrice - watchedCost) / watchedPrice) * 100)
+  const watchedCostCents =
+    typeof watchedCost === "number" && watchedCost > 0
+      ? Math.round(watchedCost * 100)
       : null;
+  const hasCost = watchedCostCents !== null;
+  const variantPricesCents =
+    variants.length > 0
+      ? effectiveVariantPricesCents(variants, watchedPrice)
+      : [];
+  const marginLabel = (() => {
+    if (!hasCost) return null;
+    const range =
+      variants.length > 0
+        ? marginRange(watchedCostCents, variantPricesCents)
+        : marginRange(
+            watchedCostCents,
+            typeof watchedPrice === "number"
+              ? [Math.round(watchedPrice * 100)]
+              : [],
+          );
+    const text = formatMarginRange(range);
+    return text ? `${text} margin` : null;
+  })();
 
   const shippingType = businessInfo?.shippingType;
   const shippingWeightInert = !!shippingType && shippingType !== "zone_weight";
@@ -1379,9 +1400,9 @@ export function ProductForm({
                             <FormItem>
                               <div className="flex items-center justify-between gap-2">
                                 <FormLabel>Cost per item</FormLabel>
-                                {marginPercent !== null && (
+                                {marginLabel !== null && (
                                   <span className="text-muted-foreground text-xs tabular-nums">
-                                    {marginPercent}% margin
+                                    {marginLabel}
                                   </span>
                                 )}
                               </div>
@@ -1389,9 +1410,26 @@ export function ProductForm({
                                 <MoneyInput placeholder="0.00" {...field} />
                               </FormControl>
                               <FormDescription>
-                                What you pay for this item. Never shown to
-                                customers.
+                                {hasCost
+                                  ? "What you pay for this item. Never shown to customers."
+                                  : "What you pay for this item. Add it to see your profit and suggested prices. Never shown to customers."}
                               </FormDescription>
+                              {hasCost && (
+                                <PricingHelper
+                                  priceDollars={watchedPrice}
+                                  costDollars={watchedCost}
+                                  variantPricesCents={variantPricesCents}
+                                  onApplyPrice={
+                                    variants.length === 0
+                                      ? (dollars) =>
+                                          form.setValue("price", dollars, {
+                                            shouldDirty: true,
+                                            shouldValidate: true,
+                                          })
+                                      : undefined
+                                  }
+                                />
+                              )}
                               <FormMessage />
                             </FormItem>
                           )}

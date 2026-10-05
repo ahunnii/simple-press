@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getBusinessUrl } from "~/lib/business-url";
+import { TEMPLATES } from "~/lib/constants";
 import { getMerchantTermsStatus } from "~/lib/legal/terms-status";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 
 type Props = {
@@ -44,6 +48,27 @@ function MerchantTermsBadge({
   );
 }
 
+function StripeBadge({
+  stripeAccountId,
+  chargesEnabled,
+}: {
+  stripeAccountId: string | null;
+  chargesEnabled: boolean;
+}) {
+  if (!stripeAccountId) {
+    return <span className="text-muted-foreground text-sm">—</span>;
+  }
+  return chargesEnabled ? (
+    <Badge variant="success">Connected</Badge>
+  ) : (
+    <Badge variant="warning">Charges off</Badge>
+  );
+}
+
+function templateName(templateId: string): string {
+  return TEMPLATES.find((t) => t.id === templateId)?.name ?? templateId;
+}
+
 export function BusinessesTable({ businesses }: Props) {
   return (
     <Card>
@@ -74,6 +99,18 @@ export function BusinessesTable({ businesses }: Props) {
                 scope="col"
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
+                Template
+              </th>
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
+                Stripe
+              </th>
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Members
               </th>
               <th
@@ -93,6 +130,9 @@ export function BusinessesTable({ businesses }: Props) {
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
                 Created
+              </th>
+              <th scope="col" className="px-6 py-3">
+                <span className="sr-only">Links</span>
               </th>
             </tr>
           </thead>
@@ -125,6 +165,15 @@ export function BusinessesTable({ businesses }: Props) {
                     {business.status}
                   </Badge>
                 </td>
+                <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
+                  {templateName(business.templateId)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StripeBadge
+                    stripeAccountId={business.stripeAccountId}
+                    chargesEnabled={business.stripeChargesEnabled}
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-foreground text-sm">
                     {business._count.memberships}
@@ -138,6 +187,23 @@ export function BusinessesTable({ businesses }: Props) {
                 </td>
                 <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                   {formatDate(business.createdAt)}
+                </td>
+                <td className="px-6 py-4 text-right whitespace-nowrap">
+                  <Button asChild variant="ghost" size="icon">
+                    <a
+                      href={getBusinessUrl({
+                        subdomain: business.subdomain,
+                        customDomain: business.customDomain,
+                        domainStatus: business.domainStatus,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open ${business.name} storefront`}
+                      title="Open storefront"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
                 </td>
               </tr>
             ))}

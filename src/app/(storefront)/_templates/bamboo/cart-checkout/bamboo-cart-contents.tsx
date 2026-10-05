@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
@@ -50,7 +50,7 @@ export function BambooCartContents({ business }: Props) {
               className="bg-primary/10 mx-auto flex size-20 items-center justify-center rounded-full"
               aria-hidden="true"
             >
-              <ShoppingBag className="text-primary size-8" />
+              <ShoppingCart className="text-primary size-8" />
             </div>
             <h1 className="text-foreground font-serif mt-6 text-2xl font-bold tracking-tight">
               Your cart is empty

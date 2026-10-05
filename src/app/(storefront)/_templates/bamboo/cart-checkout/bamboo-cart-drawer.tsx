@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { ShippingConfig } from "~/lib/shipping-utils";
@@ -194,7 +194,7 @@ export function BambooCartDrawer({
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <span className="flex size-16 items-center justify-center rounded-full bg-[var(--bam-cream-deep)]">
-              <ShoppingBag
+              <ShoppingCart
                 className="size-7 text-[var(--bam-forest)]/60"
                 aria-hidden="true"
               />

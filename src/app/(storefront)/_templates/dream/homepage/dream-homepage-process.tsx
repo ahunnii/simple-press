@@ -1,15 +1,14 @@
+import type { DreamStepItem } from "../shared/dream-steps-list";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamSection } from "../shared/dream-section";
 import { DreamSteps } from "../shared/dream-steps";
 
-type DreamStep = { heading: string; body: string };
-
 type DreamHomepageProcessProps = {
   heading: string;
   lede: string;
-  steps: DreamStep[];
+  steps: DreamStepItem[];
 };
 
 /**
@@ -38,14 +37,7 @@ export function DreamHomepageProcess({
             {lede}
           </p>
         </div>
-        <DreamSteps
-          steps={steps.map((step, i) => ({
-            heading: step.heading,
-            body: step.body,
-            headingFieldKey: `dream.homepage.process-step-${i + 1}-heading`,
-            bodyFieldKey: `dream.homepage.process-step-${i + 1}-body`,
-          }))}
-        />
+        <DreamSteps steps={steps} itemFieldKey="dream.homepage.process-steps" />
       </div>
     </DreamSection>
   );

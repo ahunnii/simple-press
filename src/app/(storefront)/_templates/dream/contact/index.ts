@@ -49,6 +49,26 @@ const contactHeroData: TemplateField[] = [
 
 // ─── Form — NOT hideable (gated on the platform contactForm flag) ──────────
 
+/**
+ * Built-in "What happens next" steps (`dream.contact.form-next-steps`'s
+ * `defaultRows`) — the retired numbered `form-next-step-{1..3}-*` fields' old
+ * defaults, verbatim. Also the resolver's fallback.
+ */
+export const DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS: Record<string, string>[] = [
+  {
+    heading: "Selest reviews your details",
+    body: "She looks over the event, the space, and the theme you described.",
+  },
+  {
+    heading: "You get a proposal",
+    body: "A plan with the pieces, colors, and pricing for your event.",
+  },
+  {
+    heading: "You lock in your date",
+    body: "Approve the plan and Selest reserves your date.",
+  },
+];
+
 const contactFormData: TemplateField[] = [
   {
     key: "dream.contact.form-heading",
@@ -123,65 +143,35 @@ const contactFormData: TemplateField[] = [
     defaultValue: "What happens next",
   },
   {
-    key: "dream.contact.form-next-step-1-heading",
-    label: "Step 1 heading",
-    description: "Heading for the first step in the panel beside the form.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "Selest reviews your details",
-  },
-  {
-    key: "dream.contact.form-next-step-1-body",
-    label: "Step 1 body",
-    description: "Short line for the first step in the panel beside the form.",
-    type: "textarea",
+    key: "dream.contact.form-next-steps",
+    label: "What happens next steps",
+    description:
+      "The numbered steps in the panel beside the form, in order. Add, remove, or drag to reorder.",
+    type: "list",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue:
-      "She looks over the event, the space, and the theme you described.",
-  },
-  {
-    key: "dream.contact.form-next-step-2-heading",
-    label: "Step 2 heading",
-    description: "Heading for the second step in the panel beside the form.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "You get a proposal",
-  },
-  {
-    key: "dream.contact.form-next-step-2-body",
-    label: "Step 2 body",
-    description: "Short line for the second step in the panel beside the form.",
-    type: "textarea",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-full",
-    defaultValue: "A plan with the pieces, colors, and pricing for your event.",
-  },
-  {
-    key: "dream.contact.form-next-step-3-heading",
-    label: "Step 3 heading",
-    description: "Heading for the third step in the panel beside the form.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "You lock in your date",
-  },
-  {
-    key: "dream.contact.form-next-step-3-body",
-    label: "Step 3 body",
-    description: "Short line for the third step in the panel beside the form.",
-    type: "textarea",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-full",
-    defaultValue: "Approve the plan and Selest reserves your date.",
+    minItems: 1,
+    maxItems: 6,
+    defaultsWhenEmpty: true,
+    itemLabel: "step",
+    summaryKey: "heading",
+    itemSchema: [
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        description: "Short heading for this step.",
+        placeholder: "e.g. Selest reviews your details",
+      },
+      {
+        key: "body",
+        label: "Description",
+        type: "textarea",
+        description: "A line or two describing this step.",
+      },
+    ],
+    defaultRows: DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS,
   },
   {
     key: "dream.contact.form-draping-label",

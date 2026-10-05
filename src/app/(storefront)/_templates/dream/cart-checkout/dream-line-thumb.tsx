@@ -1,5 +1,7 @@
 import { cn } from "~/lib/utils";
 
+import { DreamMark } from "../shared/dream-mark";
+
 type Props = {
   src: string | null;
   /** Size/radius classes — e.g. `size-[88px] sm:size-[112px]`. */
@@ -32,14 +34,7 @@ export function DreamLineThumb({ src, className }: Props) {
         />
       ) : (
         <div className="flex size-full items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element -- decorative bundled mark, same raw <img> as DreamImageFallback */}
-          <img
-            src="/templates/dream/images/logo.webp"
-            alt=""
-            aria-hidden="true"
-            className="w-1/2 max-w-12 object-contain opacity-35"
-            draggable={false}
-          />
+          <DreamMark className="block aspect-square w-1/2 max-w-12 opacity-35" />
         </div>
       )}
     </div>

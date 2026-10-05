@@ -7,9 +7,15 @@ import { getRichTextFieldValue } from "~/lib/template-fields";
 import { resolveFields } from "..";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
+import { resolveDreamStepsList } from "../shared/dream-steps-list";
 import { DreamAboutConsultation } from "./dream-about-consultation";
 import { DreamAboutStory } from "./dream-about-story";
-import { DREAM_ABOUT_STORY_BODY_DEFAULT_HTML } from "./index";
+import {
+  DREAM_ABOUT_STORY_BODY_DEFAULT_HTML,
+  DREAM_CONSULTATION_STEPS_DEFAULT_ROWS,
+} from "./index";
+
+const DREAM_CONSULTATION_STEPS_KEY = "dream.about.consultation-steps";
 
 const FIELD_KEYS = [
   "dream.about.hero-heading",
@@ -24,12 +30,6 @@ const FIELD_KEYS = [
   "dream.about.story-cta-url",
   "dream.about.consultation-heading",
   "dream.about.consultation-lede",
-  "dream.about.consultation-step-1-heading",
-  "dream.about.consultation-step-1-body",
-  "dream.about.consultation-step-2-heading",
-  "dream.about.consultation-step-2-body",
-  "dream.about.consultation-step-3-heading",
-  "dream.about.consultation-step-3-body",
   "dream.about.quote-heading",
   "dream.about.quote-accent",
   "dream.about.quote-lede",
@@ -39,7 +39,7 @@ const FIELD_KEYS = [
 
 /**
  * "Meet Selest" — design.md "Per-page section concepts › About": page hero,
- * story (portrait + pull-quote + CTA), consultation steps, closing quote
+ * story (portrait + pull-quote + CTA), consultation step list, closing quote
  * band. Purely CMS/field-driven — no data mutations.
  */
 export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
@@ -60,26 +60,11 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
     businessName,
   );
 
-  const steps = [
-    {
-      heading: f["dream.about.consultation-step-1-heading"] ?? "",
-      body: f["dream.about.consultation-step-1-body"] ?? "",
-      headingFieldKey: "dream.about.consultation-step-1-heading",
-      bodyFieldKey: "dream.about.consultation-step-1-body",
-    },
-    {
-      heading: f["dream.about.consultation-step-2-heading"] ?? "",
-      body: f["dream.about.consultation-step-2-body"] ?? "",
-      headingFieldKey: "dream.about.consultation-step-2-heading",
-      bodyFieldKey: "dream.about.consultation-step-2-body",
-    },
-    {
-      heading: f["dream.about.consultation-step-3-heading"] ?? "",
-      body: f["dream.about.consultation-step-3-body"] ?? "",
-      headingFieldKey: "dream.about.consultation-step-3-heading",
-      bodyFieldKey: "dream.about.consultation-step-3-body",
-    },
-  ];
+  const steps = resolveDreamStepsList(
+    customFields,
+    DREAM_CONSULTATION_STEPS_KEY,
+    DREAM_CONSULTATION_STEPS_DEFAULT_ROWS,
+  );
 
   return (
     <div>

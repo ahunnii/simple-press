@@ -50,21 +50,20 @@ export const storageKeySchema = z
   );
 
 /**
- * Optional `businessId` — honored only when the caller is a PLATFORM_ADMIN.
- * Non-platform-admins are silently scoped to their own business.
+ * Shop `media.*` inputs. No `businessId`: the shop router always acts on the
+ * host-resolved business. Platform admins target another business through the
+ * hub's `platformMedia.*` router, whose inputs (below) make it REQUIRED. A
+ * stray `businessId` sent to a shop procedure is stripped by zod (non-strict
+ * object), never honored.
  */
-export const mediaListInput = z.object({
-  businessId: z.string().optional(),
-});
+export const mediaListInput = z.object({});
 
 export const mediaDeleteInput = z.object({
   key: storageKeySchema,
-  businessId: z.string().optional(),
 });
 
 export const mediaDownloadInput = z.object({
   key: storageKeySchema,
-  businessId: z.string().optional(),
 });
 
 /**
@@ -75,22 +74,23 @@ export const mediaDownloadInput = z.object({
  * list (see `src/lib/validators/customer.ts`) and the Discounts list (see
  * `src/lib/validators/discounts.ts`) — but with a narrower pair of consumers
  * than either. The Media Library has no router `z.enum` to keep in sync at
- * all: `media.list` is input-free (besides the optional platform-admin
- * `businessId`) and returns the whole S3 listing, filtered/sorted/paginated
- * entirely **in memory** on the page/client, so there is no server-side
- * validation step these tuples must agree with. The two consumers are both
- * client-side: the page's own `pickParam` call and the `FilterDefFor` option
- * lists that render the filter/sort dropdowns.
+ * all: `media.list` / `platformMedia.list` take no filter input and return
+ * the whole S3 listing, filtered/sorted/paginated entirely **in memory** on
+ * the page/client, so there is no server-side validation step these tuples
+ * must agree with. The two consumers are both client-side: the shared page
+ * pipeline's `pickParam` calls and the `FilterDefFor` option lists that
+ * render the filter/sort dropdowns (both in
+ * `src/app/admin/media/_lib/build-media-page.ts`).
  *
  * An option the dropdown offers that `pickParam` doesn't recognize against
  * these tuples is a **silent** failure: `pickParam` falls back to the
  * default, so the control appears selected while the underlying rows are
  * unfiltered/unsorted. Same for a dropdown option with no matching `case` in
- * the page's filter predicate or comparator — it falls through to the
+ * the pipeline's filter predicate or comparator — it falls through to the
  * `default` branch instead of crashing.
  *
  * One `as const` tuple per param, consumed by `pickParam` and the
- * `FilterDefFor` option lists on the page, keeps both in sync. Tuple order is
+ * `FilterDefFor` option lists in that pipeline, keeps both in sync. Tuple order is
  * menu order — `FilterDefFor` maps each tuple positionally into the
  * dropdown's option list.
  */
@@ -130,11 +130,11 @@ export type MediaUsageStatus = "used" | "inactive" | "unused";
 
 /**
  * The single derivation of a file's usage bucket from its `usedBy` array —
- * shared by the Media Library's `used` filter predicate (page.tsx), the
- * `UsageBadge` component (media-library-client.tsx), and conceptually the
- * `media.delete` / `media.bulkDelete` deletability guard in the router
- * (`src/server/api/routers/media.ts` — not this file, kept in sync by
- * convention since the router derives deletability from the same
+ * shared by the Media Library's `used` filter predicate (build-media-page.ts),
+ * the `UsageBadge` component (media-library-client.tsx), and conceptually the
+ * `deleteMedia` / `bulkDeleteMedia` deletability guard
+ * (`src/server/media/library.ts` — not this file, kept in sync by
+ * convention since the service derives deletability from the same
  * `inactiveTemplate` flag rather than importing this helper directly).
  *
  * - `"unused"` — no usages at all.
@@ -176,7 +176,29 @@ export const mediaBulkDeleteInput = z.object({
       ADMIN_BULK_DELETE_LIMIT,
       `Too many files selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
     ),
-  businessId: z.string().optional(),
+});
+
+/**
+ * Platform hub (`platformMedia.*`) inputs — the shop shapes plus a REQUIRED
+ * target `businessId`. The router checks the business exists; the key-prefix
+ * guard in `~/server/media/library` ties every key to it.
+ */
+const platformBusinessIdSchema = z.string().min(1);
+
+export const platformMediaListInput = z.object({
+  businessId: platformBusinessIdSchema,
+});
+
+export const platformMediaDeleteInput = mediaDeleteInput.extend({
+  businessId: platformBusinessIdSchema,
+});
+
+export const platformMediaDownloadInput = mediaDownloadInput.extend({
+  businessId: platformBusinessIdSchema,
+});
+
+export const platformMediaBulkDeleteInput = mediaBulkDeleteInput.extend({
+  businessId: platformBusinessIdSchema,
 });
 
 /**

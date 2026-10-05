@@ -15,6 +15,10 @@ import {
   mediaBulkDeleteInput,
   mediaDeleteInput,
   mediaDownloadInput,
+  platformMediaBulkDeleteInput,
+  platformMediaDeleteInput,
+  platformMediaDownloadInput,
+  platformMediaListInput,
   storageKeySchema,
 } from "./media";
 
@@ -247,17 +251,26 @@ describe("storageKeySchema", () => {
 });
 
 describe("mediaDeleteInput / mediaDownloadInput", () => {
-  it("accepts a normal key with an optional businessId", () => {
+  it("accepts a normal key", () => {
     expect(
-      mediaDeleteInput.safeParse({
-        key: "biz_123/images/uuid-name.jpg",
-        businessId: "biz_456",
-      }).success,
+      mediaDeleteInput.safeParse({ key: "biz_123/images/uuid-name.jpg" })
+        .success,
     ).toBe(true);
     expect(
       mediaDownloadInput.safeParse({ key: "biz_123/images/uuid-name.jpg" })
         .success,
     ).toBe(true);
+  });
+
+  // The shop router always acts on the host's business — a cross-business
+  // override lives only on the platform hub's `platformMedia` inputs.
+  it("strips a businessId rather than passing it through", () => {
+    const result = mediaDeleteInput.safeParse({
+      key: "biz_123/images/uuid-name.jpg",
+      businessId: "biz_456",
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty("businessId");
   });
 
   it("rejects a traversal key", () => {
@@ -306,12 +319,13 @@ describe("mediaBulkDeleteInput", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts an optional businessId for platform-admin callers", () => {
+  it("strips a businessId rather than passing it through", () => {
     const result = mediaBulkDeleteInput.safeParse({
       keys: ["biz123/image-abcd1234.jpg"],
       businessId: "biz123",
     });
     expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty("businessId");
   });
 
   it("rejects an empty-string key", () => {
@@ -323,6 +337,36 @@ describe("mediaBulkDeleteInput", () => {
     expect(
       mediaBulkDeleteInput.safeParse({
         keys: ["biz123/image-abcd1234.jpg", "bizA/../bizB/file.jpg"],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("platformMedia inputs", () => {
+  it("require a non-empty businessId", () => {
+    const key = "biz123/library-abcd1234.jpg";
+    expect(platformMediaListInput.safeParse({}).success).toBe(false);
+    expect(platformMediaListInput.safeParse({ businessId: "" }).success).toBe(
+      false,
+    );
+    expect(
+      platformMediaListInput.safeParse({ businessId: "biz123" }).success,
+    ).toBe(true);
+    expect(platformMediaDeleteInput.safeParse({ key }).success).toBe(false);
+    expect(
+      platformMediaDeleteInput.safeParse({ key, businessId: "biz123" }).success,
+    ).toBe(true);
+    expect(platformMediaDownloadInput.safeParse({ key }).success).toBe(false);
+    expect(
+      platformMediaBulkDeleteInput.safeParse({ keys: [key] }).success,
+    ).toBe(false);
+  });
+
+  it("keep the storage-key traversal guard", () => {
+    expect(
+      platformMediaDeleteInput.safeParse({
+        key: "bizA/../bizB/file.jpg",
+        businessId: "bizA",
       }).success,
     ).toBe(false);
   });

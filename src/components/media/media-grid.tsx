@@ -17,6 +17,7 @@
 import { Check, File, Video } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { formatBytes } from "~/lib/format-bytes";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
@@ -27,16 +28,10 @@ export type MediaItem = RouterOutputs["media"]["list"]["items"][number];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
-  const i = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const val = bytes / Math.pow(1024, i);
-  return `${i === 0 ? val.toString() : val.toFixed(1)} ${units[i] ?? "B"}`;
-}
+// Lives in a plain (non-"use client") module so server components can call it
+// too — a function imported from this "use client" file is a client reference
+// on the server, not callable. Re-exported for existing client importers.
+export { formatBytes };
 
 export function getFilename(key: string): string {
   return key.split("/").pop() ?? key;

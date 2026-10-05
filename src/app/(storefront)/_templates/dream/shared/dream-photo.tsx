@@ -19,6 +19,11 @@ type DreamPhotoProps = {
   fallbackMessage?: string;
   /** Tone forwarded to `DreamImageFallback` for the empty state. Defaults to "sky". */
   fallbackTone?: "sky" | "paper" | "warm";
+  /**
+   * Extra attributes spread onto the `<figure>` — used to pass a visual-editor
+   * hook such as `listItemAttr(...)` for a photo that is one row of a list.
+   */
+  attrs?: Readonly<Record<`data-${string}`, string>>;
 };
 
 /**
@@ -38,12 +43,13 @@ export function DreamPhoto({
   priority,
   fallbackMessage,
   fallbackTone,
+  attrs,
 }: DreamPhotoProps) {
   const isEmpty = src === "" || src === "/placeholder.svg";
   const style = aspect ? ({ aspectRatio: aspect } as CSSProperties) : undefined;
 
   return (
-    <figure className={cn("dream-photo", className)} style={style}>
+    <figure className={cn("dream-photo", className)} style={style} {...attrs}>
       {isEmpty ? (
         <DreamImageFallback
           className="dream-photo-fallback"

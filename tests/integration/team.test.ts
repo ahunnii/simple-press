@@ -341,4 +341,164 @@ describe("team router", () => {
     // The invite code must never come back out of a code-keyed public lookup.
     expect(JSON.stringify(result)).not.toContain(created.code);
   });
+
+  describe("platformInvites (hub)", () => {
+    it("platform admin can invite to a business with no host context", async () => {
+      // Host that resolves to no business — the hub has no tenant host.
+      reqHost.value = "platform.simplepress.test";
+      const business = await createBusiness({ subdomain: "team-biz" });
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        email: admin.email,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      const result = await caller.platformInvites.invite({
+        businessId: business.id,
+        email: "hub-invitee@test.dev",
+        role: "STAFF",
+      });
+
+      expect(result.emailSent).toBe(true);
+      expect(result.invite).toMatchObject({
+        businessId: business.id,
+        role: "STAFF",
+        createdBy: admin.id,
+      });
+      // Link must land on the store's own host, not the platform host.
+      expect(result.inviteUrl).toContain("team-biz.simplepress.test");
+      const { inviteUrl } = sendTeamInviteEmail.mock.calls[0]![0] as {
+        inviteUrl: string;
+      };
+      expect(inviteUrl).toBe(result.inviteUrl);
+
+      const { pendingInvites, expiredInvites } =
+        await caller.platformInvites.list({ businessId: business.id });
+      expect(pendingInvites).toHaveLength(1);
+      expect(pendingInvites[0]!.inviteUrl).toBe(result.inviteUrl);
+      expect(expiredInvites).toHaveLength(0);
+    });
+
+    it("rejects a non-platform-admin with FORBIDDEN", async () => {
+      reqHost.value = "platform.simplepress.test";
+      const business = await createBusiness({ subdomain: "team-biz" });
+      const owner = await createOwnerUser(business.id);
+      const caller = createTestCaller({ userId: owner.id });
+
+      await expect(
+        caller.platformInvites.invite({
+          businessId: business.id,
+          email: "nope@test.dev",
+          role: "STAFF",
+        }),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(
+        caller.platformInvites.list({ businessId: business.id }),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+      expect(await db.teamInvite.count()).toBe(0);
+    });
+
+    it("returns NOT_FOUND for an unknown business", async () => {
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      await expect(
+        caller.platformInvites.invite({
+          businessId: "does-not-exist",
+          email: "x@test.dev",
+          role: "STAFF",
+        }),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+
+    it("revoke works and is scoped to the given business", async () => {
+      const businessA = await createBusiness({ subdomain: "team-biz" });
+      const businessB = await createBusiness({ subdomain: "team-biz-b" });
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      const { invite } = await caller.platformInvites.invite({
+        businessId: businessA.id,
+        email: "revokeme@test.dev",
+        role: "MANAGER",
+      });
+
+      // Wrong business id -> NOT_FOUND, invite untouched.
+      await expect(
+        caller.platformInvites.revoke({
+          businessId: businessB.id,
+          inviteId: invite.id,
+        }),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      expect(
+        (await db.teamInvite.findUniqueOrThrow({ where: { id: invite.id } }))
+          .used,
+      ).toBe(false);
+
+      await caller.platformInvites.revoke({
+        businessId: businessA.id,
+        inviteId: invite.id,
+      });
+      expect(
+        (await db.teamInvite.findUniqueOrThrow({ where: { id: invite.id } }))
+          .used,
+      ).toBe(true);
+      const { pendingInvites } = await caller.platformInvites.list({
+        businessId: businessA.id,
+      });
+      expect(pendingInvites).toHaveLength(0);
+    });
+
+    it("resend revokes the old invite and issues a fresh one with the same email/role", async () => {
+      const business = await createBusiness({ subdomain: "team-biz" });
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      const first = await caller.platformInvites.invite({
+        businessId: business.id,
+        email: "again@test.dev",
+        role: "STAFF",
+      });
+      const second = await caller.platformInvites.resend({
+        businessId: business.id,
+        inviteId: first.invite.id,
+      });
+
+      expect(second.invite.id).not.toBe(first.invite.id);
+      expect(second.invite.code).not.toBe(first.invite.code);
+      expect(second.invite).toMatchObject({
+        email: "again@test.dev",
+        role: "STAFF",
+      });
+      expect(sendTeamInviteEmail).toHaveBeenCalledTimes(2);
+
+      const old = await db.teamInvite.findUniqueOrThrow({
+        where: { id: first.invite.id },
+      });
+      expect(old.used).toBe(true);
+      const { pendingInvites } = await caller.platformInvites.list({
+        businessId: business.id,
+      });
+      expect(pendingInvites.map((i) => i.id)).toEqual([second.invite.id]);
+
+      // Resending an already-used (revoked) invite is rejected.
+      await expect(
+        caller.platformInvites.resend({
+          businessId: business.id,
+          inviteId: first.invite.id,
+        }),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+  });
 });

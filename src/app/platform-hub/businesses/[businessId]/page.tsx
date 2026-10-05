@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getMainDomainUrl } from "~/lib/domain-utils";
 import { api } from "~/trpc/server";
-import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,9 +12,16 @@ import {
 import { AddMemberButton } from "../../_components/add-member-button";
 import { BusinessMembersTable } from "../../_components/business-members-table";
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
+import { BusinessContentTransferCard } from "./_components/business-content-transfer-card";
 import { BusinessFeatureFlags } from "./_components/business-feature-flags";
+import { BusinessHealthCard } from "./_components/business-health-card";
+import { BusinessInvitesList } from "./_components/business-invites-list";
+import { BusinessLinks } from "./_components/business-links";
 import { BusinessStatusControl } from "./_components/business-status-control";
+import { BusinessTemplateControl } from "./_components/business-template-control";
 import { CopyBusinessContextButton } from "./_components/copy-business-context-button";
+import { EditBusinessBasicsDialog } from "./_components/edit-business-basics-dialog";
+import { InviteMemberButton } from "./_components/invite-member-button";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -30,7 +35,15 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
     notFound();
   }
 
-  const { flags } = await api.platform.getBusinessFlags({ businessId });
+  const [{ flags, disabledByDependency }, templateOptions, invites] =
+    await Promise.all([
+      api.platform.getBusinessFlags({ businessId }),
+      api.platformBusiness.listTemplateOptions({ businessId }),
+      api.platformInvites.list({ businessId }),
+    ]);
+  const wordpressExportEnabled =
+    flags.wordpressExport === true &&
+    !disabledByDependency.includes("wordpressExport");
 
   return (
     <>
@@ -42,26 +55,21 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
       />
       <div className="admin-container">
         <div className="space-y-6">
-          <div className="admin-header">
+          <div className="admin-header flex-wrap gap-4">
             <h1 className="text-2xl font-bold">{business.name}</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <BusinessLinks
+                businessId={business.id}
+                subdomain={business.subdomain}
+                customDomain={business.customDomain}
+                domainStatus={business.domainStatus}
+              />
               <CopyBusinessContextButton businessId={business.id} />
-              <Button variant="outline" size="sm" asChild>
-                <a
-                  href={getMainDomainUrl(
-                    `/admin/media?businessId=${business.id}`,
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Media Library
-                </a>
-              </Button>
             </div>
           </div>
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <CardTitle>{business.name}</CardTitle>
                   <CardDescription>
@@ -69,15 +77,23 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
                     {process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                   </CardDescription>
                 </div>
-                <BusinessStatusControl
-                  businessId={business.id}
-                  businessName={business.name}
-                  status={business.status}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <EditBusinessBasicsDialog
+                    businessId={business.id}
+                    name={business.name}
+                    ownerEmail={business.ownerEmail}
+                    supportEmail={business.supportEmail}
+                  />
+                  <BusinessStatusControl
+                    businessId={business.id}
+                    businessName={business.name}
+                    status={business.status}
+                  />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-2 gap-4 text-sm">
+              <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="text-muted-foreground font-medium">
                     Business ID
@@ -110,7 +126,14 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
                   <dt className="text-muted-foreground font-medium">
                     Template
                   </dt>
-                  <dd className="mt-1">{business.templateId}</dd>
+                  <dd className="mt-1">
+                    <BusinessTemplateControl
+                      businessId={business.id}
+                      businessName={business.name}
+                      currentTemplateId={templateOptions.currentTemplateId}
+                      options={templateOptions.options}
+                    />
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground font-medium">
@@ -144,16 +167,21 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
             </CardContent>
           </Card>
 
+          <BusinessHealthCard businessId={business.id} />
+
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <CardTitle>Team Members</CardTitle>
                   <CardDescription>
                     Users with access to this business
                   </CardDescription>
                 </div>
-                <AddMemberButton businessId={business.id} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <InviteMemberButton businessId={business.id} />
+                  <AddMemberButton businessId={business.id} />
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -164,8 +192,22 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
               ) : (
                 <BusinessMembersTable memberships={business.memberships} />
               )}
+              <div className="mt-6 space-y-2">
+                <h3 className="text-sm font-medium">Email invites</h3>
+                <BusinessInvitesList
+                  businessId={business.id}
+                  pendingInvites={invites.pendingInvites}
+                  expiredInvites={invites.expiredInvites}
+                />
+              </div>
             </CardContent>
           </Card>
+
+          <BusinessContentTransferCard
+            businessId={business.id}
+            businessName={business.name}
+            wordpressExportEnabled={wordpressExportEnabled}
+          />
 
           <BusinessFeatureFlags businessId={business.id} initialFlags={flags} />
         </div>

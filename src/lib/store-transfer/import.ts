@@ -30,7 +30,7 @@ import {
   objectExists,
   putStoredObject,
 } from "~/lib/s3/put";
-import { keyToPublicUrl } from "~/lib/s3/url";
+import { keyToPublicUrl, STORAGE_BASE } from "~/lib/s3/url";
 import {
   normalizeAreaServed,
   parseLocalPresence,
@@ -126,7 +126,14 @@ export async function importStoreBundle(args: {
 
   // ── Step 1: Parse ───────────────────────────────────────────────────────────
 
-  const zip = await JSZip.loadAsync(zipBuffer);
+  let zip: JSZip;
+  try {
+    zip = await JSZip.loadAsync(zipBuffer);
+  } catch {
+    throw new Error(
+      "Invalid store transfer ZIP: the file is not a readable ZIP archive",
+    );
+  }
 
   const manifestFile = zip.file("manifest.json");
   if (!manifestFile) {
@@ -157,7 +164,27 @@ export async function importStoreBundle(args: {
 
   const nonMissingMedia = media.filter((entry) => !entry.missing);
 
+  // Same bucket AND the object already lives under the target business's
+  // prefix (e.g. re-importing a store's own export from the platform hub):
+  // the original URL is already valid for this target, so reuse the object in
+  // place. Re-hosting it would write a content-addressed duplicate and repoint
+  // content at it, orphaning the original in the Media Library. No urlMap
+  // entry — the URL stays as-is, and Step 4 only flags urlMap keys.
+  const sameBucket = source.storageBase === STORAGE_BASE;
+  const targetPrefix = `${targetBusinessId}/`;
+
   await pool(nonMissingMedia, 5, async (entry) => {
+    if (sameBucket && entry.originalKey.startsWith(targetPrefix)) {
+      try {
+        if (await objectExists(entry.originalKey)) {
+          result.mediaSkipped++;
+          return;
+        }
+      } catch {
+        // Fall through and re-host from the ZIP.
+      }
+    }
+
     const zipFile = zip.file(entry.zipPath);
     if (!zipFile) {
       result.warnings.push(

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
@@ -146,7 +146,7 @@ export function BambooProductActions({
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="size-5" aria-hidden="true" />
+                      <ShoppingCart className="size-5" aria-hidden="true" />
                       Add to Cart - {formatPrice(displayPrice)}
                     </>
                   )}

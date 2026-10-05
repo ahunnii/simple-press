@@ -6,6 +6,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { DreamButton } from "../shared/dream-button";
+import { DreamMark } from "../shared/dream-mark";
 import { DreamReveal } from "../shared/dream-reveal";
 
 type Props = {
@@ -65,13 +66,7 @@ export function DreamEmptyPanel({
             aria-hidden="true"
             className="flex size-16 items-center justify-center rounded-full border border-[var(--dream-line)] bg-[var(--dream-paper)]"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- decorative bundled mark, same raw <img> as DreamImageFallback */}
-            <img
-              src="/templates/dream/images/logo.webp"
-              alt=""
-              className="size-8 object-contain opacity-50"
-              draggable={false}
-            />
+            <DreamMark className="block size-8 opacity-50" />
           </div>
           <h2
             className="[font-family:var(--font-dream-display)] text-[clamp(28px,3.4vw,38px)] leading-[1.1] text-[var(--dream-ink)]"
