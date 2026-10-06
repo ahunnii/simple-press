@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Star } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavChild } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
@@ -13,27 +15,23 @@ import {
 } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import { GoogleColorIcon } from "~/components/icons/google-icon";
 import {
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
   navHrefFlag,
   resolveFooterNav,
-  type NavChild,
 } from "~/app/(storefront)/_components/nav";
 
-import { resolveFields, UMSC_FOOTER_SHOP_LINKS_DEFAULT } from "../index";
+import { resolveFields } from "../index";
+import { UmscButton } from "../shared/umsc-button";
 import {
   resolveUmscContactDetails,
   umscTelHref,
 } from "../shared/umsc-contact-details";
-import { UmscGoogleReviewLink } from "../shared/umsc-google-review-link";
 import { UmscSocialIcons } from "../shared/umsc-social-icons";
 import { UmscFooterAccount } from "./umsc-footer-account";
-
-// Re-exported so the pre-migration import path (and the snapshot test) keep
-// working — the rows themselves now live in `../index.ts`'s `defaultRows`.
-export { UMSC_FOOTER_SHOP_LINKS_DEFAULT };
 
 /**
  * Help column defaults — today's hard-coded copy minus the retired policy
@@ -70,33 +68,46 @@ export async function UmscFooter({
     | undefined;
 
   const g = resolveFields(customFields, [
-    "umsc.global.visit-stores-label",
-    "umsc.global.visit-stores-url",
     "umsc.global.google-review-url",
     "umsc.global.footer-shop-heading",
+    "umsc.global.footer-review-heading",
+    "umsc.global.footer-review-body",
+    "umsc.global.footer-review-label",
   ]);
-  const visitStoresLabel =
-    g["umsc.global.visit-stores-label"] ?? "Visit Our Stores";
-  const visitStoresUrl = g["umsc.global.visit-stores-url"] ?? "";
   const googleReviewUrl = g["umsc.global.google-review-url"] ?? "";
   const footerShopHeading = g["umsc.global.footer-shop-heading"] ?? "";
+  const reviewHeading = g["umsc.global.footer-review-heading"] ?? "";
+  const reviewBody = g["umsc.global.footer-review-body"] ?? "";
+  const reviewLabel = g["umsc.global.footer-review-label"] ?? "";
 
   const shopLinkRows = parseTemplateListRows(
     customFields?.["umsc.global.footer-shop-links"],
   ) as { _id?: string; label?: string; url?: string }[];
-  const shopLinks =
-    shopLinkRows.length > 0 ? shopLinkRows : UMSC_FOOTER_SHOP_LINKS_DEFAULT;
 
-  // Owner list + "All products", each row filtered by its own route flag
-  // (PF21/B10.2) — the column stays gated on `products` below, but a
-  // collection door (e.g. `/collections/candles`) must also drop out when
+  // No owner rows → the store's first four published collections (Admin →
+  // Collections order), same source as the homepage "Shop by type" cards.
+  // `getAllPublic` is featureGate("collections")'d, so the flag guard is
+  // required. These aren't list rows, so no `itemIndex` (nothing to edit).
+  const collections =
+    shopLinkRows.length === 0 && isEnabled("collections")
+      ? await api.collections.getAllPublic().catch(() => [])
+      : [];
+
+  // Owner list (else the collections above) + "All products", each row
+  // filtered by its own route flag (PF21/B10.2) — the column stays gated on
+  // `products` below, but a collection door must also drop out when
   // `collections` is off, independent of the column-level gate.
   const shopColLinks = [
-    ...shopLinks.map((row, i) => ({
-      href: typeof row.url === "string" ? row.url : "",
-      label: typeof row.label === "string" ? row.label : "",
-      itemIndex: i,
-    })),
+    ...(shopLinkRows.length > 0
+      ? shopLinkRows.map((row, i) => ({
+          href: typeof row.url === "string" ? row.url : "",
+          label: typeof row.label === "string" ? row.label : "",
+          itemIndex: i,
+        }))
+      : collections.slice(0, 4).map((collection) => ({
+          href: `/collections/${collection.slug}`,
+          label: collection.name,
+        }))),
     { href: "/shop", label: "All products" },
   ].filter((link) => {
     const flag = navHrefFlag(link.href);
@@ -106,7 +117,10 @@ export async function UmscFooter({
   // Help column: owner-saved footer quick links (Admin → Navigation), else
   // UMSC_HELP_DEFAULTS, flag-filtered (B10.2/B10.4, PF21).
   const helpLinks = filterNavByFlags(
-    resolveFooterNav(business?.siteContent?.footerNavigationItems, UMSC_HELP_DEFAULTS),
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      UMSC_HELP_DEFAULTS,
+    ),
     isEnabled,
   );
 
@@ -195,15 +209,6 @@ export async function UmscFooter({
                 {footerTagline}
               </p>
             )}
-            {visitStoresUrl && (
-              <Link
-                href={visitStoresUrl}
-                {...fieldAttr("umsc.global.visit-stores-label")}
-                className="umsc-sans text-[13px] font-semibold text-[var(--umsc-gold-soft)] no-underline hover:underline"
-              >
-                {visitStoresLabel}
-              </Link>
-            )}
             {phone && (
               <a
                 href={umscTelHref(phone)}
@@ -248,15 +253,20 @@ export async function UmscFooter({
             </h2>
             <UmscSocialIcons
               links={socials}
-              className="mb-5"
               linkClassName="-m-3 flex items-center justify-center p-3 text-[var(--umsc-cream-on-black)] hover:text-[var(--umsc-gold-soft)]"
-            />
-            <UmscGoogleReviewLink
-              href={googleReviewUrl}
-              className="text-[var(--umsc-cream-on-black)]"
             />
           </div>
         </div>
+
+        {/* Google review strip — only once the owner sets the review link */}
+        {googleReviewUrl.trim() && reviewLabel && (
+          <UmscFooterReview
+            href={googleReviewUrl}
+            heading={reviewHeading}
+            body={reviewBody}
+            label={reviewLabel}
+          />
+        )}
       </div>
 
       <div
@@ -285,6 +295,78 @@ export async function UmscFooter({
         </nav>
       </div>
     </footer>
+  );
+}
+
+/**
+ * UmscFooterReview — the footer's Google review strip: gold stars + serif
+ * heading + one line on the left, a gold pill on the right, framed by the
+ * same gold hairline the legal strip uses. Stacks on mobile. The parent
+ * renders it only when `umsc.global.google-review-url` is set. The pill
+ * leads with Google's colour "G" on a white roundel (brand rule: the colour
+ * mark sits on white); its padding is tightened so 28px roundel + 7px
+ * top/bottom + 1px borders keeps the standard 44px pill height.
+ */
+function UmscFooterReview({
+  href,
+  heading,
+  body,
+  label,
+}: {
+  href: string;
+  heading: string;
+  body: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col gap-6 border-t border-[var(--umsc-line-gold)] pt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
+      <div className="flex flex-col gap-3">
+        <span aria-hidden="true" className="flex gap-1 text-[var(--umsc-gold)]">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className="size-4"
+              fill="currentColor"
+              strokeWidth={0}
+            />
+          ))}
+        </span>
+        {heading && (
+          <p
+            {...fieldAttr("umsc.global.footer-review-heading")}
+            className="umsc-serif m-0 text-[26px] leading-[1.15] text-[var(--umsc-gold-soft)]"
+          >
+            {heading}
+          </p>
+        )}
+        {body && (
+          <p
+            {...fieldAttr("umsc.global.footer-review-body")}
+            className="umsc-sans m-0 max-w-[52ch] text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)] opacity-90"
+          >
+            {body}
+          </p>
+        )}
+      </div>
+      <UmscButton
+        href={href}
+        external
+        variant="gold"
+        fieldKey="umsc.global.footer-review-label"
+        className="shrink-0 self-start sm:self-auto"
+        style={{ padding: "7px 28px 7px 7px", gap: 12 }}
+        leadingIcon={
+          <span
+            aria-hidden="true"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--umsc-white)]"
+          >
+            <GoogleColorIcon className="size-4" />
+          </span>
+        }
+      >
+        {label}
+      </UmscButton>
+    </div>
   );
 }
 

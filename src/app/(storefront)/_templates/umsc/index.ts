@@ -1,4 +1,3 @@
-import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
@@ -35,14 +34,6 @@ import {
 
 // ─── Global: Branding ─────────────────────────────────────────────────────
 
-/** Built-in shop-link rows — the four collections that existed on the current site. */
-const UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS = [
-  { label: "Candles", url: "/collections/candles" },
-  { label: "Soaps", url: "/collections/soaps" },
-  { label: "Body Care", url: "/collections/body-care" },
-  { label: "Home Care", url: "/collections/home-care" },
-] satisfies Record<string, string>[];
-
 const globalBrandingData: TemplateField[] = [
   {
     key: "umsc.global.header-tagline",
@@ -77,37 +68,48 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "/contact?type=custom",
   },
   {
-    key: "umsc.global.visit-stores-label",
-    label: "Store visits link text",
+    key: "umsc.global.google-review-url",
+    label: "Google review link",
     description:
-      "Label for the footer link to where customers can find you in person — markets, pop-ups, etc.",
+      "Link to your Google review page. Adds a 'Leave a Google review' strip to the footer and a review link to the reviews sections. Leave blank to hide them.",
+    type: "url",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "umsc.global.footer-review-heading",
+    label: "Footer review heading",
+    description:
+      "Heading in the footer's Google review strip. The strip shows only when the Google review link is filled in.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Visit Our Stores",
+    defaultValue: "Loved your order?",
   },
   {
-    key: "umsc.global.visit-stores-url",
-    label: "Store visits link",
+    key: "umsc.global.footer-review-body",
+    label: "Footer review message",
     description:
-      "Where the store-visits link points to — markets, pop-ups, or a locations page. Leave blank to hide the link.",
-    type: "url",
+      "One short line beside the heading in the footer's Google review strip. Leave blank to hide it.",
+    type: "textarea",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "",
+    defaultValue:
+      "A quick Google review helps a small Detroit shop more than you'd think.",
   },
   {
-    key: "umsc.global.google-review-url",
-    label: "Google review link",
-    description:
-      "Link to your Google review page. Shown as 'Click to leave us a Google Review' in the footer and the reviews section. Leave blank to hide.",
-    type: "url",
+    key: "umsc.global.footer-review-label",
+    label: "Footer review button text",
+    description: "Text on the button in the footer's Google review strip.",
+    type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "",
+    defaultValue: "Leave a Google review",
   },
   {
     key: "umsc.global.footer-shop-heading",
@@ -124,7 +126,7 @@ const globalBrandingData: TemplateField[] = [
     key: "umsc.global.footer-shop-links",
     label: "Footer shop links",
     description:
-      "Links in the footer's Shop column.",
+      "Links in the footer's Shop column. Leave empty to list your first four published collections (Admin → Collections order); add rows to choose your own links instead.",
     type: "list",
     page: "global",
     group: "global.branding",
@@ -132,8 +134,6 @@ const globalBrandingData: TemplateField[] = [
     maxItems: 8,
     itemLabel: "link",
     summaryKey: "label",
-    defaultsWhenEmpty: true,
-    defaultRows: UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS,
     itemSchema: [
       {
         key: "label",
@@ -244,10 +244,3 @@ export function resolveFields(
 ): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _umscFieldMap);
 }
-
-// ─── Derived storefront constants ──────────────────────────────────────────
-
-export const UMSC_FOOTER_SHOP_LINKS_DEFAULT = listRowsFromDefaults(
-  UMSC_FOOTER_SHOP_LINKS_DEFAULT_ROWS,
-  "default-link",
-);

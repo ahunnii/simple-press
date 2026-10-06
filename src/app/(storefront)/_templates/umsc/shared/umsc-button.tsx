@@ -13,6 +13,12 @@ type CommonProps = {
   className?: string;
   style?: CSSProperties;
   showArrow?: boolean;
+  /**
+   * Decorative mark before the label (e.g. the Google "G" on the footer
+   * review button). Sits outside the field-key span so inline text editing
+   * only ever targets the label.
+   */
+  leadingIcon?: ReactNode;
 };
 
 type LinkProps = CommonProps & {
@@ -52,6 +58,7 @@ export function UmscButton(props: Props) {
     className,
     style,
     showArrow,
+    leadingIcon,
   } = props;
 
   const isLinkVariant = variant === "link";
@@ -65,6 +72,7 @@ export function UmscButton(props: Props) {
 
   const content = (
     <>
+      {leadingIcon}
       <span {...(fieldKey ? fieldAttr(fieldKey) : {})}>{children}</span>
       {isLinkVariant && (showArrow ?? true) && (
         <ArrowRight

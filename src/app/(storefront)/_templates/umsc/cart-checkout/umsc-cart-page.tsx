@@ -1,6 +1,8 @@
 import type { DefaultCartPageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { UmscBreadcrumb } from "../shared/umsc-breadcrumb";
@@ -31,6 +33,20 @@ export async function UmscCartPage({ business }: DefaultCartPageTemplateProps) {
     customFields?.["umsc.cart.empty-doors"],
   );
 
+  // No saved doors → the store's first four published collections.
+  // `getAllPublic` is featureGate("collections")'d, so guard on the flag.
+  // Plain serialisable rows only — this crosses into a client component.
+  const { isEnabled } = await getBusinessFlags();
+  const collections =
+    doorRows.length === 0 && isEnabled("collections")
+      ? await api.collections.getAllPublic().catch(() => [])
+      : [];
+  const collectionDoors = collections.slice(0, 4).map((collection) => ({
+    title: collection.name,
+    link: `/collections/${collection.slug}`,
+    image: collection.imageUrl ?? "",
+  }));
+
   return (
     <div className="bg-[var(--umsc-paper)]">
       <div className="border-b border-[var(--umsc-line)] bg-[var(--umsc-cream)] px-6 py-10 sm:px-8">
@@ -60,6 +76,7 @@ export async function UmscCartPage({ business }: DefaultCartPageTemplateProps) {
             continueShoppingLabel={f["umsc.cart.continue-shopping"] ?? ""}
             checkoutCta={f["umsc.cart.checkout-cta"] ?? ""}
             doorRows={doorRows}
+            collectionDoors={collectionDoors}
           />
         </div>
       </div>
