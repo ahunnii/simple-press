@@ -255,9 +255,10 @@ export function DreamNavOverlay({
               const sublistId = `dream-nav-overlay-sublist-${i}`;
               const chevron = (
                 <ChevronDown
-                  className={`h-5 w-5 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${
+                  className={`h-6 w-6 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${
                     isOpen ? "rotate-180" : ""
                   }`}
+                  strokeWidth={1.75}
                   aria-hidden="true"
                 />
               );
@@ -367,18 +368,28 @@ export function DreamNavOverlay({
           className="dream-nav-overlay-line dream-nav-overlay-social"
           style={{ "--i": items.length + 1 } as React.CSSProperties}
         />
+
+        {/* Account links scroll with the nav rather than sitting in the
+            pinned footer — pinned, the account block plus CTA took ~200px
+            (a third of a 667px phone) and squeezed the links into a small
+            scroller. Only the CTA stays pinned. */}
+        <div
+          className="dream-nav-overlay-line dream-nav-overlay-account-wrap"
+          style={{ "--i": items.length + 2 } as React.CSSProperties}
+        >
+          <DreamNavOverlayAccount
+            initialSession={initialSession}
+            accountsEnabled={accountsEnabled}
+            isEnabled={isEnabled}
+            onClose={onClose}
+          />
+        </div>
       </nav>
 
       <div
         className="dream-nav-overlay-line dream-nav-overlay-bottom"
-        style={{ "--i": items.length + 2 } as React.CSSProperties}
+        style={{ "--i": items.length + 3 } as React.CSSProperties}
       >
-        <DreamNavOverlayAccount
-          initialSession={initialSession}
-          accountsEnabled={accountsEnabled}
-          isEnabled={isEnabled}
-          onClose={onClose}
-        />
         {ctaLabel && ctaUrl ? (
           <Link
             href={ctaUrl}

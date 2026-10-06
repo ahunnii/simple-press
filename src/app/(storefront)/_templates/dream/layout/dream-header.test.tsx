@@ -250,8 +250,12 @@ describe("DreamHeader CTA pill", () => {
 
   it("renders when its destination's flag is on", () => {
     renderHeader([], { customFields: CTA });
-    const pill = screen.getByRole("link", { name: "Book a session" });
-    expect(pill.getAttribute("href")).toBe("/services");
+    // Desktop pill (right cell) + mobile pill (actions); CSS shows one.
+    const pills = screen.getAllByRole("link", { name: "Book a session" });
+    expect(pills).toHaveLength(2);
+    for (const pill of pills) {
+      expect(pill.getAttribute("href")).toBe("/services");
+    }
   });
 
   it("is hidden (never re-pointed) when its destination's flag is off", () => {

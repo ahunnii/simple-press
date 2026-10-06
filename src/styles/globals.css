@@ -11658,7 +11658,16 @@ body:has(.pollen) {
   --dream-deck-h: clamp(200px, 24vw, 340px);
   padding: var(--dream-section-pad-y) var(--dream-gutter) var(--dream-deck-h);
   text-align: center;
+  /* Same language as the heroes: a soft cream halo behind the copy keeps
+     the wide sky from reading as a flat, heavy blue band (the peak was
+     #d6e6f5; lifted to #dfecf8 the same day). */
   background:
+    radial-gradient(
+      ellipse 46% 34% at 50% 30%,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 247, 226, 0.4) 45%,
+      transparent 100%
+    ),
     radial-gradient(
       ellipse 70% 38% at 50% 74%,
       rgba(255, 228, 186, 0.7) 0%,
@@ -11668,9 +11677,9 @@ body:has(.pollen) {
     linear-gradient(
       180deg,
       var(--dream-paper) 0%,
-      #e3eef9 14%,
-      #d6e6f5 42%,
-      #eef0f0 62%,
+      #e9f2fb 16%,
+      #dfecf8 42%,
+      #f0f1f0 62%,
       #f8e8d6 76%,
       var(--dream-paper) 100%
     );
@@ -11753,8 +11762,8 @@ body:has(.pollen) {
 .dream .dream-quote-band-lede {
   max-width: 60ch;
   font-size: 17px;
-  /* On the band's sky (≈#d6e6f5) `--dream-soft` is 4.1:1; the sky-text
-     shade holds 4.7:1+ (2026-10-05). */
+  /* On the band's sky (≈#dfecf8 under the halo) `--dream-soft` is about
+     4.4:1; the sky-text shade holds 5:1+ (2026-10-05). */
   color: var(--dream-soft-sky);
 }
 
@@ -12030,6 +12039,9 @@ body:has(.pollen) {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 44px touch target (was 36: 8px padding around a 20px icon). */
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px;
   color: var(--dream-ink);
   background: transparent;
@@ -12043,11 +12055,45 @@ body:has(.pollen) {
   gap: 4px;
 }
 
+/* Mobile header quote pill — compact secondary pill beside the cart and
+   hamburger; the desktop CTA takes over at 960px. Dropped on the narrowest
+   phones, and below 420px when a cart icon also needs the room (logo +
+   pill + cart + hamburger overflow a 375px bar). */
+.dream .dream-header-cta-mobile {
+  min-height: 40px;
+  margin-right: 4px;
+  padding: 8px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (min-width: 960px) {
+  .dream .dream-header-cta-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 419px) {
+  .dream
+    .dream-header-actions:has(.dream-header-cart)
+    .dream-header-cta-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 349px) {
+  .dream .dream-header-cta-mobile {
+    display: none;
+  }
+}
+
 .dream .dream-header-cart {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px;
   color: var(--dream-soft);
   text-decoration: none;
@@ -12283,8 +12329,21 @@ body:has(.pollen) {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 20px var(--dream-gutter) 32px;
+  padding: 16px var(--dream-gutter) 24px;
   border-top: 1px solid var(--dream-line);
+}
+
+/* Account links now scroll with the nav (see dream-nav-overlay.tsx). */
+.dream .dream-nav-overlay-account-wrap {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--dream-line);
+}
+
+.dream .dream-nav-overlay-account-wrap:empty {
+  display: none;
 }
 
 .dream .dream-nav-overlay-cta {

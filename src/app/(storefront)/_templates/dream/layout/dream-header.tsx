@@ -399,6 +399,19 @@ export function DreamHeader({
               being display:none below 960px. The cart shows at every width;
               the hamburger is mobile-only. */}
           <div className="dream-header-actions">
+            {/* Mobile-only quote pill (the desktop CTA lives in the right
+                cell, which is display:none below 960px) — the main action
+                shouldn't hide behind the hamburger. */}
+            {ctaLabel && ctaUrl ? (
+              <Link
+                href={ctaUrl}
+                className="dream-btn dream-btn--secondary dream-header-cta-mobile"
+                {...fieldAttr("dream.global.header-cta-label")}
+              >
+                {ctaLabel}
+              </Link>
+            ) : null}
+
             {showCart ? (
               <Link
                 href="/cart"
