@@ -50,6 +50,13 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
   const { phone, hoursRows, legacyHours, socials } =
     resolveUmscContactDetails(business);
 
+  // The "Follow" band carries the large social icons; while it is showing the
+  // aside drops its small copy so they never appear twice. Hidden band (or no
+  // socials) → the aside keeps them, so socials are never lost.
+  const followBandShown =
+    isSectionVisible(customFields, "umsc", "contact.visit") &&
+    socials.length > 0;
+
   return (
     <PageTransition>
       <UmscPageHero
@@ -88,13 +95,13 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
             phone,
             hoursRows,
             legacyHours,
-            socials,
+            socials: followBandShown ? [] : socials,
             googleReviewUrl: f["umsc.global.google-review-url"] ?? "",
           }}
         />
       </Suspense>
 
-      {isSectionVisible(customFields, "umsc", "contact.visit") && (
+      {followBandShown && (
         <UmscContactFollow
           heading={f["umsc.contact.visit-heading"] ?? ""}
           body={f["umsc.contact.visit-body"] ?? ""}

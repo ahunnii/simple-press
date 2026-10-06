@@ -12,7 +12,6 @@ import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-import { UMSC_CART_DEFAULT_DOORS } from "./cart-fields";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
 import {
@@ -20,9 +19,12 @@ import {
   UmscImageFallback,
 } from "../shared/umsc-image-fallback";
 
-// Re-exported so the pre-migration import path (and the snapshot test) keep
-// working — the rows themselves now live in `./cart-fields.ts`'s `defaultRows`.
-export { UMSC_CART_DEFAULT_DOORS };
+/** A published collection offered as an empty-bag door when the owner saved no rows. */
+export type UmscCartCollectionDoor = {
+  title: string;
+  link: string;
+  image: string;
+};
 
 type Props = {
   emptyHeading: string;
@@ -32,6 +34,8 @@ type Props = {
   checkoutCta: string;
   /** Parsed `umsc.cart.empty-doors` list rows — empty when the owner hasn't saved rows. */
   doorRows: TemplateListRow[];
+  /** First published collections — shown when `doorRows` is empty. */
+  collectionDoors: UmscCartCollectionDoor[];
 };
 
 export function UmscCartContents({
@@ -41,6 +45,7 @@ export function UmscCartContents({
   continueShoppingLabel,
   checkoutCta,
   doorRows,
+  collectionDoors,
 }: Props) {
   const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
     useCart();
@@ -68,27 +73,31 @@ export function UmscCartContents({
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (items.length === 0) {
+    // Saved rows win (a row needs a title to render); otherwise the store's
+    // first published collections. Only saved rows carry `listItemAttr`.
+    const savedDoors = doorRows.slice(0, 4).map((row, rowIndex) => ({
+      title: typeof row.title === "string" ? row.title : "",
+      link: typeof row.link === "string" && row.link ? row.link : "/shop",
+      image: typeof row.image === "string" ? row.image : undefined,
+      rowIndex,
+      saved: true,
+    }));
     const rawDoors =
       doorRows.length > 0
-        ? doorRows.slice(0, 4).map((row, i) => ({
-            title:
-              typeof row.title === "string" && row.title
-                ? row.title
-                : (UMSC_CART_DEFAULT_DOORS[i]?.title ?? ""),
-            link:
-              typeof row.link === "string" && row.link
-                ? row.link
-                : (UMSC_CART_DEFAULT_DOORS[i]?.link ?? "/shop"),
-            image: typeof row.image === "string" ? row.image : undefined,
-          }))
-        : UMSC_CART_DEFAULT_DOORS;
+        ? savedDoors.filter((door) => door.title)
+        : collectionDoors.slice(0, 4).map((door, rowIndex) => ({
+            title: door.title,
+            link: door.link,
+            image: door.image || undefined,
+            rowIndex,
+            saved: false,
+          }));
 
     // PF15 / B2.5: a door whose link is gated off 404s on the demo (and on
     // any store without that collection) — hide it, never swap the
     // destination. `rowIndex` keeps `listItemAttr` pointed at the door's
     // real position in the saved list after filtering.
     const doors = rawDoors
-      .map((door, rowIndex) => ({ ...door, rowIndex }))
       .filter((door) => {
         const flag = navHrefFlag(door.link);
         return flag === null || isEnabled(flag);
@@ -131,8 +140,10 @@ export function UmscCartContents({
           <div className="mt-10 grid w-full max-w-[880px] grid-cols-2 gap-5 text-left sm:grid-cols-4">
             {doors.map((door) => (
               <div
-                key={door.title}
-                {...listItemAttr("umsc.cart.empty-doors", door.rowIndex)}
+                key={`${door.rowIndex}-${door.link}`}
+                {...(door.saved
+                  ? listItemAttr("umsc.cart.empty-doors", door.rowIndex)
+                  : {})}
               >
                 <UmscCollectionDoor
                   href={door.link}

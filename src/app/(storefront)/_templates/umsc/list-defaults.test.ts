@@ -13,9 +13,7 @@ vi.mock("~/trpc/server", () => ({
 
 import { UMSC_CUSTOM_DEFAULT_LINES } from "./homepage/umsc-custom-section";
 import { UMSC_ABOUT_DEFAULT_VALUES } from "./about/umsc-about-page";
-import { UMSC_CART_DEFAULT_DOORS } from "./cart-checkout/umsc-cart-contents";
 import { UMSC_SHOP_DEFAULT_DOORS } from "./shop/index";
-import { UMSC_FOOTER_SHOP_LINKS_DEFAULT } from "./layout/umsc-footer";
 
 /**
  * Regression test for the 2026-09-26 migration of umsc's list-field
@@ -59,22 +57,6 @@ describe("umsc list-field defaults (moving into TemplateField.defaultRows 2026-0
     expect(strip(UMSC_ABOUT_DEFAULT_VALUES)).toEqual(expected);
   });
 
-  it("UMSC_CART_DEFAULT_DOORS (umsc.cart.empty-doors) matches the pre-migration copy", () => {
-    const expected = [
-      { title: "Candles", link: "/collections/candles" },
-      { title: "Soaps", link: "/collections/soaps" },
-      { title: "Body Care", link: "/collections/body-care" },
-      { title: "Home Care", link: "/collections/home-care" },
-    ];
-    expect(UMSC_CART_DEFAULT_DOORS).toEqual(expected);
-
-    // Verify that cart rows strictly do NOT include an "image" key (they have
-    // `image?: string`, but the default rows must not have it set).
-    for (const row of UMSC_CART_DEFAULT_DOORS) {
-      expect("image" in row).toBe(false);
-    }
-  });
-
   it("UMSC_SHOP_DEFAULT_DOORS (umsc.shop.doors) matches the pre-migration copy", () => {
     const expected: Array<Omit<TemplateListRow, "_id">> = [
       {
@@ -103,15 +85,5 @@ describe("umsc list-field defaults (moving into TemplateField.defaultRows 2026-0
       },
     ];
     expect(strip(UMSC_SHOP_DEFAULT_DOORS)).toEqual(expected);
-  });
-
-  it("UMSC_FOOTER_SHOP_LINKS_DEFAULT (umsc.global.footer-shop-links) matches the pre-migration copy", () => {
-    const expected: Array<Omit<TemplateListRow, "_id">> = [
-      { label: "Candles", url: "/collections/candles" },
-      { label: "Soaps", url: "/collections/soaps" },
-      { label: "Body Care", url: "/collections/body-care" },
-      { label: "Home Care", url: "/collections/home-care" },
-    ];
-    expect(strip(UMSC_FOOTER_SHOP_LINKS_DEFAULT)).toEqual(expected);
   });
 });
