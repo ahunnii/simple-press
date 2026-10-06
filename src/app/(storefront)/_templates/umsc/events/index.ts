@@ -6,6 +6,7 @@ import {
   defaultEventsData,
   defaultEventsFieldGroups,
 } from "../../default/events";
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
 
 /**
  * Events (`/events`, `/events/<slug>`) field registry for umsc — parity PF23
@@ -21,18 +22,33 @@ import {
  * umsc has no eyebrow/kicker labels by design (design.md "Typography"), so
  * the pages don't render it and the editor must not offer a dead field.
  *
+ * umsc's own addition: the band's optional photo (`umsc.events.hero-image`,
+ * `-image-alt`, `-image-behind`, see `shared/umsc-hero-fields.ts`), read
+ * through umsc's resolver. The index page only — event detail keeps its
+ * plain band.
+ *
  * The page components are NOT re-exported here (circular-import guard).
  */
 export const UMSC_EVENTS_OMITTED_KEYS = new Set([
   "default.events.hero-eyebrow",
 ]);
 
-export const umscEventsData: TemplateField[] = defaultEventsData.filter(
-  (field) => !UMSC_EVENTS_OMITTED_KEYS.has(field.key),
-);
+export const umscEventsData: TemplateField[] = [
+  ...defaultEventsData.filter(
+    (field) => !UMSC_EVENTS_OMITTED_KEYS.has(field.key),
+  ),
+  ...umscHeroPhotoFields("events", "events.hero"),
+];
 
 export const umscEventsFieldGroups: TemplateFieldGroup[] =
-  defaultEventsFieldGroups;
+  defaultEventsFieldGroups.map((group) =>
+    group.id === "events.hero"
+      ? {
+          ...group,
+          description: "Page heading, intro text and optional photo.",
+        }
+      : group,
+  );
 
 /** Mirrors `default/sections.ts` (same ids, titles and hideability). */
 export const umscEventsSections: TemplateSection[] = [
@@ -40,7 +56,7 @@ export const umscEventsSections: TemplateSection[] = [
     id: "events.hero",
     page: "events",
     title: "Hero",
-    description: "Page heading and intro text",
+    description: "Page heading, intro text and optional photo",
     groupIds: ["events.hero"],
     order: 0,
     hideable: false,

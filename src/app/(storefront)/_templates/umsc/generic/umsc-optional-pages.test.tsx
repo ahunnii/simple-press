@@ -29,6 +29,7 @@ import { UMSC_SERVICE_COMPONENTS } from "../services/service-pages/components";
 import { umscServiceTemplateDefs } from "../services/service-pages/fields";
 import { UmscServicePage } from "../services/service-pages/umsc-service-page";
 import { UmscServicesIndexPage } from "../services/umsc-services-index-page";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import {
   umscVideosData,
@@ -258,6 +259,55 @@ describe("UmscPageHero (PF25)", () => {
     );
     expect(screen.getByText("Back")).toBeInTheDocument();
     expect(screen.getByText("Meta line")).toBeInTheDocument();
+  });
+
+  it("puts the photo behind the text in background mode, content first", () => {
+    const { container } = render(
+      <UmscPageHero
+        heading="Shop"
+        image="https://example.com/shop.jpg"
+        imageMode="background"
+      />,
+    );
+    const band = container.querySelector<HTMLElement>(
+      "section.umsc-page-hero",
+    )!;
+    const inner = band.firstElementChild as HTMLElement;
+    expect(inner.style.maxWidth).toBe("var(--umsc-container)");
+    expect(inner.className).not.toMatch(/lg:grid-cols/);
+    const imgs = band.querySelectorAll("img");
+    expect(imgs).toHaveLength(1);
+    expect(imgs[0]).toHaveAttribute("alt", "");
+    expect(inner).not.toContainElement(imgs[0]!);
+  });
+
+  it("resolves the photo fields into side / background modes", () => {
+    expect(resolveUmscHeroPhoto({}, "shop")).toEqual({
+      image: undefined,
+      imageAlt: "",
+      imageMode: "side",
+    });
+    expect(
+      resolveUmscHeroPhoto(
+        {
+          "umsc.shop.hero-image": " /a.jpg ",
+          "umsc.shop.hero-image-alt": "Candles",
+          "umsc.shop.hero-image-behind": "true",
+        },
+        "shop",
+      ),
+    ).toEqual({
+      image: "/a.jpg",
+      imageAlt: "Candles",
+      imageMode: "background",
+    });
+    expect(
+      resolveUmscHeroPhoto(
+        { "default.services.hero-image": "/s.jpg" },
+        "services",
+        "default.services.hero-image",
+      ).image,
+    ).toBe("/s.jpg");
   });
 });
 

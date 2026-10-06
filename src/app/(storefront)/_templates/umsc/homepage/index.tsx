@@ -1,35 +1,7 @@
-import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import { SECTION_LINKS } from "~/lib/section-links";
-
-/** The four product-type doors (homepage "Shop by type" grid). */
-const UMSC_CATEGORY_DOORS_DEFAULT_ROWS = [
-  {
-    image: "/placeholder.svg",
-    title: "Candles",
-    blurb: "Soy candles and wax melts.",
-    link: "/collections/candles",
-  },
-  {
-    image: "/placeholder.svg",
-    title: "Soaps",
-    blurb: "Handmade bars for gifts and daily use.",
-    link: "/collections/soaps",
-  },
-  {
-    image: "/placeholder.svg",
-    title: "Body Care",
-    blurb: "Butters, oils, and roll-ons.",
-    link: "/collections/body-care",
-  },
-  {
-    image: "/placeholder.svg",
-    title: "Home Care",
-    blurb: "Laundry pods, bleach tablets, and mists.",
-    link: "/collections/home-care",
-  },
-] satisfies Record<string, string>[];
 
 /** "What to include" lines in the custom-order band. */
 const UMSC_CUSTOM_LINES_DEFAULT_ROWS = [
@@ -179,7 +151,8 @@ const homepageCategoriesData: TemplateField[] = [
   {
     key: "umsc.homepage.categories-heading",
     label: "Heading",
-    description: "Heading above the four category doors.",
+    description:
+      "Heading above the collection cards. The cards show your first four published collections, in the order set in Admin → Collections, each with that collection's image and description.",
     type: "text",
     page: "homepage",
     group: "homepage.categories",
@@ -196,51 +169,6 @@ const homepageCategoriesData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue:
       "Four clear doors into the catalog. Pick a type; the products carry the details.",
-  },
-  {
-    key: "umsc.homepage.categories-doors",
-    label: "Category doors",
-    description:
-      "The four product-type doors, each with a photo, title, one-line description, and link.",
-    type: "list",
-    page: "homepage",
-    group: "homepage.categories",
-    gridColumn: "col-span-full",
-    maxItems: 4,
-    itemLabel: "door",
-    summaryKey: "title",
-    defaultsWhenEmpty: true,
-    defaultRows: UMSC_CATEGORY_DOORS_DEFAULT_ROWS,
-    itemSchema: [
-      {
-        key: "image",
-        label: "Photo",
-        type: "image",
-        description: "Photo shown on the door.",
-        placeholder: "Upload a photo",
-      },
-      {
-        key: "title",
-        label: "Title",
-        type: "text",
-        description: "Door name, e.g. Candles.",
-        placeholder: "e.g. Candles",
-      },
-      {
-        key: "blurb",
-        label: "Description",
-        type: "text",
-        description: "One short line under the title.",
-        placeholder: "e.g. Soy candles and wax melts.",
-      },
-      {
-        key: "link",
-        label: "Link",
-        type: "text",
-        description: "Where the door goes, e.g. /collections/candles.",
-        placeholder: "e.g. /collections/candles",
-      },
-    ],
   },
   {
     key: "umsc.homepage.categories-all-label",
@@ -563,7 +491,8 @@ const homepageFaqData: TemplateField[] = [
   {
     key: "umsc.homepage.faq-heading",
     label: "Heading",
-    description: "Heading for the homepage FAQ teaser.",
+    description:
+      "Heading for the homepage questions. The section stays hidden until at least one question is published in Content → FAQ.",
     type: "text",
     page: "homepage",
     group: "homepage.faq",
@@ -600,6 +529,18 @@ const homepageFaqData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/faq",
   },
+  {
+    key: "umsc.homepage.faq-items",
+    label: "Questions",
+    description:
+      "Pick up to three questions from Content → FAQ. Leave empty to show your first three published questions.",
+    type: "faq",
+    page: "homepage",
+    group: "homepage.faq",
+    gridColumn: "col-span-full",
+    minItems: 0,
+    maxItems: 3,
+  },
 ];
 
 // ─── Exports ────────────────────────────────────────────────────────────────
@@ -634,7 +575,8 @@ export const umscHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.categories",
     title: "Shop by type",
-    description: "Heading, intro text, and the four category doors",
+    description:
+      "Heading, intro text, and link. The cards show your first four published collections.",
     icon: "🚪",
     columns: 2,
   },
@@ -669,7 +611,8 @@ export const umscHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.faq",
     title: "Questions",
-    description: "Homepage FAQ teaser — first three published FAQ items",
+    description:
+      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Content → FAQ",
     icon: "❓",
     columns: 2,
   },
@@ -700,7 +643,8 @@ export const umscHomepageSections: TemplateSection[] = [
     id: "homepage.categories",
     page: "homepage",
     title: "Shop by type",
-    description: "Four category doors — Candles, Soaps, Body Care, Home Care",
+    description:
+      "Cards for your first four published collections, in the order set in Admin → Collections, each using that collection's image and description",
     groupIds: ["homepage.categories"],
     order: 2,
     hideable: true,
@@ -748,7 +692,8 @@ export const umscHomepageSections: TemplateSection[] = [
     id: "homepage.faq",
     page: "homepage",
     title: "Questions",
-    description: "First three FAQ items with a link to the full FAQ page",
+    description:
+      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Content → FAQ",
     groupIds: ["homepage.faq"],
     order: 7,
     hideable: true,
@@ -757,11 +702,6 @@ export const umscHomepageSections: TemplateSection[] = [
 ];
 
 // ─── Derived storefront constants ──────────────────────────────────────────
-
-export const UMSC_CATEGORY_DEFAULT_DOORS = listRowsFromDefaults(
-  UMSC_CATEGORY_DOORS_DEFAULT_ROWS,
-  "default-door",
-);
 
 export const UMSC_CUSTOM_DEFAULT_LINES = listRowsFromDefaults(
   UMSC_CUSTOM_LINES_DEFAULT_ROWS,

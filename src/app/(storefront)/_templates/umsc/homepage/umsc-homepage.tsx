@@ -9,13 +9,13 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getRawCustomFieldString,
   parseTemplateListRows,
+  resolveFaqPickerItems,
 } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { nonBlank } from "../shared/umsc-non-blank";
-import { UMSC_CATEGORY_DEFAULT_DOORS } from ".";
 import { UmscCategoriesSection } from "./umsc-categories-section";
 import { UmscCustomSection } from "./umsc-custom-section";
 import { UmscFaqSection } from "./umsc-faq-section";
@@ -118,25 +118,26 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
     "umsc.global.google-review-url",
   ]);
 
-  // ── Category doors (list field) ─────────────────────────────────────────
-  // PF10 (B2.1(4), B2.5): each door's own href is flag-filtered individually
-  // (a door defaults to /collections/<slug>, gated on "collections", which
-  // itself cascades off when "products" is off) — never a whole-section
-  // gate, so a custom door pointed at a live route survives even when a
-  // sibling default door doesn't. Defaults are resolved here (rather than
-  // inside UmscCategoriesSection) so the filter sees the same rows the page
-  // renders. When every door is filtered out, the section render below is
-  // skipped entirely rather than showing an empty band.
-  const savedCategoryDoors = parseTemplateListRows(
-    customFields?.["umsc.homepage.categories-doors"],
-  );
-  const categoryDoorsSource =
-    savedCategoryDoors.length > 0
-      ? savedCategoryDoors
-      : UMSC_CATEGORY_DEFAULT_DOORS;
-  const categoryDoors = categoryDoorsSource.filter((row) => {
-    const link = typeof row.link === "string" && row.link.trim() ? row.link : "/shop";
-    return ctaFlagOk(link);
+  // ── Shop by type: the store's first four published collections ──────────
+  // `getAllPublic` is featureGate("collections")'d (and the flag cascades off
+  // with "products"), so the flag guard is required. Already ordered by
+  // sortOrder; `_count.collectionProducts` counts published products only.
+  // When there are none (flag off, or no published collections yet), the
+  // section render below is skipped entirely rather than showing an empty band.
+  const collections = isEnabled("collections")
+    ? await api.collections.getAllPublic().catch(() => [])
+    : [];
+  const categoryDoors = collections.slice(0, 4).map((collection) => {
+    const count = collection._count.collectionProducts;
+    return {
+      id: collection.id,
+      href: `/collections/${collection.slug}`,
+      title: collection.name,
+      blurb:
+        nonBlank(collection.description) ??
+        `${count} item${count !== 1 ? "s" : ""}`,
+      image: collection.imageUrl ?? undefined,
+    };
   });
   const customLines = parseTemplateListRows(
     customFields?.["umsc.homepage.custom-list"],
@@ -236,9 +237,13 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
     })),
   ];
 
-  // ── Questions: first three published FAQ items ──────────────────────────
+  // ── Questions: owner-picked FAQ items, else the first three published ───
   const faqItems = await api.faq.list().catch(() => []);
-  const faqTop3 = faqItems.slice(0, 3).map((item) => ({
+  const faqTop3 = resolveFaqPickerItems(
+    customFields?.["umsc.homepage.faq-items"],
+    faqItems,
+    3,
+  ).map((item) => ({
     id: item.id,
     question: item.question,
     answer: item.answer,
@@ -275,11 +280,9 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
             />
           )}
 
-        {/* PF10 (B2.5): categoryDoors above is already filtered to the doors
-            whose own href survives navHrefFlag — when every door is
-            filtered out (e.g. "collections" off, which cascades off with
-            "products"), skip the section instead of showing an empty band
-            with just the heading. */}
+        {/* The cards are the store's real collections (gated on the
+            "collections" flag above) — with none to show, skip the section
+            instead of rendering an empty band with just the heading. */}
         {isSectionVisible(customFields, "umsc", "homepage.categories") &&
           categoryDoors.length > 0 && (
             <UmscCategoriesSection
@@ -343,6 +346,7 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
           />
         )}
 
+        {/* Hidden until at least one question is published in Content → FAQ. */}
         {isSectionVisible(customFields, "umsc", "homepage.faq") &&
           faqTop3.length > 0 && (
             <UmscFaqSection

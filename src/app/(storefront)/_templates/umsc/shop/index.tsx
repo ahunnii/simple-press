@@ -3,6 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // design.md → "Per-page section concepts → Shop": three groups — the dark
 // page hero, the hideable compact door row (falls back to these four fields
 // when the store has no published collections), and the grid's empty-state
@@ -64,6 +66,7 @@ const shopHeroData: TemplateField[] = [
     defaultValue:
       "Small-batch soy candles, soaps, and body care, poured and packed by hand in Detroit.",
   },
+  ...umscHeroPhotoFields("shop", "shop.hero"),
 ];
 
 // ─── Shop: Doors ────────────────────────────────────────────────────────────
@@ -170,7 +173,7 @@ export const umscShopFieldGroups: TemplateFieldGroup[] = [
     id: "shop.hero",
     title: "Hero",
     description:
-      "Heading and intro text in the dark band at the top of the shop page",
+      "Heading, intro text, and an optional photo in the dark band at the top of the shop page",
     icon: "🛍️",
     columns: 2,
   },
@@ -196,7 +199,8 @@ export const umscShopSections: TemplateSection[] = [
     id: "shop.hero",
     page: "shop",
     title: "Hero",
-    description: "Dark page-hero band with heading and intro text",
+    description:
+      "Dark page-hero band with heading, intro text, and an optional photo",
     groupIds: ["shop.hero"],
     order: 0,
     hideable: false,

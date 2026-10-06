@@ -2,6 +2,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // FaqPage has no playbook entry (see .claude/skills/sp-new-template/references/page-playbooks.md
 // "How to use this file") — built from `_templates/default/faq/default-faq-page.tsx`'s data
 // shape (`DefaultFaqPageTemplateProps` = `{ business, items }`, `items` = `api.faq.list()`
@@ -56,6 +58,7 @@ const faqHeroData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/contact",
   },
+  ...umscHeroPhotoFields("faq", "faq.hero"),
 ];
 
 // ─── Accordion band (faq.accordion) ─────────────────────────────────────────
@@ -165,7 +168,7 @@ export const umscFaqFieldGroups: TemplateFieldGroup[] = [
     id: "faq.hero",
     title: "Hero",
     description:
-      "Heading, subheading, and the contact link shown beside the phone number",
+      "Heading, subheading, the contact link shown beside the phone number, and an optional photo",
     icon: "❓",
     columns: 2,
   },
@@ -191,7 +194,8 @@ export const umscFaqSections: TemplateSection[] = [
     id: "faq.hero",
     page: "faq",
     title: "Hero",
-    description: "Heading, subheading, phone, and a contact link",
+    description:
+      "Heading, subheading, phone, a contact link, and an optional photo",
     groupIds: ["faq.hero"],
     order: 0,
     hideable: false,

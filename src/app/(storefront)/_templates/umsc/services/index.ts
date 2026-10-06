@@ -6,6 +6,7 @@ import {
   defaultServicesData,
   defaultServicesFieldGroups,
 } from "../../default/services";
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
 
 /**
  * Services index (`/services`) field registry for umsc — parity PF24
@@ -18,7 +19,8 @@ import {
  * trap), minus the two eyebrow labels umsc never renders (design.md: no
  * eyebrow/kicker labels): `default.services.hero-eyebrow` and
  * `default.services.cta-eyebrow`. `default.services.hero-image` becomes the
- * band's right-side photo.
+ * band's optional photo (description re-worded for umsc), placed by umsc's
+ * own `umsc.services.hero-image-behind` switch.
  *
  * The card link and the designed empty state are new `umsc.services.*`
  * keys (Default hard-coded "Explore →" and "No services yet."), read
@@ -33,9 +35,17 @@ export const UMSC_SERVICES_OMITTED_KEYS = new Set([
   "default.services.cta-eyebrow",
 ]);
 
-const inheritedServicesData: TemplateField[] = defaultServicesData.filter(
-  (field) => !UMSC_SERVICES_OMITTED_KEYS.has(field.key),
-);
+const inheritedServicesData: TemplateField[] = defaultServicesData
+  .filter((field) => !UMSC_SERVICES_OMITTED_KEYS.has(field.key))
+  .map((field) =>
+    field.key === "default.services.hero-image"
+      ? {
+          ...field,
+          description:
+            "Optional photo for the band at the top of the page. Leave blank for a plain dark band. Where it shows is set by Show the photo behind the heading.",
+        }
+      : field,
+  );
 
 // ─── services.list — the service cards and their empty state ───────────────
 
@@ -81,13 +91,23 @@ const servicesListData: TemplateField[] = [
 
 export const umscServicesData: TemplateField[] = [
   ...inheritedServicesData,
+  ...umscHeroPhotoFields("services", "services.hero", { withImage: false }),
   ...servicesListData,
 ];
 
 export const umscServicesFieldGroups: TemplateFieldGroup[] = [
-  // `services.hero` ("Hero"), `services.intro` ("Intro") and `services.cta`
-  // ("Closing banner") verbatim, then umsc's list group.
-  ...defaultServicesFieldGroups,
+  // `services.hero` ("Hero", description extended for the photo switch),
+  // `services.intro` ("Intro") and `services.cta` ("Closing banner")
+  // verbatim, then umsc's list group.
+  ...defaultServicesFieldGroups.map((group) =>
+    group.id === "services.hero"
+      ? {
+          ...group,
+          description:
+            "Page heading, intro text and an optional photo — beside the heading or filling the band behind it.",
+        }
+      : group,
+  ),
   {
     id: "services.list",
     title: "Services",

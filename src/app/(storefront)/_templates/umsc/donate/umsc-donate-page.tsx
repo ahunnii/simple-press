@@ -7,12 +7,15 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 
+// umsc's own resolver for the band's optional photo (`umsc.donate.hero-*`).
+import { resolveFields } from "..";
 // Default's resolver, not umsc's: this page keeps reading the existing
 // `default.donate.*` keys, and only Default's field map knows their
 // `defaultValue`s.
 import { resolveFields as resolveDefaultFields } from "../../default";
 import { UmscEmptyState } from "../generic/umsc-page-kit";
 import { UmscHeading } from "../shared/umsc-heading";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscSection } from "../shared/umsc-section";
@@ -49,6 +52,14 @@ export function UmscDonatePage({
     "default.donate.thank-you-body",
     "default.donate.other-ways-heading",
   ]);
+  const heroPhoto = resolveUmscHeroPhoto(
+    resolveFields(customFields, [
+      "umsc.donate.hero-image",
+      "umsc.donate.hero-image-alt",
+      "umsc.donate.hero-image-behind",
+    ]),
+    "donate",
+  );
 
   const label = resolveDonationLabel(business.donationLabel);
   const handles = resolveDonationHandles(business);
@@ -79,6 +90,7 @@ export function UmscDonatePage({
         headingFieldKey="default.donate.hero-heading"
         lede={f["default.donate.hero-intro"] ?? ""}
         ledeFieldKey="default.donate.hero-intro"
+        {...heroPhoto}
         sectionAttrs={sectionGroupAttr("donate", "hero")}
       />
 

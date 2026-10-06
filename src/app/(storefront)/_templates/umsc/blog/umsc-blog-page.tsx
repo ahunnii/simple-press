@@ -8,6 +8,7 @@ import { PageTransition } from "~/components/page-animations";
 import { resolveFields as resolveDefaultFields } from "../../default";
 import { UmscGatedLink } from "../generic/umsc-gated-link";
 import { UmscEmptyState } from "../generic/umsc-page-kit";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscSection } from "../shared/umsc-section";
@@ -43,6 +44,9 @@ export function UmscBlogPage({ pages, customFields, business }: Props) {
     "umsc.blog.empty-body",
     "umsc.blog.empty-link-label",
     "umsc.blog.empty-link-url",
+    "umsc.blog.hero-image",
+    "umsc.blog.hero-image-alt",
+    "umsc.blog.hero-image-behind",
   ]);
 
   return (
@@ -52,6 +56,7 @@ export function UmscBlogPage({ pages, customFields, business }: Props) {
         headingFieldKey="default.blog.listing-title"
         lede={d["default.blog.listing-intro"] ?? ""}
         ledeFieldKey="default.blog.listing-intro"
+        {...resolveUmscHeroPhoto(f, "blog")}
         sectionAttrs={sectionGroupAttr("blog", "header")}
       />
 

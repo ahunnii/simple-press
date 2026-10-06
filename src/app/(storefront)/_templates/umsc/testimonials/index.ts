@@ -2,6 +2,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // design.md "Per-page section concepts › Testimonials": hero (not hideable)
 // → featured pull-quote + masonry (not hideable, DB-driven — real
 // testimonials only) → closing CTA band (hideable). Empty state = hero +
@@ -31,6 +33,7 @@ const testimonialsHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "Real words from real customers, in their own words.",
   },
+  ...umscHeroPhotoFields("testimonials", "testimonials.hero"),
   {
     key: "umsc.testimonials.empty-message",
     label: "Empty state message",
@@ -108,7 +111,8 @@ export const umscTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.hero",
     title: "Hero",
-    description: "Page heading, subheading, and the empty-state message",
+    description:
+      "Page heading, subheading, optional photo, and the empty-state message",
     icon: "💬",
     columns: 2,
   },
@@ -134,7 +138,7 @@ export const umscTestimonialsSections: TemplateSection[] = [
     id: "testimonials.hero",
     page: "testimonials",
     title: "Hero",
-    description: "Page heading and subheading",
+    description: "Page heading, subheading, and an optional photo",
     groupIds: ["testimonials.hero"],
     order: 0,
     hideable: false,

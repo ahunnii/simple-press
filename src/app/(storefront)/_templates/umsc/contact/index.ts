@@ -2,9 +2,11 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // design.md "Per-page section concepts › Contact": hero (not hideable) →
 // form + sticky aside (not hideable — gated on the contactForm flag inside
-// the client form) → "Visit Our Stores" (hideable). The custom-order extras
+// the client form) → "Follow on social" (hideable). The custom-order extras
 // (product type, quantity, date needed, occasion, scent-or-colour notes) are
 // visitor-filled form inputs, not owner-editable copy, so they carry no
 // template fields of their own — only the toggle-pill labels are fields, per
@@ -34,6 +36,7 @@ const contactHeroData: TemplateField[] = [
     defaultValue:
       "Questions about a candle, a custom order, or just want to say hi — we're happy to help.",
   },
+  ...umscHeroPhotoFields("contact", "contact.hero"),
 ];
 
 // ─── Form + aside (contact.form) ────────────────────────────────────────────
@@ -144,51 +147,33 @@ const contactFormData: TemplateField[] = [
   },
 ];
 
-// ─── Visit (contact.visit, hideable) ────────────────────────────────────────
+// ─── Follow on social (contact.visit, hideable) ─────────────────────────────
+// The group/section id and the heading/body keys stay `contact.visit` /
+// `umsc.contact.visit-*` so a store's saved show/hide state and copy carry
+// over from the old "Visit Our Stores" band.
 
 const contactVisitData: TemplateField[] = [
   {
     key: "umsc.contact.visit-heading",
-    label: "Visit heading",
-    description: "Heading for the 'Visit Our Stores' band.",
+    label: "Heading",
+    description: "Heading above the row of social icons.",
     type: "text",
     page: "contact",
     group: "contact.visit",
     gridColumn: "col-span-full",
-    defaultValue: "Visit Our Stores",
+    defaultValue: "Follow Monique",
   },
   {
     key: "umsc.contact.visit-body",
-    label: "Visit message",
+    label: "Message",
     description:
-      "Markets, pop-ups, or store-visit details. Leave blank to hide this section.",
+      "Optional line beneath the heading. Leave blank to show only the icons.",
     type: "textarea",
     page: "contact",
     group: "contact.visit",
     gridColumn: "col-span-full",
     defaultValue:
-      "Find Unique Monique at local markets and pop-ups around Detroit — follow our socials for the next date and location.",
-  },
-  {
-    key: "umsc.contact.visit-link-label",
-    label: "Visit link text",
-    description: "Text for the link beneath the visit copy.",
-    type: "text",
-    page: "contact",
-    group: "contact.visit",
-    gridColumn: "col-span-1",
-    defaultValue: "See upcoming markets",
-  },
-  {
-    key: "umsc.contact.visit-link-url",
-    label: "Visit link",
-    description:
-      "Where the link points — a socials page or events listing. Leave blank to hide the link.",
-    type: "url",
-    page: "contact",
-    group: "contact.visit",
-    gridColumn: "col-span-1",
-    defaultValue: "",
+      "New scents, market dates, and pop-up locations land on social first — follow along.",
   },
 ];
 
@@ -204,7 +189,7 @@ export const umscContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.hero",
     title: "Hero",
-    description: "Page heading and subheading",
+    description: "Page heading, subheading, and an optional photo",
     icon: "✉️",
     columns: 2,
   },
@@ -218,9 +203,10 @@ export const umscContactFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "contact.visit",
-    title: "Visit our stores",
-    description: "Heading, body, and link for markets/pop-ups",
-    icon: "📍",
+    title: "Follow on social",
+    description:
+      "Heading and message above the social icons, which come from your social links in Content → Branding",
+    icon: "📣",
     columns: 2,
   },
 ];
@@ -230,7 +216,7 @@ export const umscContactSections: TemplateSection[] = [
     id: "contact.hero",
     page: "contact",
     title: "Hero",
-    description: "Page heading and subheading",
+    description: "Page heading, subheading, and an optional photo",
     groupIds: ["contact.hero"],
     order: 0,
     hideable: false,
@@ -252,10 +238,12 @@ export const umscContactSections: TemplateSection[] = [
   {
     id: "contact.visit",
     page: "contact",
-    title: "Visit our stores",
-    description: "Markets/pop-ups band",
+    title: "Follow on social",
+    description:
+      "A band of large social icons, shown when at least one social link is set in Content → Branding",
     groupIds: ["contact.visit"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.branding],
   },
 ];

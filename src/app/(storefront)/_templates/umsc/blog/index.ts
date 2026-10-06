@@ -4,6 +4,7 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 import { defaultBlogData, defaultBlogFieldGroups } from "../../default/blog";
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
 
 /**
  * Blog (`/blog`, `/blog/<slug>`) field registry for umsc — parity PF22
@@ -18,8 +19,8 @@ import { defaultBlogData, defaultBlogFieldGroups } from "../../default/blog";
  * pages never render them and the editor must not offer a dead field:
  * `default.blog.listing-eyebrow` and `default.blog.post-eyebrow`.
  *
- * Copy Default never had (the card link, the designed empty state, the
- * closing band on posts) is new `umsc.blog.*` keys, in design.md's voice,
+ * Copy Default never had (the band's optional photo, the card link, the
+ * designed empty state, the closing band on posts) is new `umsc.blog.*` keys, in design.md's voice,
  * read through `resolveUmscBlogFields` (this module's own map) so defaults
  * and "blank hides" behave the same before and after the root `index.ts`
  * spreads `umscBlogData`.
@@ -156,13 +157,24 @@ const blogCtaData: TemplateField[] = [
 
 export const umscBlogData: TemplateField[] = [
   ...inheritedBlogData,
+  // blog.header — the listing band's optional photo (index page only; a
+  // post's band stays plain).
+  ...umscHeroPhotoFields("blog", "blog.header"),
   ...blogListData,
   ...blogCtaData,
 ];
 
 export const umscBlogFieldGroups: TemplateFieldGroup[] = [
-  // `blog.header` ("Blog listing") and `blog.post` ("Blog post") verbatim.
-  ...defaultBlogFieldGroups,
+  // `blog.header` ("Blog listing", description extended for the photo) and
+  // `blog.post` ("Blog post") verbatim.
+  ...defaultBlogFieldGroups.map((group) =>
+    group.id === "blog.header"
+      ? {
+          ...group,
+          description: "Heading, intro and optional photo on the blog index",
+        }
+      : group,
+  ),
   {
     id: "blog.list",
     title: "Posts",
@@ -186,7 +198,8 @@ export const umscBlogSections: TemplateSection[] = [
     id: "blog.header",
     page: "blog",
     title: "Blog listing",
-    description: "Heading, intro and search message on the blog page",
+    description:
+      "Heading, intro, optional photo and search message on the blog page",
     groupIds: ["blog.header"],
     order: 0,
     hideable: false,

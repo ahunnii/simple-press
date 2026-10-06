@@ -5,11 +5,14 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { PageTransition } from "~/components/page-animations";
 import { VideoFacade } from "~/components/video-facade";
 
+// umsc's own resolver for the band's optional photo (`umsc.videos.hero-*`).
+import { resolveFields } from "..";
 // Default's resolver, not umsc's: this page keeps reading the existing
 // `default.videos.*` keys, and only Default's field map knows their
 // `defaultValue`s.
 import { resolveFields as resolveDefaultFields } from "../../default";
 import { UmscEmptyState } from "../generic/umsc-page-kit";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
@@ -45,12 +48,21 @@ export function UmscVideosPage({
   business,
   videos,
 }: DefaultVideosPageTemplateProps) {
-  const f = resolveDefaultFields(business.siteContent?.customFields, [
+  const customFields = business.siteContent?.customFields;
+  const f = resolveDefaultFields(customFields, [
     "default.videos.hero-heading",
     "default.videos.hero-tagline",
     "default.videos.list-empty-heading",
     "default.videos.list-empty-body",
   ]);
+  const heroPhoto = resolveUmscHeroPhoto(
+    resolveFields(customFields, [
+      "umsc.videos.hero-image",
+      "umsc.videos.hero-image-alt",
+      "umsc.videos.hero-image-behind",
+    ]),
+    "videos",
+  );
 
   return (
     <PageTransition>
@@ -59,6 +71,7 @@ export function UmscVideosPage({
         headingFieldKey="default.videos.hero-heading"
         lede={f["default.videos.hero-tagline"] ?? ""}
         ledeFieldKey="default.videos.hero-tagline"
+        {...heroPhoto}
         sectionAttrs={sectionGroupAttr("videos", "hero")}
       />
 

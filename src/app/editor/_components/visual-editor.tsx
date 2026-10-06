@@ -14,7 +14,10 @@ import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
-import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import {
+  PAGE_PREVIEW_PATHS,
+  previewPageFlag,
+} from "~/lib/preview/preview-paths";
 import { PREVIEW_SOURCE } from "~/lib/preview/use-preview-bridge";
 import {
   getSpMeta,
@@ -169,7 +172,10 @@ export type VisualEditorProps = {
   sections: TemplateSection[];
   embedsEnabled: boolean;
   mediaEnabled: boolean;
-  /** Feature-flag keys enabled for this business — filters field-panel admin links. */
+  /**
+   * Feature-flag keys enabled for this business — filters field-panel admin
+   * links and hides editor pages whose storefront route is flag-gated off.
+   */
   enabledFeatures: string[];
   /** Deep-link initial page (defaults to "homepage"). */
   initialPage: string;
@@ -305,6 +311,11 @@ export function VisualEditor({
     [sections],
   );
 
+  const enabledFeatureSet = useMemo(
+    () => new Set(enabledFeatures),
+    [enabledFeatures],
+  );
+
   /**
    * Whether a template page key can be shown in the preview iframe. Static
    * paths come from `PAGE_PREVIEW_PATHS`; `"product"` is previewable only when
@@ -312,17 +323,20 @@ export function VisualEditor({
    * a business with none published never offer it. `"authentication"` is
    * gated the same way on the template declaring the auth section — the check
    * must come FIRST, since the key is in `PAGE_PREVIEW_PATHS` for every
-   * template and would otherwise pass unconditionally.
+   * template and would otherwise pass unconditionally. Pages whose feature
+   * flag is off are not offered either — their storefront route 404s.
    */
   const isPreviewablePage = useCallback(
     (key: string) => {
       if (key === AUTH_PAGE) return authPageAvailable;
+      const flag = previewPageFlag(key);
+      if (flag && !enabledFeatureSet.has(flag)) return false;
       return (
         key in PAGE_PREVIEW_PATHS ||
         (key === "product" && productPreview !== null)
       );
     },
-    [productPreview, authPageAvailable],
+    [productPreview, authPageAvailable, enabledFeatureSet],
   );
 
   // Selectable pages: page keys that have both template fields and a preview
@@ -339,11 +353,6 @@ export function VisualEditor({
       ? [...fromFields, { value: AUTH_PAGE, label: pageLabel(AUTH_PAGE) }]
       : fromFields;
   }, [templateId, isPreviewablePage, authPageAvailable]);
-
-  const enabledFeatureSet = useMemo(
-    () => new Set(enabledFeatures),
-    [enabledFeatures],
-  );
 
   // Field type lookup — text/textarea fields get the live-patch fast path.
   const fieldTypeByKey = useMemo(() => {

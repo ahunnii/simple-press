@@ -8,6 +8,7 @@ import { db } from "~/server/db";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UMSC_ABOUT_DEFAULT_VALUES } from ".";
 import { UmscAboutCommunity } from "./umsc-about-community";
@@ -25,6 +26,7 @@ const FIELD_KEYS = [
   "umsc.about.hero-lede",
   "umsc.about.hero-image",
   "umsc.about.hero-image-alt",
+  "umsc.about.hero-image-behind",
   "umsc.about.maker-heading",
   "umsc.about.maker-body-1",
   "umsc.about.maker-body-2",
@@ -89,8 +91,7 @@ export async function UmscAboutPage({
         headingFieldKey="umsc.about.hero-heading"
         lede={f["umsc.about.hero-lede"] ?? ""}
         ledeFieldKey="umsc.about.hero-lede"
-        image={f["umsc.about.hero-image"] ?? undefined}
-        imageAlt={f["umsc.about.hero-image-alt"] ?? ""}
+        {...resolveUmscHeroPhoto(f, "about")}
         sectionAttrs={sectionGroupAttr("about", "hero")}
       />
 
