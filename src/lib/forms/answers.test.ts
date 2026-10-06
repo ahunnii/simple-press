@@ -7,7 +7,9 @@ import { formDefinitionSchema } from "~/lib/validators/form";
 import {
   formatAnswerForDisplay,
   formatAnswerOrDash,
+  formatTimeForDisplay,
   getConfirmationEmail,
+  normalizeTime,
   parseAnswersJson,
   serializeAnswers,
   snapshotMatchesFieldFilter,
@@ -47,8 +49,19 @@ const definition: FormDefinition = formDefinitionSchema.parse({
   settings: { confirmationFieldId: "email" },
 });
 
+// Time fields live in their own definition so the shared one's full-submission
+// expectations above stay about the original ten types.
+const timeFields = formDefinitionSchema.parse({
+  version: 1,
+  fields: [
+    { id: "at", type: "time", label: "At" },
+    { id: "needed", type: "time", label: "Needed", required: true },
+  ],
+}).fields;
+
 const fields = definition.fields;
-const field = (id: string) => fields.find((f) => f.id === id)!;
+const field = (id: string) =>
+  [...fields, ...timeFields].find((f) => f.id === id)!;
 
 /** Validate one field in isolation. */
 function one(
@@ -216,6 +229,69 @@ describe("validateFormAnswers", () => {
     // US-style dates (spreadsheets reformat) normalize to ISO
     expect(one("when", "12/5/2026", today).value).toBe("2026-12-05");
   });
+
+  it("time normalizes 24h and 12h text to HH:mm", () => {
+    expect(one("at", "14:30").value).toBe("14:30");
+    expect(one("at", "09:05").value).toBe("09:05");
+    expect(one("at", "9:05").value).toBe("09:05");
+    expect(one("at", "14:30:00").value).toBe("14:30"); // browser seconds
+    expect(one("at", " 2:30 PM ").value).toBe("14:30");
+    expect(one("at", "2:30pm").value).toBe("14:30");
+    expect(one("at", "2:30 p.m.").value).toBe("14:30");
+    expect(one("at", "2 PM").value).toBe("14:00");
+    expect(one("at", "12:00 AM").value).toBe("00:00");
+    expect(one("at", "12:15 PM").value).toBe("12:15");
+    expect(one("at", "12 am").value).toBe("00:00");
+    expect(one("at", "00:00").value).toBe("00:00");
+    expect(one("at", "23:59").value).toBe("23:59");
+  });
+
+  it("time rejects impossible or ambiguous values", () => {
+    for (const bad of [
+      "25:00",
+      "24:00",
+      "12:60",
+      "abc",
+      "14",
+      "0 PM",
+      "13:00 PM",
+      "2:30 XM",
+      "2:30:15 PM",
+    ]) {
+      expect(one("at", bad).error, bad).toBe("Enter a valid time.");
+    }
+    expect(one("at", ["14:30"]).error).toBe("Enter a valid answer.");
+  });
+
+  it("time treats blank as null, or required when the field is required", () => {
+    expect(one("at", "").value).toBeNull();
+    expect(one("at", undefined).value).toBeNull();
+    expect(one("needed", "  ").error).toBe("This field is required.");
+    expect(one("needed", "", { relaxRequired: true }).value).toBeNull();
+    // relaxRequired still validates a present value
+    expect(one("needed", "nope", { relaxRequired: true }).error).toBe(
+      "Enter a valid time.",
+    );
+  });
+});
+
+describe("time helpers", () => {
+  it("normalizeTime returns null for non-times", () => {
+    expect(normalizeTime("14:30")).toBe("14:30");
+    expect(normalizeTime("")).toBeNull();
+    expect(normalizeTime("noon")).toBeNull();
+  });
+
+  it("formatTimeForDisplay renders 12h and passes junk through", () => {
+    expect(formatTimeForDisplay("00:00")).toBe("12:00 AM");
+    expect(formatTimeForDisplay("00:05")).toBe("12:05 AM");
+    expect(formatTimeForDisplay("09:05")).toBe("9:05 AM");
+    expect(formatTimeForDisplay("12:00")).toBe("12:00 PM");
+    expect(formatTimeForDisplay("14:30")).toBe("2:30 PM");
+    expect(formatTimeForDisplay("23:59")).toBe("11:59 PM");
+    expect(formatTimeForDisplay("later")).toBe("later");
+    expect(formatTimeForDisplay("25:00")).toBe("25:00");
+  });
 });
 
 describe("snapshots + formatting", () => {
@@ -248,6 +324,32 @@ describe("snapshots + formatting", () => {
     expect(formatAnswerForDisplay(snapshots[0]!)).toBe("Ada");
     expect(formatAnswerOrDash(null)).toBe("—");
     expect(formatAnswerOrDash("x")).toBe("x");
+  });
+
+  it("formatAnswerForDisplay shows a time snapshot in 12h, a bare value as stored", () => {
+    const at: FormAnswerSnapshot = {
+      fieldId: "at",
+      label: "At",
+      type: "time",
+      value: "14:30",
+    };
+    expect(formatAnswerForDisplay(at)).toBe("2:30 PM");
+    expect(formatAnswerOrDash(at)).toBe("2:30 PM");
+    expect(formatAnswerForDisplay(at.value)).toBe("14:30"); // CSV export path
+    expect(formatAnswerForDisplay({ ...at, value: null })).toBe("");
+    expect(formatAnswerOrDash({ ...at, value: null })).toBe("—");
+  });
+
+  it("time answers are searchable and filterable by stored or displayed form", () => {
+    const at: FormAnswerSnapshot[] = [
+      { fieldId: "at", label: "At", type: "time", value: "14:30" },
+    ];
+    expect(snapshotMatchesSearch(at, "14:30")).toBe(true);
+    expect(snapshotMatchesSearch(at, "2:30 pm")).toBe(true);
+    expect(snapshotMatchesSearch(at, "3:30")).toBe(false);
+    expect(snapshotMatchesFieldFilter(at, "at", "14:3")).toBe(true);
+    expect(snapshotMatchesFieldFilter(at, "at", "2:30 PM")).toBe(true);
+    expect(snapshotMatchesFieldFilter(at, "at", "9:00")).toBe(false);
   });
 
   it("serializeAnswers / parseAnswersJson round-trip and tolerate junk", () => {

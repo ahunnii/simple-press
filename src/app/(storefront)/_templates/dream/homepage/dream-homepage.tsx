@@ -13,6 +13,7 @@ import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { resolveFields } from "..";
 import { DREAM_CLOUD_PRESETS } from "../lib/cloud-presets";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
 import { resolveDreamStepsList } from "../shared/dream-steps-list";
 import { DreamHomepageGallery } from "./dream-homepage-gallery";
 import { DreamHomepageHero } from "./dream-homepage-hero";
@@ -81,7 +82,7 @@ export async function DreamHomepage({
   // destination route's own feature flag is off — e.g. a "What We Do" row
   // pointed at `/services` while `services` is disabled would otherwise
   // 404. `resolveFields` already applies each key's registered default
-  // (declared in this domain's `index.ts`, e.g. "/services", "/contact"),
+  // (declared in this domain's `index.ts`, e.g. "/services", "/estimate"),
   // so `f[key] ?? ""` alone is the resolved href — never a second
   // `?? "/services"`-style literal fallback, which would silently point an
   // always-rendered link at a route that may be gated off.
@@ -124,7 +125,7 @@ export async function DreamHomepage({
 
   const heroCtaUrl = f["dream.homepage.hero-cta-url"] ?? "";
   const heroCtaSecondaryUrl = f["dream.homepage.hero-cta-secondary-url"] ?? "";
-  const galleryEmptyLinkUrl = "/contact";
+  const galleryEmptyLinkUrl = DREAM_QUOTE_HREF;
   const quoteCtaUrl = f["dream.homepage.quote-cta-url"] ?? "";
 
   return (

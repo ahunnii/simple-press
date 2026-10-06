@@ -7,6 +7,7 @@ import {
   getListRowSummary,
   getRawCustomFieldString,
   iconRowsFromDefaults,
+  isContentEmpty,
   isRetiredTemplateKey,
   parseFaqPickerIds,
   parseTemplateIconListRows,
@@ -447,5 +448,41 @@ describe("parseTemplateTrustBadgesListRows", () => {
         defaults,
       ),
     ).toBe(defaults);
+  });
+});
+
+/**
+ * Embedded forms and quote calculators are leaf nodes (meaning lives in
+ * `attrs`), so a richtext field holding only one must not read as blank —
+ * otherwise its section hides or falls back to template defaults.
+ */
+describe("isContentEmpty — leaf embed nodes", () => {
+  it("treats a doc whose only content is a form node as non-empty", () => {
+    expect(
+      isContentEmpty({
+        type: "doc",
+        content: [{ type: "form", attrs: { formId: "form_123" } }],
+      }),
+    ).toBe(false);
+  });
+
+  it("treats a doc whose only content is a quoteCalculator node as non-empty", () => {
+    expect(
+      isContentEmpty({
+        type: "doc",
+        content: [
+          { type: "quoteCalculator", attrs: { calculatorId: "calc_123" } },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it("still treats a doc of only empty paragraphs as empty", () => {
+    expect(
+      isContentEmpty({
+        type: "doc",
+        content: [{ type: "paragraph" }, { type: "paragraph", content: [] }],
+      }),
+    ).toBe(true);
   });
 });

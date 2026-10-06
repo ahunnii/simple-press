@@ -1,5 +1,7 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * `dream`'s global (chrome + auth) field declarations — the single source for
  * both the editor registry (spread by the root `../index.ts`) and the chrome
@@ -36,7 +38,7 @@ const globalBrandingData: TemplateField[] = [
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
   {
     key: "dream.global.footer-signoff",

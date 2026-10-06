@@ -133,7 +133,7 @@ export function DreamLaneServicePage({
         accent={f["dream-lane.cta-accent"] ?? ""}
         lede={f["dream-lane.cta-lede"] ?? ""}
         ctaLabel={f["dream-lane.cta-label"] ?? ""}
-        ctaUrl={f["dream-lane.cta-url"] ?? "/contact"}
+        ctaUrl={f["dream-lane.cta-url"] ?? ""}
       />
     </article>
   );

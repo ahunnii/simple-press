@@ -109,6 +109,7 @@ export async function DreamFooter({
   const {
     email,
     phone,
+    address,
     hoursRows,
     legacyHours,
     footerTagline: tagline,
@@ -208,6 +209,7 @@ export async function DreamFooter({
 
         {/* Contact column — every line hidden when blank */}
         <div className="dream-footer-col dream-footer-col--contact">
+          {address ? <address className="not-italic">{address}</address> : null}
           {email ? (
             <p>
               <a href={`mailto:${email}`} className="dream-link">

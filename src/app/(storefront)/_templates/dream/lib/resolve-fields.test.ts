@@ -15,7 +15,7 @@ describe("resolveDreamFields", () => {
       "dream.global.footer-signoff-accent",
     ]);
     expect(f["dream.global.header-cta-label"]).toBe("Estimate Quote");
-    expect(f["dream.global.header-cta-url"]).toBe("/contact");
+    expect(f["dream.global.header-cta-url"]).toBe("/estimate");
     expect(f["dream.global.footer-signoff-accent"]).toBe("a theme.");
   });
 

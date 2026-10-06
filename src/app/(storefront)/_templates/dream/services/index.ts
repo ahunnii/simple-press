@@ -1,6 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * Services index page (`/services`) fields for the `dream` template.
  *
@@ -27,31 +29,33 @@ export const DREAM_PACKAGES_DEFAULT_ROWS: Record<string, string>[] = [
     name: "Essence",
     tagline: "A simple, elegant start.",
     includes: "1 panel\n3 colors\n2 layers\n2 tie backs",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+    note: "",
   },
   {
     name: "Deluxe",
     tagline: "Full and finished with a theme.",
-    includes: "1 panel\na theme\n3–5 colors\nvalance",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+    includes: "1 panel\nA theme\n3–5 colors\n2 layers\n2 tie backs\nValance",
+    note: "",
   },
   {
     name: "Premium",
     tagline: "Deluxe, plus a throne chair moment.",
-    includes: "Deluxe package\n2 panels\nthrone chair",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+    includes: "Deluxe package\n2 panels\nThrone chair",
+    note: "",
   },
   {
     name: "Lavish",
-    tagline: "Dressed for a full guest list.",
-    includes: "up to 50 guests\nchair covers\ntable cloths",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+    tagline: "Up to 50 guests.",
+    includes:
+      "Deluxe package\nChair cover & sash\nTablecloths for guest tables",
+    note: "",
   },
   {
     name: "Yasss!",
     tagline: "Big, bright, and ready to celebrate.",
-    includes: "backdrop\nballoon garland\nthrone chair\ngift tables",
-    note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+    includes:
+      "Backdrop of your choice\nBalloon garland (select up to 3 balloon colors)\nThrone chair (silver with silver trim)\nGift table(s)\nGift table decorations",
+    note: "",
   },
 ];
 
@@ -146,7 +150,7 @@ const servicesLanesData: TemplateField[] = [
     page: "services",
     group: "services.lanes",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 
@@ -172,7 +176,7 @@ const servicesPackagesData: TemplateField[] = [
     group: "services.packages",
     gridColumn: "col-span-full",
     defaultValue:
-      "Every event is different — these are starting points Selest can dress up or down for your day.",
+      "Every event is different — these are starting points Selest can dress up or down for your day. Packages are customized to your theme; delivery, setup, and teardown are quoted separately. We also drape event halls, back yards, tents and garages — you name it, we drape it!",
   },
   {
     key: "dream.services.packages",
@@ -213,7 +217,8 @@ const servicesPackagesData: TemplateField[] = [
         key: "note",
         label: "Note",
         type: "text",
-        description: "Short note shown under the package, e.g. an inquiry disclaimer.",
+        description:
+          "Short note shown under the package, e.g. an inquiry disclaimer.",
         optional: true,
         placeholder:
           "Inquiry-only; delivery, setup, and teardown quoted separately.",
@@ -276,7 +281,7 @@ const servicesCtaData: TemplateField[] = [
     page: "services",
     group: "services.cta",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 

@@ -1,6 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * Blog / BlogPost ("/blog", "/blog/<slug>") — parity-plan-2026-09-28 PF19
  * (dream previously fell back to Default here). Both pages share
@@ -167,7 +169,7 @@ const blogCtaData: TemplateField[] = [
     page: "blog",
     group: "blog.cta",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 

@@ -7,6 +7,7 @@ import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
 import { DreamLink } from "../shared/dream-link";
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
 import { DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamAccountEmptyState } from "./dream-account-empty-state";
 import { DreamAccountLayout } from "./dream-account-layout";
@@ -37,7 +38,7 @@ export function DreamOrdersPage({ business, orders }: OrdersPageTemplateProps) {
           heading={f["dream.global.orders-empty-heading"] ?? ""}
           body={f["dream.global.orders-empty-body"] ?? ""}
           ctaLabel={f["dream.global.orders-empty-button"] ?? ""}
-          ctaHref="/contact"
+          ctaHref={DREAM_QUOTE_HREF}
         />
       ) : (
         <DreamRevealGroup className="flex flex-col gap-4">

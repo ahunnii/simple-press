@@ -20,7 +20,7 @@ type DreamStepsProps = {
  * Numbered step list (one row per step of an owner-editable list field), numerals in Italiana `--dream-gold-ink` (design.md:
  * "the sequence carries meaning" — the one place section numbers are
  * allowed per the craft floor). Used by homepage "From idea to theme",
- * about "Consultation", and the contact "What happens next" aside.
+ * and about "Consultation".
  */
 export function DreamSteps({
   steps,

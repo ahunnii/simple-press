@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { DREAM_CONSULTATION_STEPS_DEFAULT_ROWS } from "../about";
-import { DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS } from "../contact";
 import { DREAM_PROCESS_STEPS_DEFAULT_ROWS } from "../homepage";
 import { resolveDreamStepsList } from "./dream-steps-list";
 
@@ -82,11 +81,10 @@ describe("resolveDreamStepsList", () => {
     ).toEqual(DEFAULTS);
   });
 
-  it("resolves each page's three built-in steps from its own defaults", () => {
+  it("resolves each list's three built-in steps from its own defaults", () => {
     for (const rows of [
       DREAM_PROCESS_STEPS_DEFAULT_ROWS,
       DREAM_CONSULTATION_STEPS_DEFAULT_ROWS,
-      DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS,
     ]) {
       const steps = resolveDreamStepsList({}, KEY, rows);
       expect(steps).toHaveLength(3);

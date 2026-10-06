@@ -45,7 +45,7 @@ function PackageCard({
 }) {
   return (
     <div
-      className="dream-card dream-reveal-item flex h-full flex-col gap-4"
+      className="dream-card dream-reveal-item flex flex-col gap-4"
       style={{ "--i": Math.min(index, 7) } as CSSProperties}
       {...(fieldKey ? listItemAttr(fieldKey, index) : {})}
     >
@@ -64,7 +64,7 @@ function PackageCard({
             <li key={i} className="flex items-baseline gap-2">
               <span
                 aria-hidden="true"
-                className="mt-[2px] inline-block h-[3px] w-[3px] shrink-0 rounded-full bg-[var(--dream-gold)]"
+                className="mt-[2px] inline-block h-[5px] w-[5px] shrink-0 rounded-full bg-[var(--dream-gold)]"
               />
               <span>{line}</span>
             </li>
@@ -73,7 +73,7 @@ function PackageCard({
       )}
 
       {pkg.note && (
-        <p className="!mt-auto pt-2 text-[13px] leading-snug text-[var(--dream-soft)]">
+        <p className="!mt-auto pt-2 text-[14px] leading-snug text-[var(--dream-soft)]">
           {pkg.note}
         </p>
       )}
@@ -93,7 +93,8 @@ type DreamPackagesProps = {
 
 /**
  * Services index "Package ideas" grid (design.md "Services index →
- * Package ideas"): hairline paper cards, no prices, 5→2→1 responsive grid.
+ * Package ideas"): hairline paper cards, no prices, 3→2→1 responsive grid with the
+ * orphaned last row centered.
  * Defaults (Essence/Deluxe/Premium/Lavish/Yasss!) are supplied by the
  * caller when the owner hasn't customized the `dream.services.packages`
  * list field yet — a fresh business is never shown an empty grid.
@@ -110,15 +111,21 @@ export function DreamPackages({
     <div>
       <style>{`
         .dream-packages-grid {
-          display: grid;
-          grid-template-columns: 1fr;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
           gap: clamp(20px, 3vw, 28px);
         }
+        .dream-packages-grid > * { flex: 0 0 100%; min-width: 0; }
         @media (min-width: 640px) {
-          .dream-packages-grid { grid-template-columns: repeat(2, 1fr); }
+          .dream-packages-grid > * {
+            flex-basis: calc((100% - clamp(20px, 3vw, 28px)) / 2);
+          }
         }
-        @media (min-width: 1200px) {
-          .dream-packages-grid { grid-template-columns: repeat(5, 1fr); }
+        @media (min-width: 960px) {
+          .dream-packages-grid > * {
+            flex-basis: calc((100% - 2 * clamp(20px, 3vw, 28px)) / 3);
+          }
         }
       `}</style>
 

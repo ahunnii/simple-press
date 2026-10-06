@@ -100,14 +100,16 @@ export function DreamServicesIndexPage({ business, services }: Props) {
             heading={f["dream.services.lanes-empty-heading"] ?? ""}
             body={f["dream.services.lanes-empty-body"] ?? ""}
             ctaLabel={f["dream.services.lanes-empty-cta-label"] ?? ""}
-            ctaUrl={f["dream.services.lanes-empty-cta-url"] ?? "/contact"}
+            ctaUrl={f["dream.services.lanes-empty-cta-url"] ?? ""}
           />
         )}
       </DreamSection>
 
       {isSectionVisible(customFields, "dream", "services.packages") && (
         <DreamSection
+          id="packages"
           tone="sky"
+          className="scroll-mt-[calc(var(--dream-header-h,72px)+24px)]"
           sectionAttrs={sectionGroupAttr("services", "packages")}
         >
           <DreamPackages
@@ -127,7 +129,7 @@ export function DreamServicesIndexPage({ business, services }: Props) {
           accent={f["dream.services.cta-accent"] ?? ""}
           lede={f["dream.services.cta-lede"] ?? ""}
           ctaLabel={f["dream.services.cta-label"] ?? ""}
-          ctaUrl={f["dream.services.cta-url"] ?? "/contact"}
+          ctaUrl={f["dream.services.cta-url"] ?? ""}
           headingFieldKey="dream.services.cta-heading"
           accentFieldKey="dream.services.cta-accent"
           ledeFieldKey="dream.services.cta-lede"

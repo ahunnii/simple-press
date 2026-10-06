@@ -12,18 +12,22 @@
  * - `cloud-1-soft.webp` … `cloud-5-soft.webp` — 1200×480 (aspect 2.5),
  *   pre-blurred, far layers.
  * - `wisp-1.webp`, `wisp-2.webp` — 1600×260 (aspect ~6.15), thin trailing
- *   wisps for the hero floor and the horizon band.
+ *   wisps for the hero floor and the quote-band deck.
  *
  * Runtime is transform-only: `<DreamClouds>` renders each entry as an
  * `<img class="dream-cloud">` with these values written to CSS custom
  * properties (`--w`, `--top`, `--op`, `--dur`, `--delay`, `--rest`) that the
  * `.dream .dream-cloud` / `@keyframes dream-drift` rules in globals.css
- * read — see `shared/dream-clouds.tsx`.
+ * read — see `shared/dream-clouds.tsx`. Every value here is authored for a
+ * 1440px board: below 640px globals.css scales `--w` (and with it the drift
+ * distance) by `--dream-cloud-scale` (.5 hero, .6 page/deck) and clamps
+ * the reduced-motion `--rest` park on-screen, so the presets need no
+ * mobile copy (2026-10-05).
  */
 
 const SPRITE_BASE = "/templates/dream/clouds";
 
-export type DreamCloudVariant = "hero" | "page" | "horizon";
+export type DreamCloudVariant = "hero" | "page" | "deck";
 
 export type DreamCloudSprite = {
   /** Sprite filename under `/templates/dream/clouds/` (no path prefix). */
@@ -51,6 +55,12 @@ export type DreamCloudSprite = {
   reverse?: boolean;
   /** Use the pre-blurred `-soft` sprite variant (far/background layers). */
   soft?: boolean;
+  /**
+   * Static sprite: parked at this `left` (`%` of the layer) instead of
+   * drifting, with a slow vertical bob over `dur` seconds — written to
+   * `--left`. Used by the `deck` bank so it never opens a gap.
+   */
+  left?: string;
 };
 
 function sprite(name: string, soft?: boolean): string {
@@ -248,42 +258,105 @@ const page: DreamCloudSprite[] = [
 ];
 
 /**
- * `horizon`: 3 wisps (was 2) anchored at the top edge of a band (e.g.
- * `DreamQuoteCta`), masked by the band's static container so they never
- * spill past its edge. Opacities bumped +.1 from the shaded-sphere recipe
- * so the white/cool-tinted wisps still read against the band ground;
- * durations dropped to 55/72s this round to match the faster drift speed.
- * Third wisp added per design.md ("a few more clouds"): a thinner, fainter
- * reversed one near the very top.
+ * `deck`: the cloud bank under the "Estimate Quote" band (2026-10-05) — the
+ * copy floats in clear sky above a sea of clouds, as if seen from above the
+ * cloud deck. Two static rows (`left`, so the bank never opens a gap — a
+ * far soft row and a near sharp row, each bobbing a few px on its own
+ * period) plus two slow drifters riding across the top of the bank for
+ * life. Every sprite's body sits below the band's content box (the band
+ * reserves that room with its bottom padding), so nothing crosses the copy.
  */
-const horizon: DreamCloudSprite[] = [
+const deck: DreamCloudSprite[] = [
+  // Far row — soft, fainter, higher.
+  {
+    sprite: sprite("cloud-2", true),
+    w: 860,
+    top: "-8%",
+    op: 0.8,
+    dur: 14,
+    delay: -3,
+    rest: 0,
+    left: "-16%",
+  },
+  {
+    sprite: sprite("cloud-4", true),
+    w: 820,
+    top: "-14%",
+    op: 0.75,
+    dur: 17,
+    delay: -9,
+    rest: 0,
+    left: "18%",
+  },
+  {
+    sprite: sprite("cloud-1", true),
+    w: 880,
+    top: "-10%",
+    op: 0.8,
+    dur: 15,
+    delay: -5,
+    rest: 0,
+    left: "46%",
+  },
+  {
+    sprite: sprite("cloud-3", true),
+    w: 840,
+    top: "-16%",
+    op: 0.75,
+    dur: 18,
+    delay: -12,
+    rest: 0,
+    left: "74%",
+  },
+  // Near row — sharp, brighter, lower.
+  {
+    sprite: sprite("cloud-5"),
+    w: 900,
+    top: "14%",
+    op: 0.95,
+    dur: 13,
+    delay: -7,
+    rest: 0,
+    left: "-10%",
+  },
+  {
+    sprite: sprite("cloud-3"),
+    w: 860,
+    top: "20%",
+    op: 0.95,
+    dur: 16,
+    delay: -2,
+    rest: 0,
+    left: "28%",
+  },
+  {
+    sprite: sprite("cloud-1"),
+    w: 900,
+    top: "16%",
+    op: 0.95,
+    dur: 12,
+    delay: -10,
+    rest: 0,
+    left: "62%",
+  },
+  // Drifters — slow, riding the top of the bank.
   {
     sprite: sprite("wisp-1"),
-    w: 560,
-    top: "-6%",
-    op: 0.55,
-    dur: 55,
-    delay: -20,
-    rest: -260,
+    w: 620,
+    top: "0%",
+    op: 0.7,
+    dur: 110,
+    delay: -40,
+    rest: -200,
   },
   {
     sprite: sprite("wisp-2"),
-    w: 480,
-    top: "2%",
-    op: 0.45,
-    dur: 72,
-    delay: -60,
-    rest: 200,
-    reverse: true,
-  },
-  {
-    sprite: sprite("wisp-1"),
-    w: 520,
-    top: "-2%",
-    op: 0.4,
-    dur: 66,
-    delay: -38,
-    rest: 380,
+    w: 540,
+    top: "8%",
+    op: 0.6,
+    dur: 140,
+    delay: -95,
+    rest: 1100,
     reverse: true,
   },
 ];
@@ -294,5 +367,5 @@ export const DREAM_CLOUD_PRESETS: Record<
 > = {
   hero,
   page,
-  horizon,
+  deck,
 };

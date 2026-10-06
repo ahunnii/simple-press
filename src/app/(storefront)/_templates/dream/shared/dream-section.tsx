@@ -5,6 +5,8 @@ import { DreamReveal } from "./dream-reveal";
 type DreamSectionProps = {
   children: React.ReactNode;
   className?: string;
+  /** Anchor id on the root element (in-page links like `#packages`). */
+  id?: string;
   /** Spread on the root element for the preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
   /** Wrap contents in the single-pass IO reveal. Defaults to true. */
@@ -22,6 +24,7 @@ type DreamSectionProps = {
  * reveal, optional sky-gradient tone.
  */
 export function DreamSection({
+  id,
   children,
   className,
   sectionAttrs,
@@ -41,6 +44,7 @@ export function DreamSection({
   return (
     <section
       {...sectionAttrs}
+      id={id}
       aria-label={ariaLabel}
       className={cn(
         "dream-section",

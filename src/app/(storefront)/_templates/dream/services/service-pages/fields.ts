@@ -23,6 +23,8 @@ import type { ServiceTemplateDef } from "~/lib/service-templates";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+import { DREAM_QUOTE_HREF } from "../../shared/dream-quote-href";
+
 // ─── dream-lane ─────────────────────────────────────────────────────────────
 // Hero is NOT a field group — it renders straight from `service.name`,
 // `service.description`, and `service.image` (design.md "Service-page
@@ -223,7 +225,7 @@ export const dreamLaneFields: TemplateField[] = [
     page: "homepage",
     group: "dream-lane.cta",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 
@@ -388,7 +390,7 @@ export const dreamPackageFields: TemplateField[] = [
     page: "homepage",
     group: "dream-package.cta",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 

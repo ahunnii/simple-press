@@ -83,6 +83,22 @@ describe("formDefinitionSchema", () => {
     expect(result.fields[4]).toMatchObject({ minDate: "none" });
   });
 
+  it("accepts a time field and strips keys it doesn't define", () => {
+    const def = baseDefinition();
+    def.fields.push({
+      id: "f_at",
+      type: "time",
+      label: "Pickup time",
+      minDate: "today", // a date-only key: stripped, as for any other type
+      maxLength: 5,
+    });
+    const result = formDefinitionSchema.parse(def);
+    const time = result.fields[3]!;
+    expect(time).toMatchObject({ type: "time", label: "Pickup time" });
+    expect(time).not.toHaveProperty("minDate");
+    expect(time).not.toHaveProperty("maxLength");
+  });
+
   it("requires at least one field and at most 50", () => {
     expect(issuePaths({ ...baseDefinition(), fields: [] })).toEqual([
       expect.objectContaining({ path: "fields" }),

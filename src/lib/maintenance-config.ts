@@ -33,6 +33,8 @@ const LEAF_CONTENT_NODE_TYPES = new Set([
   "hardBreak",
   "gallery",
   "embed",
+  "quoteCalculator",
+  "form",
 ]);
 
 /** Local equivalent of `isContentEmpty` from `~/lib/template-fields.ts` (see note above). */

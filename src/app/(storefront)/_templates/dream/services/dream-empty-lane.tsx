@@ -2,8 +2,6 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { DreamButton } from "../shared/dream-button";
 import { DreamHeading } from "../shared/dream-heading";
-import { DreamPhoto } from "../shared/dream-photo";
-import { DreamAlternatingRow } from "./dream-alternating-row";
 
 type DreamEmptyLaneProps = {
   heading: string;
@@ -14,8 +12,8 @@ type DreamEmptyLaneProps = {
 
 /**
  * Designed empty state for the "Lanes" section (design.md "Services index →
- * Lanes → Empty state"): one alternating row with the mark in place of a
- * photo, a heading + body, and an Estimate Quote button.
+ * Lanes → Empty state"): a single centered text block — heading, body, and
+ * an Estimate Quote button — with no placeholder photo tile.
  */
 export function DreamEmptyLane({
   heading,
@@ -24,13 +22,13 @@ export function DreamEmptyLane({
   ctaUrl,
 }: DreamEmptyLaneProps) {
   return (
-    <DreamAlternatingRow media={<DreamPhoto src="" alt="" aspect="4 / 3" />}>
+    <div className="mx-auto max-w-[60ch] py-8 text-center">
       <DreamHeading as="h2" fieldKey="dream.services.lanes-empty-heading">
         {heading}
       </DreamHeading>
       {body && (
         <p
-          className="!mt-4 max-w-[60ch] text-[17px] leading-relaxed text-[var(--dream-soft)]"
+          className="!mt-4 text-[17px] leading-relaxed text-[var(--dream-soft)]"
           {...fieldAttr("dream.services.lanes-empty-body")}
         >
           {body}
@@ -45,6 +43,6 @@ export function DreamEmptyLane({
           </DreamButton>
         </div>
       )}
-    </DreamAlternatingRow>
+    </div>
   );
 }
