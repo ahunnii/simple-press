@@ -643,6 +643,19 @@ function FieldControl({
         />
       );
     }
+    case "time":
+      return (
+        <Input
+          id={fieldDomId}
+          type="time"
+          value={raw}
+          aria-required={field.required || undefined}
+          aria-describedby={describedBy}
+          aria-invalid={invalid}
+          ref={(el) => registerRef(el)}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      );
     case "select":
       return (
         <select

@@ -19,8 +19,8 @@ function toStep(row: Record<string, unknown>): DreamStepItem {
 }
 
 /**
- * Resolves one of dream's three numbered step lists (homepage "From idea to
- * theme", about "Consultation", contact "What happens next"): the saved list
+ * Resolves one of dream's numbered step lists (homepage "From idea to
+ * theme", about "Consultation"): the saved list
  * at `key` (rows with a heading or a description are kept, fully blank rows
  * dropped), otherwise the field's built-in `defaultRows`.
  *

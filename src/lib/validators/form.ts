@@ -41,6 +41,7 @@ export const FORM_FIELD_TYPE_VALUES = [
   "checkboxes", // multiple answers
   "checkbox", // single yes/no box; the label is the statement
   "date",
+  "time", // wall-clock time of day, stored as 24h `HH:mm`
 ] as const;
 
 export type FormFieldType = (typeof FORM_FIELD_TYPE_VALUES)[number];
@@ -244,6 +245,12 @@ export const formDateFieldSchema = z.object({
   minDate: z.enum(["none", "today"]).default("none"),
 });
 
+/** A time of day. Stored as 24h `HH:mm`; no settings beyond the base shape. */
+export const formTimeFieldSchema = z.object({
+  type: z.literal("time"),
+  ...formFieldBaseShape,
+});
+
 export const formFieldSchema = z.discriminatedUnion("type", [
   formTextFieldSchema,
   formLongtextFieldSchema,
@@ -255,6 +262,7 @@ export const formFieldSchema = z.discriminatedUnion("type", [
   formCheckboxesFieldSchema,
   formCheckboxFieldSchema,
   formDateFieldSchema,
+  formTimeFieldSchema,
 ]);
 
 export type FormField = z.infer<typeof formFieldSchema>;

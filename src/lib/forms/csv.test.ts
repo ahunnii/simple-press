@@ -134,6 +134,52 @@ describe("buildFormCsv", () => {
   });
 });
 
+describe("time fields in CSV", () => {
+  const timeDefinition: FormDefinition = formDefinitionSchema.parse({
+    version: 1,
+    fields: [
+      { id: "name", type: "text", label: "Name" },
+      { id: "at", type: "time", label: "Pickup time" },
+    ],
+  });
+
+  it("exports the stored 24h HH:mm, not the 12h display form", () => {
+    const csv = buildFormCsv(timeDefinition, [
+      {
+        submittedAt: new Date("2026-09-01T12:34:56.000Z"),
+        status: "NEW",
+        tags: [],
+        answers: toAnswerSnapshot(timeDefinition.fields, {
+          name: "Ada",
+          at: "14:30",
+        }),
+      },
+    ]);
+    const parsed = Papa.parse<Record<string, string>>(csv, { header: true });
+    expect(parsed.data[0]!["Pickup time"]).toBe("14:30");
+  });
+
+  it("imports 12h and 24h text, normalized to HH:mm; rejects junk", () => {
+    const csv = [
+      "Name,Pickup time",
+      "A,2:30 PM",
+      "B,14:30",
+      "C,12:00 AM",
+      "D,",
+      "E,25:00",
+    ].join("\n");
+    const result = parseFormCsv(timeDefinition, csv);
+    expect(result.validRows.map((r) => r.values.at)).toEqual([
+      "14:30",
+      "14:30",
+      "00:00",
+      null,
+    ]);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]!.message).toContain("Enter a valid time.");
+  });
+});
+
 describe("parseFormCsv", () => {
   it("round-trips build → parse", () => {
     const csv = buildFormCsv(definition, [

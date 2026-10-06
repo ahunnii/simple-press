@@ -1,6 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * About ("Meet Selest") — design.md "Per-page section concepts › About".
  * Four sections: hero (not hideable), story (not hideable — this is the
@@ -141,7 +143,7 @@ const aboutStoryData: TemplateField[] = [
     page: "about",
     group: "about.story",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 
@@ -276,7 +278,7 @@ const aboutQuoteData: TemplateField[] = [
     page: "about",
     group: "about.quote",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 

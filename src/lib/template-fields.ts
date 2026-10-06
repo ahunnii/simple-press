@@ -580,6 +580,16 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "dream.contact.form-next-step-2-body",
   "dream.contact.form-next-step-3-heading",
   "dream.contact.form-next-step-3-body",
+  // dream, retired 2026-10-05 — `/contact` became a simple "Ask a question"
+  // page; the Estimate Quote intake moved to a Forms-built `/estimate` page,
+  // so the quote-only copy and the "what happens next" list went with it.
+  "dream.contact.form-theme-helper",
+  "dream.contact.form-draping-label",
+  "dream.contact.form-throne-label",
+  "dream.contact.form-full-decor-label",
+  "dream.contact.form-full-decor-error",
+  "dream.contact.form-next-heading",
+  "dream.contact.form-next-steps",
   // sledge, retired 2026-09-26 — the footer's location tag now comes from
   // Settings → General (address city) via
   // `_templates/sledge/shared/sledge-location-tag.ts`.
@@ -1222,6 +1232,8 @@ const LEAF_CONTENT_NODE_TYPES = new Set([
   "hardBreak",
   "gallery",
   "embed",
+  "quoteCalculator",
+  "form",
 ]);
 
 export function isContentEmpty(content: TiptapJSON): boolean {

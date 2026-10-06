@@ -49,36 +49,38 @@ describe("dream list-field defaults (moved into TemplateField.defaultRows)", () 
       name: "Essence",
       tagline: "A simple, elegant start.",
       includes: "1 panel\n3 colors\n2 layers\n2 tie backs",
-      note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+      note: "",
     },
     {
       name: "Deluxe",
       tagline: "Full and finished with a theme.",
-      includes: "1 panel\na theme\n3–5 colors\nvalance",
-      note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+      includes: "1 panel\nA theme\n3–5 colors\n2 layers\n2 tie backs\nValance",
+      note: "",
     },
     {
       name: "Premium",
       tagline: "Deluxe, plus a throne chair moment.",
-      includes: "Deluxe package\n2 panels\nthrone chair",
-      note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+      includes: "Deluxe package\n2 panels\nThrone chair",
+      note: "",
     },
     {
       name: "Lavish",
-      tagline: "Dressed for a full guest list.",
-      includes: "up to 50 guests\nchair covers\ntable cloths",
-      note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+      tagline: "Up to 50 guests.",
+      includes:
+        "Deluxe package\nChair cover & sash\nTablecloths for guest tables",
+      note: "",
     },
     {
       name: "Yasss!",
       tagline: "Big, bright, and ready to celebrate.",
-      includes: "backdrop\nballoon garland\nthrone chair\ngift tables",
-      note: "Inquiry-only; delivery, setup, and teardown quoted separately.",
+      includes:
+        "Backdrop of your choice\nBalloon garland (select up to 3 balloon colors)\nThrone chair (silver with silver trim)\nGift table(s)\nGift table decorations",
+      note: "",
     },
   ];
 
   describe("DREAM_PACKAGES_DEFAULT_ROWS (dream.services.packages storefront fallback)", () => {
-    it("matches the pre-migration copy verbatim", () => {
+    it("matches the client's original package copy verbatim", () => {
       expect(DREAM_PACKAGES_DEFAULT_ROWS).toEqual(expectedPackageRows);
     });
   });
@@ -267,23 +269,6 @@ describe("dream list-field defaults (moved into TemplateField.defaultRows)", () 
           },
         ],
       },
-      {
-        key: "dream.contact.form-next-steps",
-        rows: [
-          {
-            heading: "Selest reviews your details",
-            body: "She looks over the event, the space, and the theme you described.",
-          },
-          {
-            heading: "You get a proposal",
-            body: "A plan with the pieces, colors, and pricing for your event.",
-          },
-          {
-            heading: "You lock in your date",
-            body: "Approve the plan and Selest reserves your date.",
-          },
-        ],
-      },
     ];
 
     for (const { key, rows } of stepLists) {
@@ -310,7 +295,8 @@ describe("dream list-field defaults (moved into TemplateField.defaultRows)", () 
         /^dream\.homepage\.row-[123]-/,
         /^dream\.homepage\.process-step-/,
         /^dream\.about\.consultation-step-/,
-        /^dream\.contact\.form-next-step-/,
+        /^dream\.contact\.form-next-step/,
+        /^dream\.contact\.form-(theme-helper|draping|throne|full-decor)/,
       ];
       expect(
         dreamFields.filter((f) => retired.some((re) => re.test(f.key))),

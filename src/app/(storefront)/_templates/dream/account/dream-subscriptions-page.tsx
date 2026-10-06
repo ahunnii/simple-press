@@ -8,6 +8,7 @@ import { formatPrice } from "~/lib/prices";
 import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
 
 import { DreamLink } from "../shared/dream-link";
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
 import { DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamAccountEmptyState } from "./dream-account-empty-state";
 import { DreamAccountLayout } from "./dream-account-layout";
@@ -15,7 +16,7 @@ import { DreamOrderStatusBadge } from "./dream-order-status-badge";
 import { resolveDreamAccountFields } from "./fields";
 
 // Reuses the Orders page's empty-state button field (`orders-empty-button`)
-// — both pages currently ship the identical "Request an estimate" → /contact
+// — both pages currently ship the identical "Request an estimate" → /estimate
 // button, so this stays a single field instead of two kept in sync by hand.
 const FIELD_KEYS = [
   "dream.global.subscriptions-empty-heading",
@@ -69,7 +70,7 @@ export function DreamSubscriptionsPage({
           heading={f["dream.global.subscriptions-empty-heading"] ?? ""}
           body={f["dream.global.subscriptions-empty-body"] ?? ""}
           ctaLabel={f["dream.global.orders-empty-button"] ?? ""}
-          ctaHref="/contact"
+          ctaHref={DREAM_QUOTE_HREF}
         />
       ) : (
         <DreamRevealGroup className="flex flex-col gap-4">

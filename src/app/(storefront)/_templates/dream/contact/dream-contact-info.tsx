@@ -8,6 +8,7 @@ type Props = {
   heading: string;
   email?: string;
   phone?: string;
+  address?: string;
   /** Settings → Business Hours rows; wins over `legacyHours`. */
   hoursRows: { label: string; value: string }[];
   /** Legacy saved single-line hours, used only when `hoursRows` is empty. */
@@ -27,13 +28,14 @@ export function DreamContactInfo({
   heading,
   email,
   phone,
+  address,
   hoursRows,
   legacyHours,
   serviceArea,
 }: Props) {
   const area = serviceArea.trim();
   const hasHours = hoursRows.length > 0 || Boolean(legacyHours);
-  if (!email && !phone && !hasHours && !area) return null;
+  if (!email && !phone && !address && !hasHours && !area) return null;
 
   return (
     <DreamSection
@@ -46,6 +48,11 @@ export function DreamContactInfo({
           {heading}
         </DreamHeading>
         <ul className="mt-6 flex flex-col gap-2 text-[var(--dream-soft)]">
+          {address ? (
+            <li>
+              <address className="not-italic">{address}</address>
+            </li>
+          ) : null}
           {email ? (
             <li>
               <a href={`mailto:${email}`} className="dream-link">

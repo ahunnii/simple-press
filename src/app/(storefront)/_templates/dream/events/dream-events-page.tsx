@@ -43,7 +43,7 @@ const FIELD_KEYS = [
  * the same `DreamPageHero` sky band as `/<generic-slug>` (logo, the page's
  * only h1, the tagline as its lede), then one `DreamSection` of event rows
  * on the shared `--dream-container` edge, then the hideable closing band in
- * the `DreamQuoteCta` register (horizon wisps, centered h2 + lede + pill).
+ * the `DreamQuoteCta` register (cloud deck, centered h2 + lede + pill).
  *
  * Data logic is Default's events page's, carried over: media precedence
  * (video → image → none, here with dream's date tile for none),
@@ -212,7 +212,8 @@ export function DreamEventsPage({
           {...sectionGroupAttr("events", "cta")}
           className="dream-quote-band"
         >
-          <DreamClouds variant="horizon" className="dream-quote-band-clouds" />
+          <DreamClouds variant="deck" className="dream-quote-band-clouds" />
+          <div className="dream-quote-band-mist" aria-hidden="true" />
           <div className="dream-quote-band-content">
             <DreamHeading as="h2" fieldKey="default.events.cta-heading">
               {firstFilled(

@@ -89,7 +89,7 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
         storyBody={storyBody}
         storyBodyDefaultHtml={DREAM_ABOUT_STORY_BODY_DEFAULT_HTML}
         ctaLabel={f["dream.about.story-cta-label"] ?? ""}
-        ctaUrl={f["dream.about.story-cta-url"] ?? "/contact"}
+        ctaUrl={f["dream.about.story-cta-url"] ?? ""}
       />
 
       {isSectionVisible(customFields, "dream", "about.consultation") && (
@@ -106,7 +106,7 @@ export function DreamAboutPage({ business }: DefaultAboutPageTemplateProps) {
           accent={f["dream.about.quote-accent"] ?? ""}
           lede={f["dream.about.quote-lede"] ?? ""}
           ctaLabel={f["dream.about.quote-cta-label"] ?? ""}
-          ctaUrl={f["dream.about.quote-cta-url"] ?? "/contact"}
+          ctaUrl={f["dream.about.quote-cta-url"] ?? ""}
           headingFieldKey="dream.about.quote-heading"
           accentFieldKey="dream.about.quote-accent"
           ledeFieldKey="dream.about.quote-lede"

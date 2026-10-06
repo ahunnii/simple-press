@@ -100,7 +100,7 @@ export function DreamBlogPostPage({
           accent={f["dream.blog.cta-accent"] ?? ""}
           lede={f["dream.blog.cta-lede"] ?? ""}
           ctaLabel={f["dream.blog.cta-label"] ?? ""}
-          ctaUrl={f["dream.blog.cta-url"] ?? "/contact"}
+          ctaUrl={f["dream.blog.cta-url"] ?? ""}
           headingFieldKey="dream.blog.cta-heading"
           accentFieldKey="dream.blog.cta-accent"
           ledeFieldKey="dream.blog.cta-lede"

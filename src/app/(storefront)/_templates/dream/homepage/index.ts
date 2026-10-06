@@ -1,6 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * Full homepage build (design.md "Per-page section concepts › Homepage"):
  * hero (living sky), What We Do (alternating lanes), Gallery, From
@@ -119,7 +121,7 @@ const heroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
   {
     key: "dream.homepage.hero-cta-secondary-label",
@@ -554,7 +556,7 @@ const quoteData: TemplateField[] = [
     page: "homepage",
     group: "homepage.quote",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
   },
 ];
 

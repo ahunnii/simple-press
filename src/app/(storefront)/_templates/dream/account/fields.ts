@@ -12,7 +12,7 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
  *
  * Subscriptions reuses `dream.global.orders-empty-button` for its own empty
  * state's button — both pages currently ship the exact same label
- * ("Request an estimate") linking to `/contact`, so a second, identical
+ * ("Request an estimate") linking to `/estimate`, so a second, identical
  * field would just be a second place to keep that text in sync. Rewards has
  * no button of its own (a missing program isn't something the customer can
  * act on), so it only declares a heading + body pair.

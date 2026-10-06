@@ -17,6 +17,9 @@ const RECAPTCHA_ACTION = "contact";
 
 type UseContactFormOptions = {
   messageMaxLength?: number;
+  /** Set false when the caller renders its own in-page success state, so the
+   *  success isn't announced twice. Defaults to true. */
+  showSuccessToast?: boolean;
 };
 
 /** Form field values (matches ContactFormValues from validators). */
@@ -57,7 +60,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
   const { mutate, isPending } = api.contact.send.useMutation({
     onSuccess: ({ message }) => {
       toast.dismiss();
-      toast.success(message);
+      if (options.showSuccessToast !== false) toast.success(message);
       setIsSuccess(true);
       setCaptchaToken("");
       const handle = captchaRef.current;

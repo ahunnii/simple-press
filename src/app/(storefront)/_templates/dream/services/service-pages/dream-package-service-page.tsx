@@ -199,7 +199,7 @@ export function DreamPackageServicePage({
         accent={f["dream-package.cta-accent"] ?? ""}
         lede={f["dream-package.cta-lede"] ?? ""}
         ctaLabel={f["dream-package.cta-label"] ?? ""}
-        ctaUrl={f["dream-package.cta-url"] ?? "/contact"}
+        ctaUrl={f["dream-package.cta-url"] ?? ""}
       />
     </article>
   );

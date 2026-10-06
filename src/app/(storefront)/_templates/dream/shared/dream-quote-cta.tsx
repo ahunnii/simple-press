@@ -27,9 +27,12 @@ type DreamQuoteCtaProps = {
 
 /**
  * "Estimate Quote" band used on home/about/services/testimonials/service
- * pages (design.md shared inventory). Horizon wisps anchored at the band's
- * top edge and masked to it (`.dream-quote-band` + `.dream-quote-band`'s
- * mask in globals.css) so they never spill past the static container.
+ * pages (design.md shared inventory). 2026-10-05: "above the clouds" — the
+ * copy sits in clear sky over a `deck` cloud bank (`DreamClouds
+ * variant="deck"`), with a low golden-hour glow behind the bank and a mist
+ * veil that breathes along its crest. The band's bottom padding reserves
+ * the bank's room so no cloud crosses the copy; the bank melts into paper
+ * at the bottom edge (`.dream-quote-band::after`).
  */
 export function DreamQuoteCta({
   heading,
@@ -48,7 +51,8 @@ export function DreamQuoteCta({
 }: DreamQuoteCtaProps) {
   return (
     <section {...sectionAttrs} className={cn("dream-quote-band", className)}>
-      <DreamClouds variant="horizon" className="dream-quote-band-clouds" />
+      <DreamClouds variant="deck" className="dream-quote-band-clouds" />
+      <div className="dream-quote-band-mist" aria-hidden="true" />
       <div className="dream-quote-band-content">
         <DreamHeading
           as="h2"

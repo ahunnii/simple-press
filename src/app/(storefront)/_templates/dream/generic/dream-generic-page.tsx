@@ -193,24 +193,41 @@ export function DreamGenericPage({
     business.name,
   );
 
+  // No TOC → the article is the only column, so the 66ch measure centers
+  // under the (centered) page hero instead of hugging the left edge. With a
+  // TOC the prose stays left-aligned in the main column beside it.
+  const centered = !showToc;
+  const measure = centered ? "mx-auto w-full max-w-[66ch]" : undefined;
+
   const articleBody = (
     <div className="w-full">
       {isPolicy ? (
-        <p className="mb-8 text-[14px] text-[var(--dream-soft)]">
+        <p className={cn("mb-8 text-[14px] text-[var(--dream-soft)]", measure)}>
           Last updated · {formatUpdated(page.updatedAt)}
         </p>
       ) : null}
 
       {/* `.dream-embed` bridges shadcn vars → dream tokens so embedded
-          Tiptap `gallery`/`quoteCalculator` nodes render on-brand. */}
-      <div ref={contentRef} className="dream-embed">
+          Tiptap `gallery`/`quoteCalculator` nodes render on-brand. Its
+          `--centered` modifier tells the CSS where the 66ch prose column
+          sits so gallery/video blocks can break out of it symmetrically. */}
+      <div
+        ref={contentRef}
+        className={cn("dream-embed", centered && "dream-embed--centered")}
+      >
         <TiptapRenderer
           content={page.content as TiptapJSON}
-          className={DREAM_PROSE_CLASSNAME}
+          className={cn(DREAM_PROSE_CLASSNAME, centered && "mx-auto")}
         />
       </div>
 
-      <PlatformPolicyNotice slug={page.slug} />
+      {centered ? (
+        <div className={measure}>
+          <PlatformPolicyNotice slug={page.slug} />
+        </div>
+      ) : (
+        <PlatformPolicyNotice slug={page.slug} />
+      )}
     </div>
   );
 
@@ -223,9 +240,8 @@ export function DreamGenericPage({
           excerpt={page.excerpt ?? undefined}
         />
       ) : (
-        // Text-only variant: title + excerpt, no invented copy — `lede`
-        // renders as an empty (zero-height) paragraph when `page.excerpt`
-        // is blank; see the E-phase3 report for the noted primitive gap.
+        // Text-only variant: title + excerpt, no invented copy —
+        // `DreamPageHero` skips the lede when `page.excerpt` is blank.
         <DreamPageHero
           logoUrl={logoUrl}
           logoAlt={logoAlt}

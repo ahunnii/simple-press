@@ -62,6 +62,9 @@ const emailSchema = z.string().email().max(254);
 const PHONE_RE = /^[0-9+().\-\s]{7,32}$/;
 const DATE_YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DATE_US_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+// `14:30`, `14:30:00`, `2:30 PM`, `2:30pm`, `2 p.m.` — hours/minutes/seconds,
+// then an optional meridiem.
+const TIME_RE = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(?:([ap])\.?m\.?)?$/i;
 const TRUE_STRINGS = new Set(["true", "yes", "y", "1", "on", "checked", "x"]);
 const FALSE_STRINGS = new Set(["false", "no", "n", "0", "off", "unchecked"]);
 
@@ -85,6 +88,40 @@ function normalizeDate(value: string): string | null {
     return isRealCalendarDate(ymd) ? ymd : null;
   }
   return null;
+}
+
+/**
+ * 24h `HH:mm`, from the browser's `<input type="time">` value or from text a
+ * spreadsheet/person typed ("2:30 PM", "2pm"). Seconds are dropped. Returns
+ * `null` for anything that isn't a real time of day.
+ */
+export function normalizeTime(value: string): string | null {
+  const match = TIME_RE.exec(value.trim());
+  if (!match) return null;
+  let hours = Number(match[1]);
+  const minutes = match[2] === undefined ? 0 : Number(match[2]);
+  const seconds = match[3] === undefined ? 0 : Number(match[3]);
+  const meridiem = match[4]?.toLowerCase();
+  if (minutes > 59 || seconds > 59) return null;
+  if (meridiem) {
+    // A bare "14 PM" is nonsense; seconds only come from 24h browser values.
+    if (hours < 1 || hours > 12 || match[3] !== undefined) return null;
+    hours = (hours % 12) + (meridiem === "p" ? 12 : 0);
+  } else if (match[2] === undefined || hours > 23) {
+    // Without a meridiem, a bare "14" is ambiguous — require `HH:mm`.
+    return null;
+  }
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+/** `14:30` → `2:30 PM`. Anything that isn't a stored `HH:mm` passes through. */
+export function formatTimeForDisplay(value: string): string {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return value;
+  const hours = Number(match[1]);
+  const minutes = match[2]!;
+  if (hours > 23 || Number(minutes) > 59) return value;
+  return `${hours % 12 === 0 ? 12 : hours % 12}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
 }
 
 function findOption(
@@ -115,7 +152,8 @@ function validateField(
     case "longtext":
     case "email":
     case "phone":
-    case "date": {
+    case "date":
+    case "time": {
       const value = toTrimmedString(raw);
       if (value === undefined) return { error: "Enter a valid answer." };
       if (value === null) return missing();
@@ -137,6 +175,10 @@ function validateField(
         return PHONE_RE.test(value) && digits >= 7
           ? { value }
           : { error: "Enter a valid phone number." };
+      }
+      if (field.type === "time") {
+        const time = normalizeTime(value);
+        return time ? { value: time } : { error: "Enter a valid time." };
       }
       const date = normalizeDate(value);
       if (!date) return { error: "Enter a valid date." };
@@ -249,9 +291,9 @@ function validateField(
  * Validate + normalize raw answers (keyed by field id) against a form's
  * fields. Strings are trimmed, blanks become `null`, numbers are coerced,
  * choice answers become option LABELS (`string` for select/radio, `string[]`
- * in definition order for checkboxes), dates become `YYYY-MM-DD`. Keys that
- * aren't field ids are ignored. On failure, every failing field gets one
- * friendly message.
+ * in definition order for checkboxes), dates become `YYYY-MM-DD`, times become
+ * 24h `HH:mm`. Keys that aren't field ids are ignored. On failure, every
+ * failing field gets one friendly message.
  */
 export function validateFormAnswers(
   fields: FormField[],
@@ -296,16 +338,19 @@ export function toAnswerSnapshot(
 /**
  * One answer as plain text: `null` → `""`, booleans → "Yes"/"No", arrays →
  * "; "-joined (the CSV multi-value separator), numbers → `String(n)`.
- * Accepts a bare value or a whole snapshot.
+ * Accepts a bare value or a whole snapshot. A `time` snapshot reads as 12h
+ * ("2:30 PM"); a bare value (CSV export, search) stays the stored `HH:mm`.
  */
 export function formatAnswerForDisplay(
   input: FormAnswerSnapshot | FormAnswerValue,
 ): string {
-  const value =
-    input !== null && typeof input === "object" && !Array.isArray(input)
-      ? input.value
-      : input;
+  const isSnapshot =
+    input !== null && typeof input === "object" && !Array.isArray(input);
+  const value = isSnapshot ? input.value : input;
   if (value === null || value === undefined) return "";
+  if (isSnapshot && input.type === "time" && typeof value === "string") {
+    return formatTimeForDisplay(value);
+  }
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (Array.isArray(value)) return value.join("; ");
   return String(value);
@@ -363,7 +408,8 @@ export function serializeAnswers(snapshots: FormAnswerSnapshot[]): string {
 
 /**
  * Case-insensitive substring match over every snapshot's label and formatted
- * value. A blank query matches everything.
+ * value (a time matches on both its stored `14:30` and displayed `2:30 PM`
+ * forms). A blank query matches everything.
  */
 export function snapshotMatchesSearch(
   snapshots: FormAnswerSnapshot[],
@@ -374,7 +420,8 @@ export function snapshotMatchesSearch(
   return snapshots.some(
     (snapshot) =>
       snapshot.label.toLowerCase().includes(needle) ||
-      formatAnswerForDisplay(snapshot.value).toLowerCase().includes(needle),
+      formatAnswerForDisplay(snapshot.value).toLowerCase().includes(needle) ||
+      formatAnswerForDisplay(snapshot).toLowerCase().includes(needle),
   );
 }
 
@@ -411,9 +458,10 @@ export function snapshotMatchesFieldFilter(
       return wanted !== null && snapshot.value === wanted;
     }
     default:
-      return formatAnswerForDisplay(snapshot.value)
-        .toLowerCase()
-        .includes(needle);
+      return (
+        formatAnswerForDisplay(snapshot.value).toLowerCase().includes(needle) ||
+        formatAnswerForDisplay(snapshot).toLowerCase().includes(needle)
+      );
   }
 }
 

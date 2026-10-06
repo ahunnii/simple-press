@@ -19,7 +19,7 @@ type DreamCloudsProps = {
 
 /**
  * Server component: renders the baked cloud/wisp sprite layer for a hero,
- * page-hero, or horizon-band background (design.md "Motion › Cloud
+ * page-hero, or quote-band deck background (design.md "Motion › Cloud
  * system"). Pure CSS/HTML — no client JS — so it costs nothing to render on
  * every page; `DreamAmbientController` (mounted once in the layout) is what
  * pauses drift when a layer scrolls out of view.
@@ -47,12 +47,17 @@ export function DreamClouds({ variant, className, eager }: DreamCloudsProps) {
           "--dur": `${cloud.dur}s`,
           "--delay": `${cloud.delay}s`,
           "--rest": `${cloud.rest}px`,
+          ...(cloud.left ? { "--left": cloud.left } : {}),
         } as CSSProperties;
 
         return (
           <img
             key={cloud.sprite + i}
-            className={cn("dream-cloud", cloud.reverse && "is-reverse")}
+            className={cn(
+              "dream-cloud",
+              cloud.reverse && "is-reverse",
+              cloud.left && "is-static",
+            )}
             src={cloud.sprite}
             alt=""
             draggable={false}

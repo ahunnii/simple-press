@@ -3,6 +3,8 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { DREAM_QUOTE_HREF } from "../shared/dream-quote-href";
+
 /**
  * Shop listing (`/shop`) fields for the `dream` template — the page hero
  * (same `DreamPageHero` band as `/services`) and the product grid's empty /
@@ -106,8 +108,8 @@ const shopGridData: TemplateField[] = [
     page: "shop",
     group: "shop.grid",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
-    placeholder: "/contact",
+    defaultValue: DREAM_QUOTE_HREF,
+    placeholder: DREAM_QUOTE_HREF,
   },
   {
     key: "dream.shop.no-results",

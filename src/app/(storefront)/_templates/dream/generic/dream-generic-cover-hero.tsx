@@ -17,7 +17,7 @@ type Props = {
  */
 export function DreamGenericCoverHero({ image, title, excerpt }: Props) {
   return (
-    <div className="relative min-h-[clamp(320px,42vw,480px)] overflow-hidden">
+    <div className="relative flex min-h-[clamp(320px,42vw,480px)] flex-col overflow-hidden">
       <img
         src={image}
         alt=""
@@ -34,7 +34,7 @@ export function DreamGenericCoverHero({ image, title, excerpt }: Props) {
             "linear-gradient(to top, var(--dream-veil) 0%, color-mix(in srgb, var(--dream-veil) 55%, transparent) 55%, transparent 100%)",
         }}
       />
-      <div className="relative flex h-full items-end">
+      <div className="relative flex flex-1 items-end">
         <div className="mx-auto w-full [max-width:var(--dream-container)] px-[var(--dream-gutter)] pt-24 pb-12 text-center sm:pb-16">
           <DreamReveal>
             <DreamH1>{title}</DreamH1>

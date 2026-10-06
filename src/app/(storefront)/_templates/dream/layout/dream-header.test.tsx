@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 
@@ -7,9 +7,10 @@ import { DreamHeader } from "./dream-header";
 
 /**
  * Dream header: cart link visibility (the `cart` flag AND a published product
- * or a non-empty cart), P-NAV-FLAGS nav filtering, group dropdowns (parent
- * href as the first entry, Escape returns focus to the trigger), and the
- * flag-gated header CTA pill.
+ * or a non-empty cart), P-NAV-FLAGS nav filtering, group dropdowns (a parent
+ * href renders as a link + chevron toggle and the panel lists only children;
+ * no parent href is one button; close delay; Escape returns focus to the
+ * toggle), and the flag-gated header CTA pill.
  */
 
 let itemCount = 0;
@@ -128,37 +129,58 @@ describe("DreamHeader nav", () => {
     expect(screen.getByRole("link", { name: "About" })).toBeTruthy();
   });
 
-  it("lists the group parent's own href as the first dropdown entry", () => {
+  it("renders the parent as a link plus a chevron toggle listing only children", () => {
     renderHeader([], { navigationItems: GROUP_NAV });
-    const trigger = screen.getByRole("button", { name: "Explore" });
-    // The trigger never navigates.
-    expect(trigger.tagName).toBe("BUTTON");
-    fireEvent.click(trigger);
+    const link = screen.getByRole("link", { name: "Explore" });
+    expect(link.getAttribute("href")).toBe("/collections");
+    // No button carries the label itself.
+    expect(screen.queryByRole("button", { name: "Explore" })).toBeNull();
+
+    const chevron = screen.getByRole("button", { name: "Show Explore menu" });
+    expect(chevron.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(chevron);
+    expect(chevron.getAttribute("aria-expanded")).toBe("true");
     const panel = document.getElementById(
-      trigger.getAttribute("aria-controls")!,
+      chevron.getAttribute("aria-controls")!,
     )!;
     const hrefs = Array.from(panel.querySelectorAll("a")).map((a) => [
       a.textContent,
       a.getAttribute("href"),
     ]);
+    // The parent is not repeated inside the panel.
     expect(hrefs).toEqual([
-      ["Explore", "/collections"],
       ["Videos", "/videos"],
       ["Journal", "/blog"],
     ]);
+    expect(within(panel).queryByRole("link", { name: "Explore" })).toBeNull();
+  });
+
+  it("uses a single button trigger when the parent has no href", () => {
+    renderHeader([], {
+      navigationItems: [{ ...GROUP_NAV[0]!, href: "" }, GROUP_NAV[1]],
+    });
+    expect(screen.queryByRole("link", { name: "Explore" })).toBeNull();
+    const trigger = screen.getByRole("button", { name: "Explore" });
+    fireEvent.click(trigger);
+    const panel = document.getElementById(
+      trigger.getAttribute("aria-controls")!,
+    )!;
+    expect(
+      Array.from(panel.querySelectorAll("a")).map((a) => a.textContent),
+    ).toEqual(["Videos", "Journal"]);
   });
 
   it("drops gated children from a group", () => {
     enabledFlags.delete("videos");
     renderHeader([], { navigationItems: GROUP_NAV });
-    fireEvent.click(screen.getByRole("button", { name: "Explore" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show Explore menu" }));
     expect(screen.queryByRole("link", { name: "Videos" })).toBeNull();
     expect(screen.getByRole("link", { name: "Journal" })).toBeTruthy();
   });
 
-  it("closes on Escape and returns focus to the trigger", () => {
+  it("closes on Escape and returns focus to the chevron", () => {
     renderHeader([], { navigationItems: GROUP_NAV });
-    const trigger = screen.getByRole("button", { name: "Explore" });
+    const trigger = screen.getByRole("button", { name: "Show Explore menu" });
     fireEvent.click(trigger);
     const child = screen.getByRole("link", { name: "Videos" });
     child.focus();
@@ -167,6 +189,56 @@ describe("DreamHeader nav", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(screen.queryByRole("link", { name: "Videos" })).toBeNull();
     expect(document.activeElement).toBe(trigger);
+  });
+
+  describe("hover open + close delay", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const wrapOf = () =>
+      screen.getByRole("button", { name: "Show Explore menu" }).parentElement!;
+
+    it("stays open when the pointer re-enters within the delay", () => {
+      renderHeader([], { navigationItems: GROUP_NAV });
+      const wrap = wrapOf();
+      fireEvent.mouseEnter(wrap);
+      expect(screen.getByRole("link", { name: "Videos" })).toBeTruthy();
+      fireEvent.mouseLeave(wrap);
+      act(() => {
+        vi.advanceTimersByTime(80);
+      });
+      fireEvent.mouseEnter(wrap);
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      expect(screen.getByRole("link", { name: "Videos" })).toBeTruthy();
+    });
+
+    it("closes once the delay passes without re-entering", () => {
+      renderHeader([], { navigationItems: GROUP_NAV });
+      const wrap = wrapOf();
+      fireEvent.mouseEnter(wrap);
+      fireEvent.mouseLeave(wrap);
+      expect(screen.getByRole("link", { name: "Videos" })).toBeTruthy();
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      expect(screen.queryByRole("link", { name: "Videos" })).toBeNull();
+    });
+
+    it("keeps a hover-opened panel open on the first chevron click", () => {
+      renderHeader([], { navigationItems: GROUP_NAV });
+      fireEvent.mouseEnter(wrapOf());
+      const chevron = screen.getByRole("button", { name: "Show Explore menu" });
+      fireEvent.click(chevron);
+      expect(chevron.getAttribute("aria-expanded")).toBe("true");
+      fireEvent.click(chevron);
+      expect(chevron.getAttribute("aria-expanded")).toBe("false");
+    });
   });
 });
 

@@ -3,8 +3,9 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
- * Estimate Quote (ContactPage slot, `/contact`) — design.md "Per-page
- * section concepts › Estimate Quote". Three sections: hero (not hideable),
+ * Contact (ContactPage slot, `/contact`) — a simple "Ask a question" page;
+ * the Estimate Quote intake lives on the Forms-built `/estimate` page
+ * (`DREAM_QUOTE_HREF`). Three sections: hero (not hideable),
  * form (not hideable — gated on the platform `contactForm` flag instead),
  * info (hideable — email/phone/hours/service-area come from the
  * `global.branding` fields already defined in the template root; this
@@ -22,7 +23,7 @@ const contactHeroData: TemplateField[] = [
     page: "contact",
     group: "contact.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Request an",
+    defaultValue: "Contact",
   },
   {
     key: "dream.contact.hero-accent",
@@ -32,7 +33,7 @@ const contactHeroData: TemplateField[] = [
     page: "contact",
     group: "contact.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Estimate Quote",
+    defaultValue: "us",
   },
   {
     key: "dream.contact.hero-lede",
@@ -43,42 +44,22 @@ const contactHeroData: TemplateField[] = [
     group: "contact.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Give Selest the details she needs to understand the event and recommend the right setup.",
+      "Have a question for Selest? Send a quick note — she'll get back to you within 24 hours.",
   },
 ];
 
 // ─── Form — NOT hideable (gated on the platform contactForm flag) ──────────
 
-/**
- * Built-in "What happens next" steps (`dream.contact.form-next-steps`'s
- * `defaultRows`) — the retired numbered `form-next-step-{1..3}-*` fields' old
- * defaults, verbatim. Also the resolver's fallback.
- */
-export const DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS: Record<string, string>[] = [
-  {
-    heading: "Selest reviews your details",
-    body: "She looks over the event, the space, and the theme you described.",
-  },
-  {
-    heading: "You get a proposal",
-    body: "A plan with the pieces, colors, and pricing for your event.",
-  },
-  {
-    heading: "You lock in your date",
-    body: "Approve the plan and Selest reserves your date.",
-  },
-];
-
 const contactFormData: TemplateField[] = [
   {
     key: "dream.contact.form-heading",
     label: "Heading",
-    description: "Heading above the quote form.",
+    description: "Heading above the contact form.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue: "Tell Selest about your event",
+    defaultValue: "Ask a question",
   },
   {
     key: "dream.contact.form-intro",
@@ -89,18 +70,7 @@ const contactFormData: TemplateField[] = [
     group: "contact.form",
     gridColumn: "col-span-full",
     defaultValue:
-      "The more detail you share, the closer her first proposal will be.",
-  },
-  {
-    key: "dream.contact.form-theme-helper",
-    label: "Theme description helper text",
-    description: "Short helper line shown under the Theme description field.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Describe the mood, colors, and any inspiration you have in mind.",
+      "Questions about packages, rentals or availability — ask away.",
   },
   {
     key: "dream.contact.form-submit-label",
@@ -110,111 +80,60 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    defaultValue: "Send Estimate Quote Request",
+    defaultValue: "Send message",
   },
   {
     key: "dream.contact.form-success-heading",
     label: "Success heading",
-    description: "Heading shown after a request sends successfully.",
+    description: "Heading shown after a message sends successfully.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    defaultValue: "Your request is with Selest",
+    defaultValue: "Your message is with Selest",
   },
   {
     key: "dream.contact.form-success-body",
     label: "Success message",
-    description: "Short line shown after a request sends successfully.",
+    description: "Short line shown after a message sends successfully.",
     type: "textarea",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue: "She'll review the details and follow up soon.",
+    defaultValue:
+      "Thank you for reaching out to Dream Your Theme. Selest will get back to you within 24 hours.",
   },
   {
-    key: "dream.contact.form-next-heading",
-    label: "What happens next heading",
-    description: "Heading for the panel beside the form.",
+    key: "dream.contact.event-card-heading",
+    label: "Event card heading",
+    description:
+      "Heading of the card beside the form that points event requests to the Estimate Quote page.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue: "What happens next",
+    defaultValue: "Planning an event?",
   },
   {
-    key: "dream.contact.form-next-steps",
-    label: "What happens next steps",
-    description:
-      "The numbered steps in the panel beside the form, in order. Add, remove, or drag to reorder.",
-    type: "list",
+    key: "dream.contact.event-card-body",
+    label: "Event card text",
+    description: "Short line under the event card heading.",
+    type: "textarea",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    minItems: 1,
-    maxItems: 6,
-    defaultsWhenEmpty: true,
-    itemLabel: "step",
-    summaryKey: "heading",
-    itemSchema: [
-      {
-        key: "heading",
-        label: "Heading",
-        type: "text",
-        description: "Short heading for this step.",
-        placeholder: "e.g. Selest reviews your details",
-      },
-      {
-        key: "body",
-        label: "Description",
-        type: "textarea",
-        description: "A line or two describing this step.",
-      },
-    ],
-    defaultRows: DREAM_FORM_NEXT_STEPS_DEFAULT_ROWS,
+    defaultValue:
+      "For a full Estimate Quote, tell Selest about your date, venue, theme and colors — she'll recommend the right setup.",
   },
   {
-    key: "dream.contact.form-draping-label",
-    label: "Draping question label",
-    description:
-      "Label for the draping yes/no question in the quote form. Leave blank to hide the question.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "Draping",
-  },
-  {
-    key: "dream.contact.form-throne-label",
-    label: "Throne chair question label",
-    description:
-      "Label for the throne chair yes/no question in the quote form. Leave blank to hide the question.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "Throne chair",
-  },
-  {
-    key: "dream.contact.form-full-decor-label",
-    label: "Full decor question label",
-    description:
-      "Label for the full decor yes/no question in the quote form (always required while shown). Leave blank to hide the question.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "Full decor by Dream Your Theme",
-  },
-  {
-    key: "dream.contact.form-full-decor-error",
-    label: "Full decor required message",
-    description: "Message shown if the full decor question is left unanswered.",
+    key: "dream.contact.event-card-cta-label",
+    label: "Event card button label",
+    description: "Label for the button that opens the Estimate Quote page.",
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue: "Let Selest know if you'd like full decor.",
+    defaultValue: "Request an Estimate Quote",
   },
 ];
 
@@ -251,9 +170,9 @@ export const dreamContactFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "contact.form",
-    title: "Quote form",
+    title: "Contact form",
     description:
-      'Form heading/intro, theme description helper text, submit label, success copy, and the "what happens next" steps',
+      'Form heading/intro, submit label, success copy, and the "Planning an event?" card',
     icon: "📝",
     columns: 2,
   },
@@ -279,8 +198,8 @@ export const dreamContactSections: TemplateSection[] = [
   {
     id: "contact.form",
     page: "contact",
-    title: "Quote form",
-    description: 'The quote form and its "what happens next" panel',
+    title: "Contact form",
+    description: 'The contact form and its "Planning an event?" card',
     groupIds: ["contact.form"],
     order: 1,
     hideable: false,

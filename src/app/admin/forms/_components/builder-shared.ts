@@ -95,6 +95,10 @@ export const FIELD_TYPE_META: Record<
     label: "Date",
     hint: "A calendar date, optionally restricted to today or later.",
   },
+  time: {
+    label: "Time",
+    hint: "A time of day, shown in the visitor's clock format.",
+  },
 };
 
 // ─── Factories ───────────────────────────────────────────────────────────────
@@ -155,6 +159,8 @@ export function makeField(type: FormFieldType): FieldInput {
       return { ...base, type: "checkbox" };
     case "date":
       return { ...base, type: "date", minDate: "none" };
+    case "time":
+      return { ...base, type: "time" };
   }
 }
 
@@ -214,6 +220,8 @@ export function convertFieldType(
       return { ...base, type: "checkbox" };
     case "date":
       return { ...base, type: "date", minDate: "none" };
+    case "time":
+      return { ...base, type: "time" };
   }
 }
 

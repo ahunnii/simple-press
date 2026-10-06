@@ -10530,12 +10530,20 @@ body:has(.pollen) {
      hero/page-hero gradients read as a real pale-blue sky behind the
      cumulus rather than near-white. Used at 0% of the hero/page-hero
      gradients only — sky bands and everywhere else keep `--dream-sky`. */
-  --dream-sky-hero: #d0e2f4; /* 2026-09-17: ~15% less luminance (was #e4f0fb) */
+  --dream-sky-hero: #bcd4ee; /* 2026-10-05: deeper again (was #d0e2f4; #e4f0fb before 2026-09-17) — the white cloud sprites read white-on-white on the paler sky */
+  /* 2026-10-05: hero/page-hero gradient's second stop (replaces
+     `--dream-sky` there) so the upper half stays blue enough for the white
+     cumulus to read. Not `--dream-sky-mid`, which the maintenance page and
+     empty-state panels still use. */
+  --dream-sky-hero-mid: #dcebf8;
   /* Homepage hero ground (design.md "Homepage hero ground", restored from
      the reference `index.html` 2026-09-17): warm mid stop of the hero
      gradient and the cream halo behind the logo. */
   --dream-peach: #f6e6d7; /* 2026-09-17: ~15% less luminance (was #fff7f0) */
   --dream-halo: rgba(255, 247, 226, 0.61); /* 2026-09-17: was .72 */
+  /* 2026-10-05: the homepage hero's halo, between the original glow (.61 at
+     13/27/52%) and the tightened one (.61 at 11/22/42%) that read muted. */
+  --dream-halo-hero: rgba(255, 245, 220, 0.68);
   /* Stops of `--dream-placeholder`, the warm photo-placeholder gradient
      used by the hero shelf photos' empty state (design.md palette table). */
   --dream-cream: #fff9ed;
@@ -10544,6 +10552,11 @@ body:has(.pollen) {
   --dream-white: #ffffff;
   --dream-ink: #2b211d;
   --dream-soft: #746960;
+  /* 2026-10-05: `--dream-soft` nudged 12% toward ink for the hero and
+     page-hero ledes. Plain soft is only 4.38:1 on `--dream-peach` / 4.40:1
+     on `--dream-sky-hero-mid` (it passed before only on the halo's outer
+     ring, which the deeper sky pass tightened); this is 5.01 / 5.02:1. */
+  --dream-soft-sky: #6b6058;
   --dream-rose: #b94f56;
   --dream-rose-soft: #f3b3aa;
   --dream-gold: #c79a2d;
@@ -11079,18 +11092,23 @@ body:has(.pollen) {
   /* Homepage hero ground (design.md "Homepage hero ground", restored from
      the reference `index.html` 2026-09-17): a cream halo behind the logo
      over blue sky melting into warm peach — never a flat white. */
+  /* 2026-10-05 (post-launch review): deeper sky held longer (mid stop at
+     34%, peach pushed to 64%) so the white clouds read against blue
+     instead of near-white. The halo was tightened (13/27/52% → 11/22/42%)
+     then eased back to 12/25/48% at `--dream-halo-hero` — the tight one
+     read muted. The lede keeps its contrast via `--dream-soft-sky`. */
   background:
     radial-gradient(
       circle at 50% 26%,
-      rgba(255, 255, 255, 0.8) 0 13%,
-      var(--dream-halo) 27%,
-      transparent 52%
+      rgba(255, 255, 255, 0.8) 0 12%,
+      var(--dream-halo-hero) 25%,
+      transparent 48%
     ),
     linear-gradient(
       180deg,
       var(--dream-sky-hero) 0%,
-      var(--dream-sky) 22%,
-      var(--dream-peach) 60%,
+      var(--dream-sky-hero-mid) 34%,
+      var(--dream-peach) 64%,
       var(--dream-paper) 100%
     );
 }
@@ -11210,7 +11228,9 @@ body:has(.pollen) {
 .dream .dream-hero-lede {
   max-width: 60ch;
   font-size: 19px;
-  color: var(--dream-soft);
+  /* Sky-gradient soft (see the token): the lede's line ends fall outside
+     the veil's core. */
+  color: var(--dream-soft-sky);
 }
 
 /* ── Hero shelf — the drifting filmstrip on the hero floor ──
@@ -11356,22 +11376,28 @@ body:has(.pollen) {
 .dream .dream-page-hero {
   position: relative;
   overflow: hidden;
-  padding: clamp(40px, 6vw, 72px) var(--dream-gutter) clamp(48px, 6vw, 80px);
+  /* Bottom 2026-10-05: clamp(48px, 6vw, 80px) → clamp(32px, 4vw, 56px) —
+     plus the next section's 112px top padding it left a ~200–250px dead
+     band on desktop. */
+  padding: clamp(40px, 6vw, 72px) var(--dream-gutter) clamp(32px, 4vw, 56px);
   text-align: center;
   /* Page heroes share the homepage hero's ambient (design.md "Palette ›
      Page heroes share the same ambient"): a smaller cream halo behind the
-     logo over the same blue → peach → paper story, just shorter. */
+     logo over the same blue → peach → paper story, just shorter.
+     2026-10-05: same deeper-sky pass as the homepage hero — mid stop
+     `--dream-sky-hero-mid`, halo tightened in proportion (10/24/48% →
+     8/20/40%). */
   background:
     radial-gradient(
       circle at 50% 45%,
-      rgba(255, 255, 255, 0.76) 0 10%,
-      var(--dream-halo) 24%,
-      transparent 48%
+      rgba(255, 255, 255, 0.76) 0 8%,
+      var(--dream-halo) 20%,
+      transparent 40%
     ),
     linear-gradient(
       180deg,
       var(--dream-sky-hero) 0%,
-      var(--dream-sky) 30%,
+      var(--dream-sky-hero-mid) 30%,
       var(--dream-peach) 72%,
       var(--dream-paper) 100%
     );
@@ -11410,7 +11436,7 @@ body:has(.pollen) {
 .dream .dream-page-hero-lede {
   max-width: 60ch;
   font-size: 18px;
-  color: var(--dream-soft);
+  color: var(--dream-soft-sky);
 }
 
 /* ── Cloud / wisp sprite system ── */
@@ -11420,25 +11446,54 @@ body:has(.pollen) {
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
+  /* 2026-10-05: sprite scale. The presets are authored for a 1440 board
+     (hero sprites 420–960px), so on a phone they were wider than the
+     viewport and spent most of each cycle off-screen. Every sprite size
+     and distance (width, drift keyframes, shadow, reduced-motion park)
+     goes through `--cw` below, which multiplies by this. */
+  --dream-cloud-scale: 1;
 }
 
-.dream .dream-clouds[data-variant="horizon"] {
-  mask-image: linear-gradient(180deg, black 0%, black 55%, transparent 100%);
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    black 0%,
-    black 55%,
-    transparent 100%
-  );
+/* Phones: hero sprites at half size (the live-tested value); page/deck
+   presets are already smaller (300–560px), so .6 keeps them from shrinking
+   to specks. */
+@media (max-width: 639px) {
+  .dream .dream-clouds {
+    --dream-cloud-scale: 0.6;
+  }
+
+  .dream .dream-clouds[data-variant="hero"] {
+    --dream-cloud-scale: 0.5;
+  }
 }
 
 .dream .dream-cloud {
+  /* Rendered width: the preset's `--w` × the layer's scale. `dream-drift`
+     reads this (not `--w`) so a scaled sprite travels a scaled distance. */
+  --cw: calc(var(--w) * var(--dream-cloud-scale, 1));
   position: absolute;
   left: 0;
   top: var(--top);
-  width: var(--w);
+  width: var(--cw);
+  /* Preflight's `img { max-width: 100% }` silently capped the 480–960px
+     sprites at the layer width on phones/tablets while the drift still
+     travelled the full `--cw` — keep the rendered width honest. */
+  max-width: none;
   height: auto;
   opacity: var(--op);
+  /* 2026-10-05: cool two-layer contour (a soft blue-grey underside plus a
+     tight edge) so the pure-white sprites read against the pale sky and
+     the sky → paper bands instead of dissolving white-on-white. Offsets
+     scale with the sprite. Perf: with `will-change: transform` each cloud
+     is its own composited layer and the drift only changes its transform,
+     so the shadow is not re-rastered per frame; the compositor may still
+     re-apply the filter when it draws the layer — if frame sampling ever
+     shows drops, bake this shadow into the sprites instead. */
+  filter: drop-shadow(
+      0 calc(14px * var(--dream-cloud-scale, 1))
+        calc(22px * var(--dream-cloud-scale, 1)) rgba(86, 118, 160, 0.22)
+    )
+    drop-shadow(0 2px 3px rgba(86, 118, 160, 0.1));
   animation: dream-drift var(--dur) linear infinite;
   animation-delay: var(--delay);
   will-change: transform;
@@ -11502,24 +11557,29 @@ body:has(.pollen) {
   animation-play-state: paused;
 }
 
-/* Positions are the side lanes only (6% / 74% / 92% / 17% / 84% from the
-   left) — never the protected center — with negative delays so a couple
-   are always mid-flight at first paint (design.md "Balloons — the easter
-   egg", revised 2026-09-17: 5 balloons, "a few more"). */
+/* No side lanes below 960px: the protected center column is up to 640px
+   wide (plus its veil), so on phones AND tablets every lane crossed the
+   hero copy — e.g. at 768 the 84% lane sits mid-lede (2026-10-05
+   post-launch review; brief: "side lanes only, never the protected
+   center"). */
+@media (max-width: 959px) {
+  .dream .dream-balloons {
+    display: none;
+  }
+}
+
+/* Positions are the side lanes only (6% left; 84% / 92% right) — never the
+   protected center — with negative delays so two are mid-flight at first
+   paint. 2026-10-05: back to 3 balloons (brief: "2–3, low opacity"; the
+   2026-09-17 five-balloon pass read as overload) — the 74% lane drifted
+   into the text column on its -54px sway and the 17% lane doubled up the
+   left; `--gold` took the old `--gold-2` 84% lane. */
 .dream .dream-balloon--rose {
   left: 6%;
   background: var(--dream-rose-soft);
   --bx: 34px;
   animation-duration: 22s;
   animation-delay: -3s;
-}
-
-.dream .dream-balloon--gold {
-  left: 74%;
-  background: var(--dream-gold-soft);
-  --bx: -54px;
-  animation-duration: 24s;
-  animation-delay: -20s;
 }
 
 .dream .dream-balloon--paper {
@@ -11531,15 +11591,7 @@ body:has(.pollen) {
   animation-delay: -12s;
 }
 
-.dream .dream-balloon--rose-2 {
-  left: 17%;
-  background: var(--dream-rose-soft);
-  --bx: -38px;
-  animation-duration: 28s;
-  animation-delay: -8s;
-}
-
-.dream .dream-balloon--gold-2 {
+.dream .dream-balloon--gold {
   left: 84%;
   background: var(--dream-gold-soft);
   --bx: 48px;
@@ -11593,14 +11645,49 @@ body:has(.pollen) {
 }
 
 /* ── Estimate Quote band ── */
+/* 2026-10-05 "above the clouds": the copy floats in clear sky over a cloud
+   bank (`DreamClouds variant="deck"`). Paper eases into sky at the top (the
+   section above is paper), a golden-hour glow sits low behind the bank, the
+   bottom padding reserves the bank's room so no cloud crosses the copy, and
+   `::after` melts the bank into paper for the footer below. */
 .dream .dream-quote-band {
   position: relative;
   overflow: hidden;
-  padding: var(--dream-section-pad-y) var(--dream-gutter);
+  /* Room for the cloud bank under the copy — the deck layer is sized from
+     this so it can never reach the button, however tall the copy wraps. */
+  --dream-deck-h: clamp(200px, 24vw, 340px);
+  padding: var(--dream-section-pad-y) var(--dream-gutter) var(--dream-deck-h);
   text-align: center;
+  background:
+    radial-gradient(
+      ellipse 70% 38% at 50% 74%,
+      rgba(255, 228, 186, 0.7) 0%,
+      rgba(255, 238, 214, 0.35) 45%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--dream-paper) 0%,
+      #e3eef9 14%,
+      #d6e6f5 42%,
+      #eef0f0 62%,
+      #f8e8d6 76%,
+      var(--dream-paper) 100%
+    );
+}
+
+/* Melt the bank into paper at the band's bottom edge — above the clouds,
+   below the copy (z 1), so the footer reads as "under the deck". */
+.dream .dream-quote-band::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 26%;
+  z-index: 1;
+  pointer-events: none;
   background: linear-gradient(
     180deg,
-    var(--dream-sky) 0%,
+    rgba(255, 250, 244, 0) 0%,
     var(--dream-paper) 100%
   );
 }
@@ -11609,9 +11696,52 @@ body:has(.pollen) {
   z-index: 0;
 }
 
+/* The deck layer is the bottom strip only (the reserved padding plus a
+   little lift), so its sprites' `top` %s are relative to the strip, not the
+   whole band. */
+.dream .dream-quote-band-clouds[data-variant="deck"] {
+  inset: auto 0 0;
+  height: calc(var(--dream-deck-h) + 40px);
+}
+
+/* Mist veil along the crest of the bank — the "head in the clouds" haze. It
+   breathes (opacity + a few px of rise) on a slow cycle; reduced motion
+   holds it still. Sits under the copy (z 1 < content z 2). */
+.dream .dream-quote-band-mist {
+  position: absolute;
+  inset: auto -10% calc(var(--dream-deck-h) * 0.45) -10%;
+  height: calc(var(--dream-deck-h) * 0.6);
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 60%,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 75%
+  );
+  filter: blur(8px);
+  opacity: 0.75;
+  animation: dream-mist-breathe 12s ease-in-out infinite alternate;
+}
+
+/* Static bank sprites: parked at `--left`, bobbing a few px on their own
+   period (`--dur`) instead of drifting across. */
+.dream .dream-cloud.is-static {
+  left: var(--left);
+  animation: dream-deck-bob var(--dur) ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+
+.dream-js .dream-cloud.is-static {
+  animation:
+    dream-cloud-in 900ms var(--dream-ease-out) forwards,
+    dream-deck-bob var(--dur) ease-in-out infinite alternate;
+  animation-delay: 0ms, var(--delay);
+}
+
 .dream .dream-quote-band-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11623,7 +11753,9 @@ body:has(.pollen) {
 .dream .dream-quote-band-lede {
   max-width: 60ch;
   font-size: 17px;
-  color: var(--dream-soft);
+  /* On the band's sky (≈#d6e6f5) `--dream-soft` is 4.1:1; the sky-text
+     shade holds 4.7:1+ (2026-10-05). */
+  color: var(--dream-soft-sky);
 }
 
 .dream .dream-quote-band-chips {
@@ -11776,6 +11908,51 @@ body:has(.pollen) {
    shorthand would wipe `.dream-header-link`'s gradient underline. */
 .dream .dream-header-dropdown-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Split trigger (parent has an href): the label is a link, this chevron is the
+   toggle. The negative block margin keeps its 24px hit area from growing the
+   row. */
+.dream .dream-header-dropdown-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin: -4px 0 -4px -4px;
+  padding: 0;
+  color: var(--dream-soft);
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-header-dropdown-chevron:hover,
+.dream .dream-header-dropdown-chevron[aria-expanded="true"],
+.dream .dream-header-dropdown-chevron[data-active="true"] {
+  color: var(--dream-ink);
+}
+
+.dream .dream-header-chevron-icon {
+  transition: transform var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream
+  .dream-header-dropdown-wrap
+  [aria-expanded="true"]
+  .dream-header-chevron-icon {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream .dream-header-chevron-icon,
+  .dream .dream-header-dropdown-chevron {
+    transition: none;
+  }
 }
 
 .dream .dream-header-dropdown-trigger {
@@ -11788,13 +11965,18 @@ body:has(.pollen) {
   cursor: pointer;
 }
 
-.dream .dream-header-dropdown {
+/* Transparent hover bridge: the 12px of padding keeps the pointer inside the
+   wrapper while it crosses from the trigger to the visible panel. */
+.dream .dream-header-dropdown-bridge {
   position: absolute;
   top: 100%;
   left: 0;
   z-index: 20;
+  padding-top: 12px;
+}
+
+.dream .dream-header-dropdown {
   min-width: 180px;
-  margin-top: 12px;
   padding: 8px;
   background: var(--dream-paper);
   border: 1px solid var(--dream-line);
@@ -11995,7 +12177,11 @@ body:has(.pollen) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* `safe`: when the list overflows (short phones with a group expanded),
+     plain `center` pushed the top items above the scroll origin where they
+     could never be scrolled back to — "Services" and its chevron vanished
+     under the header (2026-10-05). */
+  justify-content: safe center;
   overflow-y: auto;
   padding: 24px var(--dream-gutter);
 }
@@ -12031,6 +12217,32 @@ body:has(.pollen) {
   background: transparent;
   border: 0;
   cursor: pointer;
+}
+
+/* Split row (parent has an href): the big label link plus a separate chevron
+   toggle on one line. */
+.dream .dream-nav-overlay-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dream .dream-nav-overlay-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--dream-ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.dream .dream-nav-overlay-chevron:hover,
+.dream .dream-nav-overlay-chevron[data-active="true"] {
+  color: var(--dream-rose);
 }
 
 .dream .dream-nav-overlay-sublist {
@@ -12181,7 +12393,8 @@ body:has(.pollen) {
 }
 
 .dream .dream-footer-logo {
-  height: 40px;
+  align-self: flex-start;
+  height: 56px;
   width: auto;
   object-fit: contain;
   margin-bottom: 4px;
@@ -12318,12 +12531,35 @@ body:has(.pollen) {
 }
 
 /* ── Keyframes ── */
+/* `--cw` (scaled width), not `--w`: on phones the sprites render at half
+   size, so the off-screen lead-in/out must shrink with them or each cloud
+   spends most of its cycle invisible (2026-10-05). */
 @keyframes dream-drift {
   from {
-    transform: translate3d(calc(-1 * var(--w)), 0, 0);
+    transform: translate3d(calc(-1 * var(--cw)), 0, 0);
   }
   to {
-    transform: translate3d(calc(100vw + var(--w)), 0, 0);
+    transform: translate3d(calc(100vw + var(--cw)), 0, 0);
+  }
+}
+
+@keyframes dream-deck-bob {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, calc(-8px * var(--dream-cloud-scale, 1)), 0);
+  }
+}
+
+@keyframes dream-mist-breathe {
+  from {
+    opacity: 0.55;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate3d(0, -10px, 0);
   }
 }
 
@@ -12437,11 +12673,405 @@ body:has(.pollen) {
   border-left: 1px solid var(--dream-line);
 }
 
+/* Gallery + video blocks break out of the 66ch prose column. `.dream-embed`
+   is an inline-size container so `cqw` is its exact content width (no
+   100vw/scrollbar overflow). The block is capped at 1040px, never wider than
+   the container (so no horizontal overflow at 375px), and — with no TOC —
+   centred on the centred prose column via a percentage margin (% resolves
+   against the prose width). With a TOC the prose is left-aligned in the main
+   column, so the block keeps margin-left: 0 and stays clear of the TOC. */
+.dream .dream-embed {
+  container-type: inline-size;
+}
+
+.dream .dream-embed .prose > .not-prose:has(.gallery-container),
+.dream .dream-embed .prose > figure.not-prose {
+  width: min(1040px, 100cqw);
+  max-width: none;
+}
+
+.dream .dream-embed--centered .prose > .not-prose:has(.gallery-container),
+.dream .dream-embed--centered .prose > figure.not-prose {
+  margin-left: calc(50% - min(1040px, 100cqw) / 2);
+}
+
 .dream-embed [data-slot="card"] {
   background: var(--dream-white);
   border: 1px solid var(--dream-line);
   border-radius: var(--dream-radius-card);
   box-shadow: var(--dream-shadow-card);
+}
+
+/* ── Forms block skin (2026-10-05) — the platform Forms block
+   (`src/components/forms/form-block.tsx` → `form-renderer.tsx`) renders shadcn
+   primitives with Tailwind utilities (layered, specificity 0,1,0), so it reads
+   as generic platform UI inside a dream page. Everything here is scoped
+   `.dream .sp-form-block` (unlayered, ≥0,3,0 — wins without !important) and
+   retunes those primitives onto the dream tokens, matching `.dream-input`,
+   `.dream-btn`, `.dream-card` and `DreamRadioPills`. Pure CSS: no DOM changes,
+   no leakage to other `.dream-embed` content (quote calculator, gallery). ── */
+.dream .sp-form-block {
+  /* The dream generic-page column is already 66ch; drop the platform 65ch cap. */
+  max-width: none;
+  width: 100%;
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Labels + choice-group legends: body 15px / 600 / ink. */
+.dream .sp-form-block [data-slot="label"],
+.dream .sp-form-block legend {
+  gap: 4px;
+  padding: 0;
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Required marker: rose (#b94f56 on paper ≈ 5:1, well over the 3:1 a symbol
+   needs) instead of the platform red-500. */
+.dream .sp-form-block .text-red-500 {
+  color: var(--dream-rose);
+}
+
+/* Field descriptions: `--dream-soft-sky` is the contrast-safe soft ink. */
+.dream .sp-form-block [id$="-description"] {
+  color: var(--dream-soft-sky);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Text-like controls — mirrors `.dream .dream-input` (paper field, gold
+   hairline, 16px so iOS doesn't zoom on focus, rose focus ring). The native
+   `<select>` has no data-slot, so it is targeted by element. */
+.dream .sp-form-block :is([data-slot="input"], [data-slot="textarea"], select) {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 48px;
+  padding: 13px 16px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-input);
+  background: var(--dream-paper);
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 16px;
+  line-height: 1.4;
+  box-shadow: none;
+  color-scheme: light;
+  transition:
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="textarea"] {
+  min-height: 140px;
+  resize: none;
+}
+
+.dream .sp-form-block select {
+  appearance: auto;
+}
+
+.dream
+  .sp-form-block
+  :is([data-slot="input"], [data-slot="textarea"])::placeholder {
+  color: var(--dream-soft);
+  opacity: 0.8;
+}
+
+.dream .sp-form-block [data-slot="input"]::-webkit-calendar-picker-indicator {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.dream
+  .sp-form-block
+  :is([data-slot="input"], [data-slot="textarea"], select):focus-visible {
+  outline: none;
+  border-color: var(--dream-rose);
+  box-shadow: 0 0 0 3px var(--dream-rose-soft);
+}
+
+.dream
+  .sp-form-block
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    select,
+    [data-slot="checkbox"]
+  )[aria-invalid="true"] {
+  border-color: var(--dream-error);
+}
+
+.dream
+  .sp-form-block
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    select
+  )[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(168, 50, 47, 0.22);
+}
+
+/* Option rows (a Radix item/checkbox + its <Label htmlFor>): a ≥44px hit
+   area. The label is already a real <label>, so the whole row text is
+   clickable. */
+.dream .sp-form-block [data-slot="radio-group"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream .sp-form-block div:has(> [data-slot="checkbox"]) {
+  gap: 12px;
+  min-height: 44px;
+}
+
+.dream .sp-form-block div:has(> [data-slot="checkbox"]) [data-slot="label"] {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* Checkbox: 20px, ink-ish (soft-sky ≈ 6:1) border, rose when checked. */
+.dream .sp-form-block [data-slot="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--dream-soft-sky);
+  border-radius: 6px;
+  background: var(--dream-white);
+  color: var(--dream-paper);
+  box-shadow: none;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="checkbox"][data-state="checked"] {
+  background: var(--dream-rose);
+  border-color: var(--dream-rose);
+}
+
+.dream .sp-form-block [data-slot="checkbox"]:focus-visible {
+  outline: 2px solid var(--dream-rose);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Radio groups as pill rows echoing `DreamRadioPills`. The Radix <button> is
+   stretched invisibly over the whole pill (opacity 0, absolute, inset 0) so it
+   stays the real focusable + clickable target and keeps roving-tabindex arrow
+   keys; the pill itself draws the state via `:has()`, and the rose focus ring
+   goes on the pill when the hidden button is keyboard-focused. */
+.dream .sp-form-block [data-slot="radio-group"] > div {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-paper);
+  color: var(--dream-soft-sky);
+  cursor: pointer;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="radio-group"] > div:hover {
+  border-color: var(--dream-gold);
+}
+
+.dream .sp-form-block [data-slot="radio-group-item"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+.dream .sp-form-block [data-slot="radio-group-indicator"] {
+  display: none;
+}
+
+.dream .sp-form-block [data-slot="radio-group"] > div [data-slot="label"] {
+  min-height: 44px;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="radio-group"]
+  > div:has([data-state="checked"]) {
+  background: var(--dream-ink);
+  border-color: var(--dream-ink);
+  color: var(--dream-paper);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="radio-group"]
+  > div:has([data-slot="radio-group-item"]:focus-visible) {
+  outline: 2px solid var(--dream-rose);
+  outline-offset: 2px;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="radio-group"][aria-invalid="true"]
+  > div:not(:has([data-state="checked"])) {
+  border-color: var(--dream-error);
+}
+
+/* Submit (and the preview-only "Reset preview"): `.dream-btn` primary /
+   secondary values. */
+.dream .sp-form-block [data-slot="button"] {
+  gap: 8px;
+  min-height: 48px;
+  padding: 14px 28px;
+  border: 1px solid var(--dream-ink);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-ink);
+  color: var(--dream-paper);
+  font-family: var(--font-dream-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    transform var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out),
+    background var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="button"]:hover {
+  background: var(--dream-ink);
+  transform: translateY(-2px);
+  box-shadow: var(--dream-shadow-btn);
+}
+
+.dream .sp-form-block [data-slot="button"]:focus-visible {
+  border-color: var(--dream-ink);
+  outline: 2px solid var(--dream-rose);
+  outline-offset: 2px;
+}
+
+.dream .sp-form-block [data-slot="button"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.dream .sp-form-block [data-slot="button"][data-variant="outline"] {
+  background: transparent;
+  color: var(--dream-ink);
+  border-color: var(--dream-line);
+}
+
+.dream .sp-form-block [data-slot="button"][data-variant="outline"]:hover {
+  background: var(--dream-white);
+  border-color: var(--dream-gold);
+}
+
+/* reCAPTCHA notice: 13px soft, rose underlined links. */
+.dream .sp-form-block [data-slot="button"] ~ p {
+  color: var(--dream-soft-sky);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dream .sp-form-block [data-slot="button"] ~ p a {
+  color: var(--dream-rose);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dream .sp-form-block [data-slot="button"] ~ p a:hover {
+  color: var(--dream-ink);
+}
+
+/* Errors: banner on paper with the dream error colour (#a8322f ≈ 6:1); field
+   errors 14px in the same colour. */
+.dream .sp-form-block div[role="alert"] {
+  padding: 12px 16px;
+  border: 1px solid var(--dream-error);
+  border-radius: var(--dream-radius-input);
+  background: var(--dream-paper);
+  color: var(--dream-error);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.dream .sp-form-block p[role="alert"] {
+  color: var(--dream-error);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Success panel: reads as a `.dream-card`. */
+.dream .sp-form-block div[role="status"] {
+  padding: 28px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-card);
+  background: var(--dream-white);
+  color: var(--dream-ink);
+  font-size: 16px;
+  line-height: 1.6;
+  box-shadow: var(--dream-shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream
+    .sp-form-block
+    :is(
+      [data-slot="input"],
+      [data-slot="textarea"],
+      select,
+      [data-slot="checkbox"],
+      [data-slot="button"],
+      [data-slot="radio-group"] > div
+    ) {
+    transition: none;
+  }
+
+  .dream .sp-form-block [data-slot="button"]:hover {
+    transform: none;
+  }
+}
+
+/* Windows high-contrast: background fills vanish, so mark the chosen pill with
+   a system-colour outline. */
+@media (forced-colors: active) {
+  .dream
+    .sp-form-block
+    [data-slot="radio-group"]
+    > div:has([data-state="checked"]) {
+    outline: 2px solid Highlight;
+  }
 }
 
 .dream-account h2 {
@@ -12458,8 +13088,33 @@ body:has(.pollen) {
     transform: translate3d(var(--rest), 0, 0);
   }
 
+  /* Phones: the `--rest` values are parked for a 1440 board (most land
+     past 375px). Scale them with the sprite, then clamp so every cloud
+     shows at least half of itself at the nearest edge — a still sky
+     framing the copy rather than an empty one (2026-10-05). */
+  @media (max-width: 639px) {
+    .dream .dream-cloud {
+      transform: translate3d(
+        clamp(
+          calc(-0.5 * var(--cw)),
+          calc(var(--rest) * var(--dream-cloud-scale, 1)),
+          calc(100vw - 0.5 * var(--cw))
+        ),
+        0,
+        0
+      );
+    }
+  }
+
   .dream .dream-balloons {
     display: none;
+  }
+
+  .dream .dream-quote-band-mist,
+  .dream .dream-cloud.is-static,
+  .dream-js .dream-cloud.is-static {
+    animation: none;
+    opacity: var(--op, 0.75);
   }
 
   .dream .dream-reveal,

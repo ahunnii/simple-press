@@ -22,7 +22,6 @@ import {
   activeEntryIndex,
   externalLinkProps,
   getAccountNavLinks,
-  isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
@@ -47,6 +46,9 @@ const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
   admin: <IconLayoutDashboard className="h-4 w-4" />,
 };
 
+/** Milliseconds a hover-opened dropdown waits before closing on mouse-leave. */
+const DROPDOWN_CLOSE_DELAY_MS = 150;
+
 /** Screen-reader hint on links that open in a new tab. */
 function externalHint(external?: boolean) {
   return external ? <span className="sr-only"> (opens in new tab)</span> : null;
@@ -57,9 +59,12 @@ function externalHint(external?: boolean) {
  * flex row: logo then the Admin → Content → Navigation links on the left, and
  * — pushed right by `margin-left:auto` — the account slot ("Sign in" when
  * logged out, `UserButton` when signed in) followed by the Estimate Quote CTA
- * pill. Nav entries with children open a hover/click dropdown whose first
- * entry is the parent's own href (`navGroupEntries` — the trigger never
- * navigates); Escape closes it and returns focus to its trigger.
+ * pill. Nav entries with children open a hover/click dropdown. With a parent
+ * href the label is a real link to it and a separate chevron button toggles
+ * the panel (which then lists only the children); with no parent href one
+ * button does both. The panel sits inside a padded transparent bridge and
+ * closes after a short delay, so a diagonal mouse path doesn't drop it.
+ * Escape closes it and returns focus to the toggle.
  *
  * The cart link sits at the far right at every width. Dream has no cart
  * drawer, so it goes straight to `/cart`. It only shows while the `cart` flag
@@ -82,6 +87,10 @@ export function DreamHeader({
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Which dropdown the pointer (not a click) opened — a click on its toggle
+  // keeps it open once instead of instantly undoing the hover.
+  const hoverOpenedRef = useRef<number | null>(null);
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(
     initialSession ?? null,
@@ -148,7 +157,40 @@ export function DreamHeader({
       isEnabled,
     );
 
-  // Escape closes the open dropdown and returns focus to its trigger — the
+  const cancelClose = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  };
+
+  const scheduleClose = (i: number) => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null;
+      hoverOpenedRef.current = null;
+      setOpenDropdown((current) => (current === i ? null : current));
+    }, DROPDOWN_CLOSE_DELAY_MS);
+  };
+
+  const closeDropdown = () => {
+    cancelClose();
+    hoverOpenedRef.current = null;
+    setOpenDropdown(null);
+  };
+
+  const onToggleClick = (i: number, isOpen: boolean) => {
+    cancelClose();
+    if (isOpen && hoverOpenedRef.current === i) {
+      hoverOpenedRef.current = null;
+      return;
+    }
+    hoverOpenedRef.current = null;
+    setOpenDropdown(isOpen ? null : i);
+  };
+
+  // A pending close must not fire after unmount.
+  useEffect(() => cancelClose, []);
+
+  // Escape closes the open dropdown and returns focus to its toggle — the
   // focused entry unmounts with the panel, which would otherwise drop focus
   // to <body>.
   useEffect(() => {
@@ -160,6 +202,9 @@ export function DreamHeader({
       // Only steal focus back when it was inside this dropdown; a hover-open
       // closed with Escape leaves focus wherever the shopper had it.
       if (wrapper?.contains(document.activeElement)) trigger?.focus();
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+      hoverOpenedRef.current = null;
       setOpenDropdown(null);
     };
     document.addEventListener("keydown", onKeyDown);
@@ -168,18 +213,31 @@ export function DreamHeader({
 
   const renderNavItem = (item: NavItem, i: number) => {
     if (item.children?.length) {
-      const active = isNavItemActive(pathname, item);
+      const hasParentLink = !!item.href && item.href !== "#";
       const entries = navGroupEntries(item);
       const activeEntry = activeEntryIndex(pathname, entries);
+      // `navGroupEntries` prepends the parent whenever its href is non-empty;
+      // the panel lists only the children, so offset past that entry.
+      const childOffset = item.href ? 1 : 0;
+      const groupActive = activeEntry !== -1;
+      const parentActive = childOffset === 1 && activeEntry === 0;
       const dropdownId = `dream-nav-dropdown-${i}`;
       const isOpen = openDropdown === i;
+      const triggerRef = (el: HTMLButtonElement | null) => {
+        if (el) triggerRefs.current.set(i, el);
+        else triggerRefs.current.delete(i);
+      };
 
       return (
         <div
           key={`${i}-${item.href}`}
           className="dream-header-dropdown-wrap"
-          onMouseEnter={() => setOpenDropdown(i)}
-          onMouseLeave={() => setOpenDropdown(null)}
+          onMouseEnter={() => {
+            cancelClose();
+            if (openDropdown !== i) hoverOpenedRef.current = i;
+            setOpenDropdown(i);
+          }}
+          onMouseLeave={() => scheduleClose(i)}
           onBlur={(e) => {
             // Close once focus has left the wrapper entirely.
             if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
@@ -187,40 +245,77 @@ export function DreamHeader({
             }
           }}
         >
-          {/* The trigger never navigates — a non-empty parent href is the
-              panel's first entry. Active styling, but no aria-current. */}
-          <button
-            ref={(el) => {
-              if (el) triggerRefs.current.set(i, el);
-              else triggerRefs.current.delete(i);
-            }}
-            type="button"
-            className="dream-header-link dream-header-dropdown-trigger"
-            aria-haspopup="true"
-            aria-expanded={isOpen}
-            aria-controls={dropdownId}
-            data-active={active ? "true" : undefined}
-            onClick={() => setOpenDropdown(isOpen ? null : i)}
-          >
-            {item.label}
-            <ChevronDown className="h-3 w-3" aria-hidden="true" />
-          </button>
+          {hasParentLink ? (
+            <>
+              <Link
+                href={item.href}
+                {...externalLinkProps(item.external)}
+                aria-current={parentActive ? "page" : undefined}
+                data-active={groupActive ? "true" : undefined}
+                className="dream-header-link"
+              >
+                {item.label}
+                {externalHint(item.external)}
+              </Link>
+              <button
+                ref={triggerRef}
+                type="button"
+                className="dream-header-dropdown-chevron"
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                aria-controls={dropdownId}
+                aria-label={`Show ${item.label} menu`}
+                data-active={groupActive ? "true" : undefined}
+                onClick={() => onToggleClick(i, isOpen)}
+              >
+                <ChevronDown
+                  className="dream-header-chevron-icon h-3 w-3"
+                  aria-hidden="true"
+                />
+              </button>
+            </>
+          ) : (
+            <button
+              ref={triggerRef}
+              type="button"
+              className="dream-header-link dream-header-dropdown-trigger"
+              aria-haspopup="true"
+              aria-expanded={isOpen}
+              aria-controls={dropdownId}
+              data-active={groupActive ? "true" : undefined}
+              onClick={() => onToggleClick(i, isOpen)}
+            >
+              {item.label}
+              <ChevronDown
+                className="dream-header-chevron-icon h-3 w-3"
+                aria-hidden="true"
+              />
+            </button>
+          )}
 
           {isOpen ? (
-            <div id={dropdownId} className="dream-header-dropdown" role="group">
-              {entries.map((entry, j) => (
-                <Link
-                  key={`${j}-${entry.href}`}
-                  href={entry.href}
-                  {...externalLinkProps(entry.external)}
-                  aria-current={j === activeEntry ? "page" : undefined}
-                  onClick={() => setOpenDropdown(null)}
-                  className="dream-header-dropdown-link"
-                >
-                  {entry.label}
-                  {externalHint(entry.external)}
-                </Link>
-              ))}
+            <div className="dream-header-dropdown-bridge">
+              <div
+                id={dropdownId}
+                className="dream-header-dropdown"
+                role="group"
+              >
+                {item.children.map((child, j) => (
+                  <Link
+                    key={`${j}-${child.href}`}
+                    href={child.href}
+                    {...externalLinkProps(child.external)}
+                    aria-current={
+                      j + childOffset === activeEntry ? "page" : undefined
+                    }
+                    onClick={closeDropdown}
+                    className="dream-header-dropdown-link"
+                  >
+                    {child.label}
+                    {externalHint(child.external)}
+                  </Link>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>

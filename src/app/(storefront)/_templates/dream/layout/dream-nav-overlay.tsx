@@ -12,7 +12,6 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   activeEntryIndex,
   externalLinkProps,
-  isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
@@ -53,8 +52,9 @@ const EXIT_MS = 180;
  * mechanics structurally copied from `wealth/layout/wealth-nav-overlay.tsx`
  * (itself copied from `vii/layout/vii-header.tsx`'s mobile dialog). Nav items
  * that carry children (Admin → Content → Navigation) render as an in-place
- * accordion whose first entry is the parent's own href (`navGroupEntries` —
- * the toggle never navigates); the social row and the account list sit below
+ * accordion: with a parent href the big label is a link and a separate chevron
+ * button toggles the sublist (children only); with no parent href one
+ * full-row button toggles it. The social row and the account list sit below
  * the link list.
  */
 export function DreamNavOverlay({
@@ -243,48 +243,88 @@ export function DreamNavOverlay({
         <ul className="dream-nav-overlay-list">
           {items.map((item, i) => {
             if (item.children?.length) {
-              const active = isNavItemActive(pathname, item);
+              const hasParentLink = !!item.href && item.href !== "#";
               const entries = navGroupEntries(item);
               const activeEntry = activeEntryIndex(pathname, entries);
+              // `navGroupEntries` prepends the parent whenever its href is
+              // non-empty; the sublist lists only the children.
+              const childOffset = item.href ? 1 : 0;
+              const groupActive = activeEntry !== -1;
+              const parentActive = childOffset === 1 && activeEntry === 0;
               const isOpen = expanded === i;
               const sublistId = `dream-nav-overlay-sublist-${i}`;
+              const chevron = (
+                <ChevronDown
+                  className={`h-5 w-5 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                  aria-hidden="true"
+                />
+              );
 
               return (
                 <li key={`${i}-${item.href}`}>
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    aria-controls={sublistId}
-                    onClick={() => setExpanded(isOpen ? null : i)}
-                    className="dream-nav-overlay-line dream-nav-overlay-item dream-nav-overlay-item--toggle"
-                    style={{ "--i": i + 1 } as React.CSSProperties}
-                    data-active={active ? "true" : undefined}
-                  >
-                    {item.label}
-                    <ChevronDown
-                      className={`h-5 w-5 shrink-0 transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                      aria-hidden="true"
-                    />
-                  </button>
+                  {hasParentLink ? (
+                    <div
+                      className="dream-nav-overlay-line dream-nav-overlay-row"
+                      style={{ "--i": i + 1 } as React.CSSProperties}
+                    >
+                      <Link
+                        href={item.href}
+                        {...externalLinkProps(item.external)}
+                        onClick={onClose}
+                        aria-current={parentActive ? "page" : undefined}
+                        data-active={groupActive ? "true" : undefined}
+                        className="dream-nav-overlay-item"
+                      >
+                        {item.label}
+                        {item.external ? (
+                          <span className="sr-only"> (opens in new tab)</span>
+                        ) : null}
+                      </Link>
+                      <button
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-controls={sublistId}
+                        aria-label={`Show ${item.label} links`}
+                        onClick={() => setExpanded(isOpen ? null : i)}
+                        className="dream-nav-overlay-chevron"
+                        data-active={groupActive ? "true" : undefined}
+                      >
+                        {chevron}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={sublistId}
+                      onClick={() => setExpanded(isOpen ? null : i)}
+                      className="dream-nav-overlay-line dream-nav-overlay-item dream-nav-overlay-item--toggle"
+                      style={{ "--i": i + 1 } as React.CSSProperties}
+                      data-active={groupActive ? "true" : undefined}
+                    >
+                      {item.label}
+                      {chevron}
+                    </button>
+                  )}
 
                   {isOpen ? (
                     <ul id={sublistId} className="dream-nav-overlay-sublist">
-                      {entries.map((entry, j) => {
-                        const childIsActive = j === activeEntry;
+                      {item.children.map((child, j) => {
+                        const childIsActive = j + childOffset === activeEntry;
                         return (
-                          <li key={`${j}-${entry.href}`}>
+                          <li key={`${j}-${child.href}`}>
                             <Link
-                              href={entry.href}
-                              {...externalLinkProps(entry.external)}
+                              href={child.href}
+                              {...externalLinkProps(child.external)}
                               onClick={onClose}
                               aria-current={childIsActive ? "page" : undefined}
                               data-active={childIsActive ? "true" : undefined}
                               className="dream-nav-overlay-subitem"
                             >
-                              {entry.label}
-                              {entry.external ? (
+                              {child.label}
+                              {child.external ? (
                                 <span className="sr-only">
                                   {" "}
                                   (opens in new tab)
