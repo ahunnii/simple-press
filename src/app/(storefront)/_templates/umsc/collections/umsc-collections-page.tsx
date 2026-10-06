@@ -4,6 +4,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveFields } from "..";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscImageFallback } from "../shared/umsc-image-fallback";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
@@ -12,6 +13,9 @@ import { UmscSection } from "../shared/umsc-section";
 const FIELD_KEYS = [
   "umsc.collections.hero-heading",
   "umsc.collections.hero-lede",
+  "umsc.collections.hero-image",
+  "umsc.collections.hero-image-alt",
+  "umsc.collections.hero-image-behind",
   "umsc.collections.empty-body",
 ];
 
@@ -35,6 +39,7 @@ export function UmscCollectionsPage({
         headingFieldKey="umsc.collections.hero-heading"
         lede={f["umsc.collections.hero-lede"] ?? ""}
         ledeFieldKey="umsc.collections.hero-lede"
+        {...resolveUmscHeroPhoto(f, "collections")}
         sectionAttrs={sectionGroupAttr("collections", "hero")}
       />
 

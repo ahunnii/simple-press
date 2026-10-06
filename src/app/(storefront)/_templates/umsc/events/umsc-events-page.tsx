@@ -8,6 +8,8 @@ import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 import { EventLinkQr } from "~/app/(storefront)/_components/events/event-link-qr";
 
+// umsc's own resolver for the band's optional photo (`umsc.events.hero-*`).
+import { resolveFields } from "..";
 // Default's resolver, not umsc's: these pages keep reading the existing
 // `default.events.*` keys (owner-saved copy carries over untouched), and only
 // Default's field map knows their `defaultValue`s.
@@ -19,6 +21,7 @@ import {
   UmscEmptyState,
 } from "../generic/umsc-page-kit";
 import { UmscButton } from "../shared/umsc-button";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { nonBlank } from "../shared/umsc-non-blank";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
@@ -35,6 +38,12 @@ const FIELD_KEYS = [
   "default.events.cta-body",
   "default.events.cta-button-text",
   "default.events.cta-button-link",
+];
+
+const HERO_PHOTO_KEYS = [
+  "umsc.events.hero-image",
+  "umsc.events.hero-image-alt",
+  "umsc.events.hero-image-behind",
 ];
 
 /**
@@ -58,6 +67,10 @@ export function UmscEventsPage({
 }: DefaultEventsPageTemplateProps) {
   const customFields = business.siteContent?.customFields;
   const f = resolveDefaultFields(customFields, FIELD_KEYS);
+  const heroPhoto = resolveUmscHeroPhoto(
+    resolveFields(customFields, HERO_PHOTO_KEYS),
+    "events",
+  );
   const linkFallbackLabel = f["default.events.list-link-fallback-label"];
 
   return (
@@ -67,6 +80,7 @@ export function UmscEventsPage({
         headingFieldKey="default.events.hero-heading"
         lede={f["default.events.hero-tagline"] ?? ""}
         ledeFieldKey="default.events.hero-tagline"
+        {...heroPhoto}
         sectionAttrs={sectionGroupAttr("events", "hero")}
       />
 

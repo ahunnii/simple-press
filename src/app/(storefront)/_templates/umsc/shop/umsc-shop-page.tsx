@@ -9,6 +9,7 @@ import { api } from "~/trpc/server";
 import { UMSC_SHOP_DEFAULT_DOORS } from ".";
 import { resolveFields } from "..";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
 import { UmscSection } from "../shared/umsc-section";
@@ -17,6 +18,9 @@ import { UmscShopClient } from "./umsc-shop-client";
 const FIELD_KEYS = [
   "umsc.shop.hero-heading",
   "umsc.shop.hero-lede",
+  "umsc.shop.hero-image",
+  "umsc.shop.hero-image-alt",
+  "umsc.shop.hero-image-behind",
   "umsc.shop.empty-heading",
   "umsc.shop.empty-body",
   "umsc.shop.empty-link-label",
@@ -56,6 +60,7 @@ export async function UmscShopPage({
         headingFieldKey="umsc.shop.hero-heading"
         lede={f["umsc.shop.hero-lede"] ?? ""}
         ledeFieldKey="umsc.shop.hero-lede"
+        {...resolveUmscHeroPhoto(f, "shop")}
         sectionAttrs={sectionGroupAttr("shop", "hero")}
       />
 

@@ -7,14 +7,18 @@ import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { resolveUmscContactDetails } from "../shared/umsc-contact-details";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscContactForm, UmscContactFormFallback } from "./umsc-contact-form";
-import { UmscContactVisit } from "./umsc-contact-visit";
+import { UmscContactFollow } from "./umsc-contact-follow";
 
 const FIELD_KEYS = [
   // Hero
   "umsc.contact.hero-heading",
   "umsc.contact.hero-lede",
+  "umsc.contact.hero-image",
+  "umsc.contact.hero-image-alt",
+  "umsc.contact.hero-image-behind",
   // Form
   "umsc.contact.form-heading",
   "umsc.contact.toggle-general-label",
@@ -26,11 +30,9 @@ const FIELD_KEYS = [
   "umsc.contact.expect-line-1",
   "umsc.contact.expect-line-2",
   "umsc.contact.expect-line-3",
-  // Visit
+  // Follow on social (group id + keys stay `visit`)
   "umsc.contact.visit-heading",
   "umsc.contact.visit-body",
-  "umsc.contact.visit-link-label",
-  "umsc.contact.visit-link-url",
   // Global
   "umsc.global.google-review-url",
 ];
@@ -55,6 +57,7 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
         headingFieldKey="umsc.contact.hero-heading"
         lede={f["umsc.contact.hero-lede"] ?? ""}
         ledeFieldKey="umsc.contact.hero-lede"
+        {...resolveUmscHeroPhoto(f, "contact")}
         sectionAttrs={sectionGroupAttr("contact", "hero")}
       />
 
@@ -92,11 +95,10 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
       </Suspense>
 
       {isSectionVisible(customFields, "umsc", "contact.visit") && (
-        <UmscContactVisit
+        <UmscContactFollow
           heading={f["umsc.contact.visit-heading"] ?? ""}
           body={f["umsc.contact.visit-body"] ?? ""}
-          linkLabel={f["umsc.contact.visit-link-label"] ?? ""}
-          linkUrl={f["umsc.contact.visit-link-url"] ?? ""}
+          socials={socials}
         />
       )}
     </PageTransition>

@@ -613,6 +613,13 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "umsc.contact.hours",
   "umsc.homepage.reviews-override-quote",
   "umsc.homepage.reviews-override-name",
+  // umsc, retired 2026-10-06 — the homepage "Shop by type" cards now come
+  // from the store's first four published collections, and the contact
+  // page's market-visit band became a "Follow on social" band whose icons
+  // come from Content → Branding.
+  "umsc.homepage.categories-doors",
+  "umsc.contact.visit-link-label",
+  "umsc.contact.visit-link-url",
   // dark-trend, retired 2026-09-27.
   // - `about.feature-N-header` / `-description`: the about page's numbered
   //   cards from before the `dark-trend.about.features-list` list field.

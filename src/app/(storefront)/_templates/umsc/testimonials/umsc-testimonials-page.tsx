@@ -5,6 +5,7 @@ import { api } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscTestimonialsCta } from "./umsc-testimonials-cta";
 import { UmscTestimonialsFeatured } from "./umsc-testimonials-featured";
@@ -12,6 +13,9 @@ import { UmscTestimonialsFeatured } from "./umsc-testimonials-featured";
 const FIELD_KEYS = [
   "umsc.testimonials.hero-heading",
   "umsc.testimonials.hero-lede",
+  "umsc.testimonials.hero-image",
+  "umsc.testimonials.hero-image-alt",
+  "umsc.testimonials.hero-image-behind",
   "umsc.testimonials.empty-message",
   "umsc.testimonials.review-source-label",
   "umsc.testimonials.cta-heading",
@@ -37,6 +41,7 @@ export async function UmscTestimonialsPage({
         headingFieldKey="umsc.testimonials.hero-heading"
         lede={f["umsc.testimonials.hero-lede"] ?? ""}
         ledeFieldKey="umsc.testimonials.hero-lede"
+        {...resolveUmscHeroPhoto(f, "testimonials")}
         sectionAttrs={sectionGroupAttr("testimonials", "hero")}
       />
 

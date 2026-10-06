@@ -1,6 +1,8 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // design.md → "Per-page section concepts → Collections · Collection": the
 // Collections index has one field group (hero + a single shared empty-state
 // line, used by both the index and the data-driven CollectionPage — which
@@ -29,6 +31,7 @@ const collectionsHeroData: TemplateField[] = [
     defaultValue:
       "Candles, soaps, body care, and home care — grouped the way you shop.",
   },
+  ...umscHeroPhotoFields("collections", "collections.hero"),
   {
     key: "umsc.collections.empty-body",
     label: "Empty state text",
@@ -49,7 +52,7 @@ export const umscCollectionsFieldGroups: TemplateFieldGroup[] = [
     id: "collections.hero",
     title: "Collections page",
     description:
-      "Heading, intro text, and the shared empty-state line used by both the collections index and a single collection page",
+      "Heading, intro text, an optional photo, and the shared empty-state line used by both the collections index and a single collection page",
     icon: "🗂️",
     columns: 2,
   },
@@ -61,7 +64,7 @@ export const umscCollectionsSections: TemplateSection[] = [
     page: "collections",
     title: "Collections page",
     description:
-      "Dark page-hero band with heading and intro text, above the collections grid",
+      "Dark page-hero band with heading, intro text, and an optional photo, above the collections grid",
     groupIds: ["collections.hero"],
     order: 0,
     hideable: false,

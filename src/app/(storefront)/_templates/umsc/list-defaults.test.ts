@@ -11,7 +11,6 @@ vi.mock("~/trpc/server", () => ({
   api: {},
 }));
 
-import { UMSC_CATEGORY_DEFAULT_DOORS } from "./homepage/umsc-categories-section";
 import { UMSC_CUSTOM_DEFAULT_LINES } from "./homepage/umsc-custom-section";
 import { UMSC_ABOUT_DEFAULT_VALUES } from "./about/umsc-about-page";
 import { UMSC_CART_DEFAULT_DOORS } from "./cart-checkout/umsc-cart-contents";
@@ -33,36 +32,6 @@ function strip(rows: TemplateListRow[]): Array<Omit<TemplateListRow, "_id">> {
 }
 
 describe("umsc list-field defaults (moving into TemplateField.defaultRows 2026-09-26)", () => {
-  it("UMSC_CATEGORY_DEFAULT_DOORS (umsc.homepage.categories-doors) matches the pre-migration copy", () => {
-    const expected: Array<Omit<TemplateListRow, "_id">> = [
-      {
-        image: "/placeholder.svg",
-        title: "Candles",
-        blurb: "Soy candles and wax melts.",
-        link: "/collections/candles",
-      },
-      {
-        image: "/placeholder.svg",
-        title: "Soaps",
-        blurb: "Handmade bars for gifts and daily use.",
-        link: "/collections/soaps",
-      },
-      {
-        image: "/placeholder.svg",
-        title: "Body Care",
-        blurb: "Butters, oils, and roll-ons.",
-        link: "/collections/body-care",
-      },
-      {
-        image: "/placeholder.svg",
-        title: "Home Care",
-        blurb: "Laundry pods, bleach tablets, and mists.",
-        link: "/collections/home-care",
-      },
-    ];
-    expect(strip(UMSC_CATEGORY_DEFAULT_DOORS)).toEqual(expected);
-  });
-
   it("UMSC_CUSTOM_DEFAULT_LINES (umsc.homepage.custom-list) matches the pre-migration copy", () => {
     const expected: Array<Omit<TemplateListRow, "_id">> = [
       { text: "Candles, wax melts, soaps, or body care" },

@@ -19,6 +19,7 @@ import {
   UmscEmptyState,
 } from "../generic/umsc-page-kit";
 import { UmscHeading } from "../shared/umsc-heading";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import {
   hasCustomImage,
   UmscImageFallback,
@@ -41,7 +42,8 @@ type Props = {
  * the intro and the card grid start on one left edge (B1.7).
  *
  * - `services.hero`: the black `UmscPageHero` — Default's heading + intro
- *   text, and its optional photo as the band's right-side image.
+ *   text, and its optional photo beside the text or (with
+ *   `umsc.services.hero-image-behind` on) filling the band behind it.
  * - `services.intro` (hideable, cream): optional heading + a 66ch line;
  *   skipped when both are blank (their Default defaults are blank).
  * - `services.list`: 4:5 photo cards in the collection-door language (photo
@@ -56,7 +58,6 @@ export function UmscServicesIndexPage({ business, services }: Props) {
   const d = resolveDefaultFields(customFields, [
     "default.services.hero-heading",
     "default.services.hero-tagline",
-    "default.services.hero-image",
     "default.services.intro-heading",
     "default.services.intro-body",
     "default.services.cta-heading",
@@ -67,6 +68,9 @@ export function UmscServicesIndexPage({ business, services }: Props) {
     "umsc.services.card-link-label",
     "umsc.services.empty-heading",
     "umsc.services.empty-body",
+    // The band photo: Default's inherited image key + umsc's placement switch.
+    "default.services.hero-image",
+    "umsc.services.hero-image-behind",
   ]);
 
   const heading = nonBlank(d["default.services.hero-heading"]) ?? "Services";
@@ -84,8 +88,7 @@ export function UmscServicesIndexPage({ business, services }: Props) {
         headingFieldKey="default.services.hero-heading"
         lede={d["default.services.hero-tagline"] ?? ""}
         ledeFieldKey="default.services.hero-tagline"
-        image={d["default.services.hero-image"] ?? ""}
-        imageAlt=""
+        {...resolveUmscHeroPhoto(f, "services", "default.services.hero-image")}
         sectionAttrs={sectionGroupAttr("services", "hero")}
       />
 

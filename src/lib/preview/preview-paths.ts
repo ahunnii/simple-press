@@ -1,3 +1,5 @@
+import { routeFlag } from "~/lib/features/route-flags";
+
 /** Map editor page tab keys to storefront paths for the preview iframe. */
 export const PAGE_PREVIEW_PATHS: Record<string, string> = {
   homepage: "/",
@@ -29,3 +31,14 @@ export const PAGE_PREVIEW_PATHS: Record<string, string> = {
 };
 
 export type PreviewPage = keyof typeof PAGE_PREVIEW_PATHS;
+
+/**
+ * The feature flag gating an editor page key (the page 404s on the storefront
+ * when it is off), or null when the page is ungated. `"product"` is served
+ * under `/shop`, so it shares the shop's flag.
+ */
+export function previewPageFlag(page: string): string | null {
+  return routeFlag(
+    page === "product" ? "/shop" : (PAGE_PREVIEW_PATHS[page] ?? ""),
+  );
+}

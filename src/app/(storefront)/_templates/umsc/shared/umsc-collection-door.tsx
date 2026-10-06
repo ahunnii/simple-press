@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { hasCustomImage, UmscImageFallback } from "./umsc-image-fallback";
 
@@ -14,6 +15,8 @@ type Props = {
   aspect?: string;
   titleFieldKey?: string;
   blurbFieldKey?: string;
+  /** Extra classes merged onto the blurb paragraph (e.g. `line-clamp-2`). */
+  blurbClassName?: string;
 };
 
 /**
@@ -28,6 +31,7 @@ export function UmscCollectionDoor({
   aspect = "4 / 5",
   titleFieldKey,
   blurbFieldKey,
+  blurbClassName,
 }: Props) {
   return (
     <Link href={href} className="group relative block">
@@ -56,7 +60,10 @@ export function UmscCollectionDoor({
       {blurb && (
         <p
           {...(blurbFieldKey ? fieldAttr(blurbFieldKey) : {})}
-          className="umsc-sans mt-1 text-[14px] leading-[1.5] text-[var(--umsc-muted)]"
+          className={cn(
+            "umsc-sans mt-1 text-[14px] leading-[1.5] text-[var(--umsc-muted)]",
+            blurbClassName,
+          )}
         >
           {blurb}
         </p>

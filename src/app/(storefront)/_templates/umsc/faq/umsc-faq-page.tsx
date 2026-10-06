@@ -12,7 +12,9 @@ import {
   umscTelHref,
 } from "../shared/umsc-contact-details";
 import { UmscHeading } from "../shared/umsc-heading";
+import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscLede } from "../shared/umsc-lede";
+import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscReveal, UmscRevealGroup } from "../shared/umsc-reveal";
 import { UmscSection } from "../shared/umsc-section";
 
@@ -34,6 +36,9 @@ export function UmscFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
     "umsc.faq.hero-lede",
     "umsc.faq.hero-contact-label",
     "umsc.faq.hero-contact-url",
+    "umsc.faq.hero-image",
+    "umsc.faq.hero-image-alt",
+    "umsc.faq.hero-image-behind",
     "umsc.faq.list-heading",
     "umsc.faq.empty-state-text",
     "umsc.faq.empty-state-link-label",
@@ -52,61 +57,43 @@ export function UmscFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
 
   return (
     <>
-      {/* ── Hero — composed from UmscHeading/UmscLede rather than
-          UmscPageHero: this band also needs the phone + contact line under
-          the lede, which UmscPageHero's fixed heading/lede/image shape has
-          no slot for. Same visual language (black, gold hairline bottom,
-          uppercase Marcellus h1). ── */}
-      <section
-        aria-label="Page introduction"
-        {...sectionGroupAttr("faq", "hero")}
-        className="umsc-black-surface relative border-b-2 border-[var(--umsc-gold)] bg-[var(--umsc-black)]"
-        style={{ paddingInline: "var(--umsc-section-pad-x)" }}
+      {/* ── Hero — the shared black band; the phone + contact line ride its
+          trailing slot under the lede. ── */}
+      <UmscPageHero
+        heading={f["umsc.faq.hero-heading"] ?? ""}
+        headingFieldKey="umsc.faq.hero-heading"
+        lede={f["umsc.faq.hero-lede"] ?? ""}
+        ledeFieldKey="umsc.faq.hero-lede"
+        {...resolveUmscHeroPhoto(f, "faq")}
+        sectionAttrs={sectionGroupAttr("faq", "hero")}
       >
-        <div
-          className="mx-auto py-16 lg:py-24"
-          style={{ maxWidth: "var(--umsc-container)" }}
-        >
-          <UmscHeading
-            as="h1"
-            fieldKey="umsc.faq.hero-heading"
-            className="text-[var(--umsc-cream-on-black)]"
-          >
-            {f["umsc.faq.hero-heading"] ?? ""}
-          </UmscHeading>
-          {f["umsc.faq.hero-lede"] && (
-            <UmscLede onBlack fieldKey="umsc.faq.hero-lede" className="mt-5">
-              {f["umsc.faq.hero-lede"] ?? ""}
-            </UmscLede>
+        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+          {phone && (
+            <a
+              href={umscTelHref(phone)}
+              className="umsc-sans flex items-center gap-2 text-[14px] text-[var(--umsc-cream-on-black)] no-underline hover:opacity-80"
+            >
+              <Phone
+                className="size-4 shrink-0"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+              {phone}
+            </a>
           )}
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-            {phone && (
-              <a
-                href={umscTelHref(phone)}
-                className="umsc-sans flex items-center gap-2 text-[14px] text-[var(--umsc-cream-on-black)] no-underline hover:opacity-80"
-              >
-                <Phone
-                  className="size-4 shrink-0"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-                {phone}
-              </a>
-            )}
-            {f["umsc.faq.hero-contact-url"] && (
-              <UmscButton
-                as="link"
-                href={f["umsc.faq.hero-contact-url"] ?? "/contact"}
-                variant="link"
-                fieldKey="umsc.faq.hero-contact-label"
-                className="text-[var(--umsc-gold-soft)]"
-              >
-                {f["umsc.faq.hero-contact-label"] ?? ""}
-              </UmscButton>
-            )}
-          </div>
+          {f["umsc.faq.hero-contact-url"] && (
+            <UmscButton
+              as="link"
+              href={f["umsc.faq.hero-contact-url"] ?? "/contact"}
+              variant="link"
+              fieldKey="umsc.faq.hero-contact-label"
+              className="text-[var(--umsc-gold-soft)]"
+            >
+              {f["umsc.faq.hero-contact-label"] ?? ""}
+            </UmscButton>
+          )}
         </div>
-      </section>
+      </UmscPageHero>
 
       {/* ── Questions ─────────────────────────────────────────────────── */}
       <UmscSection

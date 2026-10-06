@@ -6,6 +6,7 @@ import {
   defaultDonateData,
   defaultDonateFieldGroups,
 } from "../../default/donate";
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
 
 /**
  * Donate (`/donate`) field registry for umsc — parity PF23 (package TP7).
@@ -13,14 +14,25 @@ import {
  * them (the page reads them through Default's resolver; umsc rendered
  * Default's donate page until 2026-09-28). None are omitted — Default's
  * donate page has no eyebrow. The amount presets, label and payment lanes
- * come from Settings → Donations, not template fields.
+ * come from Settings → Donations, not template fields. umsc adds its own
+ * optional band photo (`umsc.donate.hero-*`, see `events/index.ts`).
  *
  * The page component is NOT re-exported here (circular-import guard).
  */
-export const umscDonateData: TemplateField[] = defaultDonateData;
+export const umscDonateData: TemplateField[] = [
+  ...defaultDonateData,
+  ...umscHeroPhotoFields("donate", "donate.hero"),
+];
 
 export const umscDonateFieldGroups: TemplateFieldGroup[] =
-  defaultDonateFieldGroups;
+  defaultDonateFieldGroups.map((group) =>
+    group.id === "donate.hero"
+      ? {
+          ...group,
+          description: "Page heading, intro text and optional photo.",
+        }
+      : group,
+  );
 
 /** Mirrors `default/sections.ts`. */
 export const umscDonateSections: TemplateSection[] = [
@@ -28,7 +40,7 @@ export const umscDonateSections: TemplateSection[] = [
     id: "donate.hero",
     page: "donate",
     title: "Hero",
-    description: "Page heading and intro text",
+    description: "Page heading, intro text and optional photo",
     groupIds: ["donate.hero"],
     order: 0,
     hideable: false,

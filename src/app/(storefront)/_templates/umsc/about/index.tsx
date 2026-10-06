@@ -3,6 +3,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
+import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+
 // Built-in example values, used when the owner hasn't configured any — her
 // verbatim values from the current site (design.md "must-keep phrases").
 const UMSC_ABOUT_VALUES_DEFAULT_ROWS = [
@@ -55,7 +57,7 @@ const aboutHeroData: TemplateField[] = [
     key: "umsc.about.hero-image",
     label: "Photo",
     description:
-      "Photo shown on the right of the page hero (desktop only). A photo of your products or team works well here. Leave blank to show your logo mark instead of a photo.",
+      "Optional photo for the band at the top of the page — your products or team work well. Leave blank for a plain dark band. Where it shows is set by Show the photo behind the heading.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -73,6 +75,7 @@ const aboutHeroData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "",
   },
+  ...umscHeroPhotoFields("about", "about.hero", { withImage: false }),
 ];
 
 // ─── Your story (about.maker) ──────────────────────────────────────────────
@@ -321,7 +324,8 @@ export const umscAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
     title: "Hero",
-    description: "Page-hero heading, intro text, and optional right-side photo",
+    description:
+      "Page-hero heading, intro text, and an optional photo — beside the heading or filling the band behind it",
     icon: "🕯️",
     columns: 2,
   },
