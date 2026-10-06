@@ -11344,30 +11344,33 @@ body:has(.pollen) {
   }
 }
 
-/* Hero entrance — gated on .dream-js: logo, then headline/lede/CTA row at
-   +120ms, then the photo shelf at +240ms. Content is fully visible without
-   JS (no .dream-js class means none of these rules match). */
-.dream-js .dream-hero-safe > .dream-h1,
-.dream-js .dream-hero-safe > .dream-hero-lede,
-.dream-js .dream-hero-safe > .dream-hero-ctas {
+/* Hero entrance — logo, then headline/lede/CTA row at +120ms, then the
+   photo shelf at +240ms. Pure CSS, ungated (2026-10-05): these used to wait
+   on a `.dream-js` root class added in a passive useEffect, so the SSR hero
+   painted visible, snapped hidden at hydration, then animated in. Playing
+   from first paint removes that flash; CSS animations need no JS, and the
+   `both` fill ends on the visible state. */
+.dream .dream-hero-safe > .dream-h1,
+.dream .dream-hero-safe > .dream-hero-lede,
+.dream .dream-hero-safe > .dream-hero-ctas {
   animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
 }
 
 /* The logo settles with a transform-only entrance: it must never start at
    opacity 0, because Chrome then drops it from LCP candidates and the topbar
    text becomes the reported LCP element (measured 2026-09-16). */
-.dream-js .dream-hero-logo {
+.dream .dream-hero-logo {
   animation: dream-settle var(--dream-dur-entrance) var(--dream-ease) both;
   animation-delay: 0ms;
 }
 
-.dream-js .dream-hero-safe > .dream-h1,
-.dream-js .dream-hero-safe > .dream-hero-lede,
-.dream-js .dream-hero-safe > .dream-hero-ctas {
+.dream .dream-hero-safe > .dream-h1,
+.dream .dream-hero-safe > .dream-hero-lede,
+.dream .dream-hero-safe > .dream-hero-ctas {
   animation-delay: 120ms;
 }
 
-.dream-js .dream-hero-shelf {
+.dream .dream-hero-shelf {
   animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
   animation-delay: 240ms;
 }
@@ -11439,6 +11442,31 @@ body:has(.pollen) {
   color: var(--dream-soft-sky);
 }
 
+/* Page hero entrance — same cadence as the homepage hero, pure CSS from
+   first paint (DreamPageHero is a server component). The logo is
+   transform-only (`dream-settle`): it is `fetchPriority="high"` and an LCP
+   candidate, so it must never start at opacity 0 (see the homepage logo
+   note above). Headline + lede rise at +120ms; anything passed through the
+   `children` slot (CTA rows, event meta) at +240ms — never a form. */
+.dream .dream-page-hero-logo {
+  animation: dream-settle var(--dream-dur-entrance) var(--dream-ease) both;
+}
+
+.dream .dream-page-hero-content > .dream-h1,
+.dream .dream-page-hero-content > .dream-page-hero-lede {
+  animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
+  animation-delay: 120ms;
+}
+
+.dream
+  .dream-page-hero-content
+  > :not(.dream-page-hero-logo):not(.dream-h1):not(.dream-page-hero-lede):not(
+    form
+  ):not(:has(form)) {
+  animation: dream-rise var(--dream-dur-entrance) var(--dream-ease) both;
+  animation-delay: 240ms;
+}
+
 /* ── Cloud / wisp sprite system ── */
 .dream .dream-clouds {
   position: absolute;
@@ -11494,33 +11522,27 @@ body:has(.pollen) {
         calc(22px * var(--dream-cloud-scale, 1)) rgba(86, 118, 160, 0.22)
     )
     drop-shadow(0 2px 3px rgba(86, 118, 160, 0.1));
-  animation: dream-drift var(--dur) linear infinite;
-  animation-delay: var(--delay);
+  /* Soft ambient fade-in (`dream-cloud-in`, 0ms delay) layered on the
+     drift. Ungated 2026-10-05 — it used to sit behind `.dream-js`, which
+     made SSR clouds paint, vanish at hydration, then fade back. No
+     `opacity: 0` base: the fade's `from` keyframe applies from the first
+     frame anyway, and any `animation: none` override (reduced motion, the
+     maintenance page's still sky) then leaves the cloud at `--op`. */
+  animation:
+    dream-cloud-in 900ms var(--dream-ease-out) forwards,
+    dream-drift var(--dur) linear infinite;
+  animation-delay: 0ms, var(--delay);
   will-change: transform;
   pointer-events: none;
   user-select: none;
 }
 
 .dream .dream-cloud.is-reverse {
-  animation-direction: reverse;
+  animation-direction: normal, reverse;
 }
 
 .dream .dream-clouds[data-paused] .dream-cloud {
   animation-play-state: paused;
-}
-
-/* Soft ambient fade-in once JS confirms — base rule above already keeps
-   clouds fully visible and drifting without JS. */
-.dream-js .dream-cloud {
-  opacity: 0;
-  animation:
-    dream-cloud-in 900ms var(--dream-ease-out) forwards,
-    dream-drift var(--dur) linear infinite;
-  animation-delay: 0ms, var(--delay);
-}
-
-.dream-js .dream-cloud.is-reverse {
-  animation-direction: normal, reverse;
 }
 
 /* ── Balloons (hero only) ── */
@@ -11737,11 +11759,6 @@ body:has(.pollen) {
    period (`--dur`) instead of drifting across. */
 .dream .dream-cloud.is-static {
   left: var(--left);
-  animation: dream-deck-bob var(--dur) ease-in-out infinite alternate;
-  animation-delay: var(--delay);
-}
-
-.dream-js .dream-cloud.is-static {
   animation:
     dream-cloud-in 900ms var(--dream-ease-out) forwards,
     dream-deck-bob var(--dur) ease-in-out infinite alternate;
@@ -11990,6 +12007,7 @@ body:has(.pollen) {
   background: var(--dream-paper);
   border: 1px solid var(--dream-line);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  animation: dream-dropdown-in 160ms var(--dream-ease) both;
 }
 
 .dream .dream-header-dropdown-link {
@@ -12558,34 +12576,31 @@ body:has(.pollen) {
   margin-top: 12px;
 }
 
-/* ── Scroll-reveal — armed only once useDreamReveal adds `.dream-js` to the
-   scope root. Without JS the class is never set, so `.dream-reveal` content
-   stays fully visible (progressive enhancement, no blank sections). Single
-   pass: opacity 0→1 + translateY 12px→0, 0.6s ease-out, ≤80ms stagger. ── */
-.dream-js .dream-reveal {
+/* ── Scroll-reveal — per-element phase classes set by useDreamReveal (see
+   hooks/use-dream-reveal.ts; ported from animated-bamboo's reveal):
+   (bare)  = idle: SSR/no-JS, reduced motion, or already on screen at mount —
+             rendered visible, as-is;
+   .out    = measured off-screen at mount: hidden with NO transition, so it is
+             never painted visible-then-hidden;
+   .in     = the observer fired: opacity 0→1 + translateY 12px→0, ease-out,
+             staggered 80ms per `--i` step (group items cap `--i` at 7; a
+             lone DreamReveal may pass `--i` to stagger against a sibling).
+   No root gate: without JS no phase class is ever added, so content ships
+   visible. ── */
+.dream .dream-reveal.out,
+.dream .dream-reveal-group.out .dream-reveal-item {
   opacity: 0;
   transform: translateY(12px);
+  transition: none;
+}
+
+.dream .dream-reveal.in,
+.dream .dream-reveal-group.in .dream-reveal-item {
+  opacity: 1;
+  transform: none;
   transition:
     opacity var(--dream-dur-reveal) var(--dream-ease-out),
     transform var(--dream-dur-reveal) var(--dream-ease-out);
-}
-
-.dream-js .dream-reveal.is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-.dream-js .dream-reveal-group .dream-reveal-item {
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity var(--dream-dur-reveal) var(--dream-ease-out),
-    transform var(--dream-dur-reveal) var(--dream-ease-out);
-}
-
-.dream-js .dream-reveal-group.is-visible .dream-reveal-item {
-  opacity: 1;
-  transform: none;
   transition-delay: calc(var(--i, 0) * 80ms);
 }
 
@@ -12644,6 +12659,17 @@ body:has(.pollen) {
   from {
     opacity: 0;
     transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dream-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -13170,8 +13196,7 @@ body:has(.pollen) {
   }
 
   .dream .dream-quote-band-mist,
-  .dream .dream-cloud.is-static,
-  .dream-js .dream-cloud.is-static {
+  .dream .dream-cloud.is-static {
     animation: none;
     opacity: var(--op, 0.75);
   }
@@ -13186,17 +13211,28 @@ body:has(.pollen) {
     transition: none !important;
   }
 
-  .dream-js .dream-reveal,
-  .dream-js .dream-reveal-group .dream-reveal-item {
-    opacity: 1;
-    transform: none;
+  .dream .dream-header-dropdown {
+    animation: none;
   }
 
-  .dream-js .dream-hero-logo,
-  .dream-js .dream-hero-safe > .dream-h1,
-  .dream-js .dream-hero-safe > .dream-hero-lede,
-  .dream-js .dream-hero-safe > .dream-hero-ctas,
-  .dream-js .dream-hero-shelf {
+  /* The hook never leaves `idle` under reduced motion; this is the
+     belt-and-braces for a preference flipped mid-session. */
+  .dream .dream-reveal.out,
+  .dream .dream-reveal.in,
+  .dream .dream-reveal-group.out .dream-reveal-item,
+  .dream .dream-reveal-group.in .dream-reveal-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .dream .dream-hero-logo,
+  .dream .dream-hero-safe > .dream-h1,
+  .dream .dream-hero-safe > .dream-hero-lede,
+  .dream .dream-hero-safe > .dream-hero-ctas,
+  .dream .dream-hero-shelf,
+  .dream .dream-page-hero-logo,
+  .dream .dream-page-hero-content > * {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

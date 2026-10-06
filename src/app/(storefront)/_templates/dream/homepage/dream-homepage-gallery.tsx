@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { GalleryRenderer } from "~/components/gallery-renderer";
@@ -5,6 +7,7 @@ import { GalleryRenderer } from "~/components/gallery-renderer";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamImageFallback } from "../shared/dream-image-fallback";
 import { DreamLink } from "../shared/dream-link";
+import { DreamReveal, DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
 
 type GalleryData = {
@@ -72,54 +75,69 @@ export function DreamHomepageGallery({
       }}
       tone="sky"
       aria-label="Gallery"
+      reveal={false}
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <DreamHeading as="h2" fieldKey="dream.homepage.gallery-heading">
-          {heading}
-        </DreamHeading>
-        <p
-          className="max-w-[46ch] text-[var(--dream-soft)]"
-          {...fieldAttr("dream.homepage.gallery-lede")}
-        >
-          {lede}
-        </p>
-      </div>
+      <DreamReveal>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <DreamHeading as="h2" fieldKey="dream.homepage.gallery-heading">
+            {heading}
+          </DreamHeading>
+          <p
+            className="max-w-[46ch] text-[var(--dream-soft)]"
+            {...fieldAttr("dream.homepage.gallery-lede")}
+          >
+            {lede}
+          </p>
+        </div>
+      </DreamReveal>
 
       <div className="dream-gallery mt-12">
         {hasImages && gallery ? (
-          <GalleryRenderer gallery={{ ...gallery, layout: "masonry" }} />
+          // The real tiles are rendered by the shared GalleryRenderer (not
+          // dream's to restructure), so the populated gallery reveals as one
+          // block; only the designed empty-state tiles stagger.
+          <DreamReveal>
+            <GalleryRenderer gallery={{ ...gallery, layout: "masonry" }} />
+          </DreamReveal>
         ) : (
           <div className="flex flex-col items-center gap-8 text-center">
-            <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
+            <DreamRevealGroup className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
               {EMPTY_TILE_ASPECTS.map((aspect, i) => (
                 <div
                   key={i}
                   className={cn(
-                    "overflow-hidden rounded-[var(--dream-radius-photo)] border border-[var(--dream-line)]",
+                    "dream-reveal-item overflow-hidden rounded-[var(--dream-radius-photo)] border border-[var(--dream-line)]",
                     i === 1 && "sm:mt-10",
                     i === 4 && "sm:mt-10",
                   )}
-                  style={{ aspectRatio: aspect }}
+                  style={
+                    {
+                      aspectRatio: aspect,
+                      "--i": Math.min(i, 7),
+                    } as CSSProperties
+                  }
                 >
                   <DreamImageFallback className="h-full" />
                 </div>
               ))}
-            </div>
-            <p
-              className="max-w-[46ch] text-[var(--dream-soft)]"
-              {...fieldAttr("dream.homepage.gallery-empty-message")}
-            >
-              {emptyMessage}
-            </p>
-            {emptyLinkVisible && (
-              <DreamLink href={emptyLinkUrl}>
-                <span
-                  {...fieldAttr("dream.homepage.gallery-empty-link-label")}
-                >
-                  {emptyLinkLabel}
-                </span>
-              </DreamLink>
-            )}
+            </DreamRevealGroup>
+            <DreamReveal className="flex flex-col items-center gap-8">
+              <p
+                className="max-w-[46ch] text-[var(--dream-soft)]"
+                {...fieldAttr("dream.homepage.gallery-empty-message")}
+              >
+                {emptyMessage}
+              </p>
+              {emptyLinkVisible && (
+                <DreamLink href={emptyLinkUrl}>
+                  <span
+                    {...fieldAttr("dream.homepage.gallery-empty-link-label")}
+                  >
+                    {emptyLinkLabel}
+                  </span>
+                </DreamLink>
+              )}
+            </DreamReveal>
           </div>
         )}
       </div>

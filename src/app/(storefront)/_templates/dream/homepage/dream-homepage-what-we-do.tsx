@@ -9,6 +9,7 @@ import { cn } from "~/lib/utils";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamLink } from "../shared/dream-link";
 import { DreamPhoto } from "../shared/dream-photo";
+import { DreamReveal } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
 import { DREAM_WHAT_WE_DO_ROWS_KEY } from "./dream-homepage-what-we-do-rows";
 
@@ -48,16 +49,19 @@ export function DreamHomepageWhatWeDo({
         id: "what-we-do",
       }}
       aria-label="What We Do"
+      reveal={false}
     >
-      <DreamHeading as="h2" fieldKey="dream.homepage.what-we-do-heading">
-        {heading}
-      </DreamHeading>
-      <p
-        className="mt-4 max-w-[66ch] text-[var(--dream-soft)]"
-        {...fieldAttr("dream.homepage.what-we-do-lede")}
-      >
-        {lede}
-      </p>
+      <DreamReveal>
+        <DreamHeading as="h2" fieldKey="dream.homepage.what-we-do-heading">
+          {heading}
+        </DreamHeading>
+        <p
+          className="mt-4 max-w-[66ch] text-[var(--dream-soft)]"
+          {...fieldAttr("dream.homepage.what-we-do-lede")}
+        >
+          {lede}
+        </p>
+      </DreamReveal>
 
       <div className="mt-14 flex flex-col divide-y divide-[var(--dream-line)]">
         {rows.map((row, i) => {
@@ -66,45 +70,51 @@ export function DreamHomepageWhatWeDo({
           return (
             <div
               key={i}
-              className="grid items-center gap-10 py-[78px] pb-[110px] first:pt-0 lg:grid-cols-2 lg:gap-16"
+              className="py-[78px] pb-[110px] first:pt-0"
               {...listItemAttr(DREAM_WHAT_WE_DO_ROWS_KEY, i)}
             >
-              <div className={cn(variant === "image-text" && "lg:order-2")}>
-                {row.heading && (
-                  <DreamHeading as="h3">{row.heading}</DreamHeading>
-                )}
-                {row.body && (
-                  <p className="mt-4 max-w-[60ch] text-[var(--dream-soft)]">
-                    {row.body}
-                  </p>
-                )}
-                {row.linkVisible && (
-                  <DreamLink href={row.linkUrl} className="mt-6 inline-block">
-                    {row.linkLabel}
-                  </DreamLink>
-                )}
-              </div>
-              <div
-                className={cn(
-                  "relative",
-                  variant === "image-text" && "lg:order-1",
-                )}
-              >
-                <DreamPhoto src={row.image} alt={row.alt} aspect="4 / 3" />
-                {/* Wrapper carries the positioning: `.dream-photo` sets its own
-                    `position: relative` in the scoped block, which would beat a
-                    Tailwind `absolute` utility placed on the component itself. */}
-                {showSidePhoto && (
-                  <div className="absolute -bottom-8 -left-6 hidden w-[42%] sm:block">
-                    <DreamPhoto
-                      src={row.sideImage}
-                      alt={row.sideAlt}
-                      aspect="1 / 1"
-                      className="shadow-[var(--dream-shadow-card)]"
-                    />
-                  </div>
-                )}
-              </div>
+              {/* The row div keeps the divide-y border, padding and
+                  `first:pt-0` (so those selectors still see a direct child of
+                  the list) plus the preview attr; the reveal sits inside it
+                  and carries the grid. */}
+              <DreamReveal className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+                <div className={cn(variant === "image-text" && "lg:order-2")}>
+                  {row.heading && (
+                    <DreamHeading as="h3">{row.heading}</DreamHeading>
+                  )}
+                  {row.body && (
+                    <p className="mt-4 max-w-[60ch] text-[var(--dream-soft)]">
+                      {row.body}
+                    </p>
+                  )}
+                  {row.linkVisible && (
+                    <DreamLink href={row.linkUrl} className="mt-6 inline-block">
+                      {row.linkLabel}
+                    </DreamLink>
+                  )}
+                </div>
+                <div
+                  className={cn(
+                    "relative",
+                    variant === "image-text" && "lg:order-1",
+                  )}
+                >
+                  <DreamPhoto src={row.image} alt={row.alt} aspect="4 / 3" />
+                  {/* Wrapper carries the positioning: `.dream-photo` sets its own
+                      `position: relative` in the scoped block, which would beat a
+                      Tailwind `absolute` utility placed on the component itself. */}
+                  {showSidePhoto && (
+                    <div className="absolute -bottom-8 -left-6 hidden w-[42%] sm:block">
+                      <DreamPhoto
+                        src={row.sideImage}
+                        alt={row.sideAlt}
+                        aspect="1 / 1"
+                        className="shadow-[var(--dream-shadow-card)]"
+                      />
+                    </div>
+                  )}
+                </div>
+              </DreamReveal>
             </div>
           );
         })}

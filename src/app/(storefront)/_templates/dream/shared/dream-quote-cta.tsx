@@ -4,6 +4,7 @@ import { cn } from "~/lib/utils";
 import { DreamButton } from "./dream-button";
 import { DreamClouds } from "./dream-clouds";
 import { DreamHeading } from "./dream-heading";
+import { DreamReveal } from "./dream-reveal";
 
 type DreamQuoteCtaProps = {
   heading: string;
@@ -53,7 +54,10 @@ export function DreamQuoteCta({
     <section {...sectionAttrs} className={cn("dream-quote-band", className)}>
       <DreamClouds variant="deck" className="dream-quote-band-clouds" />
       <div className="dream-quote-band-mist" aria-hidden="true" />
-      <div className="dream-quote-band-content">
+      {/* The reveal IS the positioned content element (keeps
+          `.dream-quote-band-content`'s z-index/flex); clouds and mist stay
+          outside it so they never fade with the copy. */}
+      <DreamReveal className="dream-quote-band-content">
         <DreamHeading
           as="h2"
           accent={accent}
@@ -88,7 +92,7 @@ export function DreamQuoteCta({
             </span>
           </DreamButton>
         ) : null}
-      </div>
+      </DreamReveal>
     </section>
   );
 }

@@ -12,9 +12,9 @@ import { usePathname } from "next/navigation";
  * `.dream-balloons` instances belong to page-level server components that
  * get swapped under the persistent `.dream` layout root):
  *
- * 1. Adds `dream-js` to the `.dream` scope root — same progressive-
- *    enhancement gate `use-dream-reveal` uses, so JS-only affordances never
- *    ship broken when JS is off.
+ * 1. Adds `dream-js` to the `.dream` scope root — a progressive-enhancement
+ *    gate that now only targets JS-only affordances like the nav overlay
+ *    line stagger.
  * 2. If the user prefers reduced motion, does nothing else — clouds are
  *    already parked at `--rest` by the scoped
  *    `@media (prefers-reduced-motion: reduce)` CSS, so there is nothing to

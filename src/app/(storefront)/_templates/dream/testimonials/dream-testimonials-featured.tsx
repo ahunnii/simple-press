@@ -2,6 +2,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { DreamButton } from "../shared/dream-button";
+import { DreamReveal } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
 
 type Testimonial = RouterOutputs["testimonial"]["list"][number];
@@ -94,39 +95,47 @@ export function DreamTestimonialsFeatured({
       sectionAttrs={sectionAttrs}
       tone="sky"
       aria-label="What clients are saying"
+      reveal={false}
     >
-      <figure className="mx-auto max-w-[760px] text-center">
-        <DreamQuoteMark tone="gold" size="lg" />
-        <blockquote className="mt-6">
-          <p className="font-[family-name:var(--font-dream-display)] text-[clamp(24px,3.2vw,36px)] leading-[1.25] text-[var(--dream-ink)]">
-            &ldquo;{featured.text}&rdquo;
-          </p>
-        </blockquote>
-        <figcaption className="mt-6 text-sm text-[var(--dream-soft)]">
-          {featured.customerName}
-          {featured.customerCompany ? `, ${featured.customerCompany}` : ""}
-        </figcaption>
-      </figure>
+      <DreamReveal>
+        <figure className="mx-auto max-w-[760px] text-center">
+          <DreamQuoteMark tone="gold" size="lg" />
+          <blockquote className="mt-6">
+            <p className="font-[family-name:var(--font-dream-display)] text-[clamp(24px,3.2vw,36px)] leading-[1.25] text-[var(--dream-ink)]">
+              &ldquo;{featured.text}&rdquo;
+            </p>
+          </blockquote>
+          <figcaption className="mt-6 text-sm text-[var(--dream-soft)]">
+            {featured.customerName}
+            {featured.customerCompany ? `, ${featured.customerCompany}` : ""}
+          </figcaption>
+        </figure>
+      </DreamReveal>
 
       {rest.length > 0 ? (
         <div
           className="dream-testimonials-masonry mt-16"
           data-count={rest.length}
         >
+          {/* Per-card DreamReveal instead of a DreamRevealGroup: the
+              `.dream-testimonials-masonry > *` CSS-columns rule (and its
+              `data-count` selector) needs the cards to be direct children of
+              that container, and DreamRevealGroup can't carry `data-count`.
+              Each reveal div is the column item (`break-inside: avoid`);
+              the card sits inside it. */}
           {rest.map((t) => (
-            <div
-              key={t.id}
-              className="rounded-[var(--dream-radius-card)] border border-[var(--dream-line)] bg-[var(--dream-paper)] p-6 shadow-[var(--dream-shadow-card)]"
-            >
-              <DreamQuoteMark tone="rose" size="sm" />
-              <p className="mt-3 text-[var(--dream-ink)]">
-                &ldquo;{t.text}&rdquo;
-              </p>
-              <p className="mt-3 text-sm text-[var(--dream-soft)]">
-                {t.customerName}
-                {t.customerCompany ? `, ${t.customerCompany}` : ""}
-              </p>
-            </div>
+            <DreamReveal key={t.id}>
+              <div className="rounded-[var(--dream-radius-card)] border border-[var(--dream-line)] bg-[var(--dream-paper)] p-6 shadow-[var(--dream-shadow-card)]">
+                <DreamQuoteMark tone="rose" size="sm" />
+                <p className="mt-3 text-[var(--dream-ink)]">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+                <p className="mt-3 text-sm text-[var(--dream-soft)]">
+                  {t.customerName}
+                  {t.customerCompany ? `, ${t.customerCompany}` : ""}
+                </p>
+              </div>
+            </DreamReveal>
           ))}
         </div>
       ) : null}
