@@ -172,7 +172,13 @@ export function DreamContactForm({
   }
 
   return (
-    <DreamSection sectionAttrs={sectionAttrs} aria-label="Contact form">
+    // `reveal={false}`: forms never sit inside a reveal (the success state
+    // above keeps its reveal).
+    <DreamSection
+      sectionAttrs={sectionAttrs}
+      aria-label="Contact form"
+      reveal={false}
+    >
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
         <div>
           <DreamHeading as="h2" fieldKey="dream.contact.form-heading">
@@ -338,7 +344,7 @@ export function DreamContactForm({
                 >
                   {isSubmitting && (
                     <Loader2
-                      className="h-4 w-4 animate-spin"
+                      className="h-4 w-4 animate-spin motion-reduce:animate-none"
                       aria-hidden="true"
                     />
                   )}

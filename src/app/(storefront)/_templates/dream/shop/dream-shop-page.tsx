@@ -32,7 +32,12 @@ const FIELD_KEYS = [
  *
  * The grid section skips `DreamSection`'s wrapper reveal on purpose: a
  * tall grid never reaches the reveal's 10% visibility threshold at first
- * paint, which would leave products invisible below the fold.
+ * paint, which would leave products invisible below the fold. Instead each
+ * card carries its own `DreamReveal` (stagger = its column slot, see
+ * `dream-shop-filter-client.tsx`). The phase model keeps this safe: cards
+ * already on screen at mount never hide or animate, so the above-the-fold
+ * cards are always visible, and only off-screen cards fade in as they
+ * scroll into view (each is short, so the 10% threshold is reachable).
  */
 export function DreamShopPage({ business }: DefaultProductsPageTemplateProps) {
   const customFields = business.siteContent?.customFields;

@@ -171,6 +171,16 @@ export function DreamServiceItems({
           justify-content: center;
           gap: clamp(24px, 3vw, 32px);
         }
+        @media (prefers-reduced-motion: reduce) {
+          .dream-service-book button,
+          .dream-service-book a {
+            transition: none;
+          }
+          .dream-service-book button:hover,
+          .dream-service-book a:hover {
+            transform: none;
+          }
+        }
       `}</style>
 
       <h2 className="dream-heading !mb-8 text-center">{heading}</h2>

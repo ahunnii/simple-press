@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useId } from "react";
 import { Search, X } from "lucide-react";
 
@@ -10,9 +11,13 @@ import { cn } from "~/lib/utils";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import { DreamInput, DreamSelect } from "../shared/dream-input";
+import { DreamReveal } from "../shared/dream-reveal";
 import { DreamShopCard } from "./dream-shop-card";
 
 const PAGE_SIZE = 12;
+
+/** Widest grid column count (`lg:grid-cols-3`) — a card's reveal stagger is its column slot. */
+const GRID_COLS = 3;
 
 type Props = {
   products: Product[];
@@ -207,7 +212,11 @@ export function DreamShopFilterClient({ products, noResults }: Props) {
         <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-10 p-0 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-14">
           {paginated.map((product, index) => (
             <li key={product.id} className="min-w-0">
-              <DreamShopCard product={product} priority={index < 3} />
+              <DreamReveal
+                style={{ "--i": index % GRID_COLS } as CSSProperties}
+              >
+                <DreamShopCard product={product} priority={index < 3} />
+              </DreamReveal>
             </li>
           ))}
         </ul>

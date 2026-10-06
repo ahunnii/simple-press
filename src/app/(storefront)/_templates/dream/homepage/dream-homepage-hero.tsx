@@ -162,7 +162,7 @@ export function DreamHomepageHero({
           The two buttons sit in their own row wrapper (design.md FIRST
           VIEWPORT: "primary action directly under the lede, dead center").
           The chrome CSS's entrance stagger targets
-          `.dream-js .dream-hero-safe > .dream-hero-ctas` — the wrapper
+          `.dream .dream-hero-safe > .dream-hero-ctas` — the wrapper
           itself, not the buttons — so the row fades in as one.
         */}
         {(f.ctaVisible || f.ctaSecondaryVisible) && (

@@ -8,6 +8,7 @@ import { DREAM_PACKAGES_DEFAULT_ROWS } from ".";
 import { resolveFields } from "..";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
+import { DreamReveal } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
 import { DreamEmptyLane } from "./dream-empty-lane";
 import { DreamPackages, toPackageRow } from "./dream-packages";
@@ -80,28 +81,42 @@ export function DreamServicesIndexPage({ business, services }: Props) {
       <DreamSection
         sectionAttrs={sectionGroupAttr("services", "lanes")}
         aria-label="Services"
+        reveal={false}
       >
         {services.length > 0 ? (
           <div>
             {services.map((service, i) => (
-              <DreamServiceLaneRow
+              // DreamAlternatingRow styles itself with `[&:first-child]:pt-0`
+              // and `last:border-b-0` — both always match when the row is the
+              // only child of a reveal div (row pt is always 0, row border is
+              // always hidden). So the wrapper takes over the first-row top
+              // padding and the hairline: pt-12 on every wrapper but the first,
+              // border-b on every wrapper but the last. Row pb-12 still sits
+              // above the border, so the rhythm is identical to before.
+              <DreamReveal
                 key={service.id}
-                service={service}
-                index={i}
-                isLast={i === services.length - 1}
-                seeDetailsLabel={
-                  f["dream.services.lanes-see-details-label"] ?? ""
-                }
-              />
+                className="border-b border-[var(--dream-line)] pt-12 first:pt-0 last:border-b-0"
+              >
+                <DreamServiceLaneRow
+                  service={service}
+                  index={i}
+                  isLast={i === services.length - 1}
+                  seeDetailsLabel={
+                    f["dream.services.lanes-see-details-label"] ?? ""
+                  }
+                />
+              </DreamReveal>
             ))}
           </div>
         ) : (
-          <DreamEmptyLane
-            heading={f["dream.services.lanes-empty-heading"] ?? ""}
-            body={f["dream.services.lanes-empty-body"] ?? ""}
-            ctaLabel={f["dream.services.lanes-empty-cta-label"] ?? ""}
-            ctaUrl={f["dream.services.lanes-empty-cta-url"] ?? ""}
-          />
+          <DreamReveal>
+            <DreamEmptyLane
+              heading={f["dream.services.lanes-empty-heading"] ?? ""}
+              body={f["dream.services.lanes-empty-body"] ?? ""}
+              ctaLabel={f["dream.services.lanes-empty-cta-label"] ?? ""}
+              ctaUrl={f["dream.services.lanes-empty-cta-url"] ?? ""}
+            />
+          </DreamReveal>
         )}
       </DreamSection>
 

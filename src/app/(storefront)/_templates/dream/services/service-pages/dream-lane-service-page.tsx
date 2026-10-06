@@ -17,6 +17,7 @@ import { DreamHeading } from "../../shared/dream-heading";
 import { DreamPageHero } from "../../shared/dream-page-hero";
 import { DreamPhoto } from "../../shared/dream-photo";
 import { DreamQuoteCta } from "../../shared/dream-quote-cta";
+import { DreamReveal } from "../../shared/dream-reveal";
 import { DreamSection } from "../../shared/dream-section";
 import { DreamAlternatingRow } from "../dream-alternating-row";
 import { DreamServiceItems } from "./dream-service-items";
@@ -99,21 +100,32 @@ export function DreamLaneServicePage({
       {blocks.length > 0 && (
         <DreamSection reveal={false}>
           {blocks.map((block, i) => (
-            <DreamAlternatingRow
+            // Same wrapper contract as the services index lanes: the row's
+            // `[&:first-child]:pt-0` / `last:border-b-0` always match inside
+            // a reveal, so the wrapper carries the first-row padding and the
+            // divider hairline (`divider` is therefore off on the row).
+            <DreamReveal
               key={i}
-              reversed={i % 2 === 1}
-              divider={i !== blocks.length - 1}
-              media={
-                <DreamPhoto src={block.image} alt={block.alt} aspect="4 / 3" />
-              }
+              className="border-b border-[var(--dream-line)] pt-12 first:pt-0 last:border-b-0"
             >
-              <DreamHeading as="h2">{block.heading}</DreamHeading>
-              {block.body && (
-                <p className="!mt-4 max-w-[60ch] text-[17px] leading-relaxed text-[var(--dream-soft)]">
-                  {block.body}
-                </p>
-              )}
-            </DreamAlternatingRow>
+              <DreamAlternatingRow
+                reversed={i % 2 === 1}
+                media={
+                  <DreamPhoto
+                    src={block.image}
+                    alt={block.alt}
+                    aspect="4 / 3"
+                  />
+                }
+              >
+                <DreamHeading as="h2">{block.heading}</DreamHeading>
+                {block.body && (
+                  <p className="!mt-4 max-w-[60ch] text-[17px] leading-relaxed text-[var(--dream-soft)]">
+                    {block.body}
+                  </p>
+                )}
+              </DreamAlternatingRow>
+            </DreamReveal>
           ))}
         </DreamSection>
       )}

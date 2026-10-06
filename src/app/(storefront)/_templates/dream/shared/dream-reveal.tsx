@@ -16,11 +16,16 @@ type Props = {
  * Single-block scroll reveal (fade + 12px rise). Thin client wrapper around
  * `useDreamReveal` so server components can opt into the dream reveal
  * system by wrapping already-rendered children, without becoming
- * `"use client"` themselves. Structurally copied from
- * `wealth/shared/wealth-reveal.tsx`.
+ * `"use client"` themselves.
  *
- * Progressive enhancement + reduced-motion are handled by the hook and the
- * `.dream-js` / `@media (prefers-reduced-motion)` rules in globals.css.
+ * Renders one of three phase classes alongside the base `dream-reveal`
+ * class: no extra class while `"idle"` (SSR/no-JS/reduced-motion/already on
+ * screen — CSS shows it as-is), `"out"` while off-screen and armed (CSS
+ * hides it with no transition), `"in"` once the observer has fired (CSS
+ * carries the reveal transition). A lone reveal can be staggered against a
+ * sibling by passing `style={{ "--i": n }}` (80ms per step, same as group
+ * items). See `use-dream-reveal.ts` for why the phase is set in a layout
+ * effect instead of a root `.dream-js` gate.
  */
 export function DreamReveal({
   children,
@@ -28,11 +33,11 @@ export function DreamReveal({
   style,
   threshold = 0.1,
 }: Props) {
-  const { ref, visible } = useDreamReveal(threshold);
+  const { ref, phase } = useDreamReveal(threshold);
   return (
     <div
       ref={ref}
-      className={cn("dream-reveal", visible && "is-visible", className)}
+      className={cn("dream-reveal", phase !== "idle" && phase, className)}
       style={style}
     >
       {children}
@@ -43,8 +48,10 @@ export function DreamReveal({
 /**
  * Staggered reveal group. The container observer lives here; mapped
  * children must each carry `className="dream-reveal-item"` and
- * `style={{ "--i": Math.min(i, 7) }}` for the cascade (≤80ms per item) —
- * used for packages and `DreamSteps` (design.md "Reveals").
+ * `style={{ "--i": Math.min(i, 7) }}` (cap 7) for the cascade — the
+ * `.dream-reveal-group.in .dream-reveal-item` rule in globals.css delays
+ * each item by `calc(var(--i, 0) * 80ms)`. Used for packages and
+ * `DreamSteps` (design.md "Reveals").
  */
 export function DreamRevealGroup({
   children,
@@ -52,11 +59,11 @@ export function DreamRevealGroup({
   style,
   threshold = 0.1,
 }: Props) {
-  const { ref, visible } = useDreamReveal(threshold);
+  const { ref, phase } = useDreamReveal(threshold);
   return (
     <div
       ref={ref}
-      className={cn("dream-reveal-group", visible && "is-visible", className)}
+      className={cn("dream-reveal-group", phase !== "idle" && phase, className)}
       style={style}
     >
       {children}
