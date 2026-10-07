@@ -31,11 +31,11 @@ export function DarkTrendShopClient({ products }: Props) {
     collections,
     currentPage,
     totalPages,
-    handlePage,
     filtered,
     paginated,
     hasActiveFilters,
     clearFilters,
+    pageLinkProps,
   } = useShopFilters(products, { pageSize: 12 });
 
   // Sync search state when ?q= changes externally (e.g. the header search
@@ -186,14 +186,22 @@ export function DarkTrendShopClient({ products }: Props) {
           aria-label="Pagination"
           className="mt-12 flex items-center justify-center gap-3"
         >
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
-          >
-            Previous
-          </button>
+          {currentPage === 1 ? (
+            <button
+              type="button"
+              disabled
+              className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
+            >
+              Previous
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage - 1)}
+              className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
+            >
+              Previous
+            </a>
+          )}
           <span
             className="text-sm text-white/60"
             aria-live="polite"
@@ -205,14 +213,22 @@ export function DarkTrendShopClient({ products }: Props) {
             <span className="sr-only"> of </span>
             {totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
-          >
-            Next
-          </button>
+          {currentPage === totalPages ? (
+            <button
+              type="button"
+              disabled
+              className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
+            >
+              Next
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage + 1)}
+              className="flex h-9 items-center rounded-md border border-white/10 px-4 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white disabled:opacity-30"
+            >
+              Next
+            </a>
+          )}
         </nav>
       )}
     </div>

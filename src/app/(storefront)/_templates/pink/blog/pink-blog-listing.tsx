@@ -8,6 +8,7 @@ import { Search } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { usePageParam } from "~/hooks/use-page-param";
 
 import { PinkBadge } from "../shared/pink-badge";
 import { PinkEmptyState } from "../shared/pink-empty-state";
@@ -55,7 +56,10 @@ export function PinkBlogListing({
   searchEmptyMessage,
 }: Props) {
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // "Older posts" is URL-backed (?page=N shows the first N × PAGE_SIZE posts) so
+  // each step is a crawlable link.
+  const { page, goToPage, pageLinkProps } = usePageParam();
+  const visibleCount = page * PAGE_SIZE;
   const [query, setQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -219,7 +223,7 @@ export function PinkBlogListing({
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
-                  setVisibleCount(PAGE_SIZE);
+                  if (page > 1) goToPage(1, { scroll: false });
                 }}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
@@ -258,7 +262,7 @@ export function PinkBlogListing({
                 activeId={sort}
                 onSelect={(id) => {
                   setSort(id === "oldest" ? "oldest" : "newest");
-                  setVisibleCount(PAGE_SIZE);
+                  if (page > 1) goToPage(1, { scroll: false });
                 }}
                 items={[
                   { id: "newest", label: "Newest" },
@@ -393,13 +397,12 @@ export function PinkBlogListing({
 
               {hasMore && (
                 <div className="mt-10 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  <a
+                    {...pageLinkProps(page + 1, { scroll: false })}
                     className="pink-btn pink-btn-ghost"
                   >
                     Older posts
-                  </button>
+                  </a>
                 </div>
               )}
             </>

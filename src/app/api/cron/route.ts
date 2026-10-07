@@ -14,6 +14,7 @@
 //   9. loyaltyBirthday      — award birthday points to customers whose month/day is today (business time zone)
 //  10. invoiceOverdueAlerts — email an owner the first time one of their invoices goes past due
 //  11. invoiceWeeklyDigest  — Monday 8am (business time zone) owner summary of open invoices
+//  12. indexNow             — submit changed storefront URLs to IndexNow (Bing, Yandex, …)
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -41,6 +42,7 @@ import { sendInvoiceDigests } from "~/lib/invoices/weekly-digest";
 import { awardBirthdayPoints } from "~/lib/loyalty/birthday";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
+import { runIndexNowSweep } from "~/lib/seo/indexnow";
 import { syncSubscriptions } from "~/lib/subscriptions/sync";
 import { syncVideoSources } from "~/lib/youtube/sync";
 import { db } from "~/server/db";
@@ -390,6 +392,18 @@ const JOBS: readonly CronJob[] = [
     key: "invoiceWeeklyDigest",
     name: "invoice-weekly-digest",
     run: () => sendInvoiceDigests(db),
+  },
+  // IndexNow: tell participating search engines which storefront URLs
+  // changed since each store's watermark (full sitemap on first run or after
+  // a canonical-host change). Last on purpose, so products/pages the
+  // scheduled-publish jobs above just flipped go out in the same tick.
+  // No-op unless INDEXNOW_KEY is set in a non-preview production env; up to
+  // 25 stores per tick, oldest watermark first. Throttling (429) or a
+  // rejected key (403) stops the sweep inside `runIndexNowSweep`.
+  {
+    key: "indexNow",
+    name: "indexnow",
+    run: () => runIndexNowSweep(db),
   },
 ];
 

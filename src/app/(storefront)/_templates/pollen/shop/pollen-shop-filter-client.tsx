@@ -35,11 +35,11 @@ export function PollenShopFilterClient({ products }: Props) {
     handleSort,
     currentPage,
     totalPages,
-    handlePage,
     paginated,
     filtered,
     hasActiveFilters,
     clearFilters,
+    pageLinkProps,
   } = useShopFilters(products, { pageSize: 12 });
 
   return (
@@ -130,14 +130,21 @@ export function PollenShopFilterClient({ products }: Props) {
           aria-label="Pagination"
           className="mt-10 flex items-center justify-center gap-3"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePage(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
+          {currentPage === 1 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Previous
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <a {...pageLinkProps(currentPage - 1)}>
+                Previous
+              </a>
+            </Button>
+          )}
           {/* M-9: aria-live + sr-only label on page indicator */}
           <span
             className="text-sm text-[#4c566a]"
@@ -150,14 +157,21 @@ export function PollenShopFilterClient({ products }: Props) {
             <span className="sr-only"> of </span>
             {totalPages}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+          {currentPage === totalPages ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Next
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <a {...pageLinkProps(currentPage + 1)}>
+                Next
+              </a>
+            </Button>
+          )}
         </nav>
       )}
     </>

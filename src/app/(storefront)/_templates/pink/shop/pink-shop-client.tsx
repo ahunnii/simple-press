@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
@@ -177,7 +177,6 @@ export function PinkShopClient({
   const {
     sortParam,
     handleSort,
-    priceMax,
     maxPrice,
     localPriceMax,
     setLocalPriceMax,
@@ -191,9 +190,13 @@ export function PinkShopClient({
     filtered,
     hasActiveFilters,
     clearFilters,
+    requestedPage,
+    pageLinkProps,
   } = useShopFilters(products);
 
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // "Load more" is URL-backed (?page=N shows the first N × PAGE_SIZE pieces) so
+  // each step is a crawlable link; filter/sort changes clear `page` in the hook.
+  const visibleCount = requestedPage * PAGE_SIZE;
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // P5 fix: distinguish "no products exist at all" (unfiltered — the filter
@@ -201,10 +204,6 @@ export function PinkShopClient({
   // from "a filter narrowed the catalog to zero" (the rail/sort bar must
   // stay — they're the shopper's way out via Clear/adjusting a filter).
   const hasProducts = products.length > 0;
-
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [filtered.length, sortParam, priceMax, inStockOnly, activeCollectionId]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -477,14 +476,13 @@ export function PinkShopClient({
                   Showing {visible.length} of {filtered.length}
                 </p>
                 {hasMore && (
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  <a
+                    {...pageLinkProps(requestedPage + 1, { scroll: false })}
                     className="pink-btn pink-btn-ghost px-6 py-3"
                     {...fieldAttr("pink.shop.load-more-label")}
                   >
                     {copy.loadMoreLabel}
-                  </button>
+                  </a>
                 )}
               </div>
             </>

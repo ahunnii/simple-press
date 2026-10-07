@@ -13429,6 +13429,12 @@ export namespace Prisma {
     freeShippingThreshold: number | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    handlingDaysMin: number | null
+    handlingDaysMax: number | null
+    transitDaysMin: number | null
+    transitDaysMax: number | null
+    returnWindowDays: number | null
+    returnShippingFeeCents: number | null
   }
 
   export type BusinessSumAggregateOutputType = {
@@ -13438,6 +13444,12 @@ export namespace Prisma {
     freeShippingThreshold: number | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    handlingDaysMin: number | null
+    handlingDaysMax: number | null
+    transitDaysMin: number | null
+    transitDaysMax: number | null
+    returnWindowDays: number | null
+    returnShippingFeeCents: number | null
   }
 
   export type BusinessMinAggregateOutputType = {
@@ -13493,6 +13505,16 @@ export namespace Prisma {
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    handlingDaysMin: number | null
+    handlingDaysMax: number | null
+    transitDaysMin: number | null
+    transitDaysMax: number | null
+    returnWindowDays: number | null
+    returnFees: string | null
+    returnShippingFeeCents: number | null
+    returnMethod: string | null
+    indexNowSubmittedAt: Date | null
+    indexNowHost: string | null
     donationLabel: string | null
     venmoHandle: string | null
     cashAppHandle: string | null
@@ -13553,6 +13575,16 @@ export namespace Prisma {
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
+    handlingDaysMin: number | null
+    handlingDaysMax: number | null
+    transitDaysMin: number | null
+    transitDaysMax: number | null
+    returnWindowDays: number | null
+    returnFees: string | null
+    returnShippingFeeCents: number | null
+    returnMethod: string | null
+    indexNowSubmittedAt: Date | null
+    indexNowHost: string | null
     donationLabel: string | null
     venmoHandle: string | null
     cashAppHandle: string | null
@@ -13620,6 +13652,16 @@ export namespace Prisma {
     shippingFallbackRate: number
     shippingDefaultItemWeightLb: number
     salesCountries: number
+    handlingDaysMin: number
+    handlingDaysMax: number
+    transitDaysMin: number
+    transitDaysMax: number
+    returnWindowDays: number
+    returnFees: number
+    returnShippingFeeCents: number
+    returnMethod: number
+    indexNowSubmittedAt: number
+    indexNowHost: number
     donationLabel: number
     donationPresetAmounts: number
     venmoHandle: number
@@ -13637,6 +13679,12 @@ export namespace Prisma {
     freeShippingThreshold?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    handlingDaysMin?: true
+    handlingDaysMax?: true
+    transitDaysMin?: true
+    transitDaysMax?: true
+    returnWindowDays?: true
+    returnShippingFeeCents?: true
   }
 
   export type BusinessSumAggregateInputType = {
@@ -13646,6 +13694,12 @@ export namespace Prisma {
     freeShippingThreshold?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    handlingDaysMin?: true
+    handlingDaysMax?: true
+    transitDaysMin?: true
+    transitDaysMax?: true
+    returnWindowDays?: true
+    returnShippingFeeCents?: true
   }
 
   export type BusinessMinAggregateInputType = {
@@ -13701,6 +13755,16 @@ export namespace Prisma {
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    handlingDaysMin?: true
+    handlingDaysMax?: true
+    transitDaysMin?: true
+    transitDaysMax?: true
+    returnWindowDays?: true
+    returnFees?: true
+    returnShippingFeeCents?: true
+    returnMethod?: true
+    indexNowSubmittedAt?: true
+    indexNowHost?: true
     donationLabel?: true
     venmoHandle?: true
     cashAppHandle?: true
@@ -13761,6 +13825,16 @@ export namespace Prisma {
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
+    handlingDaysMin?: true
+    handlingDaysMax?: true
+    transitDaysMin?: true
+    transitDaysMax?: true
+    returnWindowDays?: true
+    returnFees?: true
+    returnShippingFeeCents?: true
+    returnMethod?: true
+    indexNowSubmittedAt?: true
+    indexNowHost?: true
     donationLabel?: true
     venmoHandle?: true
     cashAppHandle?: true
@@ -13828,6 +13902,16 @@ export namespace Prisma {
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
     salesCountries?: true
+    handlingDaysMin?: true
+    handlingDaysMax?: true
+    transitDaysMin?: true
+    transitDaysMax?: true
+    returnWindowDays?: true
+    returnFees?: true
+    returnShippingFeeCents?: true
+    returnMethod?: true
+    indexNowSubmittedAt?: true
+    indexNowHost?: true
     donationLabel?: true
     donationPresetAmounts?: true
     venmoHandle?: true
@@ -13983,6 +14067,16 @@ export namespace Prisma {
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
     salesCountries: string[]
+    handlingDaysMin: number | null
+    handlingDaysMax: number | null
+    transitDaysMin: number | null
+    transitDaysMax: number | null
+    returnWindowDays: number | null
+    returnFees: string | null
+    returnShippingFeeCents: number | null
+    returnMethod: string | null
+    indexNowSubmittedAt: Date | null
+    indexNowHost: string | null
     donationLabel: string
     donationPresetAmounts: JsonValue | null
     venmoHandle: string | null
@@ -14070,6 +14164,16 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    handlingDaysMin?: boolean
+    handlingDaysMax?: boolean
+    transitDaysMin?: boolean
+    transitDaysMax?: boolean
+    returnWindowDays?: boolean
+    returnFees?: boolean
+    returnShippingFeeCents?: boolean
+    returnMethod?: boolean
+    indexNowSubmittedAt?: boolean
+    indexNowHost?: boolean
     donationLabel?: boolean
     donationPresetAmounts?: boolean
     venmoHandle?: boolean
@@ -14180,6 +14284,16 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    handlingDaysMin?: boolean
+    handlingDaysMax?: boolean
+    transitDaysMin?: boolean
+    transitDaysMax?: boolean
+    returnWindowDays?: boolean
+    returnFees?: boolean
+    returnShippingFeeCents?: boolean
+    returnMethod?: boolean
+    indexNowSubmittedAt?: boolean
+    indexNowHost?: boolean
     donationLabel?: boolean
     donationPresetAmounts?: boolean
     venmoHandle?: boolean
@@ -14248,6 +14362,16 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    handlingDaysMin?: boolean
+    handlingDaysMax?: boolean
+    transitDaysMin?: boolean
+    transitDaysMax?: boolean
+    returnWindowDays?: boolean
+    returnFees?: boolean
+    returnShippingFeeCents?: boolean
+    returnMethod?: boolean
+    indexNowSubmittedAt?: boolean
+    indexNowHost?: boolean
     donationLabel?: boolean
     donationPresetAmounts?: boolean
     venmoHandle?: boolean
@@ -14316,6 +14440,16 @@ export namespace Prisma {
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
+    handlingDaysMin?: boolean
+    handlingDaysMax?: boolean
+    transitDaysMin?: boolean
+    transitDaysMax?: boolean
+    returnWindowDays?: boolean
+    returnFees?: boolean
+    returnShippingFeeCents?: boolean
+    returnMethod?: boolean
+    indexNowSubmittedAt?: boolean
+    indexNowHost?: boolean
     donationLabel?: boolean
     donationPresetAmounts?: boolean
     venmoHandle?: boolean
@@ -14324,7 +14458,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -14477,6 +14611,16 @@ export namespace Prisma {
       shippingFallbackRate: number | null
       shippingDefaultItemWeightLb: number | null
       salesCountries: string[]
+      handlingDaysMin: number | null
+      handlingDaysMax: number | null
+      transitDaysMin: number | null
+      transitDaysMax: number | null
+      returnWindowDays: number | null
+      returnFees: string | null
+      returnShippingFeeCents: number | null
+      returnMethod: string | null
+      indexNowSubmittedAt: Date | null
+      indexNowHost: string | null
       donationLabel: string
       donationPresetAmounts: Prisma.JsonValue | null
       venmoHandle: string | null
@@ -15006,6 +15150,16 @@ export namespace Prisma {
     readonly shippingFallbackRate: FieldRef<"Business", 'Int'>
     readonly shippingDefaultItemWeightLb: FieldRef<"Business", 'Float'>
     readonly salesCountries: FieldRef<"Business", 'String[]'>
+    readonly handlingDaysMin: FieldRef<"Business", 'Int'>
+    readonly handlingDaysMax: FieldRef<"Business", 'Int'>
+    readonly transitDaysMin: FieldRef<"Business", 'Int'>
+    readonly transitDaysMax: FieldRef<"Business", 'Int'>
+    readonly returnWindowDays: FieldRef<"Business", 'Int'>
+    readonly returnFees: FieldRef<"Business", 'String'>
+    readonly returnShippingFeeCents: FieldRef<"Business", 'Int'>
+    readonly returnMethod: FieldRef<"Business", 'String'>
+    readonly indexNowSubmittedAt: FieldRef<"Business", 'DateTime'>
+    readonly indexNowHost: FieldRef<"Business", 'String'>
     readonly donationLabel: FieldRef<"Business", 'String'>
     readonly donationPresetAmounts: FieldRef<"Business", 'Json'>
     readonly venmoHandle: FieldRef<"Business", 'String'>
@@ -84471,6 +84625,16 @@ export namespace Prisma {
     shippingFallbackRate: 'shippingFallbackRate',
     shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
     salesCountries: 'salesCountries',
+    handlingDaysMin: 'handlingDaysMin',
+    handlingDaysMax: 'handlingDaysMax',
+    transitDaysMin: 'transitDaysMin',
+    transitDaysMax: 'transitDaysMax',
+    returnWindowDays: 'returnWindowDays',
+    returnFees: 'returnFees',
+    returnShippingFeeCents: 'returnShippingFeeCents',
+    returnMethod: 'returnMethod',
+    indexNowSubmittedAt: 'indexNowSubmittedAt',
+    indexNowHost: 'indexNowHost',
     donationLabel: 'donationLabel',
     donationPresetAmounts: 'donationPresetAmounts',
     venmoHandle: 'venmoHandle',
@@ -86267,6 +86431,16 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    handlingDaysMin?: IntNullableFilter<"Business"> | number | null
+    handlingDaysMax?: IntNullableFilter<"Business"> | number | null
+    transitDaysMin?: IntNullableFilter<"Business"> | number | null
+    transitDaysMax?: IntNullableFilter<"Business"> | number | null
+    returnWindowDays?: IntNullableFilter<"Business"> | number | null
+    returnFees?: StringNullableFilter<"Business"> | string | null
+    returnShippingFeeCents?: IntNullableFilter<"Business"> | number | null
+    returnMethod?: StringNullableFilter<"Business"> | string | null
+    indexNowSubmittedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    indexNowHost?: StringNullableFilter<"Business"> | string | null
     donationLabel?: StringFilter<"Business"> | string
     donationPresetAmounts?: JsonNullableFilter<"Business">
     venmoHandle?: StringNullableFilter<"Business"> | string | null
@@ -86376,6 +86550,16 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
+    handlingDaysMin?: SortOrderInput | SortOrder
+    handlingDaysMax?: SortOrderInput | SortOrder
+    transitDaysMin?: SortOrderInput | SortOrder
+    transitDaysMax?: SortOrderInput | SortOrder
+    returnWindowDays?: SortOrderInput | SortOrder
+    returnFees?: SortOrderInput | SortOrder
+    returnShippingFeeCents?: SortOrderInput | SortOrder
+    returnMethod?: SortOrderInput | SortOrder
+    indexNowSubmittedAt?: SortOrderInput | SortOrder
+    indexNowHost?: SortOrderInput | SortOrder
     donationLabel?: SortOrder
     donationPresetAmounts?: SortOrderInput | SortOrder
     venmoHandle?: SortOrderInput | SortOrder
@@ -86488,6 +86672,16 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    handlingDaysMin?: IntNullableFilter<"Business"> | number | null
+    handlingDaysMax?: IntNullableFilter<"Business"> | number | null
+    transitDaysMin?: IntNullableFilter<"Business"> | number | null
+    transitDaysMax?: IntNullableFilter<"Business"> | number | null
+    returnWindowDays?: IntNullableFilter<"Business"> | number | null
+    returnFees?: StringNullableFilter<"Business"> | string | null
+    returnShippingFeeCents?: IntNullableFilter<"Business"> | number | null
+    returnMethod?: StringNullableFilter<"Business"> | string | null
+    indexNowSubmittedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    indexNowHost?: StringNullableFilter<"Business"> | string | null
     donationLabel?: StringFilter<"Business"> | string
     donationPresetAmounts?: JsonNullableFilter<"Business">
     venmoHandle?: StringNullableFilter<"Business"> | string | null
@@ -86597,6 +86791,16 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
+    handlingDaysMin?: SortOrderInput | SortOrder
+    handlingDaysMax?: SortOrderInput | SortOrder
+    transitDaysMin?: SortOrderInput | SortOrder
+    transitDaysMax?: SortOrderInput | SortOrder
+    returnWindowDays?: SortOrderInput | SortOrder
+    returnFees?: SortOrderInput | SortOrder
+    returnShippingFeeCents?: SortOrderInput | SortOrder
+    returnMethod?: SortOrderInput | SortOrder
+    indexNowSubmittedAt?: SortOrderInput | SortOrder
+    indexNowHost?: SortOrderInput | SortOrder
     donationLabel?: SortOrder
     donationPresetAmounts?: SortOrderInput | SortOrder
     venmoHandle?: SortOrderInput | SortOrder
@@ -86673,6 +86877,16 @@ export namespace Prisma {
     shippingFallbackRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableWithAggregatesFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
+    handlingDaysMin?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    handlingDaysMax?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    transitDaysMin?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    transitDaysMax?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    returnWindowDays?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    returnFees?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    returnShippingFeeCents?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    returnMethod?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    indexNowSubmittedAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    indexNowHost?: StringNullableWithAggregatesFilter<"Business"> | string | null
     donationLabel?: StringWithAggregatesFilter<"Business"> | string
     donationPresetAmounts?: JsonNullableWithAggregatesFilter<"Business">
     venmoHandle?: StringNullableWithAggregatesFilter<"Business"> | string | null
@@ -93227,6 +93441,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -93336,6 +93560,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -93445,6 +93679,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93554,6 +93798,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93663,6 +93917,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -93731,6 +93995,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -93799,6 +94073,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -101636,6 +101920,16 @@ export namespace Prisma {
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
     salesCountries?: SortOrder
+    handlingDaysMin?: SortOrder
+    handlingDaysMax?: SortOrder
+    transitDaysMin?: SortOrder
+    transitDaysMax?: SortOrder
+    returnWindowDays?: SortOrder
+    returnFees?: SortOrder
+    returnShippingFeeCents?: SortOrder
+    returnMethod?: SortOrder
+    indexNowSubmittedAt?: SortOrder
+    indexNowHost?: SortOrder
     donationLabel?: SortOrder
     donationPresetAmounts?: SortOrder
     venmoHandle?: SortOrder
@@ -101651,6 +101945,12 @@ export namespace Prisma {
     freeShippingThreshold?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    handlingDaysMin?: SortOrder
+    handlingDaysMax?: SortOrder
+    transitDaysMin?: SortOrder
+    transitDaysMax?: SortOrder
+    returnWindowDays?: SortOrder
+    returnShippingFeeCents?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -101706,6 +102006,16 @@ export namespace Prisma {
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    handlingDaysMin?: SortOrder
+    handlingDaysMax?: SortOrder
+    transitDaysMin?: SortOrder
+    transitDaysMax?: SortOrder
+    returnWindowDays?: SortOrder
+    returnFees?: SortOrder
+    returnShippingFeeCents?: SortOrder
+    returnMethod?: SortOrder
+    indexNowSubmittedAt?: SortOrder
+    indexNowHost?: SortOrder
     donationLabel?: SortOrder
     venmoHandle?: SortOrder
     cashAppHandle?: SortOrder
@@ -101766,6 +102076,16 @@ export namespace Prisma {
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    handlingDaysMin?: SortOrder
+    handlingDaysMax?: SortOrder
+    transitDaysMin?: SortOrder
+    transitDaysMax?: SortOrder
+    returnWindowDays?: SortOrder
+    returnFees?: SortOrder
+    returnShippingFeeCents?: SortOrder
+    returnMethod?: SortOrder
+    indexNowSubmittedAt?: SortOrder
+    indexNowHost?: SortOrder
     donationLabel?: SortOrder
     venmoHandle?: SortOrder
     cashAppHandle?: SortOrder
@@ -101780,6 +102100,12 @@ export namespace Prisma {
     freeShippingThreshold?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
+    handlingDaysMin?: SortOrder
+    handlingDaysMax?: SortOrder
+    transitDaysMin?: SortOrder
+    transitDaysMax?: SortOrder
+    returnWindowDays?: SortOrder
+    returnShippingFeeCents?: SortOrder
   }
 
   export type EnumBusinessDomainStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -112110,6 +112436,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -112218,6 +112554,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -112393,6 +112739,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112501,6 +112857,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -116323,6 +116689,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -116431,6 +116807,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -116555,6 +116941,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -116663,6 +117059,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -116771,6 +117177,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -116879,6 +117295,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -117003,6 +117429,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117111,6 +117547,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117268,6 +117714,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -117376,6 +117832,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -117929,6 +118395,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118037,6 +118513,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118790,6 +119276,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -118898,6 +119394,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -119044,6 +119550,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119152,6 +119668,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119568,6 +120094,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -119676,6 +120212,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -119852,6 +120398,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119960,6 +120516,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120201,6 +120767,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -120309,6 +120885,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -120433,6 +121019,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120541,6 +121137,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120649,6 +121255,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -120757,6 +121373,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -120929,6 +121555,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121037,6 +121673,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121196,6 +121842,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -121304,6 +121960,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -121469,6 +122135,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121577,6 +122253,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121786,6 +122472,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -121894,6 +122590,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -122125,6 +122831,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122233,6 +122949,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122386,6 +123112,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -122494,6 +123230,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -123197,6 +123943,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -123305,6 +124061,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124037,6 +124803,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -124145,6 +124921,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -124739,6 +125525,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124847,6 +125643,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -125876,6 +126682,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -125984,6 +126800,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -126235,6 +127061,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126343,6 +127179,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126699,6 +127545,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -126807,6 +127663,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -127309,6 +128175,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127417,6 +128293,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127712,6 +128598,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -127820,6 +128716,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -128128,6 +129034,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128236,6 +129152,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128392,6 +129318,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -128500,6 +129436,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -128747,6 +129693,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128855,6 +129811,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129083,6 +130049,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -129191,6 +130167,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -129407,6 +130393,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129515,6 +130511,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129678,6 +130684,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -129786,6 +130802,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -129910,6 +130936,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130018,6 +131054,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130126,6 +131172,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -130234,6 +131290,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -130358,6 +131424,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130466,6 +131542,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130574,6 +131660,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -130682,6 +131778,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -130851,6 +131957,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130959,6 +132075,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131118,6 +132244,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -131226,6 +132362,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -131350,6 +132496,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131458,6 +132614,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131566,6 +132732,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -131674,6 +132850,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -131830,6 +133016,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131938,6 +133134,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132161,6 +133367,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -132269,6 +133485,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -132458,6 +133684,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132566,6 +133802,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132745,6 +133991,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -132853,6 +134109,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -133042,6 +134308,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133150,6 +134426,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134019,6 +135305,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -134127,6 +135423,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -134296,6 +135602,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134404,6 +135720,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134563,6 +135889,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -134671,6 +136007,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -134795,6 +136141,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134903,6 +136259,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135011,6 +136377,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -135119,6 +136495,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -135265,6 +136651,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135373,6 +136769,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135656,6 +137062,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -135764,6 +137180,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -135995,6 +137421,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136103,6 +137539,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136211,6 +137657,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -136319,6 +137775,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -136495,6 +137961,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136603,6 +138079,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136816,6 +138302,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -136924,6 +138420,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -137095,6 +138601,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137203,6 +138719,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137311,6 +138837,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -137419,6 +138955,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -137581,6 +139127,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137689,6 +139245,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137838,6 +139404,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -137946,6 +139522,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -138101,6 +139687,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138209,6 +139805,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138317,6 +139923,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -138425,6 +140041,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -138549,6 +140175,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138657,6 +140293,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138765,6 +140411,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -138873,6 +140529,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -139044,6 +140710,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139152,6 +140828,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139313,6 +140999,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -139421,6 +141117,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -139545,6 +141251,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139653,6 +141369,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139761,6 +141487,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -139869,6 +141605,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -140122,6 +141868,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140230,6 +141986,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140549,6 +142315,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -140657,6 +142433,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -140882,6 +142668,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140990,6 +142786,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -141294,6 +143100,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -141402,6 +143218,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -141868,6 +143694,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -141976,6 +143812,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142374,6 +144220,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -142482,6 +144338,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -142606,6 +144472,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142714,6 +144590,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142822,6 +144708,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -142930,6 +144826,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -143092,6 +144998,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -143200,6 +145116,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -143430,6 +145356,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -143538,6 +145474,16 @@ export namespace Prisma {
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
     donationLabel?: string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: string | null
@@ -143859,6 +145805,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
@@ -143967,6 +145923,16 @@ export namespace Prisma {
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
     donationLabel?: StringFieldUpdateOperationsInput | string
     donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
     venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null

@@ -207,6 +207,7 @@ function getNewProductDefaults(): ProductFormSchema {
     cost: undefined,
     featured: false,
     sku: "",
+    barcode: "",
     trackInventory: false,
     inventoryQty: 0,
     allowBackorders: false,
@@ -340,6 +341,7 @@ export function ProductForm({
       cost: product?.cost != null ? product.cost / 100 : undefined,
       featured: product?.featured ?? false,
       sku: product?.sku ?? "",
+      barcode: product?.barcode ?? "",
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
@@ -582,6 +584,7 @@ export function ProductForm({
       id: v.id,
       name: v.name,
       sku: v.sku ?? undefined,
+      barcode: v.barcode ?? undefined,
       price: v.price ?? priceInCents,
       compareAtPrice: v.compareAtPrice ?? undefined,
       inventoryQty: v.inventoryQty,
@@ -702,6 +705,7 @@ export function ProductForm({
               ? new Date(data.scheduledPublishAt)
               : null,
           sku: skuValue,
+          barcode: data.barcode,
           trackInventory: data.trackInventory,
           allowBackorders: data.allowBackorders,
           inventoryQty: data.inventoryQty ?? 0,
@@ -712,6 +716,7 @@ export function ProductForm({
             id: v.id,
             name: v.name,
             sku: v.sku ?? undefined,
+            barcode: v.barcode ?? undefined,
             price: v.price ?? priceInCents,
             compareAtPrice: v.compareAtPrice ?? undefined,
             inventoryQty: v.inventoryQty,
@@ -792,6 +797,7 @@ export function ProductForm({
               ? new Date(data.scheduledPublishAt)
               : null,
           sku: skuValue,
+          barcode: data.barcode,
           trackInventory: data.trackInventory,
           allowBackorders: data.allowBackorders,
           inventoryQty: data.inventoryQty ?? 0,
@@ -803,6 +809,7 @@ export function ProductForm({
           variants: variants?.map((v) => ({
             name: v.name,
             sku: v.sku ?? undefined,
+            barcode: v.barcode ?? undefined,
             price: v.price ?? priceInCents,
             compareAtPrice: v.compareAtPrice ?? undefined,
             inventoryQty: v.inventoryQty,
@@ -1557,16 +1564,25 @@ export function ProductForm({
                       <CardContent className="space-y-4">
                         {variants.length > 0 ? (
                           <p className="text-muted-foreground text-sm">
-                            SKU is set per variant below.
+                            SKU and barcode are set per variant below.
                           </p>
                         ) : (
-                          <InputFormField
-                            form={form}
-                            name="sku"
-                            label="SKU"
-                            placeholder="e.g., TSHIRT-WHT-M"
-                            description="Your own stock-keeping code. Used to match rows when importing inventory."
-                          />
+                          <>
+                            <InputFormField
+                              form={form}
+                              name="sku"
+                              label="SKU"
+                              placeholder="e.g., TSHIRT-WHT-M"
+                              description="Your own stock-keeping code. Used to match rows when importing inventory."
+                            />
+                            <InputFormField
+                              form={form}
+                              name="barcode"
+                              label="Barcode (UPC/EAN/GTIN)"
+                              placeholder="e.g., 012345678905"
+                              description="Optional. Helps Google match your product."
+                            />
+                          </>
                         )}
 
                         {/* Inventory item selector (shown when items exist and no variants) */}

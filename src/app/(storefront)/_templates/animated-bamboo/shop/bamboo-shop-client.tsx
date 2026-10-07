@@ -39,11 +39,11 @@ export function BambooShopClient({ products }: Props) {
     collections,
     currentPage,
     totalPages,
-    handlePage,
     filtered,
     paginated,
     hasActiveFilters,
     clearFilters,
+    pageLinkProps,
   } = useShopFilters(products, { pageSize: 12 });
 
   return (
@@ -206,14 +206,22 @@ export function BambooShopClient({ products }: Props) {
           aria-label="Pagination"
           className="mt-10 flex items-center justify-center gap-3"
         >
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="bamboo-btn bamboo-btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Previous
-          </button>
+          {currentPage === 1 ? (
+            <button
+              type="button"
+              disabled
+              className="bamboo-btn bamboo-btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage - 1)}
+              className="bamboo-btn bamboo-btn-ghost"
+            >
+              Previous
+            </a>
+          )}
           <span
             className="text-[0.95rem] text-[var(--bamboo-ink-soft)]"
             aria-live="polite"
@@ -225,14 +233,22 @@ export function BambooShopClient({ products }: Props) {
             <span className="sr-only"> of </span>
             {totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="bamboo-btn bamboo-btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Next
-          </button>
+          {currentPage === totalPages ? (
+            <button
+              type="button"
+              disabled
+              className="bamboo-btn bamboo-btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage + 1)}
+              className="bamboo-btn bamboo-btn-ghost"
+            >
+              Next
+            </a>
+          )}
         </nav>
       )}
     </div>

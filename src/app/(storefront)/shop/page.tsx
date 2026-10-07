@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { parsePageParam } from "~/lib/pagination";
 import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
@@ -28,12 +29,18 @@ export default async function ProductsPage() {
   );
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const business = await loadSeoBusiness("/shop");
+  const { page } = await searchParams;
   return buildPageMetadata({
     business,
     path: "/shop",
     pageMetaKey: "shop",
     title: "Shop",
+    page: parsePageParam(page),
   });
 }

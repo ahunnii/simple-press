@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type {
+  DeliveryReturnsFormValues,
   ShippingFormValues,
   ZoneWeightFormValues,
 } from "~/lib/validators/shipping";
@@ -18,6 +19,9 @@ import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import {
+  deliveryReturnsFormDefaults,
+  deliveryReturnsFormSchema,
+  deliveryReturnsFormToInput,
   shippingFormSchema,
   zoneWeightFormSchema,
 } from "~/lib/validators/shipping";
@@ -48,6 +52,7 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
+import { DeliveryReturnsCards } from "./delivery-returns-cards";
 import { ZoneWeightEditor } from "./zone-weight-editor";
 
 type Business = NonNullable<RouterOutputs["business"]["getWith"]>;
@@ -208,6 +213,16 @@ export function ShippingSettings({ business }: Props) {
     defaultValues: hydrateZoneWeightDefaults(business),
   });
 
+  // ── Delivery times + returns form ─────────────────────────────────────────
+  // Independent of the shipping mode, so it has its own form + mutation and is
+  // saved alongside whichever shipping form is active.
+  const deliveryForm = useForm<DeliveryReturnsFormValues>({
+    resolver: zodResolver(deliveryReturnsFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: deliveryReturnsFormDefaults(business),
+  });
+
   // ── Mutations ─────────────────────────────────────────────────────────────
   const updateMutation = api.business.updateShipping.useMutation({
     onSuccess: (data) => {
@@ -258,6 +273,28 @@ export function ShippingSettings({ business }: Props) {
       onMutate: () => toast.loading("Saving shipping settings..."),
     });
 
+  // Toast ids are scoped so this save can run in parallel with a shipping save
+  // without one's `toast.dismiss()` wiping the other's loading toast.
+  const DELIVERY_TOAST_ID = "delivery-returns-save";
+  const saveDeliveryMutation =
+    api.business.updateDeliveryAndReturns.useMutation({
+      onSuccess: (data) => {
+        toast.dismiss(DELIVERY_TOAST_ID);
+        toast.success(data.message);
+        deliveryForm.reset(deliveryReturnsFormDefaults(data.business));
+        void utils.business.invalidate();
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.dismiss(DELIVERY_TOAST_ID);
+        toast.error(error.message ?? "Failed to update delivery and returns");
+      },
+      onMutate: () =>
+        toast.loading("Saving delivery and returns...", {
+          id: DELIVERY_TOAST_ID,
+        }),
+    });
+
   // ── Submit handlers ───────────────────────────────────────────────────────
   const handleFlatSubmit = async (data: ShippingFormValues): Promise<void> => {
     const flatCents =
@@ -301,17 +338,26 @@ export function ShippingSettings({ business }: Props) {
     });
   };
 
+  const handleDeliverySubmit = async (
+    data: DeliveryReturnsFormValues,
+  ): Promise<void> => {
+    saveDeliveryMutation.mutate(deliveryReturnsFormToInput(data));
+  };
+
   // ── Dirty / submitting state ──────────────────────────────────────────────
   const isFlatPending = updateMutation.isPending;
   const isZonePending = saveZoneWeightMutation.isPending;
-  const isSubmitting = isFlatPending || isZonePending;
+  const isDeliveryPending = saveDeliveryMutation.isPending;
+  const isSubmitting = isFlatPending || isZonePending || isDeliveryPending;
 
   const isFlatDirty = form.formState.isDirty;
   const isZoneDirty = zoneForm.formState.isDirty;
   // In zone_weight mode the country toggles still live on the flat `form`, so
   // a country change must also count as dirty / be saved by the toolbar.
-  const isDirty =
+  const isShippingDirty =
     shippingType === "zone_weight" ? isZoneDirty || isFlatDirty : isFlatDirty;
+  const isDeliveryDirty = deliveryForm.formState.isDirty;
+  const isDirty = isShippingDirty || isDeliveryDirty;
 
   useKeyboardEnter(
     shippingType === "zone_weight" ? zoneForm : form,
@@ -322,14 +368,30 @@ export function ShippingSettings({ business }: Props) {
       data: ShippingFormValues | ZoneWeightFormValues,
     ) => Promise<void>,
   );
+  // Cmd/Ctrl+Enter also saves the delivery/returns form, but only if it has
+  // changes (the shipping shortcut above already fires unconditionally).
+  useKeyboardEnter(deliveryForm, async (data: DeliveryReturnsFormValues) => {
+    if (!isDeliveryDirty) return;
+    await handleDeliverySubmit(data);
+  });
   useDirtyForm(isDirty);
 
   // ── Toolbar save handler (dispatches to correct form) ─────────────────────
   const handleToolbarSave = () => {
-    if (shippingType === "zone_weight") {
-      void zoneForm.handleSubmit(handleZoneWeightSubmit)();
-    } else {
-      void form.handleSubmit(handleFlatSubmit)();
+    // The shipping forms always saved on click, even when untouched. Keep that,
+    // except when ONLY delivery/returns changed: re-validating an unrelated
+    // (possibly half-configured) shipping form would block that save.
+    if (isShippingDirty || !isDeliveryDirty) {
+      if (shippingType === "zone_weight") {
+        void zoneForm.handleSubmit(handleZoneWeightSubmit)();
+      } else {
+        void form.handleSubmit(handleFlatSubmit)();
+      }
+    }
+    if (isDeliveryDirty) {
+      void deliveryForm.handleSubmit(handleDeliverySubmit, () => {
+        toast.error("Fix the highlighted delivery and returns fields");
+      })();
     }
   };
 
@@ -723,6 +785,19 @@ export function ShippingSettings({ business }: Props) {
               </form>
             </Form>
           )}
+
+          {/* Delivery times + returns — independent of the shipping mode */}
+          <Form {...deliveryForm}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleToolbarSave();
+              }}
+              className="space-y-6"
+            >
+              <DeliveryReturnsCards form={deliveryForm} />
+            </form>
+          </Form>
         </div>
       </div>
     </div>

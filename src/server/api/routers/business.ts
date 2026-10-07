@@ -31,7 +31,10 @@ import {
 } from "~/lib/seo/local-presence";
 import { stripeClient } from "~/lib/stripe/client";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
-import { zoneWeightFormSchema } from "~/lib/validators/shipping";
+import {
+  deliveryReturnsInputSchema,
+  zoneWeightFormSchema,
+} from "~/lib/validators/shipping";
 import {
   pageMetaSchema,
   siteVerificationSchema,
@@ -113,6 +116,14 @@ export const businessRouter = createTRPCRouter({
         shippingFallbackRate: true,
         shippingDefaultItemWeightLb: true,
         salesCountries: true,
+        handlingDaysMin: true,
+        handlingDaysMax: true,
+        transitDaysMin: true,
+        transitDaysMax: true,
+        returnWindowDays: true,
+        returnFees: true,
+        returnShippingFeeCents: true,
+        returnMethod: true,
         zones: {
           include: { rates: true },
           orderBy: { sortOrder: "asc" as const },
@@ -226,6 +237,16 @@ export const businessRouter = createTRPCRouter({
         shippingWeightTiers: true,
         shippingFallbackRate: true,
         shippingDefaultItemWeightLb: true,
+        handlingDaysMin: true,
+        handlingDaysMax: true,
+        transitDaysMin: true,
+        transitDaysMax: true,
+        returnWindowDays: true,
+        returnFees: true,
+        returnShippingFeeCents: true,
+        returnMethod: true,
+        // Home Organization schema's return-policy applicableCountry.
+        salesCountries: true,
         zones: {
           include: { rates: true },
           orderBy: { sortOrder: "asc" as const },
@@ -1230,6 +1251,56 @@ export const businessRouter = createTRPCRouter({
       });
       return {
         message: "Shipping settings updated successfully",
+        business: updatedBusiness,
+      };
+    }),
+
+  /**
+   * Delivery-time ranges and the returns policy, which feed the Google
+   * Merchant listing structured data (`shippingDetails` / `hasMerchantReturnPolicy`).
+   *
+   * Separate from `updateShipping` on purpose: that mutation's input does not
+   * accept `zone_weight`, and these columns are independent of shipping mode, so
+   * a zone+weight store must be able to save them too. Touches no shipping field.
+   *
+   * `returnWindowDays` is tri-state: null = never set, 0 = no returns, N = accept.
+   * The fee / method / flat-fee columns only mean something while accepting, so
+   * they are nulled otherwise rather than left stale.
+   */
+  updateDeliveryAndReturns: ownerAdminProcedure
+    .input(deliveryReturnsInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const accepting =
+        input.returnWindowDays !== null && input.returnWindowDays > 0;
+      const returnFees = accepting ? input.returnFees : null;
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          handlingDaysMin: input.handlingDaysMin,
+          handlingDaysMax: input.handlingDaysMax,
+          transitDaysMin: input.transitDaysMin,
+          transitDaysMax: input.transitDaysMax,
+          returnWindowDays: input.returnWindowDays,
+          returnFees,
+          returnShippingFeeCents:
+            returnFees === "flat_fee" ? input.returnShippingFeeCents : null,
+          returnMethod: accepting ? input.returnMethod : null,
+        },
+        select: {
+          handlingDaysMin: true,
+          handlingDaysMax: true,
+          transitDaysMin: true,
+          transitDaysMax: true,
+          returnWindowDays: true,
+          returnFees: true,
+          returnShippingFeeCents: true,
+          returnMethod: true,
+        },
+      });
+      return {
+        message: "Delivery and returns settings updated successfully",
         business: updatedBusiness,
       };
     }),

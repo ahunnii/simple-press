@@ -66,7 +66,7 @@ export function DreamShopFilterClient({ products, noResults }: Props) {
     currentPage,
     totalPages,
     handleSort,
-    handlePage,
+    pageLinkProps,
     inStockOnly,
     handleInStock,
     activeCollectionId,
@@ -228,14 +228,22 @@ export function DreamShopFilterClient({ products, noResults }: Props) {
           aria-label="Pagination"
           className="flex flex-wrap items-center justify-center gap-2 pt-4"
         >
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="dream-btn dream-btn--secondary"
-          >
-            Previous
-          </button>
+          {currentPage === 1 ? (
+            <button
+              type="button"
+              disabled
+              className="dream-btn dream-btn--secondary"
+            >
+              Previous
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage - 1)}
+              className="dream-btn dream-btn--secondary"
+            >
+              Previous
+            </a>
+          )}
           <ol className="m-0 flex list-none items-center gap-1 p-0">
             {dreamPageWindow(currentPage, totalPages).map((page, i) =>
               page === "gap" ? (
@@ -248,9 +256,8 @@ export function DreamShopFilterClient({ products, noResults }: Props) {
                 </li>
               ) : (
                 <li key={page}>
-                  <button
-                    type="button"
-                    onClick={() => handlePage(page)}
+                  <a
+                    {...pageLinkProps(page)}
                     aria-label={`Page ${page}`}
                     aria-current={page === currentPage ? "page" : undefined}
                     className={cn(
@@ -261,19 +268,27 @@ export function DreamShopFilterClient({ products, noResults }: Props) {
                     )}
                   >
                     {page}
-                  </button>
+                  </a>
                 </li>
               ),
             )}
           </ol>
-          <button
-            type="button"
-            onClick={() => handlePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="dream-btn dream-btn--secondary"
-          >
-            Next
-          </button>
+          {currentPage === totalPages ? (
+            <button
+              type="button"
+              disabled
+              className="dream-btn dream-btn--secondary"
+            >
+              Next
+            </button>
+          ) : (
+            <a
+              {...pageLinkProps(currentPage + 1)}
+              className="dream-btn dream-btn--secondary"
+            >
+              Next
+            </a>
+          )}
         </nav>
       ) : null}
     </div>

@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Product } from "~/types";
 import { getEffectivePrice } from "~/lib/prices";
 import { isInStock } from "~/lib/product-stock";
+import { usePageParam } from "~/hooks/use-page-param";
 
 export type SortOption =
   | "featured"
@@ -43,7 +44,7 @@ export function useShopFilters(
 
   // URL params
   const sort = (searchParams.get("sort_by") ?? "featured") as SortOption;
-  const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
+  const { page, pageHref, goToPage, pageLinkProps } = usePageParam();
   const priceMaxParam = searchParams.get("price_max");
   const priceMax = priceMaxParam !== null ? Number(priceMaxParam) : null;
   const inStockOnly = searchParams.get("in_stock") === "1";
@@ -61,9 +62,9 @@ export function useShopFilters(
   const [search, setSearchRaw] = useState<string>(
     () => searchParams.get("q") ?? "",
   );
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
-    null,
-  );
+  const [activeCollectionId, setActiveCollectionIdRaw] = useState<
+    string | null
+  >(null);
 
   const collections = useMemo(() => {
     const seen = new Map<string, { id: string; name: string; slug: string }>();
@@ -121,13 +122,18 @@ export function useShopFilters(
     updateParams({ sort_by: value === "featured" ? null : value, page: null });
   }
 
-  function handlePage(next: number) {
-    updateParams({ page: next === 1 ? null : String(next) });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handlePage = goToPage;
+
+  function setActiveCollectionId(id: string | null) {
+    setActiveCollectionIdRaw(id);
+    if (page > 1) updateParams({ page: null });
   }
 
   function commitPriceMax(value: number) {
-    updateParams({ price_max: value >= maxPrice ? null : String(value) });
+    updateParams({
+      price_max: value >= maxPrice ? null : String(value),
+      page: null,
+    });
   }
 
   function handleInStock(checked: boolean) {
@@ -141,7 +147,7 @@ export function useShopFilters(
 
   function clearFilters() {
     setSearchRaw("");
-    setActiveCollectionId(null);
+    setActiveCollectionIdRaw(null);
     updateParams({
       price_max: null,
       in_stock: null,
@@ -221,6 +227,9 @@ export function useShopFilters(
     currentPage,
     totalPages,
     handlePage,
+    requestedPage: page,
+    pageHref,
+    pageLinkProps,
 
     // Price range
     priceMax,

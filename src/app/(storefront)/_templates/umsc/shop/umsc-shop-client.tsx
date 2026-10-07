@@ -42,7 +42,7 @@ export function UmscShopClient({
     handleSort,
     currentPage,
     totalPages,
-    handlePage,
+    pageLinkProps,
     inStockOnly,
     handleInStock,
     collections,
@@ -202,7 +202,9 @@ export function UmscShopClient({
           className="mt-12 flex items-center justify-center gap-2"
         >
           <UmscPageButton
-            onClick={() => handlePage(currentPage - 1)}
+            linkProps={
+              currentPage === 1 ? undefined : pageLinkProps(currentPage - 1)
+            }
             disabled={currentPage === 1}
             wide
           >
@@ -220,7 +222,7 @@ export function UmscShopClient({
             ) : (
               <UmscPageButton
                 key={p}
-                onClick={() => handlePage(p)}
+                linkProps={pageLinkProps(p)}
                 active={p === currentPage}
                 ariaLabel={`Page ${p}`}
                 ariaCurrent={p === currentPage}
@@ -230,7 +232,11 @@ export function UmscShopClient({
             ),
           )}
           <UmscPageButton
-            onClick={() => handlePage(currentPage + 1)}
+            linkProps={
+              currentPage === totalPages
+                ? undefined
+                : pageLinkProps(currentPage + 1)
+            }
             disabled={currentPage === totalPages}
             wide
           >
@@ -262,7 +268,7 @@ function buildPageList(
 
 function UmscPageButton({
   children,
-  onClick,
+  linkProps,
   disabled,
   active,
   wide,
@@ -270,31 +276,46 @@ function UmscPageButton({
   ariaCurrent,
 }: {
   children: React.ReactNode;
-  onClick: () => void;
+  /** `pageLinkProps(n)` — omitted when the control is disabled. */
+  linkProps?: ReturnType<ReturnType<typeof useShopFilters>["pageLinkProps"]>;
   disabled?: boolean;
   active?: boolean;
   wide?: boolean;
   ariaLabel?: string;
   ariaCurrent?: boolean;
 }) {
+  const className = cn(
+    "umsc-sans flex h-11 items-center justify-center border text-[13px] transition-colors",
+    wide ? "min-w-11 px-4" : "min-w-11",
+    active
+      ? "border-[var(--umsc-ink)] bg-[var(--umsc-ink)] text-[var(--umsc-paper)]"
+      : "border-[var(--umsc-line)] bg-transparent text-[var(--umsc-ink)]",
+    disabled && "cursor-default opacity-30",
+    !disabled && !active && "cursor-pointer hover:border-[var(--umsc-ink)]",
+  );
+
+  if (disabled || !linkProps) {
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-current={ariaCurrent ? "page" : undefined}
+        className={className}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
+    <a
+      {...linkProps}
       aria-label={ariaLabel}
       aria-current={ariaCurrent ? "page" : undefined}
-      className={cn(
-        "umsc-sans flex h-11 items-center justify-center border text-[13px] transition-colors",
-        wide ? "min-w-11 px-4" : "min-w-11",
-        active
-          ? "border-[var(--umsc-ink)] bg-[var(--umsc-ink)] text-[var(--umsc-paper)]"
-          : "border-[var(--umsc-line)] bg-transparent text-[var(--umsc-ink)]",
-        disabled && "cursor-default opacity-30",
-        !disabled && !active && "cursor-pointer hover:border-[var(--umsc-ink)]",
-      )}
+      className={className}
     >
       {children}
-    </button>
+    </a>
   );
 }

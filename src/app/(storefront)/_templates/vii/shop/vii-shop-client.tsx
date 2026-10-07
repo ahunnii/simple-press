@@ -47,7 +47,7 @@ export function ViiShopClient({
     handleSort,
     currentPage,
     totalPages,
-    handlePage,
+    pageLinkProps,
     inStockOnly,
     handleInStock,
     filtered,
@@ -238,7 +238,11 @@ export function ViiShopClient({
                   }}
                 >
                   <ViiPageButton
-                    onClick={() => handlePage(currentPage - 1)}
+                    linkProps={
+                      currentPage === 1
+                        ? undefined
+                        : pageLinkProps(currentPage - 1)
+                    }
                     disabled={currentPage === 1}
                     wide
                   >
@@ -288,7 +292,7 @@ export function ViiShopClient({
                       return (
                         <ViiPageButton
                           key={p}
-                          onClick={() => handlePage(p)}
+                          linkProps={pageLinkProps(p)}
                           active={p === currentPage}
                           ariaLabel={`Page ${p}`}
                           ariaCurrent={p === currentPage}
@@ -299,7 +303,11 @@ export function ViiShopClient({
                     });
                   })()}
                   <ViiPageButton
-                    onClick={() => handlePage(currentPage + 1)}
+                    linkProps={
+                      currentPage === totalPages
+                        ? undefined
+                        : pageLinkProps(currentPage + 1)
+                    }
                     disabled={currentPage === totalPages}
                     wide
                   >
@@ -471,7 +479,7 @@ export function ViiShopClient({
 
 function ViiPageButton({
   children,
-  onClick,
+  linkProps,
   disabled,
   active,
   wide,
@@ -479,41 +487,49 @@ function ViiPageButton({
   ariaCurrent,
 }: {
   children: React.ReactNode;
-  onClick: () => void;
+  /** `pageLinkProps(n)` — omitted when the control is disabled. */
+  linkProps?: ReturnType<ReturnType<typeof useShopFilters>["pageLinkProps"]>;
   disabled?: boolean;
   active?: boolean;
   wide?: boolean;
   ariaLabel?: string;
   ariaCurrent?: boolean;
 }) {
+  const common = {
+    "aria-label": ariaLabel,
+    "aria-current": ariaCurrent ? ("page" as const) : undefined,
+    style: {
+      height: 44,
+      minWidth: wide ? undefined : 44,
+      padding: wide ? "0 18px" : 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: "var(--radius)",
+      border: active
+        ? "1px solid var(--vii-copper-deep)"
+        : "1px solid var(--vii-hairline-strong)",
+      background: active ? "var(--vii-copper-deep)" : "transparent",
+      color: active ? "var(--vii-paper)" : "var(--vii-navy)",
+      fontFamily: "var(--font-sans)",
+      fontSize: 13,
+      cursor: disabled ? "default" : "pointer",
+      opacity: disabled ? 0.3 : 1,
+      transition: "border-color 0.2s, background 0.2s",
+    },
+  };
+
+  if (disabled || !linkProps) {
+    return (
+      <button type="button" disabled={disabled} {...common}>
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      aria-current={ariaCurrent ? "page" : undefined}
-      style={{
-        height: 44,
-        minWidth: wide ? undefined : 44,
-        padding: wide ? "0 18px" : 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "var(--radius)",
-        border: active
-          ? "1px solid var(--vii-copper-deep)"
-          : "1px solid var(--vii-hairline-strong)",
-        background: active ? "var(--vii-copper-deep)" : "transparent",
-        color: active ? "var(--vii-paper)" : "var(--vii-navy)",
-        fontFamily: "var(--font-sans)",
-        fontSize: 13,
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.3 : 1,
-        transition: "border-color 0.2s, background 0.2s",
-      }}
-    >
+    <a {...linkProps} {...common}>
       {children}
-    </button>
+    </a>
   );
 }

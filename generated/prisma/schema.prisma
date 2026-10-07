@@ -255,6 +255,24 @@ model Business {
   // Country allowlist for sales/shipping. "US" is always implicitly allowed.
   salesCountries String[] @default([]) // additional countries beyond US: subset of ["CA","MX"]
 
+  // Delivery times → schema.org OfferShippingDetails.deliveryTime (business days).
+  // null = not configured → not emitted. Both-or-neither per pair (app layer).
+  handlingDaysMin Int?
+  handlingDaysMax Int?
+  transitDaysMin  Int?
+  transitDaysMax  Int?
+
+  // Returns → schema.org MerchantReturnPolicy. returnWindowDays null = not
+  // configured (emit nothing); 0 = returns not accepted; N>0 = N-day window.
+  returnWindowDays       Int?
+  returnFees             String? // "free" | "customer_pays" | "flat_fee"
+  returnShippingFeeCents Int? // only when returnFees = "flat_fee"
+  returnMethod           String? // "by_mail" | "in_store" | "either"
+
+  // IndexNow watermark. Written ONLY via $executeRaw so it never bumps updatedAt.
+  indexNowSubmittedAt DateTime?
+  indexNowHost        String? // canonical host at last submit; mismatch ⇒ full re-seed
+
   // Donations / Tips (feature-flagged; page + card lane gated separately —
   // Venmo/CashApp handles work without a Stripe connection)
   donationLabel         String  @default("donate") // "donate" | "tip" | "support"

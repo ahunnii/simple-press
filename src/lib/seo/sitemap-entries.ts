@@ -59,13 +59,37 @@ const ROUTE_FEATURE_KEYS: Record<StaticSeoRouteKey, string | null> =
     STATIC_SEO_ROUTES.map((route) => [route.key, route.featureKey]),
   ) as Record<StaticSeoRouteKey, string | null>;
 
-function isRouteEnabled(
+/**
+ * Whether a static storefront route (and the detail routes under it) is
+ * reachable for a business — `true` for routes with no governing flag
+ * (`/about`, `/contact`, `/faq`), otherwise the flag's resolved value.
+ *
+ * Shared by the sitemap and the IndexNow sweep so both advertise exactly the
+ * URLs that don't `notFound()`.
+ */
+export function isSeoRouteEnabled(
   isEnabled: (key: string) => boolean,
   routeKey: StaticSeoRouteKey,
 ): boolean {
   const featureKey = ROUTE_FEATURE_KEYS[routeKey];
   return featureKey === null || isEnabled(featureKey);
 }
+
+// ─── Detail-route paths ─────────────────────────────────────────────────────
+
+/**
+ * Path builders for every per-row storefront route that the sitemap (and the
+ * IndexNow sweep) advertise. Relative to the canonical base URL.
+ */
+export const SEO_PATHS = {
+  product: (slug: string) => `/shop/${slug}`,
+  collection: (slug: string) => `/collections/${slug}`,
+  blogPost: (slug: string) => `/blog/${slug}`,
+  /** Custom CMS pages (any `Page.type` other than "blog") render at `/[slug]`. */
+  cmsPage: (slug: string) => `/${slug}`,
+  service: (slug: string) => `/services/${slug}`,
+  event: (slug: string) => `/events/${slug}`,
+} as const satisfies Record<string, (slug: string) => string>;
 
 // ─── Builder ────────────────────────────────────────────────────────────────
 
@@ -84,14 +108,14 @@ export function buildSitemapEntries({
     videoCount,
   } = rows;
 
-  const shopEnabled = isRouteEnabled(isEnabled, "shop");
-  const collectionsEnabled = isRouteEnabled(isEnabled, "collections");
-  const blogEnabled = isRouteEnabled(isEnabled, "blog");
-  const testimonialsEnabled = isRouteEnabled(isEnabled, "testimonials");
-  const servicesEnabled = isRouteEnabled(isEnabled, "services");
-  const eventsEnabled = isRouteEnabled(isEnabled, "events");
-  const videosEnabled = isRouteEnabled(isEnabled, "videos");
-  const donateEnabled = isRouteEnabled(isEnabled, "donate");
+  const shopEnabled = isSeoRouteEnabled(isEnabled, "shop");
+  const collectionsEnabled = isSeoRouteEnabled(isEnabled, "collections");
+  const blogEnabled = isSeoRouteEnabled(isEnabled, "blog");
+  const testimonialsEnabled = isSeoRouteEnabled(isEnabled, "testimonials");
+  const servicesEnabled = isSeoRouteEnabled(isEnabled, "services");
+  const eventsEnabled = isSeoRouteEnabled(isEnabled, "events");
+  const videosEnabled = isSeoRouteEnabled(isEnabled, "videos");
+  const donateEnabled = isSeoRouteEnabled(isEnabled, "donate");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "daily", priority: 1 },
@@ -194,7 +218,7 @@ export function buildSitemapEntries({
 
   const productRoutes: MetadataRoute.Sitemap = shopEnabled
     ? products.map((p) => ({
-        url: `${baseUrl}/shop/${p.slug}`,
+        url: `${baseUrl}${SEO_PATHS.product(p.slug)}`,
         lastModified: p.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.8,
@@ -203,7 +227,7 @@ export function buildSitemapEntries({
 
   const collectionRoutes: MetadataRoute.Sitemap = collectionsEnabled
     ? collections.map((c) => ({
-        url: `${baseUrl}/collections/${c.slug}`,
+        url: `${baseUrl}${SEO_PATHS.collection(c.slug)}`,
         lastModified: c.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.7,
@@ -214,7 +238,7 @@ export function buildSitemapEntries({
     ? pages
         .filter((p) => p.type === "blog")
         .map((p) => ({
-          url: `${baseUrl}/blog/${p.slug}`,
+          url: `${baseUrl}${SEO_PATHS.blogPost(p.slug)}`,
           lastModified: p.updatedAt,
           changeFrequency: "monthly" as const,
           priority: 0.6,
@@ -226,7 +250,7 @@ export function buildSitemapEntries({
   const pageRoutes: MetadataRoute.Sitemap = pages
     .filter((p) => p.type !== "blog")
     .map((p) => ({
-      url: `${baseUrl}/${p.slug}`,
+      url: `${baseUrl}${SEO_PATHS.cmsPage(p.slug)}`,
       lastModified: p.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.5,
@@ -234,7 +258,7 @@ export function buildSitemapEntries({
 
   const serviceRoutes: MetadataRoute.Sitemap = servicesEnabled
     ? services.map((s) => ({
-        url: `${baseUrl}/services/${s.slug}`,
+        url: `${baseUrl}${SEO_PATHS.service(s.slug)}`,
         lastModified: s.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.7,
@@ -247,7 +271,7 @@ export function buildSitemapEntries({
   // /events is reachable at all.
   const eventRoutes: MetadataRoute.Sitemap = eventsEnabled
     ? events.map((e) => ({
-        url: `${baseUrl}/events/${e.slug}`,
+        url: `${baseUrl}${SEO_PATHS.event(e.slug)}`,
         lastModified: e.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.6,

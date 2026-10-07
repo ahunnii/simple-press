@@ -610,3 +610,86 @@ describe("productUpdateSchema", () => {
     });
   });
 });
+
+describe("barcode", () => {
+  const MESSAGE = "Enter a valid 8, 12, 13 or 14-digit barcode (UPC/EAN/GTIN)";
+  const baseProduct = {
+    name: "Test Product",
+    slug: "test-product",
+    price: 10,
+    published: true,
+    featured: false,
+    trackInventory: true,
+    allowBackorders: false,
+  };
+  const baseVariant = {
+    name: "Small",
+    price: 10,
+    inventoryQty: 5,
+    options: { size: "Small" },
+  };
+
+  it("accepts a valid UPC-A on the product form and create/update inputs", () => {
+    const form = productFormSchema.safeParse({
+      ...baseProduct,
+      barcode: "012345678905",
+    });
+    expect(form.success && form.data.barcode).toBe("012345678905");
+    expect(
+      productCreateSchema.safeParse({
+        ...baseProduct,
+        variants: [],
+        barcode: "4006381333931",
+      }).success,
+    ).toBe(true);
+    expect(
+      productUpdateSchema.safeParse({
+        ...baseProduct,
+        id: "prod_1",
+        variants: [],
+        barcode: "96385074",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts spaces/hyphens and trims surrounding whitespace", () => {
+    expect(
+      productFormSchema.safeParse({
+        ...baseProduct,
+        barcode: " 0-12345-67890-5 ",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("treats empty and absent barcodes as undefined (optional)", () => {
+    const empty = productFormSchema.safeParse({ ...baseProduct, barcode: "" });
+    expect(empty.success && empty.data.barcode).toBeUndefined();
+    const blank = productFormSchema.safeParse({
+      ...baseProduct,
+      barcode: "   ",
+    });
+    expect(blank.success && blank.data.barcode).toBeUndefined();
+    expect(productFormSchema.safeParse(baseProduct).success).toBe(true);
+  });
+
+  it("rejects a bad check digit, wrong length, or non-digits", () => {
+    for (const barcode of ["012345678906", "12345", "ABCDEFGH1234"]) {
+      expect(issuesFor(productFormSchema, { ...baseProduct, barcode })).toEqual(
+        [`barcode: ${MESSAGE}`],
+      );
+    }
+  });
+
+  it("validates variant barcodes", () => {
+    expect(
+      variantSchema.safeParse({ ...baseVariant, barcode: "012345678905" })
+        .success,
+    ).toBe(true);
+    expect(
+      variantSchema.safeParse({ ...baseVariant, barcode: "" }).success,
+    ).toBe(true);
+    expect(
+      issuesFor(variantSchema, { ...baseVariant, barcode: "012345678906" }),
+    ).toEqual([`barcode: ${MESSAGE}`]);
+  });
+});
