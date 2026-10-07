@@ -17,7 +17,7 @@ const homepageHeroData: TemplateField[] = [
     key: "umsc.homepage.hero-video",
     label: "Video",
     description:
-      "Optional full-viewport video for the hero. Autoplays muted and looped, and takes priority over the photo below when set. Leave blank to use the photo instead.",
+      "Optional full-viewport video for the hero. Plays muted and looped (there is no sound), with a pause button for visitors, and takes priority over the photo below when set. Also set the photo: it shows while the video loads, when it's paused, and for visitors who turn off motion. Leave blank to use the photo instead.",
     type: "video",
     page: "homepage",
     group: "homepage.hero",

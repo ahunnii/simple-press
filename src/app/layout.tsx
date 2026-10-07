@@ -12,6 +12,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { getCachedBusiness } from "~/lib/seo";
 import { firstNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
+import { iconVersion, resolveIconSource } from "~/lib/site-icons/source";
 import { parseSiteVerification } from "~/lib/validators/site-seo";
 import { TRPCReactProvider } from "~/trpc/react";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -19,13 +20,44 @@ import { TemplateSelectorDevTool } from "~/components/development/template-selec
 
 import { Providers } from "../providers/providers";
 
+/**
+ * Icon links shared by both branches. Every icon is served from the store's
+ * own domain (`/favicon.ico` rewrites to `/site-icon/favicon.ico`; see
+ * `next.config.js`) and generated from one source image. `v` changes with the
+ * source (favicon, else logo) so browsers re-fetch after the owner swaps it
+ * while the path stays stable. `/favicon.ico` itself carries no `?v`, which is
+ * what Google asks for. A blank source (including the empty string the
+ * branding form can persist) falls back to the SimplePress icon server-side.
+ */
+function buildIcons(v: string): NonNullable<Metadata["icons"]> {
+  return {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      {
+        url: `/site-icon/icon-48.png?v=${v}`,
+        sizes: "48x48",
+        type: "image/png",
+      },
+      {
+        url: `/site-icon/icon-192.png?v=${v}`,
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      { url: `/site-icon/apple-touch-icon.png?v=${v}`, sizes: "180x180" },
+    ],
+  };
+}
+
 export async function generateMetadata() {
   const business = await getCachedBusiness();
   if (!business) {
     return {
       title: "SimplePress",
       description: "The simplest way to get started with your online business.",
-      icons: [{ rel: "icon", url: "/favicon.ico" }],
+      icons: buildIcons(iconVersion(null)),
+      manifest: "/manifest.webmanifest",
     };
   }
   const canonicalBase = getCanonicalBaseUrl(business);
@@ -41,10 +73,8 @@ export async function generateMetadata() {
   const ogDescription = firstNonBlank(business.siteContent?.metaDescription);
   // No `/placeholder.svg` fallback: a share card with a real image or none at
   // all beats one advertising a missing asset.
-  const ogImage = firstNonBlank(
-    business.siteContent?.ogImage,
-    business.siteContent?.logoUrl,
-  );
+  const ogImageUrl = firstNonBlank(business.siteContent?.ogImage);
+  const ogImage = ogImageUrl ?? firstNonBlank(business.siteContent?.logoUrl);
 
   // Search-engine ownership tokens. Emit a key only when the owner has actually
   // saved that token — an empty `<meta>` is worse than no tag at all, since
@@ -93,7 +123,16 @@ export async function generateMetadata() {
       ...(ogImage !== undefined
         ? {
             images: [
-              { url: ogImage, width: 1200, height: 630, alt: business.name },
+              {
+                url: ogImage,
+                // Only declare aspect-ratio dimensions for true OG images.
+                // Logos are typically square; declaring 1200×630 misleads
+                // social platforms about the actual aspect ratio.
+                ...(ogImageUrl !== undefined
+                  ? { width: 1200, height: 630 }
+                  : {}),
+                alt: business.name,
+              },
             ],
           }
         : {}),
@@ -108,16 +147,8 @@ export async function generateMetadata() {
     ...(Object.keys(verificationTags).length > 0
       ? { verification: verificationTags }
       : {}),
-    icons: [
-      // Not `??`: the branding form can persist an empty string here
-      // (Reset → Save), and an empty href must still fall back to the default.
-      {
-        rel: "icon",
-        url: business.siteContent?.faviconUrl?.trim()
-          ? business.siteContent.faviconUrl
-          : "/favicon.ico",
-      },
-    ],
+    icons: buildIcons(iconVersion(resolveIconSource(business.siteContent))),
+    manifest: "/manifest.webmanifest",
   } as Metadata;
 }
 

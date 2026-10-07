@@ -104,11 +104,17 @@ export async function middleware(req: NextRequest) {
   if (isPlatformSubdomain) {
     // Infrastructure and auth routes pass through unchanged — auth must not be
     // rewritten into platform-hub or the layout's session redirect loops forever.
+    // The matcher only skips a root `favicon.ico` (and `.png` etc.), so the
+    // icon route, the renamed static `.ico` and the web manifest must pass
+    // through here too.
     if (
       pathname.startsWith("/api") ||
       pathname.startsWith("/auth") ||
       pathname.startsWith("/_next") ||
-      pathname.startsWith("/favicon")
+      pathname.startsWith("/favicon") ||
+      pathname.startsWith("/simplepress-favicon") ||
+      pathname.startsWith("/site-icon") ||
+      pathname === "/manifest.webmanifest"
     ) {
       return finalize(
         NextResponse.next({ request: { headers: requestHeaders } }),
@@ -133,7 +139,9 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/site-icon") ||
+    pathname === "/manifest.webmanifest"
   ) {
     return finalize(
       NextResponse.next({ request: { headers: requestHeaders } }),

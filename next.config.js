@@ -112,6 +112,21 @@ const config = {
         source: "/api/send",
         destination: `${env.UMAMI_BASE_URL}/api/send`,
       },
+      // Root-path icon requests (browsers, Google, iOS and RSS readers fetch
+      // these without reading the HTML) resolve per-store. The SimplePress
+      // static icon lives at /simplepress-favicon.ico so it can't shadow these.
+      {
+        source: "/favicon.ico",
+        destination: "/site-icon/favicon.ico",
+      },
+      {
+        source: "/apple-touch-icon.png",
+        destination: "/site-icon/apple-touch-icon.png",
+      },
+      {
+        source: "/apple-touch-icon-precomposed.png",
+        destination: "/site-icon/apple-touch-icon.png",
+      },
     ];
   },
 };
