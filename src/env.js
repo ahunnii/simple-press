@@ -111,6 +111,8 @@ export const env = createEnv({
     UMAMI_API_USERNAME: z.string(),
     UMAMI_API_PASSWORD: z.string().optional(),
     UMAMI_API_PASSWORD_B64: z.string().optional(),
+    // One platform-wide IndexNow key; unset disables the cron submission job.
+    INDEXNOW_KEY: z.string().regex(/^[A-Za-z0-9-]{8,128}$/).optional(),
   },
 
   /**
@@ -205,6 +207,7 @@ export const env = createEnv({
     UMAMI_API_USERNAME: process.env.UMAMI_API_USERNAME,
     UMAMI_API_PASSWORD: process.env.UMAMI_API_PASSWORD,
     UMAMI_API_PASSWORD_B64: process.env.UMAMI_API_PASSWORD_B64,
+    INDEXNOW_KEY: process.env.INDEXNOW_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

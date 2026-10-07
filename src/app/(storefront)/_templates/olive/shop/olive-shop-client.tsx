@@ -64,7 +64,7 @@ export function OliveShopClient({
     handleSort,
     currentPage,
     totalPages,
-    handlePage,
+    pageLinkProps,
     inStockOnly,
     handleInStock,
     activeCollectionId,
@@ -246,7 +246,7 @@ export function OliveShopClient({
                 <OliveShopPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPage={handlePage}
+                  pageLinkProps={pageLinkProps}
                 />
               </OliveReveal>
             ) : null}
@@ -400,11 +400,11 @@ type PageEntry = number | "gap-start" | "gap-end";
 function OliveShopPagination({
   currentPage,
   totalPages,
-  onPage,
+  pageLinkProps,
 }: {
   currentPage: number;
   totalPages: number;
-  onPage: (page: number) => void;
+  pageLinkProps: ReturnType<typeof useShopFilters>["pageLinkProps"];
 }) {
   const pages: PageEntry[] = [];
   const rangeStart = Math.max(2, currentPage - 1);
@@ -422,7 +422,9 @@ function OliveShopPagination({
       className="mt-12 flex flex-wrap items-center justify-center gap-2"
     >
       <OlivePageButton
-        onClick={() => onPage(currentPage - 1)}
+        linkProps={
+          currentPage === 1 ? undefined : pageLinkProps(currentPage - 1)
+        }
         disabled={currentPage === 1}
         wide
       >
@@ -441,7 +443,7 @@ function OliveShopPagination({
         ) : (
           <OlivePageButton
             key={entry}
-            onClick={() => onPage(entry)}
+            linkProps={pageLinkProps(entry)}
             active={entry === currentPage}
             label={`Page ${entry}`}
           >
@@ -451,7 +453,11 @@ function OliveShopPagination({
       )}
 
       <OlivePageButton
-        onClick={() => onPage(currentPage + 1)}
+        linkProps={
+          currentPage === totalPages
+            ? undefined
+            : pageLinkProps(currentPage + 1)
+        }
         disabled={currentPage === totalPages}
         wide
       >
@@ -463,38 +469,46 @@ function OliveShopPagination({
 
 function OlivePageButton({
   children,
-  onClick,
+  linkProps,
   disabled = false,
   active = false,
   wide = false,
   label,
 }: {
   children: React.ReactNode;
-  onClick: () => void;
+  /** `pageLinkProps(n)` — omitted when the control is disabled. */
+  linkProps?: ReturnType<ReturnType<typeof useShopFilters>["pageLinkProps"]>;
   disabled?: boolean;
   active?: boolean;
   wide?: boolean;
   label?: string;
 }) {
+  const common = {
+    "aria-label": label,
+    "aria-current": active ? ("page" as const) : undefined,
+    className: cn(
+      "olive-btn",
+      active ? "olive-btn-primary" : "olive-btn-secondary",
+    ),
+    style: {
+      height: "2.75rem",
+      minWidth: "2.75rem",
+      paddingInline: wide ? "1.125rem" : "0.5rem",
+      fontSize: "0.8125rem",
+    },
+  };
+
+  if (disabled || !linkProps) {
+    return (
+      <button type="button" disabled={disabled} {...common}>
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "olive-btn",
-        active ? "olive-btn-primary" : "olive-btn-secondary",
-      )}
-      style={{
-        height: "2.75rem",
-        minWidth: "2.75rem",
-        paddingInline: wide ? "1.125rem" : "0.5rem",
-        fontSize: "0.8125rem",
-      }}
-    >
+    <a {...linkProps} {...common}>
       {children}
-    </button>
+    </a>
   );
 }

@@ -10,6 +10,7 @@ import type {
   StaticSeoRouteKey,
 } from "~/lib/validators/site-seo";
 import { getCanonicalUrl } from "~/lib/canonical";
+import { paginatedPath } from "~/lib/pagination";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { getPageMetaEntry } from "~/lib/validators/site-seo";
@@ -78,6 +79,13 @@ export interface BuildPageMetadataArgs {
   /** `og:image:alt`; defaults to the resolved title. */
   ogImageAlt?: string;
   noindex?: boolean;
+  /**
+   * Current page of a paginated listing. At 2 or more the canonical becomes
+   * self-referencing (`path?page=N`) and the title gains ` – Page N`, applied
+   * after any owner / entity override so those cannot make pages identical.
+   * Page 1 (or omitted) is the plain path and the unmodified title.
+   */
+  page?: number;
 }
 
 /**
@@ -111,16 +119,20 @@ export function buildPageMetadata({
   article,
   ogImageAlt,
   noindex,
+  page,
 }: BuildPageMetadataArgs): Metadata {
+  const pageNumber = page !== undefined && page >= 2 ? Math.floor(page) : 1;
   const owner: PageMetaEntry =
     pageMetaKey === undefined
       ? {}
       : getPageMetaEntry(business?.siteContent?.pageMeta, pageMetaKey);
 
-  const resolvedTitle = preferNonBlank(
+  const baseTitle = preferNonBlank(
     firstNonBlank(owner.title, entity?.title),
     title,
   );
+  const resolvedTitle =
+    pageNumber >= 2 ? `${baseTitle} – Page ${pageNumber}` : baseTitle;
 
   const desc = firstNonBlank(
     owner.description,
@@ -143,7 +155,9 @@ export function buildPageMetadata({
     : undefined;
 
   const canonical =
-    business != null ? getCanonicalUrl(business, path) : undefined;
+    business != null
+      ? getCanonicalUrl(business, paginatedPath(path, pageNumber))
+      : undefined;
 
   // No business resolved ⇒ no brand to append; `renderSeoTitle` then returns
   // the bare title.

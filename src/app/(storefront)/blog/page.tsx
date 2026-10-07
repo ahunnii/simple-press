@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { parsePageParam } from "~/lib/pagination";
 import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
@@ -46,12 +47,18 @@ export default async function BlogPage() {
   );
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const business = await loadSeoBusiness("/blog");
+  const { page } = await searchParams;
   return buildPageMetadata({
     business,
     path: "/blog",
     pageMetaKey: "blog",
     title: "Blog",
+    page: parsePageParam(page),
   });
 }

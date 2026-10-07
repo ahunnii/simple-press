@@ -2,6 +2,7 @@ export type FormVariant = {
   id?: string;
   name: string;
   sku?: string;
+  barcode?: string;
   price?: number; // in cents
   compareAtPrice?: number; // in cents
   inventoryQty: number;

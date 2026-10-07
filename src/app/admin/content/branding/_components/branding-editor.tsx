@@ -42,6 +42,8 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
+import { FaviconPreview } from "./favicon-preview";
+
 type Props = {
   business: {
     id: string;
@@ -475,17 +477,19 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       description="Describes your logo for screen readers and for search engines when the image can't load. Usually just your business name."
                     />
                   </div>
-                  <ImageUploadFormField
-                    form={form}
-                    name="faviconFile"
-                    label="Favicon"
-                    description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico, .png, or .svg. Defaults to SimplePress's favicon if no favicon is uploaded."
-                    existingPreviewUrl={siteContent.faviconUrl ?? undefined}
-                    inputRef={faviconFileInputRef}
-                    mediaLibraryEnabled={mediaLibraryEnabled}
-                    urlFieldName="faviconUrl"
-                    className="col-span-1"
-                  />
+                  <div className="col-span-1 space-y-4">
+                    <ImageUploadFormField
+                      form={form}
+                      name="faviconFile"
+                      label="Favicon"
+                      description="Square image, 512×512 or larger (PNG or SVG works best). We generate the browser-tab, Google and home-screen sizes for you. If left blank, your logo is used."
+                      existingPreviewUrl={siteContent.faviconUrl ?? undefined}
+                      inputRef={faviconFileInputRef}
+                      mediaLibraryEnabled={mediaLibraryEnabled}
+                      urlFieldName="faviconUrl"
+                    />
+                    <FaviconPreview form={form} />
+                  </div>
                 </div>
               </CardContent>
             </Card>

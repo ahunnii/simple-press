@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { ProductSortValue } from "~/lib/validators/product";
+import { normalizeGtin } from "~/lib/gtin";
 import {
   buildUsedMediaIndex,
   isAlwaysInUseKey,
@@ -535,6 +536,7 @@ export const productRouter = createTRPCRouter({
         weightUnit,
         cost,
         sku,
+        barcode,
         featured,
         subscriptionEnabled,
         subscriptionIntervals,
@@ -613,6 +615,7 @@ export const productRouter = createTRPCRouter({
           weightUnit: weightUnit ?? "lb",
           cost: cost ?? null,
           sku: sku ?? null,
+          barcode: barcode ? normalizeGtin(barcode) : null,
           featured,
           subscriptionEnabled,
           // Written explicitly — the column has no `@default` (unlike
@@ -625,6 +628,7 @@ export const productRouter = createTRPCRouter({
             create: variants.map((v) => ({
               name: v.name,
               sku: v.sku,
+              barcode: v.barcode ? normalizeGtin(v.barcode) : null,
               price: v.price,
               compareAtPrice: v.compareAtPrice ?? null,
               inventoryQty: v.inventoryQty,
@@ -671,6 +675,7 @@ export const productRouter = createTRPCRouter({
         weightUnit,
         cost,
         sku,
+        barcode,
         featured,
         subscriptionEnabled,
         subscriptionIntervals,
@@ -786,6 +791,7 @@ export const productRouter = createTRPCRouter({
           weightUnit: weightUnit ?? "lb",
           cost: cost ?? null,
           sku: sku ?? null,
+          barcode: barcode ? normalizeGtin(barcode) : null,
           featured,
           subscriptionEnabled,
           subscriptionIntervals: subscriptionIntervals as Prisma.InputJsonValue,
@@ -840,6 +846,7 @@ export const productRouter = createTRPCRouter({
                 data: {
                   name: v.name,
                   sku: v.sku ?? null,
+                  barcode: v.barcode ? normalizeGtin(v.barcode) : null,
                   price: v.price,
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,
@@ -870,6 +877,7 @@ export const productRouter = createTRPCRouter({
                   productId: product.id,
                   name: v.name,
                   sku: v.sku ?? null,
+                  barcode: v.barcode ? normalizeGtin(v.barcode) : null,
                   price: v.price,
                   compareAtPrice: v.compareAtPrice ?? null,
                   inventoryQty: v.inventoryQty,

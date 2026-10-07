@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { gtinFieldSchema } from "~/lib/gtin";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -56,6 +57,9 @@ const variantObjectSchema = z.object({
     .min(1, "Variant name is required")
     .max(255, "Name must be 255 characters or fewer"),
   sku: z.string().max(100, "SKU must be 100 characters or fewer").optional(),
+  // Optional UPC/EAN/GTIN. "" parses to undefined; the router normalizes
+  // (strips spaces/hyphens) and stores null when it's empty.
+  barcode: gtinFieldSchema,
   price: z.coerce
     .number()
     .nonnegative("Price can't be negative")
@@ -116,6 +120,7 @@ const productFormObjectSchema = z.object({
   // override this with a real Date.
   scheduledPublishAt: z.string().optional().nullable(),
   sku: z.string().max(100, "SKU must be 100 characters or fewer").optional(),
+  barcode: gtinFieldSchema,
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),
   inventoryQty: z.coerce

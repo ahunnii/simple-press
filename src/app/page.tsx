@@ -2,9 +2,11 @@ import { headers } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
-import { enforceCanonicalHost } from "~/lib/canonical";
+import { enforceCanonicalHost, getCanonicalUrl } from "~/lib/canonical";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
 import { parseLocalPresence } from "~/lib/seo/local-presence";
+import { buildMerchantReturnPolicy } from "~/lib/seo/merchant-listing";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
@@ -148,11 +150,29 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       olive: OliveLayout,
     }[business.templateId] ?? DefaultLayout;
 
+  // Organization-level MerchantReturnPolicy: covers every product, including
+  // multi-price ones (Google ignores returns on an AggregateOffer). Only for
+  // stores that sell products and whose owner has set a return window.
+  let returnPolicy: Record<string, unknown> | undefined;
+  if (
+    resolveFlags(business.featureFlags).isEnabled("products") &&
+    business.returnWindowDays !== null
+  ) {
+    const policyPages = await api.content
+      .getSimplifiedPages({ type: "policy" })
+      .catch(() => [] as Array<{ slug: string }>);
+    returnPolicy = buildMerchantReturnPolicy(business, {
+      returnPolicyUrl: policyPages.some((p) => p.slug === "refund-policy")
+        ? getCanonicalUrl(business, "/refund-policy")
+        : undefined,
+    });
+  }
+
   return (
     <HydrateClient>
       <JsonLd
         data={[
-          buildOrganizationSchema(business),
+          buildOrganizationSchema(business, { returnPolicy }),
           buildWebSiteSchema(business),
           ...(parseLocalPresence(business.localPresence) !== "none"
             ? [buildLocalBusinessSchema(business)]

@@ -240,3 +240,358 @@ export const zoneWeightFormSchema = z
   });
 
 export type ZoneWeightFormValues = z.infer<typeof zoneWeightFormSchema>;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Delivery times + returns (feeds the Google Merchant listing structured data)
+//
+// Two schemas over the same rules:
+//   • deliveryReturnsFormSchema  – what the admin form holds (strings for the
+//     number inputs, the return fee in dollars, plus a three-way returnsMode).
+//   • deliveryReturnsInputSchema – the wire format for
+//     business.updateDeliveryAndReturns (ints / cents / nulls).
+// `returnWindowDays` is tri-state on the wire: null = never set (emit nothing),
+// 0 = the store takes no returns, N = an N-day window.
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const HANDLING_DAYS_MAX = 30;
+export const TRANSIT_DAYS_MAX = 60;
+export const RETURN_WINDOW_DAYS_MAX = 365;
+
+export const RETURN_FEES = ["free", "customer_pays", "flat_fee"] as const;
+export const RETURN_METHODS = ["by_mail", "in_store", "either"] as const;
+export const RETURNS_MODES = ["unset", "none", "accept"] as const;
+
+export type ReturnFees = (typeof RETURN_FEES)[number];
+export type ReturnMethod = (typeof RETURN_METHODS)[number];
+export type ReturnsMode = (typeof RETURNS_MODES)[number];
+
+type DeliveryRangeKey = "handling" | "transit";
+
+/** The normalised numbers both schemas hand to the shared rule check. */
+type DeliveryReturnsParsed = {
+  handlingDaysMin: number | null;
+  handlingDaysMax: number | null;
+  transitDaysMin: number | null;
+  transitDaysMax: number | null;
+  /** null = not set, 0 = no returns, N = accept returns. */
+  returnWindowDays: number | null;
+  returnFees: ReturnFees | null;
+  returnShippingFeeCents: number | null;
+  returnMethod: ReturnMethod | null;
+};
+
+type DeliveryReturnsIssueKey =
+  | "handlingDaysMin"
+  | "handlingDaysMax"
+  | "transitDaysMin"
+  | "transitDaysMax"
+  | "returnWindowDays"
+  | "returnFees"
+  | "returnShippingFee"
+  | "returnMethod";
+
+/**
+ * Rules shared by the form and the wire schema. `report` receives a logical
+ * field key; each caller maps it to its own path. Range/bound violations on a
+ * value the caller could not parse are reported by the caller, not here.
+ */
+function checkDeliveryReturns(
+  v: DeliveryReturnsParsed,
+  report: (key: DeliveryReturnsIssueKey, message: string) => void,
+) {
+  const ranges: Array<{
+    key: DeliveryRangeKey;
+    label: string;
+    min: number | null;
+    max: number | null;
+    limit: number;
+  }> = [
+    {
+      key: "handling",
+      label: "Handling time",
+      min: v.handlingDaysMin,
+      max: v.handlingDaysMax,
+      limit: HANDLING_DAYS_MAX,
+    },
+    {
+      key: "transit",
+      label: "Transit time",
+      min: v.transitDaysMin,
+      max: v.transitDaysMax,
+      limit: TRANSIT_DAYS_MAX,
+    },
+  ];
+
+  for (const r of ranges) {
+    const minKey = `${r.key}DaysMin` as DeliveryReturnsIssueKey;
+    const maxKey = `${r.key}DaysMax` as DeliveryReturnsIssueKey;
+    if (r.min !== null && r.max === null) {
+      report(maxKey, `Add a maximum for ${r.label.toLowerCase()}`);
+    }
+    if (r.max !== null && r.min === null) {
+      report(minKey, `Add a minimum for ${r.label.toLowerCase()}`);
+    }
+    if (r.min !== null && r.max !== null && r.min > r.max) {
+      report(maxKey, "Maximum must be at least the minimum");
+    }
+    if (r.min !== null && (r.min < 0 || r.min > r.limit)) {
+      report(minKey, `Enter 0–${r.limit} days`);
+    }
+    if (r.max !== null && (r.max < 0 || r.max > r.limit)) {
+      report(maxKey, `Enter 0–${r.limit} days`);
+    }
+  }
+
+  const window = v.returnWindowDays;
+  if (window !== null && (window < 0 || window > RETURN_WINDOW_DAYS_MAX)) {
+    report(
+      "returnWindowDays",
+      `Enter a return window of 1–${RETURN_WINDOW_DAYS_MAX} days`,
+    );
+    return;
+  }
+
+  if (window !== null && window > 0) {
+    if (v.returnFees === null) {
+      report("returnFees", "Choose who pays for return shipping");
+    }
+    if (v.returnMethod === null) {
+      report("returnMethod", "Choose how customers return items");
+    }
+    if (
+      v.returnFees === "flat_fee" &&
+      (v.returnShippingFeeCents === null || v.returnShippingFeeCents <= 0)
+    ) {
+      report("returnShippingFee", "Enter a return fee greater than $0");
+    }
+  }
+}
+
+// ── Form schema ──────────────────────────────────────────────────────────────
+
+export const deliveryReturnsFormSchema = z
+  .object({
+    handlingDaysMin: z.string(),
+    handlingDaysMax: z.string(),
+    transitDaysMin: z.string(),
+    transitDaysMax: z.string(),
+    returnsMode: z.enum(RETURNS_MODES),
+    returnWindowDays: z.string(),
+    /** "" until the owner picks one. */
+    returnFees: z.union([z.enum(RETURN_FEES), z.literal("")]),
+    returnShippingFeeDollars: z.string(),
+    /** "" until the owner picks one. */
+    returnMethod: z.union([z.enum(RETURN_METHODS), z.literal("")]),
+  })
+  .superRefine((data, ctx) => {
+    // First message per field wins, so a parse error ("1.5") is never
+    // followed by a second, contradictory one from the shared rules.
+    const reported = new Set<string>();
+    const issue = (path: string, message: string) => {
+      if (reported.has(path)) return;
+      reported.add(path);
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message, path: [path] });
+    };
+
+    // Whole-number inputs. A blank is "not set"; anything else must be digits.
+    const parseInt0 = (raw: string, path: string): number | null => {
+      const t = raw.trim();
+      if (t === "") return null;
+      if (!/^\d+$/.test(t)) {
+        issue(path, "Enter a whole number of days");
+        return null;
+      }
+      return Number.parseInt(t, 10);
+    };
+
+    // A bad string is reported once here and then treated as blank so the
+    // shared rules don't pile a second message on the same field.
+    const handlingDaysMin = parseInt0(data.handlingDaysMin, "handlingDaysMin");
+    const handlingDaysMax = parseInt0(data.handlingDaysMax, "handlingDaysMax");
+    const transitDaysMin = parseInt0(data.transitDaysMin, "transitDaysMin");
+    const transitDaysMax = parseInt0(data.transitDaysMax, "transitDaysMax");
+
+    const accepting = data.returnsMode === "accept";
+    let returnWindowDays: number | null = null;
+    if (data.returnsMode === "none") returnWindowDays = 0;
+    if (accepting) {
+      const t = data.returnWindowDays.trim();
+      if (t === "") {
+        issue("returnWindowDays", "Enter how many days customers have");
+      } else if (!/^\d+$/.test(t)) {
+        issue("returnWindowDays", "Enter a whole number of days");
+      } else {
+        const n = Number.parseInt(t, 10);
+        if (n < 1 || n > RETURN_WINDOW_DAYS_MAX) {
+          issue(
+            "returnWindowDays",
+            `Enter a return window of 1–${RETURN_WINDOW_DAYS_MAX} days`,
+          );
+        } else {
+          returnWindowDays = n;
+        }
+      }
+    }
+
+    let returnShippingFeeCents: number | null = null;
+    const feeRaw = data.returnShippingFeeDollars.trim();
+    if (accepting && data.returnFees === "flat_fee" && feeRaw !== "") {
+      const n = Number.parseFloat(feeRaw);
+      if (Number.isNaN(n) || n < 0) {
+        issue("returnShippingFeeDollars", "Enter a valid return fee");
+      } else {
+        returnShippingFeeCents = Math.round(n * 100);
+      }
+    }
+
+    // An invalid window was already reported above. While accepting, stand in
+    // a valid one so the fee/method rules still run and every missing field is
+    // flagged in one pass.
+    const parsed: DeliveryReturnsParsed = {
+      handlingDaysMin,
+      handlingDaysMax,
+      transitDaysMin,
+      transitDaysMax,
+      returnWindowDays: accepting ? (returnWindowDays ?? 1) : returnWindowDays,
+      returnFees: accepting && data.returnFees !== "" ? data.returnFees : null,
+      returnShippingFeeCents,
+      returnMethod:
+        accepting && data.returnMethod !== "" ? data.returnMethod : null,
+    };
+
+    const pathFor: Record<DeliveryReturnsIssueKey, string> = {
+      handlingDaysMin: "handlingDaysMin",
+      handlingDaysMax: "handlingDaysMax",
+      transitDaysMin: "transitDaysMin",
+      transitDaysMax: "transitDaysMax",
+      returnWindowDays: "returnWindowDays",
+      returnFees: "returnFees",
+      returnShippingFee: "returnShippingFeeDollars",
+      returnMethod: "returnMethod",
+    };
+    checkDeliveryReturns(parsed, (key, message) =>
+      issue(pathFor[key], message),
+    );
+  });
+
+export type DeliveryReturnsFormValues = z.infer<
+  typeof deliveryReturnsFormSchema
+>;
+
+// ── Wire (tRPC input) schema ─────────────────────────────────────────────────
+
+const nullableInt = (max: number) =>
+  z.number().int().min(0).max(max).nullable();
+
+export const deliveryReturnsInputSchema = z
+  .object({
+    handlingDaysMin: nullableInt(HANDLING_DAYS_MAX),
+    handlingDaysMax: nullableInt(HANDLING_DAYS_MAX),
+    transitDaysMin: nullableInt(TRANSIT_DAYS_MAX),
+    transitDaysMax: nullableInt(TRANSIT_DAYS_MAX),
+    /** null = not set, 0 = no returns, 1–365 = accept returns. */
+    returnWindowDays: nullableInt(RETURN_WINDOW_DAYS_MAX),
+    returnFees: z.enum(RETURN_FEES).nullable(),
+    returnShippingFeeCents: z.number().int().min(0).nullable(),
+    returnMethod: z.enum(RETURN_METHODS).nullable(),
+  })
+  .superRefine((data, ctx) => {
+    const pathFor: Record<DeliveryReturnsIssueKey, string> = {
+      handlingDaysMin: "handlingDaysMin",
+      handlingDaysMax: "handlingDaysMax",
+      transitDaysMin: "transitDaysMin",
+      transitDaysMax: "transitDaysMax",
+      returnWindowDays: "returnWindowDays",
+      returnFees: "returnFees",
+      returnShippingFee: "returnShippingFeeCents",
+      returnMethod: "returnMethod",
+    };
+    checkDeliveryReturns(data, (key, message) =>
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path: [pathFor[key]],
+      }),
+    );
+  });
+
+export type DeliveryReturnsInput = z.infer<typeof deliveryReturnsInputSchema>;
+
+// ── Row ⇄ form helpers ───────────────────────────────────────────────────────
+
+/** The Business columns the delivery/returns form reads. */
+export type DeliveryReturnsRow = {
+  handlingDaysMin?: number | null;
+  handlingDaysMax?: number | null;
+  transitDaysMin?: number | null;
+  transitDaysMax?: number | null;
+  returnWindowDays?: number | null;
+  returnFees?: string | null;
+  returnShippingFeeCents?: number | null;
+  returnMethod?: string | null;
+};
+
+const intToField = (n: number | null | undefined): string =>
+  n === null || n === undefined ? "" : String(n);
+
+/** DB row → form defaults. Unknown stored enum strings fall back to blank. */
+export function deliveryReturnsFormDefaults(
+  row: DeliveryReturnsRow,
+): DeliveryReturnsFormValues {
+  const window = row.returnWindowDays ?? null;
+  const returnsMode: ReturnsMode =
+    window === null ? "unset" : window === 0 ? "none" : "accept";
+  const fees = RETURN_FEES.find((f) => f === row.returnFees) ?? "";
+  const method = RETURN_METHODS.find((m) => m === row.returnMethod) ?? "";
+  const cents = row.returnShippingFeeCents ?? null;
+  return {
+    handlingDaysMin: intToField(row.handlingDaysMin),
+    handlingDaysMax: intToField(row.handlingDaysMax),
+    transitDaysMin: intToField(row.transitDaysMin),
+    transitDaysMax: intToField(row.transitDaysMax),
+    returnsMode,
+    returnWindowDays: returnsMode === "accept" ? intToField(window) : "",
+    returnFees: returnsMode === "accept" ? fees : "",
+    returnShippingFeeDollars:
+      returnsMode === "accept" && fees === "flat_fee" && cents !== null
+        ? (cents / 100).toFixed(2)
+        : "",
+    returnMethod: returnsMode === "accept" ? method : "",
+  };
+}
+
+const fieldToInt = (raw: string): number | null => {
+  const t = raw.trim();
+  return t === "" ? null : Number.parseInt(t, 10);
+};
+
+/**
+ * Validated form values → wire input. Only call with values that passed
+ * `deliveryReturnsFormSchema`. Irrelevant fields are nulled so the payload
+ * never carries a stale fee/method under "No returns".
+ */
+export function deliveryReturnsFormToInput(
+  values: DeliveryReturnsFormValues,
+): DeliveryReturnsInput {
+  const accepting = values.returnsMode === "accept";
+  const fees = accepting && values.returnFees !== "" ? values.returnFees : null;
+  return {
+    handlingDaysMin: fieldToInt(values.handlingDaysMin),
+    handlingDaysMax: fieldToInt(values.handlingDaysMax),
+    transitDaysMin: fieldToInt(values.transitDaysMin),
+    transitDaysMax: fieldToInt(values.transitDaysMax),
+    returnWindowDays:
+      values.returnsMode === "unset"
+        ? null
+        : values.returnsMode === "none"
+          ? 0
+          : fieldToInt(values.returnWindowDays),
+    returnFees: fees,
+    returnShippingFeeCents:
+      fees === "flat_fee"
+        ? Math.round(Number.parseFloat(values.returnShippingFeeDollars) * 100)
+        : null,
+    returnMethod:
+      accepting && values.returnMethod !== "" ? values.returnMethod : null,
+  };
+}

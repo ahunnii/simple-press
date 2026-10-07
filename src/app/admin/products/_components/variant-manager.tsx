@@ -799,7 +799,7 @@ export function VariantManager({
 
                       {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
 
-                      <div className="grid flex-1 grid-cols-1 items-start gap-3 md:grid-cols-5">
+                      <div className="grid flex-1 grid-cols-1 items-start gap-3 md:grid-cols-6">
                         <div>
                           <Label className="text-muted-foreground text-xs">
                             Name
@@ -824,6 +824,26 @@ export function VariantManager({
                               updateVariant(index, "sku", e.target.value)
                             }
                             placeholder="Optional"
+                            className="h-8"
+                          />
+                        </div>
+
+                        <div>
+                          <Label
+                            htmlFor={`barcode-${index}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            Barcode
+                          </Label>
+                          <Input
+                            id={`barcode-${index}`}
+                            type="text"
+                            inputMode="numeric"
+                            value={variant.barcode ?? ""}
+                            onChange={(e) =>
+                              updateVariant(index, "barcode", e.target.value)
+                            }
+                            placeholder="UPC/EAN/GTIN"
                             className="h-8"
                           />
                         </div>

@@ -14,25 +14,33 @@
  * This module passes them through as-is; callers should not supply relative paths.
  *
  * Currency: SimplePress processes all payments in USD (hardcoded in the Stripe
- * checkout session). priceCurrency is therefore always "USD".
+ * checkout session). priceCurrency is therefore always SCHEMA_CURRENCY ("USD").
  */
-
+import type {
+  ReturnsForSchema,
+  ShippingForSchema,
+} from "~/lib/seo/merchant-listing";
+import { isValidLatitude, isValidLongitude } from "~/lib/address/coordinates";
 import {
   buildOpeningHoursSpecification,
   parseBusinessHours,
 } from "~/lib/business-hours";
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
-import {
-  isValidLatitude,
-  isValidLongitude,
-} from "~/lib/address/coordinates";
 import { eventDateTimeAttr } from "~/lib/events/format";
+import { isValidGtin, normalizeGtin } from "~/lib/gtin";
 import { getEffectivePrice } from "~/lib/prices";
+import { productDescriptionToPlainText } from "~/lib/product-description";
 import { firstNonBlank } from "~/lib/seo/blank";
 import {
   normalizeAreaServed,
   parseLocalPresence,
 } from "~/lib/seo/local-presence";
+import {
+  buildMerchantReturnPolicy,
+  buildShippingDetails,
+  productWeightLb,
+  SCHEMA_CURRENCY,
+} from "~/lib/seo/merchant-listing";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { youtubeEmbedUrl, youtubeWatchUrl } from "~/lib/youtube/parse";
 
@@ -66,6 +74,7 @@ interface ProductImage {
 interface ProductVariant {
   price?: number | null;
   inventoryQty: number;
+  barcode?: string | null;
 }
 
 interface BaseInventoryUnit {
@@ -78,6 +87,9 @@ interface ProductForSchema {
   slug: string;
   description?: string | null;
   sku?: string | null;
+  barcode?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
   price: number;
   images: ProductImage[];
   averageRating?: number | null;
@@ -163,6 +175,25 @@ function nonBlank(value: string | null | undefined): string | undefined {
 }
 
 /**
+ * The product's GTIN: its own barcode when valid, otherwise the barcode of the
+ * only variant carrying a valid one (two or more distinct variant GTINs are
+ * ambiguous for a single Product, so none is emitted). Normalised (spaces and
+ * hyphens stripped).
+ */
+function resolveGtin(product: ProductForSchema): string | undefined {
+  if (product.barcode && isValidGtin(product.barcode)) {
+    return normalizeGtin(product.barcode);
+  }
+  const variantGtins = new Set(
+    (product.variants ?? [])
+      .map((v) => v.barcode)
+      .filter((b): b is string => Boolean(b) && isValidGtin(b))
+      .map(normalizeGtin),
+  );
+  return variantGtins.size === 1 ? [...variantGtins][0] : undefined;
+}
+
+/**
  * Parse socialLinks JSON into an array of URL strings for sameAs.
  * The DB schema stores this as `{ instagram?: string, facebook?: string, twitter?: string, ... }`.
  */
@@ -188,6 +219,17 @@ export type BuildProductSchemaOptions = {
    * the storefront no longer surfaces.
    */
   includeReviews?: boolean;
+  /**
+   * Store-level merchant-listing data. When present, `offers` gains
+   * `shippingDetails` (priced for this product from the store's real shipping
+   * settings) and `hasMerchantReturnPolicy` (when a return window is set).
+   * Omitted → output is unchanged.
+   */
+  merchant?: {
+    shipping: ShippingForSchema;
+    returns: ReturnsForSchema;
+    returnPolicyUrl?: string;
+  };
 };
 
 /**
@@ -201,6 +243,9 @@ export type BuildProductSchemaOptions = {
  *   AggregateOffer (lowPrice/highPrice/offerCount) when ≥2 variants have
  *   different effective prices
  * - aggregateRating — ONLY when reviewCount > 0 (Google rejects zero-review ratings)
+ * - gtin — from a valid product barcode, else the single variant with one
+ * - offers.shippingDetails / offers.hasMerchantReturnPolicy — only when
+ *   `options.merchant` is passed
  */
 export function buildProductSchema(
   product: ProductForSchema,
@@ -244,17 +289,37 @@ export function buildProductSchema(
         lowPrice: (Math.min(...variantPriceCents) / 100).toFixed(2),
         highPrice: (Math.max(...variantPriceCents) / 100).toFixed(2),
         offerCount: variantPriceCents.length,
-        priceCurrency: "USD",
+        priceCurrency: SCHEMA_CURRENCY,
         availability: getAvailability(product),
         url: canonicalUrl,
       }
     : {
         "@type": "Offer",
         price: (effectivePriceCents / 100).toFixed(2),
-        priceCurrency: "USD",
+        priceCurrency: SCHEMA_CURRENCY,
         availability: getAvailability(product),
         url: canonicalUrl,
       };
+
+  if (options.merchant) {
+    const { shipping, returns, returnPolicyUrl } = options.merchant;
+    const shippingDetails = buildShippingDetails(shipping, {
+      priceCents: hasPriceRange
+        ? Math.min(...variantPriceCents)
+        : effectivePriceCents,
+      weightLb: productWeightLb(product, shipping.shippingDefaultItemWeightLb),
+    });
+    if (shippingDetails.length > 0) {
+      offers.shippingDetails =
+        shippingDetails.length === 1 ? shippingDetails[0] : shippingDetails;
+    }
+    const returnPolicy = buildMerchantReturnPolicy(returns, {
+      returnPolicyUrl,
+    });
+    if (returnPolicy) {
+      offers.hasMerchantReturnPolicy = returnPolicy;
+    }
+  }
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -268,12 +333,20 @@ export function buildProductSchema(
     offers,
   };
 
-  if (product.description) {
-    schema.description = product.description;
+  // Imported descriptions can carry HTML / literal "\n" escapes — JSON-LD
+  // gets the same plain text the storefront blurbs use.
+  const description = productDescriptionToPlainText(product.description);
+  if (description) {
+    schema.description = description;
   }
 
   if (product.sku) {
     schema.sku = product.sku;
+  }
+
+  const gtin = resolveGtin(product);
+  if (gtin) {
+    schema.gtin = gtin;
   }
 
   if (images.length > 0) {
@@ -321,9 +394,15 @@ export function buildProductSchema(
  * Build a schema.org Organization object for the storefront homepage.
  *
  * Includes name, url, optional logo, and optional sameAs social URLs.
+ *
+ * `returnPolicy` (a MerchantReturnPolicy from `buildMerchantReturnPolicy`)
+ * becomes `hasMerchantReturnPolicy`. Google ignores shipping/returns on an
+ * AggregateOffer, so the Organization-level policy is what covers
+ * multi-price products.
  */
 export function buildOrganizationSchema(
   business: BusinessForOrganization,
+  options: { returnPolicy?: Record<string, unknown> } = {},
 ): Record<string, unknown> {
   const baseUrl = getCanonicalBaseUrl(business);
 
@@ -350,6 +429,10 @@ export function buildOrganizationSchema(
   const sameAs = parseSameAs(business.siteContent?.socialLinks);
   if (sameAs) {
     schema.sameAs = sameAs;
+  }
+
+  if (options.returnPolicy) {
+    schema.hasMerchantReturnPolicy = options.returnPolicy;
   }
 
   return schema;

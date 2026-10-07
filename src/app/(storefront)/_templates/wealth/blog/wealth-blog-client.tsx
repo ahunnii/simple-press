@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { cn } from "~/lib/utils";
+import { usePageParam } from "~/hooks/use-page-param";
 
 import { useWealthReveal } from "../hooks/use-wealth-reveal";
 import { WealthBlogCard } from "./wealth-blog-card";
@@ -30,7 +31,10 @@ const PAGE_SIZE = 9;
  */
 export function WealthBlogClient({ pages }: Props) {
   const [query, setQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // "Load More" is URL-backed (?page=N shows the first N × PAGE_SIZE posts) so
+  // each step is a crawlable link.
+  const { page, goToPage, pageLinkProps } = usePageParam();
+  const visibleCount = page * PAGE_SIZE;
 
   const postsWithSearch = useMemo(
     () => pages.map((p) => ({ post: p, searchBlob: buildBlogSearchBlob(p) })),
@@ -76,6 +80,7 @@ export function WealthBlogClient({ pages }: Props) {
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
+            if (page > 1) goToPage(1, { scroll: false });
           }}
           aria-label="Search News + Notes posts"
           style={{
@@ -136,12 +141,9 @@ export function WealthBlogClient({ pages }: Props) {
                 marginTop: "calc(var(--wealth-rhythm) * 2)",
               }}
             >
-              <button
-                type="button"
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              <a
+                {...pageLinkProps(page + 1, { scroll: false })}
                 style={{
-                  background: "none",
-                  border: "none",
                   cursor: "pointer",
                   fontFamily: "var(--font-wealth-sub)",
                   fontStyle: "italic",
@@ -151,7 +153,7 @@ export function WealthBlogClient({ pages }: Props) {
                 }}
               >
                 Load More
-              </button>
+              </a>
             </div>
           )}
         </>

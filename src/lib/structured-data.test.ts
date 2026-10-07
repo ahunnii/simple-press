@@ -781,3 +781,252 @@ describe("buildOrganizationSchema", () => {
     expect(schema).not.toHaveProperty("email");
   });
 });
+
+describe("buildProductSchema — description and gtin", () => {
+  it("emits the description as plain text (tags stripped, entities decoded)", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        description: "<h2>Soft &amp; warm</h2><p>Hand-knit<br/>wool.</p>",
+      },
+      business,
+    );
+    expect(schema.description).toBe("Soft & warm Hand-knit wool.");
+  });
+
+  it("omits description when it is blank after stripping tags", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, description: "<p>  </p>" },
+      business,
+    );
+    expect(schema).not.toHaveProperty("description");
+  });
+
+  it("emits a normalized gtin from a valid product barcode", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, barcode: "0360-00 291452" },
+      business,
+    );
+    expect(schema.gtin).toBe("036000291452");
+  });
+
+  it("omits gtin for an invalid product barcode", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, barcode: "036000291453" },
+      business,
+    );
+    expect(schema).not.toHaveProperty("gtin");
+  });
+
+  it("falls back to the single variant with a valid barcode", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        barcode: null,
+        variants: [
+          { price: 1000, inventoryQty: 1, barcode: "4006381333931" },
+          { price: 1000, inventoryQty: 1, barcode: "not-a-gtin" },
+          { price: 1000, inventoryQty: 1 },
+        ],
+      },
+      business,
+    );
+    expect(schema.gtin).toBe("4006381333931");
+  });
+
+  it("omits gtin when two variants carry different valid barcodes", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        variants: [
+          { price: 1000, inventoryQty: 1, barcode: "4006381333931" },
+          { price: 1000, inventoryQty: 1, barcode: "036000291452" },
+        ],
+      },
+      business,
+    );
+    expect(schema).not.toHaveProperty("gtin");
+  });
+
+  it("prefers the product barcode over variant barcodes", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        barcode: "96385074",
+        variants: [{ price: 1000, inventoryQty: 1, barcode: "4006381333931" }],
+      },
+      business,
+    );
+    expect(schema.gtin).toBe("96385074");
+  });
+});
+
+describe("buildProductSchema — merchant listing", () => {
+  const shipping = {
+    shippingType: "flat_rate_with_threshold",
+    shippingFlatRate: 599,
+    freeShippingThreshold: 5000,
+    salesCountries: [],
+    shippingDefaultItemWeightLb: 0,
+    transitDaysMin: 2,
+    transitDaysMax: 5,
+  };
+  const returns = {
+    returnWindowDays: 30,
+    returnFees: "free",
+    returnShippingFeeCents: null,
+    returnMethod: "by_mail",
+    salesCountries: [],
+  };
+
+  it("leaves offers unchanged when merchant is not passed", () => {
+    const schema = buildProductSchema(baseProduct, business);
+    expect(schema.offers).toEqual({
+      "@type": "Offer",
+      price: "10.00",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: expect.any(String) as string,
+    });
+  });
+
+  it("adds a single shippingDetails object and hasMerchantReturnPolicy to an Offer", () => {
+    const schema = buildProductSchema(baseProduct, business, [], {
+      merchant: {
+        shipping,
+        returns,
+        returnPolicyUrl: "https://testshop.test/refund-policy",
+      },
+    });
+    const offers = schema.offers as Record<string, unknown>;
+    expect(offers.shippingDetails).toEqual({
+      "@type": "OfferShippingDetails",
+      shippingRate: {
+        "@type": "MonetaryAmount",
+        value: "5.99",
+        currency: "USD",
+      },
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "US" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 2,
+          maxValue: 5,
+          unitCode: "DAY",
+        },
+      },
+    });
+    expect(offers.hasMerchantReturnPolicy).toMatchObject({
+      "@type": "MerchantReturnPolicy",
+      merchantReturnDays: 30,
+      merchantReturnLink: "https://testshop.test/refund-policy",
+    });
+  });
+
+  it("prices shipping from the AggregateOffer lowPrice", () => {
+    const schema = buildProductSchema(
+      {
+        ...baseProduct,
+        price: 4000,
+        variants: [
+          { price: 4000, inventoryQty: 1 },
+          { price: 6000, inventoryQty: 1 },
+        ],
+      },
+      business,
+      [],
+      { merchant: { shipping, returns } },
+    );
+    const offers = schema.offers as Record<string, unknown>;
+    expect(offers["@type"]).toBe("AggregateOffer");
+    // lowPrice 40.00 is under the 50.00 threshold → flat rate applies.
+    expect(offers.shippingDetails).toMatchObject({
+      shippingRate: { value: "5.99" },
+    });
+  });
+
+  it("uses the effective price for the free-shipping threshold", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, price: 5000 },
+      business,
+      [],
+      { merchant: { shipping, returns } },
+    );
+    expect(
+      (schema.offers as Record<string, unknown>).shippingDetails,
+    ).toMatchObject({ shippingRate: { value: "0.00" } });
+  });
+
+  it("emits a shippingDetails array for multi-entry zone_weight stores", () => {
+    const schema = buildProductSchema(
+      { ...baseProduct, weight: 1, weightUnit: "lb" },
+      business,
+      [],
+      {
+        merchant: {
+          shipping: {
+            shippingType: "zone_weight",
+            shippingFlatRate: null,
+            freeShippingThreshold: null,
+            salesCountries: [],
+            shippingWeightTiers: [{ label: "All", minLb: 0, maxLb: null }],
+            shippingFallbackRate: 1200,
+            shippingDefaultItemWeightLb: 0,
+            zones: [
+              {
+                name: "Local",
+                states: ["MI"],
+                rates: [{ tierIndex: 0, priceCents: 400 }],
+              },
+            ],
+          },
+          returns: { returnWindowDays: null },
+        },
+      },
+    );
+    const offers = schema.offers as Record<string, unknown>;
+    expect(Array.isArray(offers.shippingDetails)).toBe(true);
+    expect(offers.shippingDetails).toHaveLength(2);
+    expect(offers).not.toHaveProperty("hasMerchantReturnPolicy");
+  });
+
+  it("omits shippingDetails when nothing can be priced", () => {
+    const schema = buildProductSchema(baseProduct, business, [], {
+      merchant: {
+        shipping: {
+          shippingType: "zone_weight",
+          shippingFlatRate: null,
+          freeShippingThreshold: null,
+          shippingFallbackRate: null,
+          zones: [],
+        },
+        returns,
+      },
+    });
+    const offers = schema.offers as Record<string, unknown>;
+    expect(offers).not.toHaveProperty("shippingDetails");
+    expect(offers).toHaveProperty("hasMerchantReturnPolicy");
+  });
+});
+
+describe("buildOrganizationSchema — return policy", () => {
+  it("omits hasMerchantReturnPolicy by default", () => {
+    expect(buildOrganizationSchema(business)).not.toHaveProperty(
+      "hasMerchantReturnPolicy",
+    );
+  });
+
+  it("emits hasMerchantReturnPolicy when given", () => {
+    const returnPolicy = {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "US",
+      returnPolicyCountry: "US",
+      returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    };
+    expect(
+      buildOrganizationSchema(business, { returnPolicy })
+        .hasMerchantReturnPolicy,
+    ).toEqual(returnPolicy);
+  });
+});

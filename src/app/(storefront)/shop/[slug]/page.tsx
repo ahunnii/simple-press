@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { notFound, permanentRedirect } from "next/navigation";
 
+import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   buildPageMetadata,
@@ -8,6 +9,7 @@ import {
   getCachedBusiness,
   loadSeoBusiness,
 } from "~/lib/seo";
+import { toMetaDescription } from "~/lib/seo/meta-description";
 import {
   buildBreadcrumbSchema,
   buildProductSchema,
@@ -108,7 +110,18 @@ export default async function ProductDetailPage({ params }: Props) {
     product,
     business,
     reviews.slice(0, 20),
-    { includeReviews: reviewsEnabled },
+    {
+      includeReviews: reviewsEnabled,
+      // Shipping rates come from the store's live settings; delivery times and
+      // the return policy only appear once the owner fills them in.
+      merchant: {
+        shipping: business,
+        returns: business,
+        returnPolicyUrl: productPolicies.hasRefundPolicy
+          ? getCanonicalUrl(business, "/refund-policy")
+          : undefined,
+      },
+    },
   );
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
@@ -144,8 +157,13 @@ export async function generateMetadata({ params }: Props) {
     path: `/shop/${product.slug}`,
     title: product.name,
     // The excerpt is the short, share-shaped copy; the long description is the
-    // fallback only when it is blank.
-    description: firstNonBlank(product.excerpt, product.description),
+    // fallback only when it is blank. Both go through toMetaDescription so
+    // imported HTML never reaches the meta tag and the text is cut at a word
+    // boundary (~160 chars).
+    description: firstNonBlank(
+      toMetaDescription(product.excerpt),
+      toMetaDescription(product.description),
+    ),
     keywords: product.metaKeywords,
     entity: {
       title: product.metaTitle,

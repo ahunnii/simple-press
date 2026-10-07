@@ -24,7 +24,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
     currentPage,
     totalPages,
     handleSort,
-    handlePage,
+    pageLinkProps,
     inStockOnly,
     handleInStock,
     inStockCount,
@@ -283,19 +283,26 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
               aria-label="Pagination"
               className="mt-16 flex items-center justify-center gap-2"
             >
-              <button
-                type="button"
-                onClick={() => handlePage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
-              >
-                Previous
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              {currentPage === 1 ? (
                 <button
-                  key={p}
                   type="button"
-                  onClick={() => handlePage(p)}
+                  disabled
+                  className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
+                >
+                  Previous
+                </button>
+              ) : (
+                <a
+                  {...pageLinkProps(currentPage - 1)}
+                  className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
+                >
+                  Previous
+                </a>
+              )}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <a
+                  key={p}
+                  {...pageLinkProps(p)}
                   aria-label={`Page ${p}`}
                   aria-current={p === currentPage ? "page" : undefined}
                   className={`flex h-9 w-9 items-center justify-center rounded-[var(--radius)] border text-sm transition-colors ${
@@ -305,16 +312,24 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
                   }`}
                 >
                   {p}
-                </button>
+                </a>
               ))}
-              <button
-                type="button"
-                onClick={() => handlePage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
-              >
-                Next
-              </button>
+              {currentPage === totalPages ? (
+                <button
+                  type="button"
+                  disabled
+                  className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
+                >
+                  Next
+                </button>
+              ) : (
+                <a
+                  {...pageLinkProps(currentPage + 1)}
+                  className="flex h-9 items-center justify-center rounded-[var(--radius)] border border-[#e8e8e8] px-4 text-sm transition-colors hover:border-[#0a0a0a] disabled:opacity-30"
+                >
+                  Next
+                </a>
+              )}
             </nav>
           )}
         </div>

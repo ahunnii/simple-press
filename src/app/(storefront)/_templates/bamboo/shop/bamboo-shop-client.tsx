@@ -37,11 +37,11 @@ export function BambooShopClient({ products }: Props) {
     collections,
     currentPage,
     totalPages,
-    handlePage,
     filtered,
     paginated,
     hasActiveFilters,
     clearFilters,
+    pageLinkProps,
   } = useShopFilters(products, { pageSize: 12 });
 
   // The select content portals to document.body by default, which escapes
@@ -200,14 +200,21 @@ export function BambooShopClient({ products }: Props) {
           aria-label="Pagination"
           className="mt-10 flex items-center justify-center gap-3"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePage(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
+          {currentPage === 1 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Previous
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <a {...pageLinkProps(currentPage - 1)}>
+                Previous
+              </a>
+            </Button>
+          )}
           <span
             className="text-muted-foreground text-sm"
             aria-live="polite"
@@ -219,14 +226,21 @@ export function BambooShopClient({ products }: Props) {
             <span className="sr-only"> of </span>
             {totalPages}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+          {currentPage === totalPages ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Next
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <a {...pageLinkProps(currentPage + 1)}>
+                Next
+              </a>
+            </Button>
+          )}
         </nav>
       )}
     </div>
