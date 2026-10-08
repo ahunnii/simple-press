@@ -90,6 +90,12 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Unique Monique",
     subdomains: ["uniquemonique"],
   },
+  // 1:1 recreation of theluvgluv.com (The LuvGluv — luxury ladies' leather
+  // gloves + charms, Michigan).
+  glove: {
+    label: "The LuvGluv",
+    subdomains: ["luvgluv"],
+  },
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {

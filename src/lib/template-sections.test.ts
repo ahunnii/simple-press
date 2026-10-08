@@ -307,6 +307,7 @@ describe("getSectionsForTemplate blog-post section coverage", () => {
     "sledge",
     "pink",
     "olive",
+    "glove",
   ];
 
   for (const templateId of curatedTemplateIds) {

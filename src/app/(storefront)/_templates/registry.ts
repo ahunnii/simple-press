@@ -202,6 +202,38 @@ import { ElegantProductPage } from "./elegant/products/elegant-product-page";
 import { ElegantShopPage } from "./elegant/shop/elegant-shop-page";
 import { ElegantTestimonialsPage } from "./elegant/testimonials/elegant-testimonials-page";
 // ---------------------------------------------------------------------------
+// Glove (The LuvGluv)
+// ---------------------------------------------------------------------------
+import { GloveAboutPage } from "./glove/about/glove-about-page";
+import { GloveAccountSecurityPage } from "./glove/account/glove-account-security-page";
+import { GloveAccountSettingsPage } from "./glove/account/glove-account-settings-page";
+import { GloveAddressBookPage } from "./glove/account/glove-address-book-page";
+import { GloveInvoicesPage } from "./glove/account/glove-invoices-page";
+import { GloveOrderDetailPage } from "./glove/account/glove-order-detail-page";
+import { GloveOrdersPage } from "./glove/account/glove-orders-page";
+import { GlovePreferencesPage } from "./glove/account/glove-preferences-page";
+import { GloveRewardsPage } from "./glove/account/glove-rewards-page";
+import { GloveSubscriptionsPage } from "./glove/account/glove-subscriptions-page";
+import { GloveBlogPage } from "./glove/blog/glove-blog-page";
+import { GloveBlogPostPage } from "./glove/blog/glove-blog-post-page";
+import { GloveCartPage } from "./glove/cart-checkout/glove-cart-page";
+import { GloveCheckoutPage } from "./glove/cart-checkout/glove-checkout-page";
+import { GloveCheckoutUnavailable } from "./glove/cart-checkout/glove-checkout-unavailable";
+import { GloveOrderSuccessPage } from "./glove/cart-checkout/glove-order-success-page";
+import { GloveCollectionPage } from "./glove/collections/glove-collection-page";
+import { GloveCollectionsPage } from "./glove/collections/glove-collections-page";
+import { GloveContactPage } from "./glove/contact/glove-contact-page";
+import { GloveDonatePage } from "./glove/donate/glove-donate-page";
+import { GloveEventPage } from "./glove/events/glove-event-page";
+import { GloveEventsPage } from "./glove/events/glove-events-page";
+import { GloveFaqPage } from "./glove/faq/glove-faq-page";
+import { GloveGenericPage } from "./glove/generic/glove-generic-page";
+import { GloveLayout } from "./glove/layout/glove-layout";
+import { GloveProductPage } from "./glove/products/glove-product-page";
+import { GloveShopPage } from "./glove/shop/glove-shop-page";
+import { GloveTestimonialsPage } from "./glove/testimonials/glove-testimonials-page";
+import { GloveVideosPage } from "./glove/videos/glove-videos-page";
+// ---------------------------------------------------------------------------
 // Happy Bamboo
 // ---------------------------------------------------------------------------
 import { HappyBambooAboutPage } from "./happy-bamboo/about/happy-bamboo-about-page";
@@ -345,9 +377,9 @@ import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
 import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
 import { PinkContactPage } from "./pink/contact/pink-contact-page";
 import { PinkDonatePage } from "./pink/donate/pink-donate-page";
-import { PinkFaqPage } from "./pink/faq/pink-faq-page";
 import { PinkEventPage } from "./pink/events/pink-event-page";
 import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
+import { PinkFaqPage } from "./pink/faq/pink-faq-page";
 import { PinkGenericPage } from "./pink/generic/pink-generic-page";
 import { PinkLayout } from "./pink/layout/pink-layout";
 import { PinkProductPage } from "./pink/products/pink-product-page";
@@ -1022,6 +1054,37 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     DonatePage: OliveDonatePage,
     FaqPage: OliveFaqPage,
     MaintenancePage: OliveMaintenancePage,
+  },
+  glove: {
+    Layout: GloveLayout,
+    AboutPage: GloveAboutPage,
+    BlogPage: GloveBlogPage,
+    BlogPostPage: GloveBlogPostPage,
+    CartPage: GloveCartPage,
+    CheckoutPage: GloveCheckoutPage,
+    CheckoutUnavailable: GloveCheckoutUnavailable,
+    OrderSuccessPage: GloveOrderSuccessPage,
+    CollectionPage: GloveCollectionPage,
+    CollectionsPage: GloveCollectionsPage,
+    ContactPage: GloveContactPage,
+    GenericPage: GloveGenericPage,
+    ProductPage: GloveProductPage,
+    ShopPage: GloveShopPage,
+    TestimonialsPage: GloveTestimonialsPage,
+    AccountSettingsPage: GloveAccountSettingsPage,
+    AccountSecurityPage: GloveAccountSecurityPage,
+    AddressBookPage: GloveAddressBookPage,
+    OrderDetailPage: GloveOrderDetailPage,
+    OrdersPage: GloveOrdersPage,
+    PreferencesPage: GlovePreferencesPage,
+    RewardsPage: GloveRewardsPage,
+    SubscriptionsPage: GloveSubscriptionsPage,
+    InvoicesPage: GloveInvoicesPage,
+    EventsPage: GloveEventsPage,
+    EventPage: GloveEventPage,
+    VideosPage: GloveVideosPage,
+    DonatePage: GloveDonatePage,
+    FaqPage: GloveFaqPage,
   },
   pollen: {
     Layout: PollenLayout,

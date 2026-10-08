@@ -60,6 +60,10 @@ import {
   noiseFieldGroups,
 } from "~/app/(storefront)/_templates/noise";
 import {
+  gloveData,
+  gloveFieldGroups,
+} from "~/app/(storefront)/_templates/glove";
+import {
   oliveData,
   oliveFieldGroups,
 } from "~/app/(storefront)/_templates/olive";
@@ -1004,6 +1008,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...dreamFieldGroups,
   ...umscFieldGroups,
   ...oliveFieldGroups,
+  ...gloveFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
@@ -1027,6 +1032,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...dreamData,
   ...umscData,
   ...oliveData,
+  ...gloveData,
 
   ...defaultTemplateData,
 };

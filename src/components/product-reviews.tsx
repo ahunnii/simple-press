@@ -159,7 +159,11 @@ export function ProductReviews({
                       <span className="w-8 text-sm font-medium">{rating}</span>
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     </button>
-                    <Progress value={percentage} className="flex-1" />
+                    <Progress
+                      value={percentage}
+                      className="flex-1"
+                      aria-label={`${rating}-star reviews: ${count}`}
+                    />
                     <span className="w-12 text-right text-sm text-gray-600">
                       {count}
                     </span>
@@ -183,7 +187,7 @@ export function ProductReviews({
               setVisibleCount(INITIAL_REVIEW_COUNT);
             }}
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48" aria-label="Sort reviews">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className={sortSelectContentClassName}>
