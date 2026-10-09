@@ -8,6 +8,7 @@ import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
+import { GlovePageBannerProvider } from "../shared/glove-page-banner";
 import { GloveAnnouncementBar } from "./glove-announcement-bar";
 import { GloveFooter } from "./glove-footer";
 import { GloveHeader } from "./glove-header";
@@ -44,7 +45,7 @@ export async function GloveLayout({
     api.content.getSimplifiedPages({ type: "policy" }),
   ]);
 
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   const themeVars = resolveThemeVars(
     "glove",
     business.siteContent?.customFields,
@@ -77,16 +78,19 @@ export async function GloveLayout({
         trackLabel={get(GLOVE_FIELD_KEYS.trackLabel)}
         trackHref={trackHref === "" ? "/order-status" : trackHref}
         // Blank saved label would leave an empty button; fall back to the default.
-        accountLabel={get(GLOVE_FIELD_KEYS.accountLabel).trim() || "My Account"}
+        accountLabel={get(GLOVE_FIELD_KEYS.accountLabel).trim() || "Account"}
       />
 
       <main id="main-content" className="min-w-0 flex-1">
-        {children}
+        <GlovePageBannerProvider src={get(GLOVE_FIELD_KEYS.pageBannerImage)}>
+          {children}
+        </GlovePageBannerProvider>
       </main>
 
       <GloveFooter
         business={business}
         policyPages={policyPages}
+        initialSession={session ?? null}
         fields={{
           badge: get(GLOVE_FIELD_KEYS.footerBadge),
           blurb: get(GLOVE_FIELD_KEYS.footerBlurb),

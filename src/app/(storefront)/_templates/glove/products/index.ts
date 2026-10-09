@@ -14,7 +14,7 @@ const guideData: TemplateField[] = [
     key: "glove.product.guide-text",
     label: "Banner text",
     description:
-      "Text at the start of the banner above every product, before the guide link. Leave blank to hide the banner.",
+      "Text at the start of the banner shown above the options on made-to-order products, before the guide link. Leave blank to hide the banner.",
     type: "text",
     page: "product",
     group: "product.guide",
@@ -51,7 +51,7 @@ const detailsData: TemplateField[] = [
     key: "glove.product.notice-collection-slug",
     label: "Custom-made collection",
     description:
-      "Slug of the collection whose products are made to order (gloves). Those products show the notice below, the numbered option steps and the add-on picker. Leave blank to treat every product that way.",
+      "Slug of the collection whose products are made to order (gloves). Those products show the notice below, the Easy Guide banner, the numbered option steps and the add-on picker. Leave blank to treat every product that way.",
     type: "text",
     page: "product",
     group: "product.details",
@@ -126,17 +126,6 @@ const detailsData: TemplateField[] = [
       "This style isn't available to order just yet. Check back soon!",
   },
   {
-    key: "glove.product.share-label",
-    label: "Share label",
-    description:
-      "Word before the share buttons. Leave blank to show just the buttons.",
-    type: "text",
-    page: "product",
-    group: "product.details",
-    gridColumn: "col-span-1",
-    defaultValue: "Share:",
-  },
-  {
     key: "glove.product.description-heading",
     label: "Description heading",
     description:
@@ -162,12 +151,12 @@ const detailsData: TemplateField[] = [
     key: "glove.product.review-prompt",
     label: "Write a review heading",
     description:
-      "Heading beside the reviews, followed by the product name in quotes.",
+      "Heading of the invitation to write a review. With no reviews yet it is the whole empty state, with the line and button below.",
     type: "text",
     page: "product",
     group: "product.details",
     gridColumn: "col-span-1",
-    defaultValue: "Be the first to review",
+    defaultValue: "Wearing hers?",
   },
   {
     key: "glove.product.review-body",
@@ -178,7 +167,7 @@ const detailsData: TemplateField[] = [
     group: "product.details",
     gridColumn: "col-span-1",
     defaultValue:
-      "Tell us how she loved her LuvGluv. Reviews from signed-in customers appear once approved.",
+      "Tell us how she loves her LuvGluv. Reviews appear once approved.",
   },
   {
     key: "glove.product.review-button-label",
@@ -199,7 +188,7 @@ const detailsData: TemplateField[] = [
     page: "product",
     group: "product.details",
     gridColumn: "col-span-1",
-    defaultValue: "Related products",
+    defaultValue: "Pairs beautifully with",
   },
 ];
 
@@ -379,7 +368,8 @@ export const gloveProductFieldGroups: TemplateFieldGroup[] = [
   {
     id: "product.guide",
     title: "Easy Guide banner",
-    description: "Banner above every product that links to the Easy Guide",
+    description:
+      "Banner above the options on made-to-order products that links to the Easy Guide",
     icon: "🧭",
     columns: 2,
   },
@@ -427,7 +417,8 @@ export const gloveProductSections: TemplateSection[] = [
     id: "product.guide",
     page: "product",
     title: "Easy Guide banner",
-    description: "Banner above every product that links to the Easy Guide",
+    description:
+      "Banner above the options on made-to-order products that links to the Easy Guide",
     groupIds: ["product.guide"],
     order: 0,
     hideable: true,

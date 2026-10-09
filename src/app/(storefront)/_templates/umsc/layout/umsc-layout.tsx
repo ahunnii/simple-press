@@ -54,7 +54,7 @@ export async function UmscLayout({
     getBusinessFlags(),
   ]);
 
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   const themeVars = resolveThemeVars(
     "umsc",
     business.siteContent?.customFields,

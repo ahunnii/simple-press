@@ -42,7 +42,7 @@ export function GloveHomeSorority({
           </h2>
           {body ? (
             <p
-              className="glove-body mt-4 text-[17px] leading-[1.7] text-[var(--glove-text)] md:text-[19px]"
+              className="glove-body mx-auto mt-4 max-w-[64ch] text-[17px] leading-[1.7] text-[var(--glove-text)] md:mx-0 md:text-[19px]"
               {...fieldAttr("glove.homepage.sorority-body")}
             >
               {body}
@@ -62,7 +62,7 @@ export function GloveHomeSorority({
           ) : null}
         </div>
         {image ? (
-          <div className="relative aspect-[1835/953] w-full overflow-hidden rounded-[var(--glove-radius-card)] bg-[var(--glove-cloud)] shadow-[var(--glove-shadow-sm)]">
+          <div className="relative aspect-[1835/953] w-full overflow-hidden rounded-[var(--glove-radius-card)] bg-[var(--glove-wash)] shadow-[var(--glove-shadow-sm)]">
             <Image
               src={image}
               alt={imageAlt}

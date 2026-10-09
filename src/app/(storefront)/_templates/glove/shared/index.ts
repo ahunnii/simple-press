@@ -23,5 +23,5 @@ export { gloveRevealItemStyle } from "./glove-reveal-style";
 export { GloveSection, type GloveSectionTone } from "./glove-section";
 export { GloveShareRow } from "./glove-share-row";
 export { GloveStyleCard } from "./glove-style-card";
-export { GloveTitleBand } from "./glove-title-band";
+export { GloveTitleBand, type GloveTitleBandVariant } from "./glove-title-band";
 export { GloveHandIcon } from "./glove-hand-icon";

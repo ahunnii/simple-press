@@ -23,6 +23,7 @@ import { gloveFaqData, gloveFaqFieldGroups } from "./faq";
 import { gloveHomepageData, gloveHomepageFieldGroups } from "./homepage";
 import { gloveLayoutData, gloveLayoutFieldGroups } from "./layout";
 import { gloveProductData, gloveProductFieldGroups } from "./products";
+import { gloveServicesData, gloveServicesFieldGroups } from "./services";
 import { gloveShopData, gloveShopFieldGroups } from "./shop";
 import {
   gloveTestimonialsData,
@@ -57,6 +58,7 @@ export const gloveData = {
     ...gloveContactData,
     ...gloveTestimonialsData,
     ...gloveBlogData,
+    ...gloveServicesData,
     ...gloveCartData,
     ...gloveCheckoutData,
     ...gloveOrderData,
@@ -83,6 +85,7 @@ export const gloveFieldGroups = {
     ...gloveContactFieldGroups,
     ...gloveTestimonialsFieldGroups,
     ...gloveBlogFieldGroups,
+    ...gloveServicesFieldGroups,
     ...gloveCartFieldGroups,
     ...gloveCheckoutFieldGroups,
     ...gloveOrderFieldGroups,

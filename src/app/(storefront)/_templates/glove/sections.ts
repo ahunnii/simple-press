@@ -16,6 +16,7 @@ import { gloveEventsSections } from "./events";
 import { gloveFaqSections } from "./faq";
 import { gloveHomepageSections } from "./homepage";
 import { gloveProductSections } from "./products";
+import { gloveServicesSections } from "./services";
 import { gloveShopSections } from "./shop";
 import { gloveTestimonialsSections } from "./testimonials";
 import { gloveVideosSections } from "./videos";
@@ -69,6 +70,7 @@ const allSections: TemplateSection[] = [
   ...gloveContactSections,
   ...gloveTestimonialsSections,
   ...gloveBlogSections,
+  ...gloveServicesSections,
   ...gloveEventsSections,
   ...gloveVideosSections,
   ...gloveDonateSections,

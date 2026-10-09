@@ -1,5 +1,5 @@
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -46,7 +46,7 @@ export async function DreamCollectionsPage({
   // destination) when the `products` flag it names is off.
   const { isEnabled } = await getBusinessFlags();
   const emptyCtaUrlRaw = f["dream.collections.grid-empty-cta-url"] ?? "";
-  const emptyCtaFlag = navHrefFlag(emptyCtaUrlRaw);
+  const emptyCtaFlag = navHrefOffFlag(emptyCtaUrlRaw, isEnabled);
   const showEmptyCta =
     emptyCtaUrlRaw !== "" &&
     (emptyCtaFlag === null || isEnabled(emptyCtaFlag)) &&

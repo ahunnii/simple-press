@@ -2,7 +2,7 @@ import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { GloveListing } from "./glove-listing";
@@ -10,7 +10,7 @@ import { gloveShopData } from "./index";
 
 /**
  * GloveShopPage (design.md Shop). Server half resolves the copy; the client
- * `GloveListing` owns the navy band + collection tabs, toolbar, grid and
+ * `GloveListing` owns the banner band + collection tabs, toolbar, grid and
  * LOAD MORE. `business.products` already carries each product's
  * `collectionProducts`, so the tabs and category lines cost no extra query.
  */
@@ -26,7 +26,7 @@ export async function GloveShopPage({
 
   // B2.5: hide a field-driven button whose destination is flagged off.
   const emptyHrefRaw = get("glove.shop.empty-button-link");
-  const emptyFlag = navHrefFlag(emptyHrefRaw);
+  const emptyFlag = navHrefOffFlag(emptyHrefRaw, isEnabled);
   const emptyHref =
     emptyFlag === null || isEnabled(emptyFlag) ? emptyHrefRaw : "";
 

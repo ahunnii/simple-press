@@ -12,6 +12,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
 
 import { GloveButton } from "../shared/glove-button";
@@ -19,7 +20,6 @@ import { GloveHandIcon } from "../shared/glove-hand-icon";
 import { GloveMedallion } from "../shared/glove-medallion";
 import { GloveMistPanel } from "../shared/glove-mist-panel";
 import { GloveRevealGroup } from "../shared/glove-reveal";
-import { gloveRevealItemStyle } from "../shared/glove-reveal-style";
 import { GloveSection } from "../shared/glove-section";
 
 /** `session.metadata.deliveryMethod`, echoed back by `/api/stripe/session`. */
@@ -75,7 +75,7 @@ function splitLines(text: string): string[] {
 }
 
 const META_LABEL =
-  "glove-display text-[11px] font-semibold tracking-[0.06em] text-[var(--glove-muted)] uppercase";
+  "glove-display text-[13px] font-medium text-[var(--glove-muted)]";
 const META_VALUE =
   "glove-body m-0 mt-1 break-words text-[16px] font-bold text-[var(--glove-ink)]";
 
@@ -103,6 +103,9 @@ export function GloveOrderConfirmation({
   const searchParams = useSearchParams();
   const { items, isHydrated, clearCart } = useCart();
   const accountCta = useOrderAccountCta(initialSession);
+  const { isEnabled } = useStorefrontFlags();
+  // B2.5: "Continue shopping" is hidden (never swapped) when Products is off.
+  const canShop = isEnabled("products");
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,6 +166,7 @@ export function GloveOrderConfirmation({
   if (!sessionId) {
     return (
       <GloveSection
+        reveal={false}
         sectionAttrs={sectionGroupAttr("checkout", "confirmation")}
         aria-labelledby="glove-order-heading"
       >
@@ -183,7 +187,7 @@ export function GloveOrderConfirmation({
               {noOrderBody}
             </p>
           ) : null}
-          {continueLabel ? (
+          {canShop && continueLabel ? (
             <GloveButton href="/shop" variant="woo" className="mt-2">
               <span
                 {...fieldAttr("glove.checkout.confirmation-continue-label")}
@@ -240,23 +244,25 @@ export function GloveOrderConfirmation({
         />
       ) : null}
 
-      <GloveRevealGroup threshold={0} className="mx-auto max-w-3xl">
+      {/* Commerce content renders at once; the check medallion's pop is the
+          page's one moment, so only it sits in a reveal group. */}
+      <div className="mx-auto max-w-3xl">
         <div className="flex flex-col items-center text-center">
-          <GloveMedallion size="lg" popIndex={0}>
-            <Check className="size-8" strokeWidth={3} aria-hidden="true" />
-          </GloveMedallion>
+          <GloveRevealGroup threshold={0}>
+            <GloveMedallion size="lg" popIndex={0}>
+              <Check className="size-8" strokeWidth={3} aria-hidden="true" />
+            </GloveMedallion>
+          </GloveRevealGroup>
           <h1
             id="glove-order-heading"
-            className="glove-reveal-item glove-display mt-6 text-[28px] leading-tight font-medium text-[var(--glove-ink)] md:text-[40px]"
-            style={gloveRevealItemStyle(1)}
+            className="glove-display mt-6 text-[28px] leading-tight font-medium text-[var(--glove-ink)] md:text-[40px]"
             {...fieldAttr("glove.checkout.confirmation-heading")}
           >
             {heading}
           </h1>
           {body ? (
             <p
-              className="glove-reveal-item mt-3 max-w-xl text-[17px] text-[var(--glove-text)]"
-              style={gloveRevealItemStyle(2)}
+              className="mt-3 max-w-xl text-[17px] text-[var(--glove-text)]"
               {...fieldAttr("glove.checkout.confirmation-body")}
             >
               {body}
@@ -265,10 +271,7 @@ export function GloveOrderConfirmation({
         </div>
 
         {meta.length > 0 ? (
-          <dl
-            className="glove-reveal-item m-0 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-dashed border-[var(--glove-mist-line)] py-6 text-center md:grid-cols-4"
-            style={gloveRevealItemStyle(3)}
-          >
+          <dl className="m-0 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-dashed border-[var(--glove-mist-line)] py-6 text-center md:grid-cols-4">
             {meta.map((m) => (
               <div key={m.label} className="min-w-0">
                 <dt className={META_LABEL}>{m.label}</dt>
@@ -279,10 +282,7 @@ export function GloveOrderConfirmation({
         ) : null}
 
         {purchased.length > 0 ? (
-          <GloveMistPanel
-            className="glove-reveal-item mt-8 p-6 md:p-8"
-            style={gloveRevealItemStyle(4)}
-          >
+          <GloveMistPanel className="mt-8 p-6 md:p-8">
             <h2
               className="glove-display text-[20px] leading-tight font-medium text-[var(--glove-ink)]"
               {...fieldAttr("glove.checkout.confirmation-items-heading")}
@@ -323,11 +323,7 @@ export function GloveOrderConfirmation({
         ) : null}
 
         {steps.length > 0 ? (
-          <section
-            aria-labelledby="glove-order-next-heading"
-            className="glove-reveal-item mt-10"
-            style={gloveRevealItemStyle(5)}
-          >
+          <section aria-labelledby="glove-order-next-heading" className="mt-10">
             <h2
               id="glove-order-next-heading"
               className="glove-display text-[20px] leading-tight font-medium text-[var(--glove-ink)]"
@@ -363,10 +359,7 @@ export function GloveOrderConfirmation({
           </section>
         ) : null}
 
-        <div
-          className="glove-reveal-item mt-10 flex flex-col items-center gap-4"
-          style={gloveRevealItemStyle(6)}
-        >
+        <div className="mt-10 flex flex-col items-center gap-4">
           <div className="flex flex-wrap items-center justify-center gap-3">
             {trackLabel ? (
               <GloveButton href="/order-status" variant="woo">
@@ -375,7 +368,7 @@ export function GloveOrderConfirmation({
                 </span>
               </GloveButton>
             ) : null}
-            {continueLabel ? (
+            {canShop && continueLabel ? (
               <GloveButton href="/shop" variant="wooOutline">
                 <span
                   {...fieldAttr("glove.checkout.confirmation-continue-label")}
@@ -394,7 +387,7 @@ export function GloveOrderConfirmation({
             </Link>
           ) : null}
         </div>
-      </GloveRevealGroup>
+      </div>
     </GloveSection>
   );
 }

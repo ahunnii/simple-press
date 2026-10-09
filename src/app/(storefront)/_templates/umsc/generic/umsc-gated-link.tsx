@@ -1,7 +1,7 @@
 "use client";
 
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { UmscButton } from "../shared/umsc-button";
 
@@ -35,7 +35,7 @@ export function UmscGatedLink({
 
   const target = href.trim();
   if (!target || !label.trim()) return null;
-  const flag = navHrefFlag(target);
+  const flag = navHrefOffFlag(target, isEnabled);
   if (flag !== null && !isEnabled(flag)) return null;
 
   return (

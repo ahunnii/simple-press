@@ -27,6 +27,7 @@ import { bambooServiceTemplateDefs } from "~/app/(storefront)/_templates/bamboo/
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
 import { dreamServiceTemplateDefs } from "~/app/(storefront)/_templates/dream/services/service-pages/fields";
+import { gloveServiceTemplateDefs } from "~/app/(storefront)/_templates/glove/services/service-pages/fields";
 import { happyBambooServiceTemplateDefs } from "~/app/(storefront)/_templates/happy-bamboo/services/service-pages/fields";
 import { noiseServiceTemplateDefs } from "~/app/(storefront)/_templates/noise/services/service-pages/fields";
 import { oliveServiceTemplateDefs } from "~/app/(storefront)/_templates/olive/services/service-pages/fields";
@@ -119,6 +120,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   olive: oliveServiceTemplateDefs,
   noise: noiseServiceTemplateDefs,
   umsc: umscServiceTemplateDefs,
+  glove: gloveServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -144,6 +146,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...oliveServiceTemplateDefs,
       ...noiseServiceTemplateDefs,
       ...umscServiceTemplateDefs,
+      ...gloveServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

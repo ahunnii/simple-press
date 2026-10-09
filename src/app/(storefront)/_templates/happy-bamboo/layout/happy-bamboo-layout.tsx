@@ -28,7 +28,7 @@ export async function HappyBambooLayout({
     getSession(),
     getBusinessFlags(),
   ]);
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   const themeVars = resolveThemeVars(
     "happy-bamboo",
     business.siteContent?.customFields,

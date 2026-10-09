@@ -1,12 +1,7 @@
 import type { Product } from "~/types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import {
-  GloveProductCard,
-  GloveRevealGroup,
-  gloveRevealItemStyle,
-  GloveSection,
-} from "../shared";
+import { GloveProductCard, GloveSection } from "../shared";
 
 type GloveHomeFeaturedProps = {
   heading: string;
@@ -32,6 +27,8 @@ export function GloveHomeFeatured({
       aria-labelledby={heading ? "glove-featured-heading" : undefined}
       aria-label={heading ? undefined : "Featured gloves"}
       sectionAttrs={sectionAttrs}
+      // Product cards are commerce content: they render at once, no fade.
+      reveal={false}
     >
       {heading ? (
         <h2
@@ -42,21 +39,15 @@ export function GloveHomeFeatured({
           {heading}
         </h2>
       ) : null}
-      <GloveRevealGroup threshold={0}>
-        <ul
-          className={`m-0 mt-8 grid list-none grid-cols-2 gap-3 p-0 md:mt-10 md:grid-cols-4 md:gap-5 ${five ? "lg:grid-cols-5 max-lg:[&>li:nth-child(5)]:hidden" : ""}`}
-        >
-          {products.map((product, i) => (
-            <li
-              key={product.id}
-              className="glove-reveal-item"
-              style={gloveRevealItemStyle(i)}
-            >
-              <GloveProductCard product={product} surface="card" />
-            </li>
-          ))}
-        </ul>
-      </GloveRevealGroup>
+      <ul
+        className={`m-0 mt-8 grid list-none grid-cols-2 gap-3 p-0 md:mt-10 md:grid-cols-4 md:gap-5 ${five ? "lg:grid-cols-5 max-lg:[&>li:nth-child(5)]:hidden" : ""}`}
+      >
+        {products.map((product) => (
+          <li key={product.id}>
+            <GloveProductCard product={product} surface="card" />
+          </li>
+        ))}
+      </ul>
     </GloveSection>
   );
 }

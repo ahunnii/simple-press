@@ -1,4 +1,4 @@
-import { routeFlag } from "~/lib/features/route-flags";
+import { routeEnabled } from "~/lib/features/route-flags";
 
 /**
  * B2.5: a field-driven link is hidden (never swapped for another destination)
@@ -11,8 +11,7 @@ export function gloveLinkAllowed(
   const trimmed = href.trim();
   if (trimmed.length === 0) return false;
   if (!isEnabled) return true;
-  const flag = routeFlag(trimmed);
-  return flag === null || isEnabled(flag);
+  return routeEnabled(trimmed, isEnabled);
 }
 
 /** True for absolute http(s) links, which open in a new tab. */

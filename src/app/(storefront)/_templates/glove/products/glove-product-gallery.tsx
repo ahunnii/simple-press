@@ -136,6 +136,11 @@ export function GloveProductGallery({ images, productName }: Props) {
         <DialogPrimitive.Overlay className="fixed inset-0 z-[80] bg-[var(--glove-ink)]/90 motion-safe:animate-[glove-fade-in_200ms_ease-out]" />
         <DialogPrimitive.Content
           onKeyDown={onLightboxKey}
+          // Content is full-viewport, so a click on the backdrop lands on it
+          // directly; clicks on the photo or controls target their own nodes.
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
           className="glove-on-dark fixed inset-0 z-[81] flex flex-col items-center justify-center p-4 outline-none md:p-10"
           aria-describedby={undefined}
         >

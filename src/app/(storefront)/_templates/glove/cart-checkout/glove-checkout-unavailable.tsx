@@ -1,3 +1,5 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
@@ -32,6 +34,12 @@ export async function GloveCheckoutUnavailable({ customFields }: Props = {}) {
       ? customFields
       : ((await api.business.simplifiedGet().catch(() => null))?.siteContent
           ?.customFields ?? undefined);
+
+  // B2.5: the shop CTA is hidden (never swapped) when Products is off. A failed
+  // tenant read falls back to registry defaults, like the fields below.
+  const { isEnabled } =
+    (await getBusinessFlags().catch(() => null)) ?? resolveFlags(undefined);
+  const canShop = isEnabled("products");
 
   const f = resolveFields(resolved, [
     ...GLOVE_STEP_FIELD_LIST,
@@ -77,9 +85,9 @@ export async function GloveCheckoutUnavailable({ customFields }: Props = {}) {
               {body}
             </p>
           ) : null}
-          {ctaText || contactText ? (
+          {(canShop && ctaText) || contactText ? (
             <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-              {ctaText ? (
+              {canShop && ctaText ? (
                 <GloveButton href="/shop" variant="woo">
                   <span {...fieldAttr("glove.checkout.unavailable-cta")}>
                     {ctaText}

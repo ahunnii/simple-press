@@ -30,8 +30,6 @@ import {
 
 import { GloveButton } from "../shared/glove-button";
 import { GloveSelect } from "../shared/glove-input";
-import { GloveRevealGroup } from "../shared/glove-reveal";
-import { gloveRevealItemStyle } from "../shared/glove-reveal-style";
 import { GloveAccountLayout } from "./glove-account-layout";
 import {
   GloveAccountCard,
@@ -48,7 +46,7 @@ const CODE_TONE: Record<string, GloveStatusTone> = {
 };
 
 const CODE_CHIP =
-  "rounded-[3px] bg-[var(--glove-cloud)] px-2 py-1 font-mono text-[14px] text-[var(--glove-ink)]";
+  "rounded-[3px] bg-[var(--glove-mist)] px-2 py-1 font-mono text-[14px] text-[var(--glove-ink)]";
 
 /**
  * The points tally: a purple medallion holding the balance. Local on purpose:
@@ -231,15 +229,9 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
   const tierNote = joined ? nextTierNote(program.tiers, balance) : null;
   const bonusNote = signupBonusNote(rules);
 
-  let order = 0;
-  const reveal = () => ({
-    className: "glove-reveal-item",
-    style: gloveRevealItemStyle(order++),
-  });
-
   return (
     <GloveAccountLayout heading="Rewards">
-      <GloveRevealGroup threshold={0} className="flex max-w-3xl flex-col gap-5">
+      <div className="flex max-w-3xl flex-col gap-5">
         {readOnly ? (
           <p
             role="status"
@@ -251,7 +243,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
         ) : null}
 
         {/* Tally */}
-        <GloveAccountCard {...reveal()}>
+        <GloveAccountCard>
           <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
             <PointsMedallion balance={balance} />
             <div className="min-w-0">
@@ -280,7 +272,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
         </GloveAccountCard>
 
         {/* How to earn */}
-        <GloveAccountCard {...reveal()}>
+        <GloveAccountCard>
           <GloveCardHeading>How to earn points</GloveCardHeading>
           {earnLines.length === 0 && !showSocial ? (
             <p className="mt-2 text-[14px] text-[var(--glove-muted)]">
@@ -348,7 +340,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
 
         {/* Redeem */}
         {program.tiers.length > 0 ? (
-          <GloveAccountCard {...reveal()}>
+          <GloveAccountCard>
             <GloveCardHeading>Redeem your points</GloveCardHeading>
             <ul className="m-0 mt-4 grid list-none gap-4 p-0 sm:grid-cols-2">
               {program.tiers.map((tier) => (
@@ -389,7 +381,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
         ) : null}
 
         {/* Reward codes */}
-        <GloveAccountCard {...reveal()}>
+        <GloveAccountCard>
           <GloveCardHeading>Your reward codes</GloveCardHeading>
           {rewards.codes.length === 0 ? (
             <p className="mt-2 text-[14px] text-[var(--glove-muted)]">
@@ -428,7 +420,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
         </GloveAccountCard>
 
         {/* Birthday */}
-        {/* The birthday controls are a form: kept out of the reveal. */}
+        {/* The birthday controls are a form: a plain card, no wrapper animation. */}
         {showBirthday ? (
           <GloveAccountCard>
             <GloveCardHeading>Birthday bonus</GloveCardHeading>
@@ -503,7 +495,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
         ) : null}
 
         {/* Recent activity */}
-        <GloveAccountCard {...reveal()}>
+        <GloveAccountCard>
           <GloveCardHeading>Recent activity</GloveCardHeading>
           {rewards.entries.length === 0 ? (
             <p className="mt-2 text-[14px] text-[var(--glove-muted)]">
@@ -544,7 +536,7 @@ export function GloveRewardsPage({ rewards }: RewardsPageTemplateProps) {
             </ul>
           )}
         </GloveAccountCard>
-      </GloveRevealGroup>
+      </div>
     </GloveAccountLayout>
   );
 }

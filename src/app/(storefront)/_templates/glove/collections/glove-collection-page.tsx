@@ -4,19 +4,13 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
-import {
-  GloveHeading,
-  GloveRevealGroup,
-  gloveRevealItemStyle,
-  GloveSection,
-  GloveStyleCard,
-} from "../shared";
+import { GloveHeading, GloveSection, GloveStyleCard } from "../shared";
 import { GloveListing } from "../shop/glove-listing";
 import { gloveCollectionsData } from "./index";
 
 /**
  * GloveCollectionPage (design.md Collection, extrapolated): the shop layout
- * for one collection — navy band with the collection's name and description,
+ * for one collection — banner band with the collection's name and description,
  * breadcrumb Home / Shop / {name}, sort, grid and LOAD MORE — then a
  * "More Collections" row so the page is never a dead end. The route 404s
  * unpublished collections and only includes published products.
@@ -54,7 +48,6 @@ export async function GloveCollectionPage({
         title={collection.name}
         subtitle={collection.description ?? undefined}
         showTabs={false}
-        fixedCategory={collection.name}
         breadcrumb={[
           { label: "Home", href: "/" },
           ...(shopOn ? [{ label: "Shop", href: "/shop" }] : []),
@@ -97,29 +90,24 @@ export async function GloveCollectionPage({
           >
             {moreHeading}
           </GloveHeading>
-          <GloveRevealGroup threshold={0}>
-            <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-10 p-0 md:grid-cols-4">
-              {others.map((c, i) => {
-                const count = c._count.collectionProducts;
-                return (
-                  <li
-                    key={c.id}
-                    className="glove-reveal-item"
-                    style={gloveRevealItemStyle(i)}
-                  >
-                    <GloveStyleCard
-                      name={c.name}
-                      blurb={`${count} ${count === 1 ? "Product" : "Products"}`}
-                      image={c.imageUrl ?? "/placeholder.svg"}
-                      href={`/collections/${c.slug}`}
-                      buttonLabel={buttonLabel}
-                      size={160}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-          </GloveRevealGroup>
+          <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-10 p-0 md:grid-cols-4">
+            {others.map((c) => {
+              const count = c._count.collectionProducts;
+              return (
+                <li key={c.id}>
+                  <GloveStyleCard
+                    name={c.name}
+                    blurb={`${count} ${count === 1 ? "Product" : "Products"}`}
+                    image={c.imageUrl}
+                    href={`/collections/${c.slug}`}
+                    buttonLabel={buttonLabel}
+                    affordance="text"
+                    size={160}
+                  />
+                </li>
+              );
+            })}
+          </ul>
         </GloveSection>
       ) : null}
     </>

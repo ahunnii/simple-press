@@ -30,7 +30,7 @@ export async function HappyBambooHomepage({
   // `featureFlags`, and already passed to every template's homepage
   // component) the same way `pollen-homepage.tsx` resolves its popup,
   // instead of adding a second business fetch here.
-  const popup = resolvePopup(business?.siteContent, flags.isEnabled("popups"));
+  const popup = resolvePopup(business?.siteContent, flags.isEnabled);
 
   const testimonialsEnabled = flags.isEnabled("testimonials");
   const testimonials = testimonialsEnabled

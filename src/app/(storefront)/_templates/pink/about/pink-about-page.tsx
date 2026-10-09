@@ -17,7 +17,7 @@ import {
   parseTemplateListRows,
 } from "~/lib/template-fields";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
@@ -174,7 +174,7 @@ export async function PinkAboutPage({
     const label = (f[labelKey] ?? "").trim();
     const href = (f[linkKey] ?? "").trim();
     if (!label || !href) return null;
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag) ? href : null;
   };
   const commissionPrimaryHref = ctaHref(

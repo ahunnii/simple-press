@@ -1,5 +1,7 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
+import { GLOVE_PAGE_BANNER_DEFAULT } from "../shared/glove-page-banner-default";
+
 /**
  * Header and footer fields (page "global"). Shown on every page; edited from
  * the "Header" and "Footer" sections of the editor's global tab.
@@ -12,6 +14,7 @@ export const GLOVE_FIELD_KEYS = {
   trackLabel: "glove.global.track-label",
   trackLink: "glove.global.track-link",
   accountLabel: "glove.global.account-label",
+  pageBannerImage: "glove.global.page-banner-image",
   footerBadge: "glove.global.footer-badge",
   footerBlurb: "glove.global.footer-blurb",
   footerQuickLinksHeading: "glove.global.footer-quick-links-heading",
@@ -51,13 +54,24 @@ export const gloveLayoutData: TemplateField[] = [
     key: GLOVE_FIELD_KEYS.accountLabel,
     label: "Account button label",
     description:
-      "Text on the bold account button in the header. Leave blank to show the default.",
+      "Text next to the account icon in the header. Leave blank to show the default.",
     type: "text",
     page: "global",
     group: "global.header",
     gridColumn: "col-span-1",
-    defaultValue: "My Account",
+    defaultValue: "Account",
     placeholder: "e.g. Sign in",
+  },
+  {
+    key: GLOVE_FIELD_KEYS.pageBannerImage,
+    label: "Inner page banner image",
+    description:
+      "Wide photo behind the page title on the shop, collections, blog, FAQ and other browse pages. The left side sits under the title, so keep the subject on the right. Leave blank to use the built-in banner.",
+    type: "image",
+    page: "global",
+    group: "global.header",
+    gridColumn: "col-span-full",
+    defaultValue: GLOVE_PAGE_BANNER_DEFAULT,
   },
 
   // ─── Footer ────────────────────────────────────────────────────────────
@@ -94,7 +108,7 @@ export const gloveLayoutData: TemplateField[] = [
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-1",
-    defaultValue: "Quick Links",
+    defaultValue: "Quick links",
   },
   {
     key: GLOVE_FIELD_KEYS.footerCustomerHeading,
@@ -105,7 +119,7 @@ export const gloveLayoutData: TemplateField[] = [
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-1",
-    defaultValue: "Customer Area",
+    defaultValue: "Customer area",
   },
   {
     key: GLOVE_FIELD_KEYS.footerContactHeading,
@@ -159,7 +173,7 @@ export const gloveLayoutFieldGroups: TemplateFieldGroup[] = [
     id: "global.header",
     title: "Header",
     description:
-      "Order tracking link and account button. Email and phone in the top strip come from Settings; the logo comes from Content → Branding; menu links from Content → Navigation.",
+      "Order tracking link, account button and the banner behind inner page titles. Email and phone in the top strip come from Settings; the logo comes from Content → Branding; menu links from Content → Navigation.",
     icon: "🧭",
     columns: 2,
   },

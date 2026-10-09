@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -10,17 +10,22 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { GloveAddOnCopy } from "./glove-addon-picker";
 import type { GloveAddOn } from "./glove-addons";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { cn } from "~/lib/utils";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { useProduct } from "~/hooks/use-product";
-import { useCart } from "~/providers/cart-context";
+import { cartLineKey, useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
-import { gloveButtonClass, GlovePrice, GloveShareRow } from "../shared";
+import { gloveButtonClass, GlovePrice } from "../shared";
 import { GloveAddOnPicker } from "./glove-addon-picker";
+import { variantOptionGroups } from "./glove-color";
+import { gloveStepPlan, orderGloveGroups } from "./glove-steps";
+import { gloveConfiguredTotal } from "./glove-total";
 import { GloveVariantSelector } from "./glove-variant-selector";
 
 type Product = DefaultProductPageTemplateProps["product"];
@@ -28,13 +33,18 @@ type Product = DefaultProductPageTemplateProps["product"];
 /** Quantity ceiling for stock that isn't counted (mirrors use-product). */
 const UNTRACKED_MAX = 100;
 
+/**
+ * Buy-bar observer root margin: grows the viewport downward far past any
+ * page, so only "scrolled above the viewport" reads as not intersecting.
+ */
+const BELOW_VIEWPORT_MARGIN = "0px 0px 1000000px 0px";
+
 export type GloveBuyBoxCopy = {
   addToCart: string;
   unavailable: string;
   notify: string;
   comingSoonHeading: string;
   comingSoonBody: string;
-  shareLabel: string;
   addOns: GloveAddOnCopy;
 };
 
@@ -50,15 +60,21 @@ type Props = {
   categories: { name: string; slug: string }[];
   /** Link category names to their collection pages (collections flag on). */
   linkCategories: boolean;
-  shareUrl: string;
-  shareImage?: string;
+  /**
+   * `cart` feature flag (B6.11 catalog mode). Off: no Add to Cart, qty
+   * stepper or add-on picker; price, variants, wishlist and notify-me stay.
+   */
+  cartEnabled: boolean;
   copy: GloveBuyBoxCopy;
 };
 
 /**
- * The PDP buy column from the price down: price (range-aware), the
- * server-rendered intro, the grouped option selector, the add-on picker, the
- * qty stepper + full-width ADD TO CART, wishlist + share, SKU/categories.
+ * The PDP buy column from the price down: price (range-aware; once a chain or
+ * charm is chosen it becomes the configured total with a muted "Glove $X"
+ * sub-line, the same number the add-on picker totals), the server-rendered
+ * intro, the grouped option selector, the add-on picker, the
+ * qty stepper + full-width ADD TO CART, then wishlist beside one quiet
+ * category/SKU line.
  *
  * Built on the shared `useProduct` hook (selection, quantity, the plain
  * add-to-cart path) and `buildVariantCartItem` for variants. Coming-soon is
@@ -73,8 +89,7 @@ export function GloveBuyBox({
   addOnSectionAttrs,
   categories,
   linkCategories,
-  shareUrl,
-  shareImage,
+  cartEnabled,
   copy,
 }: Props) {
   const {
@@ -102,6 +117,26 @@ export function GloveBuyBox({
 
   const hasVariants = product.variants.length > 0;
   const comingSoon = additionalFields?.comingSoon === true;
+
+  const addButtonRef = useRef<HTMLButtonElement | null>(null);
+  const configRef = useRef<HTMLDivElement | null>(null);
+  // Mobile buy bar: shown once the main Add to Cart has scrolled up out of
+  // view. The sentinel is a callback ref held in state, so the observer
+  // follows the node even if the purchase row remounts.
+  const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
+  const [pastAddButton, setPastAddButton] = useState(false);
+
+  // Contiguous Easy Guide numbers across the option rows and the add-on rows.
+  const stepPlan = useMemo(
+    () =>
+      gloveStepPlan(
+        orderGloveGroups(variantOptionGroups(product.variants), numbered).map(
+          (group) => group.key,
+        ),
+        numbered,
+      ),
+    [product.variants, numbered],
+  );
 
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
@@ -147,26 +182,31 @@ export function GloveBuyBox({
 
   const blockedReason = variantSoldOut
     ? copy.unavailable
-    : cartHoldsAll
+    : cartEnabled && cartHoldsAll
       ? "You already have every available one in your cart."
       : null;
 
   const onAdd = () => {
-    if (blockedReason || productSoldOut) return;
+    if (!cartEnabled || blockedReason || productSoldOut) return;
     const qty = Math.min(quantity, Math.max(1, maxQty));
+    let gloveKey: string;
     if (hasVariants && selectedVariant) {
       addItem(buildVariantCartItem(product, selectedVariant, variantMax), qty);
+      gloveKey = cartLineKey(product.id, selectedVariant.id);
       setQuantity(1);
     } else {
       handleAddToCart();
+      gloveKey = cartLineKey(product.id, selectedVariantId);
     }
     if (addOns) {
+      // Tied to the glove line so the cart nests them under it (and the same
+      // chain picked for two gloves stays two lines).
       const chain = addOns.chains.find((c) => c.id === chainId);
-      if (chain) addItem(chain.cartItem, qty);
+      if (chain) addItem({ ...chain.cartItem, addOnFor: gloveKey }, qty);
       for (const charm of addOns.charms.filter((c) =>
         charmIds.includes(c.id),
       )) {
-        addItem(charm.cartItem, qty);
+        addItem({ ...charm.cartItem, addOnFor: gloveKey }, qty);
       }
       setChainId(null);
       setCharmIds([]);
@@ -181,18 +221,116 @@ export function GloveBuyBox({
     setAnnounce(`${product.name} added to cart`);
   };
 
-  const sku = selectedVariant?.sku ?? product.sku;
+  const sku = (selectedVariant?.sku ?? product.sku)?.trim() ?? "";
   const showPicker =
+    cartEnabled &&
     addOns !== null &&
     (addOns.chains.length > 0 || addOns.charms.length > 0) &&
     !comingSoon &&
     !productSoldOut;
+  const showAddButton = cartEnabled && !comingSoon && !productSoldOut;
+
+  // One price: with a chain or charm chosen, the price spots show the
+  // configured total (the picker's number, from the shared helper) with the
+  // glove-only price as a muted sub-line. Silent here: the picker's total is
+  // the one polite live region. While a variant range is still open (nothing
+  // chosen) the glove has no single price, so the range stays and the add-ons
+  // are named on their own.
+  const gloveAmount = displayPrice * quantity;
+  const config = gloveConfiguredTotal({
+    gloveAmount,
+    quantity,
+    chains: addOns?.chains ?? [],
+    charms: addOns?.charms ?? [],
+    chainId,
+    charmIds,
+  });
+  const configured = showPicker && config.hasAddOns;
+  const rangeOpen = range !== null && !selectedVariant;
+  const gloveSubLine = `${copy.addOns.gloveLine} ${formatPrice(gloveAmount)}`;
+  const addOnsSubLine = `+ ${formatPrice(config.addOnsAmount)} add-ons`;
+
+  // One IntersectionObserver on a 1px sentinel at the bottom of the
+  // purchase row. The root's bottom margin is effectively unbounded, so the
+  // sentinel counts as "intersecting" anywhere from the viewport top down to
+  // the end of the page: it stops intersecting exactly when the row has
+  // scrolled above the viewport, and a jump from below to above (End key,
+  // anchor, scroll restoration) still flips that state, so it always
+  // notifies. Only the newest entry is read; callbacks can batch several.
+  useEffect(() => {
+    if (!sentinel || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[entries.length - 1];
+        if (!entry) return;
+        setPastAddButton(
+          !entry.isIntersecting && entry.boundingClientRect.top < 0,
+        );
+      },
+      { rootMargin: BELOW_VIEWPORT_MARGIN },
+    );
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      setPastAddButton(false);
+    };
+  }, [sentinel]);
+
+  // Leave room under the footer for the fixed bar while it is up (below md).
+  // The bar is taller by one sub-line while it shows a configured total.
+  const barRoom = configured ? "5.5rem" : "4.5rem";
+  useEffect(() => {
+    if (!pastAddButton) return;
+    const small = window.matchMedia("(max-width: 767px)");
+    const previous = document.body.style.paddingBottom;
+    const apply = () => {
+      document.body.style.paddingBottom = small.matches
+        ? `calc(${barRoom} + env(safe-area-inset-bottom))`
+        : previous;
+    };
+    apply();
+    small.addEventListener("change", apply);
+    return () => {
+      small.removeEventListener("change", apply);
+      document.body.style.paddingBottom = previous;
+    };
+  }, [pastAddButton, barRoom]);
+
+  // Same add path as the main button. A step still open (no variant chosen)
+  // takes the shopper to it; a blocked add shows the main button's reason.
+  const onBarAdd = () => {
+    if (hasVariants && !selectedVariant) {
+      const target = configRef.current?.querySelector<HTMLElement>(
+        '[role="radio"][tabindex="0"], [role="radio"], select',
+      );
+      (target ?? configRef.current)?.scrollIntoView({
+        block: "center",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+      target?.focus({ preventScroll: true });
+      return;
+    }
+    if (blockedReason) {
+      addButtonRef.current?.scrollIntoView({ block: "center" });
+      return;
+    }
+    onAdd();
+  };
 
   return (
     <div className="flex flex-col gap-6">
       <p className="m-0">
         {range ? (
           <GlovePrice price={range.min} maxPrice={range.max} size="lg" />
+        ) : configured ? (
+          <ConfiguredPrice
+            total={config.total}
+            totalLabel={copy.addOns.totalLine}
+            subLine={gloveSubLine}
+            size="lg"
+          />
         ) : (
           <GlovePrice
             price={displayPrice}
@@ -200,6 +338,9 @@ export function GloveBuyBox({
             size="lg"
           />
         )}
+        {range && configured && rangeOpen ? (
+          <PriceSubLine size="lg">{addOnsSubLine}</PriceSubLine>
+        ) : null}
       </p>
 
       {intro}
@@ -224,17 +365,20 @@ export function GloveBuyBox({
       ) : (
         <>
           {hasVariants ? (
-            <GloveVariantSelector
-              variants={product.variants}
-              trackInventory={product.trackInventory}
-              allowBackorders={product.allowBackorders}
-              selectedId={selectedVariantId}
-              onSelect={(id) => {
-                setSelectedVariantId(id);
-                setQuantity(1);
-              }}
-              numbered={numbered}
-            />
+            <div ref={configRef}>
+              <GloveVariantSelector
+                variants={product.variants}
+                trackInventory={product.trackInventory}
+                allowBackorders={product.allowBackorders}
+                selectedId={selectedVariantId}
+                onSelect={(id) => {
+                  setSelectedVariantId(id);
+                  setQuantity(1);
+                }}
+                numbered={numbered}
+                steps={stepPlan.options}
+              />
+            </div>
           ) : null}
 
           {showPicker ? (
@@ -249,6 +393,7 @@ export function GloveBuyBox({
               quantity={quantity}
               copy={copy.addOns}
               sectionAttrs={addOnSectionAttrs}
+              firstStep={stepPlan.next}
             />
           ) : null}
 
@@ -260,41 +405,60 @@ export function GloveBuyBox({
             />
           ) : (
             <div className="flex flex-col gap-3">
-              {range ? (
+              {range && !rangeOpen ? (
                 <p className="m-0">
-                  <span className="sr-only">Selected option price </span>
-                  <GlovePrice
-                    price={displayPrice}
-                    compareAtPrice={isOnSale ? displayCompareAtPrice : null}
-                    size="md"
-                  />
+                  {configured ? (
+                    <ConfiguredPrice
+                      total={config.total}
+                      totalLabel={`Selected option, ${copy.addOns.totalLine}`}
+                      subLine={gloveSubLine}
+                      size="md"
+                    />
+                  ) : (
+                    <>
+                      <span className="sr-only">Selected option price </span>
+                      <GlovePrice
+                        price={displayPrice}
+                        compareAtPrice={isOnSale ? displayCompareAtPrice : null}
+                        size="md"
+                      />
+                    </>
+                  )}
                 </p>
               ) : null}
-              <div className="flex items-stretch gap-3">
-                <QtyStepper
-                  value={quantity}
-                  max={Math.max(1, maxQty)}
-                  disabled={blockedReason !== null}
-                  onChange={setQuantity}
-                />
-                <button
-                  type="button"
-                  onClick={onAdd}
-                  aria-disabled={blockedReason ? true : undefined}
-                  aria-describedby={
-                    blockedReason ? "glove-atc-reason" : undefined
-                  }
-                  className={gloveButtonClass({
-                    variant: "woo",
-                    size: "lg",
-                    fullWidth: true,
-                    className: "flex-1",
-                  })}
-                  {...fieldAttr("glove.product.add-to-cart-label")}
-                >
-                  {copy.addToCart}
-                </button>
-              </div>
+              {cartEnabled ? (
+                <div className="relative flex items-stretch gap-3">
+                  <QtyStepper
+                    value={quantity}
+                    max={Math.max(1, maxQty)}
+                    disabled={blockedReason !== null}
+                    onChange={setQuantity}
+                  />
+                  <button
+                    ref={addButtonRef}
+                    type="button"
+                    onClick={onAdd}
+                    aria-disabled={blockedReason ? true : undefined}
+                    aria-describedby={
+                      blockedReason ? "glove-atc-reason" : undefined
+                    }
+                    className={gloveButtonClass({
+                      variant: "woo",
+                      size: "lg",
+                      fullWidth: true,
+                      className: "flex-1",
+                    })}
+                    {...fieldAttr("glove.product.add-to-cart-label")}
+                  >
+                    {copy.addToCart}
+                  </button>
+                  <span
+                    ref={setSentinel}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+                  />
+                </div>
+              ) : null}
               {blockedReason ? (
                 <p
                   id="glove-atc-reason"
@@ -316,9 +480,11 @@ export function GloveBuyBox({
                   buttonClassName={gloveButtonClass({ variant: "wooOutline" })}
                 />
               ) : null}
-              <p role="status" aria-live="polite" className="sr-only">
-                {announce}
-              </p>
+              {cartEnabled ? (
+                <p role="status" aria-live="polite" className="sr-only">
+                  {announce}
+                </p>
+              ) : null}
             </div>
           )}
         </>
@@ -348,7 +514,7 @@ export function GloveBuyBox({
         </ul>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-[var(--glove-line)] pb-5">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[var(--glove-line)] pb-5 empty:hidden">
         <WishlistButton
           item={{
             productId: product.id,
@@ -360,30 +526,11 @@ export function GloveBuyBox({
           className="static size-11 rounded-[var(--glove-radius-btn)] border border-[var(--glove-line)] bg-[var(--glove-paper)] text-[var(--glove-primary)] shadow-none backdrop-blur-none hover:scale-100 hover:border-[var(--glove-primary)]"
           iconClassName="size-5"
         />
-        <GloveShareRow
-          url={shareUrl}
-          title={product.name}
-          image={shareImage}
-          label={copy.shareLabel}
-        />
-      </div>
-
-      {sku || categories.length > 0 ? (
-        <dl className="m-0 flex flex-col gap-1.5 text-[14px]">
-          {sku ? (
-            <div className="flex gap-1.5">
-              <dt className="glove-display font-medium text-[var(--glove-ink)]">
-                SKU:
-              </dt>
-              <dd className="m-0 text-[var(--glove-muted)]">{sku}</dd>
-            </div>
-          ) : null}
-          {categories.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              <dt className="glove-display font-medium text-[var(--glove-ink)]">
-                {categories.length === 1 ? "Category:" : "Categories:"}
-              </dt>
-              <dd className="m-0 text-[var(--glove-muted)]">
+        {categories.length > 0 || sku ? (
+          <p className="m-0 min-w-0 text-[13px] text-[var(--glove-muted)]">
+            {categories.length > 0 ? (
+              <>
+                {categories.length === 1 ? "Category: " : "Categories: "}
                 {categories.map((c, i) => (
                   <span key={c.slug}>
                     {i > 0 ? ", " : null}
@@ -399,12 +546,113 @@ export function GloveBuyBox({
                     )}
                   </span>
                 ))}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
+              </>
+            ) : null}
+            {categories.length > 0 && sku ? (
+              <span aria-hidden="true"> · </span>
+            ) : null}
+            {sku ? <span>SKU {sku}</span> : null}
+          </p>
+        ) : null}
+      </div>
+
+      {showAddButton ? (
+        <div
+          aria-hidden={!pastAddButton}
+          inert={!pastAddButton}
+          className={cn(
+            "fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-[var(--glove-line)] bg-[var(--glove-paper)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-6px_18px_rgba(58,15,74,0.08)] md:hidden",
+            "transition-[transform,opacity,visibility] duration-200 ease-[var(--glove-ease)] motion-reduce:transition-none",
+            pastAddButton
+              ? "translate-y-0 opacity-100"
+              : "invisible translate-y-full opacity-0",
+          )}
+        >
+          <div className="min-w-0 flex-1">
+            <p className="glove-display m-0 truncate text-[13px] leading-tight font-medium text-[var(--glove-ink)]">
+              {product.name}
+            </p>
+            <p className="m-0 mt-0.5">
+              {configured && !rangeOpen ? (
+                <ConfiguredPrice
+                  total={config.total}
+                  totalLabel={copy.addOns.totalLine}
+                  subLine={gloveSubLine}
+                  size="sm"
+                />
+              ) : (
+                <>
+                  <GlovePrice
+                    price={displayPrice}
+                    compareAtPrice={isOnSale ? displayCompareAtPrice : null}
+                    size="sm"
+                  />
+                  {configured ? (
+                    <PriceSubLine size="sm">{addOnsSubLine}</PriceSubLine>
+                  ) : null}
+                </>
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onBarAdd}
+            aria-disabled={blockedReason ? true : undefined}
+            className={gloveButtonClass({
+              variant: "woo",
+              size: "md",
+              className: "shrink-0",
+            })}
+          >
+            {copy.addToCart}
+          </button>
+        </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The configured total in a price spot, with the glove-only price as a muted
+ * sub-line. Not a live region (the add-on picker announces the total).
+ */
+function ConfiguredPrice({
+  total,
+  totalLabel,
+  subLine,
+  size,
+}: {
+  total: number;
+  /** Read by screen readers ahead of the amount ("Total"). */
+  totalLabel: string;
+  subLine: string;
+  size: "sm" | "md" | "lg";
+}) {
+  return (
+    <>
+      <span className="sr-only">{totalLabel} </span>
+      <GlovePrice price={total} size={size} />
+      <PriceSubLine size={size}>{subLine}</PriceSubLine>
+    </>
+  );
+}
+
+function PriceSubLine({
+  size,
+  children,
+}: {
+  size: "sm" | "md" | "lg";
+  children: ReactNode;
+}) {
+  return (
+    <span
+      className={cn(
+        "glove-body mt-0.5 block leading-snug font-normal text-[var(--glove-muted)]",
+        size === "sm" ? "text-[12px]" : "text-[13px]",
+      )}
+    >
+      {children}
+    </span>
   );
 }
 

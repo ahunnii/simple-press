@@ -11,7 +11,7 @@ export function GloveAddressBookPage({
   customer,
 }: AccountAddressBookPageProps) {
   return (
-    <GloveAccountLayout heading="Address Book">
+    <GloveAccountLayout heading="Address book">
       <AddressBookContent
         customer={customer}
         salesCountries={business.salesCountries}

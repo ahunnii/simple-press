@@ -25,8 +25,11 @@ const FIELD_KEYS = [
   "glove.blog.post-back-label",
 ];
 
+/** Max width (px) of the article column. */
+const POST_BODY_WIDTH = 760;
+
 /**
- * `/blog/<slug>` — navy band (title + date), a single ~760px prose column
+ * `/blog/<slug>` — plum band (title + date), a single ~760px prose column
  * (cover image and lede above it), share row, then the other-posts band with
  * a back link. The excerpt is shown once, as the lede.
  */
@@ -49,6 +52,7 @@ export function GloveBlogPostPage({
 
   return (
     <GloveGeneralLayout
+      bandVariant="plum"
       title={page.title}
       breadcrumb={[
         { label: "Home", href: "/" },
@@ -56,7 +60,7 @@ export function GloveBlogPostPage({
         { label: page.title },
       ]}
       bandChildren={
-        <p className="glove-body text-[15px] text-[var(--glove-navy-soft)]">
+        <p className="glove-body text-[15px] text-[var(--glove-on-plum-soft)]">
           <time dateTime={new Date(date).toISOString()}>
             {formatDate(date)}
           </time>
@@ -65,7 +69,7 @@ export function GloveBlogPostPage({
     >
       {/* No reveal around the article: rich text can embed forms. */}
       <GloveSection tone="paper" reveal={false} aria-label={page.title}>
-        <article className="mx-auto max-w-[760px]">
+        <article className="mx-auto" style={{ maxWidth: POST_BODY_WIDTH }}>
           {page.image ? (
             <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-[12px] bg-[var(--glove-mist)]">
               <Image

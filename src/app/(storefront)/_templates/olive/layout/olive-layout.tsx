@@ -68,7 +68,7 @@ export async function OliveLayout({
       ),
   ]);
 
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   const navItems = filterNavByFlags(
     resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),

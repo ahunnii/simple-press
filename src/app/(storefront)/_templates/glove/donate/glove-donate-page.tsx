@@ -16,6 +16,9 @@ import { GloveHeading, GloveSection } from "../shared";
 import { GloveDonateForm } from "./glove-donate-form";
 import { GloveDonateOtherWays } from "./glove-donate-other-ways";
 
+/** Max width (px) of the donate column. */
+const DONATE_BODY_WIDTH = 760;
+
 const FIELD_KEYS = [
   "default.donate.hero-heading",
   "default.donate.hero-intro",
@@ -25,7 +28,7 @@ const FIELD_KEYS = [
 ];
 
 /**
- * `/donate` — glove's Donate / Tip / Support page on the generic base (navy
+ * `/donate` — glove's Donate / Tip / Support page on the generic base (banner
  * band + a centered column). Behavior contract is Default's: the card form
  * only renders when `business.isStripeConnected && stripeChargesEnabled`;
  * "other ways to give" only when `resolveDonationHandles(business)` is
@@ -61,6 +64,7 @@ export function GloveDonatePage({
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={heading}
       titleFieldKey="default.donate.hero-heading"
       subtitle={intro}
@@ -72,7 +76,10 @@ export function GloveDonatePage({
         // No reveal: the form must never start hidden, and the thank-you
         // banner is a live status.
         <GloveSection tone="paper" aria-label={heading} reveal={false}>
-          <div className="mx-auto flex max-w-[760px] flex-col gap-10">
+          <div
+            className="mx-auto flex flex-col gap-10"
+            style={{ maxWidth: DONATE_BODY_WIDTH }}
+          >
             {showThankYou ? (
               <div
                 role="status"
@@ -130,7 +137,7 @@ export function GloveDonatePage({
           sectionAttrs={sectionGroupAttr("donate", "other-ways")}
           revealThreshold={0}
         >
-          <div className="mx-auto max-w-[760px]">
+          <div className="mx-auto" style={{ maxWidth: DONATE_BODY_WIDTH }}>
             <GloveHeading
               fieldKey="default.donate.other-ways-heading"
               className="mb-10"

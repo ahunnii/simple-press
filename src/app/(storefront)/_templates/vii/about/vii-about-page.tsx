@@ -1,5 +1,5 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -91,7 +91,7 @@ export async function ViiAboutPage({
   // B2.5: hide the closing CTA button when its href names a flag that's
   // off — never swap in another destination.
   const ctaButtonLink = f["vii.about.cta-button-link"] ?? "";
-  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLink);
+  const ctaButtonLinkFlag = navHrefOffFlag(ctaButtonLink, isEnabled);
   const ctaButtonAllowed =
     ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag);
 

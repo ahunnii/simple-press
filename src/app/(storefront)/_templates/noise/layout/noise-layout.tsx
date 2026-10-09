@@ -44,7 +44,7 @@ export async function NoiseLayout({
     getSession(),
     getBusinessFlags(),
   ]);
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   // The nav is resolved ONCE here: the owner's saved nav (`??` semantics
   // inside `resolveNav`, so a saved empty list means no links) or

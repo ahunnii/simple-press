@@ -7,8 +7,6 @@ import { formatPrice } from "~/lib/prices";
 import { SUBSCRIPTION_STATUS_LABELS } from "~/lib/validators/subscription";
 
 import { GloveButton } from "../shared/glove-button";
-import { GloveRevealGroup } from "../shared/glove-reveal";
-import { gloveRevealItemStyle } from "../shared/glove-reveal-style";
 import { GloveAccountLayout } from "./glove-account-layout";
 import {
   GloveAccountCard,
@@ -61,20 +59,15 @@ export function GloveSubscriptionsPage({
           cta={{ label: "Shop now", href: "/shop" }}
         />
       ) : (
-        <GloveRevealGroup threshold={0} className="flex flex-col gap-4">
-          {subscriptions.map((subscription, i) => {
+        <div className="flex flex-col gap-4">
+          {subscriptions.map((subscription) => {
             const nextDate = nextDateLabel(subscription);
             const statusLabel =
               SUBSCRIPTION_STATUS_LABELS[
                 subscription.status as keyof typeof SUBSCRIPTION_STATUS_LABELS
               ] ?? subscription.status;
             return (
-              <GloveAccountCard
-                key={subscription.id}
-                as="article"
-                className="glove-reveal-item"
-                style={gloveRevealItemStyle(i)}
-              >
+              <GloveAccountCard key={subscription.id} as="article">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
@@ -119,7 +112,7 @@ export function GloveSubscriptionsPage({
               </GloveAccountCard>
             );
           })}
-        </GloveRevealGroup>
+        </div>
       )}
     </GloveAccountLayout>
   );

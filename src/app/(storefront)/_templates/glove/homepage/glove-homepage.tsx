@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { GloveStoryVideo } from "./glove-home-story";
 import type { Product } from "~/types";
@@ -8,6 +10,7 @@ import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateIframeValue } from "~/lib/template-fields";
 import { parseYouTubeVideoId } from "~/lib/youtube/parse";
+import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -135,7 +138,7 @@ export async function GloveHomepage({
     | undefined;
 
   const { isEnabled } = await getBusinessFlags();
-  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business.siteContent, isEnabled);
 
   const f = resolveFields(customFields, FIELD_KEYS);
   const field = (key: string): string => f[`glove.homepage.${key}`] ?? "";
@@ -147,6 +150,20 @@ export async function GloveHomepage({
   const show = (group: string) =>
     isSectionVisible(customFields, "glove", `homepage.${group}`);
   const productsEnabled = isEnabled("products");
+
+  // VIP band is a sign-up prompt: hide it once a customer is signed in (D8).
+  // `getSession` is request-cached and the layout already reads it, so this
+  // adds no new dynamic work. The editor preview (`x-sp-preview`) keeps the
+  // band so owners signed in to the admin can still edit it.
+  const [session, requestHeaders] = await Promise.all([
+    getSession(),
+    headers(),
+  ]);
+  const isEditorPreview = requestHeaders.get("x-sp-preview") === "1";
+  const showVip =
+    show("vip") &&
+    isEnabled("customerAccounts") &&
+    (!session?.user || isEditorPreview);
 
   // ── Remote reads: each is flag-gated server side and may throw, so every
   // one is caught; one failing read must never take the homepage down. ─────
@@ -286,7 +303,7 @@ export async function GloveHomepage({
         />
       ) : null}
 
-      {show("gift") ? (
+      {show("gift") && productsEnabled ? (
         <GloveHomeGift
           image={field("gift-image")}
           imageAlt={field("gift-image-alt")}
@@ -298,7 +315,7 @@ export async function GloveHomepage({
         />
       ) : null}
 
-      {show("collections") ? (
+      {show("collections") && isEnabled("collections") && productsEnabled ? (
         <GloveHomeCollections
           heading={field("collections-heading")}
           intro={field("collections-intro")}
@@ -343,7 +360,7 @@ export async function GloveHomepage({
         />
       ) : null}
 
-      {show("vip") && isEnabled("customerAccounts") ? (
+      {showVip ? (
         <GloveHomeVip
           heading={field("vip-heading")}
           body={field("vip-body")}

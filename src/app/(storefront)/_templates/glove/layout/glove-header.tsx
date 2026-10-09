@@ -44,10 +44,13 @@ type GloveHeaderProps = DefaultHeaderTemplateProps & {
 const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
 /**
- * Three-tier header (desktop): purple contact strip, white search-first row
- * with the bold account block, centered Poppins nav row. Below 1024px a
- * sticky 64px bar (burger, logo, search, cart) plus a left drawer replaces
- * all three. Only the mobile bar sticks; the desktop header scrolls away.
+ * Two-tier header (desktop): purple contact strip, then ONE white row with
+ * the logo, the centered Poppins nav (wraps to a second line at narrow
+ * desktop widths), and the actions (search toggle, wishlist, bag, quiet
+ * account control). Search is an icon that opens a single row under the
+ * header, shared with the mobile bar's toggle. Below 1024px a sticky 64px bar
+ * (burger, logo, search, cart) plus a left drawer replaces both tiers. Only
+ * the mobile bar sticks; the desktop header scrolls away.
  */
 export function GloveHeader({
   business,
@@ -65,12 +68,15 @@ export function GloveHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const burgerRef = useRef<HTMLButtonElement>(null);
-  const searchToggleRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchToggleRef = useRef<HTMLButtonElement>(null);
+  const mobileSearchToggleRef = useRef<HTMLButtonElement>(null);
+  // Whichever toggle opened the search row, so Esc returns focus to it.
+  const searchOpenerRef = useRef<HTMLButtonElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
-  // Close the inline mobile search on route change (state adjusted in render).
+  // Close the search row on route change (state adjusted in render).
   const [searchPath, setSearchPath] = useState(pathname);
   if (searchPath !== pathname) {
     setSearchPath(pathname);
@@ -96,11 +102,16 @@ export function GloveHeader({
   const productsEnabled = isEnabled("products");
   const cartEnabled = isEnabled("cart");
   const wishlistEnabled = isEnabled("wishlist");
-  const cartLabel = `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}, subtotal ${formatPrice(subtotal)}`;
+  const cartLabel = `Open bag, ${itemCount} ${itemCount === 1 ? "item" : "items"}, subtotal ${formatPrice(subtotal)}`;
   const wishlistLabel =
     wishlistHydrated && wishlistCount > 0
       ? `Wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "item" : "items"}`
       : "Wishlist";
+
+  const toggleSearch = (opener: HTMLButtonElement | null) => {
+    searchOpenerRef.current = opener;
+    setSearchOpen((o) => !o);
+  };
 
   const searchForm = (
     id: string,
@@ -145,7 +156,10 @@ export function GloveHeader({
           ) : null}
         </span>
         {variant === "desktop" ? (
-          <span aria-hidden="true" className="min-w-[44px] text-left">
+          <span
+            aria-hidden="true"
+            className="hidden min-w-[44px] text-left xl:inline"
+          >
             {formatPrice(subtotal)}
           </span>
         ) : null}
@@ -167,9 +181,9 @@ export function GloveHeader({
         />
       </div>
 
-      {/* ─── Desktop: main row ─── */}
+      {/* ─── Desktop: main row (logo | nav | actions) ─── */}
       <div className="hidden border-b border-[var(--glove-line)] lg:block">
-        <div className="glove-container flex h-[var(--glove-header-h)] items-center gap-8">
+        <div className="glove-container flex min-h-[var(--glove-header-h)] items-center gap-6 py-2 xl:gap-8">
           <Link href="/" className="shrink-0">
             <Image
               src={logo}
@@ -177,15 +191,39 @@ export function GloveHeader({
               width={180}
               height={90}
               priority
-              className="h-[90px] w-auto max-w-[220px] object-contain"
+              className="h-[72px] w-auto max-w-[160px] object-contain xl:h-[90px] xl:max-w-[220px]"
             />
           </Link>
 
-          <div className="mx-auto w-full max-w-[540px] flex-1">
-            {productsEnabled ? searchForm("glove-header-search") : null}
-          </div>
+          {links.length > 0 ? (
+            <nav
+              aria-label="Main navigation"
+              className="flex min-w-0 flex-1 justify-center"
+            >
+              <DesktopNav
+                links={links}
+                pathname={pathname}
+                activeIndex={activeIndex}
+              />
+            </nav>
+          ) : (
+            <div className="flex-1" />
+          )}
 
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2 xl:gap-3">
+            {productsEnabled ? (
+              <button
+                ref={desktopSearchToggleRef}
+                type="button"
+                aria-label={searchOpen ? "Close search" : "Search products"}
+                aria-expanded={searchOpen}
+                aria-controls="glove-search-row"
+                onClick={() => toggleSearch(desktopSearchToggleRef.current)}
+                className="glove-icon-btn"
+              >
+                <Search className="size-6" aria-hidden="true" />
+              </button>
+            ) : null}
             {wishlistEnabled ? (
               <Link
                 href="/wishlist"
@@ -215,20 +253,6 @@ export function GloveHeader({
         </div>
       </div>
 
-      {/* ─── Desktop: nav row ─── */}
-      {links.length > 0 ? (
-        <nav
-          aria-label="Main navigation"
-          className="hidden h-[var(--glove-nav-h)] items-center justify-center lg:flex"
-        >
-          <DesktopNav
-            links={links}
-            pathname={pathname}
-            activeIndex={activeIndex}
-          />
-        </nav>
-      ) : null}
-
       {/* ─── Mobile bar ─── */}
       <div className="border-b border-[var(--glove-line)] lg:hidden">
         <div className="grid h-[var(--glove-mobile-bar-h)] grid-cols-[1fr_auto_1fr] items-center px-2">
@@ -257,12 +281,12 @@ export function GloveHeader({
           <div className="flex items-center justify-end">
             {productsEnabled ? (
               <button
-                ref={searchToggleRef}
+                ref={mobileSearchToggleRef}
                 type="button"
                 aria-label={searchOpen ? "Close search" : "Search products"}
                 aria-expanded={searchOpen}
-                aria-controls="glove-mobile-search"
-                onClick={() => setSearchOpen((o) => !o)}
+                aria-controls="glove-search-row"
+                onClick={() => toggleSearch(mobileSearchToggleRef.current)}
                 className="glove-icon-btn"
               >
                 <Search className="size-6" aria-hidden="true" />
@@ -271,15 +295,24 @@ export function GloveHeader({
             {cartButton("mobile")}
           </div>
         </div>
-        {searchOpen && productsEnabled ? (
-          <div id="glove-mobile-search" className="px-4 pb-3">
-            {searchForm("glove-mobile-search-input", searchInputRef, () => {
-              setSearchOpen(false);
-              searchToggleRef.current?.focus();
-            })}
-          </div>
-        ) : null}
       </div>
+
+      {/* ─── Search row (shared by the desktop and mobile toggles) ─── */}
+      {searchOpen && productsEnabled ? (
+        <div
+          id="glove-search-row"
+          className="border-b border-[var(--glove-line)] py-3"
+        >
+          <div className="glove-container">
+            <div className="mx-auto w-full max-w-[540px]">
+              {searchForm("glove-search-input", searchInputRef, () => {
+                setSearchOpen(false);
+                searchOpenerRef.current?.focus();
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <GloveMobileNav
         open={menuOpen}
@@ -307,7 +340,7 @@ type DesktopNavProps = {
   activeIndex: number;
 };
 
-/** Desktop nav row: flat links plus one-level hover/focus dropdown groups. */
+/** Desktop nav: flat links plus one-level hover/focus dropdown groups. */
 function DesktopNav({ links, pathname, activeIndex }: DesktopNavProps) {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const triggerRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
@@ -346,7 +379,7 @@ function DesktopNav({ links, pathname, activeIndex }: DesktopNavProps) {
   return (
     <ul
       ref={navRef}
-      className="m-0 flex h-full list-none items-center gap-[30px] p-0"
+      className="m-0 flex list-none flex-wrap items-center justify-center gap-x-6 gap-y-1 p-0 xl:gap-x-[30px]"
     >
       {links.map((item, i) => {
         const isTopActive = i === activeIndex;
@@ -360,7 +393,7 @@ function DesktopNav({ links, pathname, activeIndex }: DesktopNavProps) {
           return (
             <li
               key={i}
-              className="relative flex h-full items-center"
+              className="relative flex items-center py-2"
               onMouseEnter={() => {
                 if (openDropdown !== i) openedByHover.current = true;
                 setOpenDropdown(i);
@@ -435,7 +468,7 @@ function DesktopNav({ links, pathname, activeIndex }: DesktopNavProps) {
         }
 
         return (
-          <li key={i} className="flex h-full items-center">
+          <li key={i} className="flex items-center py-2">
             <Link
               href={item.href}
               {...externalLinkProps(item.external)}

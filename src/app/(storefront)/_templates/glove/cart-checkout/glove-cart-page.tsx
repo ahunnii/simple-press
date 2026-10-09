@@ -9,8 +9,8 @@ import { GloveCartContents } from "./glove-cart-contents";
 import { GloveCheckoutSteps } from "./glove-checkout-steps";
 
 /**
- * Cart page: the shared navy progress band (step 1) over one section holding
- * the line-item table, the "Cart totals" card and the empty state. Fields are
+ * Cart page: the shared plum progress band (step 1) over one section holding
+ * the line-item list, the "Order summary" card and the empty state. Fields are
  * resolved here; everything that touches the cart itself lives in the client
  * `GloveCartContents`.
  */
@@ -47,8 +47,8 @@ export async function GloveCartPage({
       />
       <GloveSection
         sectionAttrs={sectionGroupAttr("cart", "main")}
-        aria-label="Cart"
-        revealThreshold={0}
+        aria-label="Your bag"
+        reveal={false}
       >
         <GloveCartContents
           shippingConfig={shippingConfigFromBusiness(business)}

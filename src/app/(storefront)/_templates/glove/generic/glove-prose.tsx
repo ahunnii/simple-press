@@ -9,7 +9,7 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
  * CSS needed, no stock colors).
  */
 export const GLOVE_PROSE_CLASS = cn(
-  "glove-body text-[15px] leading-[1.7] text-[var(--glove-text)] md:text-[16px]",
+  "glove-prose glove-body text-[15px] leading-[1.7] text-[var(--glove-text)] md:text-[16px]",
   "[overflow-wrap:anywhere] [&>*+*]:mt-5",
   // Headings
   "[&_h1]:[font-family:var(--glove-font-display)] [&_h1]:text-[clamp(28px,3.4vw,40px)] [&_h1]:leading-[1.2] [&_h1]:font-medium [&_h1]:text-[var(--glove-ink)]",
@@ -29,8 +29,8 @@ export const GLOVE_PROSE_CLASS = cn(
   "[&_blockquote]:rounded-r-[8px] [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--glove-primary)] [&_blockquote]:bg-[var(--glove-mist)] [&_blockquote]:px-5 [&_blockquote]:py-3 [&_blockquote]:text-[var(--glove-ink)] [&_blockquote]:italic",
   "[&_hr]:my-8 [&_hr]:border-[var(--glove-line)]",
   "[&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[12px]",
-  "[&_pre]:overflow-x-auto [&_pre]:rounded-[8px] [&_pre]:bg-[var(--glove-cloud)] [&_pre]:p-4 [&_pre]:text-[14px]",
-  "[&_code]:rounded-[4px] [&_code]:bg-[var(--glove-cloud)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.9em]",
+  "[&_pre]:overflow-x-auto [&_pre]:rounded-[8px] [&_pre]:bg-[var(--glove-mist)] [&_pre]:p-4 [&_pre]:text-[14px]",
+  "[&_code]:rounded-[4px] [&_code]:bg-[var(--glove-mist)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.9em]",
   "[&_pre_code]:bg-transparent [&_pre_code]:p-0",
   // Tables — hairline-bordered, scroll sideways on phones instead of the page
   "[&_table]:block [&_table]:w-full [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:text-[14px]",

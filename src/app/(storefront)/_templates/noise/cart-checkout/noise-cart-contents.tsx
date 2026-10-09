@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefFlag, navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -39,7 +39,7 @@ export function NoiseCartContents({ business }: Props) {
   // point at `/shop` (or the owner's own link) by default — 404s when
   // `products` is off, so neither may render in that case.
   const { isEnabled } = useStorefrontFlags();
-  const emptyLinkFlag = navHrefFlag(copy.emptyButtonLink);
+  const emptyLinkFlag = navHrefOffFlag(copy.emptyButtonLink, isEnabled);
   const emptyLinkEnabled = emptyLinkFlag === null || isEnabled(emptyLinkFlag);
   const continueShoppingFlag = navHrefFlag("/shop");
   const continueShoppingEnabled =

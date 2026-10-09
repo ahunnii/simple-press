@@ -35,7 +35,7 @@ type GloveBlogCardProps = {
 };
 
 /**
- * Blog card: 12px-radius image (3:2), primary uppercase date overline,
+ * Blog card: 12px-radius image (3:2), primary date line,
  * Poppins title, excerpt, "Continue reading →". The whole card is one
  * stretched link (the title link covers it) so there is a single tab stop.
  */
@@ -77,7 +77,7 @@ export function GloveBlogCard({
         )}
       </div>
       <div className="flex flex-1 flex-col pt-5">
-        <p className="glove-display text-[12px] font-medium tracking-[2px] text-[var(--glove-primary)] uppercase">
+        <p className="glove-display text-[13px] font-medium text-[var(--glove-primary)]">
           <time dateTime={new Date(date).toISOString()}>
             {formatDate(date)}
           </time>

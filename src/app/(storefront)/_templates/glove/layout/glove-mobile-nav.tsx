@@ -28,6 +28,8 @@ import {
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
 
 const MENU_ID = "glove-mobile-menu";
+/** Exit transition length; the panel stays mounted this long after close. */
+const EXIT_MS = 200;
 
 type GloveMobileNavProps = {
   open: boolean;
@@ -70,7 +72,60 @@ export function GloveMobileNav({
   const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const wasOpen = useRef(false);
+  const prevOpen = useRef(open);
+  // True while the panel plays its exit and is still mounted but closed.
+  const [exiting, setExiting] = useState(false);
+
+  // Keep the panel mounted for the exit slide, then unmount. Reduced motion
+  // (or no matchMedia) closes instantly. The scroll lock, inert background
+  // and focus return all key off `open`, so they release at close start.
+  useEffect(() => {
+    const was = prevOpen.current;
+    prevOpen.current = open;
+    if (open) {
+      setExiting(false);
+      return;
+    }
+    if (!was) return;
+    if (
+      typeof window.matchMedia !== "function" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    setExiting(true);
+    const t = setTimeout(() => setExiting(false), EXIT_MS);
+    return () => clearTimeout(t);
+  }, [open]);
+
+  // Exit animation (Web Animations API: no stylesheet edit needed). The
+  // closing panel is inert so it can't take focus or clicks while sliding.
+  useEffect(() => {
+    if (!exiting) return;
+    const panel = panelRef.current;
+    const scrim = scrimRef.current;
+    panel?.setAttribute("inert", "");
+    const animations: Animation[] = [];
+    const opts = {
+      duration: EXIT_MS,
+      easing: "ease-in",
+      fill: "forwards",
+    } as const;
+    if (panel && typeof panel.animate === "function") {
+      animations.push(
+        panel.animate(
+          [{ transform: "translateX(0)" }, { transform: "translateX(-100%)" }],
+          opts,
+        ),
+      );
+    }
+    if (scrim && typeof scrim.animate === "function") {
+      animations.push(scrim.animate([{ opacity: 1 }, { opacity: 0 }], opts));
+    }
+    return () => animations.forEach((a) => a.cancel());
+  }, [exiting]);
 
   // Close on any route change (back/forward, programmatic pushes).
   const lastPathname = useRef(pathname);
@@ -159,7 +214,7 @@ export function GloveMobileNav({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open && !exiting) return null;
 
   const logo = business.siteContent?.logoUrl ?? GLOVE_FALLBACK_LOGO;
   const email = business.supportEmail?.trim();
@@ -170,9 +225,11 @@ export function GloveMobileNav({
   return (
     <>
       <div
+        ref={scrimRef}
         className="glove-drawer-scrim"
         onClick={onClose}
         aria-hidden="true"
+        style={exiting ? { pointerEvents: "none" } : undefined}
       />
       <div
         ref={panelRef}
@@ -181,6 +238,8 @@ export function GloveMobileNav({
         aria-modal="true"
         aria-label="Menu"
         className="glove-drawer-left"
+        aria-hidden={exiting ? true : undefined}
+        style={exiting ? { pointerEvents: "none" } : undefined}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--glove-line)] px-4">
           <Link href="/" onClick={onClose} className="flex items-center">

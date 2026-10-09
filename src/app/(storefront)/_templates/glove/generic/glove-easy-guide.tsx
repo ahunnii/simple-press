@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * The `easy-guide` branch of the generic page. No navy band (matches the live
+ * The `easy-guide` branch of the generic page. No title band (matches the live
  * page): the visible h1 is the steps heading, followed by the shared
  * 6-step block with each step's own button, then the page's own rich text
  * (when it has any) below in prose. The step fields live on the homepage page

@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 /**
  * The events closing band's cream pill. Client-side only so it can read the
@@ -24,7 +24,7 @@ export function BambooEventsCtaButton({
   text: string;
 }) {
   const { isEnabled } = useStorefrontFlags();
-  const flag = navHrefFlag(href);
+  const flag = navHrefOffFlag(href, isEnabled);
   if (flag !== null && !isEnabled(flag)) return null;
 
   return (

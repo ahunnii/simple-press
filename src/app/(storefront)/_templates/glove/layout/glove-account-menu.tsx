@@ -11,6 +11,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
+import { sentenceCase } from "../shared/glove-sentence-case";
 import { GLOVE_FIELD_KEYS } from "./index";
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
@@ -26,7 +27,7 @@ type GloveAccountMenuProps = {
 };
 
 /**
- * The bold purple MY ACCOUNT block. Signed out it links to sign-in; signed in
+ * The quiet account control (icon + label, styled like the header icon buttons). Signed out it links to sign-in; signed in
  * it opens a small disclosure with the flag-aware account links
  * (`getAccountNavLinks`) and sign-out. A custom disclosure rather than Radix,
  * so the panel stays inside the `.glove` scope. The caller gates this on the
@@ -74,7 +75,7 @@ export function GloveAccountMenu({
     return (
       <span
         aria-hidden="true"
-        className="block h-12 w-[150px] animate-pulse rounded-[var(--glove-radius-btn)] bg-[var(--glove-cloud)]"
+        className="block h-11 w-[104px] animate-pulse rounded-[var(--glove-radius-btn)] bg-[var(--glove-mist)]"
       />
     );
   }
@@ -122,7 +123,7 @@ export function GloveAccountMenu({
         <ChevronDown
           aria-hidden="true"
           className={cn(
-            "size-4 transition-transform duration-200",
+            "size-3.5 transition-transform duration-200",
             open && "rotate-180",
           )}
         />
@@ -144,7 +145,7 @@ export function GloveAccountMenu({
                   className="glove-dropdown-link"
                   onClick={() => setOpen(false)}
                 >
-                  {link.label}
+                  {sentenceCase(link.label)}
                 </Link>
               </li>
             ))}

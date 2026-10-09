@@ -120,6 +120,7 @@ export async function GloveTestimonialsPage({
   return (
     <>
       <GloveTitleBand
+        variant="banner"
         title={get("title")}
         titleFieldKey="glove.testimonials.title"
         subtitle={get("subtitle")}

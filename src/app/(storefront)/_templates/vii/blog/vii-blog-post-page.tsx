@@ -1,6 +1,6 @@
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -59,7 +59,7 @@ export async function ViiBlogPostPage({
   // B2.5: hide the button (never swap in another destination) when its href
   // names a flag that's off.
   const ctaButtonLinkRaw = f["vii.blog.cta-button-link"] ?? "";
-  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLinkRaw);
+  const ctaButtonLinkFlag = navHrefOffFlag(ctaButtonLinkRaw, isEnabled);
   const ctaButtonLink =
     ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag)
       ? ctaButtonLinkRaw

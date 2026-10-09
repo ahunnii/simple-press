@@ -2,7 +2,7 @@ import type { DefaultVideosPageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
@@ -69,7 +69,7 @@ export async function PinkVideosPage({
   const ctaHref = (link: string | undefined): string | undefined => {
     const href = link?.trim();
     if (!href) return undefined;
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag) ? href : undefined;
   };
   const primaryHref = ctaHref(f["pink.videos.cta-primary-link"]);

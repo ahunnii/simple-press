@@ -9,36 +9,36 @@ import { SECTION_LINKS } from "~/lib/section-links";
 
 const contactFaqData: TemplateField[] = [
   {
-    key: "glove.contact.faq-overline",
-    label: "Small label",
-    description: "Small label above the FAQ heading. Leave blank to hide.",
-    type: "text",
-    page: "contact",
-    group: "contact.faq",
-    gridColumn: "col-span-1",
-    defaultValue: "Information Questions",
-  },
-  {
     key: "glove.contact.faq-heading",
     label: "Heading",
-    description: "Heading above the list of questions.",
+    description:
+      "Heading above the link to your FAQ page. The section stays out of view until at least one question is published (Content → FAQ).",
     type: "text",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-1",
-    defaultValue: "Frequently Asked Questions",
+    defaultValue: "Frequently asked questions",
   },
   {
-    key: "glove.contact.faq",
-    label: "Questions",
-    description:
-      "Pick questions from Content → FAQ. Leave empty to show the first published questions. The section stays out of view until at least one question is published.",
-    type: "faq",
+    key: "glove.contact.faq-body",
+    label: "Text",
+    description: "One line under the heading. Leave blank to hide.",
+    type: "textarea",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-full",
-    minItems: 0,
-    maxItems: 12,
+    defaultValue: "Find quick answers about our gloves, sizing and shipping.",
+  },
+  {
+    key: "glove.contact.faq-link-label",
+    label: "Button label",
+    description:
+      "Label of the button that opens the FAQ page. Leave blank to hide it.",
+    type: "text",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-1",
+    defaultValue: "Read the FAQ",
   },
 ];
 
@@ -57,16 +57,6 @@ const contactFormData: TemplateField[] = [
     defaultValue: "Contact us",
   },
   {
-    key: "glove.contact.form-overline",
-    label: "Small label",
-    description: "Small label above the form heading. Leave blank to hide.",
-    type: "text",
-    page: "contact",
-    group: "contact.form",
-    gridColumn: "col-span-1",
-    defaultValue: "Information About Us",
-  },
-  {
     key: "glove.contact.form-heading",
     label: "Heading",
     description: "Heading above the contact form.",
@@ -74,7 +64,7 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    defaultValue: "If You Have Questions, Contact Us",
+    defaultValue: "If you have questions, contact us",
   },
   {
     key: "glove.contact.submit-label",
@@ -84,7 +74,7 @@ const contactFormData: TemplateField[] = [
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-1",
-    defaultValue: "Ask a Question",
+    defaultValue: "Ask a question",
   },
   {
     key: "glove.contact.success-heading",
@@ -133,7 +123,7 @@ const contactDetailsData: TemplateField[] = [
     page: "contact",
     group: "contact.details",
     gridColumn: "col-span-full",
-    defaultValue: "Prefer to Reach Us Directly?",
+    defaultValue: "Prefer to reach us directly?",
   },
 ];
 
@@ -149,7 +139,7 @@ export const gloveContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.faq",
     title: "Frequently asked questions",
-    description: "Heading and the questions shown beside the form",
+    description: "Heading and link to the FAQ page, shown beside the form",
     icon: "❓",
     columns: 2,
   },
@@ -176,7 +166,7 @@ export const gloveContactSections: TemplateSection[] = [
     page: "contact",
     title: "Frequently asked questions",
     description:
-      "Accordion of questions on the left. Hidden until a question is published.",
+      "Heading and a link to the FAQ page, on the left. Hidden until a question is published.",
     groupIds: ["contact.faq"],
     order: 0,
     hideable: true,

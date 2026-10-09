@@ -8,16 +8,17 @@ import {
   getAmountUntilFreeShipping,
   SHIPPING_TYPES,
 } from "~/lib/shipping-utils";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { GloveButton } from "../shared/glove-button";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
 import { GloveMistPanel } from "../shared/glove-mist-panel";
-import { GLOVE_CART_GRID, GloveCartRow } from "./glove-cart-row";
+import { groupGloveCartLines } from "./glove-cart-groups";
+import { GloveCartRow } from "./glove-cart-row";
 
 type GloveCartContentsProps = {
-  /** Store shipping settings, for the estimate in the totals card. */
+  /** Store shipping settings, for the estimate in the summary card. */
   shippingConfig: ShippingConfig;
   columnProduct: string;
   columnPrice: string;
@@ -33,8 +34,8 @@ type GloveCartContentsProps = {
 };
 
 /**
- * Cart body: hydration skeleton, designed empty state, or the line-item table
- * beside the "Cart totals" card. Everything here reads `useCart()`, which is
+ * Cart body: hydration skeleton, designed empty state, or the line-item list
+ * beside the "Order summary" card. Everything here reads `useCart()`, which is
  * localStorage-only, so the first paint is a deliberate placeholder rather
  * than an empty state that flips to full.
  */
@@ -74,7 +75,7 @@ export function GloveCartContents({
       >
         <div className="flex flex-col gap-4">
           {[0, 1, 2].map((n) => (
-            <div key={n} className="h-[118px] bg-[var(--glove-cloud)]" />
+            <div key={n} className="h-[118px] bg-[var(--glove-mist)]" />
           ))}
         </div>
         <div className="h-[260px] rounded-[var(--glove-radius-panel)] bg-[var(--glove-mist)]" />
@@ -110,39 +111,39 @@ export function GloveCartContents({
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-12">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-12">
       <div className="min-w-0">
-        {/* Column headings: desktop only; mobile rows carry their own labels. */}
-        <div
-          aria-hidden="true"
-          className={`glove-display hidden items-center gap-x-4 border-b-2 border-[var(--glove-ink)] pb-3 text-[13px] font-semibold tracking-[0.05em] text-[var(--glove-ink)] uppercase md:grid ${GLOVE_CART_GRID}`}
-        >
-          <span className="col-span-2">
-            <span {...fieldAttr("glove.cart.column-product")}>
-              {columnProduct}
-            </span>
-          </span>
-          <span className="text-center">
-            <span {...fieldAttr("glove.cart.column-price")}>{columnPrice}</span>
-          </span>
-          <span className="text-center">
-            <span {...fieldAttr("glove.cart.column-quantity")}>
-              {columnQuantity}
-            </span>
-          </span>
-          <span className="text-center">
-            <span {...fieldAttr("glove.cart.column-subtotal")}>
-              {columnSubtotal}
-            </span>
-          </span>
-          <span />
-        </div>
+        {/* Compact total + checkout on phones, so they are reachable without
+            scrolling past every line. Hidden from lg, where the summary card
+            sits beside the list; a single item needs no repeat. */}
+        {canCheckout && checkoutLabel && items.length > 1 ? (
+          <div className="mb-2 flex items-center justify-between gap-4 rounded-[var(--glove-radius-card)] border border-[var(--glove-mist-line)] bg-[var(--glove-mist)] px-4 py-3 lg:hidden">
+            <p className="m-0 flex flex-col">
+              <span className="text-[13px] text-[var(--glove-muted)]">
+                Estimated total
+              </span>
+              <span className="glove-body text-[20px] leading-tight font-bold text-[var(--glove-primary)]">
+                {formatPrice(subtotal + shipping)}
+              </span>
+            </p>
+            <GloveButton href="/checkout" variant="woo">
+              <span {...fieldAttr("glove.cart.checkout-label")}>
+                {checkoutLabel}
+              </span>
+            </GloveButton>
+          </div>
+        ) : null}
 
+        <h2 className="sr-only" {...fieldAttr("glove.cart.column-product")}>
+          {columnProduct}
+        </h2>
         <ul className="m-0 list-none p-0">
-          {items.map((item) => (
+          {groupGloveCartLines(items).map(({ item, addOns, total }) => (
             <GloveCartRow
-              key={`${item.productId}-${item.variantId ?? "base"}`}
+              key={cartItemId(item)}
               item={item}
+              addOns={addOns}
+              groupTotal={total}
               labels={{
                 price: columnPrice,
                 quantity: columnQuantity,
@@ -153,7 +154,7 @@ export function GloveCartContents({
         </ul>
 
         <p className="sr-only" role="status" aria-live="polite">
-          {itemCount === 1 ? "1 item" : `${itemCount} items`} in your cart,
+          {itemCount === 1 ? "1 item" : `${itemCount} items`} in your bag,
           subtotal {formatPrice(subtotal)}
         </p>
 
@@ -181,7 +182,7 @@ export function GloveCartContents({
           className="m-0 mt-5 flex flex-col"
         >
           <div className="flex items-baseline justify-between gap-4 border-b border-[var(--glove-mist-line)] py-3">
-            <dt className="glove-display text-[13px] font-semibold tracking-[0.05em] text-[var(--glove-ink)] uppercase">
+            <dt className="glove-display text-[15px] font-medium text-[var(--glove-ink)]">
               {columnSubtotal}
             </dt>
             <dd className="glove-body m-0 text-[16px] font-bold text-[var(--glove-ink)]">
@@ -189,7 +190,7 @@ export function GloveCartContents({
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4 border-b border-[var(--glove-mist-line)] py-3">
-            <dt className="glove-display text-[13px] font-semibold tracking-[0.05em] text-[var(--glove-ink)] uppercase">
+            <dt className="glove-display text-[15px] font-medium text-[var(--glove-ink)]">
               Shipping
             </dt>
             <dd className="glove-body m-0 text-right text-[16px] font-bold text-[var(--glove-ink)]">
@@ -205,7 +206,7 @@ export function GloveCartContents({
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4 py-4">
-            <dt className="glove-display text-[13px] font-semibold tracking-[0.05em] text-[var(--glove-ink)] uppercase">
+            <dt className="glove-display text-[15px] font-medium text-[var(--glove-ink)]">
               Estimated total
             </dt>
             <dd className="glove-body m-0 text-[24px] font-bold text-[var(--glove-primary)]">

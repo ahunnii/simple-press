@@ -3,7 +3,7 @@ import { ArrowRight, Package } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
@@ -44,7 +44,7 @@ export function BambooFeaturedSection({
   // flag-gated route.
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
   const buttonHref = f["bamboo.homepage.featured-button-link"] || "/shop";
-  const buttonFlag = navHrefFlag(buttonHref);
+  const buttonFlag = navHrefOffFlag(buttonHref, isEnabled);
   const showButton =
     buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 

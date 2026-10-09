@@ -10,8 +10,9 @@ import type { TemplateSection } from "~/lib/template-sections";
 export const gloveCartData: TemplateField[] = [
   {
     key: "glove.cart.column-product",
-    label: "Product column heading",
-    description: "Heading above the product names in the cart table.",
+    label: "Item list label",
+    description:
+      "Screen-reader label for the list of items in the cart (not shown on screen).",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -21,8 +22,9 @@ export const gloveCartData: TemplateField[] = [
   },
   {
     key: "glove.cart.column-price",
-    label: "Price column heading",
-    description: "Heading above each item's unit price in the cart table.",
+    label: "Price label",
+    description:
+      "Screen-reader label for each item's unit price (not shown on screen).",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -32,8 +34,9 @@ export const gloveCartData: TemplateField[] = [
   },
   {
     key: "glove.cart.column-quantity",
-    label: "Quantity column heading",
-    description: "Heading above the quantity steppers in the cart table.",
+    label: "Quantity label",
+    description:
+      "Screen-reader label for each item's quantity stepper (not shown on screen).",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -43,9 +46,9 @@ export const gloveCartData: TemplateField[] = [
   },
   {
     key: "glove.cart.column-subtotal",
-    label: "Subtotal column heading",
+    label: "Subtotal label",
     description:
-      "Heading above each line's total in the cart table, also used as the subtotal label in the totals card.",
+      "Label for each line's total (screen readers) and for the subtotal row in the order summary.",
     type: "text",
     page: "cart",
     group: "cart.main",
@@ -57,58 +60,58 @@ export const gloveCartData: TemplateField[] = [
     key: "glove.cart.continue-label",
     label: "Continue shopping label",
     description:
-      "Button under the cart table that goes back to the shop. Leave blank to hide it.",
+      "Button under the cart items that goes back to the shop. Leave blank to hide it.",
     type: "text",
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-1",
-    defaultValue: "Continue shopping",
-    placeholder: "e.g. Keep browsing",
+    defaultValue: "Keep shopping",
+    placeholder: "e.g. Back to the shop",
   },
   {
     key: "glove.cart.totals-heading",
-    label: "Totals card heading",
+    label: "Order summary heading",
     description: "Heading on the card that sums up the cart.",
     type: "text",
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-1",
-    defaultValue: "Cart totals",
+    defaultValue: "Order summary",
     placeholder: "e.g. Order total",
   },
   {
     key: "glove.cart.totals-note",
-    label: "Totals card note",
+    label: "Order summary note",
     description:
       "Small line under the total, explaining what is still to come. Leave blank to hide it.",
     type: "textarea",
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-full",
-    defaultValue: "Taxes and discount codes are worked out at checkout.",
+    defaultValue: "Tax and any promo code are added at checkout.",
     placeholder: "e.g. Final total is confirmed at payment.",
   },
   {
     key: "glove.cart.checkout-label",
     label: "Checkout button label",
     description:
-      "Button on the totals card that starts checkout. It is hidden when checkout is switched off for the store.",
+      "Button on the order summary that starts checkout (repeated above the items on phones). It is hidden when checkout is switched off for the store.",
     type: "text",
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-1",
-    defaultValue: "Proceed to checkout",
+    defaultValue: "Check out",
     placeholder: "e.g. Check out",
   },
   {
     key: "glove.cart.empty-heading",
-    label: "Empty cart heading",
-    description: "Heading shown when there is nothing in the cart.",
+    label: "Empty bag heading",
+    description: "Heading shown when there is nothing in the bag.",
     type: "text",
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-1",
-    defaultValue: "Your cart is currently empty.",
+    defaultValue: "Your bag is waiting for its first pair",
     placeholder: "e.g. Nothing here yet",
   },
   {
@@ -120,7 +123,8 @@ export const gloveCartData: TemplateField[] = [
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-full",
-    defaultValue: "Browse our glove styles and find a pair she will love.",
+    defaultValue:
+      "Every woman's hands tell a story. Find the pair that tells yours.",
     placeholder: "e.g. Your next favorite is a few clicks away.",
   },
   {
@@ -132,8 +136,8 @@ export const gloveCartData: TemplateField[] = [
     page: "cart",
     group: "cart.main",
     gridColumn: "col-span-1",
-    defaultValue: "Return to shop",
-    placeholder: "e.g. Start shopping",
+    defaultValue: "Start shopping",
+    placeholder: "e.g. Browse the shop",
   },
 ];
 
@@ -142,7 +146,7 @@ export const gloveCartFieldGroups: TemplateFieldGroup[] = [
     id: "cart.main",
     title: "Cart",
     description:
-      "Table headings, totals card copy and the empty cart message on the cart page",
+      "Item labels, order summary copy and the empty cart message on the cart page",
     icon: "🛒",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -154,7 +158,7 @@ export const gloveCartSections: TemplateSection[] = [
     id: "cart.main",
     page: "cart",
     title: "Cart",
-    description: "Line items table, the totals card and the empty cart message",
+    description: "Line items, the order summary and the empty cart message",
     groupIds: ["cart.main"],
     order: 0,
     hideable: false,

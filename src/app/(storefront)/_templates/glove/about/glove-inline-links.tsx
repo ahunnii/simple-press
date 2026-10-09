@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 const LINK_PATTERN = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 
@@ -38,7 +38,7 @@ export function GloveInlineLinks({
     const [whole, label = "", href = ""] = match;
     const index = match.index;
     if (index > cursor) out.push(text.slice(cursor, index));
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     const allowed = isSafeHref(href) && (flag === null || isEnabled(flag));
     if (!allowed) {
       out.push(label);

@@ -2,7 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
-// ─── Collections index: navy band + circle cards ───────────────────────────
+// ─── Collections index: banner band + circle cards ─────────────────────────
 
 const heroData: TemplateField[] = [
   {

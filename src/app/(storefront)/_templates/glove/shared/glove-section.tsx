@@ -9,8 +9,7 @@ export type GloveSectionTone =
   | "paper"
   | "lavender"
   | "mist"
-  | "cloud"
-  | "navy"
+  | "plum"
   | "primary"
   | "fade";
 
@@ -18,8 +17,7 @@ const TONE_CLASS: Record<GloveSectionTone, string> = {
   paper: "bg-[var(--glove-paper)]",
   lavender: "bg-[var(--glove-lavender)]",
   mist: "bg-[var(--glove-mist)]",
-  cloud: "bg-[var(--glove-cloud)]",
-  navy: "bg-[var(--glove-navy)] glove-on-dark text-white",
+  plum: "bg-[var(--glove-plum)] glove-on-dark text-white",
   primary: "bg-[var(--glove-primary)] glove-on-dark text-white",
   fade: "bg-[image:var(--glove-purple-fade)] glove-on-dark text-white",
 };

@@ -15,7 +15,7 @@ export type GloveButtonSize = "sm" | "md" | "lg";
 type ButtonClassOptions = {
   variant?: GloveButtonVariant;
   size?: GloveButtonSize;
-  /** White outline treatment for scrim, purple and navy bands. */
+  /** White outline treatment for scrim, purple and plum bands. */
   onDark?: boolean;
   fullWidth?: boolean;
   className?: string;
@@ -26,10 +26,11 @@ type ButtonClassOptions = {
  * on `<Link>` / `<a>` / `<button>` where `GloveButton` doesn't fit.
  *
  * - solid: purple fill
- * - outline: hairline ink to purple on hover (LOAD MORE)
+ * - outline: hairline ink to purple on hover (Load more)
  * - outlinePrimary: purple hairline + purple text, fills on hover (secondary action)
- * - woo: uppercase 13px 600, 42px (Woo-style actions); wooOutline = woo + outlinePrimary
- * - story: Lato 18-22px Title Case, 3px radius
+ * - woo: sentence-case 14px 600, 42px (Woo-style actions); wooOutline = woo + outlinePrimary
+ * - story: Lato 18-22px Title Case
+ * Every variant shares one radius (--glove-radius-btn, 5px).
  */
 export function gloveButtonClass({
   variant = "solid",

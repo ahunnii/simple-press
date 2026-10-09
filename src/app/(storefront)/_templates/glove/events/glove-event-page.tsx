@@ -48,6 +48,7 @@ export function GloveEventPage({
 
   return (
     <GloveGeneralLayout
+      bandVariant="plum"
       title={event.name}
       breadcrumb={[
         { label: "Home", href: "/" },
@@ -112,7 +113,7 @@ export function GloveEventPage({
             ) : null}
             <time
               dateTime={eventDateTimeAttr(event, timeZone)}
-              className="glove-display inline-flex items-center gap-2 text-[14px] font-medium tracking-[2px] text-[var(--glove-primary)] uppercase"
+              className="glove-display inline-flex items-center gap-2 text-[15px] font-medium text-[var(--glove-primary)]"
             >
               <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
               {formatEventDate(event, timeZone, { showZone: true })}

@@ -82,7 +82,7 @@ export function GloveHomeVip({
               </h2>
               {body ? (
                 <p
-                  className="glove-body mt-3 text-[16px] leading-[1.6] text-[var(--glove-text)]"
+                  className="glove-body mx-auto mt-3 max-w-[64ch] text-[16px] leading-[1.6] text-[var(--glove-text)] md:mx-0"
                   {...fieldAttr("glove.homepage.vip-body")}
                 >
                   {body}

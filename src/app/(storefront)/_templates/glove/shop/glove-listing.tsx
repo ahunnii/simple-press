@@ -9,11 +9,9 @@ import type { GloveBreadcrumbItem } from "../shared";
 import type { SortOption } from "~/hooks/use-shop-filters";
 import type { Product } from "~/types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
-import { cn } from "~/lib/utils";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import {
-  GloveBreadcrumb,
   gloveButtonClass,
   GloveContainer,
   GloveProductGrid,
@@ -22,8 +20,9 @@ import {
   GloveTitleBand,
 } from "../shared";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
+import { GloveCollectionTabs } from "./glove-collection-tabs";
 
-/** Cards per "page" (the live shop shows 12; LOAD MORE adds 12). */
+/** Cards per "page" (the live shop shows 12; Load more adds 12). */
 const PAGE_SIZE = 12;
 
 type Copy = {
@@ -46,10 +45,8 @@ type Props = {
   products: Product[];
   title: string;
   subtitle?: string;
-  /** Show the collection tabs in the band (the shop, not a collection). */
+  /** Show the collection tabs strip under the band (the shop, not a collection). */
   showTabs: boolean;
-  /** Category line for every card (a collection page); else the product's collections. */
-  fixedCategory?: string;
   breadcrumb: GloveBreadcrumbItem[];
   copy: Copy;
   keys?: CopyKeys;
@@ -57,26 +54,25 @@ type Props = {
   gridSectionAttrs?: Record<string, string>;
 };
 
-function plural(n: number, one: string, many: string) {
-  return `${n} ${n === 1 ? one : many}`;
+/** Sentence-case the shared sort labels ("Price, Low to High" -> "Price, low to high"). */
+function sortLabel(label: string) {
+  const clean = label.replace(/\s+/g, " ").trim();
+  return /^[A-Z] → [A-Z]$/.test(clean)
+    ? clean
+    : clean.charAt(0) + clean.slice(1).toLowerCase();
 }
 
-/** Woo-style count: "Showing 1–12 of 17 results" / "Showing all 5 results". */
-function resultsText(shown: number, total: number) {
-  if (total === 0) return "No results";
-  if (shown >= total) {
-    return total === 1
-      ? "Showing the single result"
-      : `Showing all ${total} results`;
-  }
-  return `Showing 1–${shown} of ${total} results`;
+/** Quiet count of the filtered set: "31 pieces" / "1 piece". */
+function resultsText(total: number) {
+  if (total === 0) return "No pieces";
+  return total === 1 ? "1 piece" : `${total} pieces`;
 }
 
 /**
  * The shop listing, shared by ShopPage and CollectionPage (design.md Shop):
- * navy title band (with collection tabs on the shop), a toolbar (breadcrumb,
- * result count, sort), the 3-col product grid (2 on phones), and a crawlable
- * LOAD MORE PRODUCTS link (`?page=N`, B1.8 / P-PAGE-LINKS). Filtering,
+ * banner title band (breadcrumb inside), a collection tabs strip on the shop,
+ * a toolbar (result count, sort), the 3-col product grid (2 on phones), and a crawlable
+ * load-more link (`?page=N`, B1.8 / P-PAGE-LINKS). Filtering,
  * sorting and paging all come from `useShopFilters`. A header search lands
  * here as `/shop?q=` and is synced into the filter (dark-trend pattern).
  */
@@ -85,7 +81,6 @@ export function GloveListing({
   title,
   subtitle,
   showTabs,
-  fixedCategory,
   breadcrumb,
   copy,
   keys = {},
@@ -120,19 +115,18 @@ export function GloveListing({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qParam]);
 
-  // Tab counts from the products already in hand (no second query).
+  // Collections with at least one product here (no second query).
   const tabs = useMemo(() => {
     if (!showTabs) return [];
     const allNorm = copy.allLabel.trim().toLowerCase();
     return collections
       .filter((c) => c.name.trim().toLowerCase() !== allNorm)
-      .map((c) => ({
-        ...c,
-        count: products.filter((p) =>
+      .filter((c) =>
+        products.some((p) =>
           (p.collectionProducts ?? []).some((cp) => cp.collection.id === c.id),
-        ).length,
-      }))
-      .filter((c) => c.count > 0);
+        ),
+      )
+      .map((c) => ({ id: c.id, name: c.name }));
   }, [showTabs, collections, products, copy.allLabel]);
 
   const visibleCount = requestedPage * PAGE_SIZE;
@@ -141,58 +135,25 @@ export function GloveListing({
   const query = search.trim();
   const hasProducts = products.length > 0;
 
-  const categoriesFor = (p: Product): string[] | undefined =>
-    fixedCategory
-      ? [fixedCategory]
-      : (p.collectionProducts ?? []).map((cp) => cp.collection.name);
-
   return (
     <>
       <GloveTitleBand
+        variant="banner"
         title={title}
         titleFieldKey={keys.title}
         subtitle={subtitle}
         subtitleFieldKey={keys.subtitle}
+        breadcrumb={breadcrumb}
         sectionAttrs={bandSectionAttrs}
-      >
-        {tabs.length > 0 ? (
-          <nav aria-label="Collections">
-            <ul className="m-0 -mx-[var(--glove-gutter)] flex snap-x list-none gap-1 overflow-x-auto px-[var(--glove-gutter)] pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:justify-center md:overflow-visible md:px-0">
-              {[
-                { id: null, name: copy.allLabel, count: products.length },
-                ...tabs,
-              ].map((tab) => {
-                const active = tab.id === activeCollectionId;
-                return (
-                  <li key={tab.id ?? "all"} className="shrink-0 snap-start">
-                    <button
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => setActiveCollectionId(tab.id)}
-                      className="group flex min-h-11 flex-col items-center px-3 pt-1.5 text-[var(--glove-on-primary)]"
-                    >
-                      <span
-                        className={cn(
-                          "glove-display border-b-2 pb-0.5 text-[13px] font-medium tracking-wide whitespace-nowrap uppercase transition-colors duration-150",
-                          active
-                            ? "border-[var(--glove-on-primary)]"
-                            : "border-transparent group-hover:border-[var(--glove-navy-soft)]",
-                        )}
-                        {...(tab.id === null ? fk("allLabel") : {})}
-                      >
-                        {tab.name}
-                      </span>
-                      <span className="mt-0.5 text-[12px] whitespace-nowrap text-[var(--glove-navy-soft)]">
-                        {plural(tab.count, "Product", "Products")}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        ) : null}
-      </GloveTitleBand>
+      />
+      {tabs.length > 0 ? (
+        <GloveCollectionTabs
+          tabs={[{ id: null, name: copy.allLabel }, ...tabs]}
+          activeId={activeCollectionId}
+          onSelect={setActiveCollectionId}
+          allLabelAttrs={fk("allLabel")}
+        />
+      ) : null}
 
       <section
         aria-label="Products"
@@ -201,48 +162,8 @@ export function GloveListing({
       >
         <GloveContainer>
           <h2 className="sr-only">Products</h2>
-          <div className="flex flex-col gap-4 border-b border-[var(--glove-line)] pb-4 md:flex-row md:items-center md:justify-between">
-            <GloveBreadcrumb items={breadcrumb} />
-            {hasProducts ? (
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <p
-                  className="m-0 text-[13px] text-[var(--glove-muted)]"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
-                  {resultsText(visible.length, filtered.length)}
-                </p>
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor={sortId}
-                    className="glove-display text-[13px] font-medium text-[var(--glove-ink)]"
-                  >
-                    Sort by
-                  </label>
-                  <GloveSelect
-                    id={sortId}
-                    value={sortParam}
-                    onChange={(e) => handleSort(e.target.value as SortOption)}
-                    style={{
-                      width: "auto",
-                      minHeight: 40,
-                      paddingBlock: 8,
-                      fontSize: 14,
-                    }}
-                  >
-                    {Object.entries(SORT_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </GloveSelect>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
           {query ? (
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
               <p className="glove-display m-0 text-[18px] font-medium text-[var(--glove-ink)]">
                 <span {...fk("resultsLabel")}>{copy.resultsLabel}</span>{" "}
                 <span className="text-[var(--glove-primary)]">“{query}”</span>
@@ -255,6 +176,43 @@ export function GloveListing({
                 <X className="size-4" aria-hidden="true" />
                 <span {...fk("clearSearchLabel")}>{copy.clearSearchLabel}</span>
               </button>
+            </div>
+          ) : null}
+
+          {hasProducts ? (
+            <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 border-b border-[var(--glove-line)] pb-4">
+              <p
+                className="m-0 text-[13px] text-[var(--glove-muted)]"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {resultsText(filtered.length)}
+              </p>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor={sortId}
+                  className="glove-display text-[13px] font-medium text-[var(--glove-muted)]"
+                >
+                  Sort by
+                </label>
+                <GloveSelect
+                  id={sortId}
+                  value={sortParam}
+                  onChange={(e) => handleSort(e.target.value as SortOption)}
+                  style={{
+                    width: "auto",
+                    minHeight: 40,
+                    paddingBlock: 8,
+                    fontSize: 14,
+                  }}
+                >
+                  {Object.entries(SORT_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {sortLabel(label)}
+                    </option>
+                  ))}
+                </GloveSelect>
+              </div>
             </div>
           ) : null}
 
@@ -292,10 +250,7 @@ export function GloveListing({
               </GloveReveal>
             ) : (
               <>
-                <GloveProductGrid
-                  products={visible}
-                  categoriesFor={categoriesFor}
-                />
+                <GloveProductGrid products={visible} />
                 {hasMore ? (
                   <div className="mt-12 flex justify-center">
                     <a

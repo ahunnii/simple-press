@@ -20,15 +20,15 @@ export const gloveCheckoutData: TemplateField[] = [
   // ─── Progress bar ──────────────────────────────────────────────────────
   {
     key: GLOVE_STEP_FIELD_KEYS.cart,
-    label: "Cart step label",
+    label: "Bag step label",
     description:
       "First step in the progress bar at the top of the cart, checkout and order pages.",
     type: "text",
     page: "checkout",
     group: "checkout.steps",
     gridColumn: "col-span-1",
-    defaultValue: "Shopping cart",
-    placeholder: "e.g. Your bag",
+    defaultValue: "Your bag",
+    placeholder: "e.g. Shopping cart",
   },
   {
     key: GLOVE_STEP_FIELD_KEYS.checkout,
@@ -38,8 +38,8 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.steps",
     gridColumn: "col-span-1",
-    defaultValue: "Checkout",
-    placeholder: "e.g. Details",
+    defaultValue: "Details",
+    placeholder: "e.g. Checkout",
   },
   {
     key: GLOVE_STEP_FIELD_KEYS.complete,
@@ -49,8 +49,8 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.steps",
     gridColumn: "col-span-1",
-    defaultValue: "Order complete",
-    placeholder: "e.g. Done",
+    defaultValue: "Done",
+    placeholder: "e.g. Order complete",
   },
 
   // ─── Checkout form ─────────────────────────────────────────────────────
@@ -62,8 +62,8 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Billing details",
-    placeholder: "e.g. Your details",
+    defaultValue: "Your details",
+    placeholder: "e.g. Contact details",
   },
   {
     key: "glove.checkout.delivery-heading",
@@ -97,7 +97,7 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Have a coupon?",
+    defaultValue: "Have a promo code?",
     placeholder: "e.g. Discount code",
   },
   {
@@ -155,7 +155,7 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Your cart is currently empty.",
+    defaultValue: "Your bag is waiting for its first pair",
     placeholder: "e.g. Nothing to check out yet",
   },
   {
@@ -167,8 +167,8 @@ export const gloveCheckoutData: TemplateField[] = [
     page: "checkout",
     group: "checkout.main",
     gridColumn: "col-span-1",
-    defaultValue: "Return to shop",
-    placeholder: "e.g. Start shopping",
+    defaultValue: "Start shopping",
+    placeholder: "e.g. Browse the shop",
   },
 
   // ─── Checkout unavailable ──────────────────────────────────────────────

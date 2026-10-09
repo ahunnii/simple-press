@@ -12,7 +12,7 @@ import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   filterNavByFlags,
-  navHrefFlag,
+  navHrefOffFlag,
   resolveNav,
 } from "~/app/(storefront)/_components/nav";
 
@@ -80,6 +80,6 @@ export function dreamCtaHref(
   isEnabled: (key: string) => boolean,
 ): string {
   if (!url) return "";
-  const flag = navHrefFlag(url);
+  const flag = navHrefOffFlag(url, isEnabled);
   return flag && !isEnabled(flag) ? "" : url;
 }

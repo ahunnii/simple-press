@@ -45,7 +45,7 @@ export async function BambooHomepage({
   // `featureFlags`, and already passed to every template's homepage
   // component) the same way `pollen-homepage.tsx` / `happy-bamboo-homepage.tsx`
   // resolve their popup, instead of adding a second business fetch here.
-  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business?.siteContent, isEnabled);
 
   const testimonials = isEnabled("testimonials")
     ? await api.testimonial.listRandom({ limit: 3 })

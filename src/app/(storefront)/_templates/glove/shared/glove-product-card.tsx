@@ -10,8 +10,6 @@ import { GlovePrice } from "./glove-price";
 
 type GloveProductCardProps = {
   product: Product;
-  /** Category names under the title (e.g. ["All Products", "Gloves"]). */
-  categories?: string[];
   /** "plain" sits on white; "card" is a white tile for purple/mist bands. */
   surface?: "plain" | "card";
   /** Load the image eagerly (first row above the fold). */
@@ -20,14 +18,14 @@ type GloveProductCardProps = {
 };
 
 /**
- * Square image with a hover crossfade to the 2nd photo, wishlist heart, and
- * centered Poppins name / muted categories / primary price. Sale and sold-out
+ * Square wash well holding the photo (contained with padding, multiplied so a
+ * white photo background melts into the wash), a hover swap to the 2nd photo, wishlist heart, and
+ * centered Poppins name / primary price. Sale and sold-out
  * states show a --glove-alert badge. The title link is stretched over the
  * whole card; the heart sits above it.
  */
 export function GloveProductCard({
   product,
-  categories,
   surface = "plain",
   priority = false,
   className,
@@ -74,14 +72,14 @@ export function GloveProductCard({
         className,
       )}
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-[var(--glove-cloud)]">
+      <div className="relative aspect-square w-full overflow-hidden bg-[var(--glove-wash)]">
         <Image
           src={primary}
           alt=""
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
           priority={priority}
-          className="object-cover"
+          className="glove-product-img glove-product-img-main object-contain p-3"
         />
         {secondary ? (
           <Image
@@ -89,7 +87,7 @@ export function GloveProductCard({
             alt=""
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
-            className="glove-product-img-alt object-cover"
+            className="glove-product-img glove-product-img-alt object-contain p-3"
           />
         ) : null}
 
@@ -120,11 +118,6 @@ export function GloveProductCard({
             {product.name}
           </Link>
         </h3>
-        {categories && categories.length > 0 ? (
-          <p className="text-[13px] leading-snug text-[var(--glove-muted)]">
-            {categories.join(", ")}
-          </p>
-        ) : null}
         <GlovePrice
           className="mt-auto pt-1"
           price={status.displayPrice}

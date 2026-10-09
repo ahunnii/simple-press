@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { NoiseCartCopy } from "./noise-cart-copy";
 import type { ShippingConfig } from "~/lib/shipping-utils";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -43,7 +43,7 @@ export function NoiseCartDrawer({
   // off — neither CTA may render in that case.
   const { isEnabled } = useStorefrontFlags();
   const checkoutEnabled = isEnabled("checkout");
-  const emptyLinkFlag = navHrefFlag(copy.emptyButtonLink);
+  const emptyLinkFlag = navHrefOffFlag(copy.emptyButtonLink, isEnabled);
   const emptyLinkEnabled = emptyLinkFlag === null || isEnabled(emptyLinkFlag);
 
   const untilFree = getAmountUntilFreeShipping(subtotal, shippingConfig);

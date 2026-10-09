@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Headset } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { Session } from "~/server/better-auth/config";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   AUTH_BASE_PATHS,
@@ -47,23 +48,26 @@ export type GloveFooterFields = {
 type GloveFooterProps = DefaultFooterTemplateProps & {
   /** Published policy Pages, resolved server-side by the layout. */
   policyPages?: PolicyPage[];
+  /** Session the layout already resolved for the header; seeds the SSR pass. */
+  initialSession?: Session | null;
   fields: GloveFooterFields;
 };
 
 /**
  * White footer with four columns (brand, quick links, customer area, contact)
- * and a dark bottom bar carrying the copyright, payment logos and the
+ * and a deep-plum bottom bar carrying the copyright, payment logos and the
  * mandatory platform policy links (B10.1).
  */
 export function GloveFooter({
   business,
   policyPages = [],
+  initialSession,
   fields,
 }: GloveFooterProps) {
   const { isEnabled } = resolveFlags(business.featureFlags);
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session } = useHydratedSession(initialSession);
   const user = session?.user;
-  const signedOut = !isPending && !user;
+  const signedOut = !user;
 
   const accountsEnabled = isEnabled("customerAccounts");
   const phone = business.phoneNumber?.trim();
@@ -105,7 +109,7 @@ export function GloveFooter({
       ? [{ label: "Shipping Policy", href: `/${shipping.slug}` }]
       : []),
     ...(refund ? [{ label: "Refund Policy", href: `/${refund.slug}` }] : []),
-    { label: "Platform Policies", href: "/platform/policies/" },
+    { label: "Platform Policies", href: "/platform/policies" },
   ];
 
   const showTrack = fields.trackLabel.trim().length > 0;
@@ -261,7 +265,7 @@ export function GloveFooter({
               {isEnabled("cart") ? (
                 <li>
                   <Link href="/cart" className="glove-footer-link">
-                    My Cart
+                    My Bag
                   </Link>
                 </li>
               ) : null}
@@ -319,11 +323,11 @@ export function GloveFooter({
       </div>
 
       {/* Bottom bar */}
-      <div className="glove-on-dark bg-[var(--glove-footer-bar)] text-[13px] text-white">
+      <div className="glove-on-dark bg-[var(--glove-plum-deep)] text-[13px] text-[var(--glove-on-plum-soft)]">
         <div className="glove-container flex flex-col items-center gap-4 py-5 md:flex-row md:justify-between">
           <p className="m-0 text-center md:text-left">
-            {business.name.toUpperCase()} - &copy; {new Date().getFullYear()}{" "}
-            All Rights Reserved
+            {business.name} - &copy; {new Date().getFullYear()} All Rights
+            Reserved
           </p>
           {fields.paymentImage ? (
             <Image
@@ -344,7 +348,7 @@ export function GloveFooter({
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="inline-flex min-h-6 items-center text-[var(--glove-footer-bar-text)] underline-offset-2 transition-colors hover:text-white hover:underline"
+                  className="inline-flex min-h-6 items-center text-[var(--glove-on-plum-soft)] underline-offset-2 transition-colors hover:text-white hover:underline"
                 >
                   {link.label}
                 </Link>

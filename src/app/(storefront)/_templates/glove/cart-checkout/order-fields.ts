@@ -17,7 +17,7 @@ export const gloveOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.confirmation",
     gridColumn: "col-span-full",
-    defaultValue: "Thank you. Your order has been received.",
+    defaultValue: "Thank you! Your order is in.",
     placeholder: "e.g. Thanks, we have it!",
   },
   {
@@ -89,7 +89,7 @@ export const gloveOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.confirmation",
     gridColumn: "col-span-1",
-    defaultValue: "Track Your Order",
+    defaultValue: "Track your order",
     placeholder: "e.g. Where is my order?",
   },
   {
@@ -100,7 +100,7 @@ export const gloveOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.confirmation",
     gridColumn: "col-span-1",
-    defaultValue: "Continue shopping",
+    defaultValue: "Keep shopping",
     placeholder: "e.g. Keep browsing",
   },
   {

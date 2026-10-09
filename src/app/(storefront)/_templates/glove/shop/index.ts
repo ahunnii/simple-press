@@ -2,7 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
-// ─── Shop: navy title band + collection tabs ────────────────────────────────
+// ─── Shop: banner title band + collection tabs ──────────────────────────────
 
 const heroData: TemplateField[] = [
   {
@@ -24,7 +24,7 @@ const heroData: TemplateField[] = [
     page: "shop",
     group: "shop.hero",
     gridColumn: "col-span-1",
-    defaultValue: "All Products",
+    defaultValue: "All products",
   },
 ];
 

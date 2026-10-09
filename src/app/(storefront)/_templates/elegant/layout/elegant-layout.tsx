@@ -34,7 +34,7 @@ export async function ElegantLayout({
   // Platform-wide site banner — owner-configured in the admin, gated by the
   // `banners` feature flag. Same source every other template reads.
   const { isEnabled } = await getBusinessFlags();
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   return (
     <div

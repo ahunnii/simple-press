@@ -513,28 +513,28 @@ const featuredData: TemplateField[] = [
 export const GLOVE_PROMISE_DEFAULT_ROWS: Record<string, string>[] = [
   {
     icon: `${IMG}/feature-delivery.png`,
-    title: "Free Delivery",
-    detail: "from $100",
+    title: "Free delivery",
+    detail: "On orders from $100",
   },
   {
     icon: `${IMG}/feature-quality.png`,
-    title: "Best Quality",
-    detail: "Brand",
+    title: "Best quality",
+    detail: "Handmade leather gloves",
   },
   {
     icon: `${IMG}/feature-returns.png`,
-    title: "30 Day",
-    detail: "for free Return",
+    title: "Free returns",
+    detail: "Within 30 days",
   },
   {
     icon: `${IMG}/feature-feedback.png`,
-    title: "Feedback",
+    title: "Your feedback",
     detail: "We read every note",
   },
   {
     icon: `${IMG}/feature-payment.png`,
-    title: "Payment",
-    detail: "Secure",
+    title: "Secure payment",
+    detail: "Pay safely at checkout",
   },
 ];
 

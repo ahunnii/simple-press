@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 /**
  * Single-pass IntersectionObserver scroll reveal for the glove template.
@@ -13,9 +13,27 @@ import { useCallback, useEffect, useState } from "react";
  * `threshold` defaults to 0.1. Pass `0` for tall wrappers (a 10% sliver of a
  * very tall block may never fit in the viewport on small screens).
  *
+ * A block already in the viewport on first paint is marked visible in the same
+ * layout pass that arms `.glove-js` (before the browser paints), so above-fold
+ * content never flickers hidden -> visible. Only blocks below the fold animate.
+ *
  * Under `prefers-reduced-motion: reduce` no observer is created and
  * `visible` is true immediately (everything renders settled).
  */
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/** Mirrors the observer below: threshold ratio inside a viewport grown 8% down. */
+function isInInitialViewport(el: HTMLElement, threshold: number): boolean {
+  const rect = el.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return false;
+  const bottomEdge = window.innerHeight * 1.08;
+  const shown = Math.min(rect.bottom, bottomEdge) - Math.max(rect.top, 0);
+  if (shown <= 0) return false;
+  if (threshold <= 0 || rect.height === 0) return true;
+  return shown / rect.height >= threshold;
+}
+
 export function useGloveReveal(threshold = 0.1): {
   ref: (node: HTMLDivElement | null) => void;
   visible: boolean;
@@ -27,9 +45,16 @@ export function useGloveReveal(threshold = 0.1): {
     if (node) setEl(node);
   }, []);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!el) return;
+    // Measure before arming the gate so the rect is the un-offset position.
+    const aboveFold = isInInitialViewport(el, threshold);
     el.closest(".glove")?.classList.add("glove-js");
+
+    if (aboveFold) {
+      setVisible(true);
+      return;
+    }
 
     if (
       typeof window.matchMedia === "function" &&

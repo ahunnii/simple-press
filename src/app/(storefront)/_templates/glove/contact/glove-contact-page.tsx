@@ -4,11 +4,10 @@ import type { DefaultContactPageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { resolveFaqPickerItems } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import {
-  GloveAccordion,
+  GloveButton,
   GloveContainer,
   GloveHandIcon,
   GloveMistPanel,
@@ -18,10 +17,10 @@ import {
 import { GloveContactForm } from "./glove-contact-form";
 
 const FIELD_KEYS = [
-  "glove.contact.faq-overline",
   "glove.contact.faq-heading",
+  "glove.contact.faq-body",
+  "glove.contact.faq-link-label",
   "glove.contact.page-title",
-  "glove.contact.form-overline",
   "glove.contact.form-heading",
   "glove.contact.submit-label",
   "glove.contact.success-heading",
@@ -30,10 +29,8 @@ const FIELD_KEYS = [
   "glove.contact.details-heading",
 ];
 
-const OVERLINE =
-  "glove-display text-[14px] tracking-[0.06em] text-[var(--glove-muted)] uppercase md:text-[15px]";
 const SECTION_HEADING =
-  "glove-display mt-2 text-[24px] leading-[1.2] font-medium tracking-[0.01em] text-[var(--glove-ink)] uppercase md:text-[30px]";
+  "glove-display text-[24px] leading-[1.2] font-medium text-[var(--glove-ink)] md:text-[30px]";
 
 export async function GloveContactPage({
   business,
@@ -49,13 +46,11 @@ export async function GloveContactPage({
 
   const formEnabled = isEnabled("contactForm");
 
-  const faq = resolveFaqPickerItems(
-    customFields?.["glove.contact.faq"],
-    faqItems,
-    12,
-  );
+  // /faq has no feature flag of its own: it renders whenever a published
+  // question exists, so the link follows the same rule (and the section toggle).
   const showFaq =
-    faq.length > 0 && isSectionVisible(customFields, "glove", "contact.faq");
+    faqItems.length > 0 &&
+    isSectionVisible(customFields, "glove", "contact.faq");
 
   // Contact details all come from Settings (Business) — never template fields.
   const email = business.supportEmail?.trim() ?? "";
@@ -102,32 +97,28 @@ export async function GloveContactPage({
                   className={twoColumn ? "lg:pr-12" : undefined}
                 >
                   <GloveReveal threshold={0}>
-                    {get("faq-overline") ? (
-                      <p
-                        className={OVERLINE}
-                        {...fieldAttr("glove.contact.faq-overline")}
-                      >
-                        {get("faq-overline")}
-                      </p>
-                    ) : null}
                     <h2
                       id="glove-contact-faq"
-                      className={`${SECTION_HEADING} mb-6`}
+                      className={`${SECTION_HEADING} mb-4`}
                       {...fieldAttr("glove.contact.faq-heading")}
                     >
                       {get("faq-heading")}
                     </h2>
-                    <GloveAccordion
-                      items={faq.map((item) => ({
-                        id: item.id,
-                        question: item.question,
-                        answer: (
-                          <span className="block max-w-[75ch] whitespace-pre-line">
-                            {item.answer}
-                          </span>
-                        ),
-                      }))}
-                    />
+                    {get("faq-body") ? (
+                      <p
+                        className="glove-body mb-6 max-w-[48ch] text-[16px] leading-[1.7] text-[var(--glove-text)]"
+                        {...fieldAttr("glove.contact.faq-body")}
+                      >
+                        {get("faq-body")}
+                      </p>
+                    ) : null}
+                    {get("faq-link-label") ? (
+                      <GloveButton href="/faq" variant="wooOutline">
+                        <span {...fieldAttr("glove.contact.faq-link-label")}>
+                          {get("faq-link-label")}
+                        </span>
+                      </GloveButton>
+                    ) : null}
                   </GloveReveal>
                 </section>
               ) : null}
@@ -143,14 +134,6 @@ export async function GloveContactPage({
                   }
                 >
                   {/* Never wrapped in a reveal: forms render settled. */}
-                  {get("form-overline") ? (
-                    <p
-                      className={OVERLINE}
-                      {...fieldAttr("glove.contact.form-overline")}
-                    >
-                      {get("form-overline")}
-                    </p>
-                  ) : null}
                   <h2
                     id="glove-contact-form"
                     className={`${SECTION_HEADING} mb-6`}
@@ -246,7 +229,7 @@ function DetailItem({
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="glove-display text-[13px] font-medium tracking-[0.06em] text-[var(--glove-muted)] uppercase">
+        <p className="glove-display text-[14px] font-medium text-[var(--glove-muted)]">
           {label}
         </p>
         <p className="mt-0.5 text-[16px] leading-[1.5]">{children}</p>

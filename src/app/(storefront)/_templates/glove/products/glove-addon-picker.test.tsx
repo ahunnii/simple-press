@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { GloveAddOnCopy } from "./glove-addon-picker";
 import type { GloveAddOn } from "./glove-addons";
+import type * as CartContext from "~/providers/cart-context";
 
 import { GLOVE_MAX_CHARMS, GloveAddOnPicker } from "./glove-addon-picker";
 import { GloveBuyBox } from "./glove-buy-box";
@@ -14,7 +15,8 @@ import { GloveBuyBox } from "./glove-buy-box";
 const addItem = vi.fn<(item: { productId: string }, qty?: number) => void>();
 const setIsOpen = vi.fn();
 
-vi.mock("~/providers/cart-context", () => ({
+vi.mock("~/providers/cart-context", async (importOriginal) => ({
+  cartLineKey: (await importOriginal<typeof CartContext>()).cartLineKey,
   useCart: () => ({
     addItem,
     setIsOpen,
@@ -146,6 +148,41 @@ beforeEach(() => {
 });
 
 // ---- picker --------------------------------------------------------------
+
+describe("GloveAddOnPicker - step numbers", () => {
+  const stepsOf = () =>
+    Array.from(document.querySelectorAll(".glove-medallion")).map((el) =>
+      el.textContent.replace("Step", "").trim(),
+    );
+
+  it("starts at 1 and counts the rows it shows", () => {
+    render(<Harness />);
+    expect(stepsOf()).toEqual(["1", "2"]);
+  });
+
+  it("continues from firstStep passed by the buy box", () => {
+    render(
+      <GloveAddOnPicker
+        chains={chains}
+        charms={charms}
+        chainId={null}
+        onChainChange={() => undefined}
+        charmIds={[]}
+        onCharmsChange={() => undefined}
+        gloveAmount={GLOVE_PRICE}
+        quantity={1}
+        copy={copy}
+        firstStep={4}
+      />,
+    );
+    expect(stepsOf()).toEqual(["4", "5"]);
+  });
+
+  it("does not skip a number when there are no chains", () => {
+    render(<Harness chainList={[]} />);
+    expect(stepsOf()).toEqual(["1"]);
+  });
+});
 
 describe("GloveAddOnPicker - chain row", () => {
   it("is a labelled radiogroup with a 'No chain' option selected by default", () => {
@@ -282,12 +319,28 @@ describe("GloveAddOnPicker - live total", () => {
     return el as HTMLElement;
   };
 
-  it("lives in a polite, atomic live region and starts at the glove price", () => {
+  it("keeps an empty polite, atomic live region until an add-on is chosen", () => {
     render(<Harness />);
     const region = totalRegion();
     expect(region).toHaveAttribute("aria-atomic", "true");
+    expect(region).toBeEmptyDOMElement();
+    expect(screen.queryByText(/Total/)).not.toBeInTheDocument();
+  });
+
+  it("shows the glove line and the total once a chain or charm is chosen", () => {
+    render(<Harness />);
+    fireEvent.click(chip(/star charm/i)); // +5.00
+    const region = totalRegion();
     expect(region).toHaveTextContent("Glove $40.00");
-    expect(region).toHaveTextContent("Total $40.00");
+    expect(region).toHaveTextContent("Total $45.00");
+  });
+
+  it("hides the total again when every add-on is deselected", () => {
+    render(<Harness />);
+    fireEvent.click(chip(/gold chain/i));
+    expect(totalRegion()).toHaveTextContent("Total $55.00");
+    fireEvent.click(chip(/no chain/i));
+    expect(totalRegion()).toBeEmptyDOMElement();
   });
 
   it("adds the chain and each charm, and drops them when deselected", () => {
@@ -387,9 +440,13 @@ const plainProduct = {
 function renderBuyBox({
   product = variantProduct,
   addOns = { chains, charms },
+  cartEnabled = true,
+  categories = [],
 }: {
   product?: Product;
   addOns?: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null;
+  cartEnabled?: boolean;
+  categories?: { name: string; slug: string }[];
 } = {}) {
   return render(
     <GloveBuyBox
@@ -397,16 +454,15 @@ function renderBuyBox({
       numbered
       intro={null}
       addOns={addOns}
-      categories={[]}
+      categories={categories}
       linkCategories={false}
-      shareUrl="https://example.com/shop/luvgluv"
+      cartEnabled={cartEnabled}
       copy={{
         addToCart: "ADD TO CART",
         unavailable: "Unavailable",
         notify: "Notify me",
         comingSoonHeading: "Coming soon",
         comingSoonBody: "",
-        shareLabel: "Share",
         addOns: copy,
       }}
     />,
@@ -444,6 +500,11 @@ describe("GloveBuyBox - add to cart with add-ons", () => {
     expect(c1[1]).toBe(1);
     expect(c2[0]).toMatchObject({ productId: "charm-c" });
     expect(c2[1]).toBe(1);
+    // Each add-on is tied to the glove line so the cart nests it.
+    for (const [item] of [chain, c1, c2]) {
+      expect(item).toMatchObject({ addOnFor: "glove-1:glove-v-m" });
+    }
+    expect(glove[0]).not.toHaveProperty("addOnFor");
 
     expect(setIsOpen).toHaveBeenCalledWith(true);
   });
@@ -464,9 +525,9 @@ describe("GloveBuyBox - add to cart with add-ons", () => {
 
     expect(chip(/no chain/i)).toHaveAttribute("aria-checked", "true");
     expect(chip(/star charm/i)).toHaveAttribute("aria-checked", "false");
-    expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent(
-      "Total $40.00",
-    );
+    expect(
+      document.querySelector('[aria-live="polite"]'),
+    ).toBeEmptyDOMElement();
   });
 
   it("adds each add-on once per glove at the chosen quantity", () => {
@@ -500,6 +561,7 @@ describe("GloveBuyBox - add to cart with add-ons", () => {
     });
     expect(addItem.mock.calls[1]![0]).toMatchObject({
       productId: "chain-gold",
+      addOnFor: "glove-2:base",
     });
     expect(setIsOpen).toHaveBeenCalledWith(true);
   });
@@ -507,5 +569,235 @@ describe("GloveBuyBox - add to cart with add-ons", () => {
   it("does not show the picker when addOns is null", () => {
     renderBuyBox({ addOns: null });
     expect(screen.queryByText(copy.heading)).not.toBeInTheDocument();
+  });
+});
+
+describe("GloveBuyBox - catalog mode (cart off)", () => {
+  it("hides Add to Cart, the qty stepper and the add-on picker", () => {
+    renderBuyBox({ cartEnabled: false });
+    expect(
+      screen.queryByRole("button", { name: "ADD TO CART" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("group", { name: "Quantity" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /increase quantity/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(copy.heading)).not.toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(addItem).not.toHaveBeenCalled();
+  });
+
+  it("keeps the price, with no share row", () => {
+    renderBuyBox({ cartEnabled: false, product: plainProduct });
+    expect(screen.queryByText(/share/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/\$/).length).toBeGreaterThan(0);
+  });
+
+  it("shows the purchase UI again when cart is on", () => {
+    renderBuyBox({ cartEnabled: true });
+    expect(addToCart()).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Quantity" })).toBeInTheDocument();
+  });
+});
+
+describe("GloveBuyBox - meta line", () => {
+  it("shows category and SKU on one muted line", () => {
+    renderBuyBox({ categories: [{ name: "Gloves", slug: "gloves" }] });
+    const line = screen.getByText(/Category:/);
+    expect(line).toHaveTextContent(/Category: Gloves · SKU LG-/);
+  });
+
+  it("drops the separator when there is no category", () => {
+    renderBuyBox();
+    expect(screen.getByText(/SKU LG-/)).not.toHaveTextContent("·");
+    expect(screen.queryByText(/Category/)).not.toBeInTheDocument();
+  });
+});
+
+describe("GloveBuyBox - mobile buy bar", () => {
+  type Entry = { isIntersecting: boolean; boundingClientRect: { top: number } };
+  let observers: {
+    callback: (entries: Entry[]) => void;
+    options?: IntersectionObserverInit;
+    targets: Element[];
+  }[] = [];
+
+  beforeEach(() => {
+    observers = [];
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        private record;
+        constructor(
+          callback: (entries: Entry[]) => void,
+          options?: IntersectionObserverInit,
+        ) {
+          this.record = { callback, options, targets: [] as Element[] };
+          observers.push(this.record);
+        }
+        observe(target: Element) {
+          this.record.targets.push(target);
+        }
+        disconnect() {
+          this.record.targets = [];
+        }
+        unobserve() {
+          return undefined;
+        }
+        takeRecords() {
+          return [];
+        }
+      },
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const bar = () => {
+    const buttons = screen.getAllByRole("button", {
+      name: "ADD TO CART",
+      hidden: true,
+    });
+    const el = buttons[1]?.closest("[aria-hidden]");
+    if (!el) throw new Error("no buy bar");
+    return el;
+  };
+  const fire = (entries: Entry[]) =>
+    act(() => observers.at(-1)!.callback(entries));
+
+  it("observes one sentinel with an open-ended bottom margin", () => {
+    renderBuyBox();
+    expect(observers).toHaveLength(1);
+    expect(observers[0]!.targets).toHaveLength(1);
+    expect(observers[0]!.options?.rootMargin).toMatch(/^0px 0px \d{6,}px 0px$/);
+    expect(bar()).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("shows once the button is above the viewport and hides when it is back", () => {
+    renderBuyBox();
+    fire([{ isIntersecting: false, boundingClientRect: { top: -120 } }]);
+    expect(bar()).toHaveAttribute("aria-hidden", "false");
+    fire([{ isIntersecting: true, boundingClientRect: { top: 200 } }]);
+    expect(bar()).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("reads the newest entry when a callback batches several", () => {
+    renderBuyBox();
+    fire([
+      { isIntersecting: true, boundingClientRect: { top: 300 } },
+      { isIntersecting: false, boundingClientRect: { top: -900 } },
+    ]);
+    expect(bar()).toHaveAttribute("aria-hidden", "false");
+  });
+
+  it("stays hidden for a sentinel that is not intersecting below the viewport", () => {
+    renderBuyBox();
+    fire([{ isIntersecting: false, boundingClientRect: { top: 2000 } }]);
+    expect(bar()).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("GloveBuyBox - one price", () => {
+  const rangeProduct = {
+    ...variantProduct,
+    id: "glove-3",
+    slug: "range-glove",
+    variants: [
+      ...variantProduct.variants,
+      {
+        id: "glove-v-l",
+        name: "Navy / L",
+        price: 5000,
+        compareAtPrice: null,
+        inventoryQty: 5,
+        imageUrl: null,
+        sku: "LG-NAVY-L",
+        options: { Color: "Navy", Size: "L" },
+      },
+    ],
+  } as unknown as Product;
+
+  /** The price paragraph above the intro (first <p> in the buy column). */
+  const mainPrice = () =>
+    document.querySelector<HTMLElement>(".flex.flex-col.gap-6 > p")!;
+  const bar = () =>
+    screen
+      .getAllByRole("button", { name: "ADD TO CART", hidden: true })[1]!
+      .closest("[aria-hidden]")!;
+
+  it("shows only the glove price with no add-on chosen", () => {
+    renderBuyBox();
+    expect(mainPrice()).toHaveTextContent("$40.00");
+    expect(mainPrice()).not.toHaveTextContent("Glove");
+    expect(bar()).not.toHaveTextContent("Glove");
+  });
+
+  it("swaps in the picker's total, with the glove price beneath, in the main spot and the buy bar", () => {
+    renderBuyBox();
+    fireEvent.click(chip(/star charm/i)); // +$5.00
+    expect(mainPrice()).toHaveTextContent("$45.00");
+    expect(mainPrice()).toHaveTextContent("Glove $40.00");
+    expect(bar()).toHaveTextContent("$45.00");
+    expect(bar()).toHaveTextContent("Glove $40.00");
+    // The picker's itemised line says the same number.
+    expect(screen.getByText(/Total \$45\.00/)).toBeInTheDocument();
+  });
+
+  it("adds the chain and every charm, and goes back when they are cleared", () => {
+    renderBuyBox();
+    fireEvent.click(chip(/gold chain/i)); // +$15.00
+    fireEvent.click(chip(/star charm/i)); // +$5.00
+    fireEvent.click(chip(/heart charm/i)); // +$6.00
+    expect(mainPrice()).toHaveTextContent("$66.00");
+    fireEvent.click(chip(/no chain/i));
+    fireEvent.click(chip(/star charm/i));
+    fireEvent.click(chip(/heart charm/i));
+    expect(mainPrice()).toHaveTextContent("$40.00");
+    expect(mainPrice()).not.toHaveTextContent("Glove");
+  });
+
+  it("multiplies by quantity like the picker", () => {
+    renderBuyBox();
+    fireEvent.click(screen.getByRole("button", { name: /increase quantity/i }));
+    fireEvent.click(chip(/star charm/i));
+    // 2 × $40.00 + 2 × $5.00
+    expect(mainPrice()).toHaveTextContent("$90.00");
+    expect(mainPrice()).toHaveTextContent("Glove $80.00");
+  });
+
+  it("is not a live region (the picker's total is the one announcement)", () => {
+    renderBuyBox();
+    fireEvent.click(chip(/star charm/i));
+    expect(mainPrice().closest("[aria-live]")).toBeNull();
+    expect(mainPrice().querySelector("[aria-live]")).toBeNull();
+  });
+
+  it("keeps the variant range on top and totals the selected option beside Add to Cart", () => {
+    renderBuyBox({ product: rangeProduct });
+    expect(mainPrice()).toHaveTextContent("$40.00");
+    expect(mainPrice()).toHaveTextContent("$50.00");
+    fireEvent.click(chip(/star charm/i));
+    expect(mainPrice()).toHaveTextContent("$40.00");
+    expect(mainPrice()).toHaveTextContent("$50.00");
+    expect(mainPrice()).not.toHaveTextContent("Glove");
+    const selected = screen.getByText(/Selected option/).closest("p")!;
+    expect(selected).toHaveTextContent("$45.00");
+    expect(selected).toHaveTextContent("Glove $40.00");
+  });
+
+  it("works for a glove without variants", () => {
+    renderBuyBox({ product: plainProduct });
+    fireEvent.click(chip(/star charm/i));
+    expect(mainPrice()).toHaveTextContent("$45.00");
+    expect(mainPrice()).toHaveTextContent("Glove $40.00");
+  });
+
+  it("shows no total when the cart is off (no picker)", () => {
+    renderBuyBox({ cartEnabled: false });
+    expect(mainPrice()).toHaveTextContent("$40.00");
+    expect(mainPrice()).not.toHaveTextContent("Glove");
   });
 });

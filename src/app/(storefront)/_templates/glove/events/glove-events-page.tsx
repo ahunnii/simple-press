@@ -40,7 +40,7 @@ const FIELD_KEYS = [
 ];
 
 /**
- * `/events` — glove's events index on the generic base (navy band, 1222px
+ * `/events` — glove's events index on the generic base (banner band, 1222px
  * container, Poppins/Lato scale) carrying Default's events data logic: media
  * precedence (video, then image, then none), `formatEventDate` /
  * `eventDateTimeAttr`, price pill, "first non-blank" external-link label,
@@ -67,6 +67,7 @@ export async function GloveEventsPage({
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={heading}
       titleFieldKey="default.events.hero-heading"
       subtitle={get("default.events.hero-tagline")}
@@ -152,7 +153,7 @@ export async function GloveEventsPage({
                   <div className="flex flex-col gap-3 p-6 md:p-8">
                     <time
                       dateTime={eventDateTimeAttr(event, timeZone)}
-                      className="glove-display inline-flex items-center gap-2 text-[13px] font-medium tracking-[2px] text-[var(--glove-primary)] uppercase"
+                      className="glove-display inline-flex items-center gap-2 text-[14px] font-medium text-[var(--glove-primary)]"
                     >
                       <CalendarDays
                         className="size-4 shrink-0"
@@ -233,7 +234,7 @@ export async function GloveEventsPage({
             </GloveHeading>
             {get("default.events.cta-body") ? (
               <p
-                className="glove-body mx-auto mt-4 max-w-xl text-[16px] leading-relaxed text-[var(--glove-navy-soft)] md:text-[18px]"
+                className="glove-body mx-auto mt-4 max-w-xl text-[16px] leading-relaxed text-[var(--glove-on-plum-soft)] md:text-[18px]"
                 {...fieldAttr("default.events.cta-body")}
               >
                 {get("default.events.cta-body")}

@@ -108,7 +108,7 @@ export function GloveHomeStory({
               </div>
             ) : null}
 
-            <div className="glove-body mt-8 max-w-[75ch] text-[clamp(17px,1.5vw,20px)] leading-[1.75] md:mt-10">
+            <div className="glove-body mt-8 max-w-[64ch] text-[clamp(17px,1.5vw,20px)] leading-[1.75] md:mt-10">
               {bodyOne ? (
                 <p
                   className="mb-5"

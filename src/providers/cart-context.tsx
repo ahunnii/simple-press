@@ -24,7 +24,62 @@ export type CartItem = {
   imageUrl: string | null;
   sku: string | null;
   maxInventory?: number; // Optional: for validation
+  /**
+   * Set when this line was added as an add-on for another line (e.g. a charm
+   * picked on a glove's page): that parent's `cartLineKey`. Part of the line's
+   * identity, so the same charm picked for two gloves stays two lines.
+   * Server-side checkout ignores it.
+   */
+  addOnFor?: string;
 };
+
+/**
+ * Which lines of a product/variant a cart call targets:
+ * - `undefined` (omitted): every line of it, standalone or add-on
+ * - `null`: only the standalone line (no `addOnFor`)
+ * - a string: only the add-on line for that parent `cartLineKey`
+ */
+export type CartLineScope = string | null | undefined;
+
+/** Stable key for a product/variant, used as an add-on's `addOnFor` value. */
+export function cartLineKey(productId: string, variantId: string | null) {
+  return `${productId}:${variantId ?? "base"}`;
+}
+
+/** Unique id for one cart line (React keys etc.); includes `addOnFor`. */
+export function cartItemId(item: CartItem) {
+  const key = cartLineKey(item.productId, item.variantId);
+  return item.addOnFor ? `${key}@${item.addOnFor}` : key;
+}
+
+/** Whether `item` is a line of productId/variantId within `scope`. */
+export function matchesCartLine(
+  item: CartItem,
+  productId: string,
+  variantId: string | null,
+  scope?: CartLineScope,
+) {
+  if (item.productId !== productId || item.variantId !== variantId) {
+    return false;
+  }
+  return scope === undefined || (item.addOnFor ?? null) === scope;
+}
+
+/** Quantity of productId/variantId held by every line except `exclude`. */
+function quantityElsewhere(
+  items: CartItem[],
+  productId: string,
+  variantId: string | null,
+  exclude: CartItem | undefined,
+) {
+  return items.reduce(
+    (sum, item) =>
+      item !== exclude && matchesCartLine(item, productId, variantId)
+        ? sum + item.quantity
+        : sum,
+    0,
+  );
+}
 
 export type CartItemSnapshot = {
   productId: string;
@@ -40,17 +95,41 @@ type CartContextType = {
   items: CartItem[];
   isHydrated: boolean; // Track if cart has loaded from localStorage
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productId: string, variantId: string | null) => void;
+  removeItem: (
+    productId: string,
+    variantId: string | null,
+    scope?: CartLineScope,
+  ) => void;
+  /** Remove a standalone line and every add-on line added for it. */
+  removeItemWithAddOns: (productId: string, variantId: string | null) => void;
   updateQuantity: (
     productId: string,
     variantId: string | null,
     quantity: number,
+    scope?: CartLineScope,
   ) => void;
-  incrementItem: (productId: string, variantId: string | null) => void;
-  decrementItem: (productId: string, variantId: string | null) => void;
+  incrementItem: (
+    productId: string,
+    variantId: string | null,
+    scope?: CartLineScope,
+  ) => void;
+  decrementItem: (
+    productId: string,
+    variantId: string | null,
+    scope?: CartLineScope,
+  ) => void;
   clearCart: () => void;
-  isInCart: (productId: string, variantId: string | null) => boolean;
-  getItemQuantity: (productId: string, variantId: string | null) => number;
+  isInCart: (
+    productId: string,
+    variantId: string | null,
+    scope?: CartLineScope,
+  ) => boolean;
+  /** Summed across the matching lines (all of them when `scope` is omitted). */
+  getItemQuantity: (
+    productId: string,
+    variantId: string | null,
+    scope?: CartLineScope,
+  ) => number;
   total: number;
   itemCount: number;
 
@@ -91,7 +170,8 @@ function parseStoredCartItems(raw: string | null): CartItem[] | null {
         typeof c.price === "number" &&
         typeof c.quantity === "number" &&
         (c.imageUrl === null || typeof c.imageUrl === "string") &&
-        (c.sku === null || typeof c.sku === "string")
+        (c.sku === null || typeof c.sku === "string") &&
+        (c.addOnFor === undefined || typeof c.addOnFor === "string")
       );
     });
   } catch {
@@ -139,28 +219,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isHydrated]);
 
-  // Generate unique key for cart item
-  // const getItemKey = (productId: string, variantId: string | null) => {
-  //   return `${productId}-${variantId ?? "no-variant"}`;
-  // };
-
   // Check if item is in cart
   const isInCart = useCallback(
-    (productId: string, variantId: string | null) => {
-      return items.some(
-        (item) => item.productId === productId && item.variantId === variantId,
+    (productId: string, variantId: string | null, scope?: CartLineScope) => {
+      return items.some((item) =>
+        matchesCartLine(item, productId, variantId, scope),
       );
     },
     [items],
   );
 
-  // Get quantity of specific item
+  // Get quantity of specific item (stock checks want every line of it)
   const getItemQuantity = useCallback(
-    (productId: string, variantId: string | null) => {
-      const item = items.find(
-        (item) => item.productId === productId && item.variantId === variantId,
+    (productId: string, variantId: string | null, scope?: CartLineScope) => {
+      return items.reduce(
+        (sum, item) =>
+          matchesCartLine(item, productId, variantId, scope)
+            ? sum + item.quantity
+            : sum,
+        0,
       );
-      return item?.quantity ?? 0;
     },
     [items],
   );
@@ -177,10 +255,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         toastIsError = false;
         openCart = false;
 
-        const existingIndex = currentItems.findIndex(
-          (item) =>
-            item.productId === newItem.productId &&
-            item.variantId === newItem.variantId,
+        const existingIndex = currentItems.findIndex((item) =>
+          matchesCartLine(
+            item,
+            newItem.productId,
+            newItem.variantId,
+            newItem.addOnFor ?? null,
+          ),
+        );
+        // Stock is shared by every line of the product (an add-on line and a
+        // standalone line of the same charm draw on the same inventory).
+        const elsewhere = quantityElsewhere(
+          currentItems,
+          newItem.productId,
+          newItem.variantId,
+          currentItems[existingIndex],
         );
 
         if (existingIndex > -1) {
@@ -189,7 +278,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
           if (
             newItem.maxInventory != null &&
-            newQuantity > newItem.maxInventory
+            elsewhere + newQuantity > newItem.maxInventory
           ) {
             toastMsg = `Only ${newItem.maxInventory} available in stock`;
             toastIsError = true;
@@ -205,7 +294,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return updated;
         }
 
-        if (newItem.maxInventory != null && quantity > newItem.maxInventory) {
+        if (
+          newItem.maxInventory != null &&
+          elsewhere + quantity > newItem.maxInventory
+        ) {
           toastMsg = `Only ${newItem.maxInventory} available in stock`;
           toastIsError = true;
           return currentItems;
@@ -235,14 +327,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Remove item from cart
   const removeItem = useCallback(
+    (productId: string, variantId: string | null, scope?: CartLineScope) => {
+      let removed = false;
+
+      setItems((currentItems) => {
+        removed = false;
+        const filtered = currentItems.filter(
+          (item) => !matchesCartLine(item, productId, variantId, scope),
+        );
+        if (filtered.length < currentItems.length) removed = true;
+        return filtered;
+      });
+
+      if (removed) toast.success("Removed from cart");
+    },
+    [],
+  );
+
+  // Remove a standalone line together with the add-ons picked for it
+  const removeItemWithAddOns = useCallback(
     (productId: string, variantId: string | null) => {
+      const parentKey = cartLineKey(productId, variantId);
       let removed = false;
 
       setItems((currentItems) => {
         removed = false;
         const filtered = currentItems.filter(
           (item) =>
-            !(item.productId === productId && item.variantId === variantId),
+            !matchesCartLine(item, productId, variantId, null) &&
+            item.addOnFor !== parentKey,
         );
         if (filtered.length < currentItems.length) removed = true;
         return filtered;
@@ -255,9 +368,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Update quantity
   const updateQuantity = useCallback(
-    (productId: string, variantId: string | null, quantity: number) => {
+    (
+      productId: string,
+      variantId: string | null,
+      quantity: number,
+      scope?: CartLineScope,
+    ) => {
       if (quantity <= 0) {
-        removeItem(productId, variantId);
+        removeItem(productId, variantId, scope);
         return;
       }
 
@@ -266,8 +384,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems((currentItems) => {
         maxInventoryHit = null;
         return currentItems.map((item) => {
-          if (item.productId === productId && item.variantId === variantId) {
-            if (item.maxInventory != null && quantity > item.maxInventory) {
+          if (matchesCartLine(item, productId, variantId, scope)) {
+            const elsewhere =
+              scope === undefined
+                ? 0
+                : quantityElsewhere(currentItems, productId, variantId, item);
+            if (
+              item.maxInventory != null &&
+              elsewhere + quantity > item.maxInventory
+            ) {
               maxInventoryHit = item.maxInventory;
               return item;
             }
@@ -285,16 +410,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Increment item quantity
   const incrementItem = useCallback(
-    (productId: string, variantId: string | null) => {
+    (productId: string, variantId: string | null, scope?: CartLineScope) => {
       let maxInventoryHit: number | null = null;
 
       setItems((currentItems) => {
         maxInventoryHit = null;
         return currentItems.map((item) => {
-          if (item.productId === productId && item.variantId === variantId) {
+          if (matchesCartLine(item, productId, variantId, scope)) {
             const newQuantity = item.quantity + 1;
+            const elsewhere =
+              scope === undefined
+                ? 0
+                : quantityElsewhere(currentItems, productId, variantId, item);
 
-            if (item.maxInventory != null && newQuantity > item.maxInventory) {
+            if (
+              item.maxInventory != null &&
+              elsewhere + newQuantity > item.maxInventory
+            ) {
               maxInventoryHit = item.maxInventory;
               return item;
             }
@@ -313,14 +445,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Decrement item quantity
   const decrementItem = useCallback(
-    (productId: string, variantId: string | null) => {
+    (productId: string, variantId: string | null, scope?: CartLineScope) => {
       let removed = false;
 
       setItems((currentItems) => {
         removed = false;
         return currentItems
           .map((item) => {
-            if (item.productId === productId && item.variantId === variantId) {
+            if (matchesCartLine(item, productId, variantId, scope)) {
               const newQuantity = item.quantity - 1;
 
               if (newQuantity <= 0) {
@@ -461,6 +593,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isHydrated,
         addItem,
         removeItem,
+        removeItemWithAddOns,
         updateQuantity,
         incrementItem,
         decrementItem,

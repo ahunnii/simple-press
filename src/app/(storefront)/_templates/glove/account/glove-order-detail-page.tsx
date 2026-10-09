@@ -7,8 +7,6 @@ import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
 import { GloveButton } from "../shared/glove-button";
-import { GloveRevealGroup } from "../shared/glove-reveal";
-import { gloveRevealItemStyle } from "../shared/glove-reveal-style";
 import { GloveAccountLayout } from "./glove-account-layout";
 import {
   GloveAccountCard,
@@ -24,8 +22,8 @@ const INFO_LABEL =
 
 /**
  * Order detail: items with totals, tracking, shipping address and order info,
- * all inside the shared account layout (the heading is "Order #N" and the
- * status pill sits beside it).
+ * all inside the shared account layout (the band's h1 is "Order #N"; the
+ * status pill and order date sit under it, inside the band).
  */
 export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
@@ -35,9 +33,12 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
       heading={`Order #${order.orderNumber}`}
       headingAside={
         <span className="flex flex-wrap items-center gap-3">
-          <GloveOrderStatus status={order.status} />
-          <span className="text-[14px] text-[var(--glove-muted)]">
-            {formatDate(order.createdAt)}
+          <GloveOrderStatus
+            status={order.status}
+            paymentStatus={order.paymentStatus}
+          />
+          <span className="text-[14px] text-[var(--glove-on-plum-soft)]">
+            Placed {formatDate(order.createdAt)}
           </span>
         </span>
       }
@@ -48,15 +49,9 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
         { label: `#${order.orderNumber}` },
       ]}
     >
-      <GloveRevealGroup
-        threshold={0}
-        className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]"
-      >
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
         <div className="flex min-w-0 flex-col gap-6">
-          <GloveAccountCard
-            className="glove-reveal-item"
-            style={gloveRevealItemStyle(0)}
-          >
+          <GloveAccountCard>
             <GloveCardHeading>Items</GloveCardHeading>
             {order.items.length > 0 ? (
               <ul className="m-0 mt-4 flex list-none flex-col p-0">
@@ -123,10 +118,7 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           </GloveAccountCard>
 
           {order.shipments.length > 0 ? (
-            <GloveAccountCard
-              className="glove-reveal-item"
-              style={gloveRevealItemStyle(1)}
-            >
+            <GloveAccountCard>
               <GloveCardHeading>Tracking</GloveCardHeading>
               <div className="mt-4 flex flex-col gap-5">
                 {order.shipments.map((shipment) => (
@@ -165,10 +157,7 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
 
         <div className="flex min-w-0 flex-col gap-6">
           {addr ? (
-            <GloveAccountCard
-              className="glove-reveal-item"
-              style={gloveRevealItemStyle(1)}
-            >
+            <GloveAccountCard>
               <GloveCardHeading>Shipping address</GloveCardHeading>
               <address className="mt-3 text-[14px] leading-relaxed text-[var(--glove-text)] not-italic">
                 {addr.firstName && addr.lastName ? (
@@ -186,10 +175,7 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             </GloveAccountCard>
           ) : null}
 
-          <GloveAccountCard
-            className="glove-reveal-item"
-            style={gloveRevealItemStyle(2)}
-          >
+          <GloveAccountCard>
             <GloveCardHeading>Order info</GloveCardHeading>
             <dl className="m-0 mt-3 flex flex-col gap-3">
               <div>
@@ -224,7 +210,7 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             Back to orders
           </GloveButton>
         </div>
-      </GloveRevealGroup>
+      </div>
     </GloveAccountLayout>
   );
 }

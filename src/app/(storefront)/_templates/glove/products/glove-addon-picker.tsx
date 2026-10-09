@@ -10,6 +10,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 
+import { gloveConfiguredTotal } from "./glove-total";
 import { GloveOptionLabel } from "./glove-variant-selector";
 
 /** Most charms one glove can carry (design.md Product §3). */
@@ -39,6 +40,12 @@ type Props = {
   quantity: number;
   copy: GloveAddOnCopy;
   sectionAttrs?: Record<string, string>;
+  /**
+   * Step number of the first row shown here. The buy box passes the number
+   * after its last option row; the rows then count up from it (a missing chain
+   * or charms list leaves no gap). Default 1.
+   */
+  firstStep?: number;
 };
 
 const NO_CHAIN = "__none__";
@@ -49,7 +56,10 @@ const NO_CHAIN = "__none__";
  * name, price). A chosen chip gets the purple ring, a check, and swings from
  * its top edge once (signature 2, `.glove-swing.is-swinging`; settled under
  * reduced motion). Sold-out chips stay visible but can't be chosen. The
- * running total under it is announced politely.
+ * itemised total under it appears once an add-on is chosen and is the one
+ * polite live region for the total (the buy box's price shows the same number
+ * from `gloveConfiguredTotal`, silently); the live region itself stays
+ * mounted so the first announcement is not lost.
  */
 export function GloveAddOnPicker({
   chains,
@@ -62,28 +72,36 @@ export function GloveAddOnPicker({
   quantity,
   copy,
   sectionAttrs,
+  firstStep = 1,
 }: Props) {
   const headingId = useId();
   const [swingId, setSwingId] = useState<string | null>(null);
 
-  const chosenChain = chains.find((c) => c.id === chainId) ?? null;
-  const chosenCharms = charms.filter((c) => charmIds.includes(c.id));
+  const {
+    chain: chosenChain,
+    charms: chosenCharms,
+    chainAmount,
+    charmAmounts,
+    total,
+    hasAddOns,
+  } = gloveConfiguredTotal({
+    gloveAmount,
+    quantity,
+    chains,
+    charms,
+    chainId,
+    charmIds,
+  });
   const atLimit = charmIds.length >= GLOVE_MAX_CHARMS;
-
-  const total =
-    gloveAmount +
-    (chosenChain ? chosenChain.unitPrice * quantity : 0) +
-    chosenCharms.reduce((sum, c) => sum + c.unitPrice * quantity, 0);
 
   const totalParts = [
     `${copy.gloveLine} ${formatPrice(gloveAmount)}`,
-    ...(chosenChain
-      ? [`${copy.chainLabel} ${formatPrice(chosenChain.unitPrice * quantity)}`]
-      : []),
-    ...chosenCharms.map(
-      (c) => `${copy.charmLine} ${formatPrice(c.unitPrice * quantity)}`,
-    ),
+    ...(chosenChain ? [`${copy.chainLabel} ${formatPrice(chainAmount)}`] : []),
+    ...charmAmounts.map((amount) => `${copy.charmLine} ${formatPrice(amount)}`),
   ];
+
+  const chainStep = chains.length > 0 ? firstStep : null;
+  const charmsStep = charms.length > 0 ? firstStep + (chainStep ? 1 : 0) : null;
 
   const toggleCharm = (id: string) => {
     if (charmIds.includes(id)) {
@@ -128,7 +146,7 @@ export function GloveAddOnPicker({
           <ChipRow
             mode="single"
             label={copy.chainLabel}
-            step={5}
+            step={chainStep}
             selectedLabel={chosenChain?.name ?? copy.noChainLabel}
             items={[
               {
@@ -157,7 +175,7 @@ export function GloveAddOnPicker({
           <ChipRow
             mode="multi"
             label={copy.charmsLabel}
-            step={6}
+            step={charmsStep}
             selectedLabel={
               chosenCharms.length > 0
                 ? `${chosenCharms.length} of ${GLOVE_MAX_CHARMS}`
@@ -192,14 +210,21 @@ export function GloveAddOnPicker({
       <p
         aria-live="polite"
         aria-atomic="true"
-        className="glove-body mt-4 border-t border-[var(--glove-mist-line)] pt-3 text-[14px] text-[var(--glove-text)]"
+        className={cn(
+          "glove-body m-0 text-[14px] text-[var(--glove-text)]",
+          hasAddOns && "mt-4 border-t border-[var(--glove-mist-line)] pt-3",
+        )}
       >
-        {totalParts.join(" · ")}
-        <span aria-hidden="true"> → </span>
-        <span className="sr-only">, </span>
-        <strong className="text-[var(--glove-primary)]">
-          {copy.totalLine} {formatPrice(total)}
-        </strong>
+        {hasAddOns ? (
+          <>
+            {totalParts.join(" · ")}
+            <span aria-hidden="true"> → </span>
+            <span className="sr-only">, </span>
+            <strong className="text-[var(--glove-primary)]">
+              {copy.totalLine} {formatPrice(total)}
+            </strong>
+          </>
+        ) : null}
       </p>
     </section>
   );
@@ -229,7 +254,7 @@ function ChipRow({
 }: {
   mode: "single" | "multi";
   label: string;
-  step: number;
+  step: number | null;
   selectedLabel: string | null;
   extra?: ReactNode;
   items: ChipItem[];
@@ -284,7 +309,10 @@ function ChipRow({
         role={single ? "radiogroup" : "group"}
         aria-labelledby={labelId}
         onKeyDown={onKeyDown}
-        className="-mx-1 flex snap-x gap-2.5 overflow-x-auto px-1 pt-1 pb-2 [scrollbar-width:thin]"
+        // Bleeds to the panel's edges (its p-4 / md:p-5) with the same inset
+        // as padding + scroll-padding, so the first and last chips never sit
+        // flush against the edge, at rest or after snapping.
+        className="-mx-4 flex snap-x scroll-px-4 gap-2.5 overflow-x-auto px-4 pt-1 pb-2 [scrollbar-width:thin] md:-mx-5 md:scroll-px-5 md:px-5"
       >
         {items.map((item, index) => {
           const selected = isSelected(item.id);
@@ -307,8 +335,12 @@ function ChipRow({
                 "relative flex w-[104px] flex-none snap-start flex-col items-center gap-1.5 rounded-[var(--glove-radius-card)] border bg-[var(--glove-paper)] px-2 pt-3 pb-2.5 text-center transition-[border-color,box-shadow] duration-150",
                 selected
                   ? "border-[var(--glove-primary)] shadow-[0_0_0_1px_var(--glove-primary)]"
-                  : "border-[var(--glove-line)] hover:border-[var(--glove-primary-tint)]",
-                disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                  : disabled
+                    ? "border-dashed border-[var(--glove-line)]"
+                    : "border-[var(--glove-line)] hover:border-[var(--glove-primary-tint)]",
+                // Unavailable chips fade only the picture; the name and the
+                // "Sold out" label stay at full contrast (>= 4.5:1).
+                disabled ? "cursor-not-allowed" : "cursor-pointer",
               )}
             >
               {selected ? (
@@ -322,7 +354,8 @@ function ChipRow({
               <span
                 aria-hidden="true"
                 className={cn(
-                  "glove-swing relative block size-14 overflow-hidden rounded-[6px] bg-[var(--glove-cloud)]",
+                  "glove-swing relative block size-14 overflow-hidden rounded-[6px] bg-[var(--glove-wash)]",
+                  disabled && "opacity-50",
                   swingId === item.id && "is-swinging",
                 )}
                 onAnimationEnd={swingId === item.id ? onSwingEnd : undefined}
@@ -350,7 +383,7 @@ function ChipRow({
                     "glove-body text-[12px] font-bold",
                     item.available
                       ? "text-[var(--glove-primary)]"
-                      : "text-[var(--glove-alert)]",
+                      : "text-[var(--glove-muted)]",
                   )}
                 >
                   {status}

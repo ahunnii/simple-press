@@ -1,10 +1,14 @@
+"use client";
+
 import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "~/lib/utils";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { GloveButton } from "../shared/glove-button";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
 import { GloveMistPanel } from "../shared/glove-mist-panel";
+import { gloveLinkAllowed } from "../steps/glove-links";
 
 /** White hairline card: the account pages' one container. */
 export function GloveAccountCard({
@@ -31,7 +35,7 @@ export function GloveAccountCard({
   );
 }
 
-/** Heading inside an account card. */
+/** Heading inside an account card: an h2, since the band's h1 is the page's. */
 export function GloveCardHeading({
   children,
   className,
@@ -40,14 +44,14 @@ export function GloveCardHeading({
   className?: string;
 }) {
   return (
-    <h3
+    <h2
       className={cn(
         "glove-display text-[18px] leading-tight font-medium text-[var(--glove-ink)]",
         className,
       )}
     >
       {children}
-    </h3>
+    </h2>
   );
 }
 
@@ -61,15 +65,18 @@ export function GloveAccountEmpty({
   body: string;
   cta?: { label: string; href: string };
 }) {
+  const { isEnabled } = useStorefrontFlags();
+  // B2.5: hide (never swap) a CTA whose route flag is off.
+  const showCta = cta ? gloveLinkAllowed(cta.href, isEnabled) : false;
   return (
     <GloveMistPanel className="flex flex-col items-center gap-3 px-6 py-14 text-center">
       <GloveHandIcon className="size-16 text-[var(--glove-primary)]" />
-      <h3 className="glove-display text-[22px] leading-tight font-medium text-[var(--glove-ink)]">
+      <h2 className="glove-display text-[22px] leading-tight font-medium text-[var(--glove-ink)]">
         {heading}
-      </h3>
+      </h2>
       <p className="max-w-md text-[15px] text-[var(--glove-text)]">{body}</p>
-      {cta ? (
-        <GloveButton href={cta.href} variant="woo" className="mt-2">
+      {cta && showCta ? (
+        <GloveButton href={cta.href} variant="solid" className="mt-2">
           {cta.label}
         </GloveButton>
       ) : null}
@@ -77,15 +84,27 @@ export function GloveAccountEmpty({
   );
 }
 
-export type GloveStatusTone = "primary" | "success" | "muted" | "alert";
+/**
+ * - primary: mist fill, purple text (an open or processing order)
+ * - complete: purple outline on paper (a completed order)
+ * - success: green outline (an active subscription)
+ */
+export type GloveStatusTone =
+  | "primary"
+  | "complete"
+  | "success"
+  | "muted"
+  | "alert";
 
 const TONE: Record<GloveStatusTone, string> = {
   primary:
     "border-[var(--glove-mist-line)] bg-[var(--glove-mist)] text-[var(--glove-primary)]",
+  complete:
+    "border-[var(--glove-primary)] bg-[var(--glove-paper)] text-[var(--glove-primary)]",
   success:
     "border-[var(--glove-success)] bg-[var(--glove-paper)] text-[var(--glove-success)]",
   muted:
-    "border-[var(--glove-line)] bg-[var(--glove-cloud)] text-[var(--glove-muted)]",
+    "border-[var(--glove-line)] bg-[var(--glove-wash)] text-[var(--glove-muted)]",
   alert:
     "border-[var(--glove-alert)] bg-[var(--glove-paper)] text-[var(--glove-alert)]",
 };
@@ -114,13 +133,36 @@ const OPEN_STATUS = { label: "Open", tone: "primary" } as const;
 
 const ORDER_STATUS: Record<string, { label: string; tone: GloveStatusTone }> = {
   open: OPEN_STATUS,
-  completed: { label: "Completed", tone: "success" },
+  completed: { label: "Completed", tone: "complete" },
   cancelled: { label: "Cancelled", tone: "muted" },
   refunded: { label: "Refunded", tone: "alert" },
 };
 
-/** Order status pill; an unknown status reads as open. */
-export function GloveOrderStatus({ status }: { status: string }) {
+/**
+ * Order status pill. `status` is the order's lifecycle (open | completed |
+ * cancelled | refunded); `paymentStatus` (pending | paid | failed | refunded)
+ * refines an open order, so a paid one never reads "Open" next to a "Paid"
+ * payment line. "Processing" makes no delivery claim. An unknown status reads
+ * as open.
+ */
+export function GloveOrderStatus({
+  status,
+  paymentStatus,
+}: {
+  status: string;
+  paymentStatus?: string;
+}) {
   const entry = ORDER_STATUS[status] ?? OPEN_STATUS;
+  if (entry === OPEN_STATUS && paymentStatus) {
+    if (paymentStatus === "paid") {
+      return <GloveStatusBadge label="Processing" tone="primary" />;
+    }
+    if (paymentStatus === "pending") {
+      return <GloveStatusBadge label="Awaiting payment" tone="muted" />;
+    }
+    if (paymentStatus === "failed") {
+      return <GloveStatusBadge label="Payment failed" tone="alert" />;
+    }
+  }
   return <GloveStatusBadge label={entry.label} tone={entry.tone} />;
 }

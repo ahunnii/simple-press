@@ -2,7 +2,7 @@ import type { DefaultBlogPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { GloveEmptyState } from "../generic/glove-empty-state";
@@ -28,7 +28,7 @@ const FIELD_KEYS = [
 ];
 
 /**
- * `/blog` — navy title band, search + 3-col card grid, crawlable
+ * `/blog` — banner title band, search + 3-col card grid, crawlable
  * "load more", designed empty state. The route passes `pages`, `business`
  * and `customFields` (`DefaultBlogPageTemplateProps` only declares `pages`).
  * Server component: resolves fields, hands the interactive grid to a client
@@ -43,13 +43,14 @@ export async function GloveBlogPage({ pages, business, customFields }: Props) {
   // link points at a feature that is switched off.
   const { isEnabled } = await getBusinessFlags();
   const ctaTarget = get("glove.blog.listing-empty-cta-link").trim();
-  const ctaFlag = ctaTarget ? navHrefFlag(ctaTarget) : null;
+  const ctaFlag = ctaTarget ? navHrefOffFlag(ctaTarget, isEnabled) : null;
   const ctaHref = ctaFlag === null || isEnabled(ctaFlag) ? ctaTarget : "";
 
   const title = get("glove.blog.header-title").trim() || "Blog";
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={title}
       titleFieldKey="glove.blog.header-title"
       subtitle={get("glove.blog.header-subtitle")}

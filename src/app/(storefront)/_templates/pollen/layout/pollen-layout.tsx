@@ -15,7 +15,7 @@ export async function PollenLayout({
   // Platform announcement bar (Content → Banner & popup). Rendered once here,
   // inside the fixed header, so it shows on every storefront page including
   // the homepage.
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   // Resolved server-side so the client header doesn't bundle the whole
   // pollen field registry just for two strings.

@@ -10,7 +10,12 @@ export {
 
 export { getAccountNavLinks, type AccountNavLink } from "./account-links";
 
-export { filterNavByFlags, navHrefFlag } from "./nav-flags";
+export {
+  filterNavByFlags,
+  navHrefEnabled,
+  navHrefFlag,
+  navHrefOffFlag,
+} from "./nav-flags";
 
 export {
   FOOTER_QUICK_LINKS_TEMPLATES,

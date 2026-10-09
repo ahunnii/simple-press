@@ -55,7 +55,7 @@ export function GloveHomeCollections({
         </GloveHeading>
         {intro ? (
           <p
-            className="glove-body mt-4 text-[16px] leading-[1.7] text-[var(--glove-text)] md:text-[17px]"
+            className="glove-body mx-auto mt-4 max-w-[64ch] text-[16px] leading-[1.7] text-[var(--glove-text)] md:text-[17px]"
             {...fieldAttr("glove.homepage.collections-intro")}
           >
             {intro}
@@ -69,7 +69,7 @@ export function GloveHomeCollections({
             {cards.map((card, i) => (
               <li
                 key={card.id}
-                className="glove-reveal-item relative flex min-h-[520px] items-end overflow-hidden rounded-[30px] bg-[var(--glove-cloud)] p-4 md:min-h-[640px] md:p-8"
+                className="glove-reveal-item relative flex min-h-[520px] items-end overflow-hidden rounded-[30px] bg-[var(--glove-mist)] p-4 md:min-h-[640px] md:p-8"
                 style={gloveRevealItemStyle(i)}
                 {...listItemAttr("glove.homepage.collections-list", card.index)}
               >

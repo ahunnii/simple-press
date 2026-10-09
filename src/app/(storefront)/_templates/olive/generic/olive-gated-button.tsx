@@ -3,7 +3,7 @@
 import type { OliveButtonSize, OliveButtonVariant } from "../shared";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { OliveButton } from "../shared";
 
@@ -39,7 +39,7 @@ export function OliveGatedButton({
 
   const target = href.trim();
   if (!target || !label.trim()) return null;
-  const flag = navHrefFlag(target);
+  const flag = navHrefOffFlag(target, isEnabled);
   if (flag !== null && !isEnabled(flag)) return null;
 
   const external = /^https?:\/\//i.test(target);

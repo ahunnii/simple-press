@@ -5,7 +5,7 @@ import type { OliveCategoryEntry } from "./olive-category-section";
 import type { OliveFeedImage } from "./olive-feed-section";
 import type { OliveHeroImage } from "./olive-hero-section";
 import type { OlivePressLogo } from "./olive-press-section";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -69,7 +69,7 @@ export async function OliveHomepage({
     | undefined;
 
   const { isEnabled } = await getBusinessFlags();
-  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business.siteContent, isEnabled);
 
   const f = resolveFields(customFields, [
     "olive.homepage.hero-video",
@@ -136,7 +136,7 @@ export async function OliveHomepage({
   // *different*, flag-gated route (e.g. a "/blog" tile on a section that
   // isn't itself gated on "blog").
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

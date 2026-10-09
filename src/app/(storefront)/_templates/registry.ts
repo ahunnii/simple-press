@@ -230,6 +230,7 @@ import { GloveFaqPage } from "./glove/faq/glove-faq-page";
 import { GloveGenericPage } from "./glove/generic/glove-generic-page";
 import { GloveLayout } from "./glove/layout/glove-layout";
 import { GloveProductPage } from "./glove/products/glove-product-page";
+import { GloveServicesIndexPage } from "./glove/services/glove-services-index-page";
 import { GloveShopPage } from "./glove/shop/glove-shop-page";
 import { GloveTestimonialsPage } from "./glove/testimonials/glove-testimonials-page";
 import { GloveVideosPage } from "./glove/videos/glove-videos-page";
@@ -1085,6 +1086,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     VideosPage: GloveVideosPage,
     DonatePage: GloveDonatePage,
     FaqPage: GloveFaqPage,
+    ServicesIndexPage: GloveServicesIndexPage,
   },
   pollen: {
     Layout: PollenLayout,

@@ -12,8 +12,11 @@ import { GloveEmptyState } from "../generic/glove-empty-state";
 import { GloveGeneralLayout } from "../generic/glove-general-layout";
 import { GloveAccordion, GloveSection } from "../shared";
 
+/** Max width (px) of the FAQ column. */
+const FAQ_BODY_WIDTH = 860;
+
 /**
- * `/faq` — glove's FAQ on the generic base: the heading lives in the navy
+ * `/faq` — glove's FAQ on the generic base: the heading lives in the banner
  * band (the page's only h1) and the questions sit in a centered column as a
  * hairline `GloveAccordion` (native `<details>`, first row open, works with no
  * JS). The one `faq.page` group owns the whole page, so its hotspot is the
@@ -31,13 +34,14 @@ export function GloveFaqPage({ business, items }: DefaultFaqPageTemplateProps) {
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={heading}
       titleFieldKey="default.faq.page-heading"
       breadcrumb={[{ label: "Home", href: "/" }, { label: heading }]}
       rootAttrs={sectionGroupAttr("faq", "page")}
     >
       <GloveSection tone="paper" aria-label={heading} revealThreshold={0}>
-        <div className="mx-auto max-w-[860px]">
+        <div className="mx-auto" style={{ maxWidth: FAQ_BODY_WIDTH }}>
           {items.length === 0 ? (
             <GloveEmptyState
               body={empty}

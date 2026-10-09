@@ -7,7 +7,6 @@ import { cn } from "~/lib/utils";
 
 import { GloveMedallion, GloveSelect } from "../shared";
 import {
-  gloveStepForOption,
   isColorOptionName,
   isSizeOptionName,
   optionDisplayName,
@@ -15,6 +14,7 @@ import {
   variantOptionGroups,
   variantOptionsOf,
 } from "./glove-color";
+import { gloveStepPlan, orderGloveGroups } from "./glove-steps";
 
 type Variant = {
   id: string;
@@ -31,6 +31,12 @@ type Props = {
   onSelect: (variantId: string) => void;
   /** Number each control row with the Easy Guide step medallion. */
   numbered: boolean;
+  /**
+   * Step number per option key, computed once by the buy box so the numbers
+   * run on through the add-on picker. Omitted: this selector numbers its own
+   * rows from 1.
+   */
+  steps?: Record<string, number>;
 };
 
 /**
@@ -49,21 +55,23 @@ export function GloveVariantSelector({
   selectedId,
   onSelect,
   numbered,
+  steps,
 }: Props) {
-  const groups = useMemo(() => {
-    const all = variantOptionGroups(variants);
-    if (!numbered) return all;
-    // Follow the Easy Guide order (2 Color → 3 Size → 4 Grommet) whatever
-    // order the owner entered the options in; unnumbered dimensions trail.
-    return all
-      .map((group, index) => ({ group, index }))
-      .sort(
-        (a, b) =>
-          (gloveStepForOption(a.group.key) ?? 99) -
-            (gloveStepForOption(b.group.key) ?? 99) || a.index - b.index,
-      )
-      .map(({ group }) => group);
-  }, [variants, numbered]);
+  // Easy Guide order (Color, Size, Grommet) whatever order the owner entered
+  // the options in; unnumbered dimensions trail.
+  const groups = useMemo(
+    () => orderGloveGroups(variantOptionGroups(variants), numbered),
+    [variants, numbered],
+  );
+  const stepByKey = useMemo(
+    () =>
+      steps ??
+      gloveStepPlan(
+        groups.map((group) => group.key),
+        numbered,
+      ).options,
+    [steps, groups, numbered],
+  );
   const selected =
     variants.find((v) => v.id === selectedId) ?? variants[0] ?? null;
   const selectedOptions = selected ? variantOptionsOf(selected.options) : {};
@@ -112,7 +120,7 @@ export function GloveVariantSelector({
     <div className="flex flex-col gap-5">
       {groups.map((group) => {
         const value = selectedOptions[group.key] ?? null;
-        const step = numbered ? gloveStepForOption(group.key) : null;
+        const step = numbered ? (stepByKey[group.key] ?? null) : null;
         const items = group.values.map((option) => ({
           value: option,
           label: option,
@@ -207,7 +215,7 @@ export function GloveVariantSelector({
                     item.soldOut && "line-through",
                     item.soldOut &&
                       !isSelected &&
-                      "border-dashed border-[var(--glove-muted)] bg-[var(--glove-cloud)] text-[var(--glove-muted)]",
+                      "border-dashed border-[var(--glove-muted)] bg-[var(--glove-wash)] text-[var(--glove-muted)]",
                   )}
                 >
                   {item.label}

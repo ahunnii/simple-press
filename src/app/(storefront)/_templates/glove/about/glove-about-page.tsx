@@ -8,7 +8,7 @@ import { parseTemplateIframeValue } from "~/lib/template-fields";
 import { parseYouTubeVideoId } from "~/lib/youtube/parse";
 import { EmbedFrame } from "~/components/embed-frame";
 import { VideoFacade } from "~/components/video-facade";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { GloveButton, GloveSection } from "../shared";
@@ -84,7 +84,7 @@ export async function GloveAboutPage({
 
   // ── Press ──
   const pressUrlRaw = get("press-button-url");
-  const pressFlag = navHrefFlag(pressUrlRaw);
+  const pressFlag = navHrefOffFlag(pressUrlRaw, isEnabled);
   const pressUrl =
     pressFlag === null || isEnabled(pressFlag) ? pressUrlRaw : "";
   const pressExternal = /^https?:\/\//i.test(pressUrl);
@@ -93,7 +93,7 @@ export async function GloveAboutPage({
 
   // ── Offering CTA (B2.5: hide, never swap the destination) ──
   const offeringUrl = get("offering-button-url");
-  const offeringFlag = navHrefFlag(offeringUrl);
+  const offeringFlag = navHrefOffFlag(offeringUrl, isEnabled);
   const offeringButtonVisible =
     get("offering-button-label") !== "" &&
     offeringUrl !== "" &&
@@ -341,7 +341,7 @@ export async function GloveAboutPage({
           >
             {founderImage ? (
               <div
-                className={`relative aspect-[4/5] w-full max-w-[380px] bg-[var(--glove-cloud)] ${FRAME}`}
+                className={`relative aspect-[4/5] w-full max-w-[380px] bg-[var(--glove-wash)] ${FRAME}`}
               >
                 <Image
                   src={founderImage}

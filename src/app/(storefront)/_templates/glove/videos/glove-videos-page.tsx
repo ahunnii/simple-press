@@ -39,7 +39,7 @@ const FIELD_KEYS = [
 ];
 
 /**
- * `/videos` — glove's video gallery on the generic base (navy band + 1222px
+ * `/videos` — glove's video gallery on the generic base (banner band + 1222px
  * container), carrying Default's data logic: `resolveVideoCopy` override
  * precedence, a `VideoFacade` per video (no iframe until clicked) and the
  * empty state.
@@ -59,6 +59,7 @@ export function GloveVideosPage({
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={heading}
       titleFieldKey="default.videos.hero-heading"
       subtitle={get("default.videos.hero-tagline")}

@@ -1,19 +1,24 @@
 import type { ReactNode } from "react";
 
-import type { GloveBreadcrumbItem } from "../shared";
+import type { GloveBreadcrumbItem, GloveTitleBandVariant } from "../shared";
 import { cn } from "~/lib/utils";
 
-import { GloveBreadcrumb, GloveContainer, GloveTitleBand } from "../shared";
+import { GloveTitleBand } from "../shared";
 
 type GloveGeneralLayoutProps = {
-  /** The page's only h1 (rendered in the navy band). */
+  /**
+   * `banner` for browse pages (her banner art), `plum` for detail pages with
+   * long titles or meta rows. Required so every page chooses on purpose.
+   */
+  bandVariant: GloveTitleBandVariant;
+  /** The page's only h1 (rendered in the title band). */
   title: string;
   /** Field key when `title` is exactly one field's value (live-text patch). */
   titleFieldKey?: string;
   /** Optional line under the title. */
   subtitle?: string;
   subtitleFieldKey?: string;
-  /** Home / ... trail shown on a hairline row under the band. */
+  /** Home / ... trail, shown small above the title inside the band. */
   breadcrumb?: GloveBreadcrumbItem[];
   /** Spread on the band `<section>` (editor hotspot for the hero group). */
   sectionAttrs?: Record<string, string>;
@@ -30,12 +35,13 @@ type GloveGeneralLayoutProps = {
 };
 
 /**
- * Glove's generic page base: navy title band (the WoodMart page-title
- * convention) + optional breadcrumb row + body. The GenericPage, Blog, Blog
- * post and the optional Events / Videos / Donate / FAQ pages all sit on this
- * so they share one band, one container and one type scale (baseline B1.2).
+ * Glove's generic page base: title band (breadcrumb inside it) + body. The
+ * GenericPage, Blog, Blog post and the optional Events / Videos / Donate /
+ * FAQ / Services pages all sit on this so they share one band, one container
+ * and one type scale (baseline B1.2).
  */
 export function GloveGeneralLayout({
+  bandVariant,
   title,
   titleFieldKey,
   subtitle,
@@ -50,21 +56,16 @@ export function GloveGeneralLayout({
   return (
     <div className={cn("glove-body", className)} {...rootAttrs}>
       <GloveTitleBand
+        variant={bandVariant}
         title={title}
         titleFieldKey={titleFieldKey}
         subtitle={subtitle}
         subtitleFieldKey={subtitleFieldKey}
+        breadcrumb={breadcrumb}
         sectionAttrs={sectionAttrs}
       >
         {bandChildren}
       </GloveTitleBand>
-      {breadcrumb && breadcrumb.length > 0 ? (
-        <div className="border-b border-[var(--glove-line)] bg-[var(--glove-paper)] py-3">
-          <GloveContainer>
-            <GloveBreadcrumb items={breadcrumb} />
-          </GloveContainer>
-        </div>
-      ) : null}
       {children}
     </div>
   );

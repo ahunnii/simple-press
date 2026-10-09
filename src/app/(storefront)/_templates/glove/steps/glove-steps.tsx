@@ -81,7 +81,7 @@ function StepItem({
         <span aria-hidden="true">{number}</span>
       </GloveMedallion>
 
-      <div className="relative aspect-[600/288] w-full overflow-hidden bg-[var(--glove-cloud)]">
+      <div className="relative aspect-[600/288] w-full overflow-hidden bg-[var(--glove-wash)]">
         {step.image ? (
           <Image
             src={step.image}

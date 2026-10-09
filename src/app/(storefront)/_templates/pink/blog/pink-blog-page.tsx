@@ -2,7 +2,7 @@ import type { DefaultBlogPageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
@@ -52,7 +52,7 @@ export async function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
   // was dead: `resolveFields` returns "" for a cleared field.
   const { isEnabled } = await getBusinessFlags();
   const emptyCtaTarget = (f["pink.blog.grid-empty-cta-link"] ?? "").trim();
-  const emptyCtaFlag = emptyCtaTarget ? navHrefFlag(emptyCtaTarget) : null;
+  const emptyCtaFlag = emptyCtaTarget ? navHrefOffFlag(emptyCtaTarget, isEnabled) : null;
   const emptyCtaLink =
     emptyCtaFlag === null || isEnabled(emptyCtaFlag) ? emptyCtaTarget : "";
 

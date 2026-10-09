@@ -14234,24 +14234,35 @@ body:has(.pollen) {
   --glove-lavender: #cfb9d8;
   --glove-mist: #f7f0fb;
   --glove-mist-line: #e6d6ee;
-  --glove-cloud: #f1f1f1;
-  --glove-navy: #103a5e;
-  --glove-navy-soft: rgba(255, 255, 255, 0.78);
+  --glove-wash: #faf7fb;
+  /* Deep in-family plum for title bands; white 15.6:1, on-plum-soft 9.6:1 */
+  --glove-plum: #3a0f4a;
+  /* Footer bar plum; white 17.5:1, on-plum-soft 10.8:1 */
+  --glove-plum-deep: #2a0b35;
+  /* Lavender sub-text on plum surfaces (also 6.8:1 on --glove-primary) */
+  --glove-on-plum-soft: #d9c4e3;
   --glove-line: #eaeaea;
-  --glove-footer-bar: #373839;
-  --glove-footer-bar-text: #c8c8c8;
   --glove-alert: #d12c2c;
   --glove-success: #2e7d42;
-  --glove-hero-scrim: rgba(32, 32, 32, 0.38);
+  /* Plum-tinted, bottom-weighted scrim (a gradient: use as `background`, not
+     background-color). Light over her face (top ~40%), heavy under the copy
+     at the foot of the hero. */
+  --glove-hero-scrim: linear-gradient(
+    to bottom,
+    rgba(42, 11, 53, 0.25) 0%,
+    rgba(42, 11, 53, 0.3) 40%,
+    rgba(42, 11, 53, 0.62) 75%,
+    rgba(42, 11, 53, 0.7) 100%
+  );
   --glove-hero-text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
   --glove-purple-fade: linear-gradient(var(--glove-primary) 70%, #ffffff 100%);
   --glove-on-primary: #ffffff;
-  --glove-shadow-sm: 0 2px 10px rgba(36, 36, 36, 0.1);
-  --glove-shadow-md: 0 10px 30px rgba(36, 36, 36, 0.14);
+  --glove-shadow-sm: 0 2px 10px rgba(42, 11, 53, 0.1);
+  --glove-shadow-md: 0 10px 30px rgba(42, 11, 53, 0.14);
 
   /* Shape */
   --radius: 0.3125rem;
-  --glove-radius-btn: 5px;
+  --glove-radius-btn: 5px; /* the one button radius: every .glove-btn* variant */
   --glove-radius-card: 8px;
   --glove-radius-panel: 16px;
 
@@ -14259,13 +14270,33 @@ body:has(.pollen) {
   --glove-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --glove-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* shadcn bridge — shared components (video facade, reviews, dialogs inside
+     .glove) read these; glove tokens win everywhere in the template. */
+  --background: var(--glove-paper);
+  --foreground: var(--glove-ink);
+  --card: var(--glove-paper);
+  --card-foreground: var(--glove-ink);
+  --popover: var(--glove-paper);
+  --popover-foreground: var(--glove-ink);
+  --primary: var(--glove-primary);
+  --primary-foreground: var(--glove-on-primary);
+  --secondary: var(--glove-mist);
+  --secondary-foreground: var(--glove-ink);
+  --muted: var(--glove-mist);
+  --muted-foreground: var(--glove-muted);
+  --accent: var(--glove-mist);
+  --accent-foreground: var(--glove-primary);
+  --destructive: var(--glove-alert);
+  --border: var(--glove-line);
+  --input: var(--glove-line);
+  --ring: var(--glove-primary);
+
   /* Layout scale */
   --glove-container: 1222px;
   --glove-gutter: 15px;
   --glove-section-pad-y: clamp(48px, 7vw, 88px);
   --glove-topbar-h: 36px;
   --glove-header-h: 100px;
-  --glove-nav-h: 52px;
   --glove-mobile-bar-h: 64px;
 
   /* Fonts — map to the next/font variables the layout loads */
@@ -14325,25 +14356,103 @@ body:has(.pollen) {
   padding-block: var(--glove-section-pad-y);
 }
 
+/* Page-title bands (GloveTitleBand + checkout steps). One fixed minimum
+   height per variant so the band never drifts page to page; copy sits
+   vertically centered and left-aligned in the container. */
+.glove .glove-band {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--glove-plum);
+  color: var(--glove-on-primary);
+}
+
+.glove .glove-band--plum {
+  min-height: 160px;
+  padding-block: 32px;
+}
+
+.glove .glove-band--banner {
+  min-height: 224px;
+  padding-block: 32px;
+}
+
+.glove .glove-band__copy {
+  max-width: 40rem;
+}
+
+/* Scrim over her banner art. Phones and tablets: the photo sits behind the
+   text, so the plum stays heavy across the whole width. */
+.glove .glove-band__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--glove-plum) 92%, transparent) 0%,
+    color-mix(in srgb, var(--glove-plum) 84%, transparent) 60%,
+    color-mix(in srgb, var(--glove-plum) 66%, transparent) 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .glove .glove-band--plum {
+    min-height: 200px;
+    padding-block: 40px;
+  }
+
+  .glove .glove-band--banner {
+    min-height: 280px;
+    padding-block: 40px;
+  }
+}
+
+/* From 1024px the 40rem copy column sits on the left ~half: the scrim lifts
+   off past it. Sampled against the art, white text keeps >= 4.8:1 anywhere
+   in that column (1024-1920px); below 1024 the heavy scrim holds >= 6:1. */
+@media (min-width: 1024px) {
+  .glove .glove-band__scrim {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--glove-plum) 75%, transparent) 0%,
+      color-mix(in srgb, var(--glove-plum) 68%, transparent) 45%,
+      color-mix(in srgb, var(--glove-plum) 25%, transparent) 65%,
+      transparent 85%
+    );
+  }
+}
+
+/* Shop collection tabs: right-edge fade while the row has more to scroll */
+.glove .glove-tabs-scroll--fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 40px),
+    transparent
+  );
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+}
+
 /* Headings — in @layer components so Tailwind utilities (tone/size
    classNames on GloveHeading/GloveOverline) can override them. */
 @layer components {
-.glove .glove-heading {
-  font-family: var(--glove-font-display);
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--glove-ink);
-  font-size: clamp(26px, 3.4vw, 40px);
-}
+  .glove .glove-heading {
+    font-family: var(--glove-font-display);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--glove-ink);
+    font-size: clamp(26px, 3.4vw, 40px);
+  }
 
-.glove .glove-overline {
-  font-family: var(--glove-font-display);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--glove-primary);
-  font-size: clamp(16px, 2vw, 24px);
-}
+  .glove .glove-overline {
+    font-family: var(--glove-font-display);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--glove-primary);
+    font-size: clamp(16px, 2vw, 24px);
+  }
 }
 
 /* Focus — 2px primary outline + offset everywhere; white on dark bands */
@@ -14417,9 +14526,8 @@ body:has(.pollen) {
 }
 
 .glove .glove-btn--woo {
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-size: 13px;
+  text-transform: none;
+  font-size: 14px;
   min-height: 42px;
   padding: 10px 22px;
 }
@@ -14428,7 +14536,6 @@ body:has(.pollen) {
   font-family: var(--glove-font-body);
   font-weight: 400;
   text-transform: none;
-  border-radius: 3px;
   font-size: clamp(17px, 1.6vw, 21px);
   min-height: 52px;
   padding: 12px 30px;
@@ -14588,26 +14695,24 @@ body:has(.pollen) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 48px;
-  padding: 0 20px;
+  min-height: 44px;
+  padding: 0 6px;
   border: 0;
   border-radius: var(--glove-radius-btn);
-  background: var(--glove-primary);
-  color: var(--glove-on-primary);
+  background: transparent;
+  color: var(--glove-nav);
   font-family: var(--glove-font-display);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 13px;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 150ms ease;
+  transition: color 150ms ease;
 }
 
 .glove .glove-account-btn:hover,
 .glove .glove-account-btn[aria-expanded="true"] {
-  background: var(--glove-primary-hover);
-  color: var(--glove-on-primary);
+  background: transparent;
+  color: var(--glove-primary);
 }
 
 .glove .glove-account-btn:focus-visible {
@@ -14694,8 +14799,7 @@ body:has(.pollen) {
 .glove .glove-footer-heading {
   font-family: var(--glove-font-display);
   font-weight: 500;
-  font-size: clamp(20px, 2vw, 23px);
-  text-transform: uppercase;
+  font-size: clamp(18px, 1.8vw, 21px);
   color: var(--glove-ink);
   line-height: 1.3;
 }
@@ -14717,17 +14821,19 @@ body:has(.pollen) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 3px;
-  background: var(--glove-cloud);
-  color: var(--glove-text);
-  transition: background-color 150ms ease;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--glove-radius-btn);
+  background: var(--glove-mist);
+  color: var(--glove-primary);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .glove .glove-social-btn:hover {
-  background: var(--glove-primary-tint);
-  color: var(--glove-ink);
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
 }
 
 /* Scroll reveal — armed only once useGloveReveal adds `.glove-js` to the
@@ -14860,18 +14966,62 @@ body:has(.pollen) {
 }
 
 /* Cards */
+/* The photo multiplies into the circle's mist fill, so a white photo
+   background (charms) reads as mist inside its ring instead of vanishing. */
 .glove .glove-style-img {
+  mix-blend-mode: multiply;
   transition: transform 400ms var(--glove-ease);
 }
 
 .glove .glove-style-card:hover .glove-style-img,
-.glove .glove-style-card:focus-within .glove-style-img {
+.glove .glove-style-card:focus-visible .glove-style-img {
   transform: scale(1.04);
+}
+
+/* The card is one link: its call to action reacts to the card, not itself. */
+.glove .glove-style-card:hover .glove-btn,
+.glove .glove-style-card:focus-visible .glove-btn {
+  background: var(--glove-primary-hover);
+}
+
+.glove .glove-style-card:hover .glove-style-cta,
+.glove .glove-style-card:focus-visible .glove-style-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.glove .glove-style-cta-arrow {
+  transition: transform 200ms var(--glove-ease);
+}
+
+.glove .glove-style-card:hover .glove-style-cta-arrow,
+.glove .glove-style-card:focus-visible .glove-style-cta-arrow {
+  transform: translateX(3px);
+}
+
+/* Image well: photos sit contained on the wash and multiply into it, so a
+   white photo background melts away instead of showing as a box. */
+.glove .glove-product-img {
+  mix-blend-mode: multiply;
+}
+
+.glove .glove-product-img-main {
+  transition: opacity 300ms ease;
 }
 
 .glove .glove-product-img-alt {
   opacity: 0;
   transition: opacity 300ms ease;
+}
+
+/* Multiplied layers would stack and darken, so the 2nd photo replaces the 1st. */
+.glove
+  .glove-product-card:has(.glove-product-img-alt):hover
+  .glove-product-img-main,
+.glove
+  .glove-product-card:has(.glove-product-img-alt):focus-within
+  .glove-product-img-main {
+  opacity: 0;
 }
 
 .glove .glove-product-card:hover .glove-product-img-alt,
@@ -14895,7 +15045,7 @@ body:has(.pollen) {
   align-items: center;
   padding: 3px 10px;
   border-radius: 3px;
-  background: var(--glove-alert);
+  background: var(--glove-primary);
   color: var(--glove-on-primary);
   font-family: var(--glove-font-display);
   font-weight: 600;
@@ -14991,16 +15141,7 @@ body:has(.pollen) {
   transform: rotate(180deg);
 }
 
-/* Notice, panels, inputs */
-.glove .glove-notice {
-  border-radius: 8px;
-  background: var(--glove-primary);
-  color: var(--glove-on-primary);
-  font-size: 13px;
-  line-height: 1.6;
-  padding: 14px 18px;
-}
-
+/* Panels, inputs */
 .glove .glove-mist-panel {
   border-radius: var(--glove-radius-panel);
   background: var(--glove-mist);
@@ -15009,56 +15150,56 @@ body:has(.pollen) {
 
 /* Inputs — layered so padding/size utilities on GloveInput/GloveSelect win. */
 @layer components {
-.glove .glove-input,
-.glove .glove-select {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 14px;
-  border: 1px solid var(--glove-line);
-  border-radius: 3px;
-  background: var(--glove-paper);
-  color: var(--glove-ink);
-  font-family: var(--glove-font-body);
-  font-size: 15px;
-  line-height: 1.4;
-  transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease;
-}
+  .glove .glove-input,
+  .glove .glove-select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--glove-line);
+    border-radius: 3px;
+    background: var(--glove-paper);
+    color: var(--glove-ink);
+    font-family: var(--glove-font-body);
+    font-size: 15px;
+    line-height: 1.4;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
 
-.glove textarea.glove-input {
-  min-height: 120px;
-  resize: vertical;
-}
+  .glove textarea.glove-input {
+    min-height: 120px;
+    resize: vertical;
+  }
 
-.glove .glove-input::placeholder {
-  color: var(--glove-muted);
-}
+  .glove .glove-input::placeholder {
+    color: var(--glove-muted);
+  }
 
-.glove .glove-input:hover,
-.glove .glove-select:hover {
-  border-color: var(--glove-muted);
-}
+  .glove .glove-input:hover,
+  .glove .glove-select:hover {
+    border-color: var(--glove-muted);
+  }
 
-.glove .glove-input:focus-visible,
-.glove .glove-select:focus-visible {
-  outline: none;
-  border-color: var(--glove-primary);
-  box-shadow: 0 0 0 2px var(--glove-primary-tint);
-}
+  .glove .glove-input:focus-visible,
+  .glove .glove-select:focus-visible {
+    outline: none;
+    border-color: var(--glove-primary);
+    box-shadow: 0 0 0 2px var(--glove-primary-tint);
+  }
 
-.glove .glove-input[aria-invalid="true"] {
-  border-color: var(--glove-alert);
-}
+  .glove .glove-input[aria-invalid="true"] {
+    border-color: var(--glove-alert);
+  }
 
-.glove .glove-select {
-  appearance: none;
-  padding-right: 36px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23601B76' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-}
+  .glove .glove-select {
+    appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23601B76' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
 }
 
 .glove .glove-error {
@@ -15093,7 +15234,7 @@ body:has(.pollen) {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(36, 36, 36, 0.5);
+  background: rgba(42, 11, 53, 0.5);
   animation: glove-fade-in 200ms ease both;
 }
 
@@ -15110,28 +15251,110 @@ body:has(.pollen) {
   animation: glove-slide-in-left 280ms var(--glove-ease) both;
 }
 
-/* Account bridge — maps glove tokens onto the shadcn variables the shared
-   account components read. Set on the outermost account wrapper. */
-.glove-account {
-  --background: var(--glove-paper);
-  --foreground: var(--glove-ink);
-  --card: var(--glove-paper);
-  --card-foreground: var(--glove-ink);
-  --popover: var(--glove-paper);
-  --popover-foreground: var(--glove-ink);
-  --primary: var(--glove-primary);
-  --primary-foreground: var(--glove-on-primary);
-  --secondary: var(--glove-mist);
-  --secondary-foreground: var(--glove-ink);
-  --muted: var(--glove-mist);
-  --muted-foreground: var(--glove-muted);
-  --accent: var(--glove-mist);
-  --accent-foreground: var(--glove-primary);
-  --destructive: var(--glove-alert);
-  --border: var(--glove-line);
-  --input: var(--glove-line);
-  --ring: var(--glove-primary);
+/* Shared reviews component (~/components/product-reviews) hardcodes Tailwind
+   palette greys, yellow stars and a blue hover. Re-tone them under the
+   reviews section only: muted/text greys, purple stars (lavender when empty). */
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-500,
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-600 {
+  color: var(--glove-muted);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-700 {
+  color: var(--glove-text);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-300 {
+  color: var(--glove-lavender);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-yellow-400 {
+  color: var(--glove-primary);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .fill-yellow-400 {
+  fill: var(--glove-primary);
+}
+
+.glove
+  section[aria-labelledby="glove-reviews-heading"]
+  .hover\:text-blue-600:hover {
+  color: var(--glove-primary);
+}
+
+/* Radix dialogs portal to <body>, outside .glove, so they fall back to the
+   stock shadcn palette. Carry the bridge (and the write-review dialog's
+   hardcoded red/green) onto dialog content on glove pages only. */
+body:has(.glove) [data-slot="dialog-content"] {
+  /* --glove-* tokens only exist on .glove, so these are literal values. */
+  --background: #ffffff;
+  --foreground: #242424;
+  --card: #ffffff;
+  --card-foreground: #242424;
+  --popover: #ffffff;
+  --popover-foreground: #242424;
+  --primary: #601b76;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f0fb;
+  --secondary-foreground: #242424;
+  --muted: #f7f0fb;
+  --muted-foreground: #666666;
+  --accent: #f7f0fb;
+  --accent-foreground: #601b76;
+  --destructive: #d12c2c;
+  --border: #eaeaea;
+  --input: #eaeaea;
+  --ring: #601b76;
   --radius: 0.3125rem;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-red-500 {
+  color: #d12c2c;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-green-600 {
+  color: #2e7d42;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-yellow-400 {
+  color: #601b76;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .fill-yellow-400 {
+  fill: #601b76;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-gray-300 {
+  color: #cfb9d8;
+}
+
+/* Write-review dialog helper lines (text-gray-500): --glove-muted, literal. */
+body:has(.glove) [data-slot="dialog-content"] .text-gray-500 {
+  color: #666666;
+}
+
+/* Required asterisk the shared phone field hardcodes as text-red-500. */
+.glove [data-slot="form-label"] > .text-red-500[aria-hidden="true"] {
+  color: var(--glove-alert);
+}
+
+/* Rich-text embed placeholders (the renderer's gallery skeleton and
+   "not available" panel) hardcode gray-200/50/400; map them to mist. */
+.glove .glove-prose .border-gray-200 {
+  border-color: var(--glove-mist-line);
+}
+
+.glove .glove-prose .bg-gray-50,
+.glove .glove-prose .bg-gray-50\/50 {
+  background-color: var(--glove-mist);
+}
+
+.glove .glove-prose .text-gray-400 {
+  color: var(--glove-muted);
+}
+
+/* Account wrapper — the shadcn variable bridge now lives on the .glove root;
+   this only sets the body face and the account-scoped component styling. */
+.glove-account {
   font-family: var(--glove-font-body);
 }
 
@@ -15185,6 +15408,37 @@ body:has(.pollen) {
   box-shadow: 0 0 0 2px var(--glove-primary-tint);
 }
 
+/* Settings/Security section titles (better-auth cards: an h2 above each
+   card) read like GloveCardHeading. */
+.glove-account h2.mb-3.text-sm {
+  margin-bottom: 12px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+/* Shared shadcn buttons: one glove button voice (5px, Poppins 600). The
+   avatar trigger keeps its round shape. */
+.glove-account [data-slot="button"]:not(:has([data-slot="avatar"])),
+.glove-account [data-slot="dropdown-menu-trigger"] {
+  border-radius: var(--glove-radius-btn);
+  font-family: var(--glove-font-display);
+  font-weight: 600;
+}
+
+.glove-account [data-slot="button"][data-variant="default"]:hover {
+  background: var(--glove-primary-hover);
+}
+
+/* Address book "Remove" reads muted in the card; red stays for the confirm
+   dialog (portaled outside this wrapper). */
+.glove-account [data-slot="button"].text-destructive {
+  color: var(--glove-muted);
+}
+
+.glove-account [data-slot="button"].text-destructive:hover {
+  color: var(--glove-ink);
+}
+
 /* Reduced motion — everything renders settled; transitions near-instant */
 @media (prefers-reduced-motion: reduce) {
   .glove *,
@@ -15217,7 +15471,9 @@ body:has(.pollen) {
   }
 
   .glove .glove-style-card:hover .glove-style-img,
-  .glove .glove-style-card:focus-within .glove-style-img {
+  .glove .glove-style-card:focus-visible .glove-style-img,
+  .glove .glove-style-card:hover .glove-style-cta-arrow,
+  .glove .glove-style-card:focus-visible .glove-style-cta-arrow {
     transform: none;
   }
 

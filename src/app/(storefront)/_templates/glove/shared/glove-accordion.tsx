@@ -43,7 +43,7 @@ export function GloveAccordion({
               aria-hidden="true"
             />
           </summary>
-          <div className="pb-5 text-[15px] leading-relaxed text-[var(--glove-text)]">
+          <div className="max-w-[52ch] pb-5 text-[15px] leading-relaxed text-[var(--glove-text)]">
             {item.answer}
           </div>
         </details>

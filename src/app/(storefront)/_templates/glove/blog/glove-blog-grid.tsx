@@ -64,10 +64,10 @@ export function GloveBlogGrid({
 
   return (
     <div className="flex flex-col gap-8 md:gap-10">
-      <div className="relative w-full max-w-[360px]">
+      <div className="relative w-full max-w-[320px]">
         <Search
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[var(--glove-muted)]"
+          className="pointer-events-none absolute top-1/2 left-0 size-4 -translate-y-1/2 text-[var(--glove-muted)]"
         />
         <GloveInput
           type="search"
@@ -75,7 +75,7 @@ export function GloveBlogGrid({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search posts"
           aria-label="Search blog posts"
-          className="pl-10"
+          className="rounded-none border-0 border-b border-[var(--glove-muted)] bg-transparent pr-0 pl-7 focus-visible:border-b-2 focus-visible:border-[var(--glove-primary)] focus-visible:shadow-none"
         />
       </div>
 

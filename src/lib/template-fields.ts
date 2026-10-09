@@ -48,6 +48,10 @@ import {
   elegantFieldGroups,
 } from "~/app/(storefront)/_templates/elegant";
 import {
+  gloveData,
+  gloveFieldGroups,
+} from "~/app/(storefront)/_templates/glove";
+import {
   happyBambooData,
   happyBambooFieldGroups,
 } from "~/app/(storefront)/_templates/happy-bamboo";
@@ -59,10 +63,6 @@ import {
   noiseData,
   noiseFieldGroups,
 } from "~/app/(storefront)/_templates/noise";
-import {
-  gloveData,
-  gloveFieldGroups,
-} from "~/app/(storefront)/_templates/glove";
 import {
   oliveData,
   oliveFieldGroups,
@@ -677,6 +677,17 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "default.homepage.testimonial-quote",
   "default.homepage.testimonial-author",
   "default.global.image-overlay-color",
+  // glove, retired 2026-10-08 — the contact page drops the small labels above
+  // its headings and replaces the repeated FAQ accordion (and its question
+  // picker) with a link to /faq. Hidden from the admin's custom pairs and
+  // preserved on save; nothing reads them.
+  "glove.contact.faq-overline",
+  "glove.contact.form-overline",
+  "glove.contact.faq",
+  // glove, retired 2026-10-08 — the product page drops its share row (the
+  // buy column keeps the wishlist and one category/SKU line). Hidden from the
+  // admin's custom pairs and preserved on save; nothing reads it.
+  "glove.product.share-label",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

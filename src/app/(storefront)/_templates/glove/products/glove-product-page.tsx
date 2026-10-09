@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { GloveAddOn, GloveAddOnSource } from "./glove-addons";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
@@ -13,7 +12,7 @@ import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { db } from "~/server/db";
 import { TrackView } from "~/components/analytics/track-view";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import {
@@ -25,9 +24,11 @@ import {
 import { toGloveAddOn } from "./glove-addons";
 import { GloveBuyBox } from "./glove-buy-box";
 import { optionDisplayName, variantOptionGroups } from "./glove-color";
+import { isGloveMadeToOrder, showGloveEasyGuide } from "./glove-pdp-rules";
 import { GloveProductGallery } from "./glove-product-gallery";
 import { GloveProductReviews } from "./glove-product-reviews";
 import { GloveRelatedProducts } from "./glove-related-products";
+import { visibleSpecGroups } from "./glove-steps";
 import { GLOVE_PRODUCT_FIELD_KEYS } from "./index";
 
 const ADDON_PRODUCT_SELECT = {
@@ -81,10 +82,12 @@ const PROSE_CLASS = [
  * made-to-order glove (member of the `notice-collection-slug` collection),
  * and loads the chain/charm add-ons with one tenant-scoped query. The buy
  * column from the price down is the client `GloveBuyBox` (useProduct).
- * Order: Easy Guide banner → gallery | breadcrumb, title, price, notice,
- * short description, attribute table, numbered options, add-on picker,
- * qty + ADD TO CART, wishlist + share, meta, support rows → description →
- * reviews → related products.
+ * Order: breadcrumb → gallery | title, price, notice, short description,
+ * attribute table, Easy Guide banner (gloves only, right above the options
+ * it explains), numbered options, add-on picker, qty + ADD TO CART,
+ * wishlist + category/SKU line, support rows → description → reviews →
+ * related products. On phones the column stacks under the gallery; with the
+ * banner out of the way the title and price sit in the first viewport.
  */
 export async function GloveProductPage({
   product,
@@ -112,9 +115,10 @@ export async function GloveProductPage({
     orderBy: { collection: { sortOrder: "asc" } },
   });
 
-  const madeToOrder =
-    noticeSlug === "" ||
-    memberships.some((m) => m.collection.slug === noticeSlug);
+  const madeToOrder = isGloveMadeToOrder(
+    noticeSlug,
+    memberships.map((m) => m.collection.slug),
+  );
   const categories = memberships
     .filter((m) => m.collection.published)
     .map((m) => ({ name: m.collection.name, slug: m.collection.slug }));
@@ -159,14 +163,19 @@ export async function GloveProductPage({
   const guideText = get("glove.product.guide-text");
   const guideLabel = get("glove.product.guide-link-label");
   const guideHrefRaw = get("glove.product.guide-link");
-  const guideFlag = navHrefFlag(guideHrefRaw);
+  const guideFlag = navHrefOffFlag(guideHrefRaw, isEnabled);
   const guideHref =
     guideFlag === null || isEnabled(guideFlag) ? guideHrefRaw : "";
-  const showGuide =
-    isSectionVisible(customFields, "glove", "product.guide") &&
-    guideText.trim() !== "";
+  const showGuide = showGloveEasyGuide({
+    madeToOrder,
+    sectionVisible: isSectionVisible(customFields, "glove", "product.guide"),
+    text: guideText,
+  });
 
-  const noticeText = get("glove.product.notice-text");
+  // The seeded copy opens with "PLEASE NOTE:"; the panel's own label says it.
+  const noticeText = get("glove.product.notice-text")
+    .replace(/^\s*please note\s*[:\-–—]?\s*/i, "")
+    .trim();
   const additional = parseCardAdditionalFields(product.additionalFields);
   const excerpt = product.excerpt?.trim() ?? "";
   const description = product.description?.trim() ?? "";
@@ -176,7 +185,15 @@ export async function GloveProductPage({
   const longPlain = excerpt !== "" ? description : "";
   const descriptionHeading = get("glove.product.description-heading");
 
-  const optionGroups = variantOptionGroups(product.variants);
+  // A dimension that has its own selector in the buy box (every one, unless
+  // the product is "coming soon") is not repeated in the spec table.
+  const selectorsShown =
+    product.variants.length > 0 && additional.comingSoon !== true;
+  const allOptionGroups = variantOptionGroups(product.variants);
+  const optionGroups = visibleSpecGroups(
+    allOptionGroups,
+    selectorsShown ? allOptionGroups.map((group) => group.key) : [],
+  );
 
   // ── Support rows (B6.2) ────────────────────────────────────────────────
   const shippingSummary = get("glove.product.shipping-summary").trim();
@@ -194,14 +211,10 @@ export async function GloveProductPage({
     isSectionVisible(customFields, "glove", "product.questions") &&
     questionText !== "";
 
-  const shareUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
-  const firstImage = product.images[0]?.url;
-  const shareImage = firstImage?.startsWith("http") ? firstImage : undefined;
-
   const intro = (
     <>
       {madeToOrder && noticeText.trim() !== "" ? (
-        <GloveNotice fieldKey="glove.product.notice-text">
+        <GloveNotice fieldKey="glove.product.notice-text" label="Please note">
           {noticeText}
         </GloveNotice>
       ) : null}
@@ -233,6 +246,27 @@ export async function GloveProductPage({
           </tbody>
         </table>
       ) : null}
+      {showGuide ? (
+        <aside
+          aria-label="Easy Guide"
+          className="rounded-[var(--glove-radius-card)] border border-[var(--glove-mist-line)] bg-[var(--glove-mist)] px-4 py-3.5 text-[15px] leading-snug text-[var(--glove-primary)] md:px-5 md:text-[16px]"
+          {...sectionGroupAttr("product", "guide")}
+        >
+          <span {...fieldAttr("glove.product.guide-text")}>{guideText}</span>{" "}
+          {guideLabel && guideHref ? (
+            <>
+              <Link
+                href={guideHref}
+                className="font-bold underline decoration-[var(--glove-primary-tint)] decoration-2 underline-offset-4 transition-colors hover:decoration-[var(--glove-primary)]"
+                {...fieldAttr("glove.product.guide-link-label")}
+              >
+                {guideLabel}
+              </Link>
+              !
+            </>
+          ) : null}
+        </aside>
+      ) : null}
     </>
   );
 
@@ -252,29 +286,8 @@ export async function GloveProductPage({
             ]}
           />
         </div>
-        {showGuide ? (
-          <aside
-            aria-label="Easy Guide"
-            className="rounded-[var(--glove-radius-card)] border border-[var(--glove-mist-line)] bg-[var(--glove-mist)] px-4 py-3.5 text-[16px] leading-snug text-[var(--glove-primary)] md:px-5 md:text-[18px]"
-            {...sectionGroupAttr("product", "guide")}
-          >
-            <span {...fieldAttr("glove.product.guide-text")}>{guideText}</span>{" "}
-            {guideLabel && guideHref ? (
-              <>
-                <Link
-                  href={guideHref}
-                  className="font-bold underline decoration-[var(--glove-primary-tint)] decoration-2 underline-offset-4 transition-colors hover:decoration-[var(--glove-primary)]"
-                  {...fieldAttr("glove.product.guide-link-label")}
-                >
-                  {guideLabel}
-                </Link>
-                !
-              </>
-            ) : null}
-          </aside>
-        ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-12">
+        <div className="grid gap-6 md:gap-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)] lg:gap-12">
           <div className="lg:sticky lg:top-6 lg:self-start">
             <GloveProductGallery
               images={product.images}
@@ -303,15 +316,13 @@ export async function GloveProductPage({
               addOnSectionAttrs={sectionGroupAttr("product", "addons")}
               categories={categories}
               linkCategories={isEnabled("collections")}
-              shareUrl={shareUrl}
-              shareImage={shareImage}
+              cartEnabled={isEnabled("cart")}
               copy={{
                 addToCart: get("glove.product.add-to-cart-label"),
                 unavailable: get("glove.product.unavailable-text"),
                 notify: get("glove.product.notify-text"),
                 comingSoonHeading: get("glove.product.coming-soon-heading"),
                 comingSoonBody: get("glove.product.coming-soon-body"),
-                shareLabel: get("glove.product.share-label"),
                 addOns: {
                   heading: get("glove.product.addons-heading"),
                   helper: get("glove.product.addons-helper"),
@@ -369,18 +380,13 @@ export async function GloveProductPage({
 
         {hasRich || longPlain ? (
           <GloveReveal>
-            <section aria-labelledby="glove-description-heading">
-              <div className="border-b border-[var(--glove-line)]">
-                <span
-                  aria-hidden="true"
-                  className="glove-display inline-block border-t-2 border-[var(--glove-primary)] pt-3 pb-3 text-[13px] font-semibold tracking-wide text-[var(--glove-primary)] uppercase"
-                >
-                  {descriptionHeading}
-                </span>
-              </div>
+            <section
+              aria-labelledby="glove-description-heading"
+              className="border-t border-[var(--glove-line)] pt-10 md:pt-12"
+            >
               <h2
                 id="glove-description-heading"
-                className="glove-body mt-6 mb-3 text-[24px] font-normal text-[var(--glove-ink)]"
+                className="glove-body m-0 mb-3 text-[24px] font-normal text-[var(--glove-ink)]"
                 {...fieldAttr("glove.product.description-heading")}
               >
                 {descriptionHeading}
@@ -405,12 +411,10 @@ export async function GloveProductPage({
           buttonLabel={get("glove.product.review-button-label")}
         />
 
-        <GloveReveal threshold={0}>
-          <GloveRelatedProducts
-            productId={product.id}
-            heading={get("glove.product.related-heading")}
-          />
-        </GloveReveal>
+        <GloveRelatedProducts
+          productId={product.id}
+          heading={get("glove.product.related-heading")}
+        />
       </GloveContainer>
     </div>
   );

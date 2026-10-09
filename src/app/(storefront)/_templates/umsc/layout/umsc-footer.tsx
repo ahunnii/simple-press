@@ -20,7 +20,7 @@ import {
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
-  navHrefFlag,
+  navHrefOffFlag,
   resolveFooterNav,
 } from "~/app/(storefront)/_components/nav";
 
@@ -110,7 +110,7 @@ export async function UmscFooter({
         }))),
     { href: "/shop", label: "All products" },
   ].filter((link) => {
-    const flag = navHrefFlag(link.href);
+    const flag = navHrefOffFlag(link.href, isEnabled);
     return flag === null || isEnabled(flag);
   });
 

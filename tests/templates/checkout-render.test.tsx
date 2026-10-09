@@ -9,6 +9,7 @@ import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/
 import { DefaultCheckoutForm } from "~/app/(storefront)/_templates/default/cart-checkout/default-checkout-form";
 import { DreamCheckoutForm } from "~/app/(storefront)/_templates/dream/cart-checkout/dream-checkout-form";
 import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-checkout/elegant-checkout-form";
+import { GloveCheckoutForm } from "~/app/(storefront)/_templates/glove/cart-checkout/glove-checkout-form";
 import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
 import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
 import { NoiseCheckoutForm } from "~/app/(storefront)/_templates/noise/cart-checkout/noise-checkout-form";
@@ -151,6 +152,23 @@ const UmscForm: FormComponent = (props) => (
   />
 );
 
+// glove's form also takes its field-driven headings and notes as props.
+const GloveForm: FormComponent = (props) => (
+  <GloveCheckoutForm
+    {...props}
+    detailsHeading="Billing details"
+    deliveryHeading="Delivery"
+    shippingHeading="Shipping"
+    discountHeading="Discount code"
+    summaryHeading="Your order"
+    submitLabel="Place order"
+    taxNote="Tax calculated at payment"
+    secureNote="Secure checkout"
+    emptyHeading="Your cart is empty"
+    emptyCta="Shop"
+  />
+);
+
 const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["default", DefaultCheckoutForm],
   ["modern", ModernCheckoutForm],
@@ -165,6 +183,7 @@ const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["pink", PinkCheckoutForm],
   ["dream", DreamCheckoutForm],
   ["umsc", UmscForm],
+  ["glove", GloveForm],
 ];
 
 describe("checkout form renders for every template", () => {

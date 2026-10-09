@@ -15,8 +15,11 @@ type Props = {
 /** Slug of the CMS page that carries the shared 6-step block. */
 export const GLOVE_EASY_GUIDE_SLUG = "easy-guide";
 
+/** Max width (px) of the generic / policy prose column. */
+const GLOVE_GENERIC_BODY_WIDTH = 860;
+
 /**
- * `/<slug>` — any CMS page. Navy title band (H1 = page title, excerpt as the
+ * `/<slug>` — any CMS page. Banner title band (H1 = page title, excerpt as the
  * sub-line) + a centered prose column on glove tokens. Policy pages get a
  * "Policy" overline and a last-updated line. The `easy-guide` slug takes the
  * guide branch instead: no band, the shared steps block as the page opener.
@@ -30,6 +33,7 @@ export function GloveGenericPage({ business, page }: Props) {
 
   return (
     <GloveGeneralLayout
+      bandVariant="banner"
       title={page.title}
       subtitle={page.excerpt ?? ""}
       breadcrumb={[{ label: "Home", href: "/" }, { label: page.title }]}
@@ -37,7 +41,10 @@ export function GloveGenericPage({ business, page }: Props) {
       {/* No reveal: rich text can embed forms, and a form must never start hidden. */}
       <GloveSection tone="paper" reveal={false} contained={false}>
         <GloveContainer>
-          <div className="mx-auto max-w-[860px]">
+          <div
+            className="mx-auto"
+            style={{ maxWidth: GLOVE_GENERIC_BODY_WIDTH }}
+          >
             {isPolicy ? (
               <div className="mb-8 flex flex-col gap-1 border-b border-[var(--glove-line)] pb-5">
                 <GloveOverline align="left">Policy</GloveOverline>

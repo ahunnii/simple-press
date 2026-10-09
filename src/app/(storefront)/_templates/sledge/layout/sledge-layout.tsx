@@ -31,7 +31,7 @@ export async function SledgeLayout({
     getSession(),
     getBusinessFlags(),
   ]);
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   return (
     <div className={`${fontSans.variable} ${fontHeading.variable} sledge`}>
       <a

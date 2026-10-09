@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
@@ -92,7 +92,7 @@ export function GloveCheckoutForm({
       >
         <div className="flex flex-col gap-4">
           {[0, 1, 2, 3].map((n) => (
-            <div key={n} className="h-11 bg-[var(--glove-cloud)]" />
+            <div key={n} className="h-11 bg-[var(--glove-mist)]" />
           ))}
         </div>
         <div className="h-[360px] rounded-[var(--glove-radius-panel)] bg-[var(--glove-mist)]" />
@@ -203,84 +203,6 @@ export function GloveCheckoutForm({
             </GloveField>
           </div>
         </section>
-
-        {/* ── Discount code ─────────────────────────────────────────── */}
-        {form.couponsEnabled ? (
-          <section aria-labelledby="glove-co-discount-heading">
-            <h2
-              id="glove-co-discount-heading"
-              className={SECTION_HEADING}
-              {...fieldAttr("glove.checkout.discount-heading")}
-            >
-              {discountHeading}
-            </h2>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
-              <div className="flex-1">
-                <label htmlFor="glove-co-discount" className="sr-only">
-                  Discount code
-                </label>
-                <GloveInput
-                  id="glove-co-discount"
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Discount code"
-                  value={form.discountCodeInput}
-                  onChange={(e) => {
-                    form.setDiscountCodeInput(e.target.value.toUpperCase());
-                    form.setDiscountFieldError(null);
-                  }}
-                  onKeyDown={(e) => {
-                    // Enter applies the code; it must not submit the order form.
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      form.handleApplyDiscount();
-                    }
-                  }}
-                  aria-invalid={discountFieldError ? true : undefined}
-                  aria-describedby={
-                    discountFieldError ? "glove-co-discount-error" : undefined
-                  }
-                />
-              </div>
-              <GloveButton
-                variant="wooOutline"
-                onClick={form.handleApplyDiscount}
-                disabled={
-                  form.isValidatingDiscount ||
-                  form.items.length === 0 ||
-                  !form.discountCodeInput.trim()
-                }
-                className="sm:min-h-11"
-              >
-                {form.isValidatingDiscount ? (
-                  <>
-                    <Loader2
-                      className="size-4 animate-spin motion-reduce:animate-none"
-                      aria-hidden="true"
-                    />
-                    Checking…
-                  </>
-                ) : (
-                  "Apply coupon"
-                )}
-              </GloveButton>
-            </div>
-            {discountFieldError ? (
-              <p
-                id="glove-co-discount-error"
-                role="alert"
-                className="glove-error mt-2"
-              >
-                {discountFieldError}
-              </p>
-            ) : null}
-            {discountCodeLabel && discountAmount > 0 ? (
-              <p role="status" className="glove-success mt-2 text-[14px]">
-                Code <strong>{discountCodeLabel}</strong> applied.
-              </p>
-            ) : null}
-          </section>
-        ) : null}
 
         {/* ── Delivery method (only when the store offers pickup) ───── */}
         {shippingConfig.offersInStorePickup ? (
@@ -494,6 +416,88 @@ export function GloveCheckoutForm({
           shippingCalculating={shippingCalculating}
         />
 
+        {/* Promo code: a collapsed disclosure under the totals, not a form section. */}
+        {form.couponsEnabled ? (
+          <div className="mt-5">
+            <details className="group/coupon">
+              <summary className="glove-display inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-[15px] font-medium text-[var(--glove-primary)] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--glove-primary)] [&::-webkit-details-marker]:hidden">
+                <span {...fieldAttr("glove.checkout.discount-heading")}>
+                  {discountHeading}
+                </span>
+                <ChevronDown
+                  className="size-4 transition-transform group-open/coupon:rotate-180 motion-reduce:transition-none"
+                  aria-hidden="true"
+                />
+              </summary>
+              <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="flex-1">
+                  <label htmlFor="glove-co-discount" className="sr-only">
+                    Promo code
+                  </label>
+                  <GloveInput
+                    id="glove-co-discount"
+                    type="text"
+                    autoComplete="off"
+                    placeholder="Promo code"
+                    value={form.discountCodeInput}
+                    onChange={(e) => {
+                      form.setDiscountCodeInput(e.target.value.toUpperCase());
+                      form.setDiscountFieldError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      // Enter applies the code; it must not submit the order form.
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        form.handleApplyDiscount();
+                      }
+                    }}
+                    aria-invalid={discountFieldError ? true : undefined}
+                    aria-describedby={
+                      discountFieldError ? "glove-co-discount-error" : undefined
+                    }
+                  />
+                </div>
+                <GloveButton
+                  variant="wooOutline"
+                  onClick={form.handleApplyDiscount}
+                  disabled={
+                    form.isValidatingDiscount ||
+                    form.items.length === 0 ||
+                    !form.discountCodeInput.trim()
+                  }
+                  className="sm:min-h-11"
+                >
+                  {form.isValidatingDiscount ? (
+                    <>
+                      <Loader2
+                        className="size-4 animate-spin motion-reduce:animate-none"
+                        aria-hidden="true"
+                      />
+                      Checking…
+                    </>
+                  ) : (
+                    "Apply code"
+                  )}
+                </GloveButton>
+              </div>
+              {discountFieldError ? (
+                <p
+                  id="glove-co-discount-error"
+                  role="alert"
+                  className="glove-error mt-2"
+                >
+                  {discountFieldError}
+                </p>
+              ) : null}
+            </details>
+            {discountCodeLabel && discountAmount > 0 ? (
+              <p role="status" className="glove-success mt-1 text-[14px]">
+                Code <strong>{discountCodeLabel}</strong> applied.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div role="alert" aria-live="assertive" aria-atomic="true">
           {form.error ? (
             <p className="mt-4 rounded-[var(--glove-radius-card)] border border-[var(--glove-alert)] bg-[var(--glove-paper)] p-3 text-[14px] text-[var(--glove-alert)]">
@@ -516,7 +520,7 @@ export function GloveCheckoutForm({
                 className="size-4 animate-spin motion-reduce:animate-none"
                 aria-hidden="true"
               />
-              Processing…
+              Taking you to payment…
             </>
           ) : shippingCalculating ? (
             <>

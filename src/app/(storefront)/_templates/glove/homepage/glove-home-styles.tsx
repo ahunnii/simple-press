@@ -58,7 +58,7 @@ export function GloveHomeStyles({
               <GloveStyleCard
                 name={entry.name}
                 blurb={entry.blurb}
-                image={entry.image || "/placeholder.svg"}
+                image={entry.image}
                 imageAlt={entry.imageAlt || entry.name}
                 href={entry.href}
                 buttonLabel={entry.buttonLabel}
