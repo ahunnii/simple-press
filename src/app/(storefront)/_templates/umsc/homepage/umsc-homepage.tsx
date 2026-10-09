@@ -1,7 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { UmscReviewCardData } from "./umsc-reviews-section";
 import type { Product } from "~/types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -46,7 +46,7 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
   // B2.4: the owner's popup. `getHomepage` doesn't select `popupConfig` (it's
   // not needed for the fields/products it returns), so this reads from the
   // richer `business` prop instead — same source noise/olive/vii use.
-  const popup = resolvePopup(props?.business?.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(props?.business?.siteContent, isEnabled);
 
   // B2.5: hide a field-driven CTA/door/link when its route's flag is off —
   // never swap in another destination. A section may already require its
@@ -57,7 +57,7 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
   // `f[key] ?? ""` — never `?? "/shop"` — is the resolved href; a blank href
   // (the owner cleared the field) stays blank rather than being overridden.
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

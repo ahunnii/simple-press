@@ -16,6 +16,7 @@ import { elegantSections } from "~/app/(storefront)/_templates/elegant/sections"
 import { happyBambooSections } from "~/app/(storefront)/_templates/happy-bamboo/sections";
 import { modernSections } from "~/app/(storefront)/_templates/modern/sections";
 import { noiseSections } from "~/app/(storefront)/_templates/noise/sections";
+import { gloveSections } from "~/app/(storefront)/_templates/glove/sections";
 import { oliveSections } from "~/app/(storefront)/_templates/olive/sections";
 import { pinkSections } from "~/app/(storefront)/_templates/pink/sections";
 import { pollenSections } from "~/app/(storefront)/_templates/pollen/sections";
@@ -91,6 +92,7 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...dreamSections,
   ...umscSections,
   ...oliveSections,
+  ...gloveSections,
 };
 
 function humanizeGroupKey(key: string): string {

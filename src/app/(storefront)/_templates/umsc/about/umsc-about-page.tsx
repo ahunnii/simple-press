@@ -1,5 +1,5 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -77,7 +77,7 @@ export async function UmscAboutPage({
   // (e.g. /shop with products off) hides — never swaps destinations. The
   // fallbacks mirror the render components' `url || "/shop"` defaults.
   const ctaAllowed = (url: string, fallback: string) => {
-    const flag = navHrefFlag(url || fallback);
+    const flag = navHrefOffFlag(url || fallback, isEnabled);
     return flag === null || isEnabled(flag);
   };
   const makerPrimaryUrl = f["umsc.about.maker-primary-url"] ?? "";

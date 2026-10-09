@@ -75,7 +75,7 @@ export async function DreamLayout({
     isEnabled,
   );
 
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   const legacyText = nonBlank(
     getRawCustomFieldString(customFields, "dream.global.announcement-text"),

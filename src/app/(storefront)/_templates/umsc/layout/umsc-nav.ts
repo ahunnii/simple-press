@@ -14,7 +14,7 @@ import {
   activeEntryIndex,
   filterNavByFlags,
   navGroupEntries,
-  navHrefFlag,
+  navHrefOffFlag,
   resolveNav,
 } from "~/app/(storefront)/_components/nav";
 
@@ -95,6 +95,6 @@ export function umscHrefAllowed(
   href: string,
   isEnabled: (flag: string) => boolean,
 ): boolean {
-  const flag = navHrefFlag(href);
+  const flag = navHrefOffFlag(href, isEnabled);
   return flag === null || isEnabled(flag);
 }

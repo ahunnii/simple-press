@@ -8,7 +8,7 @@ import {
   resolveFaqPickerItems,
 } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
@@ -111,7 +111,7 @@ export async function PinkTableServicePage({
   const { isEnabled } = await getBusinessFlags();
   const quicklink2Target =
     (f["pink-table.quicklink-2-href"] ?? "").trim() || "/shop";
-  const quicklink2Flag = navHrefFlag(quicklink2Target);
+  const quicklink2Flag = navHrefOffFlag(quicklink2Target, isEnabled);
   const quicklink2Href =
     quicklink2Flag === null || isEnabled(quicklink2Flag)
       ? quicklink2Target

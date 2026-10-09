@@ -33,7 +33,7 @@ export async function PollenHomepage({
   // `featureFlags`) the same way the default template's homepage resolves
   // its popup, instead of adding a second business fetch here.
   const { isEnabled } = resolveFlags(business?.featureFlags);
-  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business?.siteContent, isEnabled);
 
   const f = resolveFields(customFields, [
     "pollen.homepage.hero-image",

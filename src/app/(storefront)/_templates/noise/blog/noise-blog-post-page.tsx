@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -59,7 +59,7 @@ export function NoiseBlogPostPage({
   // B2.5: the whole band is a pitch for the link, so it hides with it when
   // the link's route is flag-gated off (e.g. `/shop` with `products` off).
   const { isEnabled } = useStorefrontFlags();
-  const shopCtaFlag = navHrefFlag(shopCtaLink);
+  const shopCtaFlag = navHrefOffFlag(shopCtaLink, isEnabled);
   const showShopCta = shopCtaFlag === null || isEnabled(shopCtaFlag);
 
   const filtered = relatedPosts.filter((p) => p.slug !== page.slug).slice(0, 3);

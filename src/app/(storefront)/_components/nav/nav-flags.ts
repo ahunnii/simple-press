@@ -10,23 +10,41 @@
  * `dependsOn` cascades already applied).
  */
 
-import { routeFlag } from "~/lib/features/route-flags";
+import {
+  routeEnabled,
+  routeFlag,
+  routeOffFlag,
+} from "~/lib/features/route-flags";
 
 import type { NavChild, NavItem } from "./resolve-nav";
 
 /**
- * The flag gating `href`, or null when no flag gates it (see `routeFlag`).
- * Matches on the first path segment; external and non-path hrefs are ungated.
+ * The flag gating `href` most specifically, or null when no flag gates it
+ * (see `routeFlag`). Matches whole path segments; external and non-path hrefs
+ * are ungated.
  */
 export const navHrefFlag = routeFlag;
+
+/**
+ * The first OFF flag gating `href`, or null (see `routeOffFlag`). Use this —
+ * not `navHrefFlag` — for owner/field-driven hrefs: it sees the whole prefix
+ * chain, so `/account/orders` is gated by `customerAccounts` as well as
+ * `orders`. Callers keep their `flag === null || isEnabled(flag)` check.
+ */
+export const navHrefOffFlag = routeOffFlag;
+
+/**
+ * True when every flag gating `href` is on — `/account/orders` needs both
+ * `customerAccounts` and `orders` (see `routeEnabled`).
+ */
+export const navHrefEnabled = routeEnabled;
 
 function isGated(
   entry: NavChild,
   isEnabled: (key: string) => boolean,
 ): boolean {
   if (entry.external) return false;
-  const flag = navHrefFlag(entry.href);
-  return flag !== null && !isEnabled(flag);
+  return !routeEnabled(entry.href, isEnabled);
 }
 
 /**

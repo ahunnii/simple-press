@@ -1,6 +1,6 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -68,7 +68,7 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
   // B2.4: the owner's popup. `getHomepage` doesn't select `popupConfig` (it's
   // not needed for the fields/products it returns), so this reads from the
   // richer `business` prop instead — same source olive/vii use.
-  const popup = resolvePopup(props?.business?.siteContent, flags.isEnabled("popups"));
+  const popup = resolvePopup(props?.business?.siteContent, flags.isEnabled);
 
   // B2.5: hide a field-driven CTA/link when its route's flag is off — never
   // swap in another destination. A section may already require its own flag
@@ -79,7 +79,7 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
   // alone — never `?? "/shop"` — is the resolved href; a blank href (the
   // owner cleared the field) stays blank rather than being overridden.
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, flags.isEnabled);
     return flag === null || flags.isEnabled(flag);
   };
 

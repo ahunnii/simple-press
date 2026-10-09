@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
 
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import {
   fieldAttr,
   listItemAttr,
@@ -110,13 +110,13 @@ export function BambooHeroSection({
   // the general-purpose pattern for a field read with an inline fallback.
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
   const primaryHref = f["bamboo.homepage.hero-primary-button-link"] || "/shop";
-  const primaryFlag = navHrefFlag(primaryHref);
+  const primaryFlag = navHrefOffFlag(primaryHref, isEnabled);
   const showPrimary = primaryFlag === null || isEnabled(primaryFlag);
 
   const secondaryHref =
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
     f["bamboo.homepage.hero-secondary-button-link"] || "/about";
-  const secondaryFlag = navHrefFlag(secondaryHref);
+  const secondaryFlag = navHrefOffFlag(secondaryHref, isEnabled);
   const showSecondary =
     secondaryText !== "" &&
     (secondaryFlag === null || isEnabled(secondaryFlag));

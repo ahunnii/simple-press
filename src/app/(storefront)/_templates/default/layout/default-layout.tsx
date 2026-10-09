@@ -27,7 +27,7 @@ export async function DefaultLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   const { isEnabled } = await getBusinessFlags();
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   const themeVars = resolveThemeVars(
     "default",
     business.siteContent?.customFields,

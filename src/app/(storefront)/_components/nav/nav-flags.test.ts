@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { filterNavByFlags, navHrefFlag } from "./nav-flags";
+import {
+  filterNavByFlags,
+  navHrefEnabled,
+  navHrefFlag,
+  navHrefOffFlag,
+} from "./nav-flags";
 import type { NavItem } from "./resolve-nav";
 
 const only =
@@ -20,6 +25,28 @@ describe("navHrefFlag", () => {
     expect(navHrefFlag("/")).toBeNull();
   });
 
+  it("maps checkout, subscribe and account routes, longest prefix winning", () => {
+    expect(navHrefFlag("/checkout")).toBe("checkout");
+    expect(navHrefFlag("/subscribe?product=x")).toBe("subscriptions");
+    expect(navHrefFlag("/account")).toBe("customerAccounts");
+    expect(navHrefFlag("/account/")).toBe("customerAccounts");
+    expect(navHrefFlag("/account/settings")).toBe("customerAccounts");
+    expect(navHrefFlag("/account/address-book")).toBe("customerAccounts");
+    expect(navHrefFlag("/account/orders")).toBe("orders");
+    expect(navHrefFlag("/account/orders/abc")).toBe("orders");
+    expect(navHrefFlag("/account/subscriptions")).toBe("subscriptions");
+    expect(navHrefFlag("/account/invoices")).toBe("invoices");
+    expect(navHrefFlag("/account/rewards")).toBe("loyalty");
+    expect(navHrefFlag("/Account/Rewards")).toBe("loyalty");
+  });
+
+  it("matches whole segments, never a longer word", () => {
+    expect(navHrefFlag("/accounting")).toBeNull();
+    expect(navHrefFlag("/checkouts")).toBeNull();
+    expect(navHrefFlag("/subscriber")).toBeNull();
+    expect(navHrefFlag("/account/ordersx")).toBe("customerAccounts");
+  });
+
   it("never gates non-path hrefs", () => {
     expect(navHrefFlag("https://example.com/shop")).toBeNull();
     expect(navHrefFlag("//cdn.example.com/shop")).toBeNull();
@@ -28,7 +55,58 @@ describe("navHrefFlag", () => {
   });
 });
 
+describe("navHrefEnabled", () => {
+  it("requires every flag along the prefix chain", () => {
+    expect(navHrefEnabled("/account/rewards", only("loyalty"))).toBe(false);
+    expect(navHrefEnabled("/account/orders", only("customerAccounts"))).toBe(
+      false,
+    );
+    expect(navHrefEnabled("/account/orders", only("loyalty"))).toBe(true);
+    expect(navHrefEnabled("/about", () => false)).toBe(true);
+  });
+});
+
+describe("navHrefOffFlag", () => {
+  it("names the first off flag on the prefix chain, or null", () => {
+    expect(navHrefOffFlag("/account/orders", only("customerAccounts"))).toBe(
+      "customerAccounts",
+    );
+    expect(navHrefOffFlag("/account/orders", only("orders"))).toBe("orders");
+    expect(navHrefOffFlag("/account/orders", () => true)).toBeNull();
+    expect(navHrefOffFlag("/shop", only("products"))).toBe("products");
+    expect(navHrefOffFlag("/about", () => false)).toBeNull();
+    expect(navHrefOffFlag("https://x.test/shop", () => false)).toBeNull();
+  });
+
+  it("keeps the caller's `flag === null || isEnabled(flag)` check correct", () => {
+    const isEnabled = only("customerAccounts");
+    const flag = navHrefOffFlag("/account/orders", isEnabled);
+    expect(flag === null || isEnabled(flag)).toBe(false);
+  });
+});
+
 describe("filterNavByFlags", () => {
+  it("drops account sub-routes, checkout and subscribe by their own flags", () => {
+    const items: NavItem[] = [
+      { label: "Rewards", href: "/account/rewards" },
+      { label: "Orders", href: "/account/orders" },
+      { label: "Checkout", href: "/checkout" },
+      { label: "Subscribe", href: "/subscribe" },
+      { label: "Accounting", href: "/accounting" },
+    ];
+    expect(
+      filterNavByFlags(items, only("loyalty", "checkout", "subscriptions")),
+    ).toEqual([
+      { label: "Orders", href: "/account/orders" },
+      { label: "Accounting", href: "/accounting" },
+    ]);
+    expect(filterNavByFlags(items, only("customerAccounts"))).toEqual([
+      { label: "Checkout", href: "/checkout" },
+      { label: "Subscribe", href: "/subscribe" },
+      { label: "Accounting", href: "/accounting" },
+    ]);
+  });
+
   it("drops /shop and /shop/x when products is off, but keeps /shopping", () => {
     const items: NavItem[] = [
       { label: "Shop", href: "/shop" },

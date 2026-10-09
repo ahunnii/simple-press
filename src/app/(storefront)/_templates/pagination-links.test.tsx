@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Product } from "~/types";
 
+import { GloveBlogGrid } from "./glove/blog/glove-blog-grid";
+import { GloveListing } from "./glove/shop/glove-listing";
 import { OliveShopClient } from "./olive/shop/olive-shop-client";
 import { PinkBlogListing } from "./pink/blog/pink-blog-listing";
 import { UmscShopClient } from "./umsc/shop/umsc-shop-client";
@@ -44,6 +46,18 @@ vi.mock("./olive/shared", async (importOriginal) => {
     ),
   };
 });
+vi.mock("./glove/shared", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    GloveProductGrid: ({ products }: { products: unknown[] }) => (
+      <div data-testid="grid" data-count={products.length} />
+    ),
+  };
+});
+vi.mock("./glove/blog/glove-blog-card", () => ({
+  GloveBlogCard: () => <div data-testid="card" />,
+}));
 vi.mock("./vii/homepage/vii-brands-section", () => ({
   ViiBrandsSection: () => null,
 }));
@@ -209,6 +223,74 @@ describe("load-more pagers derive from the URL", () => {
     render(<WealthBlogClient pages={posts} />);
     expect(screen.getAllByTestId("card")).toHaveLength(18);
     const more = screen.getByRole("link", { name: "Load More" });
+    expect(more.getAttribute("href")).toBe("/shop?page=3");
+  });
+
+  it("glove shop: ?page=2 shows 2 × 12 products and links to ?page=3", () => {
+    search = "page=2";
+    render(
+      <GloveListing
+        products={products}
+        title="Shop"
+        showTabs={false}
+        breadcrumb={[]}
+        copy={{
+          allLabel: "All",
+          resultsLabel: "results",
+          clearSearchLabel: "Clear",
+          loadMoreLabel: "Load more",
+          emptyHeading: "e",
+          emptyBody: "e",
+          emptyButtonLabel: "e",
+          emptyButtonHref: "/",
+          noResultsHeading: "n",
+          noResultsBody: "n",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("grid").getAttribute("data-count")).toBe("24");
+    const more = screen.getByRole("link", { name: "Load more" });
+    expect(more.getAttribute("href")).toBe("/shop?page=3");
+  });
+
+  it("glove shop: the link disappears once everything is shown", () => {
+    search = "page=5";
+    render(
+      <GloveListing
+        products={products}
+        title="Shop"
+        showTabs={false}
+        breadcrumb={[]}
+        copy={{
+          allLabel: "All",
+          resultsLabel: "results",
+          clearSearchLabel: "Clear",
+          loadMoreLabel: "Load more",
+          emptyHeading: "e",
+          emptyBody: "e",
+          emptyButtonLabel: "e",
+          emptyButtonHref: "/",
+          noResultsHeading: "n",
+          noResultsBody: "n",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("grid").getAttribute("data-count")).toBe("60");
+    expect(screen.queryByRole("link", { name: "Load more" })).toBeNull();
+  });
+
+  it("glove blog: ?page=2 shows 2 × 9 posts and links to ?page=3", () => {
+    search = "page=2";
+    render(
+      <GloveBlogGrid
+        posts={posts}
+        readMoreLabel="Read more"
+        loadMoreLabel="Load more"
+        searchEmptyMessage="none"
+      />,
+    );
+    expect(screen.getAllByTestId("card")).toHaveLength(18);
+    const more = screen.getByRole("link", { name: "Load more" });
     expect(more.getAttribute("href")).toBe("/shop?page=3");
   });
 

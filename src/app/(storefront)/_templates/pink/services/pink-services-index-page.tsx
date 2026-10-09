@@ -11,7 +11,7 @@ import {
 } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkBadge } from "../shared/pink-badge";
@@ -78,7 +78,7 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
   const ctaHref = (link: string | undefined): string | undefined => {
     const href = (link ?? "").trim();
     if (!href) return undefined;
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag) ? href : undefined;
   };
   const primaryHref = ctaHref(f["pink.services.cta-primary-link"]);

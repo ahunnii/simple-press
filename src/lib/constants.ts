@@ -18,6 +18,7 @@ export const TEMPLATE_IDS = {
   OLIVE: "olive",
   DREAM: "dream",
   UMSC: "umsc",
+  GLOVE: "glove",
 } as const;
 
 export const TEMPLATES = [
@@ -153,6 +154,13 @@ export const TEMPLATES = [
     description:
       "Detroit women's boutique (Olive Mode) — white swatch-book cards, photo-led grids, sage-green cover footer, Josefin Sans + Figtree",
     previewImage: "/templates/olive-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.GLOVE,
+    name: "The LuvGluv",
+    description:
+      "Royal-purple luxury glove boutique (The LuvGluv) — search-first Woo-style header, lavender story band, 6-step customization guide, charm add-on picker on the product page, Poppins + Lato",
+    previewImage: "/templates/glove-preview.png",
   },
 ] as const;
 

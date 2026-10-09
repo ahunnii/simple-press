@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Quote, Star } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
@@ -51,7 +51,7 @@ export function BambooTestimonialsSection({
   const buttonHref =
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
     f["bamboo.homepage.testimonials-button-link"] || "/testimonials";
-  const buttonFlag = navHrefFlag(buttonHref);
+  const buttonFlag = navHrefOffFlag(buttonHref, isEnabled);
   const showButton =
     buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefFlag, navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
@@ -99,7 +99,7 @@ export function UmscCartContents({
     // real position in the saved list after filtering.
     const doors = rawDoors
       .filter((door) => {
-        const flag = navHrefFlag(door.link);
+        const flag = navHrefOffFlag(door.link, isEnabled);
         return flag === null || isEnabled(flag);
       });
 

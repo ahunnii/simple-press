@@ -51,7 +51,7 @@ export async function WealthLayout({
     getBusinessFlags(),
   ]);
 
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
   // `wealth` has no theme presets (fixed brand, per design.md) — resolveThemeVars
   // returns null for a templateId with no TEMPLATE_THEMES entry, so this is a
   // safe no-op today and starts working automatically if a theme.ts is ever

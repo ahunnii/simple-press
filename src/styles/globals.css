@@ -14216,3 +14216,1276 @@ body:has(.pollen) {
     animation: none;
   }
 }
+
+/* ─── The LuvGluv (glove) — design tokens ─────────────────────────────────
+   Scoped to .glove (layout root) so they never bleed into other templates.
+   Fixed brand: no theme presets. Source of truth: docs/templates/glove/design.md */
+
+.glove {
+  /* Palette */
+  --glove-paper: #ffffff;
+  --glove-ink: #242424;
+  --glove-text: #4a4a4a;
+  --glove-muted: #666666;
+  --glove-nav: #333333;
+  --glove-primary: #601b76;
+  --glove-primary-hover: #4c135e;
+  --glove-primary-tint: #debbe9;
+  --glove-lavender: #cfb9d8;
+  --glove-mist: #f7f0fb;
+  --glove-mist-line: #e6d6ee;
+  --glove-wash: #faf7fb;
+  /* Deep in-family plum for title bands; white 15.6:1, on-plum-soft 9.6:1 */
+  --glove-plum: #3a0f4a;
+  /* Footer bar plum; white 17.5:1, on-plum-soft 10.8:1 */
+  --glove-plum-deep: #2a0b35;
+  /* Lavender sub-text on plum surfaces (also 6.8:1 on --glove-primary) */
+  --glove-on-plum-soft: #d9c4e3;
+  --glove-line: #eaeaea;
+  --glove-alert: #d12c2c;
+  --glove-success: #2e7d42;
+  /* Plum-tinted, bottom-weighted scrim (a gradient: use as `background`, not
+     background-color). Light over her face (top ~40%), heavy under the copy
+     at the foot of the hero. */
+  --glove-hero-scrim: linear-gradient(
+    to bottom,
+    rgba(42, 11, 53, 0.25) 0%,
+    rgba(42, 11, 53, 0.3) 40%,
+    rgba(42, 11, 53, 0.62) 75%,
+    rgba(42, 11, 53, 0.7) 100%
+  );
+  --glove-hero-text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --glove-purple-fade: linear-gradient(var(--glove-primary) 70%, #ffffff 100%);
+  --glove-on-primary: #ffffff;
+  --glove-shadow-sm: 0 2px 10px rgba(42, 11, 53, 0.1);
+  --glove-shadow-md: 0 10px 30px rgba(42, 11, 53, 0.14);
+
+  /* Shape */
+  --radius: 0.3125rem;
+  --glove-radius-btn: 5px; /* the one button radius: every .glove-btn* variant */
+  --glove-radius-card: 8px;
+  --glove-radius-panel: 16px;
+
+  /* Motion */
+  --glove-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --glove-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* shadcn bridge — shared components (video facade, reviews, dialogs inside
+     .glove) read these; glove tokens win everywhere in the template. */
+  --background: var(--glove-paper);
+  --foreground: var(--glove-ink);
+  --card: var(--glove-paper);
+  --card-foreground: var(--glove-ink);
+  --popover: var(--glove-paper);
+  --popover-foreground: var(--glove-ink);
+  --primary: var(--glove-primary);
+  --primary-foreground: var(--glove-on-primary);
+  --secondary: var(--glove-mist);
+  --secondary-foreground: var(--glove-ink);
+  --muted: var(--glove-mist);
+  --muted-foreground: var(--glove-muted);
+  --accent: var(--glove-mist);
+  --accent-foreground: var(--glove-primary);
+  --destructive: var(--glove-alert);
+  --border: var(--glove-line);
+  --input: var(--glove-line);
+  --ring: var(--glove-primary);
+
+  /* Layout scale */
+  --glove-container: 1222px;
+  --glove-gutter: 15px;
+  --glove-section-pad-y: clamp(48px, 7vw, 88px);
+  --glove-topbar-h: 36px;
+  --glove-header-h: 100px;
+  --glove-mobile-bar-h: 64px;
+
+  /* Fonts — map to the next/font variables the layout loads */
+  --glove-font-display:
+    var(--font-glove-display), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --glove-font-body:
+    var(--font-glove-body), "Lato", ui-sans-serif, system-ui, sans-serif;
+
+  background: var(--glove-paper);
+  color: var(--glove-text);
+  font-family: var(--glove-font-body);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+@media (max-width: 767px) {
+  .glove {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .glove {
+    --glove-gutter: 24px;
+  }
+}
+
+/* Font classes live on the TEXT element itself (never font-[var(--x)]). */
+.glove .glove-display {
+  font-family: var(--glove-font-display);
+}
+
+.glove .glove-body {
+  font-family: var(--glove-font-body);
+}
+
+.glove h1,
+.glove h2,
+.glove h3 {
+  text-wrap: balance;
+}
+
+.glove p {
+  text-wrap: pretty;
+}
+
+/* Layout helpers */
+.glove .glove-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--glove-container);
+  margin-inline: auto;
+  padding-inline: var(--glove-gutter);
+}
+
+.glove .glove-section {
+  padding-block: var(--glove-section-pad-y);
+}
+
+/* Page-title bands (GloveTitleBand + checkout steps). One fixed minimum
+   height per variant so the band never drifts page to page; copy sits
+   vertically centered and left-aligned in the container. */
+.glove .glove-band {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--glove-plum);
+  color: var(--glove-on-primary);
+}
+
+.glove .glove-band--plum {
+  min-height: 160px;
+  padding-block: 32px;
+}
+
+.glove .glove-band--banner {
+  min-height: 224px;
+  padding-block: 32px;
+}
+
+.glove .glove-band__copy {
+  max-width: 40rem;
+}
+
+/* Scrim over her banner art. Phones and tablets: the photo sits behind the
+   text, so the plum stays heavy across the whole width. */
+.glove .glove-band__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--glove-plum) 92%, transparent) 0%,
+    color-mix(in srgb, var(--glove-plum) 84%, transparent) 60%,
+    color-mix(in srgb, var(--glove-plum) 66%, transparent) 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .glove .glove-band--plum {
+    min-height: 200px;
+    padding-block: 40px;
+  }
+
+  .glove .glove-band--banner {
+    min-height: 280px;
+    padding-block: 40px;
+  }
+}
+
+/* From 1024px the 40rem copy column sits on the left ~half: the scrim lifts
+   off past it. Sampled against the art, white text keeps >= 4.8:1 anywhere
+   in that column (1024-1920px); below 1024 the heavy scrim holds >= 6:1. */
+@media (min-width: 1024px) {
+  .glove .glove-band__scrim {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--glove-plum) 75%, transparent) 0%,
+      color-mix(in srgb, var(--glove-plum) 68%, transparent) 45%,
+      color-mix(in srgb, var(--glove-plum) 25%, transparent) 65%,
+      transparent 85%
+    );
+  }
+}
+
+/* Shop collection tabs: right-edge fade while the row has more to scroll */
+.glove .glove-tabs-scroll--fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 40px),
+    transparent
+  );
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+}
+
+/* Headings — in @layer components so Tailwind utilities (tone/size
+   classNames on GloveHeading/GloveOverline) can override them. */
+@layer components {
+  .glove .glove-heading {
+    font-family: var(--glove-font-display);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--glove-ink);
+    font-size: clamp(26px, 3.4vw, 40px);
+  }
+
+  .glove .glove-overline {
+    font-family: var(--glove-font-display);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--glove-primary);
+    font-size: clamp(16px, 2vw, 24px);
+  }
+}
+
+/* Focus — 2px primary outline + offset everywhere; white on dark bands */
+.glove :focus-visible {
+  outline: 2px solid var(--glove-primary);
+  outline-offset: 2px;
+}
+
+.glove .glove-on-dark :focus-visible,
+.glove .glove-on-dark:focus-visible {
+  outline-color: var(--glove-on-primary);
+}
+
+/* Buttons */
+.glove .glove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--glove-radius-btn);
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+  font-family: var(--glove-font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.glove .glove-btn:hover {
+  background: var(--glove-primary-hover);
+  color: var(--glove-on-primary);
+}
+
+.glove .glove-btn--sm {
+  min-height: 36px;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.glove .glove-btn--md {
+  min-height: 44px;
+  padding: 10px 24px;
+  font-size: 14px;
+}
+
+.glove .glove-btn--lg {
+  min-height: 52px;
+  padding: 14px 32px;
+  font-size: 16px;
+}
+
+.glove .glove-btn--outline {
+  background: transparent;
+  color: var(--glove-ink);
+  border-color: var(--glove-ink);
+  font-weight: 500;
+}
+
+.glove .glove-btn--outline:hover {
+  background: var(--glove-primary);
+  border-color: var(--glove-primary);
+  color: var(--glove-on-primary);
+}
+
+.glove .glove-btn--woo {
+  text-transform: none;
+  font-size: 14px;
+  min-height: 42px;
+  padding: 10px 22px;
+}
+
+.glove .glove-btn--story {
+  font-family: var(--glove-font-body);
+  font-weight: 400;
+  text-transform: none;
+  font-size: clamp(17px, 1.6vw, 21px);
+  min-height: 52px;
+  padding: 12px 30px;
+}
+
+/* Purple outline (secondary action beside a solid purple button) */
+.glove .glove-btn--outline-primary {
+  background: transparent;
+  color: var(--glove-primary);
+  border-color: var(--glove-primary);
+}
+
+.glove .glove-btn--outline-primary:hover {
+  background: var(--glove-primary);
+  border-color: var(--glove-primary);
+  color: var(--glove-on-primary);
+}
+
+/* White outline on a scrim / purple / navy band */
+.glove .glove-btn--on-dark {
+  background: transparent;
+  color: var(--glove-on-primary);
+  border-color: var(--glove-on-primary);
+}
+
+.glove .glove-btn--on-dark:hover {
+  background: var(--glove-on-primary);
+  border-color: var(--glove-on-primary);
+  color: var(--glove-primary);
+}
+
+.glove .glove-btn[aria-disabled="true"],
+.glove .glove-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Nav link — underline grows from the center */
+.glove .glove-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-block: 6px;
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--glove-nav);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.glove .glove-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--glove-primary);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 250ms var(--glove-ease);
+}
+
+.glove .glove-nav-link:hover,
+.glove .glove-nav-link:focus-visible,
+.glove .glove-nav-link[aria-current="page"],
+.glove .glove-nav-link[data-active="true"] {
+  color: var(--glove-primary);
+}
+
+.glove .glove-nav-link:hover::after,
+.glove .glove-nav-link:focus-visible::after,
+.glove .glove-nav-link[aria-current="page"]::after,
+.glove .glove-nav-link[data-active="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Header chrome */
+.glove .glove-topbar {
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.glove .glove-topbar a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.glove .glove-topbar a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.glove .glove-topbar :focus-visible {
+  outline-color: var(--glove-on-primary);
+}
+
+.glove .glove-search {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--glove-line);
+  border-radius: 3px;
+  background: var(--glove-paper);
+  transition: border-color 150ms ease;
+}
+
+.glove .glove-search:focus-within {
+  border-color: var(--glove-primary);
+}
+
+.glove .glove-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0 14px;
+  min-height: 44px;
+  font-family: var(--glove-font-body);
+  font-size: 14px;
+  color: var(--glove-ink);
+}
+
+.glove .glove-search input::placeholder {
+  color: var(--glove-muted);
+}
+
+.glove .glove-search input:focus-visible {
+  outline: none;
+}
+
+.glove .glove-search button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  border: 0;
+  background: transparent;
+  color: var(--glove-primary);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.glove .glove-search button:hover {
+  color: var(--glove-primary-hover);
+}
+
+.glove .glove-account-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--glove-radius-btn);
+  background: transparent;
+  color: var(--glove-nav);
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.glove .glove-account-btn:hover,
+.glove .glove-account-btn[aria-expanded="true"] {
+  background: transparent;
+  color: var(--glove-primary);
+}
+
+.glove .glove-account-btn:focus-visible {
+  outline-offset: 3px;
+}
+
+.glove .glove-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--glove-nav);
+  font-family: var(--glove-font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.glove .glove-icon-btn:hover {
+  color: var(--glove-primary);
+}
+
+/* Badge anchors to the icon (not the button), so a subtotal label beside the
+   icon never collides with it. */
+.glove .glove-icon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.glove .glove-count-badge {
+  position: absolute;
+  top: -7px;
+  right: -10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+  font-family: var(--glove-font-body);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.glove .glove-dropdown-panel {
+  background: var(--glove-paper);
+  border: 1px solid var(--glove-line);
+  border-radius: var(--glove-radius-card);
+  box-shadow: var(--glove-shadow-md);
+}
+
+.glove .glove-dropdown-link {
+  display: block;
+  padding: 10px 16px;
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--glove-nav);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.glove .glove-dropdown-link:hover,
+.glove .glove-dropdown-link[aria-current="page"] {
+  background: var(--glove-mist);
+  color: var(--glove-primary);
+}
+
+/* Footer */
+.glove .glove-footer-heading {
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  font-size: clamp(18px, 1.8vw, 21px);
+  color: var(--glove-ink);
+  line-height: 1.3;
+}
+
+.glove .glove-footer-link {
+  font-size: 14px;
+  color: var(--glove-ink);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.glove .glove-footer-link:hover {
+  color: var(--glove-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.glove .glove-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--glove-radius-btn);
+  background: var(--glove-mist);
+  color: var(--glove-primary);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.glove .glove-social-btn:hover {
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+}
+
+/* Scroll reveal — armed only once useGloveReveal adds `.glove-js` to the
+   scope root, so content stays fully visible with JS off. */
+.glove-js .glove-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 550ms var(--glove-ease),
+    transform 550ms var(--glove-ease);
+}
+
+.glove-js .glove-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.glove-js .glove-reveal-group .glove-reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 550ms var(--glove-ease),
+    transform 550ms var(--glove-ease);
+}
+
+.glove-js .glove-reveal-group.is-visible .glove-reveal-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: min(calc(var(--i, 0) * 70ms), 350ms);
+}
+
+/* Hero entrance — H1 rises 20px over 700ms; the sub-line follows at +150ms */
+@keyframes glove-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.glove .glove-hero-rise {
+  animation: glove-hero-rise 700ms var(--glove-ease) both;
+}
+
+.glove .glove-hero-rise--late {
+  animation-delay: 150ms;
+}
+
+/* Signature 1 — step medallions pop in sequence as their row enters */
+@keyframes glove-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.glove-js .glove-reveal-group .glove-pop {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.glove-js .glove-reveal-group.is-visible .glove-pop {
+  animation: glove-pop 450ms var(--glove-ease-back) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* Medallion (purple numbered disc) */
+.glove .glove-medallion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+  font-family: var(--glove-font-display);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.glove .glove-medallion--sm {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.glove .glove-medallion--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 28px;
+}
+
+/* Signature 2 — charm swing, hanging from a chain */
+@keyframes glove-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  22% {
+    transform: rotate(-9deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+  76% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.glove .glove-swing {
+  transform-origin: top center;
+}
+
+.glove .glove-charm-card:hover .glove-swing,
+.glove .glove-charm-card:focus-within .glove-swing,
+.glove .glove-swing.is-swinging {
+  animation: glove-swing 700ms ease-in-out 1;
+}
+
+/* Cards */
+/* The photo multiplies into the circle's mist fill, so a white photo
+   background (charms) reads as mist inside its ring instead of vanishing. */
+.glove .glove-style-img {
+  mix-blend-mode: multiply;
+  transition: transform 400ms var(--glove-ease);
+}
+
+.glove .glove-style-card:hover .glove-style-img,
+.glove .glove-style-card:focus-visible .glove-style-img {
+  transform: scale(1.04);
+}
+
+/* The card is one link: its call to action reacts to the card, not itself. */
+.glove .glove-style-card:hover .glove-btn,
+.glove .glove-style-card:focus-visible .glove-btn {
+  background: var(--glove-primary-hover);
+}
+
+.glove .glove-style-card:hover .glove-style-cta,
+.glove .glove-style-card:focus-visible .glove-style-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.glove .glove-style-cta-arrow {
+  transition: transform 200ms var(--glove-ease);
+}
+
+.glove .glove-style-card:hover .glove-style-cta-arrow,
+.glove .glove-style-card:focus-visible .glove-style-cta-arrow {
+  transform: translateX(3px);
+}
+
+/* Image well: photos sit contained on the wash and multiply into it, so a
+   white photo background melts away instead of showing as a box. */
+.glove .glove-product-img {
+  mix-blend-mode: multiply;
+}
+
+.glove .glove-product-img-main {
+  transition: opacity 300ms ease;
+}
+
+.glove .glove-product-img-alt {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+/* Multiplied layers would stack and darken, so the 2nd photo replaces the 1st. */
+.glove
+  .glove-product-card:has(.glove-product-img-alt):hover
+  .glove-product-img-main,
+.glove
+  .glove-product-card:has(.glove-product-img-alt):focus-within
+  .glove-product-img-main {
+  opacity: 0;
+}
+
+.glove .glove-product-card:hover .glove-product-img-alt,
+.glove .glove-product-card:focus-within .glove-product-img-alt {
+  opacity: 1;
+}
+
+.glove .glove-product-title-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.glove .glove-product-title-link:hover {
+  color: var(--glove-primary);
+}
+
+.glove .glove-sale-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+  font-family: var(--glove-font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Carousel */
+.glove .glove-carousel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-block: 4px;
+}
+
+.glove .glove-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.glove .glove-carousel-slide {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.glove .glove-carousel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid var(--glove-line);
+  background: var(--glove-paper);
+  color: var(--glove-primary);
+  box-shadow: var(--glove-shadow-sm);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.glove .glove-carousel-btn:hover:not(:disabled) {
+  background: var(--glove-primary);
+  color: var(--glove-on-primary);
+}
+
+.glove .glove-carousel-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Accordion (details/summary) */
+.glove .glove-accordion-row {
+  border-bottom: 1px solid var(--glove-line);
+}
+
+.glove .glove-accordion-row summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding-block: 12px;
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--glove-ink);
+  transition: color 150ms ease;
+}
+
+.glove .glove-accordion-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.glove .glove-accordion-row[open] > summary,
+.glove .glove-accordion-row summary:hover {
+  color: var(--glove-primary);
+}
+
+.glove .glove-accordion-chevron {
+  flex-shrink: 0;
+  transition: transform 250ms var(--glove-ease);
+}
+
+.glove .glove-accordion-row[open] .glove-accordion-chevron {
+  transform: rotate(180deg);
+}
+
+/* Panels, inputs */
+.glove .glove-mist-panel {
+  border-radius: var(--glove-radius-panel);
+  background: var(--glove-mist);
+  border: 1px solid var(--glove-mist-line);
+}
+
+/* Inputs — layered so padding/size utilities on GloveInput/GloveSelect win. */
+@layer components {
+  .glove .glove-input,
+  .glove .glove-select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--glove-line);
+    border-radius: 3px;
+    background: var(--glove-paper);
+    color: var(--glove-ink);
+    font-family: var(--glove-font-body);
+    font-size: 15px;
+    line-height: 1.4;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .glove textarea.glove-input {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .glove .glove-input::placeholder {
+    color: var(--glove-muted);
+  }
+
+  .glove .glove-input:hover,
+  .glove .glove-select:hover {
+    border-color: var(--glove-muted);
+  }
+
+  .glove .glove-input:focus-visible,
+  .glove .glove-select:focus-visible {
+    outline: none;
+    border-color: var(--glove-primary);
+    box-shadow: 0 0 0 2px var(--glove-primary-tint);
+  }
+
+  .glove .glove-input[aria-invalid="true"] {
+    border-color: var(--glove-alert);
+  }
+
+  .glove .glove-select {
+    appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23601B76' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+}
+
+.glove .glove-error {
+  color: var(--glove-alert);
+  font-size: 13px;
+}
+
+.glove .glove-success {
+  color: var(--glove-success);
+}
+
+/* Drawer + mobile nav overlay */
+@keyframes glove-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes glove-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.glove .glove-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(42, 11, 53, 0.5);
+  animation: glove-fade-in 200ms ease both;
+}
+
+.glove .glove-drawer-left {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  width: min(86vw, 360px);
+  background: var(--glove-paper);
+  box-shadow: var(--glove-shadow-md);
+  animation: glove-slide-in-left 280ms var(--glove-ease) both;
+}
+
+/* Shared reviews component (~/components/product-reviews) hardcodes Tailwind
+   palette greys, yellow stars and a blue hover. Re-tone them under the
+   reviews section only: muted/text greys, purple stars (lavender when empty). */
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-500,
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-600 {
+  color: var(--glove-muted);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-700 {
+  color: var(--glove-text);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-gray-300 {
+  color: var(--glove-lavender);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .text-yellow-400 {
+  color: var(--glove-primary);
+}
+
+.glove section[aria-labelledby="glove-reviews-heading"] .fill-yellow-400 {
+  fill: var(--glove-primary);
+}
+
+.glove
+  section[aria-labelledby="glove-reviews-heading"]
+  .hover\:text-blue-600:hover {
+  color: var(--glove-primary);
+}
+
+/* Radix dialogs portal to <body>, outside .glove, so they fall back to the
+   stock shadcn palette. Carry the bridge (and the write-review dialog's
+   hardcoded red/green) onto dialog content on glove pages only. */
+body:has(.glove) [data-slot="dialog-content"] {
+  /* --glove-* tokens only exist on .glove, so these are literal values. */
+  --background: #ffffff;
+  --foreground: #242424;
+  --card: #ffffff;
+  --card-foreground: #242424;
+  --popover: #ffffff;
+  --popover-foreground: #242424;
+  --primary: #601b76;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f0fb;
+  --secondary-foreground: #242424;
+  --muted: #f7f0fb;
+  --muted-foreground: #666666;
+  --accent: #f7f0fb;
+  --accent-foreground: #601b76;
+  --destructive: #d12c2c;
+  --border: #eaeaea;
+  --input: #eaeaea;
+  --ring: #601b76;
+  --radius: 0.3125rem;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-red-500 {
+  color: #d12c2c;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-green-600 {
+  color: #2e7d42;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-yellow-400 {
+  color: #601b76;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .fill-yellow-400 {
+  fill: #601b76;
+}
+
+body:has(.glove) [data-slot="dialog-content"] .text-gray-300 {
+  color: #cfb9d8;
+}
+
+/* Write-review dialog helper lines (text-gray-500): --glove-muted, literal. */
+body:has(.glove) [data-slot="dialog-content"] .text-gray-500 {
+  color: #666666;
+}
+
+/* Required asterisk the shared phone field hardcodes as text-red-500. */
+.glove [data-slot="form-label"] > .text-red-500[aria-hidden="true"] {
+  color: var(--glove-alert);
+}
+
+/* Rich-text embed placeholders (the renderer's gallery skeleton and
+   "not available" panel) hardcode gray-200/50/400; map them to mist. */
+.glove .glove-prose .border-gray-200 {
+  border-color: var(--glove-mist-line);
+}
+
+.glove .glove-prose .bg-gray-50,
+.glove .glove-prose .bg-gray-50\/50 {
+  background-color: var(--glove-mist);
+}
+
+.glove .glove-prose .text-gray-400 {
+  color: var(--glove-muted);
+}
+
+/* Account wrapper — the shadcn variable bridge now lives on the .glove root;
+   this only sets the body face and the account-scoped component styling. */
+.glove-account {
+  font-family: var(--glove-font-body);
+}
+
+.glove-account [data-slot="card"] {
+  background: var(--glove-paper);
+  border: 1px solid var(--glove-line);
+  border-radius: var(--glove-radius-card);
+  box-shadow: none;
+}
+
+.glove-account h2 {
+  font-family: var(--glove-font-display);
+  font-weight: 500;
+  color: var(--glove-ink);
+}
+
+.glove-account [data-slot="item"] {
+  border-color: var(--glove-line);
+}
+
+.glove-account [data-slot="item-separator"] {
+  background: var(--glove-line);
+}
+
+.glove-account [data-slot="field-label"] {
+  color: var(--glove-text);
+}
+
+.glove-account [data-slot="card-footer"] {
+  border-top-color: var(--glove-line);
+}
+
+.glove-account
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.glove-account textarea,
+.glove-account [data-slot="select-trigger"] {
+  background: var(--glove-paper);
+  border: 1px solid var(--glove-line);
+  border-radius: 3px;
+  color: var(--glove-ink);
+}
+
+.glove-account
+  input:not([type="checkbox"]):not([type="radio"]):not(
+    [type="submit"]
+  ):focus-visible,
+.glove-account textarea:focus-visible,
+.glove-account [data-slot="select-trigger"]:focus-visible {
+  border-color: var(--glove-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--glove-primary-tint);
+}
+
+/* Settings/Security section titles (better-auth cards: an h2 above each
+   card) read like GloveCardHeading. */
+.glove-account h2.mb-3.text-sm {
+  margin-bottom: 12px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+/* Shared shadcn buttons: one glove button voice (5px, Poppins 600). The
+   avatar trigger keeps its round shape. */
+.glove-account [data-slot="button"]:not(:has([data-slot="avatar"])),
+.glove-account [data-slot="dropdown-menu-trigger"] {
+  border-radius: var(--glove-radius-btn);
+  font-family: var(--glove-font-display);
+  font-weight: 600;
+}
+
+.glove-account [data-slot="button"][data-variant="default"]:hover {
+  background: var(--glove-primary-hover);
+}
+
+/* Address book "Remove" reads muted in the card; red stays for the confirm
+   dialog (portaled outside this wrapper). */
+.glove-account [data-slot="button"].text-destructive {
+  color: var(--glove-muted);
+}
+
+.glove-account [data-slot="button"].text-destructive:hover {
+  color: var(--glove-ink);
+}
+
+/* Reduced motion — everything renders settled; transitions near-instant */
+@media (prefers-reduced-motion: reduce) {
+  .glove *,
+  .glove *::before,
+  .glove *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01s !important;
+    transition-delay: 0s !important;
+  }
+
+  .glove .glove-hero-rise,
+  .glove .glove-hero-rise--late,
+  .glove .glove-drawer-scrim,
+  .glove .glove-drawer-left {
+    animation: none;
+  }
+
+  .glove-js .glove-reveal,
+  .glove-js .glove-reveal-group .glove-reveal-item,
+  .glove-js .glove-reveal-group .glove-pop {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .glove .glove-charm-card:hover .glove-swing,
+  .glove .glove-charm-card:focus-within .glove-swing,
+  .glove .glove-swing.is-swinging {
+    animation: none;
+  }
+
+  .glove .glove-style-card:hover .glove-style-img,
+  .glove .glove-style-card:focus-visible .glove-style-img,
+  .glove .glove-style-card:hover .glove-style-cta-arrow,
+  .glove .glove-style-card:focus-visible .glove-style-cta-arrow {
+    transform: none;
+  }
+
+  .glove .glove-carousel-track {
+    scroll-behavior: auto;
+  }
+
+  /* The revealed-state rules that start these keyframes are more specific
+     than the gated reset above, so force them off outright. */
+  .glove .glove-pop,
+  .glove .glove-reveal,
+  .glove .glove-reveal-item {
+    animation: none !important;
+  }
+}

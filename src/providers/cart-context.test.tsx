@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CartItem, CartItemSnapshot } from "./cart-context";
 
-import { CartProvider, useCart } from "./cart-context";
+import { cartItemId, cartLineKey, CartProvider, useCart } from "./cart-context";
 
 // Cart shows toasts via sonner; stub it so tests don't touch the toast portal.
 vi.mock("sonner", () => ({
@@ -250,5 +250,162 @@ describe("CartProvider", () => {
       expect(screen.getByTestId("count").textContent).toBe("2"),
     );
     expect(screen.getByTestId("slug").textContent).toBe("none");
+  });
+});
+
+describe("CartProvider add-on lines (addOnFor)", () => {
+  const GLOVE: Omit<CartItem, "quantity"> = {
+    ...SAMPLE,
+    productId: "glove",
+    variantId: "g-purple",
+    productName: "Glove",
+  };
+  const CHAIN: Omit<CartItem, "quantity"> = {
+    ...SAMPLE,
+    productId: "chain",
+    productName: "Chain",
+    price: 2500,
+  };
+  const KEY_A = cartLineKey("glove", "g-purple");
+  const KEY_B = cartLineKey("glove", "g-black");
+
+  let cart: ReturnType<typeof useCart>;
+  function Capture() {
+    cart = useCart();
+    return null;
+  }
+
+  async function renderCapture() {
+    render(
+      <CartProvider>
+        <Capture />
+      </CartProvider>,
+    );
+    await waitFor(() => expect(cart.isHydrated).toBe(true));
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("keeps the same chain picked for two gloves as two lines", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(GLOVE);
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+      cart.addItem({ ...GLOVE, variantId: "g-black" });
+      cart.addItem({ ...CHAIN, addOnFor: KEY_B });
+    });
+
+    const chains = cart.items.filter((i) => i.productId === "chain");
+    expect(chains).toHaveLength(2);
+    expect(chains.map((c) => c.addOnFor)).toEqual([KEY_A, KEY_B]);
+  });
+
+  it("merges a repeat add of the same add-on for the same glove", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A }, 2);
+    });
+    expect(cart.items).toHaveLength(1);
+    expect(cart.items[0]?.quantity).toBe(3);
+  });
+
+  it("keeps a standalone line apart from an add-on line of the same product", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(CHAIN);
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+    });
+    expect(cart.items).toHaveLength(2);
+    expect(cart.items[0]?.addOnFor).toBeUndefined();
+  });
+
+  it("scopes isInCart / getItemQuantity, summing every line when unscoped", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(CHAIN);
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A }, 2);
+    });
+    expect(cart.getItemQuantity("chain", null)).toBe(3);
+    expect(cart.getItemQuantity("chain", null, null)).toBe(1);
+    expect(cart.getItemQuantity("chain", null, KEY_A)).toBe(2);
+    expect(cart.getItemQuantity("chain", null, KEY_B)).toBe(0);
+    expect(cart.isInCart("chain", null, KEY_A)).toBe(true);
+    expect(cart.isInCart("chain", null, KEY_B)).toBe(false);
+  });
+
+  it("removes and updates only the targeted line when scoped", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+      cart.addItem({ ...CHAIN, addOnFor: KEY_B });
+    });
+
+    act(() => cart.updateQuantity("chain", null, 4, KEY_B));
+    expect(cart.getItemQuantity("chain", null, KEY_A)).toBe(1);
+    expect(cart.getItemQuantity("chain", null, KEY_B)).toBe(4);
+
+    act(() => cart.removeItem("chain", null, KEY_A));
+    expect(cart.items).toHaveLength(1);
+    expect(cart.items[0]?.addOnFor).toBe(KEY_B);
+  });
+
+  it("unscoped removeItem drops every line of the product (checkout cleanup)", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(CHAIN);
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+      cart.addItem(GLOVE);
+    });
+    act(() => cart.removeItem("chain", null));
+    expect(cart.items.map((i) => i.productId)).toEqual(["glove"]);
+  });
+
+  it("removeItemWithAddOns removes a glove and only its own add-ons", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(GLOVE);
+      cart.addItem({ ...CHAIN, addOnFor: KEY_A });
+      cart.addItem({ ...GLOVE, variantId: "g-black" });
+      cart.addItem({ ...CHAIN, addOnFor: KEY_B });
+      cart.addItem(CHAIN);
+    });
+    act(() => cart.removeItemWithAddOns("glove", "g-purple"));
+    expect(cart.items.map(cartItemId)).toEqual([
+      cartLineKey("glove", "g-black"),
+      `${cartLineKey("chain", null)}@${KEY_B}`,
+      cartLineKey("chain", null),
+    ]);
+  });
+
+  it("checks stock against every line of the product", async () => {
+    await renderCapture();
+    const limited = { ...CHAIN, maxInventory: 3 };
+    act(() => {
+      cart.addItem({ ...limited, addOnFor: KEY_A }, 2);
+      cart.addItem({ ...limited, addOnFor: KEY_B }, 2); // 4 > 3: rejected
+    });
+    expect(cart.items).toHaveLength(1);
+
+    act(() => cart.addItem({ ...limited, addOnFor: KEY_B }, 1));
+    expect(cart.getItemQuantity("chain", null)).toBe(3);
+
+    act(() => cart.updateQuantity("chain", null, 2, KEY_B)); // 2 + 2 > 3
+    expect(cart.getItemQuantity("chain", null, KEY_B)).toBe(1);
+  });
+
+  it("restores addOnFor from a saved cart and drops a malformed one", async () => {
+    localStorage.setItem(
+      CART_KEY,
+      JSON.stringify([
+        { ...CHAIN, quantity: 1, addOnFor: KEY_A },
+        { ...CHAIN, productId: "bad", quantity: 1, addOnFor: 7 },
+      ]),
+    );
+    await renderCapture();
+    expect(cart.items).toHaveLength(1);
+    expect(cart.items[0]?.addOnFor).toBe(KEY_A);
   });
 });

@@ -5,7 +5,7 @@ import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefFlag, navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { DreamGenericCoverHero } from "../generic/dream-generic-cover-hero";
@@ -58,7 +58,7 @@ export async function DreamCollectionPage({
     collectionsFlag === null || isEnabled(collectionsFlag);
 
   const emptyCtaUrlRaw = f["dream.collections.detail-empty-cta-url"] ?? "";
-  const emptyCtaFlag = navHrefFlag(emptyCtaUrlRaw);
+  const emptyCtaFlag = navHrefOffFlag(emptyCtaUrlRaw, isEnabled);
   const showEmptyCta =
     emptyCtaUrlRaw !== "" &&
     (emptyCtaFlag === null || isEnabled(emptyCtaFlag)) &&

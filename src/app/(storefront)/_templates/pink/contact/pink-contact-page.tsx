@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkContactTopic } from "./pink-contact-form";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
@@ -115,7 +115,7 @@ export async function PinkContactPage({
   // row, with `services` off).
   const shortcuts: ShortcutItem[] = shortcutsSource.filter((item) => {
     const href = item.href ?? "";
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   });
 

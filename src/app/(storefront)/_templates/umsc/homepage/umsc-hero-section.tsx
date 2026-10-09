@@ -228,11 +228,11 @@ export function UmscHeroSection({
       <div aria-hidden="true" className="umsc-hero-scrim absolute inset-0" />
 
       {/* ── Content ── */}
-      <div className="relative z-[2] mx-auto w-full max-w-[1040px] px-6 pt-[96px] pb-[clamp(44px,8vh,84px)] text-center sm:px-8">
+      <div className="relative z-[2] mx-auto w-full max-w-[1280px] px-6 pt-[96px] pb-[clamp(44px,8vh,84px)] text-center sm:px-8">
         {headline && (
           <h1
             {...fieldAttr("umsc.homepage.hero-headline")}
-            className="umsc-hero-rise umsc-serif text-[clamp(42px,6.4vw,86px)] leading-[1.05] tracking-[0.035em] text-balance text-[var(--umsc-cream-on-black)] uppercase"
+            className="umsc-hero-rise umsc-serif text-[clamp(32px,4.6vw,64px)] leading-[1.08] tracking-[0.035em] text-balance text-[var(--umsc-cream-on-black)] uppercase"
             style={{ transitionDelay: "0ms" }}
             data-visible={shown || undefined}
           >

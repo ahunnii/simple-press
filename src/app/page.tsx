@@ -44,6 +44,8 @@ import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-ho
 import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
 import { OliveHomepage } from "./(storefront)/_templates/olive/homepage/olive-homepage";
 import { OliveLayout } from "./(storefront)/_templates/olive/layout/olive-layout";
+import { GloveHomepage } from "./(storefront)/_templates/glove/homepage/glove-homepage";
+import { GloveLayout } from "./(storefront)/_templates/glove/layout/glove-layout";
 import { PinkHomepage } from "./(storefront)/_templates/pink/homepage/pink-homepage";
 import { PinkLayout } from "./(storefront)/_templates/pink/layout/pink-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
@@ -125,6 +127,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       dream: DreamHomepage,
       umsc: UmscHomepage,
       olive: OliveHomepage,
+      glove: GloveHomepage,
     }[business.templateId] ?? DefaultHomePage;
 
   const TemplateLayout =
@@ -148,6 +151,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       dream: DreamLayout,
       umsc: UmscLayout,
       olive: OliveLayout,
+      glove: GloveLayout,
     }[business.templateId] ?? DefaultLayout;
 
   // Organization-level MerchantReturnPolicy: covers every product, including

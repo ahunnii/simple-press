@@ -1,5 +1,5 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import {
   googleMapsUrls,
   resolveMapCoordinates,
@@ -92,7 +92,7 @@ export async function OliveContactPage({
   // B2.5: hide the promo button (never swap in another destination) when its
   // href names a flag that's off.
   const promoButtonRaw = f["olive.contact.promo-button-link"] ?? "";
-  const promoButtonFlag = navHrefFlag(promoButtonRaw);
+  const promoButtonFlag = navHrefOffFlag(promoButtonRaw, isEnabled);
   const promoButtonHref =
     promoButtonFlag === null || isEnabled(promoButtonFlag)
       ? promoButtonRaw

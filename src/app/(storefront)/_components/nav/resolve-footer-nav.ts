@@ -92,4 +92,5 @@ export const FOOTER_QUICK_LINKS_TEMPLATES: readonly string[] = [
   "umsc",
   "pink",
   "olive",
+  "glove",
 ];

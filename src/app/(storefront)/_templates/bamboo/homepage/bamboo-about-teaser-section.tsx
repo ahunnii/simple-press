@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 
@@ -44,7 +44,7 @@ export function BambooAboutTeaserSection({ customFields, isEnabled }: Props) {
   // names a flag that's off.
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
   const buttonHref = f["bamboo.homepage.about-teaser-button-link"] || "/about";
-  const buttonFlag = navHrefFlag(buttonHref);
+  const buttonFlag = navHrefOffFlag(buttonHref, isEnabled);
   const showButton =
     buttonText !== "" && (buttonFlag === null || isEnabled(buttonFlag));
 

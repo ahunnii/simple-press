@@ -5,6 +5,7 @@
  */
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { routeEnabled } from "~/lib/features/route-flags";
 import type { BannerConfig, PopupConfig } from "~/lib/validators/site-banner";
 import { isContentEmpty } from "~/lib/template-fields";
 import {
@@ -24,12 +25,19 @@ type SiteContentLike =
  * - `enabled !== true` in the stored config
  * - content is empty (nothing to render)
  * - the stored JSON fails schema validation
+ *
+ * A link to a route whose feature flag is off (e.g. `/shop` with `products`
+ * off) would 404, so `linkUrl`/`linkLabel` are dropped and the banner text
+ * renders on its own (baseline B2.4/B2.5).
+ *
+ * `isEnabled` is the business's resolved flag check (`dependsOn` cascades
+ * applied) — it gates both the `banners` flag and the link's route.
  */
 export function resolveBanner(
   siteContent: SiteContentLike,
-  bannersEnabled: boolean,
+  isEnabled: (key: string) => boolean,
 ): BannerConfig | null {
-  if (!bannersEnabled) return null;
+  if (!isEnabled("banners")) return null;
   if (!siteContent) return null;
 
   const raw = siteContent.bannerConfig;
@@ -47,6 +55,10 @@ export function resolveBanner(
   if (config.content === null) return null;
   if (isContentEmpty(config.content as TiptapJSON)) return null;
 
+  if (config.linkUrl && !routeEnabled(config.linkUrl, isEnabled)) {
+    return { ...config, linkUrl: null, linkLabel: null };
+  }
+
   return config;
 }
 
@@ -57,12 +69,19 @@ export function resolveBanner(
  * - `enabled !== true` in the stored config
  * - content is empty (text mode: no content; image mode: no imagePath)
  * - the stored JSON fails schema validation
+ *
+ * Like the banner link, a CTA pointing at a flag-disabled route (e.g. `/shop`
+ * with `products` off) would 404, so `ctaUrl`/`ctaLabel` are dropped and the
+ * popup renders without its button.
+ *
+ * `isEnabled` is the business's resolved flag check — it gates both the
+ * `popups` flag and the CTA's route.
  */
 export function resolvePopup(
   siteContent: SiteContentLike,
-  popupsEnabled: boolean,
+  isEnabled: (key: string) => boolean,
 ): PopupConfig | null {
-  if (!popupsEnabled) return null;
+  if (!isEnabled("popups")) return null;
   if (!siteContent) return null;
 
   const raw = siteContent.popupConfig;
@@ -82,6 +101,10 @@ export function resolvePopup(
   } else {
     // image mode: require a non-empty imagePath
     if (!config.imagePath) return null;
+  }
+
+  if (config.ctaUrl && !routeEnabled(config.ctaUrl, isEnabled)) {
+    return { ...config, ctaUrl: null, ctaLabel: null };
   }
 
   return config;

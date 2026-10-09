@@ -1,5 +1,5 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -50,7 +50,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     getBusinessFlags(),
   ]);
 
-  const popup = resolvePopup(props?.business?.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(props?.business?.siteContent, isEnabled);
 
   // Blog posts for the blog section. `getBlogPages` is gated behind the
   // "blog" feature flag, so when it's disabled the catch yields an empty array
@@ -146,7 +146,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
   // *different*, flag-gated route (e.g. a "/shop" button on a section that
   // isn't itself gated on "products").
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

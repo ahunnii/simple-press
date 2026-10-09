@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import type { Session } from "~/server/better-auth/config";
 import type { CartItem } from "~/providers/cart-context";
 import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
@@ -130,7 +130,7 @@ export function PinkOrderConfirmation({
   // its route's feature flag and hidden (never re-pointed) when that
   // feature is off — same contract as `navHrefFlag`'s other adopters.
   const hrefEnabled = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

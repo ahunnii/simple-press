@@ -19,6 +19,7 @@ export const TEMPLATES = [
   "olive",
   "umsc",
   "dream",
+  "glove",
 ] as const;
 
 export type SeedTenant = {

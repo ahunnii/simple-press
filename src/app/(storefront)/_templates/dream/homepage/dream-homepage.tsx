@@ -8,7 +8,7 @@ import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
 import { HydrateClient } from "~/trpc/server";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { DREAM_CLOUD_PRESETS } from "../lib/cloud-presets";
@@ -76,7 +76,7 @@ export async function DreamHomepage({
   // B2.4: the owner's announcement popup — same source/shape every other
   // template's homepage uses (`business.siteContent.popupConfig`, gated on
   // the `popups` flag).
-  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business.siteContent, isEnabled);
 
   // B2.5: a field-driven CTA/link must be HIDDEN (never redirected) when its
   // destination route's own feature flag is off — e.g. a "What We Do" row
@@ -87,7 +87,7 @@ export async function DreamHomepage({
   // `?? "/services"`-style literal fallback, which would silently point an
   // always-rendered link at a route that may be gated off.
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
   const ctaVisible = (href: string): boolean =>

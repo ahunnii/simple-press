@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 
 import { VII_BUTTON_STYLE } from "../shared/vii-button-style";
 
@@ -26,7 +26,7 @@ export function ViiEventsCtaButton({
 }) {
   const { isEnabled } = useStorefrontFlags();
   if (!href.trim() || !text.trim()) return null;
-  const flag = navHrefFlag(href);
+  const flag = navHrefOffFlag(href, isEnabled);
   if (flag !== null && !isEnabled(flag)) return null;
 
   return (

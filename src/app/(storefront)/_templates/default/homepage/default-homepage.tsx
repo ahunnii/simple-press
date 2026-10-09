@@ -33,7 +33,7 @@ export async function DefaultHomePage({
     getBusinessFlags(),
   ]);
 
-  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business?.siteContent, isEnabled);
   const products = homepage?.products ?? [];
   const customFields = business?.siteContent?.customFields;
 

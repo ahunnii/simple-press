@@ -12,7 +12,7 @@ export async function DarkTrendLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   const { isEnabled } = await getBusinessFlags();
-  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const banner = resolveBanner(business.siteContent, isEnabled);
 
   return (
     <div className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased">

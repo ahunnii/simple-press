@@ -3,7 +3,7 @@ import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import type { PinkFeaturedProduct } from "./pink-collection-section";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -114,14 +114,14 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   // owner-configured popup could never render on this template regardless of
   // the `popups` flag. Mirrors default-homepage.tsx's wiring exactly.
   const { isEnabled } = await getBusinessFlags();
-  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+  const popup = resolvePopup(business.siteContent, isEnabled);
 
   // PF14/PF15 (B2.1(4), B2.5): hide a field-driven CTA/chip when its route's
   // flag is off — never swap in another destination. `resolveFields` already
   // applies each key's own default (declared on the field itself) when unset,
   // so `f[key] ?? ""` — never a literal `?? "/shop"` — is the resolved href.
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

@@ -1,7 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -64,7 +64,7 @@ export async function ViiShopPage({
   // B2.5: hide a promo button when its href names a flag that's off — never
   // swap in another destination.
   const ctaFlagOk = (href: string): boolean => {
-    const flag = navHrefFlag(href);
+    const flag = navHrefOffFlag(href, isEnabled);
     return flag === null || isEnabled(flag);
   };
 

@@ -12,7 +12,7 @@ import { api } from "~/trpc/server";
 import {
   externalLinkProps,
   getAccountNavLinks,
-  navHrefFlag,
+  navHrefOffFlag,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
 
@@ -247,7 +247,7 @@ export async function OliveFooter({
   const ctaIsExternal = /^https?:\/\//i.test(ctaLink);
   // B2.5: a CTA pointing at a flag-disabled route (e.g. /shop with products
   // off) is hidden, never re-pointed; the tagline shows in its place.
-  const ctaFlag = navHrefFlag(ctaLink);
+  const ctaFlag = navHrefOffFlag(ctaLink, isEnabled);
   const showCta =
     ctaLink.length > 0 &&
     ctaLabel.length > 0 &&

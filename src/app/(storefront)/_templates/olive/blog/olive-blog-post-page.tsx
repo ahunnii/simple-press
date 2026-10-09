@@ -3,7 +3,7 @@ import Image from "next/image";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { deriveExcerpt } from "~/lib/blog-search";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -53,7 +53,7 @@ export async function OliveBlogPostPage({
   // link"]` already carries the field's own default ("/shop") for an unset
   // key — resolveFields applies `defaultValue` — so no separate fallback.
   const ctaButtonLinkRaw = f["olive.blog.post-cta-button-link"] ?? "";
-  const ctaButtonLinkFlag = navHrefFlag(ctaButtonLinkRaw);
+  const ctaButtonLinkFlag = navHrefOffFlag(ctaButtonLinkRaw, isEnabled);
   const ctaButtonLink =
     ctaButtonLinkFlag === null || isEnabled(ctaButtonLinkFlag)
       ? ctaButtonLinkRaw

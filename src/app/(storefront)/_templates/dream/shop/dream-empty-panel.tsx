@@ -3,7 +3,7 @@
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { DreamButton } from "../shared/dream-button";
 import { DreamMark } from "../shared/dream-mark";
@@ -46,7 +46,7 @@ export function DreamEmptyPanel({
   className,
 }: Props) {
   const { isEnabled } = useStorefrontFlags();
-  const flag = ctaHref ? navHrefFlag(ctaHref) : null;
+  const flag = ctaHref ? navHrefOffFlag(ctaHref, isEnabled) : null;
   const showCta =
     ctaLabel.trim() !== "" &&
     ctaHref.trim() !== "" &&
