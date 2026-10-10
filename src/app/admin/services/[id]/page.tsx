@@ -35,6 +35,9 @@ export default async function EditServicePage({ params }: PageProps) {
       <ServiceEditor
         service={service}
         embedsEnabled={embedsEnabled}
+        galleriesEnabled={flags.isEnabled("galleries")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
+        formsEnabled={flags.isEnabled("forms")}
         storefrontTemplateId={business.templateId}
       />
     </>

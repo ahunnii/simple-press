@@ -99,3 +99,27 @@ export const FOOTER_QUICK_LINKS_TEMPLATES: readonly string[] = [
   "olive",
   "glove",
 ];
+
+/**
+ * Templates whose footer falls back to their OWN built-in quick-links list
+ * (not the main nav's top level) when the owner hasn't saved a footer list.
+ * Value = a short owner-facing description of that built-in list, shown in
+ * Admin > Navigation. Every key must also be in `FOOTER_QUICK_LINKS_TEMPLATES`.
+ *
+ * Must be kept in sync with the footers' fallback lists:
+ * - default: `default/layout/default-footer.tsx` (`quickLinksFallback`)
+ * - noise: `noise/layout/noise-footer.tsx` (`quickLinksFallback`)
+ * - pink: `pink/layout/pink-footer.tsx` (Studio column `col2Defaults`, or the
+ *   template's saved footer links)
+ * - umsc: `umsc/layout/umsc-footer.tsx` (`UMSC_HELP_DEFAULTS`)
+ */
+export const FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK: Readonly<
+  Record<string, string>
+> = {
+  default:
+    "About us, Reviews, Blog and Services (Reviews, Blog and Services only when those features are on), plus Donate when it is set to show in the footer",
+  noise:
+    "About Us, Blog, Testimonials and Contact (Blog and Testimonials only when those features are on)",
+  pink: "About, Journal, Events, Videos, Testimonials and Contact (Journal, Events, Videos and Testimonials only when those features are on), unless you've set your own links in the template's footer settings",
+  umsc: "FAQ, Contact and Custom orders",
+};

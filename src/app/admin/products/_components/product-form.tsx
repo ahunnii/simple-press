@@ -125,6 +125,9 @@ import { VariantManager } from "./variant-manager";
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   collectionsEnabled?: boolean;
   /** `subscriptions` feature flag, resolved server-side — gates whether the
    *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
@@ -238,6 +241,9 @@ function getNewProductDefaults(): ProductFormSchema {
 export function ProductForm({
   product,
   galleriesEnabled,
+  embedsEnabled,
+  quotesEnabled,
+  formsEnabled,
   collectionsEnabled,
   subscriptionsEnabled,
   mediaEnabled,
@@ -2141,6 +2147,9 @@ export function ProductForm({
                       output="json"
                       editorContentClassName={"p-4 min-h-[400px]"}
                       galleriesEnabled={galleriesEnabled}
+                      embedsEnabled={embedsEnabled}
+                      quotesEnabled={quotesEnabled}
+                      formsEnabled={formsEnabled}
                     />
                   </CardContent>
                 </Card>

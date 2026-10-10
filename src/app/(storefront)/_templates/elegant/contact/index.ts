@@ -167,7 +167,7 @@ export const elegantContactData: TemplateField[] = [
     key: "elegant.contact.faq",
     label: "Questions",
     description:
-      "Pick questions from Content → FAQ. Leave empty to show the first 10 published questions.",
+      "Pick questions from Site Setup → FAQ. Leave empty to show the first 10 published questions.",
     type: "faq",
     page: "contact",
     group: "contact.faq",

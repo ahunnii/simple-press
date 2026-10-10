@@ -113,7 +113,7 @@ const uploadAndInsertVideo = async (
   }
 };
 
-const createExtensions = ({
+export const createExtensions = ({
   placeholder,
   uploader,
   videoUploader,
@@ -459,7 +459,10 @@ export const useMinimalTiptapEditor = ({
     if (JSON.stringify(lastEmitted) === JSON.stringify(value)) return;
 
     lastEmittedContentRef.current = value;
-    editor.commands.setContent(value);
+    // Value-driven sync (mount, Reset, setValue, templates) must not echo back
+    // through onUpdate: TipTap would hand the form its schema-normalized JSON
+    // (empty doc → one empty paragraph) and mark an untouched form dirty.
+    editor.commands.setContent(value, { emitUpdate: false });
   }, [editor, value]);
 
   return editor;

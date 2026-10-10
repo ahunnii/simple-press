@@ -492,7 +492,7 @@ const homepageFaqData: TemplateField[] = [
     key: "umsc.homepage.faq-heading",
     label: "Heading",
     description:
-      "Heading for the homepage questions. The section stays hidden until at least one question is published in Content → FAQ.",
+      "Heading for the homepage questions. The section stays hidden until at least one question is published in Site Setup → FAQ.",
     type: "text",
     page: "homepage",
     group: "homepage.faq",
@@ -533,7 +533,7 @@ const homepageFaqData: TemplateField[] = [
     key: "umsc.homepage.faq-items",
     label: "Questions",
     description:
-      "Pick up to three questions from Content → FAQ. Leave empty to show your first three published questions.",
+      "Pick up to three questions from Site Setup → FAQ. Leave empty to show your first three published questions.",
     type: "faq",
     page: "homepage",
     group: "homepage.faq",
@@ -612,7 +612,7 @@ export const umscHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.faq",
     title: "Questions",
     description:
-      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Content → FAQ",
+      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Site Setup → FAQ",
     icon: "❓",
     columns: 2,
   },
@@ -693,7 +693,7 @@ export const umscHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Questions",
     description:
-      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Content → FAQ",
+      "Up to three questions with a link to the full FAQ page. Stays hidden until at least one question is published in Site Setup → FAQ",
     groupIds: ["homepage.faq"],
     order: 7,
     hideable: true,

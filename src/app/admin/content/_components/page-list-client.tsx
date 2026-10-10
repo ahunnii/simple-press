@@ -151,12 +151,13 @@ const ENTITY = {
     /** Title-cased for dialog headings and button labels. */
     nounTitle: { one: "Page", many: "Pages" },
     heading: "Pages",
-    subheading: "Standalone content pages like About, Contact and FAQ",
+    subheading:
+      "Standalone content pages like Our Story, Team or a Sizing Guide",
     createLabel: "Create Page",
     firstCreateLabel: "Create Your First Page",
     emptyTitle: "No pages yet",
     emptyDescription:
-      "Add a standalone page — About, Contact, FAQ — and it gets its own address on your site. To edit homepage sections, use the Site Editor instead.",
+      "Add a standalone page — Our Story, Team, Gallery, Sizing Guide — and it gets its own address on your site. Built-in pages like About, Contact and FAQ already exist and are edited in the Site Editor (FAQ questions under Site Setup → FAQ), as are homepage sections.",
     searchPlaceholder: "Search pages…",
     searchAriaLabel: "Search pages by title, URL or excerpt",
     identityHeading: "Page",

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { NavItem } from "./resolve-nav";
 
 import {
+  FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK,
+  FOOTER_QUICK_LINKS_TEMPLATES,
   resolveFooterNav,
   resolveFooterQuickLinks,
   topLevelNav,
@@ -243,5 +245,13 @@ describe("resolveFooterQuickLinks", () => {
         donate: { show: false, label: "Donate" },
       }),
     ).toEqual([{ label: "Shop", href: "/shop" }]);
+  });
+});
+
+describe("FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK", () => {
+  it("only lists templates that render footer quick links", () => {
+    for (const id of Object.keys(FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK)) {
+      expect(FOOTER_QUICK_LINKS_TEMPLATES).toContain(id);
+    }
   });
 });

@@ -17,6 +17,7 @@ import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
+import { rasterImageUrl } from "~/lib/image-url";
 import {
   releaseReservation,
   reserveInventory,
@@ -791,7 +792,8 @@ export async function POST(req: NextRequest) {
       const rawImageUrl =
         variantRecord?.product.images[0]?.url ??
         productRecord?.images[0]?.url ??
-        business.siteContent?.logoUrl ??
+        // Stripe product images must be raster; an SVG logo is skipped.
+        rasterImageUrl(business.siteContent?.logoUrl) ??
         null;
       const imageUrl =
         rawImageUrl?.startsWith("https://") ||

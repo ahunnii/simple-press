@@ -16,6 +16,9 @@ type Props = {
   customFields: Record<string, unknown>;
   onFieldChange: (key: string, value: unknown) => void;
   embedsEnabled?: boolean;
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
 };
 
 /**
@@ -29,6 +32,9 @@ export function ServiceTemplateFieldsEditor({
   customFields,
   onFieldChange,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
 }: Props) {
   const mediaEnabled = useMediaLibraryEnabled();
   const fieldsByGroup = getServiceTemplateFieldsByGroup(serviceTemplateId);
@@ -79,6 +85,9 @@ export function ServiceTemplateFieldsEditor({
               onFieldChange={onFieldChange}
               isUngrouped={isUngrouped}
               embedsEnabled={embedsEnabled}
+              galleriesEnabled={galleriesEnabled}
+              quotesEnabled={quotesEnabled}
+              formsEnabled={formsEnabled}
               mediaLibraryEnabled={mediaEnabled}
             />
           );

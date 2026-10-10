@@ -74,7 +74,7 @@ function isImageFile(file: File): boolean {
     file.type.startsWith("image/") ||
     // Some browsers (notably Android Chrome) leave `file.type` empty for
     // HEIC/HEIF, so fall back to the extension for those.
-    /\.(jpg|jpeg|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name)
+    /\.(jpg|jpeg|png|webp|gif|bmp|avif|heic|heif|svg)$/i.test(file.name)
   );
 }
 

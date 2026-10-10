@@ -90,6 +90,10 @@ type Props = {
   /** Pass a service when in edit mode; omit for create mode. */
   service?: ServiceRecord;
   embedsEnabled?: boolean;
+  /** Rich-text "Insert elements" gates for the Page-content tab. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   /**
    * The current business's storefront templateId (e.g. "pollen", "vii",
    * "modern"). Controls which service-page templates are shown in the picker.
@@ -110,6 +114,9 @@ type Props = {
 export function ServiceEditor({
   service,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   storefrontTemplateId,
 }: Props) {
   const router = useRouter();
@@ -772,6 +779,9 @@ export function ServiceEditor({
                     customFields={customFields}
                     onFieldChange={handleFieldChange}
                     embedsEnabled={embedsEnabled}
+                    galleriesEnabled={galleriesEnabled}
+                    quotesEnabled={quotesEnabled}
+                    formsEnabled={formsEnabled}
                   />
                 </TabsContent>
               )}

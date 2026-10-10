@@ -10,6 +10,8 @@ import {
   Text,
 } from "@react-email/components";
 
+import { isSvgUrl } from "~/lib/image-url";
+
 type EmailLayoutProps = {
   children: React.ReactNode;
   previewText: string;
@@ -27,13 +29,17 @@ export function EmailLayout({
   footerText,
   ownerEmail,
 }: EmailLayoutProps) {
+  // Gmail and Outlook don't render SVG, so an SVG logo falls back to the
+  // business name instead of showing a broken image.
+  const showLogo = Boolean(logoUrl) && !isSvgUrl(logoUrl);
+
   return (
     <Html>
       <Head />
       <Body style={main}>
         <Container style={container}>
           {/* Logo/Header */}
-          {logoUrl ? (
+          {showLogo && logoUrl ? (
             <Section style={header}>
               <Img src={logoUrl} alt={businessName} style={logo} />
             </Section>

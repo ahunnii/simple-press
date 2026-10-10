@@ -129,7 +129,7 @@ const contactPageQuestionsData: TemplateField[] = [
     key: "modern.contact.faq-list",
     label: "Questions",
     description:
-      "Pick questions from Content → FAQ. Leave empty to show the first 6 published questions.",
+      "Pick questions from Site Setup → FAQ. Leave empty to show the first 6 published questions.",
     type: "faq",
     page: "contact",
     group: "contact.questions",

@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
+import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
@@ -165,8 +166,25 @@ export function PageEditor({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [activeTab, setActiveTab] = useState<PageEditorTab>("content");
   // Initialize form with TipTap content
+  // This editor only handles URL-served pages (new ones are always created as
+  // type "page"), so a slug that shadows a built-in route like /about — or a
+  // policy's fixed slug — is rejected here before the server has to. An
+  // existing page keeps whatever slug it already has (legacy rows stay
+  // editable); only a changed slug is checked, mirroring `content.updatePage`.
+  const originalSlug = page?.slug;
+  const resolverSchema = useMemo(
+    () =>
+      pageFormSchema.superRefine((values, ctx) => {
+        if (values.slug === originalSlug) return;
+        const message = getReservedPageSlugMessage(values.slug, "page");
+        if (message) {
+          ctx.addIssue({ code: "custom", path: ["slug"], message });
+        }
+      }),
+    [originalSlug],
+  );
   const form = useForm<PageFormValues>({
-    resolver: zodResolver(pageFormSchema),
+    resolver: zodResolver(resolverSchema),
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
@@ -414,6 +432,10 @@ export function PageEditor({
 
   const watchedTitle = form.watch("title") ?? "";
   const watchedSlug = form.watch("slug") ?? "";
+  const reservedSlugMessage =
+    watchedSlug !== originalSlug
+      ? getReservedPageSlugMessage(watchedSlug, "page")
+      : null;
   const titleDerivedSlug = slugify(watchedTitle);
   const slugFrozen = !slugAutoSyncs(form.watch("published"));
   const showContentRenameWarning =
@@ -657,6 +679,14 @@ export function PageEditor({
                         >
                           Edit in SEO
                         </Button>
+                        {/* The slug auto-follows the title, so typing
+                            "About" lands on a built-in route without the
+                            owner ever opening the SEO tab — say so here. */}
+                        {reservedSlugMessage && (
+                          <span className="text-destructive basis-full">
+                            {reservedSlugMessage}
+                          </span>
+                        )}
                       </div>
                     )}
 

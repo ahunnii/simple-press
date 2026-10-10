@@ -15,7 +15,8 @@
  *    (including Page.previewDraft and Business.maintenanceMessage)
  *  - Gallery images that are referenced by gallery-type template fields or by
  *    `gallery` nodes inside TipTap documents
- *  - Logo / favicon objects are marked "always in use" via `isAlwaysInUseKey`
+ *  - Logo / favicon fixed-key objects are never auto-cleaned (`isAlwaysInUseKey`);
+ *    the Media Library protects only the one in use (`isProtectedBrandAssetKey`)
  */
 
 import type { TemplateField } from "~/lib/template-fields";
@@ -68,9 +69,13 @@ function buildTemplateFieldOwnerIndex(): Map<string, TemplateFieldOwner> {
 // ─── Always-in-use predicate ──────────────────────────────────────────────────
 
 /**
- * Logo and favicon objects are written to a fixed key and should never be
- * one-click-deletable — the upload always overwrites the same S3 key, so the
- * SiteContent column may transiently lag after a re-upload.
+ * Logo and favicon objects live at fixed keys ({businessId}/logo.{ext},
+ * favicon.{ext}). This strict predicate is for automatic "delete if
+ * unreferenced" cleanup (gallery / product routers), which must never remove
+ * a brand file: the SiteContent column can lag an upload. A format switch
+ * (logo.png → logo.svg) leaves the old key behind, so the Media Library
+ * narrows this to the key actually in use via `isProtectedBrandAssetKey`
+ * (`~/lib/media/brand-asset-keys`), letting the stale one be deleted.
  */
 export function isAlwaysInUseKey(key: string): boolean {
   // Key shape: {businessId}/logo.{ext} or {businessId}/favicon.{ext}
@@ -627,7 +632,8 @@ async function scanMediaReferences(
         // (`scrubMediaUrlsFromSiteContent` in the media router) only ever
         // touches SiteContent. Flagging a stale service-template field would
         // therefore delete the object and leave `Service.customFields`
-        // pointing at a 404.
+        // pointing at a 404. The same holds for gallery embeds: the scrub in
+        // `gallery.delete` is SiteContent-only too.
         const cf = s.customFields;
         if (cf && typeof cf === "object" && !Array.isArray(cf)) {
           const serviceFieldsByKey = new Map(
@@ -1073,6 +1079,12 @@ export type GalleryExternalUsage = {
   location: string;
   entityLabel?: string;
   adminHref?: string;
+  /**
+   * Set when the embed is a field value of a template the owner switched away
+   * from (carried from the scan — only SiteContent refs ever set it). Such an
+   * embed is reported but does NOT block `gallery.delete`; the delete scrubs it.
+   */
+  inactiveTemplate?: boolean;
 };
 
 /**
@@ -1098,9 +1110,15 @@ export type GalleryExternalUsage = {
  * This is the single source of truth for both `gallery.delete`'s CONFLICT
  * guard and the admin "Embedded" badge — they must never drift apart.
  *
- * `inactiveTemplate` is deliberately ignored: an embed from an inactive
- * template still counts as embedded and still blocks gallery deletion, because
- * switching the template back would restore it.
+ * `inactiveTemplate` is carried through, matching the Media Library rule
+ * (`deleteMedia` in `~/server/media/library`): an embed that is a leftover field
+ * value of a template the owner switched away from is REPORTED (with the flag)
+ * but does not block deletion — owners have no UI to clear an inactive
+ * template's fields. `gallery.delete` blocks only on usages without the flag and
+ * scrubs the inactive ones out of `SiteContent.customFields` /
+ * `previewCustomFields` before deleting, so a reactivated template falls back to
+ * its field defaults. When an active and an inactive reference dedupe to the
+ * same entry, the active one wins.
  */
 export async function buildGalleryExternalUsage(
   businessId: string,
@@ -1124,11 +1142,18 @@ export async function buildGalleryExternalUsage(
     if (!known.has(ref.id)) continue;
     const usages =
       deduped.get(ref.id) ?? new Map<string, GalleryExternalUsage>();
-    usages.set(`${ref.entityType}:${ref.entityId ?? ref.location}`, {
-      location: ref.location,
-      entityLabel: ref.entityLabel,
-      adminHref: ref.adminHref,
-    });
+    const key = `${ref.entityType}:${ref.entityId ?? ref.location}`;
+    const existing = usages.get(key);
+    // Active wins: never let an inactive duplicate downgrade an active entry
+    // (that would let `gallery.delete` through and scrub a live embed).
+    if (!existing || (existing.inactiveTemplate && !ref.inactiveTemplate)) {
+      usages.set(key, {
+        location: ref.location,
+        entityLabel: ref.entityLabel,
+        adminHref: ref.adminHref,
+        inactiveTemplate: ref.inactiveTemplate ? true : undefined,
+      });
+    }
     deduped.set(ref.id, usages);
   }
 

@@ -171,6 +171,10 @@ export type VisualEditorProps = {
   /** All sections for the active template (all pages, template order). */
   sections: TemplateSection[];
   embedsEnabled: boolean;
+  /** Rich-text "Insert elements" gates — each off unless its feature is on. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaEnabled: boolean;
   /**
    * Feature-flag keys enabled for this business — filters field-panel admin
@@ -291,6 +295,9 @@ export function VisualEditor({
   productPreview,
   sections,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaEnabled,
   enabledFeatures,
   initialPage,
@@ -1480,6 +1487,10 @@ export function VisualEditor({
         onClose={() => setCmsPanelOpen(false)}
         adminHref={cmsAdminHref(activeCmsPage)}
         variant={variant}
+        galleriesEnabled={galleriesEnabled}
+        embedsEnabled={embedsEnabled}
+        quotesEnabled={quotesEnabled}
+        formsEnabled={formsEnabled}
       />
     ) : themeOpen && templateTheme ? (
       <ThemePanel
@@ -1498,6 +1509,9 @@ export function VisualEditor({
         publishedFields={publishedFields}
         onFieldChange={applyFieldUpdate}
         embedsEnabled={embedsEnabled}
+        galleriesEnabled={galleriesEnabled}
+        quotesEnabled={quotesEnabled}
+        formsEnabled={formsEnabled}
         mediaEnabled={mediaEnabled}
         enabledFeatures={enabledFeatureSet}
         disabled={isPublishing || mutationPending}

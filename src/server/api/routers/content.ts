@@ -3,12 +3,15 @@ import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
 import type { TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
-import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
+import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
+import { isContentEmpty } from "~/lib/template-fields";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -613,6 +616,8 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
+      const isPolicyList = input.type === "policy";
+
       const pages = await ctx.db.page.findMany({
         where: {
           businessId: business.id,
@@ -623,11 +628,25 @@ export const contentRouter = createTRPCRouter({
           id: true,
           title: true,
           slug: true,
+          // Only policy lists need the body (to drop blank ones, below);
+          // every other list keeps the cheap id/title/slug read.
+          ...(isPolicyList ? { content: true } : {}),
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });
 
-      return pages;
+      if (!isPolicyList) return pages;
+
+      // A published policy whose body was cleared (empty TipTap doc) would be
+      // linked from footers / checkout and render a blank page. Drop it from
+      // every policy link list; the admin Policies screen already treats a
+      // blank policy as "not live". Same `{ id, title, slug }` shape as above.
+      return pages
+        .filter(
+          (p) =>
+            !isContentEmpty((p as { content?: unknown }).content as TiptapJSON),
+        )
+        .map(({ id, title, slug }) => ({ id, title, slug }));
     }),
 
   getPageById: ownerAdminProcedure
@@ -842,6 +861,16 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Reject slugs that would shadow a built-in route (or squat a policy's
+      // fixed slug) — the page would save fine but never be reachable.
+      const reservedMessage = getReservedPageSlugMessage(
+        input.data.slug,
+        input.data.type,
+      );
+      if (reservedMessage) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: reservedMessage });
+      }
+
       // Check if slug already exists
       const existing = await ctx.db.page.findUnique({
         where: {
@@ -907,6 +936,20 @@ export const contentRouter = createTRPCRouter({
 
       // If changing slug, check it doesn't conflict
       if (input.data.slug && input.data.slug !== existingPage.slug) {
+        // Only validated when the slug actually changes, so legacy pages
+        // already sitting on a reserved slug can still be edited. `type` is
+        // immutable (checked above), so the existing type is authoritative.
+        const reservedMessage = getReservedPageSlugMessage(
+          input.data.slug,
+          existingPage.type,
+        );
+        if (reservedMessage) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: reservedMessage,
+          });
+        }
+
         const conflict = await ctx.db.page.findUnique({
           where: {
             businessId_slug: {
@@ -1062,9 +1105,7 @@ export const contentRouter = createTRPCRouter({
 
       async function missingIds(
         ids: string[],
-        findMany: (id: {
-          in: string[];
-        }) => Promise<{ id: string }[]>,
+        findMany: (id: { in: string[] }) => Promise<{ id: string }[]>,
       ): Promise<string[]> {
         if (ids.length === 0) return [];
         const found = await findMany({ in: ids });

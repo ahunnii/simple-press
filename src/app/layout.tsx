@@ -9,6 +9,7 @@ import Script from "next/script";
 import { env } from "~/env";
 import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { checkBusiness } from "~/lib/check-business";
+import { rasterImageUrl } from "~/lib/image-url";
 import { getCachedBusiness } from "~/lib/seo";
 import { firstNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
@@ -74,7 +75,8 @@ export async function generateMetadata() {
   // No `/placeholder.svg` fallback: a share card with a real image or none at
   // all beats one advertising a missing asset.
   const ogImageUrl = firstNonBlank(business.siteContent?.ogImage);
-  const ogImage = ogImageUrl ?? firstNonBlank(business.siteContent?.logoUrl);
+  const ogImage =
+    ogImageUrl ?? firstNonBlank(rasterImageUrl(business.siteContent?.logoUrl));
 
   // Search-engine ownership tokens. Emit a key only when the owner has actually
   // saved that token — an empty `<meta>` is worse than no tag at all, since

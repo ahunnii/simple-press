@@ -567,6 +567,94 @@ describe("buildGalleryExternalUsage", () => {
     expect(external.get("gal_1")).toHaveLength(1);
   });
 
+  function siteContentWithFields(
+    customFields: unknown,
+    templateId: string,
+    previewCustomFields: unknown = null,
+  ) {
+    return {
+      heroImageUrl: null,
+      aboutImageUrl: null,
+      ogImage: null,
+      faviconUrl: null,
+      logoUrl: null,
+      pageMeta: null,
+      popupConfig: null,
+      customFields,
+      previewCustomFields,
+      business: { templateId },
+    };
+  }
+
+  it("flags an embed from an inactive template's gallery field as inactiveTemplate", async () => {
+    // Business is on Modern; the Noise gallery field is a leftover.
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "modern",
+        { "noise.homepage.intro-gallery": "gal_1" },
+      ),
+    );
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+    const usages = external.get("gal_1") ?? [];
+
+    // Published + draft blobs → two entries, both inactive.
+    expect(usages).toHaveLength(2);
+    for (const u of usages) {
+      expect(u.inactiveTemplate).toBe(true);
+      expect(u.location).toContain("(not active)");
+    }
+  });
+
+  it("does not flag the same gallery field when its template IS active", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "noise",
+      ),
+    );
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toHaveLength(1);
+    expect(external.get("gal_1")?.[0]?.inactiveTemplate).toBeUndefined();
+  });
+
+  it("reports active page embeds unflagged alongside inactive-template ones", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "modern",
+      ),
+    );
+    asMock(db.page.findMany).mockResolvedValue([pageRow(galleryDoc("gal_1"))]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+    const usages = external.get("gal_1") ?? [];
+
+    expect(usages).toHaveLength(2);
+    expect(usages.filter((u) => !u.inactiveTemplate)).toEqual([
+      expect.objectContaining({ entityLabel: "About" }),
+    ]);
+    expect(usages.filter((u) => u.inactiveTemplate)).toHaveLength(1);
+  });
+
+  it("never flags a service-page gallery field (gallery.delete's scrub is SiteContent-only)", async () => {
+    asMock(db.service.findMany).mockResolvedValue([
+      serviceRow({ "service-two.gallery": "gal_1" }, "service-two"),
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toHaveLength(1);
+    expect(external.get("gal_1")?.[0]?.inactiveTemplate).toBeUndefined();
+  });
+
   it("drops references to galleries that are not this business's", async () => {
     asMock(db.page.findMany).mockResolvedValue([
       pageRow(galleryDoc("gal_gone")),

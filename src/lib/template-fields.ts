@@ -462,7 +462,7 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "happy-bamboo.homepage.about-body",
   // pollen, retired 2026-09-26 — orphan saved keys with no declaration and
   // no runtime reader; the data now comes from Settings (address, phone),
-  // Content → FAQ (the services-page `type: "faq"` picker), or Admin →
+  // Site Setup → FAQ (the services-page `type: "faq"` picker), or Admin →
   // Testimonials. `image-overlay-color` was declared but never read by the
   // auth shell. Hidden from the admin's custom pairs and preserved on save.
   "pollen.contact.address",
@@ -1173,6 +1173,11 @@ export const PAGE_METADATA = {
     description: "Product listing and collection pages",
     icon: "📦",
   },
+  shop: {
+    title: "Shop",
+    description: "Shop listing page content",
+    icon: "🛍️",
+  },
   product: {
     title: "Product",
     description: "Individual product page content",
@@ -1227,6 +1232,11 @@ export const PAGE_METADATA = {
     title: "Videos",
     description: "Video gallery page content",
     icon: "📺",
+  },
+  faq: {
+    title: "FAQ",
+    description: "Frequently asked questions page content",
+    icon: "❓",
   },
   donate: {
     title: "Donate",

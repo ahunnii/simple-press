@@ -140,6 +140,9 @@ export function FieldGroup({
   onFieldChange,
   isUngrouped,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaLibraryEnabled,
 }: {
   groupId: string;
@@ -158,6 +161,10 @@ export function FieldGroup({
   onFieldChange: (key: string, value: unknown) => void;
   isUngrouped: boolean;
   embedsEnabled?: boolean;
+  /** Rich-text "Insert elements" gates — off unless the feature is on. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
 }) {
   const columns = groupMeta?.columns ?? 1;
@@ -206,6 +213,9 @@ export function FieldGroup({
                 isModified={modifiedFields?.has(field.key) ?? false}
                 onChange={(value) => onFieldChange(field.key, value)}
                 embedsEnabled={embedsEnabled}
+                galleriesEnabled={galleriesEnabled}
+                quotesEnabled={quotesEnabled}
+                formsEnabled={formsEnabled}
                 mediaLibraryEnabled={mediaLibraryEnabled}
               />
             </div>
@@ -236,6 +246,9 @@ export function FieldInput({
   isModified,
   onChange,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaLibraryEnabled,
   listFocusRequest,
 }: {
@@ -244,6 +257,10 @@ export function FieldInput({
   isModified: boolean;
   onChange: (value: unknown) => void;
   embedsEnabled?: boolean;
+  /** Rich-text "Insert elements" gates — off unless the feature is on. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
   /** `list` fields only: expand + focus a row. Ignored for other types. */
   listFocusRequest?: TemplateListFocusRequest | null;
@@ -339,7 +356,10 @@ export function FieldInput({
           editorContentClassName="min-h-[220px] p-4 text-base md:text-sm"
           editorClassName="focus:outline-hidden"
           editable
+          galleriesEnabled={galleriesEnabled}
           embedsEnabled={embedsEnabled}
+          quotesEnabled={quotesEnabled}
+          formsEnabled={formsEnabled}
           uploader={uploadRichTextImage}
         />
       ) : field.type === "textarea" ? (
@@ -1245,13 +1265,13 @@ export function FaqFieldEditor({
       <Alert role="note">
         <Info aria-hidden="true" />
         <AlertTitle>
-          {count} {questions} typed in before this field used Content → FAQ
+          {count} {questions} typed in before this field used Site Setup → FAQ
         </AlertTitle>
         <AlertDescription className="space-y-3">
           <p>
             {field.rendersLegacyRows
               ? `Your page still shows ${count === 1 ? "it" : "them"} until you pick questions instead.`
-              : `Your page no longer shows ${count === 1 ? "it" : "them"}. It shows the first ${maxItems} published questions from Content → FAQ instead.`}{" "}
+              : `Your page no longer shows ${count === 1 ? "it" : "them"}. It shows the first ${maxItems} published questions from Site Setup → FAQ instead.`}{" "}
             To keep {count === 1 ? "it" : "them"}, add{" "}
             {count === 1 ? "it" : "them"} under{" "}
             <a
@@ -1259,7 +1279,7 @@ export function FaqFieldEditor({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Content → FAQ
+              Site Setup → FAQ
             </a>{" "}
             first.
           </p>
@@ -1300,7 +1320,7 @@ export function FaqFieldEditor({
             rel="noopener noreferrer"
             className="text-foreground underline underline-offset-2"
           >
-            Pick specific ones, or add questions under Content → FAQ
+            Pick specific ones, or add questions under Site Setup → FAQ
           </a>
           .
         </p>

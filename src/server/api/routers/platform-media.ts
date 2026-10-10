@@ -54,7 +54,7 @@ export const platformMediaRouter = createTRPCRouter({
     .input(platformMediaListInput)
     .query(async ({ ctx, input }) => {
       const business = await requireBusiness(ctx.db, input.businessId);
-      const { businessId, items } = await listMedia(business.id);
+      const { businessId, items } = await listMedia(ctx.db, business.id);
       // Same merge + dependency cascade as `features.getFlags` / `featureGate`.
       const mediaEnabled = resolveFlags(business.featureFlags).isEnabled(
         "media",

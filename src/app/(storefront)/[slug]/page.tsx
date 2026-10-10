@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -11,6 +12,7 @@ import {
   buildBreadcrumbSchema,
   buildWebPageSchema,
 } from "~/lib/structured-data";
+import { isContentEmpty } from "~/lib/template-fields";
 import { collectGalleryIds } from "~/lib/tiptap/gallery-ids";
 import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -36,6 +38,11 @@ export default async function PageView({ params }: Props) {
   // — bypassing the blog flag and creating a duplicate-canonical URL for
   // the same content at two paths.
   if (!page || page.type === "blog") notFound();
+
+  // A policy saved with no text has nothing to show — 404 rather than a blank
+  // "live" page (its footer/checkout links are already dropped).
+  if (page.type === "policy" && isContentEmpty(page.content as JSONContent))
+    notFound();
 
   const t = getTemplate(business.templateId);
 
@@ -78,7 +85,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     getCachedBusiness(),
   ]);
 
-  if (!page || page.type === "blog") return { title: "Page Not Found" };
+  if (
+    !page ||
+    page.type === "blog" ||
+    (page.type === "policy" && isContentEmpty(page.content as JSONContent))
+  ) {
+    return { title: "Page Not Found" };
+  }
 
   return buildPageMetadata({
     business,

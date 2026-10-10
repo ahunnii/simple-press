@@ -84,7 +84,7 @@ const faqListData: TemplateField[] = [
     key: "relocation.faq.empty-message",
     label: "No-Questions Message",
     description:
-      "Shown in place of the list while you haven't added any questions yet. Add questions under Content → FAQ.",
+      "Shown in place of the list while you haven't added any questions yet. Add questions under Site Setup → FAQ.",
     type: "textarea",
     page: "faq",
     group: "faq.list",
@@ -113,7 +113,7 @@ export const relocationFaqFieldGroups: TemplateFieldGroup[] = [
     id: "faq.list",
     title: "FAQs",
     description:
-      "Heading above the question list, plus the message shown before you've added any questions. The questions themselves live under Content → FAQ.",
+      "Heading above the question list, plus the message shown before you've added any questions. The questions themselves live under Site Setup → FAQ.",
     icon: "❓",
     columns: 2,
   },
@@ -135,7 +135,7 @@ export const relocationFaqSections: TemplateSection[] = [
     page: "faq",
     title: "FAQs",
     description:
-      "'FAQs' heading and the expandable question list (questions come from Content → FAQ)",
+      "'FAQs' heading and the expandable question list (questions come from Site Setup → FAQ)",
     groupIds: ["faq.list"],
     order: 1,
     hideable: false,

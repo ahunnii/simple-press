@@ -86,6 +86,9 @@ type Props = {
     customFields: any;
   };
   embedsEnabled?: boolean;
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaEnabled?: boolean;
 };
 
@@ -117,6 +120,9 @@ export function TemplateFieldsEditor({
   business,
   siteContent,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaEnabled,
 }: Props) {
   const router = useRouter();
@@ -1142,6 +1148,9 @@ export function TemplateFieldsEditor({
                                 onFieldChange={handleFieldChange}
                                 isUngrouped={isUngrouped}
                                 embedsEnabled={embedsEnabled}
+                                galleriesEnabled={galleriesEnabled}
+                                quotesEnabled={quotesEnabled}
+                                formsEnabled={formsEnabled}
                                 mediaLibraryEnabled={mediaEnabled}
                               />
                             );

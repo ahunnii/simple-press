@@ -23,7 +23,7 @@ type PinkTableFaqRow = { question: string; answer: string; _id?: string };
 /**
  * The service page's FAQ rows, in priority order:
  *
- *   1. questions picked in the `pink-table.faq` Content → FAQ picker,
+ *   1. questions picked in the `pink-table.faq` Site Setup → FAQ picker,
  *      resolved against the published FAQ corpus (only fetched when something
  *      is picked, so a service without FAQs costs no query);
  *   2. otherwise, `{question, answer}` rows saved before the field became a

@@ -135,10 +135,10 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   mainActionCount = 0,
   size,
   variant,
-  galleriesEnabled = true,
-  embedsEnabled = true,
-  quotesEnabled = true,
-  formsEnabled = true,
+  galleriesEnabled = false,
+  embedsEnabled = false,
+  quotesEnabled = false,
+  formsEnabled = false,
 }) => {
   const filteredActions = activeActions
     .filter((a) => galleriesEnabled || a !== "gallery")

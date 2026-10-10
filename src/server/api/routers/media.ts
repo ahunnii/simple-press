@@ -45,11 +45,11 @@ export const mediaRouter = createTRPCRouter({
   list: ownerAdminProcedure
     .use(featureGate("media"))
     .input(mediaListInput)
-    .query(({ ctx }) => listMedia(ctx.businessId)),
+    .query(({ ctx }) => listMedia(ctx.db, ctx.businessId)),
 
   /**
-   * Delete one S3 object — blocked when it has any ACTIVE usage or is a
-   * logo/favicon fixed-key asset; inactive-template-only usages are scrubbed.
+   * Delete one S3 object — blocked when it has any ACTIVE usage or is the
+   * logo/favicon in use; inactive-template-only usages are scrubbed.
    * See `deleteMedia` for the full contract.
    */
   delete: ownerAdminProcedure

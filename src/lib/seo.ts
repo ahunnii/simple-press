@@ -10,6 +10,7 @@ import type {
   StaticSeoRouteKey,
 } from "~/lib/validators/site-seo";
 import { getCanonicalUrl } from "~/lib/canonical";
+import { rasterImageUrl } from "~/lib/image-url";
 import { paginatedPath } from "~/lib/pagination";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
@@ -144,7 +145,8 @@ export function buildPageMetadata({
     entity?.ogImage,
     ogImage,
     business?.siteContent?.ogImage,
-    business?.siteContent?.logoUrl,
+    // Share scrapers (Facebook, X, Slack) don't render SVG.
+    rasterImageUrl(business?.siteContent?.logoUrl),
   );
 
   const parsedKeywords = keywords
