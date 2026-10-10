@@ -18,11 +18,19 @@ import {
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  topLevelNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
@@ -37,6 +45,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
@@ -110,10 +119,20 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
       : []),
   ];
 
-  const links =
-    (business?.siteContent?.navigationItems as
-      | { label: string; href: string }[]
-      | undefined) ?? DEFAULT_NAV_LINKS;
+  // Owner nav (or the starter menu above) through the shared resolver + route→
+  // flag filter; the Donations "show in header" switch appends a last /donate.
+  // This header has no dropdowns, so `topLevelNav` flattens first (dropping
+  // href-less group parents) — a /donate hidden in a group then can't block
+  // the switch's link.
+  const links = withDonateLink(
+    topLevelNav(
+      filterNavByFlags(
+        resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+        isStorefrontEnabled,
+      ),
+    ),
+    donateLinkOptions(business, isStorefrontEnabled, "header"),
+  );
 
   const cartFields = resolveFields(business?.siteContent?.customFields, [
     "elegant.global.cart-title",
@@ -450,46 +469,49 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 </Link>
               )}
 
-              <button
-                type="button"
-                onClick={() => setIsOpen(true)}
-                aria-label={
-                  itemCount > 0
-                    ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
-                    : "Cart"
-                }
-                style={{ ...iconBtnStyle, position: "relative" }}
-                className="el-icon-btn"
-              >
-                <ShoppingBag
-                  aria-hidden={true}
-                  style={{ width: 17, height: 17 }}
-                />
-                <span
-                  aria-hidden={true}
-                  style={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    minWidth: 16,
-                    height: 16,
-                    padding: "0 4px",
-                    background: "var(--el-sage, #4a5240)",
-                    color: "var(--el-paper, #fbf8f2)",
-                    borderRadius: 999,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-sans, sans-serif)",
-                    transform: itemCount > 0 ? "scale(1)" : "scale(0)",
-                    transition: `transform 0.35s ${ease}`,
-                  }}
+              {/* Catalog mode (B6.11): no bag button when `cart` is off */}
+              {cartEnabled && (
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(true)}
+                  aria-label={
+                    itemCount > 0
+                      ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
+                      : "Cart"
+                  }
+                  style={{ ...iconBtnStyle, position: "relative" }}
+                  className="el-icon-btn"
                 >
-                  {itemCount}
-                </span>
-              </button>
+                  <ShoppingBag
+                    aria-hidden={true}
+                    style={{ width: 17, height: 17 }}
+                  />
+                  <span
+                    aria-hidden={true}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      minWidth: 16,
+                      height: 16,
+                      padding: "0 4px",
+                      background: "var(--el-sage, #4a5240)",
+                      color: "var(--el-paper, #fbf8f2)",
+                      borderRadius: 999,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-sans, sans-serif)",
+                      transform: itemCount > 0 ? "scale(1)" : "scale(0)",
+                      transition: `transform 0.35s ${ease}`,
+                    }}
+                  >
+                    {itemCount}
+                  </span>
+                </button>
+              )}
             </div>
           </nav>
 
@@ -543,16 +565,20 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
         </div>
       </div>
 
-      {/* Cart drawer */}
-      <ElegantCartDrawer
-        cartTitle={cartFields["elegant.global.cart-title"] ?? ""}
-        emptyHeading={
-          cartFields["elegant.global.cart-drawer-empty-heading"] ?? ""
-        }
-        emptyBody={cartFields["elegant.global.cart-empty-body"] ?? ""}
-        browseButtonText={cartFields["elegant.global.cart-browse-button"] ?? ""}
-        checkoutNote={cartFields["elegant.global.cart-drawer-note"] ?? ""}
-      />
+      {/* Cart drawer — not mounted in catalog mode (B6.11) */}
+      {cartEnabled && (
+        <ElegantCartDrawer
+          cartTitle={cartFields["elegant.global.cart-title"] ?? ""}
+          emptyHeading={
+            cartFields["elegant.global.cart-drawer-empty-heading"] ?? ""
+          }
+          emptyBody={cartFields["elegant.global.cart-empty-body"] ?? ""}
+          browseButtonText={
+            cartFields["elegant.global.cart-browse-button"] ?? ""
+          }
+          checkoutNote={cartFields["elegant.global.cart-drawer-note"] ?? ""}
+        />
+      )}
     </>
   );
 }

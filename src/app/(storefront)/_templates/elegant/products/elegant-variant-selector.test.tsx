@@ -10,6 +10,7 @@ import { ElegantVariantSelector } from "./elegant-variant-selector";
  * tolerant of a missing provider on its own, so it needs no mock.
  */
 const addItem = vi.fn();
+vi.mock("~/hooks/use-cart-enabled", () => ({ useCartEnabled: () => true }));
 vi.mock("~/providers/cart-context", () => ({
   useCart: () => ({ addItem }),
 }));

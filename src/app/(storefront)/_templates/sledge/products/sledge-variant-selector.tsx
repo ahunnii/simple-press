@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -29,6 +30,7 @@ export function SledgeVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -65,7 +67,7 @@ export function SledgeVariantSelector({
       !product.allowBackorders);
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
     // S-8: guard out-of-stock condition
     if (
       product.trackInventory &&
@@ -152,63 +154,68 @@ export function SledgeVariantSelector({
         </p>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-        {selectedVariant && (
-          // S-3: wrap stepper in group with label
-          <div
-            role="group"
-            aria-label="Quantity"
-            className="flex items-center rounded-sm border border-[var(--sl-ink)]"
-          >
-            <button
-              type="button"
-              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
+      {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
+      {cartEnabled && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+          {selectedVariant && (
+            // S-3: wrap stepper in group with label
+            <div
+              role="group"
+              aria-label="Quantity"
+              className="flex items-center rounded-sm border border-[var(--sl-ink)]"
             >
-              <Minus className="size-3.5" />
-            </button>
-            {/* S-3: announce quantity updates */}
-            <span
-              aria-live="polite"
-              className="min-w-[40px] text-center font-sans text-sm font-medium"
-            >
-              {quantity}
-            </span>
-            <button
-              type="button"
-              className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70 disabled:opacity-40"
-              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
-              disabled={quantity >= effectiveMax}
-              aria-label="Increase quantity"
-            >
-              <Plus className="size-3.5" />
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-3.5" />
+              </button>
+              {/* S-3: announce quantity updates */}
+              <span
+                aria-live="polite"
+                className="min-w-[40px] text-center font-sans text-sm font-medium"
+              >
+                {quantity}
+              </span>
+              <button
+                type="button"
+                className="flex min-h-[46px] items-center justify-center px-3 transition-opacity hover:opacity-70 disabled:opacity-40"
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                disabled={quantity >= effectiveMax}
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-3.5" />
+              </button>
+            </div>
+          )}
 
-        {/* S-8: aria-disabled instead of disabled for add button */}
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          aria-disabled={isAddDisabled ? "true" : undefined}
-          className={cn(
-            "sl-btn flex-1",
-            isAddDisabled && "cursor-not-allowed opacity-60",
-            isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
-          )}
-        >
-          {isAdded ? (
-            <>
-              <Check className="size-4" />
-              Added!
-            </>
-          ) : (
-            `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
-          )}
-        </button>
-      </div>
+          {/* S-8: aria-disabled instead of disabled for add button */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            aria-disabled={isAddDisabled ? "true" : undefined}
+            className={cn(
+              "sl-btn flex-1",
+              isAddDisabled && "cursor-not-allowed opacity-60",
+              isAdded && "bg-[var(--sl-green)] text-[var(--sl-ink)]",
+            )}
+          >
+            {isAdded ? (
+              <>
+                <Check className="size-4" />
+                Added!
+              </>
+            ) : (
+              `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && isAddDisabled && (

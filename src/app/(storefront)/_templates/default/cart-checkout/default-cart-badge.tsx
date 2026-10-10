@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 
 export function DefaultCartBadge() {
   const { itemCount, isHydrated } = useCart();
+  const cartEnabled = useCartEnabled();
+
+  // Catalog mode (B6.11): /cart 404s when `cart` is off — no icon to it.
+  if (!cartEnabled) return null;
 
   // Don't show count until hydrated (prevents flash)
   if (!isHydrated) {

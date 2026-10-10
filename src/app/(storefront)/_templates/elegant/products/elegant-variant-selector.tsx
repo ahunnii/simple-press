@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -32,6 +33,7 @@ export function ElegantVariantSelector({
   onQuantityChange,
 }: VariantSelectorProps) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -62,7 +64,7 @@ export function ElegantVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
@@ -127,8 +129,8 @@ export function ElegantVariantSelector({
         </div>
       </div>
 
-      {/* Qty stepper */}
-      {selectedVariant && effectiveMax > 0 && (
+      {/* Qty stepper — catalog mode (B6.11): hidden when `cart` is off */}
+      {cartEnabled && selectedVariant && effectiveMax > 0 && (
         <div style={{ marginBottom: 24 }}>
           <div
             style={{
@@ -245,75 +247,109 @@ export function ElegantVariantSelector({
         </div>
       )}
 
-      {/* Add to bag */}
-      <div style={{ marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={!selectedVariant || effectiveMax === 0}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            width: "100%",
-            padding: "16px 28px",
-            borderRadius: 999,
-            fontSize: 13,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontWeight: 500,
-            background: isAdded
-              ? "var(--el-sage, #4a5240)"
-              : !selectedVariant || effectiveMax === 0
-                ? "var(--el-cream-3, #e0d9c8)"
-                : "var(--el-ink, #1c1a17)",
-            color:
-              !selectedVariant || effectiveMax === 0
-                ? "var(--el-ink-soft, #6b6659)"
-                : "var(--el-paper, #fbf8f2)",
-            border: "none",
-            cursor:
-              !selectedVariant || effectiveMax === 0
-                ? "not-allowed"
-                : "pointer",
-            fontFamily: "var(--font-sans, sans-serif)",
-            transition: `background 0.4s ${ease}`,
-          }}
-        >
-          {isAdded ? (
+      {!cartEnabled &&
+        product.trackInventory &&
+        selectedVariant &&
+        effectiveMax > 0 &&
+        (isBackordered || selectedVariant.inventoryQty <= 5) && (
+          <p
+            style={{
+              marginBottom: 24,
+              fontSize: 11,
+              color: "var(--el-ink-soft, #6b6659)",
+              fontFamily: "var(--font-mono, ui-monospace)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}
+          >
+            {isBackordered
+              ? "Backordered — ships when available"
+              : selectedVariant.inventoryQty <= 5
+                ? selectedVariant.inventoryQty === 1
+                  ? "Last one"
+                  : `${selectedVariant.inventoryQty} left`
+                : null}
+          </p>
+        )}
+
+      {/* Catalog mode (B6.11): no Add to bag when `cart` is off */}
+      {(cartEnabled || (selectedVariant && effectiveMax === 0)) && (
+        <div style={{ marginBottom: 24 }}>
+          {cartEnabled && (
             <>
-              <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
-              Added to bag
-            </>
-          ) : (
-            <>
-              Add {quantity > 1 ? `${quantity} ` : ""}to bag
-              {price > 0 && ` · ${formatPrice(price * quantity)}`}
-              <ArrowRight
-                aria-hidden={true}
-                style={{ width: 14, height: 14 }}
-              />
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={!selectedVariant || effectiveMax === 0}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  width: "100%",
+                  padding: "16px 28px",
+                  borderRadius: 999,
+                  fontSize: 13,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  background: isAdded
+                    ? "var(--el-sage, #4a5240)"
+                    : !selectedVariant || effectiveMax === 0
+                      ? "var(--el-cream-3, #e0d9c8)"
+                      : "var(--el-ink, #1c1a17)",
+                  color:
+                    !selectedVariant || effectiveMax === 0
+                      ? "var(--el-ink-soft, #6b6659)"
+                      : "var(--el-paper, #fbf8f2)",
+                  border: "none",
+                  cursor:
+                    !selectedVariant || effectiveMax === 0
+                      ? "not-allowed"
+                      : "pointer",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  transition: `background 0.4s ${ease}`,
+                }}
+              >
+                {isAdded ? (
+                  <>
+                    <Check
+                      aria-hidden={true}
+                      style={{ width: 14, height: 14 }}
+                    />
+                    Added to bag
+                  </>
+                ) : (
+                  <>
+                    Add {quantity > 1 ? `${quantity} ` : ""}to bag
+                    {price > 0 && ` · ${formatPrice(price * quantity)}`}
+                    <ArrowRight
+                      aria-hidden={true}
+                      style={{ width: 14, height: 14 }}
+                    />
+                  </>
+                )}
+              </button>
+              <span className="sr-only" aria-live="polite" aria-atomic="true">
+                {isAdded ? "Added to bag" : ""}
+              </span>
             </>
           )}
-        </button>
-        <span className="sr-only" aria-live="polite" aria-atomic="true">
-          {isAdded ? "Added to bag" : ""}
-        </span>
 
-        {/* Notify me when the selected variant is back in stock */}
-        {selectedVariant && effectiveMax === 0 && (
-          <NotifyMeForm
-            productId={product.id}
-            variantId={selectedVariant.id}
-            className="mt-4"
-            message="Get notified when this option is back in stock."
-            messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
-            inputClassName="rounded-full border-[var(--el-line)] px-4"
-            buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
-          />
-        )}
-      </div>
+          {/* Notify me when the selected variant is back in stock */}
+          {selectedVariant && effectiveMax === 0 && (
+            <NotifyMeForm
+              productId={product.id}
+              variantId={selectedVariant.id}
+              className="mt-4"
+              message="Get notified when this option is back in stock."
+              messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
+              inputClassName="rounded-full border-[var(--el-line)] px-4"
+              buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

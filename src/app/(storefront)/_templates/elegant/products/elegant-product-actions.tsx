@@ -40,6 +40,7 @@ export function ElegantProductActions({
     formatPrice,
     displayPrice,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const additional = parseCardAdditionalFields(product.additionalFields);
@@ -165,7 +166,8 @@ export function ElegantProductActions({
 
   return (
     <>
-      {canAddMore && (
+      {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+      {cartEnabled && canAddMore && (
         <div style={{ marginBottom: 24 }}>
           <div
             style={{
@@ -271,59 +273,78 @@ export function ElegantProductActions({
         </div>
       )}
 
-      {/* Add to bag */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          alignItems: "stretch",
-          marginBottom: 24,
-        }}
-      >
-        <button
-          type="button"
-          onClick={handleAddToCart}
+      {cartEnabled && (
+        <>
+          {/* Add to bag */}
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              alignItems: "stretch",
+              marginBottom: 24,
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              style={{
+                flex: 1,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                padding: "16px 28px",
+                borderRadius: 999,
+                fontSize: 13,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                background: justAdded
+                  ? "var(--el-sage, #4a5240)"
+                  : "var(--el-ink, #1c1a17)",
+                color: "var(--el-paper, #fbf8f2)",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-sans, sans-serif)",
+                transition: `background 0.4s ${ease}`,
+              }}
+            >
+              {justAdded ? (
+                <>
+                  <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
+                  Added to bag
+                </>
+              ) : (
+                <>
+                  Add to bag · {formatPrice(displayPrice * quantity)}
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 14, height: 14 }}
+                  />
+                </>
+              )}
+            </button>
+          </div>
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {justAdded ? "Added to bag" : ""}
+          </span>
+        </>
+      )}
+
+      {!cartEnabled && remainingStock <= 5 && remainingStock > 0 && (
+        <p
           style={{
-            flex: 1,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            padding: "16px 28px",
-            borderRadius: 999,
-            fontSize: 13,
-            letterSpacing: "0.08em",
+            fontFamily: "var(--font-mono, ui-monospace)",
+            fontSize: 11,
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
-            fontWeight: 500,
-            background: justAdded
-              ? "var(--el-sage, #4a5240)"
-              : "var(--el-ink, #1c1a17)",
-            color: "var(--el-paper, #fbf8f2)",
-            border: "none",
-            cursor: "pointer",
-            fontFamily: "var(--font-sans, sans-serif)",
-            transition: `background 0.4s ${ease}`,
+            color: "var(--el-ink-soft, #6b6659)",
+            marginBottom: 16,
           }}
         >
-          {justAdded ? (
-            <>
-              <Check aria-hidden={true} style={{ width: 14, height: 14 }} />
-              Added to bag
-            </>
-          ) : (
-            <>
-              Add to bag · {formatPrice(displayPrice * quantity)}
-              <ArrowRight
-                aria-hidden={true}
-                style={{ width: 14, height: 14 }}
-              />
-            </>
-          )}
-        </button>
-      </div>
-      <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {justAdded ? "Added to bag" : ""}
-      </span>
+          {remainingStock === 1 ? "Last one" : `${remainingStock} left`}
+        </p>
+      )}
 
       {product.trackInventory &&
         product.allowBackorders &&
@@ -342,7 +363,7 @@ export function ElegantProductActions({
           </p>
         )}
 
-      {!canAddMore && inStock && (
+      {cartEnabled && !canAddMore && inStock && (
         <p
           style={{
             fontFamily: "var(--font-mono, ui-monospace)",

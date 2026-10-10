@@ -9,6 +9,7 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
@@ -19,6 +20,7 @@ type Props = {
 
 export function NoiseProductCard({ product, index }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
@@ -49,7 +51,7 @@ export function NoiseProductCard({ product, index }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (productStatus.disableCart) return;
+    if (!cartEnabled || productStatus.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -146,7 +148,8 @@ export function NoiseProductCard({ product, index }: Props) {
 
         {/* Add-to-cart bar — slides up on hover. z-10 keeps it above the
             stretched card link (::after) so it stays independently clickable. */}
-        {!productStatus.disableCart && (
+        {/* Catalog mode (B6.11): no Add to bag when `cart` is off */}
+        {cartEnabled && !productStatus.disableCart && (
           <div className="absolute inset-x-0 bottom-0 z-10 translate-y-full transition-transform duration-300 group-focus-within:translate-y-0 group-hover:translate-y-0">
             <button
               type="button"

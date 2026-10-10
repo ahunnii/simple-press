@@ -37,6 +37,7 @@ export function ModernProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -95,71 +96,80 @@ export function ModernProductActions({
         <>
           {canAddMore && (
             <>
-              {/* Quantity Selector */}
-              <div
-                role="group"
-                aria-label="Quantity"
-                className="flex w-fit items-center gap-4"
-              >
-                <span
-                  aria-hidden="true"
-                  className="text-foreground text-xs font-semibold tracking-widest uppercase"
-                >
-                  Quantity
-                </span>
-                <div className="border-border flex items-center border">
-                  <button
-                    type="button"
-                    onClick={handleDecrement}
-                    disabled={quantity <= 1}
-                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                    aria-label="Decrease quantity"
+              {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+              {cartEnabled && (
+                <>
+                  {/* Quantity Selector */}
+                  <div
+                    role="group"
+                    aria-label="Quantity"
+                    className="flex w-fit items-center gap-4"
                   >
-                    <Minus className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                    <span
+                      aria-hidden="true"
+                      className="text-foreground text-xs font-semibold tracking-widest uppercase"
+                    >
+                      Quantity
+                    </span>
+                    <div className="border-border flex items-center border">
+                      <button
+                        type="button"
+                        onClick={handleDecrement}
+                        disabled={quantity <= 1}
+                        className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <span
+                        aria-live="polite"
+                        aria-atomic="true"
+                        className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium"
+                      >
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleIncrement}
+                        disabled={quantity >= remainingStock}
+                        className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={!canAddMore}
+                      className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
+                    >
+                      {justAdded ? (
+                        <>
+                          <Check className="h-4 w-4" aria-hidden="true" />
+                          Added to Cart
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                          Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <span
+                    className="sr-only"
                     aria-live="polite"
                     aria-atomic="true"
-                    className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium"
                   >
-                    {quantity}
+                    {justAdded ? `${product.name} added to cart` : ""}
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleIncrement}
-                    disabled={quantity >= remainingStock}
-                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={!canAddMore}
-                  className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {justAdded ? (
-                    <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                      Add to Cart
-                    </>
-                  )}
-                </button>
-              </div>
-              <span className="sr-only" aria-live="polite" aria-atomic="true">
-                {justAdded ? `${product.name} added to cart` : ""}
-              </span>
+                </>
+              )}
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (
@@ -170,7 +180,7 @@ export function ModernProductActions({
             </>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">
               You have the maximum available quantity in your cart
             </p>

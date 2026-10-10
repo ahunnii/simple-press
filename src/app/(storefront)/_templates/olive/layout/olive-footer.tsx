@@ -10,6 +10,7 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
+  donateLinkOptions,
   externalLinkProps,
   getAccountNavLinks,
   navHrefOffFlag,
@@ -135,6 +136,8 @@ export async function OliveFooter({
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: OLIVE_DEFAULT_NAV,
     isEnabled,
+    // Donations "show in footer" switch (before the dedupe set below).
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
   const quickLinkHrefs = new Set(quickLinks.map((link) => link.href));
 

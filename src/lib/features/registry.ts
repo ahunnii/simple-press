@@ -200,9 +200,9 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   // `resolveFlags` (unknown keys are dropped).
   wordpressExport: {
     key: "wordpressExport",
-    label: "Export to WordPress",
+    label: "Products CSV import/export",
     description:
-      "Download your content, products, and records in WordPress/WooCommerce import formats",
+      "Import and export products as a CSV from the Products page (downloading your whole site is always available to owners)",
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,

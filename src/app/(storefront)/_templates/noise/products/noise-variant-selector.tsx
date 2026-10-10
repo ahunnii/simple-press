@@ -6,6 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
@@ -29,6 +30,7 @@ export function NoiseVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -59,7 +61,7 @@ export function NoiseVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
@@ -123,70 +125,75 @@ export function NoiseVariantSelector({
         </p>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Quantity */}
-        {selectedVariant && (
-          <div className="border-border flex items-center border">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 rounded-none"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
-            >
-              <Minus className="size-3.5" aria-hidden="true" />
-            </Button>
-            <span
-              className="text-foreground w-10 text-center font-sans text-sm font-medium"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 rounded-none"
-              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
-              disabled={quantity >= effectiveMax}
-              aria-label="Increase quantity"
-            >
-              <Plus className="size-3.5" aria-hidden="true" />
-            </Button>
-          </div>
-        )}
+      {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+      {cartEnabled && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Quantity */}
+          {selectedVariant && (
+            <div className="border-border flex items-center border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10 rounded-none"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-3.5" aria-hidden="true" />
+              </Button>
+              <span
+                className="text-foreground w-10 text-center font-sans text-sm font-medium"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {quantity}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10 rounded-none"
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                disabled={quantity >= effectiveMax}
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-3.5" aria-hidden="true" />
+              </Button>
+            </div>
+          )}
 
-        {/* Add to Cart */}
-        {(() => {
-          const isUnavailable =
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders);
-          return (
-            <Button
-              type="button"
-              aria-disabled={isUnavailable ? "true" : undefined}
-              onClick={() => {
-                if (isUnavailable) return;
-                handleAddToCart();
-              }}
-              className={`flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
-              size="lg"
-            >
-              {isAdded ? (
-                <>
-                  <Check className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                  Added
-                </>
-              ) : (
-                `Add ${quantity > 1 ? `${quantity} ` : ""}to bag`
-              )}
-            </Button>
-          );
-        })()}
-      </div>
+          {/* Add to Cart */}
+          {(() => {
+            const isUnavailable =
+              !selectedVariant ||
+              (product.trackInventory &&
+                selectedVariant.inventoryQty === 0 &&
+                !product.allowBackorders);
+            return (
+              <Button
+                type="button"
+                aria-disabled={isUnavailable ? "true" : undefined}
+                onClick={() => {
+                  if (isUnavailable) return;
+                  handleAddToCart();
+                }}
+                className={`flex-1 rounded-none font-sans text-[10px] tracking-[0.25em] uppercase ${isUnavailable ? "cursor-not-allowed opacity-50" : ""}`}
+                size="lg"
+              >
+                {isAdded ? (
+                  <>
+                    <Check className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                    Added
+                  </>
+                ) : (
+                  `Add ${quantity > 1 ? `${quantity} ` : ""}to bag`
+                )}
+              </Button>
+            );
+          })()}
+        </div>
+      )}
       {/* S-2: live region for add-to-cart announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {isAdded && selectedVariant

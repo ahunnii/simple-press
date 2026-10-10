@@ -82,6 +82,26 @@ const ROLE_LABELS: Record<TeamRole, string> = {
   STAFF: "Staff",
 };
 
+/**
+ * Toast options for an invite whose email failed: a "Copy link" action, and a
+ * long duration so the owner has time to reach it. Mirrors the platform hub's
+ * `invite-member-button.tsx`.
+ */
+function inviteLinkToastOptions(inviteUrl: string) {
+  return {
+    duration: 30_000,
+    action: {
+      label: "Copy link",
+      onClick: () => {
+        navigator.clipboard.writeText(inviteUrl).then(
+          () => toast.success("Invite link copied"),
+          () => toast.error("Could not copy the link"),
+        );
+      },
+    },
+  };
+}
+
 interface Props {
   memberships: Membership[];
   pendingInvites: PendingInvite[];
@@ -176,7 +196,8 @@ export function TeamMembers({
         toast.success("Invitation sent!");
       } else {
         toast.warning(
-          "Invite created, but the email could not be sent. Share the invite link with them directly.",
+          "Invite created, but the email could not be sent. Copy the invite link and send it to them yourself.",
+          inviteLinkToastOptions(data.inviteUrl),
         );
       }
       setInviteOpen(false);
@@ -232,7 +253,8 @@ export function TeamMembers({
         toast.success("Invitation resent");
       } else {
         toast.warning(
-          "Invite refreshed, but the email could not be sent. Share the invite link with them directly.",
+          "Invite refreshed, but the email could not be sent. Copy the invite link and send it to them yourself.",
+          inviteLinkToastOptions(data.inviteUrl),
         );
       }
       setResendingId(null);

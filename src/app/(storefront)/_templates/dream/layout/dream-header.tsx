@@ -22,7 +22,9 @@ import {
   activeEntryIndex,
   externalLinkProps,
   getAccountNavLinks,
+  donateLinkOptions,
   navGroupEntries,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveDreamFields } from "../lib/resolve-fields";
@@ -149,12 +151,17 @@ export function DreamHeader({
       icon: ACCOUNT_LINK_ICONS[link.key],
     }));
 
+  // Donations "show in header" switch: the layout's list already has Donate
+  // appended; the fallback appends it here (no-op if already present).
   const navItems =
     navItemsProp ??
-    resolveDreamNav(
-      business?.siteContent?.navigationItems,
-      customFields,
-      isEnabled,
+    withDonateLink(
+      resolveDreamNav(
+        business?.siteContent?.navigationItems,
+        customFields,
+        isEnabled,
+      ),
+      donateLinkOptions(business, isEnabled, "header"),
     );
 
   const cancelClose = () => {

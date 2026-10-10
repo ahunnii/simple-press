@@ -8,6 +8,7 @@ import type { Product } from "~/types";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -25,6 +26,7 @@ export function HappyBambooProductCard({
   saleBadgeFormat = "true",
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { productTagline } = parseCardAdditionalFields(
     product.additionalFields,
   );
@@ -52,7 +54,7 @@ export function HappyBambooProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (productStatus.disableCart) return;
+    if (!cartEnabled || productStatus.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -191,7 +193,8 @@ export function HappyBambooProductCard({
                 )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {!productStatus.hasVariants && (
+              {/* Catalog mode (B6.11): no quick-add when `cart` is off */}
+              {cartEnabled && !productStatus.hasVariants && (
                 <Button
                   type="button"
                   size="sm"

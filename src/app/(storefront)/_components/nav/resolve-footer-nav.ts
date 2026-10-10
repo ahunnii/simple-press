@@ -8,9 +8,11 @@
  * Pure module — no React, no hooks — safe on either side of the
  * server/client boundary.
  */
+import type { NavChild, NavItem } from "./resolve-nav";
 
+import { withDonateLink } from "./donate-link";
 import { filterNavByFlags } from "./nav-flags";
-import { resolveNav, type NavChild, type NavItem } from "./resolve-nav";
+import { resolveNav } from "./resolve-nav";
 
 /**
  * Flatten a resolved nav to the entries a footer can link to: children are
@@ -53,22 +55,25 @@ export function resolveFooterNav(
  * The common case: an owner's footer quick links, falling back to the main
  * nav's top level when they haven't set their own, with feature-flag gating
  * applied last (same P-NAV-FLAGS rule every header/mobile nav/footer
- * applies — see `nav-flags.ts`).
+ * applies — see `nav-flags.ts`). When `donate` is passed (build it with
+ * `donateLinkOptions(business, isEnabled, "footer")`), the Donations "show in
+ * footer" switch is applied last via `withDonateLink`: it only appends a
+ * /donate link, never removes or duplicates one.
  */
 export function resolveFooterQuickLinks(opts: {
   footerItems: unknown;
   navigationItems: unknown;
   navDefaults: NavItem[];
   isEnabled: (key: string) => boolean;
+  donate?: { show: boolean; label: string };
 }): NavChild[] {
-  const { footerItems, navigationItems, navDefaults, isEnabled } = opts;
-  const mainNavFallback = topLevelNav(
-    resolveNav(navigationItems, navDefaults),
-  );
-  return filterNavByFlags(
+  const { footerItems, navigationItems, navDefaults, isEnabled, donate } = opts;
+  const mainNavFallback = topLevelNav(resolveNav(navigationItems, navDefaults));
+  const links = filterNavByFlags(
     resolveFooterNav(footerItems, mainNavFallback),
     isEnabled,
   );
+  return donate ? withDonateLink(links, donate) : links;
 }
 
 /**

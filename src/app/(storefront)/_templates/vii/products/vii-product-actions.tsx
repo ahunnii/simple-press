@@ -35,6 +35,7 @@ export function ViiProductActions({
     quantity,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const stepperBorder = "1px solid var(--vii-hairline-strong)";
@@ -155,7 +156,8 @@ export function ViiProductActions({
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {canAddMore && (
+        {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+        {cartEnabled && canAddMore && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {/* Qty stepper */}
             <div

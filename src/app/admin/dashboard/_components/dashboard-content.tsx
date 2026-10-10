@@ -41,11 +41,19 @@ import {
 } from "~/app/admin/_components/admin-table-style";
 
 type DashboardContentProps = {
+  /**
+   * Header shortcuts gated on the same feature flags as their target routes
+   * (`products/layout.tsx` and `orders/layout.tsx` 404 when the flag is off),
+   * so the dashboard never offers a button that leads to a dead page.
+   */
+  quickActions: { addProduct: boolean; newOrder: boolean };
   business: {
     id: string;
     name: string;
     subdomain: string;
     customDomain: string | null;
+    /** IANA zone the revenue chart's day labels are written in. */
+    timeZone: string;
   };
   stats: {
     totalRevenue: number;
@@ -119,7 +127,7 @@ type DashboardContentProps = {
     order: { id: string; orderNumber: number } | null;
     previousQty: number;
   }>;
-  /** One entry per local calendar day, pre-bucketed server-side; `revenue` is in cents. */
+  /** One entry per store-local calendar day, pre-bucketed server-side; `revenue` is in cents. */
   revenueByDay: Array<{
     date: Date;
     revenue: number;
@@ -177,6 +185,7 @@ function DeltaChip({
 export function DashboardContent({
   business,
   stats,
+  quickActions,
   conversionCard,
   searchReadiness,
   setupProgress,
@@ -232,11 +241,14 @@ export function DashboardContent({
     }
   };
 
-  // Process revenue data for chart (already bucketed per local day server-side)
+  // Process revenue data for chart (already bucketed per store-local day
+  // server-side). Labelled in the store's zone too, so a bar reads the same
+  // day on the server render and in an owner's browser in any other zone.
   const chartData = revenueByDay.map((item) => ({
     date: new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      timeZone: business.timeZone,
     }),
     revenue: item.revenue / 100,
   }));
@@ -275,18 +287,22 @@ export function DashboardContent({
 
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-2 sm:shrink-0">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/products/new">
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Add Product
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/orders/new">
-                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
-                New Order
-              </Link>
-            </Button>
+            {quickActions.addProduct && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/products/new">
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Add Product
+                </Link>
+              </Button>
+            )}
+            {quickActions.newOrder && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/orders/new">
+                  <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                  New Order
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link href="/editor?from=/admin/dashboard">
                 <Palette className="mr-1.5 h-3.5 w-3.5" />
@@ -344,7 +360,7 @@ export function DashboardContent({
           <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ordersToFulfillCount > 0 && (
               <Link
-                href="/admin/orders?fulfillment=unfulfilled&paymentStatus=paid"
+                href="/admin/orders?status=open&fulfillment=unfulfilled&paymentStatus=paid"
                 className="group"
               >
                 <div className="flex items-center gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 transition-colors group-hover:bg-amber-100">
@@ -650,9 +666,9 @@ export function DashboardContent({
                         <div className="flex items-center gap-3">
                           <AlertTriangle
                             // `<= 0`, matching isOutOfStock in the inventory
-                            // page: the feeding query is `lte: 10` with no lower
-                            // bound, so a negative pool is in this list and must
-                            // read as broken, not merely low.
+                            // page: the feeding query has no lower bound, so a
+                            // negative pool is in this list and must read as
+                            // broken, not merely low.
                             className={cn(
                               "h-5 w-5 shrink-0",
                               pool.inventoryQty <= 0

@@ -38,6 +38,7 @@ export function BambooProductActions({
     justAdded,
     remainingStock,
     isInventoryTracked,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -88,56 +89,62 @@ export function BambooProductActions({
         <>
           {canAddMore && (
             <>
-              {/* Quantity Selector */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="bamboo-qty-stepper">
+              {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
+              {cartEnabled && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="bamboo-qty-stepper">
+                    <button
+                      type="button"
+                      onClick={() => handleDecrement()}
+                      disabled={quantity <= 1}
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="size-4" aria-hidden="true" />
+                    </button>
+                    <span aria-live="polite" aria-atomic="true">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleIncrement()}
+                      disabled={quantity >= remainingStock}
+                      aria-label="Increase quantity"
+                      aria-describedby={
+                        isInventoryTracked
+                          ? "bamboo-actions-stock-msg"
+                          : undefined
+                      }
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => handleDecrement()}
-                    disabled={quantity <= 1}
-                    aria-label="Decrease quantity"
+                    onClick={handleAddToCart}
+                    className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 sm:flex-none"
                   >
-                    <Minus className="size-4" aria-hidden="true" />
+                    {justAdded ? (
+                      <>
+                        <Check className="h-4 w-4" aria-hidden="true" />
+                        Added to Cart
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="size-5" aria-hidden="true" />
+                        Add to Cart - {formatPrice(displayPrice)}
+                      </>
+                    )}
                   </button>
-                  <span aria-live="polite" aria-atomic="true">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleIncrement()}
-                    disabled={quantity >= remainingStock}
-                    aria-label="Increase quantity"
-                    aria-describedby={
-                      isInventoryTracked
-                        ? "bamboo-actions-stock-msg"
-                        : undefined
-                    }
+                  {/* S-1: live region announces add-to-cart confirmation */}
+                  <div
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="sr-only"
                   >
-                    <Plus className="size-4" aria-hidden="true" />
-                  </button>
+                    {justAdded ? `${product.name} added to cart` : ""}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 sm:flex-none"
-                >
-                  {justAdded ? (
-                    <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="size-5" aria-hidden="true" />
-                      Add to Cart - {formatPrice(displayPrice)}
-                    </>
-                  )}
-                </button>
-                {/* S-1: live region announces add-to-cart confirmation */}
-                <div aria-live="polite" aria-atomic="true" className="sr-only">
-                  {justAdded ? `${product.name} added to cart` : ""}
-                </div>
-              </div>
+              )}
               {isInventoryTracked &&
                 !product.allowBackorders &&
                 remainingStock <= 1 && (
@@ -158,7 +165,7 @@ export function BambooProductActions({
             </>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="mt-3 text-center text-sm text-[var(--bamboo-terracotta-deep)]">
               You have the maximum available quantity in your cart
             </p>

@@ -8,23 +8,22 @@ import { IconPackage } from "@tabler/icons-react";
 import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
-
-type NavChild = { label: string; href: string; external?: boolean };
-type NavLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-  children?: NavChild[];
-};
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -117,7 +116,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
 
   const { isEnabled } = useStorefrontFlags();
 
-  const defaultNavLinks: NavLink[] = [
+  const defaultNavLinks: NavItem[] = [
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },
     ...(isEnabled("services")
@@ -138,8 +137,24 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     { href: "/contact", label: "Contact" },
   ];
 
-  const links =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? defaultNavLinks;
+  // Owner nav (children + external preserved) or the starter menu above, then
+  // the shared route→flag filter (P-NAV-FLAGS) drops anything the store has
+  // switched off — owner-saved items included (e.g. `/donate` with donations
+  // off). `??` semantics live in `resolveNav`: a saved `[]` means "no links".
+  // `links` feeds the desktop nav, its dropdowns and the mobile menu.
+  const filteredLinks = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, defaultNavLinks),
+    isEnabled,
+  );
+
+  // The Donations "show in header" switch only ADDS a link: it never removes
+  // one the owner placed, and never duplicates one. With the starter menu
+  // Donate is already there (before Contact), so this is a no-op; with a
+  // custom menu it appends Donate last so the switch keeps working.
+  const links = withDonateLink(
+    filteredLinks,
+    donateLinkOptions(business, isEnabled, "header"),
+  );
 
   const toggleMobileExpanded = (index: number) => {
     setExpandedMobile((prev) => {

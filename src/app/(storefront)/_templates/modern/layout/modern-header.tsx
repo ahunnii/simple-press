@@ -10,15 +10,24 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  topLevelNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useStorefrontFlags();
@@ -107,11 +116,20 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
     { href: "/contact", label: "Contact" },
   ];
 
-  const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? defaultNavLinks;
+  // Owner nav (or the starter menu above) through the shared resolver + route→
+  // flag filter; the Donations "show in header" switch appends a last /donate.
+  // This header has no dropdowns, so `topLevelNav` flattens first (dropping
+  // href-less group parents) — a /donate hidden in a group then can't block
+  // the switch's link.
+  const links = withDonateLink(
+    topLevelNav(
+      filterNavByFlags(
+        resolveNav(business?.siteContent?.navigationItems, defaultNavLinks),
+        isEnabled,
+      ),
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
+  );
 
   const authActions = (
     <>
@@ -211,19 +229,22 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               </Link>
             )}
 
-            <Link
-              href="/cart"
-              className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
-              aria-label={`Shopping cart with ${itemCount} items`}
-            >
-              {/* M-2: decorative icon inside an aria-labeled link */}
-              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-              {itemCount > 0 && (
-                <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+            {/* Catalog mode (B6.11): no cart icon when `cart` is off */}
+            {cartEnabled && (
+              <Link
+                href="/cart"
+                className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+                aria-label={`Shopping cart with ${itemCount} items`}
+              >
+                {/* M-2: decorative icon inside an aria-labeled link */}
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                {itemCount > 0 && (
+                  <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {isEnabled("customerAccounts") && (
               <>
@@ -309,33 +330,38 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           ))}
         </nav>
 
-        <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
-          {isEnabled("wishlist") && (
-            <Link
-              href="/wishlist"
-              className="text-foreground flex items-center gap-3"
-              onClick={closeMenu}
-            >
-              {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
-              <Heart className="h-5 w-5" aria-hidden="true" />
-              <span className="text-sm font-medium">
-                Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
-              </span>
-            </Link>
-          )}
+        {/* Catalog mode (B6.11): drop the block when nothing is left in it */}
+        {(isEnabled("wishlist") || cartEnabled) && (
+          <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
+            {isEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                className="text-foreground flex items-center gap-3"
+                onClick={closeMenu}
+              >
+                {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
+                <Heart className="h-5 w-5" aria-hidden="true" />
+                <span className="text-sm font-medium">
+                  Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+                </span>
+              </Link>
+            )}
 
-          <Link
-            href="/cart"
-            className="text-foreground flex items-center gap-3"
-            onClick={closeMenu}
-          >
-            {/* M-2: decorative icon, link text "Cart (n)" provides the name */}
-            <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-            <span className="text-sm font-medium">
-              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-            </span>
-          </Link>
-        </div>
+            {cartEnabled && (
+              <Link
+                href="/cart"
+                className="text-foreground flex items-center gap-3"
+                onClick={closeMenu}
+              >
+                {/* M-2: decorative icon, link text "Cart (n)" provides the name */}
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                <span className="text-sm font-medium">
+                  Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+                </span>
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

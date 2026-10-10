@@ -11,11 +11,19 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  topLevelNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 type NavLink = { label: string; href: string; external?: boolean };
 
@@ -30,6 +38,7 @@ export function BuildersHeader({
   initialSession,
 }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession(initialSession);
@@ -136,17 +145,29 @@ export function BuildersHeader({
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
-  // `??`, never `||`: an owner who saves an empty item list in the Navigation
-  // builder means "no nav links", which `||` would silently overwrite with the
-  // shipped default.
-  const customNav = business?.siteContent?.navigationItems as
-    | NavLink[]
-    | undefined;
-
-  const navLinks: NavLink[] = customNav ?? [
+  const defaultNav: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Our Work" }] : []),
     ...DEFAULT_NAV.filter((l) => l.href !== "/blog" || isEnabled("blog")),
   ];
+
+  // Owner nav or the shipped default, then the shared route→flag filter
+  // (P-NAV-FLAGS) drops links to switched-off features. `??` semantics live in
+  // `resolveNav`: a saved `[]` means "no links". This header has no
+  // dropdowns, so `topLevelNav` flattens (dropping href-less group parents
+  // that would be dead links).
+  const filteredNav = topLevelNav(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, defaultNav),
+      isStorefrontEnabled,
+    ),
+  );
+
+  // Donations "show in header" only ADDS a plain last menu item (no
+  // duplicate, never removes an owner link). Desktop and mobile share it.
+  const navLinks: NavLink[] = withDonateLink(
+    filteredNav,
+    donateLinkOptions(business, isStorefrontEnabled, "header"),
+  );
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
@@ -327,8 +348,8 @@ export function BuildersHeader({
               </Link>
             )}
 
-            {/* Cart */}
-            {isEnabled("cart") && (
+            {/* Cart — hidden in catalog mode (B6.11) */}
+            {cartEnabled && (
               <Link
                 href="/cart"
                 aria-label={
@@ -519,7 +540,7 @@ export function BuildersHeader({
                   </>
                 )}
 
-                {isEnabled("cart") && (
+                {cartEnabled && (
                   <>
                     <Link
                       href="/cart"

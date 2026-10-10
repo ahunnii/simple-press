@@ -16,6 +16,7 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { cn } from "~/lib/utils";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   getAccountNavLinks,
   isNavItemActive,
@@ -258,9 +259,11 @@ function MobileMenuPanel({
   // Shared resolver (lib/nav.ts, over `resolveNav` + `filterNavByFlags`) — the
   // header's desktop nav and the footer read the same list, so the three
   // can't drift apart or link to a flag-disabled route.
+  // Donations "show in header" switch appends a plain last /donate item.
   const links = resolveHappyBambooNav(
     business?.siteContent?.navigationItems,
     isEnabled,
+    donateLinkOptions(business, isEnabled, "header"),
   );
   // One group open at a time. The panel mounts fresh on every open, so the
   // initializer auto-expands the group holding the current route.

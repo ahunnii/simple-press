@@ -4,6 +4,10 @@ import type { DefaultFooterTemplateProps } from "../../types";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
+import {
+  donateLinkOptions,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { BambooGlyph } from "../shared/bamboo-glyph";
@@ -33,17 +37,22 @@ export async function BambooFooter({ business }: DefaultFooterTemplateProps) {
       : []),
   ];
 
-  const companyLinks = [
-    { label: "About", href: "/about" },
-    ...(isEnabled("testimonials")
-      ? [{ label: "Testimonials", href: "/testimonials" }]
-      : []),
-    ...(isEnabled("blog") ? [{ label: "Insights", href: "/blog" }] : []),
-    { label: "Contact", href: "/contact" },
-    // Root-relative: a bare slug would resolve against the current path and
-    // 404 from nested routes such as /blog/<post>.
-    ...policies.map((p) => ({ label: p.title, href: `/${p.slug}` })),
-  ];
+  const companyLinks = withDonateLink(
+    [
+      { label: "About", href: "/about" },
+      ...(isEnabled("testimonials")
+        ? [{ label: "Testimonials", href: "/testimonials" }]
+        : []),
+      ...(isEnabled("blog") ? [{ label: "Insights", href: "/blog" }] : []),
+      { label: "Contact", href: "/contact" },
+      // Root-relative: a bare slug would resolve against the current path and
+      // 404 from nested routes such as /blog/<post>.
+      ...policies.map((p) => ({ label: p.title, href: `/${p.slug}` })),
+    ],
+    // Donations "show in footer": appended last, skipped if a policy page
+    // already links to /donate.
+    donateLinkOptions(business, isEnabled, "footer"),
+  );
 
   return (
     <footer

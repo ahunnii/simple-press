@@ -7,8 +7,10 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 import {
+  donateLinkOptions,
   filterNavByFlags,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { NoiseAnnouncementBar } from "./noise-announcement-bar";
@@ -51,9 +53,11 @@ export async function NoiseLayout({
   // `NOISE_DEFAULT_NAV`, then the shared route→flag filter (P-NAV-FLAGS).
   // The header's desktop bar and its mobile menu both render this array.
   const savedNav: unknown = business?.siteContent?.navigationItems;
-  const navItems = filterNavByFlags(
-    resolveNav(savedNav, NOISE_DEFAULT_NAV),
-    isEnabled,
+  // Donations "show in header" switch: Donate is appended last, before the
+  // left/right split is computed.
+  const navItems = withDonateLink(
+    filterNavByFlags(resolveNav(savedNav, NOISE_DEFAULT_NAV), isEnabled),
+    donateLinkOptions(business, isEnabled, "header"),
   );
   const navLeftCount = noiseNavLeftCount(navItems, !Array.isArray(savedNav));
 

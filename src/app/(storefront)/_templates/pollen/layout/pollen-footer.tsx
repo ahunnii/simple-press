@@ -17,6 +17,7 @@ import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveSocialLinks } from "~/lib/social-links";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -187,6 +188,8 @@ export function PollenFooter({
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: mainMenuLinks,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
   // A long list still gets split, into two side-by-side columns under the
   // one heading.

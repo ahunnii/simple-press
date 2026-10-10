@@ -23,11 +23,13 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { BambooLeafSprig } from "../shared/bamboo-leaf-sprig";
@@ -133,9 +135,14 @@ export function BambooMobileNav({
     setContainer(document.querySelector<HTMLElement>("div.bamboo"));
   }, []);
 
-  const links = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
-    isEnabled,
+  // Donations "show in header" switch only ADDS a /donate link (last item) —
+  // the desktop and phone menus apply it identically so they never drift.
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
+      isEnabled,
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
   );
   const logoUrl = business.siteContent?.logoUrl;
   const businessName = business.name ?? "Menu";

@@ -6,6 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
@@ -29,6 +30,7 @@ export function DarkTrendVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -60,7 +62,7 @@ export function DarkTrendVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
 
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
@@ -142,8 +144,20 @@ export function DarkTrendVariantSelector({
         </div>
       </div>
 
+      {/* Catalog mode (B6.11): no qty stepper when `cart` is off — stock stays */}
+      {selectedVariant &&
+        !cartEnabled &&
+        product.trackInventory &&
+        (isBackordered || selectedVariant.inventoryQty > 0) && (
+          <p className="mb-8 text-sm text-white/60">
+            {isBackordered
+              ? "Backordered — ships when available"
+              : `${selectedVariant.inventoryQty} available`}
+          </p>
+        )}
+
       {/* Quantity Selection */}
-      {selectedVariant && (
+      {cartEnabled && selectedVariant && (
         <div className="mb-8">
           <div
             role="group"
@@ -194,32 +208,34 @@ export function DarkTrendVariantSelector({
         </div>
       )}
 
-      {/* Add to Cart */}
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-        <button
-          type="button"
-          aria-disabled={isCartDisabled ? "true" : undefined}
-          onClick={(e) => {
-            if (isCartDisabled) {
-              e.preventDefault();
-              return;
-            }
-            handleAddToCart();
-          }}
-          className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-            isAdded ? "bg-violet-600" : "bg-violet-600 hover:bg-violet-700"
-          } ${isCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity} to Cart`
-          )}
-        </button>
-      </div>
+      {/* Add to Cart (hidden in catalog mode, B6.11) */}
+      {cartEnabled && (
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+          <button
+            type="button"
+            aria-disabled={isCartDisabled ? "true" : undefined}
+            onClick={(e) => {
+              if (isCartDisabled) {
+                e.preventDefault();
+                return;
+              }
+              handleAddToCart();
+            }}
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
+              isAdded ? "bg-violet-600" : "bg-violet-600 hover:bg-violet-700"
+            } ${isCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
+          >
+            {isAdded ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" />
+                Added to Cart
+              </>
+            ) : (
+              `Add ${quantity} to Cart`
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && isCartDisabled && (

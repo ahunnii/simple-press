@@ -8,6 +8,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -41,6 +42,7 @@ export function UmscVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const selectedVariant =
@@ -80,7 +82,7 @@ export function UmscVariantSelector({
   const unitPrice = selectedVariant?.price ?? product.price;
 
   const handleAddToCart = () => {
-    if (!selectedVariant || addToCartDisabled) return;
+    if (!cartEnabled || !selectedVariant || addToCartDisabled) return;
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
@@ -163,59 +165,64 @@ export function UmscVariantSelector({
       {/* Qty + Add to cart + wishlist */}
       {selectedVariant && (
         <div className="flex flex-col gap-2.5">
-          <div className="flex flex-wrap items-center gap-3">
-            <div
-              role="group"
-              aria-label="Quantity"
-              className="inline-flex h-12 w-[130px] shrink-0 items-center border border-[var(--umsc-line)]"
-            >
-              <button
-                type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-                className="flex h-full flex-1 items-center justify-center text-[18px] font-light text-[var(--umsc-ink)] disabled:opacity-30"
-              >
-                <span aria-hidden="true">−</span>
-              </button>
-              <span
-                aria-live="polite"
-                aria-atomic="true"
-                className="umsc-tabular umsc-sans w-10 text-center text-[14px] font-medium text-[var(--umsc-ink)]"
-              >
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-                className="flex h-full flex-1 items-center justify-center text-[18px] font-light text-[var(--umsc-ink)] disabled:opacity-30"
-              >
-                <span aria-hidden="true">+</span>
-              </button>
-            </div>
+          <div className="flex flex-wrap items-center gap-3 empty:hidden">
+            {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+            {cartEnabled && (
+              <>
+                <div
+                  role="group"
+                  aria-label="Quantity"
+                  className="inline-flex h-12 w-[130px] shrink-0 items-center border border-[var(--umsc-line)]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    aria-label="Decrease quantity"
+                    className="flex h-full flex-1 items-center justify-center text-[18px] font-light text-[var(--umsc-ink)] disabled:opacity-30"
+                  >
+                    <span aria-hidden="true">−</span>
+                  </button>
+                  <span
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="umsc-tabular umsc-sans w-10 text-center text-[14px] font-medium text-[var(--umsc-ink)]"
+                  >
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setQuantity(Math.min(effectiveMax, quantity + 1))
+                    }
+                    disabled={quantity >= effectiveMax}
+                    aria-label="Increase quantity"
+                    className="flex h-full flex-1 items-center justify-center text-[18px] font-light text-[var(--umsc-ink)] disabled:opacity-30"
+                  >
+                    <span aria-hidden="true">+</span>
+                  </button>
+                </div>
 
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              aria-disabled={addToCartDisabled || undefined}
-              className={cn(
-                "umsc-btn umsc-btn-gold h-12 min-w-0 flex-1 basis-full sm:basis-auto",
-                addToCartDisabled && "cursor-not-allowed opacity-50",
-              )}
-            >
-              {isAdded ? (
-                <>
-                  <Check className="size-4" aria-hidden="true" />
-                  Added
-                </>
-              ) : (
-                <>Add to cart · {formatPrice(unitPrice)}</>
-              )}
-            </button>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  aria-disabled={addToCartDisabled || undefined}
+                  className={cn(
+                    "umsc-btn umsc-btn-gold h-12 min-w-0 flex-1 basis-full sm:basis-auto",
+                    addToCartDisabled && "cursor-not-allowed opacity-50",
+                  )}
+                >
+                  {isAdded ? (
+                    <>
+                      <Check className="size-4" aria-hidden="true" />
+                      Added
+                    </>
+                  ) : (
+                    <>Add to cart · {formatPrice(unitPrice)}</>
+                  )}
+                </button>
+              </>
+            )}
 
             {wishlistSlot}
           </div>

@@ -2,10 +2,10 @@
  * Flag-gated list of customer-account links for storefront headers, mobile
  * overlays, and account sidebars.
  *
- * Mirrors `BASE_NAV_ITEMS` in
- * `src/app/(storefront)/_templates/default/account/default-account-layout.tsx`
- * (labels, hrefs, and flag gating) so every template's chrome agrees with
- * Default's own account sidebar about which links exist and when they show.
+ * Default's own account sidebar
+ * (`src/app/(storefront)/_templates/default/account/default-account-layout.tsx`)
+ * renders this list too, so every template's chrome agrees with it about
+ * which links exist and when they show.
  * Pure module — no React, no hooks.
  */
 

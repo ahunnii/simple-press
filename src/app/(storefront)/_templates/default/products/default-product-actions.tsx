@@ -42,6 +42,7 @@ export function DefaultProductActions({
     setSelectedVariantId,
     selectedVariantId,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -98,7 +99,8 @@ export function DefaultProductActions({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {canAddMore && (
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled && canAddMore && (
             <div className="flex items-center gap-3">
               {/* Qty stepper */}
               <div
@@ -168,7 +170,7 @@ export function DefaultProductActions({
               </p>
             )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="text-sm text-amber-700">
               You have the maximum available quantity in your cart.
             </p>

@@ -49,6 +49,7 @@ export function NoiseProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -182,7 +183,8 @@ export function NoiseProductActions({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {canAddMore && (
+          {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+          {cartEnabled && canAddMore && (
             <div className="flex items-stretch gap-3">
               {/* Qty stepper */}
               <div
@@ -244,7 +246,7 @@ export function NoiseProductActions({
             </div>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="font-mono text-[10px] tracking-[0.2em] text-amber-600 uppercase">
               Maximum available quantity in cart
             </p>

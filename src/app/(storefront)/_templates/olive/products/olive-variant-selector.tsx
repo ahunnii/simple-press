@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -71,6 +72,7 @@ export function OliveVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
   const [quantity, setQuantity] = useState(1);
 
@@ -152,7 +154,7 @@ export function OliveVariantSelector({
       !product.allowBackorders);
 
   const onAdd = () => {
-    if (!selected || soldOut) return;
+    if (!cartEnabled || !selected || soldOut) return;
     addItem(buildVariantCartItem(product, selected, effectiveMax), quantity);
     setQuantity(1);
     announceOliveCartAdded(`${product.name} — ${selected.name}`);
@@ -243,22 +245,25 @@ export function OliveVariantSelector({
             buttonClassName="olive-btn olive-btn-secondary olive-btn-sm"
           />
         </div>
-      ) : (
+      ) : cartEnabled || product.trackInventory ? (
         <div className="flex flex-col gap-3">
-          <OliveBuyRow
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            max={effectiveMax}
-            itemLabel={`${product.name}${selected ? ` — ${selected.name}` : ""}`}
-            onAdd={onAdd}
-          />
+          {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+          {cartEnabled ? (
+            <OliveBuyRow
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              max={effectiveMax}
+              itemLabel={`${product.name}${selected ? ` — ${selected.name}` : ""}`}
+              onAdd={onAdd}
+            />
+          ) : null}
           <OliveVariantStock
             trackInventory={product.trackInventory}
             allowBackorders={product.allowBackorders}
             inventoryQty={selected?.inventoryQty ?? 0}
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

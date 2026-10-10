@@ -138,15 +138,16 @@ function BannerForm({ form }: { form: UseFormReturn<BannerFormValues> }) {
                 without it these two stack full-width and the 2-col grid does
                 nothing. `items-start` because only `linkUrl` can raise a
                 validation error, and a `FormMessage` under one cell would
-                otherwise stretch the other and sink its label. */}
+                otherwise stretch the other and sink its label. Plain text, not
+                type="url": `safeHrefSchema` accepts relative paths like /shop,
+                which a url input would mark :invalid. */}
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="linkUrl"
                 label="Link URL"
-                description="Optional. Where the link in the banner goes."
-                placeholder="https://example.com/sale"
-                type="url"
+                description="Optional. Where the link in the banner goes: a page on your site like /shop, or a full web address."
+                placeholder="/shop or https://example.com/sale"
                 className="col-span-1"
               />
               <InputFormField
@@ -327,9 +328,8 @@ function PopupForm({
                 form={form}
                 name="ctaUrl"
                 label="CTA link URL"
-                description="Optional. Where the call-to-action button goes."
-                placeholder="https://example.com/sale"
-                type="url"
+                description="Optional. Where the call-to-action button goes: a page on your site like /shop, or a full web address."
+                placeholder="/shop or https://example.com/sale"
                 className="col-span-1"
               />
               <InputFormField

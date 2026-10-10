@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Check, Heart } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
@@ -85,6 +89,7 @@ export function UmscProductInfo({
     handleDecrement,
     handleAddToCart,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   // Product's own features (Products → product → features) win; otherwise
@@ -215,7 +220,12 @@ export function UmscProductInfo({
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {canAddMore ? (
+              {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+              {!cartEnabled ? (
+                <div className="flex flex-wrap items-center gap-3 empty:hidden">
+                  <UmscWishlistHeart product={product} price={displayPrice} />
+                </div>
+              ) : canAddMore ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <div
                     role="group"

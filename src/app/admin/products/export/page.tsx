@@ -21,7 +21,7 @@ export default async function ProductExportPage() {
   const { isEnabled } = await getBusinessFlags();
 
   if (!isEnabled("wordpressExport")) {
-    return <GenericFeatureDisabledPage featureName="Export to WordPress" />;
+    return <GenericFeatureDisabledPage featureName="Products CSV import/export" />;
   }
 
   return (

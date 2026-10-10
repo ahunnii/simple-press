@@ -28,6 +28,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
@@ -35,6 +36,7 @@ import {
   navGroupEntries,
   resolveNav,
   type NavItem,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "../index";
@@ -278,9 +280,14 @@ export function ViiHeader({
   // ── Nav links: owner-saved (`??`, never `||` — an empty saved list means
   // "no nav links") or the shipped default, then the shared route→flag filter
   // (P-NAV-FLAGS) so a flag-disabled route never renders, from either source ─
-  const links = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
-    isEnabled,
+  // The Donations "show in header" switch appends a plain last /donate item
+  // (desktop + mobile overlay share this list; Book Now CTA is separate).
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+      isEnabled,
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
   );
 
   // ── Resolve global fields ──────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -21,6 +21,7 @@ import {
 } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
 import { ProductReviews } from "~/components/product-reviews";
@@ -132,6 +133,7 @@ export function OliveProductPage({
     selectedVariantId,
     setSelectedVariantId,
   } = useProduct(product);
+  const cartEnabled = useCartEnabled();
 
   const { data: related } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -296,8 +298,15 @@ export function OliveProductPage({
   const hasDetails = !isContentEmpty(details);
   const relatedProducts = related ?? [];
 
+  // Catalog mode leaves only the stock line under the (hidden) buy row.
+  const hasStockLine =
+    (product.trackInventory &&
+      product.allowBackorders &&
+      product.inventoryQty === 0) ||
+    (isInventoryTracked && remainingStock > 0);
+
   const onAddSimple = () => {
-    if (!canAddMore) return;
+    if (!cartEnabled || !canAddMore) return;
     handleAddToCart();
     announceOliveCartAdded(product.name);
   };
@@ -436,16 +445,19 @@ export function OliveProductPage({
                   buttonClassName="olive-btn olive-btn-secondary olive-btn-sm"
                 />
               </div>
-            ) : (
+            ) : cartEnabled || hasStockLine ? (
               <div className="flex flex-col gap-3">
-                <OliveBuyRow
-                  quantity={quantity}
-                  onQuantityChange={handleQuantityChange}
-                  max={remainingStock > 0 ? remainingStock : undefined}
-                  itemLabel={product.name}
-                  onAdd={onAddSimple}
-                  disabled={!canAddMore}
-                />
+                {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+                {cartEnabled ? (
+                  <OliveBuyRow
+                    quantity={quantity}
+                    onQuantityChange={handleQuantityChange}
+                    max={remainingStock > 0 ? remainingStock : undefined}
+                    itemLabel={product.name}
+                    onAdd={onAddSimple}
+                    disabled={!canAddMore}
+                  />
+                ) : null}
 
                 {product.trackInventory &&
                 product.allowBackorders &&
@@ -466,7 +478,7 @@ export function OliveProductPage({
                   )
                 ) : null}
 
-                {!canAddMore ? (
+                {cartEnabled && !canAddMore ? (
                   <p
                     className="olive-caption"
                     {...fieldAttr("olive.global.product-max-in-bag")}
@@ -475,7 +487,7 @@ export function OliveProductPage({
                   </p>
                 ) : null}
               </div>
-            )}
+            ) : null}
 
             {/* `olive-subscribe-panel` (globals.css) scopes the shared
                 token-only panel to olive's own palette — see the note in
@@ -499,10 +511,7 @@ export function OliveProductPage({
                   <li
                     key={`${label}-${position}`}
                     {...(index !== null
-                      ? listItemAttr(
-                          "olive.global.product-trust-badges",
-                          index,
-                        )
+                      ? listItemAttr("olive.global.product-trust-badges", index)
                       : {})}
                     className="flex items-start gap-2 text-[0.8125rem] leading-relaxed"
                     style={{ color: "var(--olive-ink-soft)" }}

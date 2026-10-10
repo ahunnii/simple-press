@@ -9,6 +9,7 @@ import {
   resolveVariantPrice,
 } from "~/lib/variant-price";
 import { useCart } from "~/providers/cart-context";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 
 const MAX_UNTRACKED_QTY = 100;
 
@@ -16,6 +17,10 @@ export function useProduct(
   product: NonNullable<RouterOutputs["product"]["get"]>,
 ) {
   const { addItem, getItemQuantity, isHydrated } = useCart();
+  // Catalog mode (B6.11): callers hide their buy UI on `!cartEnabled`;
+  // `handleAddToCart` also no-ops so a missed button can't fill a cart that
+  // has no /cart or /checkout to go to.
+  const cartEnabled = useCartEnabled();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     pickInitialVariant(product.variants, product)?.id ?? null,
@@ -153,7 +158,7 @@ export function useProduct(
   };
 
   const handleAddToCart = () => {
-    if (!canAddMore) return;
+    if (!cartEnabled || !canAddMore) return;
 
     addItem(
       {
@@ -223,6 +228,7 @@ export function useProduct(
     variantOptions,
     selectedOptions,
     isHydrated,
+    cartEnabled,
     cartQuantity,
     remainingStock,
     canAddMore,

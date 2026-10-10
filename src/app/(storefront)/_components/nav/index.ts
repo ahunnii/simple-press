@@ -23,3 +23,5 @@ export {
   resolveFooterQuickLinks,
   topLevelNav,
 } from "./resolve-footer-nav";
+
+export { donateLinkOptions, withDonateLink } from "./donate-link";

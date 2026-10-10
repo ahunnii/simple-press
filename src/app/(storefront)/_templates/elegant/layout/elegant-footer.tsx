@@ -7,6 +7,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -50,6 +51,8 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: ELEGANT_DEFAULT_NAV,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
 
   const brandLinks = BRAND_LINKS.filter(

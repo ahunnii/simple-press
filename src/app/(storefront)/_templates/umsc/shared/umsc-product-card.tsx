@@ -8,6 +8,7 @@ import { Check, ShoppingBag } from "lucide-react";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
@@ -24,6 +25,7 @@ type Props = {
  */
 export function UmscProductCard({ product }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const [isAdded, setIsAdded] = useState(false);
 
   const status = checkProductStatus({
@@ -50,7 +52,7 @@ export function UmscProductCard({ product }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (status.disableCart) return;
+    if (!cartEnabled || status.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -136,7 +138,8 @@ export function UmscProductCard({ product }: Props) {
             formatPrice(status.displayPrice)
           )}
         </span>
-        {!status.disableCart && (
+        {/* Catalog mode (B6.11): no quick-add when `cart` is off */}
+        {cartEnabled && !status.disableCart && (
           <div className="relative z-10 mt-3">
             <button
               type="button"

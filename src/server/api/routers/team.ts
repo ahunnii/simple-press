@@ -187,14 +187,17 @@ export const teamRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { invite, emailSent } = await createTeamInvite(ctx.db, {
+      const { invite, emailSent, inviteUrl } = await createTeamInvite(ctx.db, {
         businessId: ctx.businessId,
         actorUserId: ctx.session.user.id,
         email: input.email,
         role: input.role,
       });
 
-      return { ...invite, emailSent };
+      // `inviteUrl` lets the Team page offer "Copy link" when the email
+      // fails. It adds no exposure: the row spread above already carries
+      // `code`, and only owners reach this procedure.
+      return { ...invite, emailSent, inviteUrl };
     }),
 
   changeRole: ownerOnlyProcedure

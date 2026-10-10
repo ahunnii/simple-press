@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
@@ -11,6 +12,9 @@ import { WealthNewsletter } from "./wealth-newsletter";
 
 export async function WealthFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
+  const showDonate =
+    resolveFlags(business?.featureFlags).isEnabled("donations") &&
+    !!business?.donationShowInFooter;
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
@@ -136,6 +140,14 @@ export async function WealthFooter({ business }: DefaultFooterTemplateProps) {
             color: "var(--wealth-muted)",
           }}
         >
+          {/* Donations on AND the owner's "show in footer" switch on. Label
+              matches the header's "Support DCWF" (client copy), not the
+              owner's Donate/Tip/Support verb. */}
+          {showDonate ? (
+            <Link href="/donate" className="hover:opacity-80">
+              Support DCWF
+            </Link>
+          ) : null}
           {privacyPolicy ? (
             <Link href={`/${privacyPolicy.slug}`} className="hover:opacity-80">
               Privacy Policy

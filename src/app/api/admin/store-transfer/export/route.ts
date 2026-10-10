@@ -23,9 +23,9 @@ import type {
 } from "~/lib/store-transfer/types";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness } from "~/lib/check-business";
-import { s3Client } from "~/lib/s3/client";
+import { downloadStoredObjects } from "~/lib/s3/download";
 import { listBusinessObjects } from "~/lib/s3/list";
-import { keyToPublicUrl, STORAGE_BASE, STORAGE_BUCKET } from "~/lib/s3/url";
+import { keyToPublicUrl, STORAGE_BASE } from "~/lib/s3/url";
 import { collectStoreContent } from "~/lib/store-transfer/export";
 import { STORE_TRANSFER_FORMAT_VERSION } from "~/lib/store-transfer/types";
 import { auth } from "~/server/better-auth";
@@ -38,28 +38,6 @@ const APP_VERSION: string = pkg.version;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-// ─── Bounded-concurrency helper ───────────────────────────────────────────────
-
-/**
- * Process an array in chunks of `concurrency`, awaiting each chunk before
- * starting the next. Preserves order of results.
- */
-async function chunkedAsync<T, R>(
-  items: T[],
-  concurrency: number,
-  fn: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = [];
-  for (let i = 0; i < items.length; i += concurrency) {
-    const chunk = items.slice(i, i + concurrency);
-    const chunkResults = await Promise.all(
-      chunk.map((item, j) => fn(item, i + j)),
-    );
-    results.push(...chunkResults);
-  }
-  return results;
-}
 
 // ─── Route handler ────────────────────────────────────────────────────────────
 
@@ -112,39 +90,20 @@ export async function GET(req: Request): Promise<Response> {
     const listedObjects = await listBusinessObjects(targetBusinessId);
 
     // ── 4. Fetch media bytes (bounded concurrency = 5) ───────────────────────
-    const bucketBase = s3Client.buildBucketUrl(STORAGE_BUCKET);
+    const downloaded = await downloadStoredObjects(listedObjects, 5);
 
-    const mediaEntries = await chunkedAsync(
-      listedObjects,
-      5,
-      async (
-        obj,
+    const mediaEntries = downloaded.map(
+      (
+        { obj, buffer, contentType },
         idx,
-      ): Promise<{
+      ): {
         entry: StoreTransferMediaEntry;
         buffer: ArrayBuffer | null;
-      }> => {
+      } => {
         const seq = String(idx + 1).padStart(4, "0");
         const basename = path.basename(obj.key);
         const zipPath = `media/${seq}-${basename}`;
-
-        let buffer: ArrayBuffer | null = null;
-        let missing = false;
-        let contentType: string | undefined;
-
-        try {
-          const res = await s3Client.s3.fetch(`${bucketBase}/${obj.key}`, {
-            method: "GET",
-          });
-          if (!res.ok) {
-            missing = true;
-          } else {
-            contentType = res.headers.get("content-type") ?? undefined;
-            buffer = await res.arrayBuffer();
-          }
-        } catch {
-          missing = true;
-        }
+        const missing = buffer === null;
 
         const entry: StoreTransferMediaEntry = {
           originalUrl: keyToPublicUrl(obj.key),

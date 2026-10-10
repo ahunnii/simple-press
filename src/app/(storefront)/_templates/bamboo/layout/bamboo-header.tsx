@@ -21,12 +21,14 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
@@ -230,9 +232,14 @@ export function BambooHeader({
   // `shared/bamboo-emblem-clearance.ts` for the 72px overhang this implies).
   const isHome = pathname === "/";
 
-  const links = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
-    isEnabled,
+  // Donations "show in header" switch only ADDS a /donate link (last item) —
+  // the desktop and phone menus apply it identically so they never drift.
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, BAMBOO_DEFAULT_NAV),
+      isEnabled,
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
   );
   const socialLinks = readBambooSocialLinks(business?.siteContent?.socialLinks);
   const hasSocials = hasBambooSocialLinks(socialLinks);

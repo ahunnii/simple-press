@@ -1154,10 +1154,13 @@ export function NoiseHeader({
         ) : null}
       </AnimatePresence>
 
-      <NoiseCartDrawer
-        shippingConfig={shippingConfigFromBusiness(business)}
-        copy={resolveNoiseCartCopy(customFields)}
-      />
+      {/* Catalog mode (B6.11): no drawer to open when `cart` is off */}
+      {cartEnabled && (
+        <NoiseCartDrawer
+          shippingConfig={shippingConfigFromBusiness(business)}
+          copy={resolveNoiseCartCopy(customFields)}
+        />
+      )}
     </>
   );
 }

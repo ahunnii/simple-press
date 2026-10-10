@@ -35,15 +35,12 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
     notFound();
   }
 
-  const [{ flags, disabledByDependency }, templateOptions, invites] =
+  const [{ flags }, templateOptions, invites] =
     await Promise.all([
       api.platform.getBusinessFlags({ businessId }),
       api.platformBusiness.listTemplateOptions({ businessId }),
       api.platformInvites.list({ businessId }),
     ]);
-  const wordpressExportEnabled =
-    flags.wordpressExport === true &&
-    !disabledByDependency.includes("wordpressExport");
 
   return (
     <>
@@ -206,7 +203,6 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
           <BusinessContentTransferCard
             businessId={business.id}
             businessName={business.name}
-            wordpressExportEnabled={wordpressExportEnabled}
           />
 
           <BusinessFeatureFlags businessId={business.id} initialFlags={flags} />

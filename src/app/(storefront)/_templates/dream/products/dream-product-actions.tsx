@@ -7,6 +7,7 @@ import { Check } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { useProduct } from "~/hooks/use-product";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -82,6 +83,7 @@ export function DreamProductActions({
     isInventoryTracked,
   } = state;
 
+  const cartEnabled = useCartEnabled();
   const stockId = useId();
   const [added, setAdded] = useState(false);
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -90,6 +92,13 @@ export function DreamProductActions({
   // variant products) — mirror it so SubscribePanel links with the real qty.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Catalog mode leaves only the stock notes under the (hidden) buy row.
+  const showStockLines =
+    (isInventoryTracked && !product.allowBackorders) ||
+    (product.trackInventory &&
+      product.allowBackorders &&
+      (product.inventoryQty ?? 0) === 0);
 
   const heading = comingSoonHeading.trim();
   const body = comingSoonBody.trim();
@@ -145,28 +154,31 @@ export function DreamProductActions({
             buttonClassName={DREAM_NOTIFY_BUTTON_CLASSNAME}
           />
         </div>
-      ) : canAddMore ? (
+      ) : canAddMore && (cartEnabled || showStockLines) ? (
         <div className="flex flex-col gap-2.5">
-          <div className="flex flex-wrap items-center gap-3">
-            <DreamQuantityStepper
-              value={quantity}
-              onDecrement={handleDecrement}
-              onIncrement={handleIncrement}
-              canDecrement={quantity > 1}
-              canIncrement={quantity < remainingStock}
-              describedBy={isInventoryTracked ? stockId : undefined}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                handleAddToCart();
-                setAdded(true);
-              }}
-              className="dream-btn h-12 min-w-[12rem] flex-1"
-            >
-              Add to cart
-            </button>
-          </div>
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <DreamQuantityStepper
+                value={quantity}
+                onDecrement={handleDecrement}
+                onIncrement={handleIncrement}
+                canDecrement={quantity > 1}
+                canIncrement={quantity < remainingStock}
+                describedBy={isInventoryTracked ? stockId : undefined}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  handleAddToCart();
+                  setAdded(true);
+                }}
+                className="dream-btn h-12 min-w-[12rem] flex-1"
+              >
+                Add to cart
+              </button>
+            </div>
+          ) : null}
           {isInventoryTracked && !product.allowBackorders ? (
             <p id={stockId} className="text-[14px] text-[var(--dream-soft)]">
               {remainingStock > 1 ? `${remainingStock} available` : "Last one"}
@@ -180,16 +192,16 @@ export function DreamProductActions({
             </p>
           ) : null}
         </div>
-      ) : (
+      ) : !canAddMore && cartEnabled ? (
         <p className="text-[15px] text-[var(--dream-soft)]">
           You have all available stock of this item in your cart.{" "}
           <Link href="/cart" className="dream-link font-semibold">
             View cart
           </Link>
         </p>
-      )}
+      ) : null}
 
-      <AddedNotice show={added} />
+      <AddedNotice show={added && cartEnabled} />
 
       <SubscribePanel
         product={product}

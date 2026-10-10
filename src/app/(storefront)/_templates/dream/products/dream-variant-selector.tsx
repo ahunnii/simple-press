@@ -6,6 +6,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -49,6 +50,7 @@ export function DreamVariantSelector({
   onAdded,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
   const labelId = useId();
   const stockId = useId();
@@ -85,7 +87,7 @@ export function DreamVariantSelector({
       !product.allowBackorders);
 
   const handleAddToCart = () => {
-    if (!selectedVariant || addToCartDisabled) return;
+    if (!cartEnabled || !selectedVariant || addToCartDisabled) return;
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
@@ -151,30 +153,33 @@ export function DreamVariantSelector({
 
       {selectedVariant ? (
         <div className="flex flex-col gap-2.5">
-          <div className="flex flex-wrap items-center gap-3">
-            <DreamQuantityStepper
-              value={quantity}
-              onDecrement={() => setQuantity(Math.max(1, quantity - 1))}
-              onIncrement={() =>
-                setQuantity(Math.min(effectiveMax, quantity + 1))
-              }
-              canDecrement={quantity > 1}
-              canIncrement={quantity < effectiveMax}
-              describedBy={product.trackInventory ? stockId : undefined}
-            />
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              aria-disabled={addToCartDisabled || undefined}
-              className={cn(
-                "dream-btn h-12 min-w-[12rem] flex-1",
-                addToCartDisabled &&
-                  "cursor-not-allowed opacity-50 hover:translate-y-0 hover:shadow-none",
-              )}
-            >
-              {addToCartDisabled ? "Sold out" : "Add to cart"}
-            </button>
-          </div>
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <DreamQuantityStepper
+                value={quantity}
+                onDecrement={() => setQuantity(Math.max(1, quantity - 1))}
+                onIncrement={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                canDecrement={quantity > 1}
+                canIncrement={quantity < effectiveMax}
+                describedBy={product.trackInventory ? stockId : undefined}
+              />
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                aria-disabled={addToCartDisabled || undefined}
+                className={cn(
+                  "dream-btn h-12 min-w-[12rem] flex-1",
+                  addToCartDisabled &&
+                    "cursor-not-allowed opacity-50 hover:translate-y-0 hover:shadow-none",
+                )}
+              >
+                {addToCartDisabled ? "Sold out" : "Add to cart"}
+              </button>
+            </div>
+          ) : null}
 
           {product.trackInventory ? (
             <p id={stockId} className="text-[14px] text-[var(--dream-soft)]">

@@ -87,7 +87,9 @@ export function WealthHeader({
           },
         ]),
     { type: "link", label: "Contact & Office Hours", href: "/contact" },
-    ...(isEnabled("donations")
+    // Donations on AND the owner's "show in header" switch on. Label stays
+    // "Support DCWF" (client copy), not the owner's Donate/Tip/Support verb.
+    ...(isEnabled("donations") && business?.donationShowInHeader
       ? [{ type: "link" as const, label: "Support DCWF", href: "/donate" }]
       : []),
   ];

@@ -1,4 +1,5 @@
 import { env } from "~/env";
+import { isSetupGateComplete } from "~/lib/admin/setup-steps";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
@@ -66,9 +67,9 @@ export default async function AdminLayout({ children }: Props) {
 
   const featureData = await api.features.getFlags();
 
-  // Cheap lookup for the sidebar's "Finish setup" nudge — same shape as the
-  // setupComplete check in /admin/page.tsx, minus customDomain (a subdomain
-  // store with Stripe + a product is a legitimately finished setup).
+  // Cheap lookup for the sidebar's "Finish setup" nudge. It runs the same
+  // isSetupGateComplete rule as /admin/page.tsx, so the nudge and the /admin
+  // redirect agree on whether setup is finished (custom domain included).
   //
   // Runs alongside the pending-review count below — both are single cheap
   // reads needed on every admin page load, so they fire in parallel rather
@@ -78,6 +79,7 @@ export default async function AdminLayout({ children }: Props) {
       where: { id: business.id },
       select: {
         stripeAccountId: true,
+        customDomain: true,
         // Rides along on the query the sidebar nudge already runs — the
         // payments-disabled strip costs no extra round trip in the normal
         // case (a `true` here is trusted; only a `false` is verified against
@@ -114,10 +116,11 @@ export default async function AdminLayout({ children }: Props) {
             businessName={businessName}
             featureData={featureData}
             membershipRole={membershipRole}
-            welcomeSetupStatus={{
-              stripeConnected: Boolean(welcomeSetupStatus?.stripeAccountId),
-              hasProducts: (welcomeSetupStatus?._count.products ?? 0) > 0,
-            }}
+            setupComplete={isSetupGateComplete({
+              stripeAccountId: welcomeSetupStatus?.stripeAccountId ?? null,
+              customDomain: welcomeSetupStatus?.customDomain ?? null,
+              productCount: welcomeSetupStatus?._count.products ?? 0,
+            })}
             pendingReviewCount={pendingReviewCount}
           />
           <SidebarInset>

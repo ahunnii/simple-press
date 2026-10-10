@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { CoopMobileMenu } from "./coop-mobile-menu";
@@ -34,6 +36,7 @@ const LOGO_SRC_SET =
  */
 export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
   const overlay = pathname === "/";
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -66,11 +69,16 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
     ? "text-[var(--coop-background)]"
     : "text-[var(--coop-color-001)]";
 
+  const donate = donateLinkOptions(business, isEnabled, "header");
+
   const mobileLinks = [
     { href: "/", label: "Home" },
     { href: galleryHref, label: galleryLabel },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
+    // Donations "show in header": a plain last item, desktop and mobile alike.
+    // This header is hard-coded (ignores saved nav by design).
+    ...(donate.show ? [{ href: "/donate", label: donate.label }] : []),
   ];
 
   return (
@@ -188,6 +196,14 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
                 >
                   Contact
                 </Link>
+                {donate.show && (
+                  <Link
+                    href="/donate"
+                    className={`mx-[0.5375rem] inline-block cursor-pointer py-[0.5375rem] align-middle ${navLinkColorClass}`}
+                  >
+                    {donate.label}
+                  </Link>
+                )}
               </div>
             </nav>
           </div>

@@ -441,10 +441,13 @@ export function PinkHeader({
         }}
       />
 
-      <PinkCartDrawer
-        themeVars={themeVars ?? undefined}
-        customFields={customFields}
-      />
+      {/* Catalog mode (B6.11): no cart drawer when `cart` is off */}
+      {isEnabled("cart") ? (
+        <PinkCartDrawer
+          themeVars={themeVars ?? undefined}
+          customFields={customFields}
+        />
+      ) : null}
     </>
   );
 }

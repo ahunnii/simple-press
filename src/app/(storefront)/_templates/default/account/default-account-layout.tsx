@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,48 +17,24 @@ import {
 
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 /**
- * `flag` optionally gates a nav item behind a storefront feature flag
- * (Subscriptions → `"subscriptions"`, Rewards → `"loyalty"`); omitted (or
- * `undefined`) means always-on. Mirrors the same shape/filter used by
- * `OliveAccountLayout`'s `NAV_ITEMS`.
+ * Icons for the shared account links. Which links show (and their flag
+ * gating — Orders needs `orders`, Address Book needs `checkout`, and so on)
+ * comes from `getAccountNavLinks`, the same list every other template's
+ * account chrome uses, so a link never points at a route that 404s.
  */
-const BASE_NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package, flag: undefined },
-  {
-    href: "/account/subscriptions",
-    label: "Subscriptions",
-    icon: Repeat,
-    flag: "subscriptions",
-  },
-  {
-    href: "/account/invoices",
-    label: "Invoices",
-    icon: FileText,
-    flag: "invoices",
-  },
-  {
-    href: "/account/settings",
-    label: "Settings",
-    icon: Settings,
-    flag: undefined,
-  },
-  { href: "/account/security", label: "Security", icon: Lock, flag: undefined },
-  {
-    href: "/account/address-book",
-    label: "Address Book",
-    icon: BookUser,
-    flag: undefined,
-  },
-  {
-    href: "/account/preferences",
-    label: "Preferences",
-    icon: Bell,
-    flag: undefined,
-  },
-  { href: "/account/rewards", label: "Rewards", icon: Gift, flag: "loyalty" },
-] as const;
+const NAV_ICONS: Record<string, LucideIcon> = {
+  orders: Package,
+  "address-book": BookUser,
+  subscriptions: Repeat,
+  invoices: FileText,
+  rewards: Gift,
+  settings: Settings,
+  security: Lock,
+  preferences: Bell,
+};
 
 type Props = {
   children: ReactNode;
@@ -68,8 +45,8 @@ export function DefaultAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
   const flags = useStorefrontFlags();
 
-  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
-    (item) => !item.flag || flags.isEnabled(item.flag),
+  const NAV_ITEMS = getAccountNavLinks({ isEnabled: flags.isEnabled }).map(
+    (link) => ({ ...link, icon: NAV_ICONS[link.key] ?? Settings }),
   );
 
   return (

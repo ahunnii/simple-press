@@ -9,6 +9,7 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
@@ -19,6 +20,7 @@ type Props = {
 };
 export function ModernProductCard({ product }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
@@ -44,7 +46,7 @@ export function ModernProductCard({ product }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (productStatus.disableCart) return;
+    if (!cartEnabled || productStatus.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -121,7 +123,8 @@ export function ModernProductCard({ product }: Props) {
           >
             <Eye className="h-4 w-4" aria-hidden="true" />
           </Link>
-        ) : (
+        ) : cartEnabled ? (
+          // Catalog mode (B6.11): no quick-add when `cart` is off
           <>
             <button
               type="button"
@@ -150,7 +153,7 @@ export function ModernProductCard({ product }: Props) {
               {isAdded ? `${product.name} added to cart` : ""}
             </span>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

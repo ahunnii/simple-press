@@ -8,21 +8,30 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { formatPrice } from "~/lib/prices";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  topLevelNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
-const NAV_LINKS = [
+const NAV_LINKS: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
-] as const;
+];
 
 function LogoTwoLine({ name }: { name: string }) {
   const parts = name.trim().split(/\s+/);
@@ -48,6 +57,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount, total } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { isEnabled } = useStorefrontFlags();
+  const cartEnabled = useCartEnabled();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -81,11 +91,20 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [mobileMenuOpen]);
 
-  const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? NAV_LINKS;
+  // Owner nav (or the shipped default) through the shared resolver + route→
+  // flag filter; the Donations "show in header" switch appends a last /donate.
+  // This header has no dropdowns, so `topLevelNav` flattens first (dropping
+  // href-less group parents) — a /donate hidden in a group then can't block
+  // the switch's link.
+  const links = withDonateLink(
+    topLevelNav(
+      filterNavByFlags(
+        resolveNav(business?.siteContent?.navigationItems, NAV_LINKS),
+        isEnabled,
+      ),
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
+  );
 
   const authActions = (
     <>
@@ -217,16 +236,19 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
               <Heart aria-hidden="true" className="h-5 w-5" />
             </Link>
           )}
-          <Link
-            href="/cart"
-            className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
-            aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}, total ${formatPrice(total)}`}
-          >
-            <span className="text-sm font-medium" aria-hidden="true">
-              {formatPrice(total)}
-            </span>
-            <ShoppingBag aria-hidden="true" className="h-5 w-5" />
-          </Link>
+          {/* Catalog mode (B6.11): no cart link when `cart` is off */}
+          {cartEnabled && (
+            <Link
+              href="/cart"
+              className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
+              aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}, total ${formatPrice(total)}`}
+            >
+              <span className="text-sm font-medium" aria-hidden="true">
+                {formatPrice(total)}
+              </span>
+              <ShoppingBag aria-hidden="true" className="h-5 w-5" />
+            </Link>
+          )}
           {isEnabled("customerAccounts") && (
             <>
               {isPending ? (

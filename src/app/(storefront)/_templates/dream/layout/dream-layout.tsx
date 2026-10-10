@@ -13,6 +13,11 @@ import { getSession } from "~/server/better-auth/server";
 import { DreamAmbientController } from "../shared/dream-ambient-controller";
 import { dreamMarkUrlVar } from "../shared/dream-mark";
 import { nonBlank } from "../shared/dream-non-blank";
+import {
+  donateLinkOptions,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
+
 import { DreamFooter } from "./dream-footer";
 import { DreamHeader } from "./dream-header";
 import { resolveDreamNav } from "./dream-nav";
@@ -73,6 +78,12 @@ export async function DreamLayout({
     business.siteContent?.navigationItems,
     customFields,
     isEnabled,
+  );
+  // Donations "show in header" switch: header + overlay get Donate appended;
+  // the footer keeps the un-appended `navItems` so its fallback ignores it.
+  const headerNavItems = withDonateLink(
+    navItems,
+    donateLinkOptions(business, isEnabled, "header"),
   );
 
   const banner = resolveBanner(business.siteContent, isEnabled);
@@ -136,7 +147,7 @@ export async function DreamLayout({
       <DreamHeader
         business={business}
         initialSession={session ?? null}
-        navItems={navItems}
+        navItems={headerNavItems}
       />
 
       <main id="main-content" className="flex-1">

@@ -6,6 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
@@ -30,6 +31,7 @@ export function PollenVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -60,7 +62,7 @@ export function PollenVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
 
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
@@ -123,65 +125,70 @@ export function PollenVariantSelector({
         </p>
       )}
 
-      {/* S-3: wrap stepper in role="group" with aria-label */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {selectedVariant && (
-          <div
-            role="group"
-            aria-label={`Quantity for ${product.name}`}
-            className="flex items-center gap-1 rounded-md border border-[#2a351f]/20"
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
+      {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+      {cartEnabled && (
+        // S-3: wrap stepper in role="group" with aria-label
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          {selectedVariant && (
+            <div
+              role="group"
+              aria-label={`Quantity for ${product.name}`}
+              className="flex items-center gap-1 rounded-md border border-[#2a351f]/20"
             >
-              <Minus className="size-4" aria-hidden="true" />
-            </Button>
-            {/* S-3: aria-live on the quantity value span */}
-            <span
-              className="w-10 text-center text-base font-semibold text-[#2a351f]"
-              aria-live="polite"
-            >
-              {quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
-              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
-              disabled={quantity >= effectiveMax}
-              aria-label="Increase quantity"
-            >
-              <Plus className="size-4" aria-hidden="true" />
-            </Button>
-          </div>
-        )}
-
-        <Button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders)
-          }
-          className="flex-1 bg-[#215935] text-white hover:bg-[#1a4729] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isAdded ? (
-            <>
-              <Check className="mr-2 h-4 w-4" aria-hidden="true" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity} to Cart`
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-4" aria-hidden="true" />
+              </Button>
+              {/* S-3: aria-live on the quantity value span */}
+              <span
+                className="w-10 text-center text-base font-semibold text-[#2a351f]"
+                aria-live="polite"
+              >
+                {quantity}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-10 text-[#2a351f] hover:bg-[#2a351f]/5"
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                disabled={quantity >= effectiveMax}
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
           )}
-        </Button>
-      </div>
+
+          <Button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={
+              !selectedVariant ||
+              (product.trackInventory &&
+                selectedVariant.inventoryQty === 0 &&
+                !product.allowBackorders)
+            }
+            className="flex-1 bg-[#215935] text-white hover:bg-[#1a4729] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isAdded ? (
+              <>
+                <Check className="mr-2 h-4 w-4" aria-hidden="true" />
+                Added to Cart
+              </>
+            ) : (
+              `Add ${quantity} to Cart`
+            )}
+          </Button>
+        </div>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && effectiveMax === 0 && (

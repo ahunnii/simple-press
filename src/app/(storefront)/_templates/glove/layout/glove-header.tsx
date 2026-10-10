@@ -18,8 +18,10 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   navGroupEntries,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { GloveAccountMenu } from "./glove-account-menu";
@@ -87,9 +89,11 @@ export function GloveHeader({
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
-  const links = resolveGloveNav(
-    business.siteContent?.navigationItems,
-    isEnabled,
+  // Donations "show in header" switch appends a plain last /donate item; the
+  // same list feeds the desktop nav and the phone menu.
+  const links = withDonateLink(
+    resolveGloveNav(business.siteContent?.navigationItems, isEnabled),
+    donateLinkOptions(business, isEnabled, "header"),
   );
   const activeIndex = activeTopIndex(pathname, links);
 

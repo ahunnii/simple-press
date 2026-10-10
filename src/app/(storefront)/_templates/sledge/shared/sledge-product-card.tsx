@@ -8,6 +8,7 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
@@ -18,6 +19,7 @@ type Props = {
 
 export function SledgeProductCard({ product, index: _index }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   // S-2: announce add-to-cart feedback to screen readers
   const [announce, setAnnounce] = useState("");
 
@@ -48,7 +50,7 @@ export function SledgeProductCard({ product, index: _index }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (productStatus.disableCart) return;
+    if (!cartEnabled || productStatus.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -150,7 +152,8 @@ export function SledgeProductCard({ product, index: _index }: Props) {
 
         {/* CTA — always in layout, opacity-only reveal so card height never shifts */}
         <div className="sledge-cta-reveal">
-          {!productStatus.disableCart ? (
+          {/* Catalog mode (B6.11): "View item" (to the PDP) when `cart` is off */}
+          {cartEnabled && !productStatus.disableCart ? (
             <button
               type="button"
               onClick={handleAddToCart}

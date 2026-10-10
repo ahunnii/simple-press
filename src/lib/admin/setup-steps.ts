@@ -69,6 +69,24 @@ export function isStorefrontCustomized(
   );
 }
 
+/**
+ * The gate that decides whether `/admin` opens the dashboard or the Setup
+ * Guide. Stripe connected, at least one product, and a custom domain are all
+ * required. The sidebar "Almost there!" nudge uses the same rule, so the two
+ * can never disagree about whether setup is finished.
+ */
+export function isSetupGateComplete(input: {
+  stripeAccountId: string | null;
+  customDomain: string | null;
+  productCount: number;
+}): boolean {
+  return (
+    Boolean(input.stripeAccountId) &&
+    input.productCount > 0 &&
+    Boolean(input.customDomain)
+  );
+}
+
 export type SetupStatusInput = {
   stripeAccountId: string | null;
   /**

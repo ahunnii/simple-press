@@ -12,9 +12,11 @@ import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 import {
   externalLinkProps,
+  donateLinkOptions,
   filterNavByFlags,
   getAccountNavLinks,
   resolveFooterNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
@@ -83,12 +85,16 @@ export async function NoiseFooter({
     { href: "/contact", label: "Contact" },
   ];
 
-  const quickLinks = filterNavByFlags(
-    resolveFooterNav(
-      business?.siteContent?.footerNavigationItems,
-      quickLinksFallback,
+  // Donations "show in footer" switch: appends Donate last (no-op if present).
+  const quickLinks = withDonateLink(
+    filterNavByFlags(
+      resolveFooterNav(
+        business?.siteContent?.footerNavigationItems,
+        quickLinksFallback,
+      ),
+      isEnabled,
     ),
-    isEnabled,
+    donateLinkOptions(business, isEnabled, "footer"),
   );
 
   // Shop column: the whole column rides on `products` (its links all point

@@ -37,9 +37,15 @@ export function DarkTrendProductActions({
     additionalFields,
     isInventoryTracked,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const [liveMessage, setLiveMessage] = useState("");
+
+  const showBackorderNote =
+    product.trackInventory &&
+    product.allowBackorders &&
+    (product.inventoryQty ?? 0) === 0;
 
   const hasVariants = Object.keys(variantOptions).length > 0;
 
@@ -51,7 +57,7 @@ export function DarkTrendProductActions({
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
   const addToCart = () => {
-    if (!canAddMore) return;
+    if (!cartEnabled || !canAddMore) return;
     handleAddToCart();
     setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
     setTimeout(() => {
@@ -110,92 +116,107 @@ export function DarkTrendProductActions({
             {liveMessage}
           </div>
 
+          {/* Catalog mode (B6.11): stock line only, no qty/Add to Cart */}
+          {!cartEnabled && isInventoryTracked && inStock && (
+            <p className="mb-8 text-sm text-white/60">
+              {remainingStock > 1 ? `${remainingStock} available` : "Last one!"}
+            </p>
+          )}
+
           {canAddMore && (
             <>
               {/* Quantity Selector */}
-              <div className="mb-8">
-                <div
-                  role="group"
-                  aria-label="Quantity"
-                  className="inline-flex flex-col gap-2"
-                >
-                  <span className="block text-sm font-medium text-white">
-                    Quantity
-                  </span>
-                  <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
-                    <button
-                      type="button"
-                      onClick={handleDecrement}
-                      disabled={quantity <= 1}
-                      className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <span
-                      aria-live="polite"
-                      aria-atomic="true"
-                      className="w-8 text-center font-medium text-white"
-                    >
-                      {quantity}
+              {cartEnabled && (
+                <div className="mb-8">
+                  <div
+                    role="group"
+                    aria-label="Quantity"
+                    className="inline-flex flex-col gap-2"
+                  >
+                    <span className="block text-sm font-medium text-white">
+                      Quantity
                     </span>
-                    <button
-                      type="button"
-                      onClick={handleIncrement}
-                      disabled={quantity >= remainingStock}
-                      className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
-                      aria-label="Increase quantity"
-                      aria-describedby={
-                        isInventoryTracked ? "dt-actions-stock-msg" : undefined
-                      }
-                    >
-                      <Plus className="h-4 w-4" aria-hidden="true" />
-                    </button>
-
-                    {isInventoryTracked && (
-                      <span
-                        id="dt-actions-stock-msg"
-                        className="text-sm text-white/60"
+                    <div className="bg-card inline-flex items-center gap-4 rounded-md px-4 py-2">
+                      <button
+                        type="button"
+                        onClick={handleDecrement}
+                        disabled={quantity <= 1}
+                        className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
+                        aria-label="Decrease quantity"
                       >
-                        {remainingStock > 1
-                          ? `${remainingStock} available`
-                          : "Last one!"}
+                        <Minus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <span
+                        aria-live="polite"
+                        aria-atomic="true"
+                        className="w-8 text-center font-medium text-white"
+                      >
+                        {quantity}
                       </span>
-                    )}
+                      <button
+                        type="button"
+                        onClick={handleIncrement}
+                        disabled={quantity >= remainingStock}
+                        className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white disabled:opacity-50"
+                        aria-label="Increase quantity"
+                        aria-describedby={
+                          isInventoryTracked
+                            ? "dt-actions-stock-msg"
+                            : undefined
+                        }
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+
+                      {isInventoryTracked && (
+                        <span
+                          id="dt-actions-stock-msg"
+                          className="text-sm text-white/60"
+                        >
+                          {remainingStock > 1
+                            ? `${remainingStock} available`
+                            : "Last one!"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Add to Cart Buttons */}
-              <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={addToCart}
-                  className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-                    justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
-                  }`}
-                >
-                  {justAdded ? (
-                    <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    "Add to Cart"
+              {(cartEnabled || showBackorderNote) && (
+                <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+                  {cartEnabled && (
+                    <button
+                      type="button"
+                      onClick={addToCart}
+                      className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
+                        justAdded
+                          ? "bg-primary"
+                          : "bg-primary hover:bg-primary/90"
+                      }`}
+                    >
+                      {justAdded ? (
+                        <>
+                          <Check className="h-4 w-4" aria-hidden="true" />
+                          Added to Cart
+                        </>
+                      ) : (
+                        "Add to Cart"
+                      )}
+                    </button>
                   )}
-                </button>
-                {product.trackInventory &&
-                  product.allowBackorders &&
-                  (product.inventoryQty ?? 0) === 0 && (
+                  {showBackorderNote && (
                     <p className="text-muted-foreground text-sm">
                       Backordered — ships when available
                     </p>
                   )}
-              </div>
+                </div>
+              )}
             </>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">
               You have the maximum available quantity in your cart
             </p>

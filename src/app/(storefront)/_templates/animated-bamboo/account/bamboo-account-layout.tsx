@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation";
 import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { BambooEdge } from "../shared/bamboo-edge";
 import { BambooGlyph } from "../shared/bamboo-glyph";
 
-const NAV_ITEMS = [
+// `flag`: `account/orders` 404s when `orders` is off, so the link hides too.
+const BASE_NAV_ITEMS = [
   { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/orders", label: "Orders", icon: Package, flag: "orders" },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
   { href: "/account/preferences", label: "Preferences", icon: Bell },
@@ -39,6 +41,10 @@ type Props = {
  */
 export function BambooAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
+  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
+    (item) => !("flag" in item) || isEnabled(item.flag),
+  );
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");

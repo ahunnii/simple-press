@@ -36,6 +36,7 @@ export function SledgeProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -126,7 +127,8 @@ export function SledgeProductActions({
           </p>
         )}
 
-      {inStock && canAddMore && (
+      {/* Catalog mode (B6.11): no qty or Add To Cart when `cart` is off */}
+      {cartEnabled && inStock && canAddMore && (
         <div className="flex items-stretch gap-3">
           {/* S-3: group wrapper with accessible label */}
           <div
@@ -180,7 +182,7 @@ export function SledgeProductActions({
         </div>
       )}
 
-      {inStock && !canAddMore && (
+      {cartEnabled && inStock && !canAddMore && (
         <p className="sl-eyebrow font-sans text-xs tracking-[0.12em] text-[var(--sl-coral-aa)] uppercase">
           Maximum available quantity in cart
         </p>

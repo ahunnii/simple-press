@@ -28,7 +28,8 @@ type NavItem = {
 };
 
 const BASE_NAV_ITEMS: NavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
+  // `account/orders` 404s when `orders` is off.
+  { href: "/account/orders", label: "Orders", icon: Package, flag: "orders" },
   {
     href: "/account/subscriptions",
     label: "Subscriptions",

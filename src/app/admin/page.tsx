@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { isSetupGateComplete } from "~/lib/admin/setup-steps";
 import { checkBusiness } from "~/lib/check-business";
 import { db } from "~/server/db";
 
@@ -23,12 +24,13 @@ export default async function AdminPage() {
     redirect("/admin/welcome");
   }
 
-  // All three conditions must be met: Stripe connected, ≥1 product, custom domain set.
-  // Custom domain is a hard requirement — owners should not operate on the platform subdomain.
-  const setupComplete =
-    Boolean(business.stripeAccountId) &&
-    business._count.products > 0 &&
-    Boolean(business.customDomain);
+  // Custom domain is a hard requirement (see isSetupGateComplete). Owners should
+  // not operate on the platform subdomain.
+  const setupComplete = isSetupGateComplete({
+    stripeAccountId: business.stripeAccountId,
+    customDomain: business.customDomain,
+    productCount: business._count.products,
+  });
 
   redirect(setupComplete ? "/admin/dashboard" : "/admin/welcome");
 }

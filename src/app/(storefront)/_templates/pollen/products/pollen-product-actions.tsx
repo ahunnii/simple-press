@@ -40,6 +40,7 @@ export function PollenProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -103,7 +104,8 @@ export function PollenProductActions({
         </div>
       ) : (
         <>
-          {canAddMore && (
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled && canAddMore && (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Label>Quantity</Label>
               {/* S-3: wrap stepper in role="group" with aria-label */}
@@ -160,7 +162,7 @@ export function PollenProductActions({
           )}
 
           {/* M-7: amber-600 → amber-700 */}
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="mt-3 text-center text-sm text-amber-700">
               You have the maximum available quantity in your cart
             </p>

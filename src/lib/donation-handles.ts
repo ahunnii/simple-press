@@ -13,6 +13,8 @@
  * result is styled and laid out.
  */
 
+import { resolveDonationLabel } from "~/lib/donations/label";
+
 export type DonationHandleKey = "venmo" | "cashapp";
 
 export interface ResolvedDonationHandle {
@@ -64,9 +66,13 @@ export function cashAppUrl(cashtag: string): string {
   return `https://cash.app/$${cashtag}`;
 }
 
-/** Prefilled payment note used in Venmo payment-intent links. */
-export function donationNote(businessName: string): string {
-  return `Donation to ${businessName}`;
+/**
+ * Prefilled payment note used in Venmo payment-intent links. `noun` is the
+ * owner's chosen wording from `resolveDonationLabel(...).noun` ("Donation",
+ * "Tip", "Contribution") so the note matches the rest of the feature.
+ */
+export function donationNote(businessName: string, noun: string): string {
+  return `${noun} to ${businessName}`;
 }
 
 /**
@@ -78,8 +84,11 @@ export function resolveDonationHandles(business: {
   name: string;
   venmoHandle: string | null;
   cashAppHandle: string | null;
+  /** `Business.donationLabel`; unknown/null falls back to "donate". */
+  donationLabel: string | null;
 }): ResolvedDonationHandle[] {
   const resolved: ResolvedDonationHandle[] = [];
+  const { noun } = resolveDonationLabel(business.donationLabel);
 
   const venmo = normalizeVenmoHandle(business.venmoHandle);
   if (venmo) {
@@ -87,7 +96,7 @@ export function resolveDonationHandles(business: {
       key: "venmo",
       label: "Venmo",
       displayHandle: `@${venmo}`,
-      url: venmoUrl(venmo, donationNote(business.name)),
+      url: venmoUrl(venmo, donationNote(business.name, noun)),
     });
   }
 

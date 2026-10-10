@@ -12,6 +12,7 @@ import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,
 } from "~/lib/variant-price";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
 
@@ -238,6 +239,7 @@ export function OliveProductCard({
 }: OliveProductCardProps) {
   const NameHeading = headingLevel === 2 ? "h2" : "h3";
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const reducedMotion = useReducedMotion();
 
   const [hovered, setHovered] = useState(false);
@@ -363,7 +365,7 @@ export function OliveProductCard({
   };
 
   const addSimple = () => {
-    if (blocked) return;
+    if (!cartEnabled || blocked) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -381,7 +383,7 @@ export function OliveProductCard({
   };
 
   const addVariant = (choice: VariantChoice) => {
-    if (blocked) return;
+    if (!cartEnabled || blocked) return;
     const { variant } = choice;
     const price = resolveVariantPrice(variant.price, product.price);
     const compareAt = resolveVariantCompareAtPrice(
@@ -542,7 +544,8 @@ export function OliveProductCard({
             className="mt-auto"
           />
 
-          {showQuickAdd ? (
+          {/* Catalog mode (B6.11): no quick-add pill when `cart` is off */}
+          {showQuickAdd && cartEnabled ? (
             <QuickAdd
               blockedLabel={
                 status.comingSoon

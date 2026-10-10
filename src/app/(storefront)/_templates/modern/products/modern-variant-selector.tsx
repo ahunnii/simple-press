@@ -6,6 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -28,6 +29,7 @@ export function ModernVariantSelector({
   onQuantityChange,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -58,7 +60,7 @@ export function ModernVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
 
     addItem(
       buildVariantCartItem(product, selectedVariant, effectiveMax),
@@ -115,8 +117,8 @@ export function ModernVariantSelector({
         </div>
       </div>
 
-      {/* Quantity Selection */}
-      {selectedVariant && effectiveMax > 0 && (
+      {/* Quantity Selection — catalog mode (B6.11): hidden when `cart` is off */}
+      {cartEnabled && selectedVariant && effectiveMax > 0 && (
         <div role="group" aria-label="Quantity">
           <span className="text-foreground mb-3 block text-xs font-semibold tracking-widest uppercase">
             Quantity
@@ -156,34 +158,49 @@ export function ModernVariantSelector({
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders)
-          }
-          className={`bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${
-            !isAdded && "hover:opacity-90"
-          }`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity > 1 ? quantity : ""} to Cart`.trim()
-          )}
-        </button>
-      </div>
-      <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {isAdded ? `${product.name} added to cart` : ""}
-      </span>
+      {!cartEnabled &&
+        product.trackInventory &&
+        selectedVariant &&
+        effectiveMax > 0 && (
+          <p className="text-muted-foreground text-sm">
+            {isBackordered
+              ? "Backordered — ships when available"
+              : `${selectedVariant.inventoryQty} available`}
+          </p>
+        )}
+
+      {/* Catalog mode (B6.11): no Add to cart when `cart` is off */}
+      {cartEnabled && (
+        <>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={
+                !selectedVariant ||
+                (product.trackInventory &&
+                  selectedVariant.inventoryQty === 0 &&
+                  !product.allowBackorders)
+              }
+              className={`bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${
+                !isAdded && "hover:opacity-90"
+              }`}
+            >
+              {isAdded ? (
+                <>
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                  Added to Cart
+                </>
+              ) : (
+                `Add ${quantity > 1 ? quantity : ""} to Cart`.trim()
+              )}
+            </button>
+          </div>
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {isAdded ? `${product.name} added to cart` : ""}
+          </span>
+        </>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && effectiveMax === 0 && (

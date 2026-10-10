@@ -40,6 +40,7 @@ export function HappyBambooProductActions({
     justAdded,
     remainingStock,
     isInventoryTracked,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -101,34 +102,39 @@ export function HappyBambooProductActions({
               {/* Quantity Selector */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex flex-col gap-1.5">
-                  <div className="border-border flex items-center justify-between gap-1 rounded-lg border">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-10"
-                      onClick={() => handleDecrement()}
-                      disabled={quantity <= 1}
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="size-4" />
-                    </Button>
-                    <span className="text-foreground w-10 text-center text-base font-semibold">
-                      {quantity}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-10"
-                      onClick={() => handleIncrement()}
-                      disabled={quantity >= remainingStock}
-                      aria-label="Increase quantity"
-                      aria-describedby={
-                        isInventoryTracked ? "hb-actions-stock-msg" : undefined
-                      }
-                    >
-                      <Plus className="size-4" />
-                    </Button>
-                  </div>
+                  {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
+                  {cartEnabled && (
+                    <div className="border-border flex items-center justify-between gap-1 rounded-lg border">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-10"
+                        onClick={() => handleDecrement()}
+                        disabled={quantity <= 1}
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="size-4" />
+                      </Button>
+                      <span className="text-foreground w-10 text-center text-base font-semibold">
+                        {quantity}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-10"
+                        onClick={() => handleIncrement()}
+                        disabled={quantity >= remainingStock}
+                        aria-label="Increase quantity"
+                        aria-describedby={
+                          isInventoryTracked
+                            ? "hb-actions-stock-msg"
+                            : undefined
+                        }
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    </div>
+                  )}
                   {isInventoryTracked && !product.allowBackorders && (
                     <span
                       id="hb-actions-stock-msg"
@@ -140,28 +146,32 @@ export function HappyBambooProductActions({
                     </span>
                   )}
                 </div>
-                <Button size="lg" onClick={handleAddToCart} className="flex">
-                  {justAdded ? (
-                    <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="size-5" aria-hidden="true" />
-                      Add to Cart - {formatPrice(displayPrice)}
-                    </>
-                  )}
-                </Button>
+                {cartEnabled && (
+                  <Button size="lg" onClick={handleAddToCart} className="flex">
+                    {justAdded ? (
+                      <>
+                        <Check className="h-4 w-4" aria-hidden="true" />
+                        Added to Cart
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="size-5" aria-hidden="true" />
+                        Add to Cart - {formatPrice(displayPrice)}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
-              <span
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-                className="sr-only"
-              >
-                {justAdded ? "Added to cart" : ""}
-              </span>
+              {cartEnabled && (
+                <span
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="sr-only"
+                >
+                  {justAdded ? "Added to cart" : ""}
+                </span>
+              )}
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (
@@ -172,7 +182,7 @@ export function HappyBambooProductActions({
             </>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="mt-3 text-center text-sm text-amber-500">
               You have the maximum available quantity in your cart
             </p>

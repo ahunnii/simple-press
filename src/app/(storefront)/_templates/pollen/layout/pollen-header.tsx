@@ -25,7 +25,7 @@ import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
@@ -33,12 +33,14 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { PollenAnnouncementBar } from "./pollen-announcement-bar";
@@ -98,11 +100,9 @@ export function PollenHeader({
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = useHydratedSession();
-  const { isEnabled } = useFeatureFlags({
-    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
-  });
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
   const { itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const user = session?.user;
   const shouldReduceMotion = useReducedMotion();
@@ -161,9 +161,13 @@ export function PollenHeader({
   // has switched off — e.g. /services while `services` is off, or /shop
   // while `products` is off (cascades: collections/cart depend on products).
   // Consumed by both the desktop nav and the mobile overlay below.
-  const links = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, POLLEN_DEFAULT_NAV),
-    isStorefrontEnabled,
+  // The Donations "show in header" switch appends a plain last /donate item.
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, POLLEN_DEFAULT_NAV),
+      isStorefrontEnabled,
+    ),
+    donateLinkOptions(business, isStorefrontEnabled, "header"),
   );
 
   const accountsEnabled = isStorefrontEnabled("customerAccounts");
@@ -505,7 +509,7 @@ export function PollenHeader({
               )}
 
               {/* Cart icon */}
-              {isEnabled("cart") && (
+              {cartEnabled && (
                 <Link
                   href="/cart"
                   className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"

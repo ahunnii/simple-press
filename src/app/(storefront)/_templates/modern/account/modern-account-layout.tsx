@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-const NAV_ITEMS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
+// `flag`: `account/orders` 404s when `orders` is off, so the link hides too.
+const BASE_NAV_ITEMS = [
+  { href: "/account/orders", label: "Orders", icon: Package, flag: "orders" },
   { href: "/account/settings", label: "Settings", icon: Settings },
   { href: "/account/security", label: "Security", icon: Lock },
   { href: "/account/address-book", label: "Address Book", icon: BookUser },
@@ -22,6 +24,10 @@ type Props = {
 
 export function ModernAccountLayout({ children, heading }: Props) {
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
+  const NAV_ITEMS = BASE_NAV_ITEMS.filter(
+    (item) => !("flag" in item) || isEnabled(item.flag),
+  );
 
   return (
     <>

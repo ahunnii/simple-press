@@ -18,6 +18,7 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -83,6 +84,8 @@ export function GloveFooter({
     navigationItems: business.siteContent?.navigationItems,
     navDefaults: GLOVE_DEFAULT_FOOTER_LINKS,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   }).filter((link) => {
     const isAuthLink = link.href === SIGN_IN_HREF || link.href === SIGN_UP_HREF;
     if (!isAuthLink) return true;

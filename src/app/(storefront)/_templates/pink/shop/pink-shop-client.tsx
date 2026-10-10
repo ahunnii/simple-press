@@ -7,6 +7,7 @@ import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import type { Product } from "~/types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { useCart } from "~/providers/cart-context";
 
@@ -74,7 +75,11 @@ function AddToBasketButton({
   copy: Copy;
 }) {
   const { addItem, getItemQuantity } = useCart();
+  const cartEnabled = useCartEnabled();
   const [justAdded, setJustAdded] = useState(false);
+
+  // Catalog mode (B6.11): no quick-add / "Choose options" when `cart` is off
+  if (!cartEnabled) return null;
 
   const hasVariants = product.variants.length > 0;
   const soldOut =

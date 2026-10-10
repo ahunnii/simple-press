@@ -11,9 +11,18 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
 import { SearchReadinessStrip } from "~/app/admin/dashboard/_components/search-readiness-strip";
-import { bucketRevenueByDay } from "~/app/admin/dashboard/_lib/revenue-by-day";
+import {
+  bucketRevenueByDay,
+  startOfZonedDay,
+} from "~/app/admin/dashboard/_lib/revenue-by-day";
 
 import { TrailHeader } from "../_components/trail-header";
+
+/**
+ * Low-stock line for the dashboard card when a product or inventory item has
+ * no "Low stock alert at" threshold of its own. Rows with a threshold use it.
+ */
+const DEFAULT_LOW_STOCK_THRESHOLD = 10;
 
 export default async function AdminDashboardPage() {
   const business = await checkBusiness();
@@ -77,14 +86,16 @@ export default async function AdminDashboardPage() {
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  // "Today" and the chart's calendar days are the STORE's days
+  // (`Business.timeZone`), not the server's — production runs in UTC, which
+  // would roll a Detroit store's "today" over at 8pm.
+  const timeZone = businessData?.timeZone ?? business.timeZone;
+  const todayStart = startOfZonedDay(new Date(), timeZone);
 
   // The revenue chart labels whole calendar days, so its window starts at
-  // local midnight — otherwise the first bar would silently cover a partial
-  // day. Other 30-day stats keep the rolling `thirtyDaysAgo` window.
-  const chartWindowStart = new Date(thirtyDaysAgo);
-  chartWindowStart.setHours(0, 0, 0, 0);
+  // the store's midnight — otherwise the first bar would silently cover a
+  // partial day. Other 30-day stats keep the rolling `thirtyDaysAgo` window.
+  const chartWindowStart = startOfZonedDay(thirtyDaysAgo, timeZone);
 
   const [
     totalRevenue,
@@ -151,48 +162,78 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Low stock products — variants first, then base products without variants.
+    // Low stock products — variants first, then base products without
+    // variants. Each row is measured against its own product's "Low stock
+    // alert at" threshold (variants inherit the product's), falling back to
+    // DEFAULT_LOW_STOCK_THRESHOLD when the owner never set one. Variants go
+    // through raw SQL because the threshold lives on the parent Product, and
+    // Prisma field references can't cross a relation.
     Promise.all([
-      db.productVariant.findMany({
-        where: {
-          product: {
-            businessId: business.id,
-            published: true,
-            trackInventory: true,
-          },
-          inventoryQty: { lte: 10, gte: 0 },
-        },
-        orderBy: { inventoryQty: "asc" },
-        take: 10,
-        include: { product: { select: { name: true } } },
-      }),
+      db.$queryRaw<
+        Array<{
+          id: string;
+          name: string;
+          inventoryQty: number;
+          productName: string;
+        }>
+      >`
+        SELECT v.id, v.name, v."inventoryQty", p.name AS "productName"
+        FROM "ProductVariant" v
+        JOIN "Product" p ON p.id = v."productId"
+        WHERE p."businessId" = ${business.id}
+          AND p.published = true
+          AND p."trackInventory" = true
+          AND v."inventoryQty" >= 0
+          AND v."inventoryQty" <= COALESCE(p."lowInventoryThreshold", ${DEFAULT_LOW_STOCK_THRESHOLD})
+        ORDER BY v."inventoryQty" ASC
+        LIMIT 10
+      `,
       db.product.findMany({
         where: {
           businessId: business.id,
           published: true,
           trackInventory: true,
-          inventoryQty: { lte: 10, gte: 0 },
           variants: { none: {} },
+          OR: [
+            {
+              lowInventoryThreshold: null,
+              inventoryQty: { lte: DEFAULT_LOW_STOCK_THRESHOLD, gte: 0 },
+            },
+            {
+              inventoryQty: {
+                lte: db.product.fields.lowInventoryThreshold,
+                gte: 0,
+              },
+            },
+          ],
         },
         orderBy: { inventoryQty: "asc" },
         take: 10,
         select: { id: true, name: true, inventoryQty: true },
       }),
     ]).then(([variants, baseProducts]) => {
+      const variantRows = variants.map((v) => ({
+        id: v.id,
+        name: v.name,
+        inventoryQty: v.inventoryQty,
+        product: { name: v.productName },
+      }));
       const baseAsVariants = baseProducts.map((p) => ({
         id: p.id,
         name: "",
         inventoryQty: p.inventoryQty,
         product: { name: p.name },
       }));
-      return [...variants, ...baseAsVariants]
+      return [...variantRows, ...baseAsVariants]
         .sort((a, b) => a.inventoryQty - b.inventoryQty)
         .slice(0, 5);
     }),
 
-    // Low stock pools — pools with inventory at or near zero. Scoped to
-    // `itemType: "stock"`: a rental item sitting at "2 on hand" can simply
-    // mean the other 8 are out with customers (see `outQty` on
+    // Low stock pools — measured against each item's own threshold, falling
+    // back to DEFAULT_LOW_STOCK_THRESHOLD when none is set. No lower bound, so
+    // an oversold (negative) pool is listed and painted as out of stock.
+    // Scoped to `itemType: "stock"`: a rental item sitting at "2 on hand" can
+    // simply mean the other 8 are out with customers (see `outQty` on
     // `baseInventoryUnit.items`), not that the business is short. Every
     // pool that existed before rentals shipped is "stock" by default, so
     // this is a no-op for any business without rental items.
@@ -200,7 +241,17 @@ export default async function AdminDashboardPage() {
       where: {
         businessId: business.id,
         itemType: "stock",
-        inventoryQty: { lte: 10 },
+        OR: [
+          {
+            lowInventoryThreshold: null,
+            inventoryQty: { lte: DEFAULT_LOW_STOCK_THRESHOLD },
+          },
+          {
+            inventoryQty: {
+              lte: db.baseInventoryUnit.fields.lowInventoryThreshold,
+            },
+          },
+        ],
       },
       orderBy: { inventoryQty: "asc" },
       take: 5,
@@ -212,7 +263,7 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Revenue by day (last 30 days) — raw rows, bucketed into local
+    // Revenue by day (last 30 days) — raw rows, bucketed into store-local
     // calendar days below (Prisma's groupBy(["createdAt"]) groups by the
     // full timestamp, i.e. one row per order, not per day).
     //
@@ -283,13 +334,17 @@ export default async function AdminDashboardPage() {
       take: 5,
     }),
 
-    // Orders needing fulfillment (paid, not yet fully fulfilled, not cancelled/refunded)
+    // Orders needing fulfillment. Must match the card's link filter exactly
+    // (/admin/orders?status=open&fulfillment=unfulfilled&paymentStatus=paid),
+    // so the number equals the rows the link opens. Partially fulfilled orders
+    // are deliberately excluded; they get their own row badge on the Orders
+    // page instead. Same decision as the Orders page's "Needs fulfillment" card.
     db.order.count({
       where: {
         businessId: business.id,
+        status: "open",
         paymentStatus: "paid",
-        fulfillmentStatus: { in: ["unfulfilled", "partially_fulfilled"] },
-        status: { notIn: ["cancelled", "refunded"] },
+        fulfillmentStatus: "unfulfilled",
       },
     }),
 
@@ -404,12 +459,13 @@ export default async function AdminDashboardPage() {
     }),
   ]);
 
-  // Bucket raw revenue rows into one total per local calendar day, filling
-  // zero-revenue days so the chart axis is continuous.
+  // Bucket raw revenue rows into one total per store-local calendar day,
+  // filling zero-revenue days so the chart axis is continuous.
   const revenueByDay = bucketRevenueByDay(
     revenueOrders,
     chartWindowStart,
     todayStart,
+    timeZone,
   );
 
   // Get product details for top products
@@ -505,6 +561,10 @@ export default async function AdminDashboardPage() {
         </Alert>
       )}
       <DashboardContent
+        quickActions={{
+          addProduct: flags.isEnabled("products"),
+          newOrder: flags.isEnabled("orders"),
+        }}
         business={businessData!}
         setupProgress={setupProgress}
         stats={{

@@ -24,6 +24,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
+    "site-export": "tsx --env-file=.env --env-file=.env.local scripts/site-export.ts",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
