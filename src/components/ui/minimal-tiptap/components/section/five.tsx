@@ -8,7 +8,7 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
-import { Calculator, Frame, FormInput, Images, Table } from "lucide-react";
+import { Calculator, FormInput, Frame, Images, Table } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
@@ -73,7 +73,7 @@ const formatActions: InsertElement[] = [
     action: (editor) => editor.chain().focus().insertGallery().run(),
     isActive: () => false,
     canExecute: (editor) => editor.can().chain().focus().insertGallery().run(),
-    shortcuts: ["mod", "alt", "G"],
+    shortcuts: [],
   },
   {
     value: "embed",
@@ -82,7 +82,7 @@ const formatActions: InsertElement[] = [
     action: (editor) => editor.chain().focus().insertEmbed().run(),
     isActive: () => false,
     canExecute: (editor) => editor.can().chain().focus().insertEmbed().run(),
-    shortcuts: ["mod", "alt", "E"],
+    shortcuts: [],
   },
   {
     value: "quoteCalculator",
@@ -92,7 +92,7 @@ const formatActions: InsertElement[] = [
     isActive: () => false,
     canExecute: (editor) =>
       editor.can().chain().focus().insertQuoteCalculator().run(),
-    shortcuts: ["mod", "alt", "Q"],
+    shortcuts: [],
   },
   {
     value: "form",
@@ -101,7 +101,7 @@ const formatActions: InsertElement[] = [
     action: (editor) => editor.chain().focus().insertForm().run(),
     isActive: () => false,
     canExecute: (editor) => editor.can().chain().focus().insertForm().run(),
-    shortcuts: ["mod", "alt", "F"],
+    shortcuts: [],
   },
   {
     value: "table",

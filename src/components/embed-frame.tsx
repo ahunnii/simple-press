@@ -156,6 +156,15 @@ export function EmbedFrame({
     </>
   );
 
+  // YouTube's player refuses to load without a referrer ("Error 153 — Video
+  // player configuration error"), and Vimeo's domain-restricted embeds need
+  // one too. `strict-origin-when-cross-origin` sends only our origin (never
+  // the page path) cross-origin, matching `VideoFacade`. Every other embed
+  // host keeps the stricter `no-referrer`.
+  const referrerPolicy = isVideoEmbed(safeSrc)
+    ? "strict-origin-when-cross-origin"
+    : "no-referrer";
+
   // Resolve effective aspect-ratio CSS value:
   // - Explicit aspectRatio prop takes precedence (but "fit" and unknowns return null → fixed height)
   // - Legacy: no aspectRatio + video URL → 16:9
@@ -178,7 +187,7 @@ export function EmbedFrame({
             src={safeSrc}
             title={title}
             sandbox={EMBED_SANDBOX}
-            referrerPolicy="no-referrer"
+            referrerPolicy={referrerPolicy}
             loading="lazy"
             data-embed-title={title}
             onLoad={() => setLoaded(true)}
@@ -201,7 +210,7 @@ export function EmbedFrame({
             src={safeSrc}
             title={title}
             sandbox={EMBED_SANDBOX}
-            referrerPolicy="no-referrer"
+            referrerPolicy={referrerPolicy}
             loading="lazy"
             data-embed-title={title}
             onLoad={() => setLoaded(true)}

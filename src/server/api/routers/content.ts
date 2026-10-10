@@ -12,6 +12,7 @@ import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
 import { isContentEmpty } from "~/lib/template-fields";
+import { stripEmptyPlaceholderNodes } from "~/lib/tiptap/strip-empty-placeholders";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -290,7 +291,11 @@ export const contentRouter = createTRPCRouter({
                 data: {
                   title: parsed.data.title,
                   excerpt: parsed.data.excerpt,
-                  content: parsed.data.content as Prisma.InputJsonValue,
+                  // Drafts saved before placeholder stripping existed may
+                  // still carry an unfilled embed/gallery/etc. node.
+                  content: stripEmptyPlaceholderNodes(
+                    parsed.data.content,
+                  ) as Prisma.InputJsonValue,
                   previewDraft: Prisma.DbNull,
                   previewDraftUpdatedAt: null,
                 },
@@ -681,10 +686,19 @@ export const contentRouter = createTRPCRouter({
       // Deliberately NOT feature-gated on `blog`: if the flag is toggled off
       // mid-session, in-flight autosaves must not start erroring. Drafts are
       // owner-only and publicly invisible, so accepting one costs nothing.
+      // The editor autosaves while an inserted embed/gallery/quote/form node
+      // may still be an unfilled placeholder (its inline panel open, Save not
+      // yet clicked). Drop those here so a blank block never lands in the
+      // draft. The editor keeps its in-memory node — it never re-syncs from
+      // this write — so the open panel is unaffected.
+      const draft = {
+        ...input.draft,
+        content: stripEmptyPlaceholderNodes(input.draft.content),
+      };
       const { count } = await ctx.db.page.updateMany({
         where: { id: input.pageId, businessId, type: { in: ["page", "blog"] } },
         data: {
-          previewDraft: input.draft as Prisma.InputJsonValue,
+          previewDraft: draft as Prisma.InputJsonValue,
           previewDraftUpdatedAt: new Date(),
         },
       });
@@ -892,7 +906,11 @@ export const contentRouter = createTRPCRouter({
         data: {
           ...input.data,
           businessId,
-          content: input.data.content ?? EMPTY_TIPTAP_DOC,
+          // Unfilled placeholder nodes (embed panel still open, etc.) are
+          // never persisted — see `stripEmptyPlaceholderNodes`.
+          content: stripEmptyPlaceholderNodes(
+            input.data.content ?? EMPTY_TIPTAP_DOC,
+          ),
         },
       });
 
@@ -969,7 +987,17 @@ export const contentRouter = createTRPCRouter({
 
       const page = await ctx.db.page.update({
         where: { id: input.id },
-        data: input.data,
+        data:
+          input.data.content === undefined
+            ? input.data
+            : {
+                ...input.data,
+                // Unfilled placeholder nodes (embed panel still open, etc.)
+                // are never persisted. The returned page carries the
+                // stripped content, so editors that reset from the response
+                // show exactly what was saved.
+                content: stripEmptyPlaceholderNodes(input.data.content),
+              },
       });
 
       return { data: page, message: "Page updated successfully" };

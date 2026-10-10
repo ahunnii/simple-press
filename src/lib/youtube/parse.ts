@@ -133,6 +133,8 @@ export type ChannelRef =
  * - `youtube.com/@SomeHandle` → `{ kind: "handle", handle }` (leading `@` stripped)
  * - legacy `youtube.com/c/Name` and `youtube.com/user/Name` → `{ kind: "handle", handle: "Name" }`
  * - a bare `UC…` string on its own → `{ kind: "channel", externalId }`
+ * - a bare `@SomeHandle` on its own → `{ kind: "handle", handle }` (leading `@`
+ *   stripped). The `@` is required: a bare word is ambiguous with IDs.
  *
  * Returns `null` for anything else.
  */
@@ -144,6 +146,14 @@ export function parseChannelRef(input: string): ChannelRef | null {
   // `[A-Za-z0-9_-]`, so this can never accidentally match a URL string.
   if (CHANNEL_ID_RE.test(trimmed)) {
     return { kind: "channel", externalId: trimmed };
+  }
+
+  // Bare `@handle` (no URL wrapper). A URL never starts with `@`, so this
+  // can't swallow anything that should parse as a URL; the shape check in
+  // `sanitizeHandle` rejects spaces, slashes, and over-long input.
+  if (trimmed.startsWith("@") && !trimmed.startsWith("@@")) {
+    const handle = sanitizeHandle(trimmed.slice(1));
+    return handle ? { kind: "handle", handle } : null;
   }
 
   const url = tryParseUrl(trimmed);

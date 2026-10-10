@@ -351,7 +351,8 @@ export function FormBuilder({ form: existingForm }: Props) {
                 <CardHeader>
                   <CardTitle>Form</CardTitle>
                   <CardDescription>
-                    Only you see this name — it labels the form in the admin.
+                    Labels the form in your admin. Visitors see it in their
+                    confirmation email.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -506,7 +507,8 @@ export function FormBuilder({ form: existingForm }: Props) {
               variant="destructive"
               onClick={(event) => {
                 event.preventDefault();
-                if (existingForm) deleteMutation.mutate({ id: existingForm.id });
+                if (existingForm)
+                  deleteMutation.mutate({ id: existingForm.id });
               }}
               disabled={isDeleting}
             >

@@ -251,12 +251,27 @@ describe("parseFormCsv", () => {
       {
         row: 3,
         message: [
-          'Submitted at: "not a date" isn\'t a date we can read',
-          'Status: "Pending" must be New, Read, or Archived',
+          'Submitted at: "not a date" isn\'t a date we can read.',
+          'Status: "Pending" must be New, Read, or Archived.',
           "Email: Enter a valid email address.",
           'Color: "Purple" isn\'t one of the options.',
           'Extras: "Zeta" isn\'t one of the options.',
-        ].join("; "),
+        ].join(" "),
+      },
+    ]);
+  });
+
+  it("joins two row problems with a single space and one period each", () => {
+    const csv = [
+      "Name,Email,Color,Status,Submitted at,Extras",
+      "Bad,nope,red,Pending,,",
+    ].join("\n");
+    const result = parseFormCsv(definition, csv);
+    expect(result.errors).toEqual([
+      {
+        row: 2,
+        message:
+          'Status: "Pending" must be New, Read, or Archived. Email: Enter a valid email address.',
       },
     ]);
   });

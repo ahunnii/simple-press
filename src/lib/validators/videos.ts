@@ -232,10 +232,10 @@ export type PublishRulesInput = z.input<typeof publishRulesSchema>;
  * Three states for reading `VideoSource.publishRules` back out of storage,
  * deliberately NOT collapsed into a boolean or a bare nullable `PublishRules`:
  *
- * - `"none"` — nothing configured: either the column is `NULL`, or it holds a
- *   rule set every clause of which is empty (`hasAnyRule` false). A rule set
- *   the owner saved and then fully cleared must behave identically to a
- *   column that was never touched.
+ * - `"none"` — nothing configured: the column is `NULL`, a legacy empty object
+ *   `{}`, or a rule set every clause of which is empty (`hasAnyRule` false). A
+ *   rule set the owner saved and then fully cleared must behave identically to
+ *   a column that was never touched.
  * - `"rules"` — a valid, non-empty rule set ready to evaluate.
  * - `"invalid"` — the stored JSON failed `publishRulesSchema` (a version
  *   bump, hand-edited data, whatever). Callers MUST fail CLOSED on this: the
@@ -249,8 +249,20 @@ export type StoredPublishRules =
   | { kind: "rules"; rules: PublishRules }
   | { kind: "invalid" };
 
+function isEmptyPlainObject(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 0
+  );
+}
+
 export function parseStoredPublishRules(raw: unknown): StoredPublishRules {
   if (raw === null || raw === undefined) return { kind: "none" };
+  // Legacy rows were written with `{}` before the rule set carried a
+  // `version`; an empty plain object means "nothing configured", same as null.
+  if (isEmptyPlainObject(raw)) return { kind: "none" };
 
   const parsed = publishRulesSchema.safeParse(raw);
   if (!parsed.success) return { kind: "invalid" };

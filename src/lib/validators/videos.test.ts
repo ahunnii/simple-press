@@ -276,6 +276,15 @@ describe("parseStoredPublishRules", () => {
     expect(parseStoredPublishRules(undefined)).toEqual({ kind: "none" });
   });
 
+  it("treats a legacy empty object as no rules", () => {
+    expect(parseStoredPublishRules({})).toEqual({ kind: "none" });
+  });
+
+  it("does not treat arrays or non-empty junk objects as no rules", () => {
+    expect(parseStoredPublishRules([])).toEqual({ kind: "invalid" });
+    expect(parseStoredPublishRules({ foo: 1 })).toEqual({ kind: "invalid" });
+  });
+
   it("treats a valid but all-empty rule set as no rules", () => {
     expect(
       parseStoredPublishRules({

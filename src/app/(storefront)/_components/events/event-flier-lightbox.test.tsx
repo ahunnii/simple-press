@@ -29,6 +29,17 @@ describe("EventFlierLightbox", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("lets the trigger fill a framed parent so h-full / fill children don't collapse", () => {
+    renderLightbox();
+
+    const trigger = screen.getByRole("button", {
+      name: `View flier for ${ALT}`,
+    });
+    // A bare `block w-full` button is auto-height, which zeroes a `fill`
+    // image (or `h-full` wrapper) inside an aspect-ratio frame.
+    expect(trigger).toHaveClass("block", "h-full", "w-full");
+  });
+
   it("opens a dialog with an accessible name when the trigger is activated", async () => {
     const user = userEvent.setup();
     renderLightbox();

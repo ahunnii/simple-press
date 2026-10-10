@@ -65,7 +65,7 @@ export function EventFlierLightbox({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="block w-full cursor-zoom-in appearance-none border-0 bg-transparent p-0 text-left"
+          className="block h-full w-full cursor-zoom-in appearance-none border-0 bg-transparent p-0 text-left"
           aria-label={`View flier for ${alt}`}
         >
           {children}
