@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  History,
   MoreVertical,
   Package,
   Pencil,
@@ -116,6 +117,9 @@ type Props = {
    * own gate (`requireAdminAccess({ allowedRoles: [] })`).
    */
   isPlatformAdmin: boolean;
+  /** Read-only "Import history" link for owners/managers, resolved server-side:
+   *  shown only when a platform admin has imported products into this store. */
+  showImportHistory: boolean;
   /**
    * Gates the "Export products (CSV)" button. Resolved server-side as
    * `isPlatformAdmin || membershipRole === "OWNER"`, AND the `wordpressExport`
@@ -160,6 +164,7 @@ export function ProductsClient({
   page,
   pageSize,
   isPlatformAdmin,
+  showImportHistory,
   canExportProducts,
   canBulkDelete,
 }: Props) {
@@ -453,6 +458,15 @@ export function ProductsClient({
               <Link href={`${BASE_PATH}/export`}>
                 <Download className="mr-2 h-4 w-4" />
                 Export products (CSV)
+              </Link>
+            </Button>
+          )}
+
+          {showImportHistory && (
+            <Button variant="outline" asChild size="sm">
+              <Link href={`${BASE_PATH}/import/history`}>
+                <History className="mr-2 h-4 w-4" />
+                Import history
               </Link>
             </Button>
           )}

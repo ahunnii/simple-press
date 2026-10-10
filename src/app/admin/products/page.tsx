@@ -10,6 +10,7 @@ import {
   PRODUCT_STATUS_DEFAULT,
   PRODUCT_STATUS_VALUES,
 } from "~/lib/validators/product";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
@@ -66,7 +67,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   // Same guard `/admin/layout.tsx` already ran, called again for its resolved
   // `membershipRole` — which is what decides whether the bulk bar may offer
   // Delete at all. Matches /admin/settings/team's use of it.
-  const { session, membershipRole } = await requireAdminAccess();
+  const { session, membershipRole, business } = await requireAdminAccess();
 
   // Unlike Collections, Services and Inventory, this page does NOT narrow with
   // `buildTablePage`: `product.secureList` already filters, sorts, counts and
@@ -125,6 +126,16 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
 
+  // Owners and managers can't run an import, but a platform admin may have
+  // run one for them — offer the read-only log only once there is something
+  // in it. Platform admins reach it from the import wizard instead.
+  const showImportHistory =
+    !isPlatformAdmin &&
+    (await db.productImport.findFirst({
+      where: { businessId: business.id },
+      select: { id: true },
+    })) !== null;
+
   // Mirrors `/admin/products/export/page.tsx`'s own gate exactly, so the
   // Export button only ever appears for someone who won't land on that
   // page's Owner-only alert or its feature-disabled fallback.
@@ -153,6 +164,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         // drift.
         pageSize={result.pageSize}
         isPlatformAdmin={isPlatformAdmin}
+        showImportHistory={showImportHistory}
         canExportProducts={canExportProducts}
         // Mirrors `ownerOnlyProcedure`, which `product.bulkDelete` uses:
         // PLATFORM_ADMIN bypasses the membership check, everyone else needs

@@ -75,8 +75,16 @@ export async function parseWooCommerceCSV(
       skipEmptyLines: true,
       transformHeader: (header) => header.trim(), // Remove BOM and whitespace
       complete: (results) => {
+        // ID is only needed so variations can point at their parent
+        // (Parent "id:<ID>"). Simple and variation rows often leave it blank
+        // (our own exporter does, so WooCommerce assigns IDs), so blank IDs
+        // get a placeholder from the CSV line number instead of being dropped.
         const parsed = results.data
-          .filter((row) => row.ID && row.Type) // Skip empty rows
+          .map((row, index) => ({
+            ...row,
+            ID: row.ID?.trim() || `row-${index + 2}`, // +2: 1-indexed + header
+          }))
+          .filter((row) => row.Type?.trim()) // Skip empty rows
           .map(mapWooCommerceProduct);
         resolve(parsed);
       },

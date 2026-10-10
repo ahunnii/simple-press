@@ -560,12 +560,21 @@ export const productRouter = createTRPCRouter({
       if (baseInventoryUnitId) {
         const pool = await ctx.db.baseInventoryUnit.findFirst({
           where: { id: baseInventoryUnitId, businessId },
-          select: { id: true },
+          select: { id: true, itemType: true },
         });
         if (!pool) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid inventory pool",
+          });
+        }
+        // Rental items are returnable: a sale would permanently subtract from
+        // their on-hand count, mixing sold-off units with checked-out ones.
+        if (pool.itemType === "rental") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Rental items can't be linked to a product. Choose a stock item.",
           });
         }
       }
@@ -698,13 +707,29 @@ export const productRouter = createTRPCRouter({
       if (baseInventoryUnitId) {
         const pool = await ctx.db.baseInventoryUnit.findFirst({
           where: { id: baseInventoryUnitId, businessId },
-          select: { id: true },
+          select: { id: true, itemType: true },
         });
         if (!pool) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid inventory pool",
           });
+        }
+        // Same rule as create, but a link made before rentals were excluded
+        // is left alone — only switching TO a rental item is refused, so
+        // saving an unrelated edit on such a product never fails.
+        if (pool.itemType === "rental") {
+          const linked = await ctx.db.product.findFirst({
+            where: { id, businessId },
+            select: { baseInventoryUnitId: true },
+          });
+          if (linked?.baseInventoryUnitId !== baseInventoryUnitId) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Rental items can't be linked to a product. Choose a stock item.",
+            });
+          }
         }
       }
 

@@ -30,6 +30,7 @@ export default async function NewProductPage() {
         mediaEnabled={flags.isEnabled("media")}
         allCollections={allCollections}
         pools={pools}
+        inventoryEnabled={flags.isEnabled("inventory")}
       />
     </>
   );

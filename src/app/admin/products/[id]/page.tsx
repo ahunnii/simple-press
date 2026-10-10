@@ -43,6 +43,7 @@ export default async function EditProductPage({ params }: Props) {
         mediaEnabled={flags.isEnabled("media")}
         allCollections={allCollections}
         pools={pools}
+        inventoryEnabled={flags.isEnabled("inventory")}
       />
     </>
   );

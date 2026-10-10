@@ -87,6 +87,12 @@ export function PoolDialog({
   const router = useRouter();
   const apiUtils = api.useUtils();
   const isEdit = !!item;
+  // Products can't sell from a rental item, so a linked stock item can't
+  // become one (the server refuses too). An item that is already a rental
+  // keeps the option — a link made before that rule existed must not trap it.
+  const linkedProducts =
+    item && item.itemType !== "rental" ? item._count.products : 0;
+  const rentalDisabled = !rentalsEnabled || linkedProducts > 0;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -136,7 +142,11 @@ export function PoolDialog({
     },
     onError: (err) =>
       applyTrpcErrorToForm(form, err, {
-        fieldMap: { sku: "sku", "checked out": "itemType" },
+        fieldMap: {
+          sku: "sku",
+          "checked out": "itemType",
+          "linked to this item": "itemType",
+        },
         fallbackMessage: "Failed to update item",
       }),
   });
@@ -221,7 +231,7 @@ export function PoolDialog({
                       <Label
                         htmlFor="item-type-rental"
                         className={`flex items-start gap-2 rounded-lg border p-3 font-normal ${
-                          rentalsEnabled
+                          !rentalDisabled
                             ? "hover:bg-accent has-[[data-state=checked]]:border-primary cursor-pointer"
                             : "cursor-not-allowed opacity-50"
                         }`}
@@ -229,7 +239,7 @@ export function PoolDialog({
                         <RadioGroupItem
                           value="rental"
                           id="item-type-rental"
-                          disabled={!rentalsEnabled}
+                          disabled={rentalDisabled}
                         />
                         <span className="grid gap-0.5">
                           <span className="text-sm font-medium">Rental</span>
@@ -240,12 +250,18 @@ export function PoolDialog({
                       </Label>
                     </RadioGroup>
                   </FormControl>
-                  {!rentalsEnabled && (
+                  {!rentalsEnabled ? (
                     <FormDescription>
                       Turn on Rental Check-outs under Settings → Features to add
                       rental items.
                     </FormDescription>
-                  )}
+                  ) : linkedProducts > 0 ? (
+                    <FormDescription>
+                      {linkedProducts === 1
+                        ? "1 product sells from this item. Unlink it to make it a rental."
+                        : `${linkedProducts} products sell from this item. Unlink them to make it a rental.`}
+                    </FormDescription>
+                  ) : null}
                   <FormMessage />
                 </FormItem>
               )}

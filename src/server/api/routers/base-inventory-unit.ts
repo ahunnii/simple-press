@@ -101,6 +101,26 @@ function unitsOutMessage(n: number): string {
   return `${n} ${n === 1 ? "unit is" : "units are"} still checked out — check them in first`;
 }
 
+/**
+ * Products can't sell from a rental item (product.create/update refuse the
+ * link), so a linked stock item can't become one either. Returns the refusal,
+ * or null when nothing is linked.
+ */
+async function linkedProductsError(
+  tx: TxClient,
+  businessId: string,
+  itemId: string,
+): Promise<TRPCError | null> {
+  const n = await tx.product.count({
+    where: { businessId, baseInventoryUnitId: itemId },
+  });
+  if (n === 0) return null;
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message: `${n} ${n === 1 ? "product is" : "products are"} linked to this item — unlink ${n === 1 ? "it" : "them"} before making it a rental`,
+  });
+}
+
 async function loadTimeZone(db: DbClient, businessId: string) {
   const business = await db.business.findUnique({
     where: { id: businessId },
@@ -640,6 +660,10 @@ export const baseInventoryUnitRouter = createTRPCRouter({
           if (input.sku) {
             await assertSkuFree(tx, businessId, input.sku, input.id);
           }
+          if (input.itemType === "rental" && item.itemType !== "rental") {
+            const linked = await linkedProductsError(tx, businessId, input.id);
+            if (linked) throw linked;
+          }
           if (input.itemType === "stock" && item.itemType === "rental") {
             const out =
               (await getOutstandingByItem(tx, businessId, [input.id])).get(
@@ -1007,6 +1031,14 @@ export const baseInventoryUnitRouter = createTRPCRouter({
               const skuTo = row.changes.sku?.to;
               if (typeof skuTo === "string" && skuTo !== "") {
                 await assertSkuFree(tx, businessId, skuTo, item.id);
+              }
+              if (row.changes.itemType?.to === "rental") {
+                const linked = await linkedProductsError(
+                  tx,
+                  businessId,
+                  item.id,
+                );
+                if (linked) throw linked;
               }
               if (row.changes.itemType?.to === "stock") {
                 const out =

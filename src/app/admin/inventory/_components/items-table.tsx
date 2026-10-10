@@ -99,8 +99,19 @@ const ITEM_NOUN = { one: "item", many: "items" } as const;
 // Aliased to the short names this file reads with.
 const TH = TABLE_HEAD;
 const TD = TABLE_CELL;
-const TH_ACTIONS = TABLE_HEAD;
-const TD_ACTIONS = TABLE_CELL;
+/**
+ * The ⋮ column is pinned to the right edge. `.admin-container` caps the card at
+ * ~1214px, so no viewport is ever wide enough for the full 2xl column set
+ * (~1290px): from 1536px up the table always scrolls sideways, and without the
+ * pin the actions menu sat off-screen. Opaque background so scrolled cells
+ * pass under it; the hover tint is mixed onto `--card` because the row's
+ * translucent `bg-muted/50` would otherwise stop at this cell. The left rule
+ * only shows at 2xl, the one tier where the table actually overflows.
+ */
+const STICKY_ACTIONS =
+  "bg-card sticky right-0 z-10 [tr:hover>&]:bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] 2xl:shadow-[inset_1px_0_0_var(--border)]";
+const TH_ACTIONS = `${TABLE_HEAD} ${STICKY_ACTIONS}`;
+const TD_ACTIONS = `${TABLE_CELL} ${STICKY_ACTIONS}`;
 
 /**
  * Deliberately NO AdminBulkBar: there is no bulk endpoint for items, and

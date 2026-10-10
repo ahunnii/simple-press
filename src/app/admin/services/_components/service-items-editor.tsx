@@ -421,6 +421,7 @@ function ServiceItemFormDialog({
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
+        isSignature: data.isSignature ?? false,
         category,
       });
     } else {
@@ -437,6 +438,7 @@ function ServiceItemFormDialog({
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
+        isSignature: data.isSignature ?? false,
         category,
       });
     }

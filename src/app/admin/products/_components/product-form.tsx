@@ -133,6 +133,9 @@ type Props = {
   mediaEnabled?: boolean;
   allCollections?: RouterOutputs["collections"]["getAll"];
   pools?: RouterOutputs["baseInventoryUnit"]["list"];
+  /** `inventory` feature flag — with it off, the Inventory item picker only
+   *  shows on a product that is already linked, so the link can be removed. */
+  inventoryEnabled?: boolean;
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
@@ -240,6 +243,7 @@ export function ProductForm({
   mediaEnabled,
   allCollections = [],
   pools = [],
+  inventoryEnabled,
 }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -247,6 +251,17 @@ export function ProductForm({
   const imageUploaderRef = useRef<ImageUploaderHandle>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
+
+  // Rental items are returnable, so they can't back a product's stock (the
+  // server refuses the link too). The saved link is always kept in the list —
+  // a product linked before rentals were excluded still shows, and can be
+  // unlinked — and is the only reason to show the picker with Inventory off.
+  const savedPoolId = product?.baseInventoryUnitId ?? null;
+  const linkablePools = pools.filter(
+    (pool) => pool.itemType !== "rental" || pool.id === savedPoolId,
+  );
+  const showItemPicker =
+    linkablePools.length > 0 && (!!inventoryEnabled || savedPoolId !== null);
 
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
   const siteHost = useSiteHost();
@@ -1586,7 +1601,7 @@ export function ProductForm({
                         )}
 
                         {/* Inventory item selector (shown when items exist and no variants) */}
-                        {pools.length > 0 && variants.length === 0 && (
+                        {showItemPicker && variants.length === 0 && (
                           <div className="space-y-3 rounded-lg border p-4">
                             <div>
                               <Label className="text-sm font-medium">
@@ -1622,7 +1637,7 @@ export function ProductForm({
                                       <SelectItem value="__none__">
                                         None — use individual inventory
                                       </SelectItem>
-                                      {pools.map((pool) => (
+                                      {linkablePools.map((pool) => (
                                         <SelectItem
                                           key={pool.id}
                                           value={pool.id}
@@ -2114,8 +2129,9 @@ export function ProductForm({
                   <CardHeader>
                     <CardTitle>Additional information</CardTitle>
                     <CardDescription>
-                      Shown in the &quot;Additional Information&quot; tab on the
-                      product page
+                      Materials, care, sizing, and other details. Shown in their
+                      own section on the product page &mdash; its name and
+                      placement depend on your site&apos;s design.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

@@ -6,11 +6,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   CheckCircle,
   FileText,
+  History,
   Loader2,
   Upload,
 } from "lucide-react";
@@ -117,13 +119,21 @@ export function ProductImportWizard() {
   return (
     <div className="bg-muted/30 min-h-screen py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-foreground text-3xl font-bold">
-            Import Products
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Import your products from WooCommerce
-          </p>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-foreground text-3xl font-bold">
+              Import Products
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Import your products from WooCommerce
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/admin/products/import/history">
+              <History className="mr-2 h-4 w-4" />
+              Import history
+            </Link>
+          </Button>
         </div>
 
         {/* Progress indicator */}
@@ -474,7 +484,12 @@ export function ProductImportWizard() {
                   Your products have been imported successfully.
                 </p>
 
-                <div className="mt-8">
+                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                  <Button variant="outline" asChild>
+                    <Link href="/admin/products/import/history">
+                      View import history
+                    </Link>
+                  </Button>
                   <Button onClick={handleDone}>Go to Products</Button>
                 </div>
               </div>

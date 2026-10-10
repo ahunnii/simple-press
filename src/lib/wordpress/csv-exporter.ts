@@ -22,6 +22,34 @@ function collectionCategories(product: ProductWithRelations): string {
     .join(", ");
 }
 
+/**
+ * WooCommerce price columns from our cents values. Woo's "Regular price" is
+ * the original (higher) price and "Sale price" the current selling price, so
+ * a product is on sale only when compareAtPrice is above price. The importer
+ * (src/lib/woocommerce/csv-parser.ts) reads them back the same way.
+ */
+function wooPrices(
+  price: number,
+  compareAtPrice: number | null,
+): { regularPrice: string; salePrice: string } {
+  const dollars = (cents: number) => (cents / 100).toFixed(2);
+  if (compareAtPrice != null && compareAtPrice > price) {
+    return { regularPrice: dollars(compareAtPrice), salePrice: dollars(price) };
+  }
+  return { regularPrice: dollars(price), salePrice: "" };
+}
+
+/**
+ * Product weight in grams for the "Weight (g)" column. weightUnit is "kg" or
+ * "lb"; anything else (including null) is treated as lb, matching
+ * normalizeWeightToLb in shipping-utils.
+ */
+function weightInGrams(weight: number | null, unit: string | null): string {
+  if (!weight || weight <= 0) return "";
+  const grams = unit?.toLowerCase() === "kg" ? weight * 1000 : weight * 453.592;
+  return Math.round(grams).toString();
+}
+
 type WooCommerceExportRow = {
   ID: string;
   Type: string;
@@ -112,19 +140,10 @@ export function exportToWooCommerceCSV(
 function createSimpleProductRow(
   product: ProductWithRelations,
 ): WooCommerceExportRow {
-  // Convert price from cents to dollars
-  const regularPrice = (product.price / 100).toFixed(2);
-  const salePrice = product.compareAtPrice
-    ? (product.price / 100).toFixed(2)
-    : "";
-  const comparePrice = product.compareAtPrice
-    ? (product.compareAtPrice / 100).toFixed(2)
-    : regularPrice;
-
-  // Convert weight from kg to grams
-  const weightGrams = product.weight
-    ? Math.round(product.weight * 1000).toString()
-    : "";
+  const { regularPrice, salePrice } = wooPrices(
+    product.price,
+    product.compareAtPrice,
+  );
 
   // Join images with comma
   const images = product.images
@@ -151,14 +170,14 @@ function createSimpleProductRow(
     "Low stock amount": "",
     "Backorders allowed?": product.allowBackorders ? "1" : "0",
     "Sold individually?": "0",
-    "Weight (g)": weightGrams,
+    "Weight (g)": weightInGrams(product.weight, product.weightUnit),
     "Length (in)": "",
     "Width (in)": "",
     "Height (in)": "",
     "Allow customer reviews?": "1",
     "Purchase note": "",
     "Sale price": salePrice,
-    "Regular price": salePrice || comparePrice,
+    "Regular price": regularPrice,
     Categories: collectionCategories(product),
     Tags: "",
     "Shipping class": "",
@@ -236,7 +255,7 @@ function createVariableProductRow(
     "Low stock amount": "",
     "Backorders allowed?": "0",
     "Sold individually?": "0",
-    "Weight (g)": "",
+    "Weight (g)": weightInGrams(product.weight, product.weightUnit),
     "Length (in)": "",
     "Width (in)": "",
     "Height (in)": "",
@@ -283,13 +302,10 @@ function createVariationRow(
   variant: ProductVariant,
   index: number,
 ): WooCommerceExportRow {
-  const regularPrice = ((variant.price ?? product.price) / 100).toFixed(2);
-  const salePrice = variant.compareAtPrice
-    ? ((variant.price ?? product.price) / 100).toFixed(2)
-    : "";
-  const comparePrice = variant.compareAtPrice
-    ? (variant.compareAtPrice / 100).toFixed(2)
-    : regularPrice;
+  const { regularPrice, salePrice } = wooPrices(
+    variant.price ?? product.price,
+    variant.compareAtPrice,
+  );
 
   // Get attributes from variant options
   const options = variant.options as Record<string, string>;
@@ -321,7 +337,7 @@ function createVariationRow(
     "Allow customer reviews?": "0",
     "Purchase note": "",
     "Sale price": salePrice,
-    "Regular price": salePrice || comparePrice,
+    "Regular price": regularPrice,
     Categories: "",
     Tags: "",
     "Shipping class": "",
