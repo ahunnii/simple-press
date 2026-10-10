@@ -48,6 +48,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Form, FormField } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
@@ -370,6 +371,10 @@ export function ServiceEditor({
   };
 
   const onSubmit = async (data: ServiceFormValues) => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     // The Published switch is visible on every tab, so a save started from the
     // Page content tab has to carry the record too — and vice versa. Both
     // halves go out from this one handler.
@@ -467,6 +472,9 @@ export function ServiceEditor({
     ogImageUploader.isPending;
   const isDeleting = deleteMutation.isPending;
   const isSavingContent = updateCustomFieldsMutation.isPending;
+  // True while a Page content rich-text image is still uploading — saving
+  // then would drop it (its temporary `blob:` src is stripped server-side).
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   // The cover image is an RHF field now (`imageFile`), so `formState.isDirty`
   // covers it — the old `imageUrl` string state and its manual diff are gone.
@@ -482,6 +490,10 @@ export function ServiceEditor({
    * insisting there were unsaved changes.
    */
   const handleSaveAll = () => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     if (isFormDirty || !service?.id) {
       // `onSubmit` flushes the page-content draft itself, so one click lands
       // both halves. A validation error blocks both rather than half-saving.
@@ -665,13 +677,18 @@ export function ServiceEditor({
               <Button
                 type="button"
                 size="sm"
-                disabled={isBusy || (!!service?.id && !isDirty)}
+                disabled={isBusy || isUploading || (!!service?.id && !isDirty)}
                 onClick={handleSaveAll}
               >
                 {isBusy ? (
                   <>
                     <span className="saving-indicator" />
                     Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Uploading…
                   </>
                 ) : (
                   <>
@@ -782,6 +799,7 @@ export function ServiceEditor({
                     galleriesEnabled={galleriesEnabled}
                     quotesEnabled={quotesEnabled}
                     formsEnabled={formsEnabled}
+                    onUploadingChange={onUploadingChange}
                   />
                 </TabsContent>
               )}

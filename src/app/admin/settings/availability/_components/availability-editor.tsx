@@ -48,6 +48,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
@@ -280,6 +281,9 @@ export function AvailabilityEditor({
 
   // The flyer upload runs inside the save, so "busy" is either half of it.
   const isSaving = updateMutation.isPending || imageUploader.isPending;
+  // True while a message image is still being processed — saving then would
+  // store its temporary `blob:` src.
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -308,6 +312,10 @@ export function AvailabilityEditor({
   }
 
   async function handleSave() {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     // Light client-side checks first so the obvious mistakes don't need a
     // round trip; the server's zod schema stays authoritative.
     if (cta) {
@@ -731,6 +739,7 @@ export function AvailabilityEditor({
                   editorContentClassName="min-h-[160px] p-4"
                   editorClassName="focus:outline-hidden"
                   editable={!isSaving}
+                  onUploadingChange={onUploadingChange}
                 />
                 <p className="text-muted-foreground text-xs">
                   Shown below the headline — and below the flyer and launch date
@@ -889,7 +898,7 @@ export function AvailabilityEditor({
             <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <AlertDialogTrigger asChild>
                 <Button
-                  disabled={isSaving}
+                  disabled={isSaving || isUploading}
                   onClick={(e) => {
                     // Only a save that takes the storefront offline opens the
                     // dialog; every other save goes straight through.
@@ -899,7 +908,11 @@ export function AvailabilityEditor({
                     }
                   }}
                 >
-                  {isSaving ? "Saving..." : "Save changes"}
+                  {isSaving
+                    ? "Saving..."
+                    : isUploading
+                      ? "Uploading…"
+                      : "Save changes"}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>

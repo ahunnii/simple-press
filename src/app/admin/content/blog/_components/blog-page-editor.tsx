@@ -57,6 +57,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
@@ -187,6 +188,10 @@ export function BlogPostEditor({
   const slugManuallyEditedRef = useRef(false);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  // True while a rich-text image/video is still uploading. Saving then would
+  // drop it (a temporary `blob:` image src is stripped server-side), so Save
+  // waits for the upload to finish.
+  const { isUploading, onUploadingChange } = useUploadingState();
   const [activeTab, setActiveTab] = useState<BlogEditorTab>("content");
   // Initialize form with TipTap content
   const form = useForm<PageFormValues>({
@@ -382,6 +387,10 @@ export function BlogPostEditor({
   });
 
   const onSubmit = async (data: PageFormValues) => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     let imageUrl: string | null | undefined;
     let ogImageUrl: string | null | undefined;
     const imageFile = data.imageFile;
@@ -593,7 +602,7 @@ export function BlogPostEditor({
                   type="submit"
                   variant="outline"
                   size="sm"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   onClick={() => {
                     createAnotherRef.current = true;
                   }}
@@ -607,7 +616,7 @@ export function BlogPostEditor({
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 onClick={() => {
                   createAnotherRef.current = false;
                 }}
@@ -616,6 +625,11 @@ export function BlogPostEditor({
                   <>
                     <span className="saving-indicator" />
                     Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Uploading…
                   </>
                 ) : (
                   <>
@@ -804,6 +818,7 @@ export function BlogPostEditor({
                       videosEnabled={true}
                       mediaEnabled={mediaEnabled}
                       required
+                      onUploadingChange={onUploadingChange}
                     />
                   </CardContent>
                 </Card>

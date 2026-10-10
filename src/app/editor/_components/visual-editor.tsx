@@ -41,6 +41,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/components/ui/drawer";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 
 import { CmsPagePanel } from "./cms-page-panel";
 import { CmsPageRail } from "./cms-page-rail";
@@ -522,6 +523,12 @@ export function VisualEditor({
    * against double-click / publish-then-discard response inversion.
    */
   const mutationPendingRef = useRef(false);
+  // True while a rich-text image/video (page panel or a field) is still
+  // uploading. Publishing then would ship the page without it (a `blob:`
+  // image src is stripped server-side), so Publish waits.
+  const { isUploading, onUploadingChange } = useUploadingState();
+  const isUploadingRef = useRef(false);
+  isUploadingRef.current = isUploading;
   /** Consecutive failed flush attempts; reset on success or new edit. */
   const retryCountRef = useRef(0);
   /** True once the retry budget is exhausted — surfaced in the status chip. */
@@ -844,6 +851,10 @@ export function VisualEditor({
 
   const handlePublish = useCallback(() => {
     if (mutationPendingRef.current) return; // double-click / overlap guard
+    if (isUploadingRef.current) {
+      toast.info("Wait for the upload to finish, then publish.");
+      return;
+    }
     setMutationPendingState(true);
     void (async () => {
       cancelPendingFlush();
@@ -1491,6 +1502,7 @@ export function VisualEditor({
         embedsEnabled={embedsEnabled}
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
+        onUploadingChange={onUploadingChange}
       />
     ) : themeOpen && templateTheme ? (
       <ThemePanel
@@ -1513,6 +1525,7 @@ export function VisualEditor({
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
         mediaEnabled={mediaEnabled}
+        onUploadingChange={onUploadingChange}
         enabledFeatures={enabledFeatureSet}
         disabled={isPublishing || mutationPending}
         onClose={() => setActiveSectionId(null)}
@@ -1600,6 +1613,7 @@ export function VisualEditor({
       onDeviceChange={setDevice}
       hasUnpublishedChanges={hasUnpublishedChanges}
       isPublishing={isPublishing}
+      isUploading={isUploading}
       flushPending={flushPending}
       mutationPending={mutationPending}
       saveFailed={saveFailed}

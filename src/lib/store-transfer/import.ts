@@ -42,6 +42,10 @@ import {
   rewriteTiptapDoc,
   rewriteUrl,
 } from "~/lib/store-transfer/rewrite";
+import {
+  stripEmptyPlaceholderNodes,
+  stripEmptyPlaceholdersInFields,
+} from "~/lib/tiptap/strip-empty-placeholders";
 import { parseStoredFormDefinition } from "~/lib/validators/form";
 import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 import { parseManifest } from "~/lib/validators/store-transfer";
@@ -542,19 +546,25 @@ export async function importStoreBundle(args: {
   if (content.siteContent) {
     const sc = content.siteContent;
     try {
-      const rewrittenCustomFields = rewriteJsonValue(
-        sc.customFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      // Rich-text fields drop unfilled "Insert elements" placeholders, like
+      // every other owner write (see `stripEmptyPlaceholderNodes`).
+      const rewrittenCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          sc.customFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
-      const rewrittenPreviewCustomFields = rewriteJsonValue(
-        sc.previewCustomFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenPreviewCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          sc.previewCustomFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
       const rewrittenFeatures = rewriteJsonValue(
         sc.features,
@@ -845,12 +855,14 @@ export async function importStoreBundle(args: {
           ? (baseUnitMap.get(prod.exportBaseInventoryUnitId) ?? null)
           : null;
 
-      const rewrittenAdditionalFields = rewriteJsonValue(
-        prod.additionalFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenAdditionalFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          prod.additionalFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
       // Absent in bundles exported before 2026-09-25.
       const subscriptionIntervals = toJsonOrUndefined(
@@ -1115,12 +1127,14 @@ export async function importStoreBundle(args: {
   // ── 3h. Services + ServiceItems
   for (const svc of content.services) {
     try {
-      const rewrittenCustomFields = rewriteJsonValue(
-        svc.customFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          svc.customFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
 
       const existing = await db.service.findUnique({
@@ -1238,11 +1252,10 @@ export async function importStoreBundle(args: {
   // ── 3i. Pages
   for (const page of content.pages) {
     try {
-      const rewrittenContent = rewriteTiptapDoc(
-        page.content,
-        urlMap,
-        galleryIdMap,
-        embedIdMaps,
+      // Unfilled "Insert elements" placeholders (embed/gallery/etc. with no
+      // id) are dropped on import too — see `stripEmptyPlaceholderNodes`.
+      const rewrittenContent = stripEmptyPlaceholderNodes(
+        rewriteTiptapDoc(page.content, urlMap, galleryIdMap, embedIdMaps),
       );
 
       // previewDraft is { title, excerpt, content } — only its `content` key
@@ -1265,11 +1278,8 @@ export async function importStoreBundle(args: {
         const draft = page.previewDraft as Record<string, unknown>;
         rewrittenPreviewDraft = {
           ...draft,
-          content: rewriteTiptapDoc(
-            draft.content,
-            urlMap,
-            galleryIdMap,
-            embedIdMaps,
+          content: stripEmptyPlaceholderNodes(
+            rewriteTiptapDoc(draft.content, urlMap, galleryIdMap, embedIdMaps),
           ),
         } as Prisma.InputJsonValue;
       } else {

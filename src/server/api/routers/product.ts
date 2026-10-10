@@ -13,6 +13,7 @@ import {
 } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { publicUrlToKey } from "~/lib/s3/url";
+import { stripEmptyPlaceholdersInFields } from "~/lib/tiptap/strip-empty-placeholders";
 import {
   ADMIN_BULK_SELECTION_LIMIT,
   MAX_REQUESTED_PAGE,
@@ -611,9 +612,13 @@ export const productRouter = createTRPCRouter({
           lowInventoryThreshold: lowInventoryThreshold ?? null,
           baseInventoryUnitId: baseInventoryUnitId ?? null,
           baseUnitsConsumed: baseUnitsConsumed ?? null,
+          // `additionalInformation` is TipTap JSON — drop any unfilled
+          // "Insert elements" placeholder (see `stripEmptyPlaceholderNodes`).
           additionalFields: additionalFields
             ? (JSON.parse(
-                JSON.stringify(additionalFields),
+                JSON.stringify(
+                  stripEmptyPlaceholdersInFields(additionalFields),
+                ),
               ) as Prisma.InputJsonValue)
             : undefined,
           metaTitle: metaTitle ?? null,
@@ -803,9 +808,13 @@ export const productRouter = createTRPCRouter({
           lowInventoryThreshold: lowInventoryThreshold ?? null,
           baseInventoryUnitId: baseInventoryUnitId ?? null,
           baseUnitsConsumed: baseUnitsConsumed ?? null,
+          // `additionalInformation` is TipTap JSON — drop any unfilled
+          // "Insert elements" placeholder (see `stripEmptyPlaceholderNodes`).
           additionalFields: additionalFields
             ? (JSON.parse(
-                JSON.stringify(additionalFields),
+                JSON.stringify(
+                  stripEmptyPlaceholdersInFields(additionalFields),
+                ),
               ) as Prisma.InputJsonValue)
             : undefined,
           metaTitle: metaTitle ?? null,
@@ -1232,9 +1241,13 @@ export const productRouter = createTRPCRouter({
             metaDescription: source.metaDescription,
             metaKeywords: source.metaKeywords,
             ogImage: source.ogImage,
+            // Rows saved before placeholder stripping may still carry an
+            // unfilled "Insert elements" node — don't copy it forward.
             additionalFields: source.additionalFields
               ? (JSON.parse(
-                  JSON.stringify(source.additionalFields),
+                  JSON.stringify(
+                    stripEmptyPlaceholdersInFields(source.additionalFields),
+                  ),
                 ) as Prisma.InputJsonValue)
               : undefined,
             businessId,

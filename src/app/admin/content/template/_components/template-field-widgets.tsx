@@ -10,9 +10,9 @@
  */
 "use client";
 
-import type { Content } from "@tiptap/react";
-import { useId, useRef, useCallback, useEffect, useState } from "react";
 import type { DragEndEvent } from "@dnd-kit/core";
+import type { Content } from "@tiptap/react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { TemplateListFocusRequest } from "./template-list-field-editor";
 import type {
   EmbedAspectRatio,
   EmbedDisplayMode,
@@ -92,7 +93,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
 import { EmbedFrame } from "~/components/embed-frame";
 
-import type { TemplateListFocusRequest } from "./template-list-field-editor";
 import { TemplateListFieldEditor } from "./template-list-field-editor";
 import {
   TemplateImageUploadField,
@@ -144,6 +144,7 @@ export function FieldGroup({
   quotesEnabled,
   formsEnabled,
   mediaLibraryEnabled,
+  onUploadingChange,
 }: {
   groupId: string;
   page: string;
@@ -166,6 +167,8 @@ export function FieldGroup({
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const columns = groupMeta?.columns ?? 1;
   const fieldsByKey = buildFieldsByKey(allFields ?? fields);
@@ -217,6 +220,7 @@ export function FieldGroup({
                 quotesEnabled={quotesEnabled}
                 formsEnabled={formsEnabled}
                 mediaLibraryEnabled={mediaLibraryEnabled}
+                onUploadingChange={onUploadingChange}
               />
             </div>
           ))}
@@ -251,6 +255,7 @@ export function FieldInput({
   formsEnabled,
   mediaLibraryEnabled,
   listFocusRequest,
+  onUploadingChange,
 }: {
   field: TemplateField;
   value: unknown;
@@ -264,6 +269,8 @@ export function FieldInput({
   mediaLibraryEnabled?: boolean;
   /** `list` fields only: expand + focus a row. Ignored for other types. */
   listFocusRequest?: TemplateListFocusRequest | null;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   // `value === undefined` means the key was never saved — distinct from an
   // explicitly saved "" (which owners use to hide optional text/colors).
@@ -361,6 +368,7 @@ export function FieldInput({
           quotesEnabled={quotesEnabled}
           formsEnabled={formsEnabled}
           uploader={uploadRichTextImage}
+          onUploadingChange={onUploadingChange}
         />
       ) : field.type === "textarea" ? (
         <Textarea
@@ -374,7 +382,9 @@ export function FieldInput({
       ) : field.type === "boolean" ? (
         <Switch
           id={field.key}
-          checked={isUnset ? field.defaultValue === "true" : stringValue === "true"}
+          checked={
+            isUnset ? field.defaultValue === "true" : stringValue === "true"
+          }
           onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
           aria-describedby={descId}
         />
@@ -498,7 +508,9 @@ function NumberSliderWidget({
     [defaultValue, sliderMin, sliderMax],
   );
 
-  const [draft, setDraft] = useState<number>(() => resolveNumeric(displayValue));
+  const [draft, setDraft] = useState<number>(() =>
+    resolveNumeric(displayValue),
+  );
 
   useEffect(() => {
     setDraft(resolveNumeric(displayValue));
@@ -1333,7 +1345,10 @@ export function FaqFieldEditor({
           modifiers={[restrictToVerticalAxis]}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={sortIds} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={sortIds}
+            strategy={verticalListSortingStrategy}
+          >
             <div className="space-y-2">
               {ids.map((id, rowIndex) => {
                 const usedElsewhere = new Set(

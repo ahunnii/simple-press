@@ -19,6 +19,8 @@ type Props = {
   galleriesEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 /**
@@ -35,6 +37,7 @@ export function ServiceTemplateFieldsEditor({
   galleriesEnabled,
   quotesEnabled,
   formsEnabled,
+  onUploadingChange,
 }: Props) {
   const mediaEnabled = useMediaLibraryEnabled();
   const fieldsByGroup = getServiceTemplateFieldsByGroup(serviceTemplateId);
@@ -89,6 +92,7 @@ export function ServiceTemplateFieldsEditor({
               quotesEnabled={quotesEnabled}
               formsEnabled={formsEnabled}
               mediaLibraryEnabled={mediaEnabled}
+              onUploadingChange={onUploadingChange}
             />
           );
         })

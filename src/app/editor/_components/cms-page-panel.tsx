@@ -76,6 +76,8 @@ export type CmsPagePanelProps = {
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /** Rich-text uploads in flight — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 function ModifiedBadge() {
@@ -109,6 +111,7 @@ export function CmsPagePanel({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  onUploadingChange,
 }: CmsPagePanelProps) {
   const isBlog = kind === "blog";
   const titleModified = values.title !== baseline.title;
@@ -227,6 +230,7 @@ export function CmsPagePanel({
             embedsEnabled={embedsEnabled}
             quotesEnabled={quotesEnabled}
             formsEnabled={formsEnabled}
+            onUploadingChange={onUploadingChange}
           />
         </div>
 

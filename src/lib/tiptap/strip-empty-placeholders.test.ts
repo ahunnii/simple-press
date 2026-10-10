@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   isEmptyPlaceholderNode,
+  isUnfinishedUploadNode,
   stripEmptyPlaceholderNodes,
+  stripEmptyPlaceholdersInFields,
 } from "./strip-empty-placeholders";
 
 const doc = (...content: unknown[]) => ({ type: "doc", content });
@@ -225,5 +227,177 @@ describe("stripEmptyPlaceholderNodes", () => {
         { type: "horizontalRule" },
       ),
     );
+  });
+});
+
+describe("unfinished image uploads", () => {
+  const blobImage = {
+    type: "image",
+    attrs: { src: "blob:http://demo.localhost:3000/3f2a", alt: "a.png" },
+  };
+  const storedImage = {
+    type: "image",
+    attrs: { src: "https://storage.example.com/a.png", alt: "a.png" },
+  };
+
+  it("flags only images whose src is a blob: URL", () => {
+    expect(isUnfinishedUploadNode(blobImage)).toBe(true);
+    expect(
+      isUnfinishedUploadNode({ type: "image", attrs: { src: " BLOB:x" } }),
+    ).toBe(true);
+    expect(isUnfinishedUploadNode(storedImage)).toBe(false);
+    expect(
+      isUnfinishedUploadNode({
+        type: "image",
+        attrs: { src: "data:image/png;base64,AAAA" },
+      }),
+    ).toBe(false);
+    expect(
+      isUnfinishedUploadNode({ type: "video", attrs: { src: "blob:x" } }),
+    ).toBe(false);
+    expect(isUnfinishedUploadNode({ type: "image" })).toBe(false);
+  });
+
+  it("removes blob: images and keeps stored ones", () => {
+    expect(
+      stripEmptyPlaceholderNodes(doc(para("a"), blobImage, storedImage)),
+    ).toEqual(doc(para("a"), storedImage));
+  });
+
+  it("removes a blob: image nested in a blockquote and backfills it", () => {
+    expect(
+      stripEmptyPlaceholderNodes(
+        doc({ type: "blockquote", content: [blobImage] }),
+      ),
+    ).toEqual(doc({ type: "blockquote", content: [{ type: "paragraph" }] }));
+  });
+
+  it("leaves an emptied paragraph valid (no nested block)", () => {
+    expect(
+      stripEmptyPlaceholderNodes(
+        doc({
+          type: "paragraph",
+          attrs: { textAlign: null },
+          content: [blobImage],
+        }),
+      ),
+    ).toEqual(doc({ type: "paragraph", attrs: { textAlign: null } }));
+  });
+
+  it("strips blob: images inside string-encoded field docs", () => {
+    const fields = { body: JSON.stringify(doc(para("x"), blobImage)) };
+    const out = stripEmptyPlaceholdersInFields(fields);
+    expect(JSON.parse(out.body)).toEqual(doc(para("x")));
+  });
+});
+
+describe("stripEmptyPlaceholdersInFields", () => {
+  const richWithPlaceholder = () => doc(para("intro"), embed(), filledEmbed);
+  const richStripped = doc(para("intro"), filledEmbed);
+
+  it("strips object-encoded docs stored as field values", () => {
+    const fields = {
+      "pink.about.body": richWithPlaceholder(),
+      "pink.about.title": "About us",
+    };
+    expect(stripEmptyPlaceholdersInFields(fields)).toEqual({
+      "pink.about.body": richStripped,
+      "pink.about.title": "About us",
+    });
+  });
+
+  it("strips string-encoded docs and re-serializes only those", () => {
+    const fields = {
+      "noise.home.body": JSON.stringify(richWithPlaceholder()),
+      "noise.home.clean": JSON.stringify(doc(para("hi"), filledEmbed)),
+    };
+    const out = stripEmptyPlaceholdersInFields(fields);
+    expect(JSON.parse(out["noise.home.body"])).toEqual(richStripped);
+    // Nothing to remove → the exact original string (formatting preserved).
+    expect(out["noise.home.clean"]).toBe(fields["noise.home.clean"]);
+  });
+
+  it("keeps a pretty-printed doc string byte-identical when it has no placeholder", () => {
+    const pretty = JSON.stringify(doc(para("x"), filledEmbed), null, 2);
+    expect(stripEmptyPlaceholdersInFields({ k: pretty }).k).toBe(pretty);
+  });
+
+  it("walks list rows and strips docs in their cells", () => {
+    const rows = [
+      { title: "One", body: richWithPlaceholder() },
+      { title: "Two", body: "plain text" },
+    ];
+    const out = stripEmptyPlaceholdersInFields({ "vii.list": rows });
+    expect(out["vii.list"]).toEqual([
+      { title: "One", body: richStripped },
+      { title: "Two", body: "plain text" },
+    ]);
+    // The untouched row keeps its identity.
+    expect(out["vii.list"][1]).toBe(rows[1]);
+  });
+
+  it("never alters non-doc values", () => {
+    const iframe = JSON.stringify({
+      src: "https://example.com/embed",
+      height: 400,
+    });
+    const embedLookingJson = JSON.stringify({ type: "embed", src: null });
+    const fields = {
+      text: "Hello",
+      braces: "{not json",
+      iframe,
+      embedLookingJson,
+      num: 3,
+      bool: true,
+      nil: null,
+      empty: "",
+      // A bare placeholder node that is NOT inside a doc is not rich text.
+      looseNode: embed(),
+    };
+    const out = stripEmptyPlaceholdersInFields(fields);
+    expect(out).toBe(fields);
+    expect(out).toEqual({ ...fields });
+  });
+
+  it("returns the input by reference when nothing was removed", () => {
+    const fields = {
+      a: doc(para("a"), filledEmbed),
+      b: JSON.stringify(doc(para("b"))),
+      list: [{ c: doc(para("c")) }],
+    };
+    expect(stripEmptyPlaceholdersInFields(fields)).toBe(fields);
+  });
+
+  it("preserves identity of unchanged siblings when one value changes", () => {
+    const clean = doc(para("clean"));
+    const fields = { dirty: richWithPlaceholder(), clean };
+    const out = stripEmptyPlaceholdersInFields(fields);
+    expect(out).not.toBe(fields);
+    expect(out.clean).toBe(clean);
+  });
+
+  it("handles a product additionalFields blob", () => {
+    const additionalFields = {
+      additionalInformation: doc(
+        para("Care"),
+        { type: "gallery", attrs: { galleryId: null } },
+        { type: "quoteCalculator", attrs: { calculatorId: null } },
+      ),
+      productFeatures: [{ icon: "leaf", text: "Organic" }],
+      comingSoon: false,
+      productTagline: null,
+    };
+    const out = stripEmptyPlaceholdersInFields(additionalFields);
+    expect(out).toEqual({
+      ...additionalFields,
+      additionalInformation: doc(para("Care")),
+    });
+    expect(out.productFeatures).toBe(additionalFields.productFeatures);
+  });
+
+  it("passes through non-object top-level input", () => {
+    expect(stripEmptyPlaceholdersInFields(null)).toBeNull();
+    expect(stripEmptyPlaceholdersInFields(undefined)).toBeUndefined();
+    expect(stripEmptyPlaceholdersInFields("plain")).toBe("plain");
   });
 });

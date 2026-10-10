@@ -81,6 +81,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { InputGroup, InputGroupAddon } from "~/components/ui/input-group";
 import { Label } from "~/components/ui/label";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { MoneyInput } from "~/components/ui/money-input";
 import {
   InputGroupNumberInput,
@@ -571,6 +572,10 @@ export function ProductForm({
   });
 
   const onSubmit = async (data: ProductFormSchema) => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
 
@@ -921,6 +926,10 @@ export function ProductForm({
     }
   };
 
+  // True while an Additional information image/video is still uploading —
+  // saving then would drop it (a `blob:` image src is stripped server-side).
+  const { isUploading, onUploadingChange } = useUploadingState();
+
   const isSubmitting =
     updateProductMutation.isPending ||
     createProductMutation.isPending ||
@@ -1176,7 +1185,7 @@ export function ProductForm({
                   type="submit"
                   variant="outline"
                   size="sm"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   onClick={() => {
                     createAnotherRef.current = true;
                   }}
@@ -1185,6 +1194,11 @@ export function ProductForm({
                     <>
                       <span className="saving-indicator" />
                       Saving...
+                    </>
+                  ) : isUploading ? (
+                    <>
+                      <span className="saving-indicator" />
+                      Uploading…
                     </>
                   ) : (
                     <>
@@ -1201,7 +1215,7 @@ export function ProductForm({
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 onClick={() => {
                   createAnotherRef.current = false;
                 }}
@@ -1210,6 +1224,11 @@ export function ProductForm({
                   <>
                     <span className="saving-indicator" />
                     Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Uploading…
                   </>
                 ) : (
                   <>
@@ -2150,6 +2169,7 @@ export function ProductForm({
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
                       formsEnabled={formsEnabled}
+                      onUploadingChange={onUploadingChange}
                     />
                   </CardContent>
                 </Card>

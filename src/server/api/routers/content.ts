@@ -12,7 +12,10 @@ import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
 import { isContentEmpty } from "~/lib/template-fields";
-import { stripEmptyPlaceholderNodes } from "~/lib/tiptap/strip-empty-placeholders";
+import {
+  stripEmptyPlaceholderNodes,
+  stripEmptyPlaceholdersInFields,
+} from "~/lib/tiptap/strip-empty-placeholders";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -212,8 +215,21 @@ export const contentRouter = createTRPCRouter({
         clearPreviewDraft,
         publishCmsPageDrafts,
         footerNavigationItems,
-        ...data
+        ...rest
       } = input;
+
+      // Rich-text template fields can carry an unfilled "Insert elements"
+      // placeholder (embed/gallery/etc. with no id) if the owner saves while
+      // its inline panel is still open — never persist one. See
+      // `stripEmptyPlaceholderNodes`. `undefined` stays `undefined` so an
+      // unrelated save (Branding, Navigation) never touches this column.
+      const data =
+        rest.customFields === undefined
+          ? rest
+          : {
+              ...rest,
+              customFields: stripEmptyPlaceholdersInFields(rest.customFields),
+            };
 
       // `footerNavigationItems` is a JSON? column — a plain JS `null` spread
       // via `...data` writes as SQL NULL only by accident (Prisma's JSON
@@ -317,15 +333,24 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Same placeholder stripping as `updateSiteContent`: the visual editor
+      // autosaves this draft on a debounce, so an "Insert elements" panel
+      // that's still open would otherwise land in the draft (and be promoted
+      // on Publish). The editor never re-syncs from this write, so the open
+      // panel is unaffected.
+      const previewCustomFields = stripEmptyPlaceholdersInFields(
+        input.customFields,
+      ) as Prisma.InputJsonValue;
+
       await ctx.db.siteContent.upsert({
         where: { businessId },
         create: {
           businessId,
-          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewCustomFields,
           previewUpdatedAt: new Date(),
         },
         update: {
-          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewCustomFields,
           previewUpdatedAt: new Date(),
         },
       });

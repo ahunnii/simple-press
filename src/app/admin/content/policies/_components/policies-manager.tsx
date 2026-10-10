@@ -56,6 +56,7 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { isEditorContentEqual } from "~/components/ui/minimal-tiptap/normalize-content";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -112,6 +113,9 @@ export function PoliciesManager({ business }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
   const [templateUsed, setTemplateUsed] = useState(false);
+  // True while a policy image is still uploading — saving then would drop it
+  // (its temporary `blob:` src is stripped server-side).
+  const { isUploading, onUploadingChange } = useUploadingState();
   const [overwriteKey, setOverwriteKey] = useState<PolicyTemplateKey | null>(
     null,
   );
@@ -327,6 +331,10 @@ export function PoliciesManager({ business }: Props) {
   };
 
   const handleSaveAll = () => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     // Clearing a saved policy used to be skipped like any empty tab, so the
     // old text stayed live. Now it means "remove it" — confirm first.
     const toClear = POLICY_KEYS.filter(
@@ -437,11 +445,20 @@ export function PoliciesManager({ business }: Props) {
             Reset
           </Button>
 
-          <Button size="sm" disabled={isSaving} onClick={handleSaveAll}>
+          <Button
+            size="sm"
+            disabled={isSaving || isUploading}
+            onClick={handleSaveAll}
+          >
             {isSaving ? (
               <>
                 <span className="saving-indicator" />
                 Saving...
+              </>
+            ) : isUploading ? (
+              <>
+                <span className="saving-indicator" />
+                Uploading…
               </>
             ) : (
               <>
@@ -584,6 +601,7 @@ export function PoliciesManager({ business }: Props) {
                         placeholder="Write your policy or use the template..."
                         output="json"
                         editorContentClassName="min-h-[500px] p-4"
+                        onUploadingChange={onUploadingChange}
                       />
                     </Form>
                   </CardContent>

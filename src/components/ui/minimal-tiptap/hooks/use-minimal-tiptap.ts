@@ -55,6 +55,14 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /**
+   * Called with `true` when this editor's first image/video upload starts
+   * and `false` when its last in-flight one settles (success or failure).
+   * While an image uploads the doc holds a temporary `blob:` src that the
+   * server drops on save, so Save buttons should wait for `false`. Combine
+   * several editors with `useUploadingState`.
+   */
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -116,6 +124,7 @@ const uploadAndInsertVideo = async (
 export const createExtensions = ({
   placeholder,
   uploader,
+  fallbackUploader,
   videoUploader,
   mediaEnabled,
   businessId,
@@ -126,6 +135,8 @@ export const createExtensions = ({
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
+  /** Used instead of `fakeuploader` when no `uploader` is set (lets the hook count it). */
+  fallbackUploader?: (file: File) => Promise<string>;
   videoUploader?: (file: File) => Promise<string>;
   mediaEnabled?: boolean;
   businessId?: string;
@@ -176,7 +187,9 @@ export const createExtensions = ({
       maxFileSize: imageMaxFileSize,
       allowBase64: true,
       uploadFn: async (file) => {
-        return uploader ? await uploader(file) : await fakeuploader(file);
+        return uploader
+          ? await uploader(file)
+          : await (fallbackUploader ?? fakeuploader)(file);
       },
       onToggle(editor, files, pos) {
         editor.commands.insertContentAt(
@@ -357,8 +370,50 @@ export const useMinimalTiptapEditor = ({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  onUploadingChange,
   ...props
 }: UseMinimalTiptapEditorProps) => {
+  // Count this editor's in-flight uploads. The callback is read through a
+  // ref so a new identity never rebuilds the uploaders (which key the
+  // extensions memo below and would recreate the editor).
+  const pendingUploadsRef = React.useRef(0);
+  const onUploadingChangeRef = React.useRef(onUploadingChange);
+  onUploadingChangeRef.current = onUploadingChange;
+  const countUploads = React.useCallback(
+    (fn: ((file: File) => Promise<string>) | undefined) =>
+      fn
+        ? async (file: File) => {
+            pendingUploadsRef.current += 1;
+            if (pendingUploadsRef.current === 1) {
+              onUploadingChangeRef.current?.(true);
+            }
+            try {
+              return await fn(file);
+            } finally {
+              pendingUploadsRef.current -= 1;
+              if (pendingUploadsRef.current === 0) {
+                onUploadingChangeRef.current?.(false);
+              }
+            }
+          }
+        : undefined,
+    [],
+  );
+  const countedUploader = React.useMemo(
+    () => countUploads(uploader),
+    [countUploads, uploader],
+  );
+  const countedVideoUploader = React.useMemo(
+    () => countUploads(videoUploader),
+    [countUploads, videoUploader],
+  );
+  // Editors without an `uploader` still hold a `blob:` image for the
+  // fallback's duration, so count that too.
+  const countedFallbackUploader = React.useMemo(
+    () => countUploads(fakeuploader),
+    [countUploads],
+  );
+
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
   const lastEmittedContentRef = React.useRef<Content | undefined>(undefined);
 
@@ -398,8 +453,9 @@ export const useMinimalTiptapEditor = ({
     () =>
       createExtensions({
         placeholder,
-        uploader,
-        videoUploader,
+        uploader: countedUploader,
+        fallbackUploader: countedFallbackUploader,
+        videoUploader: countedVideoUploader,
         mediaEnabled,
         businessId,
         galleriesEnabled,
@@ -409,8 +465,9 @@ export const useMinimalTiptapEditor = ({
       }) as unknown as Extension[],
     [
       placeholder,
-      uploader,
-      videoUploader,
+      countedUploader,
+      countedFallbackUploader,
+      countedVideoUploader,
       mediaEnabled,
       businessId,
       galleriesEnabled,

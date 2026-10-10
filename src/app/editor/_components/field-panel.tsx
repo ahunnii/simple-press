@@ -138,6 +138,8 @@ export type FieldPanelProps = {
   galleriesEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /** Rich-text uploads in flight — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
   /** Whether the Media Library feature is enabled — gates the "Choose from
    *  library" picker on image/video fields. */
   mediaEnabled: boolean;
@@ -178,6 +180,7 @@ export function FieldPanel({
   quotesEnabled,
   formsEnabled,
   mediaEnabled,
+  onUploadingChange,
   enabledFeatures,
   disabled = false,
   onClose,
@@ -404,6 +407,7 @@ export function FieldPanel({
                         quotesEnabled={quotesEnabled}
                         formsEnabled={formsEnabled}
                         mediaLibraryEnabled={mediaEnabled}
+                        onUploadingChange={onUploadingChange}
                         listFocusRequest={
                           listRequest?.fieldKey === field.key
                             ? listRequest.request
