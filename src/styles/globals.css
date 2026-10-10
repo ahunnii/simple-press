@@ -3181,6 +3181,30 @@ body:has(.pollen) {
   outline: 2px solid var(--el-sage, #4a5240);
   outline-offset: 2px;
 }
+/* Desktop nav dropdown panel + mobile accordion (B3.2/B3.3) */
+.elegant .el-nav-panel-link:hover {
+  background: rgba(28, 26, 23, 0.05) !important;
+  color: var(--el-ink, #1c1a17) !important;
+}
+.elegant .el-nav-panel-link:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: -2px;
+}
+.elegant .el-mobile-group-btn:focus-visible,
+.elegant .el-mobile-sublink:focus-visible {
+  outline: 2px solid var(--el-sage, #4a5240);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.elegant .el-mobile-sublink:hover {
+  color: var(--el-ink, #1c1a17) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .elegant .el-nav-panel,
+  .elegant .el-nav-panel-link {
+    transition: none !important;
+  }
+}
 @media (max-width: 767px) {
   .elegant .el-desktop-nav {
     display: none !important;

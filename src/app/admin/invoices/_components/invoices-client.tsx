@@ -119,6 +119,8 @@ type Props = {
   summary: RouterOutputs["invoice"]["summary"];
   /** `Business.timeZone`. */
   timeZone: string;
+  /** `Business.name` — seeds the New QuickBooks invoice dialog's Description placeholder. */
+  businessName: string;
   connection: ConnectionData;
   environment: QboEnvironment;
   /** The deployment has QuickBooks app credentials (`QBO_CLIENT_ID`/`SECRET`). */
@@ -271,6 +273,7 @@ export function InvoicesClient({
   qboEnabled,
   summary,
   timeZone,
+  businessName,
   connection,
   environment,
   platformConfigured,
@@ -842,6 +845,7 @@ export function InvoicesClient({
           defaults={NEW_QBO_INVOICE_DEFAULTS}
           defaultDueDays={defaultDueDays}
           timeZone={timeZone}
+          businessName={businessName}
         />
       )}
     </div>

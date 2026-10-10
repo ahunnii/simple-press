@@ -44,7 +44,10 @@ export default async function CustomerDetailPage({ params }: Props) {
     notFound();
   }
 
-  const canAdjustLoyalty = membershipRole !== "STAFF";
+  // Staff are fulfillment-only: loyalty adjustments, notes and anonymize are
+  // all ownerAdmin-tier server-side.
+  const canManage = membershipRole !== "STAFF";
+  const canAdjustLoyalty = canManage;
 
   const name =
     [customer.firstName, customer.lastName].filter(Boolean).join(" ") || null;
@@ -177,7 +180,11 @@ export default async function CustomerDetailPage({ params }: Props) {
               customerEmail={customer.email}
             />
 
-            <CustomerNotes customerId={customer.id} notes={customer.notes} />
+            {/* The server returns `notes: null` to Staff, so rendering the
+                card would falsely read "No notes". */}
+            {canManage && (
+              <CustomerNotes customerId={customer.id} notes={customer.notes} />
+            )}
 
             <CustomerPrivacyActions
               customer={{
@@ -185,6 +192,7 @@ export default async function CustomerDetailPage({ params }: Props) {
                 deletionRequestedAt: customer.deletionRequestedAt,
                 anonymizedAt: customer.anonymizedAt,
               }}
+              canAnonymize={canManage}
             />
           </div>
         </div>

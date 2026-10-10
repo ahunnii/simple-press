@@ -20,6 +20,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { FulfillmentFormValues } from "~/lib/validators/order";
+import { fulfillmentToast } from "~/lib/orders/fulfillment-email";
 import { fulfillmentFormSchema } from "~/lib/validators/order";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -92,9 +93,16 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
   const isPartiallyFulfilled = items.some((item) => item.fulfilledQuantity > 0);
 
   const markFulfilled = api.order.markAsFulfilled.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.dismiss();
-      toast.success("Fulfillment recorded and email sent to customer");
+      // Say what the customer was actually told — a partial shipment without
+      // tracking sends nothing, and a send can fail. See `fulfillmentToast`.
+      const { tone, title, description } = fulfillmentToast({
+        customerEmailSent: result.customerEmailSent,
+        customerEmailFailed: result.customerEmailFailed,
+        fullyFulfilled: result.fulfillmentStatus === "fulfilled",
+      });
+      toast[tone](title, description ? { description } : undefined);
       void utils.order.invalidate();
       router.refresh();
     },
@@ -349,9 +357,13 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
               ) : (
                 <>
                   <Package className="mr-2 h-4 w-4" />
+                  {/* A partial shipment without tracking only emails if it
+                      completes the order — see the note above. */}
                   {shipAllRemaining || items.length === 0
                     ? "Mark as Fulfilled & Send Email"
-                    : "Fulfill Selected Items & Send Email"}
+                    : hasTracking
+                      ? "Fulfill Selected Items & Send Email"
+                      : "Fulfill Selected Items"}
                 </>
               )}
             </Button>

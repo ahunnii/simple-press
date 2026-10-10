@@ -5,9 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Heart,
+  Menu,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
@@ -18,16 +27,25 @@ import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
+  activeEntryIndex,
   donateLinkOptions,
+  externalLinkProps,
   filterNavByFlags,
+  isNavItemActive,
+  navGroupEntries,
   resolveNav,
-  topLevelNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
 
-type NavLink = { label: string; href: string; external?: boolean };
+const MOBILE_MENU_ID = "builders-mobile-menu";
 
-const DEFAULT_NAV: NavLink[] = [
+const BODY_FONT = "var(--font-builders-body, 'Agdasima', sans-serif)";
+const DISPLAY_FONT = "var(--font-builders-display, 'Jost', sans-serif)";
+
+const externalHint = <span className="sr-only"> (opens in new tab)</span>;
+
+const DEFAULT_NAV: NavItem[] = [
   { href: "/about", label: "The Coop" },
   { href: "/contact", label: "Work With Us" },
   { href: "/blog", label: "Journal" },
@@ -44,6 +62,7 @@ export function BuildersHeader({
   const { data: session, isPending } = useHydratedSession(initialSession);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const dd = useNavDropdown(pathname, "builders-nav");
   const mobileDialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null);
@@ -145,27 +164,23 @@ export function BuildersHeader({
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
-  const defaultNav: NavLink[] = [
+  const defaultNav: NavItem[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Our Work" }] : []),
     ...DEFAULT_NAV.filter((l) => l.href !== "/blog" || isEnabled("blog")),
   ];
 
   // Owner nav or the shipped default, then the shared route→flag filter
   // (P-NAV-FLAGS) drops links to switched-off features. `??` semantics live in
-  // `resolveNav`: a saved `[]` means "no links". This header has no
-  // dropdowns, so `topLevelNav` flattens (dropping href-less group parents
-  // that would be dead links).
-  const filteredNav = topLevelNav(
+  // `resolveNav`: a saved `[]` means "no links". Groups (one level of
+  // children) render as desktop dropdowns and phone accordions (B3.2/B3.3).
+  // Donations "show in header" only ADDS a plain last menu item — it sees a
+  // /donate nested inside a group too, so never duplicates and never removes
+  // an owner link. Desktop and mobile share this list.
+  const navLinks: NavItem[] = withDonateLink(
     filterNavByFlags(
       resolveNav(business?.siteContent?.navigationItems, defaultNav),
       isStorefrontEnabled,
     ),
-  );
-
-  // Donations "show in header" only ADDS a plain last menu item (no
-  // duplicate, never removes an owner link). Desktop and mobile share it.
-  const navLinks: NavLink[] = withDonateLink(
-    filteredNav,
     donateLinkOptions(business, isStorefrontEnabled, "header"),
   );
 
@@ -175,11 +190,6 @@ export function BuildersHeader({
     business?.siteContent?.logoAltText,
     businessName,
   );
-
-  const isActive = (href: string) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname === href || pathname.startsWith(href + "/");
 
   // The transparent/white-on-hero treatment is only valid on the homepage,
   // which has a dark hero behind the header. On every other route (inner pages
@@ -192,6 +202,110 @@ export function BuildersHeader({
     !!session?.session?.membershipId;
 
   const closeMobileMenu = () => setMobileOpen(false);
+
+  // Desktop top-level link / group trigger: follows the header's
+  // solid-vs-transparent coloring. The outline inherits the text color, so
+  // focus reads white on the hero and ink on the solid bar.
+  const desktopLinkClass = (active: boolean) =>
+    cn(
+      "text-sm font-bold tracking-widest uppercase transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current",
+      solid
+        ? active
+          ? "text-[var(--builders-ink)]"
+          : "text-gray-600 hover:text-[var(--builders-ink)]"
+        : active
+          ? "text-white"
+          : "text-white/80 hover:text-white",
+    );
+  const desktopLinkStyle = { fontFamily: BODY_FONT, letterSpacing: "0.1em" };
+
+  const renderDesktopItem = (item: NavItem, i: number) => {
+    if (item.children?.length) {
+      const isOpen = dd.openIndex === i;
+      const entries = navGroupEntries(item);
+      const activeEntry = activeEntryIndex(pathname, entries);
+      const groupActive = isNavItemActive(pathname, item);
+      return (
+        <div
+          key={i}
+          className="relative flex items-center"
+          {...dd.groupProps(i)}
+        >
+          {/* The trigger never navigates — a non-empty parent href is the
+              panel's first entry. Active styling, but no aria-current. */}
+          <button
+            {...dd.triggerProps(i)}
+            className={cn(
+              desktopLinkClass(groupActive),
+              "inline-flex cursor-pointer items-center gap-1.5",
+            )}
+            style={desktopLinkStyle}
+          >
+            {item.label}
+            <ChevronDown
+              aria-hidden="true"
+              strokeWidth={2}
+              className={cn(
+                "size-3.5 transition-transform duration-200 motion-reduce:transition-none",
+                isOpen && "rotate-180",
+              )}
+            />
+          </button>
+
+          {isOpen && (
+            // pt-4 is the hover bridge: the padded wrapper stays inside the
+            // group so the pointer never "leaves" on its way to the panel.
+            // The panel is always solid (white/ink) — readable over the hero.
+            <div
+              id={dd.panelId(i)}
+              className="absolute top-full -left-5 z-10 pt-4"
+            >
+              <ul className="min-w-56 rounded-none border border-t-2 border-[var(--builders-rule,#e5e7eb)] border-t-[var(--builders-accent,#FFC5B6)] bg-white py-2 shadow-[0_16px_32px_-16px_rgba(0,0,0,0.25)]">
+                {entries.map((child, j) => {
+                  const childActive = j === activeEntry;
+                  return (
+                    <li key={j}>
+                      <Link
+                        href={child.href}
+                        {...externalLinkProps(child.external)}
+                        aria-current={childActive ? "page" : undefined}
+                        onClick={dd.close}
+                        className={cn(
+                          "block border-l-2 px-5 py-2.5 text-sm font-bold tracking-widest whitespace-nowrap uppercase transition-colors hover:border-[var(--builders-accent)] hover:bg-black/[0.03] hover:text-[var(--builders-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--builders-ink)]",
+                          childActive
+                            ? "border-[var(--builders-accent)] text-[var(--builders-ink)]"
+                            : "border-transparent text-gray-600",
+                        )}
+                        style={desktopLinkStyle}
+                      >
+                        {child.label}
+                        {child.external && externalHint}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const active = isNavItemActive(pathname, item);
+    return (
+      <Link
+        key={i}
+        href={item.href}
+        {...externalLinkProps(item.external)}
+        aria-current={active ? "page" : undefined}
+        className={desktopLinkClass(active)}
+        style={desktopLinkStyle}
+      >
+        {item.label}
+        {item.external && externalHint}
+      </Link>
+    );
+  };
 
   const brand = logoUrl ? (
     <div className="relative h-[3.125rem] w-[7.5rem]">
@@ -272,38 +386,11 @@ export function BuildersHeader({
 
           {/* Desktop nav */}
           <nav
+            ref={dd.containerRef}
             className="hidden items-center gap-8 md:flex"
             aria-label="Primary navigation"
           >
-            {navLinks.map((link) => (
-              <Link
-                key={link.href + link.label}
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                aria-current={isActive(link.href) ? "page" : undefined}
-                className={cn(
-                  "text-sm font-bold tracking-widest uppercase transition-colors",
-                  solid
-                    ? isActive(link.href)
-                      ? "text-[var(--builders-ink)]"
-                      : "text-gray-600 hover:text-[var(--builders-ink)]"
-                    : isActive(link.href)
-                      ? "text-white"
-                      : "text-white/80 hover:text-white",
-                )}
-                style={{
-                  fontFamily:
-                    "var(--font-builders-body, 'Agdasima', sans-serif)",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                {link.label}
-                {link.external && (
-                  <span className="sr-only">(opens in new tab)</span>
-                )}
-              </Link>
-            ))}
+            {navLinks.map(renderDesktopItem)}
           </nav>
 
           {/* Right actions */}
@@ -391,7 +478,7 @@ export function BuildersHeader({
               )}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
-              aria-controls="builders-mobile-menu"
+              aria-controls={MOBILE_MENU_ID}
               onClick={() => setMobileOpen((open) => !open)}
             >
               {mobileOpen ? (
@@ -408,7 +495,7 @@ export function BuildersHeader({
       {mobileOpen ? (
         <div
           ref={mobileDialogRef}
-          id="builders-mobile-menu"
+          id={MOBILE_MENU_ID}
           role="dialog"
           aria-modal="true"
           aria-label="Mobile navigation"
@@ -443,50 +530,11 @@ export function BuildersHeader({
           </div>
 
           {/* Mobile nav links */}
-          <nav
-            className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-8"
-            aria-label="Mobile navigation"
-          >
-            <ul className="flex flex-1 flex-col items-start gap-6 pt-10">
-              {navLinks.map((link) => {
-                const active = isActive(link.href);
-                return (
-                  <li key={link.href + link.label}>
-                    <Link
-                      href={link.href}
-                      target={link.external ? "_blank" : undefined}
-                      rel={link.external ? "noopener noreferrer" : undefined}
-                      onClick={closeMobileMenu}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "group flex items-center gap-4 text-4xl leading-tight transition-all",
-                        active
-                          ? "border-b-2 pb-1 font-bold text-[var(--builders-ink)]"
-                          : "text-[var(--builders-ink)]/70 hover:text-[var(--builders-ink)]",
-                      )}
-                      style={{
-                        fontFamily:
-                          "var(--font-builders-display, 'Jost', sans-serif)",
-                        fontWeight: active ? 700 : 300,
-                        ...(active
-                          ? { borderColor: "var(--builders-accent)" }
-                          : {}),
-                      }}
-                    >
-                      {link.label}
-                      {link.external && (
-                        <span className="sr-only">(opens in new tab)</span>
-                      )}
-                      <ArrowRight
-                        aria-hidden
-                        className="h-7 w-7 -translate-x-4 text-[var(--builders-accent-hover)] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-                      />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+          <BuildersMobileNav
+            links={navLinks}
+            pathname={pathname}
+            onClose={closeMobileMenu}
+          />
 
           {/* Mobile footer */}
           <div
@@ -617,5 +665,141 @@ export function BuildersHeader({
         </div>
       ) : null}
     </>
+  );
+}
+
+type BuildersMobileNavProps = {
+  links: NavItem[];
+  pathname: string;
+  onClose: () => void;
+};
+
+/**
+ * The full-screen overlay's link list. Its own component so it mounts fresh
+ * with the overlay: the `expanded` initializer auto-expands the group holding
+ * the current route on every open. One group open at a time.
+ */
+function BuildersMobileNav({
+  links,
+  pathname,
+  onClose,
+}: BuildersMobileNavProps) {
+  const [expanded, setExpanded] = useState<number | null>(() => {
+    const idx = links.findIndex(
+      (item) => !!item.children?.length && isNavItemActive(pathname, item),
+    );
+    return idx === -1 ? null : idx;
+  });
+
+  // Huge Jost row: 300 weight, 700 + accent rule when current.
+  const rowClass = (active: boolean) =>
+    cn(
+      "group flex items-center gap-4 text-4xl leading-tight transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--builders-ink)]",
+      active
+        ? "border-b-2 pb-1 font-bold text-[var(--builders-ink)]"
+        : "text-[var(--builders-ink)]/70 hover:text-[var(--builders-ink)]",
+    );
+  const rowStyle = (active: boolean) => ({
+    fontFamily: DISPLAY_FONT,
+    fontWeight: active ? 700 : 300,
+    ...(active ? { borderColor: "var(--builders-accent)" } : {}),
+  });
+
+  return (
+    <nav
+      className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-8"
+      aria-label="Mobile navigation"
+    >
+      <ul className="flex flex-1 flex-col items-start gap-6 pt-10 pb-10">
+        {links.map((item, i) => {
+          if (item.children?.length) {
+            const isOpen = expanded === i;
+            const sublistId = `${MOBILE_MENU_ID}-group-${i}`;
+            const entries = navGroupEntries(item);
+            const activeEntry = activeEntryIndex(pathname, entries);
+            const groupActive = isNavItemActive(pathname, item);
+            return (
+              <li key={i}>
+                {/* Group trigger — never navigates; a non-empty parent href
+                    is the sub-list's first entry. No aria-current. */}
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={sublistId}
+                  onClick={() => setExpanded(isOpen ? null : i)}
+                  className={cn(
+                    rowClass(groupActive),
+                    "cursor-pointer text-left",
+                  )}
+                  style={rowStyle(groupActive)}
+                >
+                  {item.label}
+                  <ChevronDown
+                    aria-hidden="true"
+                    strokeWidth={1.5}
+                    className={cn(
+                      "h-7 w-7 shrink-0 text-[var(--builders-accent-hover)] transition-transform duration-300 motion-reduce:transition-none",
+                      isOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                {isOpen && (
+                  <ul
+                    id={sublistId}
+                    className="mt-4 ml-1 flex flex-col items-start gap-1 border-l-2 pl-5"
+                    style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
+                  >
+                    {entries.map((child, j) => {
+                      const childActive = j === activeEntry;
+                      return (
+                        <li key={j}>
+                          <Link
+                            href={child.href}
+                            {...externalLinkProps(child.external)}
+                            onClick={onClose}
+                            aria-current={childActive ? "page" : undefined}
+                            className={cn(
+                              "flex min-h-11 items-center border-b-2 text-xl leading-snug transition-colors hover:text-[var(--builders-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--builders-ink)]",
+                              childActive
+                                ? "border-[var(--builders-accent)] font-medium text-[var(--builders-ink)]"
+                                : "border-transparent text-[var(--builders-ink)]/70",
+                            )}
+                            style={{ fontFamily: DISPLAY_FONT }}
+                          >
+                            {child.label}
+                            {child.external && externalHint}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </li>
+            );
+          }
+
+          const active = isNavItemActive(pathname, item);
+          return (
+            <li key={i}>
+              <Link
+                href={item.href}
+                {...externalLinkProps(item.external)}
+                onClick={onClose}
+                aria-current={active ? "page" : undefined}
+                className={rowClass(active)}
+                style={rowStyle(active)}
+              >
+                {item.label}
+                {item.external && externalHint}
+                <ArrowRight
+                  aria-hidden
+                  className="h-7 w-7 -translate-x-4 text-[var(--builders-accent-hover)] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

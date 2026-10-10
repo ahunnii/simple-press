@@ -160,7 +160,7 @@ export async function DarkTrendHomepage() {
       {/* Custom Embroidery Section */}
       {showFirstSection && (
         <section
-          className="bg-zinc-900/80 py-20"
+          className="overflow-hidden bg-zinc-900/80 py-20"
           {...sectionGroupAttr("homepage", "first-section")}
         >
           <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -345,7 +345,7 @@ export async function DarkTrendHomepage() {
       {/* Products Section */}
       {showProducts && (
         <section
-          className="bg-[#1A1A1A] py-20"
+          className="overflow-hidden bg-[#1A1A1A] py-20"
           {...sectionGroupAttr("homepage", "products")}
         >
           <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">

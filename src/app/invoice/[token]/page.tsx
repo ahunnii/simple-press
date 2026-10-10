@@ -18,6 +18,7 @@ import { recordInvoiceView } from "~/lib/invoices/views";
 import { getClientIpFromHeaders, invoiceViewLimiter } from "~/lib/rate-limit";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
+import { ContactToPay } from "~/components/invoices/contact-to-pay";
 import { InvoiceDocument } from "~/components/invoices/invoice-document";
 
 import { PaymentInstructions } from "./_components/payment-instructions";
@@ -112,10 +113,10 @@ function resolveTotals(invoice: PublicInvoiceView): InvoiceDocumentTotals {
 }
 
 /**
- * "How to pay" content. `paymentInstructions` is empty exactly when the
- * invoice is cancelled or nothing is owed (see `PublicInvoiceView`'s
- * docblock), so those two states get their own message instead of an empty
- * "How to pay" section.
+ * "How to pay" content. `paymentInstructions` is empty when the invoice is
+ * cancelled, when nothing is owed, AND when the owner attached no payment
+ * methods to an invoice that still has a balance — so emptiness alone can't
+ * mean "paid". Check the balance first, then fall back to a contact prompt.
  */
 function resolvePaymentSlot(invoice: PublicInvoiceView): ReactNode {
   if (invoice.status === "CANCELLED") {
@@ -123,11 +124,20 @@ function resolvePaymentSlot(invoice: PublicInvoiceView): ReactNode {
       <p className="text-sm text-neutral-600">This invoice was cancelled.</p>
     );
   }
-  if (invoice.paymentInstructions.length === 0) {
+  if (invoice.balanceCents <= 0) {
     return (
       <p className="text-sm font-medium text-emerald-700">
         Paid in full — thank you.
       </p>
+    );
+  }
+  if (invoice.paymentInstructions.length === 0) {
+    return (
+      <ContactToPay
+        businessName={invoice.issuer.name}
+        email={invoice.issuer.email}
+        phone={invoice.issuer.phone}
+      />
     );
   }
   return <PaymentInstructions instructions={invoice.paymentInstructions} />;

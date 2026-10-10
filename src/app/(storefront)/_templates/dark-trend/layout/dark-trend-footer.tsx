@@ -199,12 +199,12 @@ export async function DarkTrendFooter({
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col items-start gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8">
         <p className="text-sm text-white/60">
           © {currentYear} {business.name}. All rights reserved.
         </p>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {policies?.map((policy, idx) => (
             <Fragment key={policy.id || idx}>
               {!!idx && (

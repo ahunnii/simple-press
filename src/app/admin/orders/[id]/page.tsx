@@ -62,14 +62,34 @@ export default async function OrderDetailPage({ params }: Props) {
     }
   };
 
+  const capitalize = (value: string) =>
+    value.charAt(0).toUpperCase() + value.slice(1);
+
+  const paymentStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Pending";
+      case "paid":
+        return "Paid";
+      case "failed":
+        return "Failed";
+      case "refunded":
+        return "Refunded";
+      default:
+        return capitalize(status);
+    }
+  };
+
   const fulfillmentLabel = (status: string) => {
     switch (status) {
-      case "fulfilled":
-        return "fulfilled";
+      case "unfulfilled":
+        return "Unfulfilled";
       case "partially_fulfilled":
-        return "partially fulfilled";
+        return "Partially fulfilled";
+      case "fulfilled":
+        return "Fulfilled";
       default:
-        return "unfulfilled";
+        return capitalize(status);
     }
   };
 
@@ -94,7 +114,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <TrailHeader
         breadcrumbs={[
           { label: "Orders", href: "/admin/orders" },
-          { label: `Order #${order.id.slice(0, 8)}` },
+          { label: `Order #${order.orderNumber}` },
         ]}
       />
 
@@ -109,7 +129,7 @@ export default async function OrderDetailPage({ params }: Props) {
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <h1 className="text-base font-medium">
-              Order #{order.id.slice(0, 8)}
+              Order #{order.orderNumber}
             </h1>
 
             <Badge variant="outline">{formatDate(order.createdAt)}</Badge>
@@ -121,7 +141,7 @@ export default async function OrderDetailPage({ params }: Props) {
             <Badge
               variant={order.paymentStatus === "paid" ? "default" : "secondary"}
             >
-              Payment: {order.paymentStatus}
+              Payment: {paymentStatusLabel(order.paymentStatus)}
             </Badge>
 
             <Badge
@@ -165,7 +185,7 @@ export default async function OrderDetailPage({ params }: Props) {
               <span className="ml-2 hidden sm:inline">Invoice</span>
             </Link>
           </Button>
-          <OrderMoreOptions order={order} />
+          <OrderMoreOptions order={order} canManage={!isStaffViewer} />
         </div>
       </div>
 
@@ -454,14 +474,17 @@ export default async function OrderDetailPage({ params }: Props) {
                     {order.shippingAddress && (
                       <CopyAddressButton address={order.shippingAddress} />
                     )}
-                    <EditShippingAddressDialog
-                      orderId={order.id}
-                      address={order.shippingAddress ?? null}
-                      canAdd={!!order.customerId}
-                      allowedCountries={getAllowedCountries(
-                        business?.salesCountries ?? [],
-                      )}
-                    />
+                    {/* `order.updateShippingAddress` is ownerAdmin-tier. */}
+                    {!isStaffViewer && (
+                      <EditShippingAddressDialog
+                        orderId={order.id}
+                        address={order.shippingAddress ?? null}
+                        canAdd={!!order.customerId}
+                        allowedCountries={getAllowedCountries(
+                          business?.salesCountries ?? [],
+                        )}
+                      />
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -561,7 +584,8 @@ export default async function OrderDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const order = await api.order.getById(id);
+  if (!order) return { title: "Order" };
   return {
-    title: `Order #${order?.id.slice(0, 8)}`,
+    title: `Order #${order.orderNumber}`,
   };
 }

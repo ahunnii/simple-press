@@ -205,6 +205,7 @@ export default async function AdminInvoicesPage({ searchParams }: Props) {
         qboEnabled={list.qboEnabled}
         summary={summary}
         timeZone={list.timeZone}
+        businessName={connectionData.businessName}
         connection={connection}
         environment={connectionData.environment}
         platformConfigured={connectionData.platformConfigured}
