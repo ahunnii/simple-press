@@ -161,6 +161,10 @@ export function isManualOrder(order: {
  *    loyalty points and offer a restock; flipping the label alone would leave
  *    the Finances page counting the money as collected. Likewise an order that
  *    is already (even partly) refunded cannot be overridden back to "paid".
+ *  - An order with an open Stripe dispute ("disputed") can't be overridden at
+ *    all. The webhook owns that status: it moves back to "paid" when the
+ *    dispute is won (or closed with a warning) and to "refunded" when lost.
+ *    Letting the owner mark it paid would hide the dispute from the list.
  *  - Paid is one-way. Once the sale happened, going back to pending/failed
  *    would leave the deducted stock, counted spend and earned points behind
  *    with nothing to undo them; cancelling is the way to back out of a sale.
@@ -203,6 +207,14 @@ export function planPaymentStatusOverride(
       ok: false,
       message:
         "This order has been refunded, so its payment status can't change.",
+    };
+  }
+
+  if (order.paymentStatus === "disputed") {
+    return {
+      ok: false,
+      message:
+        "This order has an open Stripe dispute. Its payment status updates automatically when the dispute closes — respond in your Stripe Dashboard.",
     };
   }
 

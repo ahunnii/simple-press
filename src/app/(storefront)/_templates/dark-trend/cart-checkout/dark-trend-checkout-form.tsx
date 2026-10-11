@@ -428,7 +428,8 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               {/* Discount Code Input — inline, dark-trend style */}
               {f.couponsEnabled && (
                 <div className="space-y-3 pt-4">
-                  {f.discountCodeLabel && f.discountAmount > 0 ? (
+                  {f.discountCodeLabel &&
+                  (f.discountAmount > 0 || f.discountFreeShipping) ? (
                     <div
                       role="status"
                       className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
@@ -445,11 +446,16 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-green-400">
-                              Discount Applied: {f.discountCodeLabel}
+                              {f.discountAmount > 0
+                                ? "Discount Applied"
+                                : "Free shipping applied"}
+                              : {f.discountCodeLabel}
                             </p>
-                            <p className="text-sm text-green-500">
-                              You saved {formatPrice(f.discountAmount)}
-                            </p>
+                            {f.discountAmount > 0 && (
+                              <p className="text-sm text-green-500">
+                                You saved {formatPrice(f.discountAmount)}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <Button

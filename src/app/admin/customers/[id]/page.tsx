@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { requireAdminAccess } from "~/lib/require-admin-access";
@@ -35,9 +36,10 @@ export default async function CustomerDetailPage({ params }: Props) {
   // `membershipRole` — which is what decides whether the Rewards card's
   // "Adjust points" control renders. Matches /admin/orders/[id]/page.tsx's
   // use of it.
-  const [customer, { membershipRole }] = await Promise.all([
+  const [customer, { membershipRole }, { isEnabled }] = await Promise.all([
     api.customer.getById(id).catch(rethrowTrpcForErrorBoundary),
     requireAdminAccess(),
+    getBusinessFlags(),
   ]);
 
   if (!customer) {
@@ -173,6 +175,7 @@ export default async function CustomerDetailPage({ params }: Props) {
             <CustomerLoyaltyCard
               customerId={customer.id}
               canAdjust={canAdjustLoyalty}
+              loyaltyEnabled={isEnabled("loyalty")}
             />
 
             <CustomerInvoicesCard

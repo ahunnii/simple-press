@@ -1,4 +1,5 @@
 import type { DbClient } from "~/server/db";
+import { startOfToday } from "~/lib/discount-validation";
 
 /**
  * Sets active=false for codes that are past expiry or have exhausted usage limits.
@@ -13,7 +14,9 @@ export async function deactivateExpiredDiscountCodes(
     where: {
       businessId,
       active: true,
-      expiresAt: { lt: now },
+      // A code stays valid through the end of its expiry day (see
+      // `isPastExpiry`), so only deactivate once that whole day is behind us.
+      expiresAt: { lt: startOfToday(now) },
     },
     data: { active: false },
   });

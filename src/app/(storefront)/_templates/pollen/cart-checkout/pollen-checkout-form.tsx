@@ -186,6 +186,14 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                 applied.
               </p>
             )}
+            {f.discountCodeLabel && f.discountFreeShipping && (
+              <p role="status" className="mt-2 text-sm text-green-700">
+                Free shipping applied:{" "}
+                <span className="font-mono font-semibold">
+                  {f.discountCodeLabel}
+                </span>
+              </p>
+            )}
           </section>
         )}
 

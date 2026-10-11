@@ -57,6 +57,9 @@ type UseCheckoutFormReturn = {
   setDiscountCodeInput: (v: string) => void;
   discountCodeId: string | null;
   discountAmount: number;
+  // True when the applied code is a free-shipping code. `shipping` is already
+  // 0 (and not pending) in that case, so summaries just render "Free".
+  discountFreeShipping: boolean;
   discountCodeLabel: string | null;
   discountFieldError: string | null;
   setDiscountFieldError: (v: string | null) => void;
@@ -334,6 +337,8 @@ export function useCheckoutForm(
   // When coupons are disabled, never let an applied/stale discount affect
   // totals or the checkout payload — treat it as if none was applied.
   const effectiveDiscountAmount = couponsEnabled ? discount.discountAmount : 0;
+  const effectiveDiscountFreeShipping =
+    couponsEnabled && discount.discountFreeShipping;
   const effectiveDiscountCodeId = couponsEnabled
     ? discount.discountCodeId
     : null;
@@ -442,6 +447,16 @@ export function useCheckoutForm(
       deliveryMethod === "pickup"
         ? 0
         : calculateShipping(subtotal, shippingConfig);
+    isQuotingShipping = false;
+    shippingPending = false;
+  }
+
+  // A free-shipping code's validate amount is 0 (shipping isn't known then);
+  // create-session sets the real discount to the computed shipping cost. The
+  // payload only carries the code id, so zeroing shipping here is display-only
+  // and mirrors what Stripe will charge — no double-discount.
+  if (effectiveDiscountFreeShipping && deliveryMethod === "ship") {
+    shipping = 0;
     isQuotingShipping = false;
     shippingPending = false;
   }
@@ -777,6 +792,7 @@ export function useCheckoutForm(
     setDiscountCodeInput: discount.setDiscountCodeInput,
     discountCodeId: effectiveDiscountCodeId,
     discountAmount: effectiveDiscountAmount,
+    discountFreeShipping: effectiveDiscountFreeShipping,
     discountCodeLabel: discount.discountCodeLabel,
     discountFieldError: discount.discountFieldError,
     setDiscountFieldError: discount.setDiscountFieldError,

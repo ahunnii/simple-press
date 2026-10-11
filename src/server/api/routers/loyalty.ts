@@ -583,7 +583,7 @@ export const loyaltyRouter = createTRPCRouter({
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message:
-            "Reward codes need the Discount Codes feature turned on — ask the store owner.",
+            "Reward codes need the Coupons & Discounts feature turned on — ask the store owner.",
         });
       }
 

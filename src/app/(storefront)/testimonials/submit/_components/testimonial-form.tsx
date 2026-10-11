@@ -27,11 +27,16 @@ type TestimonialFormProps = {
     id: string;
     name: string;
   };
+  /** Business has Auto-approve on, so a submission goes live without review. */
+  autoApprove: boolean;
 };
 
 const MAX_PHOTOS = 5;
 
-export function TestimonialForm({ business }: TestimonialFormProps) {
+export function TestimonialForm({
+  business,
+  autoApprove,
+}: TestimonialFormProps) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
@@ -382,8 +387,9 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                   )}
                 </Button>
                 <p className="text-muted-foreground mt-2 text-center text-xs">
-                  Your testimonial will be reviewed before it appears on the
-                  site
+                  {autoApprove
+                    ? "Your testimonial will appear on the site right away"
+                    : "Your testimonial will be reviewed before it appears on the site"}
                 </p>
               </div>
             </CardContent>

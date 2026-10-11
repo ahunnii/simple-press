@@ -64,6 +64,7 @@ export function CheckoutForm({
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     handleApplyDiscount,
@@ -237,6 +238,14 @@ export function CheckoutForm({
                   {discountCodeLabel}
                 </span>{" "}
                 applied.
+              </p>
+            )}
+            {discountCodeLabel && discountFreeShipping && (
+              <p className="text-sm text-green-700" role="status">
+                Free shipping applied:{" "}
+                <span className="font-semibold tabular-nums">
+                  {discountCodeLabel}
+                </span>
               </p>
             )}
           </fieldset>

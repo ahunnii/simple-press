@@ -15,7 +15,9 @@ const RANGES = [
   { value: "30d", label: "Last 30 days" },
   { value: "90d", label: "Last 90 days" },
   { value: "ytd", label: "Year to date" },
-  { value: "year", label: "This calendar year" },
+  // Label filled in per render with the current year so it matches the
+  // server's page label ("Calendar year 2026").
+  { value: "year", label: "Calendar year" },
 ] as const;
 
 type Range = (typeof RANGES)[number]["value"];
@@ -29,6 +31,7 @@ export function RangeSelector({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const year = new Date().getFullYear();
 
   const handleChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -44,7 +47,7 @@ export function RangeSelector({
       <SelectContent>
         {RANGES.map((r) => (
           <SelectItem key={r.value} value={r.value}>
-            {r.label}
+            {r.value === "year" ? `${r.label} ${year}` : r.label}
           </SelectItem>
         ))}
       </SelectContent>

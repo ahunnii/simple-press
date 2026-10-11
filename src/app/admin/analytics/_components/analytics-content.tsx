@@ -22,12 +22,12 @@ import {
   YAxis,
 } from "recharts";
 
-import type { AnalyticsRange } from "~/server/api/routers/analytics";
 import type {
   UmamiMetricRow,
   UmamiPageviewSeries,
   UmamiStats,
 } from "~/lib/umami/client";
+import type { AnalyticsRange } from "~/server/api/routers/analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Table,
@@ -344,6 +344,26 @@ function formatHourLabel(x: string): string {
   return date.toLocaleTimeString(undefined, { hour: "numeric" });
 }
 
+/**
+ * Format a day-bucket x value (e.g. "2026-09-11 00:00:00") as "Sep 11", or
+ * "Thu, Sep 11" with `withWeekday`. Reads the calendar date straight from the
+ * string and formats it in UTC — `new Date("2026-09-11 00:00:00")` would shift
+ * to the previous day in any timezone west of UTC.
+ */
+function formatDayLabel(x: string, withWeekday = false): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(x);
+  if (!match) return x;
+  const date = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
+  );
+  return date.toLocaleDateString(undefined, {
+    weekday: withWeekday ? "short" : undefined,
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function AnalyticsContent({
   range,
   overview,
@@ -453,7 +473,11 @@ export function AnalyticsContent({
                   angle={-35}
                   textAnchor="end"
                   height={60}
-                  tickFormatter={range === "24h" ? formatHourLabel : undefined}
+                  tickFormatter={
+                    range === "24h"
+                      ? formatHourLabel
+                      : (x: string) => formatDayLabel(x)
+                  }
                 />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
@@ -462,7 +486,9 @@ export function AnalyticsContent({
                     "Pageviews",
                   ]}
                   labelFormatter={
-                    range === "24h" ? formatHourLabel : undefined
+                    range === "24h"
+                      ? formatHourLabel
+                      : (x: string) => formatDayLabel(x, true)
                   }
                   contentStyle={{
                     backgroundColor: "var(--popover)",

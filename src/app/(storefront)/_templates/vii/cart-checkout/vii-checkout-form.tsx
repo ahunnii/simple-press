@@ -1102,6 +1102,27 @@ export function ViiCheckoutForm({
                       you saved {formatPrice(f.discountAmount)}
                     </p>
                   )}
+
+                  {f.discountCodeLabel && f.discountFreeShipping && (
+                    <p
+                      role="status"
+                      className="vii-fade-up"
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 12,
+                        lineHeight: 1.4,
+                        color: "var(--vii-success)",
+                        background: "var(--vii-success-bg)",
+                        border: "1px solid var(--vii-success-border)",
+                        borderRadius: "var(--radius)",
+                        padding: "8px 12px",
+                        margin: 0,
+                      }}
+                    >
+                      Free shipping applied:{" "}
+                      <strong>{f.discountCodeLabel}</strong>
+                    </p>
+                  )}
                 </div>
               )}
 

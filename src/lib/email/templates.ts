@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
+import AbandonedCheckoutEmail, {
+  type AbandonedCheckoutItem,
+} from "~/emails/abandoned-checkout";
 import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
@@ -519,6 +521,7 @@ export async function sendAbandonedCheckoutEmail(params: {
     customDomain?: string | null;
     domainStatus?: string | null;
   };
+  items?: AbandonedCheckoutItem[];
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
@@ -541,6 +544,7 @@ export async function sendAbandonedCheckoutEmail(params: {
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
+      items: params.items,
     }),
     tags: [
       { name: "category", value: "abandoned_checkout" },
@@ -739,6 +743,8 @@ export async function sendPoolOutOfStockAlert(params: {
  * without this email the owner's first signal is an angry customer.
  */
 export async function sendPaymentsDisabledAlert(params: {
+  /** Defaults to `business.ownerEmail`; the webhook sends one per recipient. */
+  to?: string;
   adminSettingsUrl?: string;
   idempotencyKey?: string;
   business: {
@@ -751,7 +757,7 @@ export async function sendPaymentsDisabledAlert(params: {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
     fromName: params.business.name,
-    to: params.business.ownerEmail,
+    to: params.to ?? params.business.ownerEmail,
     subject: `Action required: ${params.business.name} can't accept payments`,
     react: PaymentsDisabledEmail({
       businessName: params.business.name,

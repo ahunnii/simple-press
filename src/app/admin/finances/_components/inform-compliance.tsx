@@ -2,7 +2,13 @@
 
 import { AlertTriangle, CheckCircle, ExternalLink } from "lucide-react";
 
+import type { InformBarTone } from "~/lib/finance/inform";
 import type { RouterOutputs } from "~/trpc/react";
+import {
+  evaluateInform,
+  INFORM_TRANSACTION_THRESHOLD,
+  informBarTone,
+} from "~/lib/finance/inform";
 import { formatCurrency } from "~/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
@@ -17,8 +23,11 @@ import {
 
 type BreakdownData = RouterOutputs["finance"]["getBreakdown"];
 
-const INFORM_TRANSACTION_THRESHOLD = 200;
-const INFORM_REVENUE_THRESHOLD_CENTS = 500_000; // $5,000
+const BAR_TONE_CLASS: Record<InformBarTone, string> = {
+  green: "bg-green-500",
+  amber: "bg-amber-500",
+  red: "bg-red-500",
+};
 
 export type InformComplianceProps = {
   inform: BreakdownData["inform"];
@@ -34,22 +43,16 @@ export function InformAlerts({
   inform,
   stripeDetailsSubmitted,
 }: InformComplianceProps) {
-  const transactionPct = Math.min(
-    (inform.annualTransactions / INFORM_TRANSACTION_THRESHOLD) * 100,
-    100,
-  );
-  const revenuePct = Math.min(
-    (inform.annualRevenueCents / INFORM_REVENUE_THRESHOLD_CENTS) * 100,
-    100,
-  );
+  const { isApproaching } = evaluateInform({
+    transactions: inform.trailing12moTransactions,
+    revenueCents: inform.trailing12moRevenueCents,
+  });
 
-  // Warn at 75% of either metric so owners can verify before being required
-  // to. `!stripeDetailsSubmitted` is intentionally true for both `false` and
+  // Warn once EITHER metric reaches the warn ratio (before the AND threshold
+  // is met) so owners can verify before being required to.
+  // `!stripeDetailsSubmitted` is intentionally true for both `false` and
   // `null` (unknown) — either way verification isn't confirmed yet.
-  const isApproachingThreshold =
-    !inform.thresholdReached &&
-    !stripeDetailsSubmitted &&
-    (transactionPct >= 75 || revenuePct >= 75);
+  const isApproachingThreshold = isApproaching && !stripeDetailsSubmitted;
 
   // The destructive alert requires an explicit `false`. `null` means unknown
   // (not connected to Stripe, or the account read failed) and must not claim
@@ -67,11 +70,11 @@ export function InformAlerts({
           <AlertTitle>Approaching INFORM Act Threshold</AlertTitle>
           <AlertDescription className="mt-1 space-y-2">
             <p>
-              You&apos;re getting close to the limit that requires seller
+              You&apos;re getting close to the threshold that requires seller
               identity verification under the{" "}
-              <strong>INFORM Consumers Act</strong>. Complete your Stripe
-              account verification now so you&apos;re ready before it&apos;s
-              required.
+              <strong>INFORM Consumers Act</strong> (200+ sales and $5,000+ in
+              revenue within 12 months). Complete your Stripe account
+              verification now so you&apos;re ready before it&apos;s required.
             </p>
             <Button
               size="sm"
@@ -98,10 +101,10 @@ export function InformAlerts({
           <AlertTitle>Seller Verification Required</AlertTitle>
           <AlertDescription className="mt-1 space-y-2">
             <p>
-              Your store has reached a threshold that may require identity
+              Your store has reached the threshold that may require identity
               verification under the <strong>INFORM Consumers Act</strong> (200+
-              transactions or $5,000+ in annual sales). Please complete your
-              Stripe account verification to remain compliant.
+              sales and $5,000+ in revenue over the last 12 months). Please
+              complete your Stripe account verification to remain compliant.
             </p>
             <Button size="sm" variant="outline" asChild>
               <a
@@ -131,7 +134,7 @@ function ComplianceBadge({
     return (
       <Badge variant="secondary" className="gap-1">
         <CheckCircle className="h-3 w-3" />
-        Below Thresholds
+        Below Threshold
       </Badge>
     );
   }
@@ -174,14 +177,10 @@ export function InformComplianceCard({
   inform,
   stripeDetailsSubmitted,
 }: InformComplianceProps) {
-  const transactionPct = Math.min(
-    (inform.annualTransactions / INFORM_TRANSACTION_THRESHOLD) * 100,
-    100,
-  );
-  const revenuePct = Math.min(
-    (inform.annualRevenueCents / INFORM_REVENUE_THRESHOLD_CENTS) * 100,
-    100,
-  );
+  const { transactionPct, revenuePct } = evaluateInform({
+    transactions: inform.trailing12moTransactions,
+    revenueCents: inform.trailing12moRevenueCents,
+  });
 
   return (
     <Card>
@@ -190,8 +189,8 @@ export function InformComplianceCard({
           <div>
             <CardTitle>INFORM Act Compliance</CardTitle>
             <CardDescription>
-              Annual transaction and revenue thresholds that trigger seller
-              verification requirements
+              Sales and revenue over the last 12 months, measured against the
+              thresholds that trigger seller verification
             </CardDescription>
           </div>
           <ComplianceBadge
@@ -203,21 +202,15 @@ export function InformComplianceCard({
       <CardContent className="space-y-4">
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Annual Transactions</span>
+            <span className="text-muted-foreground">Sales, last 12 months</span>
             <span className="font-medium">
-              {inform.annualTransactions.toLocaleString()} /{" "}
+              {inform.trailing12moTransactions.toLocaleString()} /{" "}
               {INFORM_TRANSACTION_THRESHOLD}
             </span>
           </div>
           <div className="bg-muted h-2 overflow-hidden rounded-full">
             <div
-              className={`h-full rounded-full transition-all ${
-                transactionPct >= 100
-                  ? "bg-red-500"
-                  : transactionPct >= 80
-                    ? "bg-amber-500"
-                    : "bg-green-500"
-              }`}
+              className={`h-full rounded-full transition-all ${BAR_TONE_CLASS[informBarTone(transactionPct)]}`}
               style={{ width: `${transactionPct}%` }}
             />
           </div>
@@ -225,29 +218,27 @@ export function InformComplianceCard({
 
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Annual Revenue</span>
+            <span className="text-muted-foreground">
+              Revenue, last 12 months
+            </span>
             <span className="font-medium">
-              {formatCurrency(inform.annualRevenueCents)} / $5,000
+              {formatCurrency(inform.trailing12moRevenueCents)} / $5,000
             </span>
           </div>
           <div className="bg-muted h-2 overflow-hidden rounded-full">
             <div
-              className={`h-full rounded-full transition-all ${
-                revenuePct >= 100
-                  ? "bg-red-500"
-                  : revenuePct >= 80
-                    ? "bg-amber-500"
-                    : "bg-green-500"
-              }`}
+              className={`h-full rounded-full transition-all ${BAR_TONE_CLASS[informBarTone(revenuePct)]}`}
               style={{ width: `${revenuePct}%` }}
             />
           </div>
         </div>
 
         <p className="text-muted-foreground text-xs">
-          Figures reflect the current calendar year (orders that were paid,
-          including any later refunded or disputed). Thresholds trigger when
-          either condition is met.{" "}
+          Figures cover the last 12 months of paid orders, including any later
+          refunded or disputed and excluding cancelled ones. The FTC test is
+          both 200+ sales and $5,000+ in revenue in any continuous 12-month
+          period within the last 24 months; this gauge only looks at the most
+          recent 12 months.{" "}
           <a
             href="https://www.ftc.gov/business-guidance/blog/2023/06/inform-act"
             target="_blank"

@@ -5,8 +5,16 @@ import * as Sentry from "@sentry/nextjs";
 import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
 import { db } from "~/server/db";
 
-function htmlPage(title: string, message: string, success: boolean): Response {
-  const color = success ? "#16a34a" : "#dc2626";
+type PageTone = "success" | "error" | "neutral";
+
+// `neutral` is the badge/status for the placeholder link in test broadcasts —
+// nothing succeeded or failed, so it gets neither the green nor the red.
+function htmlPage(title: string, message: string, tone: PageTone): Response {
+  const color =
+    tone === "success" ? "#16a34a" : tone === "neutral" ? "#6b7280" : "#dc2626";
+  const icon = tone === "success" ? "✅" : tone === "neutral" ? "✉️" : "⚠️";
+  const badge =
+    tone === "success" ? "Done" : tone === "neutral" ? "Test" : "Invalid link";
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,16 +70,16 @@ function htmlPage(title: string, message: string, success: boolean): Response {
 </head>
 <body>
   <div class="card">
-    <div class="icon">${success ? "✅" : "⚠️"}</div>
+    <div class="icon">${icon}</div>
     <h1>${title}</h1>
     <p>${message}</p>
-    <span class="badge">${success ? "Done" : "Invalid link"}</span>
+    <span class="badge">${badge}</span>
   </div>
 </body>
 </html>`;
 
   return new Response(html, {
-    status: success ? 200 : 400,
+    status: tone === "error" ? 400 : 200,
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
@@ -137,10 +145,27 @@ async function unsubscribeByToken(
   };
 }
 
+// "Send test to myself" broadcasts embed this placeholder token. There is no
+// customer behind it, so it never touches the database.
+const TEST_TOKEN = "test";
+
+const TEST_PAGE = {
+  title: "This is a test email",
+  message:
+    "In a real campaign this link unsubscribes the customer from your marketing emails. Nothing was changed.",
+};
+
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("t");
+  if (token === TEST_TOKEN) {
+    return htmlPage(TEST_PAGE.title, TEST_PAGE.message, "neutral");
+  }
   const result = await unsubscribeByToken(token);
-  return htmlPage(result.title, result.message, result.success);
+  return htmlPage(
+    result.title,
+    result.message,
+    result.success ? "success" : "error",
+  );
 }
 
 // Opt out of caching so the page is always served fresh
@@ -154,6 +179,9 @@ export const runtime = "nodejs";
 // the `t` query param, and expect a plain 200/4xx response rather than HTML.
 export async function POST(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("t");
+  if (token === TEST_TOKEN) {
+    return NextResponse.json({ success: true, message: TEST_PAGE.message });
+  }
   const result = await unsubscribeByToken(token);
   return NextResponse.json(
     { success: result.success, message: result.message },

@@ -410,3 +410,38 @@ describe("computeSeoScorecard — catalog shareable image", () => {
     expect(item?.label).toBe("Products with a shareable image");
   });
 });
+
+function pageTitleItem(scorecard: Scorecard) {
+  return scorecard.groups
+    .find((g) => g.id === "page-listing")
+    ?.items.find((i) => i.key === "page-meta-title");
+}
+
+describe("computeSeoScorecard — Donate page", () => {
+  const SITE_WITH_DONATE_TITLE: SiteContentForScorecard = {
+    ...BASE_SITE_CONTENT,
+    pageMeta: { donate: { title: "Support us" } },
+  };
+
+  it("counts the Donate page toward page-title coverage when donations is on", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "donations",
+      business: BASE_BUSINESS,
+      siteContent: SITE_WITH_DONATE_TITLE,
+    });
+    // About, Contact, FAQ, and Donate are applicable; Donate has its title set.
+    expect(pageTitleItem(scorecard)?.detail).toBe("1 of 4 pages");
+  });
+
+  it("leaves the Donate page out of page-title coverage when donations is off", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: BASE_BUSINESS,
+      siteContent: SITE_WITH_DONATE_TITLE,
+    });
+    // Only About, Contact, and FAQ apply; the Donate title it has is ignored.
+    expect(pageTitleItem(scorecard)?.detail).toBe("0 of 3 pages");
+  });
+});

@@ -22,6 +22,7 @@ import {
 
 import { DomainSetup } from "../../_components/domain/domain-setup";
 import { ConnectStripeButton } from "../../_components/payment/connect-stripe-button";
+import { StripeConnectReturnToast } from "../../_components/payment/stripe-connect-return-toast";
 import { SetupStep } from "./setup-step";
 
 type Business = {
@@ -91,6 +92,9 @@ export function SetupChecklist({ business, status, vpsIp }: Props) {
         />
 
         {/* Step 2: Connect Stripe */}
+        {/* ConnectStripeButton mounts its own return toast, but it's gone once
+            the OAuth round-trip succeeds — so the success toast mounts here. */}
+        {stripeConnected && <StripeConnectReturnToast />}
         <SetupStep
           completed={stripeConnected}
           icon={<CreditCard className="h-5 w-5" />}

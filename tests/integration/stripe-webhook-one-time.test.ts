@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db, resetDb } from "../helpers/db";
@@ -25,8 +26,9 @@ import {
  *
  * Everything that would do network I/O is mocked — Stripe (signature
  * verification + session re-read) and the single `sendEmail` chokepoint every
- * template helper funnels through. Sentry is left real: with no client
- * initialized every capture is a no-op.
+ * template helper funnels through. Sentry stays real (no client initialized,
+ * so captures are no-ops) except `captureMessage`, wrapped in a spy so tests
+ * can assert on the warnings the handler emits.
  */
 
 // Stripe: the route verifies the signature and re-reads the session on the
@@ -35,6 +37,7 @@ import {
 const stripeMocks = vi.hoisted(() => ({
   constructEvent: vi.fn(),
   sessionsRetrieve: vi.fn(),
+  listLineItems: vi.fn(),
 }));
 vi.mock("~/lib/stripe/client", () => ({
   stripeClient: {
@@ -46,6 +49,8 @@ vi.mock("~/lib/stripe/client", () => ({
       sessions: {
         retrieve: (...args: unknown[]): unknown =>
           stripeMocks.sessionsRetrieve(...args),
+        listLineItems: (...args: unknown[]): unknown =>
+          stripeMocks.listLineItems(...args),
       },
     },
   },
@@ -64,8 +69,55 @@ vi.mock("~/lib/email/send", () => ({
   },
 }));
 
+// The helper calls the template as a plain function (the element sendEmail
+// receives is the layout's, not the template's), so capture the props the
+// template was invoked with while still rendering the real component.
+type AbandonedTemplateProps = { items?: unknown };
+const abandonedTemplate = vi.hoisted(() => ({
+  props: vi.fn<(props: AbandonedTemplateProps) => void>(),
+}));
+vi.mock("~/emails/abandoned-checkout", async (importOriginal) => {
+  const actual = await importOriginal<{
+    default: (props: AbandonedTemplateProps) => unknown;
+  }>();
+  return {
+    ...actual,
+    default: (props: AbandonedTemplateProps) => {
+      abandonedTemplate.props(props);
+      return actual.default(props);
+    },
+  };
+});
+
+// Sentry: keep the real module (no client initialized, so captures are
+// no-ops) but spy on captureMessage, still delegating. A Proxy rather than a
+// spread: part of the module's export surface is inherited via its prototype,
+// which `{ ...actual }` would drop.
+vi.mock("@sentry/nextjs", async (importOriginal) => {
+  const actual = await importOriginal<typeof Sentry>();
+  const captureMessage = vi.fn(actual.captureMessage);
+  return new Proxy(actual, {
+    get: (target, prop, receiver) =>
+      prop === "captureMessage"
+        ? captureMessage
+        : (Reflect.get(target, prop, receiver) as unknown),
+  });
+});
+
 const ACCOUNT_ID = "acct_test_onetime";
 const OTHER_ACCOUNT_ID = "acct_test_attacker";
+
+/** The captureMessage call logged for a given `webhook.step` tag, if any. */
+function findSentryMessage(step: string) {
+  return vi
+    .mocked(Sentry.captureMessage)
+    .mock.calls.find(
+      ([, hint]) =>
+        (hint as { tags?: Record<string, string> } | undefined)?.tags?.[
+          "webhook.step"
+        ] === step,
+    );
+}
 
 type EmailCall = {
   to: string | string[];
@@ -81,6 +133,12 @@ function emailCategories(): string[] {
   });
 }
 
+/** The `items` prop the abandoned-checkout template was rendered with. */
+function abandonedItemsProp(): unknown {
+  expect(abandonedTemplate.props).toHaveBeenCalledTimes(1);
+  return abandonedTemplate.props.mock.calls[0]![0].items;
+}
+
 function emailCallWithCategory(category: string): EmailCall | undefined {
   return emailMocks.sendEmail.mock.calls
     .map((call) => call[0] as EmailCall)
@@ -90,13 +148,19 @@ function emailCallWithCategory(category: string): EmailCall | undefined {
 }
 
 async function setupStore(
-  opts: { sendAbandonedCheckoutEmails?: boolean } = {},
+  opts: {
+    sendAbandonedCheckoutEmails?: boolean;
+    subdomain?: string;
+    stripeAccountId?: string;
+  } = {},
 ) {
-  const created = await createBusiness({ subdomain: "webhook-biz" });
+  const created = await createBusiness({
+    subdomain: opts.subdomain ?? "webhook-biz",
+  });
   const business = await db.business.update({
     where: { id: created.id },
     data: {
-      stripeAccountId: ACCOUNT_ID,
+      stripeAccountId: opts.stripeAccountId ?? ACCOUNT_ID,
       sendAbandonedCheckoutEmails: opts.sendAbandonedCheckoutEmails ?? false,
     },
   });
@@ -210,6 +274,9 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
     await resetDb();
     stripeMocks.constructEvent.mockReset();
     stripeMocks.sessionsRetrieve.mockReset();
+    stripeMocks.listLineItems.mockReset();
+    abandonedTemplate.props.mockReset();
+    vi.mocked(Sentry.captureMessage).mockClear();
     emailMocks.sendEmail.mockReset();
     emailMocks.sendEmail.mockResolvedValue({ success: true, id: "test" });
   });
@@ -423,6 +490,65 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       expect(productAfter.reservedQty).toBe(0);
     });
 
+    it("does not let a merchant consume another tenant's reservation via metadata.reservationId", async () => {
+      // Victim store holds an active reservation under its own session.
+      const victimStore = await setupStore();
+      const victim = await reserveFor(victimStore, "cs_test_victim_session");
+
+      // The attacker is a different business that legitimately owns its
+      // connected account, so the event passes the businessId/account guard and
+      // their own order IS created. Their session metadata, though, points
+      // reservationId at the victim's reservation.
+      const attackerStore = await setupStore({
+        subdomain: "attacker-biz",
+        stripeAccountId: OTHER_ACCOUNT_ID,
+      });
+      const { session, fullSession } = buildPaidSession(attackerStore, {
+        id: "cs_test_completed_attacker",
+        metadata: { reservationId: victim.id },
+      });
+
+      const event = makeCheckoutCompletedEvent(session, OTHER_ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+      stripeMocks.sessionsRetrieve.mockResolvedValue(fullSession);
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+
+      // The attacker's own order was created...
+      expect(
+        await db.order.count({
+          where: { businessId: attackerStore.business.id },
+        }),
+      ).toBe(1);
+
+      // ...but the victim's hold was left alone.
+      const victimAfter = await db.inventoryReservation.findUniqueOrThrow({
+        where: { id: victim.id },
+      });
+      expect(victimAfter.status).toBe("active");
+
+      const productAfter = await db.product.findUniqueOrThrow({
+        where: { id: victimStore.product.id },
+      });
+      const variantAfter = await db.productVariant.findUniqueOrThrow({
+        where: { id: victimStore.variant.id },
+      });
+      expect(productAfter.reservedQty).toBe(2);
+      expect(variantAfter.reservedQty).toBe(1);
+
+      // The cross-tenant attempt is surfaced as a warning.
+      const warning = findSentryMessage(
+        "reservation-release-business-mismatch",
+      );
+      expect(warning).toBeDefined();
+      expect(warning![0]).toContain(victim.id);
+      expect(warning![1]).toMatchObject({
+        level: "warning",
+        tags: { businessId: attackerStore.business.id },
+      });
+    });
+
     it("rejects a spoofed event.account: 200, no order, no Stripe read", async () => {
       const store = await setupStore();
       const { session, fullSession } = buildPaidSession(store);
@@ -541,10 +667,51 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
 
       const event = makeCheckoutExpiredEvent(session, ACCOUNT_ID);
       stripeMocks.constructEvent.mockReturnValue(event);
+      stripeMocks.listLineItems.mockResolvedValue({
+        data: [
+          {
+            id: "li_1",
+            description: "Cotton Tee",
+            quantity: 2,
+            amount_subtotal: 3000,
+            price: {
+              unit_amount: 1500,
+              product: {
+                id: "prod_1",
+                name: "Cotton Tee",
+                images: ["https://img.test/tee.jpg"],
+                metadata: {},
+              },
+            },
+          },
+          {
+            id: "li_2",
+            description: "Large",
+            quantity: 1,
+            amount_subtotal: 2500,
+            price: {
+              unit_amount: 2500,
+              product: {
+                id: "prod_2",
+                name: "Stoneware Mug",
+                // No product image: create-session falls back to the logo.
+                images: [],
+                metadata: { variantName: "Large" },
+              },
+            },
+          },
+        ],
+      });
 
       const res = await postWebhookEvent(event);
       expect(res.status).toBe(200);
       expect(await res.json()).toEqual({ received: true });
+
+      expect(stripeMocks.listLineItems).toHaveBeenCalledWith(
+        session.id,
+        expect.objectContaining({ expand: ["data.price.product"] }),
+        { stripeAccount: ACCOUNT_ID },
+      );
 
       const reservationAfter = await db.inventoryReservation.findUniqueOrThrow({
         where: { id: reservation.id },
@@ -569,9 +736,146 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       // Stripe-supplied address without `normalizeEmail`.
       expect(abandoned.to).toBe("Jane@Shopper.Test");
       expect(abandoned.idempotencyKey).toBe(`abandoned-checkout-${session.id}`);
+      expect(abandonedItemsProp()).toEqual([
+        {
+          name: "Cotton Tee",
+          variantName: undefined,
+          quantity: 2,
+          unitAmount: 1500,
+          imageUrl: "https://img.test/tee.jpg",
+        },
+        {
+          name: "Stoneware Mug",
+          variantName: "Large",
+          quantity: 1,
+          unitAmount: 2500,
+          imageUrl: undefined,
+        },
+      ]);
 
       // No order is ever created from an expired session.
       expect(await db.order.count()).toBe(0);
+    });
+
+    it("still sends the abandoned-checkout email, without items, when listing line items fails", async () => {
+      const store = await setupStore({ sendAbandonedCheckoutEmails: true });
+      const { session } = buildPaidSession(store, { id: "cs_test_expired_4" });
+      const reservation = await reserveFor(store, session.id);
+
+      const event = makeCheckoutExpiredEvent(session, ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+      stripeMocks.listLineItems.mockRejectedValue(new Error("stripe is down"));
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ received: true });
+
+      expect(emailCategories()).toEqual(["abandoned_checkout"]);
+      expect(abandonedItemsProp()).toBeUndefined();
+
+      const reservationAfter = await db.inventoryReservation.findUniqueOrThrow({
+        where: { id: reservation.id },
+      });
+      expect(reservationAfter.status).toBe("released");
+    });
+
+    it("sends no abandoned-checkout email and releases no reservation when the event account does not own the business", async () => {
+      const store = await setupStore({ sendAbandonedCheckoutEmails: true });
+      const { session } = buildPaidSession(store, { id: "cs_test_expired_5" });
+      const reservation = await reserveFor(store, session.id);
+
+      const event = makeCheckoutExpiredEvent(session, OTHER_ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ received: true });
+
+      expect(stripeMocks.listLineItems).not.toHaveBeenCalled();
+      expect(emailMocks.sendEmail).not.toHaveBeenCalled();
+
+      // The reservation's business must own the event's connected account, so
+      // a foreign-account event leaves the hold untouched.
+      const reservationAfter = await db.inventoryReservation.findUniqueOrThrow({
+        where: { id: reservation.id },
+      });
+      expect(reservationAfter.status).toBe("active");
+
+      const productAfter = await db.product.findUniqueOrThrow({
+        where: { id: store.product.id },
+      });
+      const variantAfter = await db.productVariant.findUniqueOrThrow({
+        where: { id: store.variant.id },
+      });
+      expect(productAfter.reservedQty).toBe(2);
+      expect(variantAfter.reservedQty).toBe(1);
+
+      // The skipped release is surfaced as an error, tagged with the victim.
+      const releaseMismatch = findSentryMessage(
+        "reservation-release-account-mismatch",
+      );
+      expect(releaseMismatch).toBeDefined();
+      expect(releaseMismatch![0]).toContain(OTHER_ACCOUNT_ID);
+      expect(releaseMismatch![1]).toMatchObject({
+        level: "error",
+        tags: { businessId: store.business.id },
+      });
+
+      // So is the skipped abandoned-checkout email (this store opted in).
+      const emailMismatch = findSentryMessage(
+        "abandoned-checkout-account-mismatch",
+      );
+      expect(emailMismatch).toBeDefined();
+      expect(emailMismatch![0]).toContain(OTHER_ACCOUNT_ID);
+      expect(emailMismatch![1]).toMatchObject({
+        level: "error",
+        tags: { businessId: store.business.id },
+      });
+    });
+
+    it("does not let another tenant release a reservation via metadata.reservationId", async () => {
+      // Victim store holds an active reservation under its own session.
+      const store = await setupStore();
+      const victim = await reserveFor(store, "cs_test_victim_session");
+
+      // A different connected merchant expires one of THEIR sessions, but sets
+      // metadata.reservationId to the victim's reservation id.
+      const { session } = buildPaidSession(store, {
+        id: "cs_test_expired_attacker",
+        metadata: { reservationId: victim.id },
+      });
+      const event = makeCheckoutExpiredEvent(session, OTHER_ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ received: true });
+
+      const victimAfter = await db.inventoryReservation.findUniqueOrThrow({
+        where: { id: victim.id },
+      });
+      expect(victimAfter.status).toBe("active");
+
+      const productAfter = await db.product.findUniqueOrThrow({
+        where: { id: store.product.id },
+      });
+      const variantAfter = await db.productVariant.findUniqueOrThrow({
+        where: { id: store.variant.id },
+      });
+      expect(productAfter.reservedQty).toBe(2);
+      expect(variantAfter.reservedQty).toBe(1);
+
+      // The cross-tenant attempt is surfaced as an error, tagged with the
+      // victim's business.
+      const releaseMismatch = findSentryMessage(
+        "reservation-release-account-mismatch",
+      );
+      expect(releaseMismatch).toBeDefined();
+      expect(releaseMismatch![0]).toContain(OTHER_ACCOUNT_ID);
+      expect(releaseMismatch![1]).toMatchObject({
+        level: "error",
+        tags: { businessId: store.business.id },
+      });
     });
 
     it("releases the reservation but sends no email when the business has opted out", async () => {

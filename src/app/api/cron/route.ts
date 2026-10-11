@@ -28,10 +28,12 @@
 // Failures are reported to Sentry (tag `cron.job`) and reflected in the JSON
 // summary: { "<job>": { ok: boolean, count: number } }.
 import { createHash, timingSafeEqual } from "crypto";
+import type { Prisma } from "generated/prisma";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { canCheckoutOne } from "~/lib/back-in-stock/purchasable";
 import { getBusinessUrl } from "~/lib/business-url";
 import { sendBackInStockEmail } from "~/lib/email/templates";
 import { archivePastEvents } from "~/lib/events/archive";
@@ -40,7 +42,6 @@ import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { notifyOverdueInvoices } from "~/lib/invoices/overdue-alerts";
 import { sendInvoiceDigests } from "~/lib/invoices/weekly-digest";
 import { awardBirthdayPoints } from "~/lib/loyalty/birthday";
-import { parseCardAdditionalFields } from "~/lib/products";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
 import { runIndexNowSweep } from "~/lib/seo/indexnow";
 import { syncSubscriptions } from "~/lib/subscriptions/sync";
@@ -134,121 +135,185 @@ async function publishScheduledPages(): Promise<number> {
 }
 
 // Back-in-stock notifications: email pending requests whose target
-// product/variant is purchasable again. Semantics mirror the storefront
-// `isInStock` helper (src/hooks/use-shop-filters.ts) plus the checkout
-// validation's `comingSoon` guard. Per-request try/catch — a failed send
-// leaves notifiedAt null so it retries on the next run. Requests whose
-// product/variant no longer exists are retired (notifiedAt set) without an
-// email. Requests for a business with the backInStock feature flag disabled
-// are skipped (not retired) so they resume automatically if the flag is
-// re-enabled.
+// product/variant checkout would accept again, for a quantity of 1 — see
+// `canCheckoutOne` (src/lib/back-in-stock/purchasable.ts), which mirrors
+// `checkCartAvailability`: pool first for pooled products (their own
+// trackInventory is forced off), `baseUnitsConsumed` pool units per sale, and
+// reserved stock never counts as available.
+//
+// Two passes, so the per-run budget is spent only on requests that can act:
+//   1. Group pending requests by (productId, variantId) target, oldest pending
+//      first, and classify targets in chunks — "retire" when the product,
+//      variant or business is gone; "send" when purchasable and the business
+//      has the backInStock flag on. Targets that are still sold out, or whose
+//      business has the flag off, are skipped (left pending, NOT retired, so
+//      they resume automatically on restock / re-enable). Classification
+//      stops once the actionable targets cover a full batch.
+//   2. Load up to BACK_IN_STOCK_BATCH pending requests for those targets only.
+// This way old requests for still-sold-out items can never starve newer
+// requests for restocked ones out of the batch.
+//
+// Per-request try/catch — a failed send leaves notifiedAt null so it retries
+// on the next run; notifiedAt is stamped only when sendEmail reports success.
+const BACK_IN_STOCK_BATCH = 300;
+const BACK_IN_STOCK_PRODUCT_CHUNK = 200;
+
+const RESTOCK_PRODUCT_SELECT = {
+  id: true,
+  name: true,
+  slug: true,
+  businessId: true,
+  published: true,
+  trackInventory: true,
+  allowBackorders: true,
+  inventoryQty: true,
+  reservedQty: true,
+  additionalFields: true,
+  baseInventoryUnitId: true,
+  baseUnitsConsumed: true,
+  baseInventoryUnit: {
+    select: { inventoryQty: true, reservedQty: true, allowBackorders: true },
+  },
+  variants: {
+    select: { id: true, name: true, inventoryQty: true, reservedQty: true },
+  },
+} satisfies Prisma.ProductSelect;
+
+const RESTOCK_BUSINESS_SELECT = {
+  id: true,
+  name: true,
+  ownerEmail: true,
+  subdomain: true,
+  customDomain: true,
+  domainStatus: true,
+  featureFlags: true,
+  siteContent: { select: { logoUrl: true } },
+} satisfies Prisma.BusinessSelect;
+
+type RestockCronProduct = Prisma.ProductGetPayload<{
+  select: typeof RESTOCK_PRODUCT_SELECT;
+}>;
+type RestockCronBusiness = Prisma.BusinessGetPayload<{
+  select: typeof RESTOCK_BUSINESS_SELECT;
+}>;
+
 async function notifyBackInStock(): Promise<number> {
-  const requests = await db.backInStockRequest.findMany({
+  // Only the two target columns plus count/min per group — never full rows.
+  const groups = await db.backInStockRequest.groupBy({
+    by: ["productId", "variantId"],
     where: { notifiedAt: null },
-    orderBy: { createdAt: "asc" },
-    take: 300,
+    _count: { _all: true },
+    _min: { createdAt: true },
   });
-  if (requests.length === 0) return 0;
+  if (groups.length === 0) return 0;
+  groups.sort(
+    (a, b) =>
+      (a._min.createdAt?.getTime() ?? 0) - (b._min.createdAt?.getTime() ?? 0),
+  );
 
-  const productIds = [...new Set(requests.map((r) => r.productId))];
-  const products = await db.product.findMany({
-    where: { id: { in: productIds } },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      businessId: true,
-      published: true,
-      trackInventory: true,
-      allowBackorders: true,
-      inventoryQty: true,
-      additionalFields: true,
-      baseInventoryUnit: {
-        select: { inventoryQty: true, allowBackorders: true },
-      },
-      variants: { select: { id: true, name: true, inventoryQty: true } },
-    },
-  });
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const targetKey = (productId: string, variantId: string | null) =>
+    `${productId}:${variantId ?? ""}`;
 
-  const businessIds = [...new Set(products.map((p) => p.businessId))];
-  const businesses = await db.business.findMany({
-    where: { id: { in: businessIds } },
-    select: {
-      id: true,
-      name: true,
-      ownerEmail: true,
-      subdomain: true,
-      customDomain: true,
-      domainStatus: true,
-      featureFlags: true,
-      siteContent: { select: { logoUrl: true } },
-    },
-  });
-  const businessMap = new Map(businesses.map((b) => [b.id, b]));
+  const productMap = new Map<string, RestockCronProduct>();
+  const businessMap = new Map<string, RestockCronBusiness>();
   // Cron requests arrive on the platform host, so the host-based
   // featureGate middleware can't resolve a business here — resolve each
   // business's flags directly instead.
-  const backInStockEnabledMap = new Map(
-    businesses.map((b) => [
-      b.id,
-      resolveFlags(b.featureFlags).isEnabled("backInStock"),
-    ]),
-  );
+  const backInStockEnabledMap = new Map<string, boolean>();
+  const actionable = new Map<string, "send" | "retire">();
+  let actionableRequests = 0;
 
-  type RestockProduct = (typeof products)[number];
-  type RestockVariant = RestockProduct["variants"][number];
+  // Classify targets in product-id chunks (oldest pending first) until the
+  // actionable ones cover a full batch.
+  const productIdsInOrder = [...new Set(groups.map((g) => g.productId))];
+  for (
+    let i = 0;
+    i < productIdsInOrder.length && actionableRequests < BACK_IN_STOCK_BATCH;
+    i += BACK_IN_STOCK_PRODUCT_CHUNK
+  ) {
+    const chunk = productIdsInOrder.slice(i, i + BACK_IN_STOCK_PRODUCT_CHUNK);
+    const products = await db.product.findMany({
+      where: { id: { in: chunk } },
+      select: RESTOCK_PRODUCT_SELECT,
+    });
+    for (const p of products) productMap.set(p.id, p);
 
-  const isPurchasable = (
-    product: RestockProduct,
-    variant: RestockVariant | null,
-  ): boolean => {
-    if (!product.published) return false;
-    // Coming-soon products are blocked at checkout even with inventory.
-    if (parseCardAdditionalFields(product.additionalFields)?.comingSoon)
-      return false;
-    if (!product.trackInventory) return true;
-    if (product.allowBackorders) return true;
-    if (product.baseInventoryUnit) {
-      return (
-        product.baseInventoryUnit.allowBackorders ||
-        product.baseInventoryUnit.inventoryQty > 0
-      );
+    const newBusinessIds = [
+      ...new Set(products.map((p) => p.businessId)),
+    ].filter((id) => !businessMap.has(id));
+    if (newBusinessIds.length > 0) {
+      const businesses = await db.business.findMany({
+        where: { id: { in: newBusinessIds } },
+        select: RESTOCK_BUSINESS_SELECT,
+      });
+      for (const b of businesses) {
+        businessMap.set(b.id, b);
+        backInStockEnabledMap.set(
+          b.id,
+          resolveFlags(b.featureFlags).isEnabled("backInStock"),
+        );
+      }
     }
-    if (variant) return variant.inventoryQty > 0;
-    if (product.variants.length > 0) {
-      return product.variants.some((v) => v.inventoryQty > 0);
+
+    const chunkIds = new Set(chunk);
+    for (const g of groups) {
+      if (!chunkIds.has(g.productId)) continue;
+      const product = productMap.get(g.productId);
+      const variant = g.variantId
+        ? (product?.variants.find((v) => v.id === g.variantId) ?? null)
+        : null;
+      const business = product ? businessMap.get(product.businessId) : null;
+
+      let action: "send" | "retire" | null = null;
+      // Product (or its requested variant, or its business) is gone —
+      // retire so it doesn't retry forever.
+      if (!product || !business || (g.variantId && !variant)) {
+        action = "retire";
+      } else if (
+        backInStockEnabledMap.get(business.id) &&
+        canCheckoutOne(product, variant)
+      ) {
+        action = "send";
+      }
+      if (!action) continue;
+      actionable.set(targetKey(g.productId, g.variantId), action);
+      actionableRequests += g._count._all;
     }
-    return (product.inventoryQty ?? 0) > 0;
-  };
+  }
+  if (actionable.size === 0) return 0;
+
+  const requests = await db.backInStockRequest.findMany({
+    where: {
+      notifiedAt: null,
+      OR: groups
+        .filter((g) => actionable.has(targetKey(g.productId, g.variantId)))
+        .map((g) => ({ productId: g.productId, variantId: g.variantId })),
+    },
+    orderBy: { createdAt: "asc" },
+    take: BACK_IN_STOCK_BATCH,
+  });
 
   let sent = 0;
   for (const request of requests) {
     try {
+      const action = actionable.get(
+        targetKey(request.productId, request.variantId),
+      );
       const product = productMap.get(request.productId);
-      const variant = request.variantId
-        ? (product?.variants.find((v) => v.id === request.variantId) ?? null)
-        : null;
       const business = product
         ? businessMap.get(product.businessId)
         : undefined;
 
-      // Product (or its requested variant, or its business) is gone —
-      // retire the request so it doesn't retry forever.
-      if (!product || !business || (request.variantId && !variant)) {
+      if (action === "retire" || !product || !business) {
         await db.backInStockRequest.update({
           where: { id: request.id },
           data: { notifiedAt: new Date() },
         });
         continue;
       }
-
-      // Feature disabled for this business — skip without retiring, so
-      // notifications resume automatically if backInStock is re-enabled.
-      if (!backInStockEnabledMap.get(business.id)) continue;
-
-      // Still not purchasable — leave pending for a future run.
-      if (!isPurchasable(product, variant)) continue;
+      const variant = request.variantId
+        ? (product.variants.find((v) => v.id === request.variantId) ?? null)
+        : null;
 
       const emailResult = await sendBackInStockEmail({
         to: request.email,

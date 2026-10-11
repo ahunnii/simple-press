@@ -93,8 +93,14 @@ export default async function AdminLayout({ children }: Props) {
     // owner-created rows that are unapproved, but owner-created reviews
     // default to `isApproved: true` (see review.ownerCreate), so in practice
     // this is the pending-customer-review queue the sidebar badge is for.
+    // Hidden rows are dismissed, not pending, so `isHidden: false` keeps them
+    // out of the count (pending = !isApproved && !isHidden).
     db.productReview.count({
-      where: { isApproved: false, product: { businessId: business.id } },
+      where: {
+        isApproved: false,
+        isHidden: false,
+        product: { businessId: business.id },
+      },
     }),
   ]);
 

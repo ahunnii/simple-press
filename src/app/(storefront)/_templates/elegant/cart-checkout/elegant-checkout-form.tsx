@@ -313,6 +313,19 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                   Code {f.discountCodeLabel} applied.
                 </p>
               )}
+              {f.discountCodeLabel && f.discountFreeShipping && (
+                <p
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: "var(--el-sage, #4a5240)",
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  Free shipping applied: {f.discountCodeLabel}
+                </p>
+              )}
             </div>
           </fieldset>
         )}

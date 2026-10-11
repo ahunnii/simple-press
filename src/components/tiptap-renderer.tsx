@@ -254,6 +254,10 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           />
         );
       }
+      // A placeholder saved before anything was chosen has nothing to render;
+      // skip it instead of emitting an empty wrapper div.
+      if (isQuoteCalculatorNode(node) && !node.attrs.calculatorId) return null;
+      if (isFormNode(node) && !node.attrs.formId) return null;
       if (isQuoteCalculatorNode(node) && node.attrs.calculatorId) {
         return (
           <QuoteCalculatorBlock

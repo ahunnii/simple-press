@@ -495,6 +495,14 @@ export function DefaultCheckoutForm({
                       {formatPrice(f.discountAmount)}
                     </p>
                   )}
+                  {f.discountCodeLabel && f.discountFreeShipping && (
+                    <p
+                      role="status"
+                      className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-900"
+                    >
+                      Free shipping applied: {f.discountCodeLabel}
+                    </p>
+                  )}
                 </div>
               )}
 

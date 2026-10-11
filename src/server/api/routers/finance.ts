@@ -18,12 +18,14 @@
  */
 
 import type { Prisma } from "generated/prisma";
-import type Stripe from "stripe";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { evaluateInform, resolveInformWindow } from "~/lib/finance/inform";
+import type { BalanceTxnSummary } from "~/lib/finance/stripe-summary";
+import { summarizeBalanceTransactions } from "~/lib/finance/stripe-summary";
 import type { OrdersBreakdown } from "~/lib/orders/order-money";
 import {
   EMPTY_ORDERS_BREAKDOWN,
@@ -39,39 +41,6 @@ type RangeKey = z.infer<typeof rangeKeySchema>;
 const BALANCE_TXN_CAP = 5000;
 /** Hard cap on auto-paged payouts. */
 const PAYOUT_CAP = 5000;
-
-/**
- * Balance-transaction types that represent money coming IN from a sale.
- * Direct charges on a Standard connected account land as `charge` (Checkout /
- * PaymentIntents) or `payment` (older/legacy charge objects).
- */
-const CHARGE_TYPES: ReadonlySet<Stripe.BalanceTransaction.Type> = new Set([
-  "charge",
-  "payment",
-]);
-
-/**
- * Balance-transaction types that represent a refund going back OUT. Their
- * `amount` is negative in Stripe.
- */
-const REFUND_TYPES: ReadonlySet<Stripe.BalanceTransaction.Type> = new Set([
-  "refund",
-  "payment_refund",
-  "payment_failure_refund",
-]);
-
-/**
- * Chargeback / dispute and other balance adjustments. Signed: a lost dispute is
- * negative, a won dispute reversal is positive.
- */
-const ADJUSTMENT_TYPES: ReadonlySet<Stripe.BalanceTransaction.Type> = new Set([
-  "adjustment",
-]);
-
-/** INFORM Consumers Act: high-volume seller at 200+ transactions/year… */
-const INFORM_TRANSACTION_THRESHOLD = 200;
-/** …OR $5,000+ in annual gross revenue. */
-const INFORM_REVENUE_THRESHOLD_CENTS = 500000;
 
 /** How many "most recent payouts ever" to surface on the page. */
 const RECENT_PAYOUT_LIMIT = 5;
@@ -152,14 +121,11 @@ function toUnixSeconds(d: Date): number {
   return Math.floor(d.getTime() / 1000);
 }
 
-export type StripeFinanceSummary = {
-  grossChargesCents: number;
-  processingFeesCents: number;
-  /** POSITIVE magnitude — Stripe reports refunds as negative amounts. */
-  refundsCents: number;
-  /** Signed — negative when disputes went against the business. */
-  disputeAdjustmentsCents: number;
-  netToBalanceCents: number;
+/**
+ * Balance-transaction figures (see `summarizeBalanceTransactions` — net
+ * excludes payouts) plus payout and balance reads for the same window.
+ */
+export type StripeFinanceSummary = BalanceTxnSummary & {
   paidOutCents: number;
   balanceAvailableCents: number;
   balancePendingCents: number;
@@ -174,13 +140,14 @@ export type StripeFinanceSummary = {
 };
 
 /**
- * INFORM Consumers Act compliance figures. Always calendar-year-to-date and
- * DB-driven, so they are independent of both the selected `range` and of
- * whether Stripe is connected.
+ * INFORM Consumers Act compliance figures. Always the trailing 12 months
+ * ending today (see `~/lib/finance/inform`) and DB-driven, so they are
+ * independent of both the selected `range` and of whether Stripe is connected.
  */
 export type InformActSummary = {
-  annualTransactions: number;
-  annualRevenueCents: number;
+  trailing12moTransactions: number;
+  trailing12moRevenueCents: number;
+  /** 200+ sales AND $5,000+ revenue — the FTC test is AND, not OR. */
   thresholdReached: boolean;
 };
 
@@ -198,8 +165,8 @@ export const financeRouter = createTRPCRouter({
    * getBreakdown — one call powering the whole Finances page.
    *
    * DB half (always returned): the order-money breakdown for the selected
-   * range, calendar-YTD tax collected, and the calendar-YTD INFORM Act
-   * transaction/revenue counters.
+   * range, calendar-YTD tax collected (refund-adjusted), and the trailing
+   * 12-month INFORM Act transaction/revenue counters.
    * Stripe half (best-effort): balance transactions, payouts and balance for
    * the same window, read from the connected account with direct charges, plus
    * the account's verification status and its last few payouts overall.
@@ -246,34 +213,41 @@ export const financeRouter = createTRPCRouter({
         status: { not: "cancelled" },
       };
 
-      // INFORM Act scope — current calendar year, and deliberately NOT the
-      // finance scopes above. The thresholds measure transactions *conducted*,
-      // not revenue currently retained: an order that was paid counts even if
-      // it was later refunded, disputed or cancelled, while an order that was
-      // never paid (pending/unpaid/failed) does not. Gross, not net of refunds.
-      const startOfCalendarYear = new Date(now.getFullYear(), 0, 1);
+      // INFORM Act scope — trailing 12 months ending today, and deliberately
+      // NOT the finance scopes above. The thresholds measure sales *made*, not
+      // revenue currently retained: an order that was paid counts even if it
+      // was later refunded or disputed, while one that was never paid
+      // (pending/failed) or was cancelled does not. Manual orders count — they
+      // are sales too. Gross, not net of refunds.
+      const informWindow = resolveInformWindow(now);
       const informOrderScope: Prisma.OrderWhereInput = {
         businessId,
-        createdAt: { gte: startOfCalendarYear },
+        createdAt: { gte: informWindow.start, lt: informWindow.endExclusive },
         paymentStatus: { in: ["paid", "refunded", "disputed"] },
+        status: { not: "cancelled" },
       };
 
-      const [orderRows, ytdTaxAgg, informAgg, donationAgg, allTimeDonationCount] =
+      const orderMoneySelect = {
+        total: true,
+        tax: true,
+        shipping: true,
+        discount: true,
+        refundAmountCents: true,
+        paymentMethod: true,
+      } satisfies Prisma.OrderSelect;
+
+      const [orderRows, ytdTaxRows, informAgg, donationAgg, allTimeDonationCount] =
         await Promise.all([
           ctx.db.order.findMany({
             where: orderScope,
-            select: {
-              total: true,
-              tax: true,
-              shipping: true,
-              discount: true,
-              refundAmountCents: true,
-              paymentMethod: true,
-            },
+            select: orderMoneySelect,
           }),
-          ctx.db.order.aggregate({
-            where: ytdOrderScope,
-            _sum: { tax: true },
+          // Row-level (not `_sum.tax`) so YTD tax gets the same refund
+          // proration as the range tile. Untaxed orders contribute 0, so
+          // they are skipped to keep the read small.
+          ctx.db.order.findMany({
+            where: { ...ytdOrderScope, tax: { gt: 0 } },
+            select: orderMoneySelect,
           }),
           ctx.db.order.aggregate({
             where: informOrderScope,
@@ -302,16 +276,17 @@ export const financeRouter = createTRPCRouter({
           ? summarizeOrderMoney(orderRows)
           : { ...EMPTY_ORDERS_BREAKDOWN };
 
-      const taxCollectedYtdCents = ytdTaxAgg._sum.tax ?? 0;
+      const taxCollectedYtdCents = summarizeOrderMoney(ytdTaxRows).taxCents;
 
-      const annualTransactions = informAgg._count.id;
-      const annualRevenueCents = informAgg._sum.total ?? 0;
+      const trailing12moTransactions = informAgg._count.id;
+      const trailing12moRevenueCents = informAgg._sum.total ?? 0;
       const inform: InformActSummary = {
-        annualTransactions,
-        annualRevenueCents,
-        thresholdReached:
-          annualTransactions >= INFORM_TRANSACTION_THRESHOLD ||
-          annualRevenueCents >= INFORM_REVENUE_THRESHOLD_CENTS,
+        trailing12moTransactions,
+        trailing12moRevenueCents,
+        thresholdReached: evaluateInform({
+          transactions: trailing12moTransactions,
+          revenueCents: trailing12moRevenueCents,
+        }).thresholdReached,
       };
 
       // NOTE: no cost-of-goods figure is reported here on purpose.
@@ -413,30 +388,10 @@ export const financeRouter = createTRPCRouter({
         if (summaryFailures.length === 3) {
           stripeError = true;
         } else {
-          let grossChargesCents = 0;
-          let processingFeesCents = 0;
-          let refundAmountSum = 0;
-          let disputeAdjustmentsCents = 0;
-          let netToBalanceCents = 0;
-          let truncated = false;
-
-          if (txnsResult.status === "fulfilled") {
-            const txns = txnsResult.value;
-            truncated = txns.length >= BALANCE_TXN_CAP;
-            for (const txn of txns) {
-              // Fees are withheld on EVERY transaction type, not just charges.
-              processingFeesCents += txn.fee;
-              netToBalanceCents += txn.net;
-              if (CHARGE_TYPES.has(txn.type)) {
-                grossChargesCents += txn.amount;
-              } else if (REFUND_TYPES.has(txn.type)) {
-                // Negative in Stripe; accumulate signed, flip below.
-                refundAmountSum += txn.amount;
-              } else if (ADJUSTMENT_TYPES.has(txn.type)) {
-                disputeAdjustmentsCents += txn.amount;
-              }
-            }
-          }
+          const txns =
+            txnsResult.status === "fulfilled" ? txnsResult.value : [];
+          const truncated = txns.length >= BALANCE_TXN_CAP;
+          const txnSummary = summarizeBalanceTransactions(txns);
 
           let paidOutCents = 0;
           if (payoutsResult.status === "fulfilled") {
@@ -460,12 +415,7 @@ export const financeRouter = createTRPCRouter({
           }
 
           stripe = {
-            grossChargesCents,
-            processingFeesCents,
-            // Returned as a positive magnitude so the UI can render "− $X".
-            refundsCents: Math.abs(refundAmountSum),
-            disputeAdjustmentsCents,
-            netToBalanceCents,
+            ...txnSummary,
             paidOutCents,
             balanceAvailableCents,
             balancePendingCents,

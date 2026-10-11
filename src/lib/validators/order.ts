@@ -69,9 +69,13 @@ export const ORDER_PAYMENT_WRITE_VALUES = [
   "failed",
   "refunded",
 ] as const;
+// "disputed" is filter-only: the Stripe dispute webhook is the sole writer of
+// it, so it stays out of the write values (updatePaymentStatus, createManual)
+// while the list/export filters can still select it.
 export const ORDER_PAYMENT_VALUES = [
   "all",
   ...ORDER_PAYMENT_WRITE_VALUES,
+  "disputed",
 ] as const;
 export const ORDER_PAYMENT_DEFAULT = "all";
 

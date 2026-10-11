@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 import { useEffect, useMemo, useState } from "react";
 import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
+import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import FinalQuoteEmail from "~/emails/final-quote";
@@ -366,6 +367,34 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             businessName: business.name,
             businessLogoUrl: logoUrl,
             businessUrl,
+            items: sampleOrder?.items?.map((item) => ({
+              name: item.productName,
+              variantName: item.variantName ?? undefined,
+              quantity: item.quantity,
+              unitAmount: Math.round(item.price),
+            })) ?? [
+              {
+                name: "Sample Product",
+                variantName: "Medium / Blue",
+                quantity: 2,
+                unitAmount: 2999,
+              },
+              { name: "Another Item", quantity: 1, unitAmount: 1500 },
+            ],
+          }),
+      },
+      {
+        // Not owner-customizable: sendBackInStockEmail builds its own subject
+        // ("<item> is back in stock") and reads no email override.
+        key: "back-in-stock",
+        label: "Back in Stock",
+        build: () =>
+          BackInStockEmail({
+            productName: "Sample Product",
+            variantName: "Medium / Blue",
+            productUrl: `${businessUrl}/shop/sample-product`,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
           }),
       },
       {

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 
+import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import type { PoolDeductionResult } from "~/lib/inventory";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
@@ -14,6 +15,7 @@ import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import { splitCustomerName } from "~/lib/customer-name";
 import { handleDonationCheckoutCompleted } from "~/lib/donations/webhook";
+import { getBusinessAlertRecipients } from "~/lib/email/alert-recipients";
 import {
   sendAbandonedCheckoutEmail,
   sendBackorderAlert,
@@ -762,11 +764,18 @@ export async function POST(req: NextRequest) {
             // Release the inventory reservation now that physical inventory has
             // been deducted. Look up by stripeSessionId first, fall back to
             // metadata.reservationId. Guard so a missing/already-consumed
-            // reservation never breaks order creation.
+            // reservation never breaks order creation. metadata.reservationId
+            // is attacker-controllable by any connected merchant (they can set
+            // arbitrary metadata on their own checkout sessions), so the lookup
+            // is scoped to the verified business — otherwise a merchant could
+            // consume another tenant's active stock hold. A reservationId that
+            // belongs to a different business is left untouched and logged as a
+            // warning.
             try {
               const reservationId = session.metadata?.reservationId;
               const reservation = await tx.inventoryReservation.findFirst({
                 where: {
+                  businessId,
                   OR: [
                     { stripeSessionId: session.id },
                     ...(reservationId ? [{ id: reservationId }] : []),
@@ -774,6 +783,25 @@ export async function POST(req: NextRequest) {
                   status: "active",
                 },
               });
+              if (reservationId && reservation?.id !== reservationId) {
+                const other = await tx.inventoryReservation.findUnique({
+                  where: { id: reservationId },
+                  select: { businessId: true },
+                });
+                if (other && other.businessId !== businessId) {
+                  Sentry.captureMessage(
+                    `[Webhook] metadata.reservationId ${reservationId} belongs to business ${other.businessId}, not ${businessId}; reservation left untouched`,
+                    {
+                      level: "warning",
+                      tags: {
+                        "webhook.step":
+                          "reservation-release-business-mismatch",
+                        businessId,
+                      },
+                    },
+                  );
+                }
+              }
               if (reservation) {
                 const entries = reservation.items as ReservationEntry[];
                 await releaseReservation(tx, { items: entries });
@@ -1088,6 +1116,8 @@ export async function POST(req: NextRequest) {
 
     // Handle checkout.session.expired — release the inventory reservation so
     // held stock is returned to available. Idempotent: no-op if already released.
+    // The reservation's business must own the connected account the event came
+    // from, otherwise nothing is released.
     if (event.type === "checkout.session.expired") {
       const expiredSession = event.data.object;
 
@@ -1107,6 +1137,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
+      // Like the completed-session path, the reservation's business must own
+      // the connected account the event came from. metadata.reservationId is
+      // attacker-controllable by any connected merchant (they can set arbitrary
+      // metadata on their own checkout sessions), so without this check a
+      // merchant could release another tenant's active stock hold.
       try {
         const reservationId = expiredSession.metadata?.reservationId;
         const reservation = await db.inventoryReservation.findFirst({
@@ -1117,8 +1152,24 @@ export async function POST(req: NextRequest) {
             ],
             status: "active",
           },
+          include: { business: { select: { stripeAccountId: true } } },
         });
-        if (reservation) {
+        if (
+          reservation &&
+          (!event.account ||
+            reservation.business.stripeAccountId !== event.account)
+        ) {
+          Sentry.captureMessage(
+            `[Webhook] businessId/account mismatch on expired session: reservation business ${reservation.businessId} does not own connected account ${event.account ?? "(none)"}`,
+            {
+              level: "error",
+              tags: {
+                "webhook.step": "reservation-release-account-mismatch",
+                businessId: reservation.businessId,
+              },
+            },
+          );
+        } else if (reservation) {
           await db.$transaction(async (tx) => {
             const entries = reservation.items as ReservationEntry[];
             await releaseReservation(tx, { items: entries });
@@ -1136,13 +1187,18 @@ export async function POST(req: NextRequest) {
 
       // Abandoned-checkout recovery email — only when the business has opted
       // in and Stripe captured an email before the session expired. The
-      // shopper's cart lives in their browser localStorage, so linking back to
-      // /cart restores exactly what they left. Note: the expired-session event
-      // payload does not include line_items (requires expansion), so the email
-      // stays generic — no item names. Stripe sends checkout.session.expired
-      // once per session, so no extra idempotency guard is needed; the Resend
-      // idempotency key covers redelivered webhook events. Failures never fail
-      // the webhook.
+      // shopper's cart lives in their browser localStorage, so the email links
+      // to /cart, which shows it again on the same device/browser (it may be
+      // empty elsewhere, and the copy says so). The expired-session event
+      // payload does not include line_items (requires expansion), so the items
+      // are fetched with listLineItems on the connected account and shown in
+      // the email. If that call fails the email still goes out, generic and
+      // without items. Like the completed-session path, the metadata business
+      // must own the connected account the event came from (metadata is
+      // attacker-controllable by any connected merchant), otherwise no email
+      // is sent. Stripe sends checkout.session.expired once per session, so no
+      // extra idempotency guard is needed; the Resend idempotency key covers
+      // redelivered webhook events. Failures never fail the webhook.
       try {
         const abandonedBusinessId = expiredSession.metadata?.businessId;
         const abandonedEmail =
@@ -1157,17 +1213,74 @@ export async function POST(req: NextRequest) {
               subdomain: true,
               customDomain: true,
               domainStatus: true,
+              stripeAccountId: true,
               sendAbandonedCheckoutEmails: true,
               siteContent: { select: { logoUrl: true } },
             },
           });
           if (abandonedBusiness?.sendAbandonedCheckoutEmails) {
-            await sendAbandonedCheckoutEmail({
-              to: abandonedEmail,
-              customerName: expiredSession.customer_details?.name ?? undefined,
-              business: abandonedBusiness,
-              idempotencyKey: `abandoned-checkout-${expiredSession.id}`,
-            });
+            if (
+              !event.account ||
+              abandonedBusiness.stripeAccountId !== event.account
+            ) {
+              Sentry.captureMessage(
+                `[Webhook] businessId/account mismatch on expired session: metadata business ${abandonedBusinessId} does not own connected account ${event.account ?? "(none)"}`,
+                {
+                  level: "error",
+                  tags: {
+                    "webhook.step": "abandoned-checkout-account-mismatch",
+                    businessId: abandonedBusinessId,
+                  },
+                },
+              );
+            } else {
+              let items: AbandonedCheckoutItem[] | undefined;
+              try {
+                const lineItems =
+                  await stripeClient.checkout.sessions.listLineItems(
+                    expiredSession.id,
+                    { limit: 100, expand: ["data.price.product"] },
+                    { stripeAccount: event.account },
+                  );
+                const logoUrl = abandonedBusiness.siteContent?.logoUrl;
+                items = lineItems.data.map((line) => {
+                  const product =
+                    line.price?.product &&
+                    typeof line.price.product !== "string" &&
+                    !("deleted" in line.price.product)
+                      ? line.price.product
+                      : undefined;
+                  const quantity = line.quantity ?? 1;
+                  // create-session falls back to the business logo when a
+                  // product has no image — not a useful thumbnail, so drop it.
+                  const image = product?.images[0];
+                  const variantName = product?.metadata.variantName;
+                  return {
+                    name: product?.name ?? line.description ?? "Item",
+                    variantName: variantName?.length ? variantName : undefined,
+                    quantity,
+                    unitAmount:
+                      line.price?.unit_amount ??
+                      (quantity
+                        ? Math.round(line.amount_subtotal / quantity)
+                        : line.amount_subtotal),
+                    imageUrl: image && image !== logoUrl ? image : undefined,
+                  };
+                });
+              } catch (lineItemsErr) {
+                Sentry.captureException(lineItemsErr, {
+                  tags: { "webhook.step": "abandoned-checkout-line-items" },
+                });
+              }
+              await sendAbandonedCheckoutEmail({
+                to: abandonedEmail,
+                customerName:
+                  expiredSession.customer_details?.name ?? undefined,
+                business: abandonedBusiness,
+                items,
+                idempotencyKey: `abandoned-checkout-${expiredSession.id}`,
+              });
+            }
           }
         }
       } catch (abandonedErr) {
@@ -1315,22 +1428,32 @@ export async function POST(req: NextRequest) {
                 },
               });
 
-              try {
-                await sendDisputeAlert({
-                  to: order.business.ownerEmail,
-                  orderNumber: order.orderNumber,
-                  disputeAmountCents: dispute.amount,
-                  reason: dispute.reason,
-                  evidenceDueBy,
-                  business: order.business,
-                });
-              } catch (emailError) {
-                Sentry.captureException(emailError, {
-                  tags: {
-                    "webhook.step": "dispute-alert-email",
-                    businessId: order.businessId,
-                  },
-                });
+              // Owner plus OWNER/MANAGER members. One email each so addresses
+              // aren't exposed to one another, and one failure can't stop the
+              // rest (sendEmail never throws; the catch covers render errors).
+              const recipients = await getBusinessAlertRecipients(
+                db,
+                order.businessId,
+                order.business.ownerEmail,
+              );
+              for (const to of recipients) {
+                try {
+                  await sendDisputeAlert({
+                    to,
+                    orderNumber: order.orderNumber,
+                    disputeAmountCents: dispute.amount,
+                    reason: dispute.reason,
+                    evidenceDueBy,
+                    business: order.business,
+                  });
+                } catch (emailError) {
+                  Sentry.captureException(emailError, {
+                    tags: {
+                      "webhook.step": "dispute-alert-email",
+                      businessId: order.businessId,
+                    },
+                  });
+                }
               }
             } else {
               // charge.dispute.closed — status is won | lost | warning_closed
@@ -1429,19 +1552,33 @@ export async function POST(req: NextRequest) {
           // recovery, nor from the Connect callback (onboarding just finished)
           // or disconnect (deliberate owner action) routes.
           if (business.stripeChargesEnabled && !chargesEnabled) {
-            try {
-              await sendPaymentsDisabledAlert({
-                business,
-                adminSettingsUrl: `${getBusinessUrl(business)}/admin/settings/integrations`,
-                idempotencyKey: `payments-disabled-${event.id}`,
-              });
-            } catch (emailError) {
-              Sentry.captureException(emailError, {
-                tags: {
-                  "webhook.step": "payments-disabled-email",
-                  businessId: business.id,
-                },
-              });
+            // Owner plus OWNER/MANAGER members, one email each. The owner
+            // keeps the original key (a redelivery stays deduped); the rest
+            // are suffixed with their index so each key is unique.
+            const recipients = await getBusinessAlertRecipients(
+              db,
+              business.id,
+              business.ownerEmail,
+            );
+            for (const [index, to] of recipients.entries()) {
+              try {
+                await sendPaymentsDisabledAlert({
+                  to,
+                  business,
+                  adminSettingsUrl: `${getBusinessUrl(business)}/admin/settings/integrations`,
+                  idempotencyKey:
+                    index === 0
+                      ? `payments-disabled-${event.id}`
+                      : `payments-disabled-${event.id}-${index}`,
+                });
+              } catch (emailError) {
+                Sentry.captureException(emailError, {
+                  tags: {
+                    "webhook.step": "payments-disabled-email",
+                    businessId: business.id,
+                  },
+                });
+              }
             }
           }
         }

@@ -23,6 +23,7 @@ export function FormNodeView({
   node,
   updateAttributes,
   deleteNode,
+  editor,
   extension,
 }: NodeViewProps) {
   const opts = extension.options as FormOptions;
@@ -55,6 +56,24 @@ export function FormNodeView({
     }
   };
 
+  // Nothing chosen yet: the node is only a just-inserted placeholder, so
+  // dismissing it needs no confirm and hands focus back to the editor.
+  const isEmpty = !node.attrs.formId;
+  const handleCancel = () => {
+    deleteNode();
+    editor.commands.focus();
+  };
+
+  // Escape cancels an empty placeholder. Radix Select closes its open list on
+  // a document-level Escape and calls preventDefault, so that keypress arrives
+  // here already defaultPrevented and only closes the list; a second Escape
+  // (list closed) removes the placeholder.
+  const handlePickerKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== "Escape" || event.defaultPrevented || !isEmpty) return;
+    event.preventDefault();
+    handleCancel();
+  };
+
   // Disabled state — preserve the node in the document but show a notice.
   if (!formsEnabled) {
     return (
@@ -71,7 +90,10 @@ export function FormNodeView({
   if (isEditing || !node.attrs.formId) {
     return (
       <NodeViewWrapper className="form-node my-4">
-        <div className="rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 p-6">
+        <div
+          className="rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 p-6"
+          onKeyDown={handlePickerKeyDown}
+        >
           <div className="flex items-start gap-4">
             <div className="shrink-0">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
@@ -96,7 +118,7 @@ export function FormNodeView({
                     value={node.attrs.formId ?? undefined}
                     onValueChange={handleFormSelect}
                   >
-                    <SelectTrigger className="w-64">
+                    <SelectTrigger className="w-64" autoFocus={isEmpty}>
                       <SelectValue placeholder="Select a form..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -111,18 +133,35 @@ export function FormNodeView({
                     </SelectContent>
                   </Select>
 
-                  <Button variant="outline" size="sm" onClick={handleRemove}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={isEmpty ? handleCancel : handleRemove}
+                    aria-label={isEmpty ? "Cancel" : "Remove this form"}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div className="text-sm text-gray-600">
                   <p className="mb-2">No forms found.</p>
-                  <Button size="sm" variant="outline" asChild>
-                    <a href="/admin/forms/new" target="_blank">
-                      Create a Form
-                    </a>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <a href="/admin/forms/new" target="_blank">
+                        Create a Form
+                      </a>
+                    </Button>
+                    {isEmpty && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCancel}
+                        autoFocus
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -148,7 +187,12 @@ export function FormNodeView({
             >
               Change
             </Button>
-            <Button size="sm" variant="destructive" onClick={handleRemove}>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleRemove}
+              aria-label="Remove this form"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>

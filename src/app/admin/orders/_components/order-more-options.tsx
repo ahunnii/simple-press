@@ -161,6 +161,7 @@ export function OrderMoreOptions({ order, canManage }: Props) {
   };
 
   const isPaid = order.paymentStatus === "paid";
+  const isDisputed = order.paymentStatus === "disputed";
   const isFulfilled = order.fulfillmentStatus === "fulfilled";
   const isRefunded = order.status === "refunded";
   const shipmentsWithTracking = order.shipments.filter((s) => s.trackingNumber);
@@ -279,13 +280,17 @@ export function OrderMoreOptions({ order, canManage }: Props) {
                       // Paid is one-way: reverting to pending would orphan the
                       // deducted stock and payment record. Cancel instead.
                       const blockedByPaid = value === "pending" && isPaid;
+                      // An open Stripe dispute owns the payment status: the
+                      // webhook sets it back to paid/refunded when it closes.
+                      const blockedByDispute = isDisputed;
                       return (
                         <DropdownMenuItem
                           key={value}
                           disabled={
                             order.paymentStatus === value ||
                             blockedByRefund ||
-                            blockedByPaid
+                            blockedByPaid ||
+                            blockedByDispute
                           }
                           onSelect={() =>
                             updatePaymentStatus.mutate({
@@ -303,6 +308,13 @@ export function OrderMoreOptions({ order, canManage }: Props) {
                           {blockedByRefund && order.paymentStatus !== value && (
                             <span className="text-muted-foreground ml-auto text-xs">
                               refunded
+                            </span>
+                          )}
+                          {blockedByDispute &&
+                            !blockedByRefund &&
+                            order.paymentStatus !== value && (
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              dispute open
                             </span>
                           )}
                           {blockedByPaid && order.paymentStatus !== value && (

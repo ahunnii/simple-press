@@ -532,6 +532,14 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
                 {formatPrice(f.discountAmount)}
               </p>
             ) : null}
+            {f.discountCodeLabel && f.discountFreeShipping ? (
+              <p
+                role="status"
+                className="text-[14px] text-[var(--dream-success)]"
+              >
+                Free shipping applied: {f.discountCodeLabel}
+              </p>
+            ) : null}
           </div>
         ) : null}
 

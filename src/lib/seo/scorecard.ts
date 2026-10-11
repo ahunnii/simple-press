@@ -208,11 +208,12 @@ export async function computeSeoScorecard({
   const blogEnabled = isEnabled("blog");
   const galleriesEnabled = isEnabled("galleries");
   // Hoisted only because STATIC_SEO_ROUTES (Page titles & descriptions, below)
-  // references these three feature keys too — nothing above this point needed
+  // references these four feature keys too — nothing above this point needed
   // them.
   const testimonialsEnabled = isEnabled("testimonials");
   const eventsEnabled = isEnabled("events");
   const videosEnabled = isEnabled("videos");
+  const donationsEnabled = isEnabled("donations");
 
   const pageMeta = parsePageMeta(siteContent?.pageMeta);
   const siteVerification = parseSiteVerification(siteContent?.siteVerification);
@@ -503,7 +504,7 @@ export async function computeSeoScorecard({
   );
 
   // ── Page titles & descriptions ─────────────────────────────────────────────
-  // The ten storefront routes in STATIC_SEO_ROUTES render from a template, not
+  // The eleven storefront routes in STATIC_SEO_ROUTES render from a template, not
   // a DB row, so they have no `metaTitle`/`metaDescription` columns to run
   // through `addCatalogEntity`'s coverage() — their values live in
   // `SiteContent.pageMeta` instead. A route whose owning feature is off is
@@ -518,6 +519,7 @@ export async function computeSeoScorecard({
     testimonials: testimonialsEnabled,
     events: eventsEnabled,
     videos: videosEnabled,
+    donations: donationsEnabled,
   };
   const applicableRoutes = STATIC_SEO_ROUTES.filter(
     (route) =>

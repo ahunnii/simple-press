@@ -230,6 +230,20 @@ describe("planPaymentStatusOverride", () => {
     ).toBe(false);
   });
 
+  it("blocks every override on a disputed order — the webhook owns it", () => {
+    for (const next of ["paid", "pending", "failed"]) {
+      const plan = planPaymentStatusOverride(
+        manualOrder({
+          paymentStatus: "disputed",
+          stripePaymentIntentId: "pi_1",
+        }),
+        next,
+      );
+      expect(plan.ok).toBe(false);
+      if (!plan.ok) expect(plan.message).toMatch(/dispute/i);
+    }
+  });
+
   it("rejects marking a refunded or partly refunded order paid", () => {
     expect(
       planPaymentStatusOverride(

@@ -14,6 +14,11 @@ import { getCachedBusiness } from "~/lib/seo";
 import { firstNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { iconVersion, resolveIconSource } from "~/lib/site-icons/source";
+import {
+  buildUmamiBeforeSendSource,
+  isUmamiExcludedPath,
+  UMAMI_BEFORE_SEND_FN,
+} from "~/lib/umami-exclusions";
 import { parseSiteVerification } from "~/lib/validators/site-seo";
 import { TRPCReactProvider } from "~/trpc/react";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -168,7 +173,8 @@ export default async function RootLayout({
   // inline scripts automatically; this one is ours, so it needs it explicitly.
   // Reading headers() costs nothing here — `checkBusiness()` above already
   // resolves the tenant from the Host header, so this layout is dynamic anyway.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const requestHeaders = await headers();
+  const nonce = requestHeaders.get("x-nonce") ?? undefined;
 
   // Decide which Umami website ID (if any) to inject.
   let umamiWebsiteId: string | undefined;
@@ -184,17 +190,36 @@ export default async function RootLayout({
     umamiWebsiteId = env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   }
 
+  // Owner surfaces (/admin, /auth, /editor, …) and the Site Editor's preview
+  // frames are never tracked, or owners would inflate their own store stats.
+  // `x-pathname` is path + search from middleware; `x-sp-preview` is set from
+  // `?__preview=1`. Soft navigations out of the storefront are covered by the
+  // before-send hook below.
+  const isTrackablePage =
+    !isUmamiExcludedPath(requestHeaders.get("x-pathname") ?? "") &&
+    requestHeaders.get("x-sp-preview") !== "1";
+
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <Providers>
-          {umamiWebsiteId && (
-            <Script
-              defer
-              src="/umami.js"
-              data-website-id={umamiWebsiteId}
-              nonce={nonce}
-            />
+          {umamiWebsiteId && isTrackablePage && (
+            <>
+              <Script
+                id="umami-before-send"
+                nonce={nonce}
+                dangerouslySetInnerHTML={{
+                  __html: buildUmamiBeforeSendSource(),
+                }}
+              />
+              <Script
+                defer
+                src="/umami.js"
+                data-website-id={umamiWebsiteId}
+                data-before-send={UMAMI_BEFORE_SEND_FN}
+                nonce={nonce}
+              />
+            </>
           )}
           <TooltipProvider>
             <TRPCReactProvider>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   AlertTriangle,
+  BookOpen,
   CreditCard,
   HeartHandshake,
   Landmark,
@@ -10,6 +11,7 @@ import {
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -34,11 +36,14 @@ function formatCurrency(cents: number, currency = "usd") {
 function StatTile({
   label,
   value,
+  caption,
   emphasize = false,
   tone,
 }: {
   label: string;
   value: string;
+  /** Short explainer under the value, for figures that need a definition. */
+  caption?: string;
   emphasize?: boolean;
   tone?: "destructive" | "amber";
 }) {
@@ -55,6 +60,9 @@ function StatTile({
     >
       <p className="text-muted-foreground text-sm">{label}</p>
       <p className={`mt-1 text-2xl font-semibold ${toneClass}`}>{value}</p>
+      {caption && (
+        <p className="text-muted-foreground mt-1 text-xs">{caption}</p>
+      )}
     </div>
   );
 }
@@ -79,12 +87,20 @@ export function FinanceBreakdown({ data }: { data: Data }) {
 
   return (
     <div className="admin-container space-y-6">
-      <div className="admin-header">
+      <div className="admin-header flex-wrap gap-4">
         <div>
           <h1>Finances</h1>
           <p>{range.label} — where every dollar collected actually went</p>
         </div>
-        <RangeSelector current={range.key} basePath="/admin/finances" />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/finances/tax-guide">
+              <BookOpen className="h-4 w-4" />
+              Tax Guide
+            </Link>
+          </Button>
+          <RangeSelector current={range.key} basePath="/admin/finances" />
+        </div>
       </div>
 
       <InformAlerts
@@ -329,8 +345,9 @@ export function FinanceBreakdown({ data }: { data: Data }) {
                   />
                 )}
                 <StatTile
-                  label="Net added to your balance"
-                  value={formatCurrency(stripe.netToBalanceCents)}
+                  label="Net from sales"
+                  value={formatCurrency(stripe.netFromSalesCents)}
+                  caption="Sales minus refunds, Stripe fees and dispute adjustments, before payouts"
                   emphasize
                 />
                 <StatTile
@@ -411,14 +428,21 @@ export function FinanceBreakdown({ data }: { data: Data }) {
               <AlertDescription>
                 Without Stripe Tax enabled, checkout may not be collecting the
                 correct amount of sales tax in every jurisdiction you sell to.
-                Review your{" "}
+                Turn it on in{" "}
+                <Link
+                  href="/admin/settings/integrations"
+                  className="underline underline-offset-2"
+                >
+                  Settings → Integrations
+                </Link>{" "}
+                once Stripe Tax is set up — see the{" "}
                 <Link
                   href="/admin/finances/tax-guide"
                   className="underline underline-offset-2"
                 >
-                  tax settings
-                </Link>
-                .
+                  Tax Guide
+                </Link>{" "}
+                for the steps.
               </AlertDescription>
             </Alert>
           )}

@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { toast } from "sonner";
@@ -54,8 +55,19 @@ function parseStoredItems(raw: string | null): WishlistItem[] | null {
 }
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [items, setItemsState] = useState<WishlistItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
+
+  // Latest wishlist, readable synchronously. React may defer a setState
+  // updater, so toggle/remove must not infer "added"/"removed" from inside one
+  // (that made add -> remove -> add toast "Removed"). Every write goes through
+  // `setItems`, which updates this ref first, so rapid clicks still stack on
+  // the newest list.
+  const itemsRef = useRef<WishlistItem[]>([]);
+  const setItems = useCallback((next: WishlistItem[]) => {
+    itemsRef.current = next;
+    setItemsState(next);
+  }, []);
 
   // Load wishlist from localStorage on mount (client-side only)
   useEffect(() => {
@@ -77,7 +89,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsHydrated(true);
     }
-  }, []);
+  }, [setItems]);
 
   // Save wishlist to localStorage whenever it changes (after hydration)
   useEffect(() => {
@@ -102,48 +114,45 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  }, [setItems]);
 
   const has = useCallback(
     (productId: string) => items.some((item) => item.productId === productId),
     [items],
   );
 
-  const toggle = useCallback((item: Omit<WishlistItem, "addedAt">) => {
-    let added = false;
-
-    setItems((currentItems) => {
-      added = false;
-      const exists = currentItems.some(
+  const toggle = useCallback(
+    (item: Omit<WishlistItem, "addedAt">) => {
+      const current = itemsRef.current;
+      const exists = current.some(
         (existing) => existing.productId === item.productId,
       );
+
       if (exists) {
-        return currentItems.filter(
-          (existing) => existing.productId !== item.productId,
+        setItems(
+          current.filter((existing) => existing.productId !== item.productId),
         );
+        toast.success("Removed from wishlist");
+        return;
       }
-      added = true;
-      return [...currentItems, { ...item, addedAt: new Date().toISOString() }];
-    });
 
-    if (added) toast.success(`${item.name} saved to wishlist`);
-    else toast.success("Removed from wishlist");
-  }, []);
+      setItems([...current, { ...item, addedAt: new Date().toISOString() }]);
+      toast.success(`${item.name} saved to wishlist`);
+    },
+    [setItems],
+  );
 
-  const remove = useCallback((productId: string) => {
-    let removed = false;
+  const remove = useCallback(
+    (productId: string) => {
+      const current = itemsRef.current;
+      const filtered = current.filter((item) => item.productId !== productId);
+      if (filtered.length === current.length) return;
 
-    setItems((currentItems) => {
-      removed = false;
-      const filtered = currentItems.filter(
-        (item) => item.productId !== productId,
-      );
-      if (filtered.length < currentItems.length) removed = true;
-      return filtered;
-    });
-
-    if (removed) toast.success("Removed from wishlist");
-  }, []);
+      setItems(filtered);
+      toast.success("Removed from wishlist");
+    },
+    [setItems],
+  );
 
   const count = items.length;
 

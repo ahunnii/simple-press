@@ -12,7 +12,6 @@ const baseInput = {
   ownerEmail: "owner@example.com",
   supportEmail: "support@example.com",
   slug: "test-business",
-  sendAbandonedCheckoutEmails: false,
   timeZone: "America/Detroit",
 };
 

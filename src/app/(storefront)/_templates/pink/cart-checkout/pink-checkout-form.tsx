@@ -373,6 +373,17 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     saved {formatPrice(form.discountAmount)}
                   </p>
                 )}
+
+                {form.discountCodeLabel && form.discountFreeShipping && (
+                  <p
+                    role="status"
+                    className="text-[12px]"
+                    style={{ color: "var(--pink-success)" }}
+                  >
+                    Free shipping applied:{" "}
+                    <strong>{form.discountCodeLabel}</strong>
+                  </p>
+                )}
               </div>
             )}
 

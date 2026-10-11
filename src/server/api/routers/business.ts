@@ -774,7 +774,7 @@ export const businessRouter = createTRPCRouter({
             throw new TRPCError({
               code: "BAD_REQUEST",
               message:
-                "Stripe Tax is not fully configured on your account. Add your business address and at least one active tax registration in the Stripe Tax Dashboard, then try again.",
+                "Stripe Tax isn't set up on your account yet. Finish your Tax settings in the Stripe Tax Dashboard, mainly your head office address, then try again.",
             });
           }
         } catch (err) {
@@ -797,7 +797,7 @@ export const businessRouter = createTRPCRouter({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:
-              "Could not verify your Stripe Tax setup. Make sure Stripe Tax is configured in your Stripe Dashboard before enabling this.",
+              "Could not verify your Stripe Tax setup. Make sure your Tax settings, including your head office address, are complete in the Stripe Tax Dashboard, then try again.",
           });
         }
       }

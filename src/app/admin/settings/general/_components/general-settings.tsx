@@ -118,8 +118,6 @@ export function GeneralSettings({ business }: Props) {
       ...addressDefaults(business),
       ...mapPinDefaults(business),
       slug: business.slug ?? "",
-      sendAbandonedCheckoutEmails:
-        business.sendAbandonedCheckoutEmails ?? false,
       timeZone: business.timeZone ?? "America/Detroit",
     },
   });
@@ -187,8 +185,6 @@ export function GeneralSettings({ business }: Props) {
         ...addressDefaults(data.business),
         ...mapPinDefaults(data.business),
         slug: data.business.slug,
-        sendAbandonedCheckoutEmails:
-          data.business.sendAbandonedCheckoutEmails ?? false,
         timeZone: data.business.timeZone ?? "America/Detroit",
       });
       void utils.business.invalidate();
@@ -217,7 +213,6 @@ export function GeneralSettings({ business }: Props) {
       latitude: data.latitude?.trim() ? Number(data.latitude.trim()) : null,
       longitude: data.longitude?.trim() ? Number(data.longitude.trim()) : null,
       phoneNumber: data.phoneNumber ?? undefined,
-      sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
       timeZone: data.timeZone,
     });
   };
@@ -231,8 +226,6 @@ export function GeneralSettings({ business }: Props) {
         phoneNumber: business.phoneNumber ?? undefined,
         ...addressDefaults(business),
         ...mapPinDefaults(business),
-        sendAbandonedCheckoutEmails:
-          business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
       },
     );

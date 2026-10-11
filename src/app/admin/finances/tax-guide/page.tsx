@@ -85,10 +85,11 @@ export default function TaxGuidePage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p>
-              Most states use a threshold of{" "}
-              <strong>$100,000 in sales or 200 transactions</strong> in a
-              calendar year to establish economic nexus — but thresholds vary
-              and change. A few examples:
+              Many states use a threshold of <strong>$100,000 in sales</strong>{" "}
+              in a calendar year to establish economic nexus. Some of those
+              states also count <strong>200 transactions</strong> as a separate
+              trigger, though a growing number have dropped that test.
+              Thresholds vary and change. A few examples:
             </p>
             <ul className="ml-4 list-disc space-y-1">
               <li>
@@ -96,12 +97,15 @@ export default function TaxGuidePage() {
                 transactions (one of the highest thresholds)
               </li>
               <li>
-                <strong>California, Texas, Florida:</strong> $500,000 in sales
-                (no transaction count)
+                <strong>California and Texas:</strong> $500,000 in sales (no
+                transaction count)
               </li>
               <li>
-                <strong>Most other states:</strong> $100,000 in sales OR 200
-                transactions
+                <strong>Florida:</strong> $100,000 in sales
+              </li>
+              <li>
+                <strong>Many other states:</strong> $100,000 in sales, with or
+                without a 200-transaction test
               </li>
             </ul>
             <p className="text-muted-foreground">
@@ -125,8 +129,8 @@ export default function TaxGuidePage() {
               When a customer in a new state buys from you, you are{" "}
               <strong>not immediately required to collect sales tax</strong>{" "}
               unless you&apos;ve already crossed that state&apos;s economic
-              nexus threshold. Stripe Tax will automatically handle this — it
-              only collects tax in states where you have active registrations.
+              nexus threshold. Stripe Tax collects tax only in places where
+              you&apos;ve added a registration in Stripe.
             </p>
             <p>
               Here&apos;s what to do as your business grows into new states:
@@ -166,11 +170,13 @@ export default function TaxGuidePage() {
               </li>
             </ol>
             <p className="rounded-md bg-amber-50 p-3 text-amber-900">
-              <strong>Important:</strong> Stripe Tax collects tax but does not
-              file returns or remit taxes to the states on your behalf. You are
-              responsible for filing periodic sales tax returns and sending the
-              collected tax to each state. Consider using a service like TaxJar
-              AutoFile or Avalara Returns to automate this.
+              <strong>Important:</strong> Collecting tax and filing it are
+              separate. Stripe Tax can file and remit returns for you through a
+              filing partner, but that is an added paid service and only
+              available in supported places. Otherwise, you are responsible for
+              filing your sales tax returns and sending the collected tax to
+              each state, either through the state&apos;s own portal or with a
+              filing service.
             </p>
           </CardContent>
         </Card>
@@ -186,34 +192,47 @@ export default function TaxGuidePage() {
           <CardContent className="space-y-3 text-sm">
             <ol className="ml-4 list-decimal space-y-3">
               <li>
-                <strong>Enable the toggle in your store.</strong> Go to{" "}
-                <Link
-                  href="/admin/settings/integrations"
-                  className="underline underline-offset-2"
-                >
-                  Settings → Integrations
-                </Link>{" "}
-                and turn on <em>Automatic Tax Collection</em> under your Stripe
-                connection.
-              </li>
-              <li>
-                <strong>Add tax registrations in Stripe.</strong> Open the{" "}
+                <strong>Finish your Tax settings in Stripe.</strong> Open the{" "}
                 <a
-                  href="https://dashboard.stripe.com/tax/registrations"
+                  href="https://dashboard.stripe.com/tax"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2"
                 >
                   Stripe Tax Dashboard
                 </a>{" "}
-                and click <em>Add a registration</em>. Select each state where
-                you have nexus and enter your state tax permit number.
+                and complete the required settings, mainly your head office
+                address. Stripe marks Stripe Tax as active once these are filled
+                in.
               </li>
               <li>
-                <strong>Verify your registrations are active.</strong> Stripe
-                will only collect tax in states with an &quot;Active&quot;
-                status. Pending or incomplete registrations will not trigger tax
-                collection.
+                <strong>
+                  Add a registration for each state you collect in.
+                </strong>{" "}
+                Go to{" "}
+                <a
+                  href="https://dashboard.stripe.com/tax/registrations"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  Stripe Tax → Registrations
+                </a>
+                , click <em>Add a registration</em>, and enter your state tax
+                permit number for each state where you&apos;re registered.
+                Stripe only collects tax where a registration has been added.
+              </li>
+              <li>
+                <strong>Turn on Automatic Tax Collection.</strong> Go to{" "}
+                <Link
+                  href="/admin/settings/integrations"
+                  className="underline underline-offset-2"
+                >
+                  Settings → Integrations
+                </Link>{" "}
+                and switch on <em>Automatic Tax Collection</em> under your
+                Stripe connection. The switch won&apos;t turn on until your
+                Stripe Tax settings are complete.
               </li>
               <li>
                 <strong>Test a checkout.</strong> Place a test order from an
@@ -223,9 +242,9 @@ export default function TaxGuidePage() {
               </li>
             </ol>
             <p className="text-muted-foreground">
-              If you enable automatic tax but have no active registrations in
-              Stripe, checkout sessions will fail. Always add at least one
-              registration before enabling the toggle.
+              If you have no registrations yet, Stripe won&apos;t charge any tax
+              at checkout. The switch also won&apos;t turn on until your head
+              office address is set in your Stripe Tax settings.
             </p>
           </CardContent>
         </Card>
@@ -235,25 +254,32 @@ export default function TaxGuidePage() {
           <CardHeader>
             <CardTitle>The INFORM Consumers Act</CardTitle>
             <CardDescription>
-              Seller identity verification requirements for marketplace sellers
+              A federal law about high-volume sellers on online marketplaces
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p>
-              High-volume sellers — those completing{" "}
-              <strong>200+ transactions</strong> or generating{" "}
-              <strong>$5,000+ in gross annual revenue</strong> in a calendar
-              year — must have their identity verified under the INFORM
-              Consumers Act. Completing Stripe&apos;s onboarding (KYB/KYC)
-              satisfies this requirement.
+              Under the INFORM Consumers Act, a{" "}
+              <strong>high-volume third-party seller</strong> is one with{" "}
+              <strong>200 or more discrete sales</strong> and{" "}
+              <strong>$5,000 or more in gross revenue</strong> in any continuous
+              12-month period within the previous 24 months. The law&apos;s
+              obligations fall mainly on online marketplaces, which must collect
+              and verify seller information.
             </p>
             <p>
-              Track your progress toward these thresholds on the{" "}
+              Keeping your Stripe account verification complete means your
+              identity details are on file with Stripe. That isn&apos;t a
+              compliance determination, so ask a professional if you&apos;re
+              unsure how the law applies to you.
+            </p>
+            <p>
+              See where you stand on the{" "}
               <Link
                 href="/admin/finances#inform"
                 className="underline underline-offset-2"
               >
-                Finances page
+                last-12-months tracker on the Finances page
               </Link>
               .
             </p>

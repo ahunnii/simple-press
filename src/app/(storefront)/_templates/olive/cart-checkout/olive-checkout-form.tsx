@@ -760,6 +760,16 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                       {formatPrice(form.discountAmount)}
                     </p>
                   ) : null}
+
+                  {form.discountCodeLabel && form.discountFreeShipping ? (
+                    <p
+                      role="status"
+                      className="olive-note-settle text-[0.8125rem] leading-snug"
+                      style={{ color: "var(--olive-success)" }}
+                    >
+                      Free shipping applied: {form.discountCodeLabel}
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 

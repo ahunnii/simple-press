@@ -92,6 +92,9 @@ function OrderFlagBadges({ order }: { order: OrderRow }) {
       {order.paymentStatus === "pending" && order.status !== "cancelled" && (
         <Badge variant="warning">Awaiting payment</Badge>
       )}
+      {order.paymentStatus === "disputed" && (
+        <Badge variant="destructive">Disputed</Badge>
+      )}
       {order.fulfillmentStatus === "partially_fulfilled" && (
         <Badge variant="warning">Partially fulfilled</Badge>
       )}

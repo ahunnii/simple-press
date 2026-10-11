@@ -570,6 +570,16 @@ export function UmscCheckoutForm({
                       you saved {formatPrice(f.discountAmount)}
                     </p>
                   )}
+
+                  {f.discountCodeLabel && f.discountFreeShipping && (
+                    <p
+                      role="status"
+                      className="umsc-sans border border-[var(--umsc-success)]/30 bg-[var(--umsc-success)]/10 px-3 py-2 text-[12px] leading-[1.4] text-[var(--umsc-success)]"
+                    >
+                      Free shipping applied:{" "}
+                      <strong>{f.discountCodeLabel}</strong>
+                    </p>
+                  )}
                 </div>
               )}
 

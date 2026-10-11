@@ -48,6 +48,10 @@ type Props = {
   customerId: string;
   /** true for OWNER/MANAGER (and PLATFORM_ADMIN); false for STAFF. */
   canAdjust: boolean;
+  /** Whether the Rewards feature flag is on. When off, the card only shows
+   *  for a customer who already has a balance or history (ledger reads stay
+   *  ungated so history survives a flag toggle). */
+  loyaltyEnabled: boolean;
 };
 
 type DiscountCodeSummary = {
@@ -219,7 +223,11 @@ function AdjustPointsDialog({ customerId }: { customerId: string }) {
   );
 }
 
-export function CustomerLoyaltyCard({ customerId, canAdjust }: Props) {
+export function CustomerLoyaltyCard({
+  customerId,
+  canAdjust,
+  loyaltyEnabled,
+}: Props) {
   const { data, isPending, isError } = api.loyalty.getCustomerLedger.useQuery({
     customerId,
   });
@@ -263,6 +271,12 @@ export function CustomerLoyaltyCard({ customerId, canAdjust }: Props) {
     return null;
   }
 
+  // With Rewards turned off there's nothing to set up, so the empty card is
+  // just noise; existing balances and history stay visible and adjustable.
+  if (!loyaltyEnabled && balance === 0 && entries.length === 0) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -285,6 +299,12 @@ export function CustomerLoyaltyCard({ customerId, canAdjust }: Props) {
         <p className="text-3xl font-bold">
           {balance.toLocaleString()} {balance === 1 ? "point" : "points"}
         </p>
+
+        {!loyaltyEnabled && (
+          <p className="text-muted-foreground text-sm">
+            Rewards is turned off — balances are kept.
+          </p>
+        )}
 
         {entries.length === 0 ? (
           <p className="text-muted-foreground text-sm">
