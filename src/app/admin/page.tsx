@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { isSetupGateComplete } from "~/lib/admin/setup-steps";
+import { loadSetupGate } from "~/lib/admin/setup-status.server";
 import { checkBusiness } from "~/lib/check-business";
-import { db } from "~/server/db";
 
 export default async function AdminPage() {
   const businessMeta = await checkBusiness();
@@ -11,26 +10,16 @@ export default async function AdminPage() {
     redirect("/admin/welcome");
   }
 
-  const business = await db.business.findUnique({
-    where: { id: businessMeta.id },
-    select: {
-      stripeAccountId: true,
-      customDomain: true,
-      _count: { select: { products: true } },
-    },
-  });
+  const gate = await loadSetupGate(businessMeta.id);
 
-  if (!business) {
+  if (!gate) {
     redirect("/admin/welcome");
   }
 
-  // Custom domain is a hard requirement (see isSetupGateComplete). Owners should
-  // not operate on the platform subdomain.
-  const setupComplete = isSetupGateComplete({
-    stripeAccountId: business.stripeAccountId,
-    customDomain: business.customDomain,
-    productCount: business._count.products,
-  });
-
-  redirect(setupComplete ? "/admin/dashboard" : "/admin/welcome");
+  // The gate is the store's REQUIRED setup steps (see `computeSetupStatus`) —
+  // optional steps never hold an owner on the Setup Guide. Legacy stores keep
+  // the original rule: Stripe, a first product, and a custom domain (owners
+  // should not operate on the platform subdomain). Once passed it latches
+  // (`setupCompletedAt`), so a launched store always opens the dashboard.
+  redirect(gate.gateComplete ? "/admin/dashboard" : "/admin/welcome");
 }

@@ -11,8 +11,8 @@ import { Button } from "~/components/ui/button";
 
 type Props = {
   /**
-   * Whether the store passes the /admin setup gate (isSetupGateComplete:
-   * Stripe connected, at least one product, and a custom domain).
+   * Whether the store passes the /admin setup gate (`status.requiredComplete`
+   * from `loadSetupStatus`: every required step in the store's plan is done).
    */
   setupComplete: boolean;
 };

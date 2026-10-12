@@ -32,7 +32,7 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
 
   const acceptMutation = api.team.acceptInvite.useMutation({
     onSuccess: ({ adminUrl }) => {
-      toast.success("Invitation accepted! Redirecting to your dashboard...");
+      toast.success("Invitation accepted! Redirecting to your store admin...");
       setTimeout(() => {
         // adminUrl points at the business's own domain (absolute in prod), so
         // use a full navigation rather than a same-origin push — /admin on the

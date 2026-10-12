@@ -67,8 +67,9 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   /** Business membership role; null for PLATFORM_ADMIN (sees everything). */
   membershipRole?: AdminRole | null;
   /**
-   * Whether the store passes the /admin setup gate (isSetupGateComplete). When
-   * false, the sidebar shows the "Finish setup" nudge. See WelcomeNotification.
+   * Whether the store passes the /admin setup gate (`requiredComplete` from
+   * `loadSetupStatus`). When false, the sidebar shows the "Finish setup"
+   * nudge. See WelcomeNotification.
    */
   setupComplete?: boolean;
   /**

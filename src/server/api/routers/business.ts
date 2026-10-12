@@ -5,6 +5,10 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { formatBusinessAddress, hasAddressParts } from "~/lib/address/format";
+import {
+  CONFIRMABLE_SETUP_STEPS,
+  parseSetupConfirmations,
+} from "~/lib/admin/setup-plan";
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
@@ -1507,4 +1511,45 @@ export const businessRouter = createTRPCRouter({
     .mutation(({ ctx, input }) =>
       setBusinessTemplate(ctx.db, ctx.businessId, input.templateId),
     ),
+
+  /**
+   * Setup Guide "Mark as done" — for steps the platform can't verify (sales
+   * tax, shipping or pickup). Stores the confirmation date under
+   * `setupConfirmations[step]`; `confirmed: false` removes it ("Undo").
+   * Read-modify-write is fine here: one owner clicking one button.
+   */
+  confirmSetupStep: ownerAdminProcedure
+    .input(
+      z.object({
+        step: z.enum(CONFIRMABLE_SETUP_STEPS as [string, ...string[]]),
+        confirmed: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { setupConfirmations: true },
+      });
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const confirmations: Record<string, string> = {
+        ...parseSetupConfirmations(business.setupConfirmations),
+      };
+      if (input.confirmed) {
+        confirmations[input.step] = new Date().toISOString();
+      } else {
+        delete confirmations[input.step];
+      }
+
+      await ctx.db.business.update({
+        where: { id: ctx.businessId },
+        data: { setupConfirmations: confirmations },
+      });
+      return { success: true };
+    }),
 });

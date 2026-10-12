@@ -1,5 +1,5 @@
 import { env } from "~/env";
-import { isSetupGateComplete } from "~/lib/admin/setup-steps";
+import { loadSetupGate } from "~/lib/admin/setup-status.server";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
@@ -67,27 +67,17 @@ export default async function AdminLayout({ children }: Props) {
 
   const featureData = await api.features.getFlags();
 
-  // Cheap lookup for the sidebar's "Finish setup" nudge. It runs the same
-  // isSetupGateComplete rule as /admin/page.tsx, so the nudge and the /admin
-  // redirect agree on whether setup is finished (custom domain included).
+  // The sidebar's "Finish setup" nudge. `loadSetupGate` is the same rule
+  // /admin/page.tsx redirects on, so the nudge and the /admin redirect agree
+  // on whether setup is finished (required steps only, latched once passed).
+  // A launched store answers from a few scalar columns — this runs on every
+  // admin page — and the result is request-cached for the page below.
   //
   // Runs alongside the pending-review count below — both are single cheap
   // reads needed on every admin page load, so they fire in parallel rather
   // than adding a sequential round trip each.
-  const [welcomeSetupStatus, pendingReviewCount] = await Promise.all([
-    db.business.findUnique({
-      where: { id: business.id },
-      select: {
-        stripeAccountId: true,
-        customDomain: true,
-        // Rides along on the query the sidebar nudge already runs — the
-        // payments-disabled strip costs no extra round trip in the normal
-        // case (a `true` here is trusted; only a `false` is verified against
-        // Stripe, see `getPaymentsHealth`).
-        stripeChargesEnabled: true,
-        _count: { select: { products: true } },
-      },
-    }),
+  const [gate, pendingReviewCount] = await Promise.all([
+    loadSetupGate(business.id),
     // ProductReview has no businessId column — scoped through the product
     // relation, same tenancy rule as review.ts. Counts customer-submitted AND
     // owner-created rows that are unapproved, but owner-created reviews
@@ -122,11 +112,7 @@ export default async function AdminLayout({ children }: Props) {
             businessName={businessName}
             featureData={featureData}
             membershipRole={membershipRole}
-            setupComplete={isSetupGateComplete({
-              stripeAccountId: welcomeSetupStatus?.stripeAccountId ?? null,
-              customDomain: welcomeSetupStatus?.customDomain ?? null,
-              productCount: welcomeSetupStatus?._count.products ?? 0,
-            })}
+            setupComplete={gate?.gateComplete ?? false}
             pendingReviewCount={pendingReviewCount}
           />
           <SidebarInset>
@@ -140,13 +126,13 @@ export default async function AdminLayout({ children }: Props) {
                   down; the Stripe read is bounded and cached. Hidden from
                   STAFF, who are fulfillment-only and can reach neither Stripe
                   nor settings. */}
-              {membershipRole !== "STAFF" && welcomeSetupStatus && (
+              {membershipRole !== "STAFF" && gate && (
                 <PaymentsDisabledBanner
                   business={{
                     id: business.id,
-                    stripeAccountId: welcomeSetupStatus.stripeAccountId,
-                    stripeChargesEnabled:
-                      welcomeSetupStatus.stripeChargesEnabled,
+                    stripeAccountId: gate.stripeAccountId,
+                    // Rides along on the gate query — no extra round trip.
+                    stripeChargesEnabled: gate.stripeChargesEnabled,
                   }}
                 />
               )}

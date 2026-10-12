@@ -124,10 +124,15 @@ export const teamRouter = createTRPCRouter({
       // The member must land on the *business's* admin (its own subdomain or
       // custom domain) — /admin on the platform domain has no tenant context.
       // Invite links now point at that host already, so an accepting member is
-      // signed in there and can go straight to the dashboard: admin role checks
-      // resolve the membership live (see `requireAdminAccess`), so no re-sign-in
-      // is needed for the new role to take effect. A member arriving from a
-      // legacy platform-domain link simply gets bounced to that host's sign-in.
+      // signed in there and can go straight in: admin role checks resolve the
+      // membership live (see `requireAdminAccess`), so no re-sign-in is needed
+      // for the new role to take effect. A member arriving from a legacy
+      // platform-domain link simply gets bounced to that host's sign-in.
+      //
+      // Bare `/admin`, not `/admin/dashboard`: the setup gate there decides —
+      // an owner with required setup steps left lands on the tailored Setup
+      // Guide, everyone else on the dashboard (staff are sent on to orders by
+      // `requireAdminAccess`).
       const business = await ctx.db.business.findUnique({
         where: { id: invite.businessId },
         select: { subdomain: true, customDomain: true, domainStatus: true },
@@ -137,8 +142,8 @@ export const teamRouter = createTRPCRouter({
             subdomain: business.subdomain ?? "",
             customDomain: business.customDomain,
             domainStatus: business.domainStatus,
-          })}/admin/dashboard`
-        : "/admin/dashboard";
+          })}/admin`
+        : "/admin";
 
       // Guard against duplicate membership
       const existing = await ctx.db.businessMembership.findUnique({

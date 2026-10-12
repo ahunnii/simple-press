@@ -141,9 +141,7 @@ export function DomainSetup({ business, vpsIp }: DomainSetupProps) {
     return (
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Custom Domain (Optional)
-          </label>
+          <label className="text-sm font-medium">Custom Domain</label>
           <Input
             type="text"
             placeholder="example.com"

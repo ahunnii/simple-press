@@ -231,6 +231,19 @@ model Business {
   status             String  @default("active") // active | suspended | closed
   onboardingComplete Boolean @default(false)
 
+  // Setup checklist (src/lib/admin/setup-plan.ts). businessType null = legacy
+  // store → the original 5-step checklist. setupSteps is the full resolved
+  // Record<SetupStepKey, "required" | "optional" | "off"> saved when a type is
+  // applied; setupConfirmations is Record<SetupStepKey, ISO date> for steps the
+  // owner checks off by hand. setupCompletedAt is the launch latch: stamped the
+  // first time every required step is done, after which the setup gate never
+  // re-fires (a later required step only shows on the checklist).
+  // DDL: prisma/manual/2026-10-12-business-setup-plan.sql
+  businessType       String? // products | services | informational | donations
+  setupSteps         Json?
+  setupConfirmations Json      @default("{}")
+  setupCompletedAt   DateTime?
+
   // SEO / AEO / GEO controls
   localBusinessEnabled        Boolean @default(false) // DEPRECATED — superseded by localPresence (backfilled by prisma/manual/2026-09-24-local-presence.sql); no longer read, drop in a later pass
   localPresence               String   @default("none") // none | service_area | storefront — which LocalBusiness JSON-LD (if any) the storefront emits

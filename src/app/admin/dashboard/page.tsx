@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
-import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { WidgetId } from "~/lib/dashboard/widgets";
-import { computeSetupStatus } from "~/lib/admin/setup-steps";
+import { loadSetupStatus } from "~/lib/admin/setup-status.server";
 import { checkBusiness } from "~/lib/check-business";
 import { toCardDataInput } from "~/lib/dashboard/card-data";
 import {
@@ -12,7 +11,6 @@ import {
   WIDGET_IDS,
 } from "~/lib/dashboard/widgets";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { isContentEmpty } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -71,9 +69,9 @@ export default async function AdminDashboardPage() {
     },
   });
 
-  // Cheap lookup that feeds two strips: the "Finish setting up" card (shared
-  // with /admin/welcome via `computeSetupStatus`) and the search-readiness
-  // strip (the six meta columns, scored by `computeSeoScorecard`).
+  // Feeds the search-readiness strip (the six meta columns, scored by
+  // `computeSeoScorecard`). The "Finish setting up" card reads its own
+  // siteContent bits through `loadSetupStatus` below.
   //
   // `pageMeta` and `siteVerification` MUST stay in this select. /admin/content/seo
   // loads siteContent via `business.getWith({ includeSiteContent: true })` (a
@@ -102,14 +100,20 @@ export default async function AdminDashboardPage() {
     layout,
     businessData,
     siteContentForSetup,
+    setup,
     recentOversells,
     ordersToFulfillCount,
     awaitingPaymentCount,
-    requiredPolicyPages,
   ] = await Promise.all([
     layoutPromise,
     businessDataPromise,
     siteContentPromise,
+
+    // The "Finish setting up" card — the same checklist /admin/welcome renders
+    // in full, and (via `facts.policiesLive`) the attention strip's missing
+    // policies nudge. Request-cached: while a store is still in setup, the
+    // layout's gate check reuses this same read.
+    loadSetupStatus(business.id),
 
     // Recent oversells (last 30 days)
     db.inventoryHistory.findMany({
@@ -149,43 +153,16 @@ export default async function AdminDashboardPage() {
         status: { notIn: ["cancelled", "refunded"] },
       },
     }),
-
-    // Terms of Service + Refund Policy pages — the two documents checkout
-    // will soon reference ("you agree to this store's Terms of Service").
-    // Fetched regardless of `published` so the emptiness/publish check below
-    // can tell "never written" apart from "written, not published".
-    db.page.findMany({
-      where: {
-        businessId: business.id,
-        type: "policy",
-        slug: { in: ["terms-of-service", "refund-policy"] },
-      },
-      select: { slug: true, published: true, content: true },
-    }),
   ]);
 
   // Nudge (not a gate): true when either required policy page is missing,
-  // unpublished, or empty. Mirrors the "no live policies" check on
-  // /admin/content/policies (missingRequiredPolicies in policies-manager.tsx).
-  const isPolicyLive = (slug: string) =>
-    requiredPolicyPages.some(
-      (p) =>
-        p.slug === slug &&
-        p.published &&
-        !isContentEmpty(p.content as TiptapJSON),
-    );
-  const missingPolicies =
-    !isPolicyLive("terms-of-service") || !isPolicyLive("refund-policy");
+  // unpublished, or empty — whether or not this store's plan shows the
+  // `policiesLive` setup step. Shared rule: `areRequiredPoliciesLive`.
+  const missingPolicies = setup ? !setup.facts.policiesLive : false;
 
-  // "Finish setting up" card — the same 5-step checklist /admin/welcome renders
-  // in full (businessCreated is always true post-onboarding). `progress` is
-  // null once every step is done, which is what hides the card.
-  const setupStatus = computeSetupStatus({
-    stripeAccountId: businessData?.stripeAccountId ?? null,
-    customDomain: businessData?.customDomain ?? null,
-    productCount: businessData?._count.products ?? 0,
-    siteContent: siteContentForSetup,
-  });
+  // `progress` is null once every visible step is done, which is what hides
+  // the "Finish setting up" card.
+  const setupProgress = setup?.status.progress ?? null;
 
   return (
     <HydrateClient>
@@ -217,7 +194,7 @@ export default async function AdminDashboardPage() {
         hiddenCount={layout.hiddenCards.length}
         widgetHrefs={widgetHrefs}
         pinned={{
-          setup: <SetupProgressCard setupProgress={setupStatus.progress} />,
+          setup: <SetupProgressCard setupProgress={setupProgress} />,
           searchReadiness:
             // Owner-toggleable under Settings → Features (dashboardSearchReadiness);
             // gated here rather than inside the strip so the scorecard queries don't run.

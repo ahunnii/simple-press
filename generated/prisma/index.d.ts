@@ -13501,6 +13501,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    businessType: string | null
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean | null
     localPresence: string | null
     allowAiCrawlers: boolean | null
@@ -13571,6 +13573,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    businessType: string | null
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean | null
     localPresence: string | null
     allowAiCrawlers: boolean | null
@@ -13643,6 +13647,10 @@ export namespace Prisma {
     umamiEnabled: number
     status: number
     onboardingComplete: number
+    businessType: number
+    setupSteps: number
+    setupConfirmations: number
+    setupCompletedAt: number
     localBusinessEnabled: number
     localPresence: number
     areaServed: number
@@ -13751,6 +13759,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     allowAiCrawlers?: true
@@ -13821,6 +13831,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     allowAiCrawlers?: true
@@ -13893,6 +13905,10 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupSteps?: true
+    setupConfirmations?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     areaServed?: true
@@ -14058,6 +14074,10 @@ export namespace Prisma {
     umamiEnabled: boolean
     status: string
     onboardingComplete: boolean
+    businessType: string | null
+    setupSteps: JsonValue | null
+    setupConfirmations: JsonValue
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean
     localPresence: string
     areaServed: string[]
@@ -14155,6 +14175,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14275,6 +14299,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14353,6 +14381,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14431,6 +14463,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14467,7 +14503,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "businessType" | "setupSteps" | "setupConfirmations" | "setupCompletedAt" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -14602,6 +14638,10 @@ export namespace Prisma {
       umamiEnabled: boolean
       status: string
       onboardingComplete: boolean
+      businessType: string | null
+      setupSteps: Prisma.JsonValue | null
+      setupConfirmations: Prisma.JsonValue
+      setupCompletedAt: Date | null
       localBusinessEnabled: boolean
       localPresence: string
       areaServed: string[]
@@ -15141,6 +15181,10 @@ export namespace Prisma {
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
+    readonly businessType: FieldRef<"Business", 'String'>
+    readonly setupSteps: FieldRef<"Business", 'Json'>
+    readonly setupConfirmations: FieldRef<"Business", 'Json'>
+    readonly setupCompletedAt: FieldRef<"Business", 'DateTime'>
     readonly localBusinessEnabled: FieldRef<"Business", 'Boolean'>
     readonly localPresence: FieldRef<"Business", 'String'>
     readonly areaServed: FieldRef<"Business", 'String[]'>
@@ -84617,6 +84661,10 @@ export namespace Prisma {
     umamiEnabled: 'umamiEnabled',
     status: 'status',
     onboardingComplete: 'onboardingComplete',
+    businessType: 'businessType',
+    setupSteps: 'setupSteps',
+    setupConfirmations: 'setupConfirmations',
+    setupCompletedAt: 'setupCompletedAt',
     localBusinessEnabled: 'localBusinessEnabled',
     localPresence: 'localPresence',
     areaServed: 'areaServed',
@@ -86428,6 +86476,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    businessType?: StringNullableFilter<"Business"> | string | null
+    setupSteps?: JsonNullableFilter<"Business">
+    setupConfirmations?: JsonFilter<"Business">
+    setupCompletedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     localPresence?: StringFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -86547,6 +86599,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrderInput | SortOrder
+    setupSteps?: SortOrderInput | SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrderInput | SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -86669,6 +86725,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    businessType?: StringNullableFilter<"Business"> | string | null
+    setupSteps?: JsonNullableFilter<"Business">
+    setupConfirmations?: JsonFilter<"Business">
+    setupCompletedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     localPresence?: StringFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -86788,6 +86848,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrderInput | SortOrder
+    setupSteps?: SortOrderInput | SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrderInput | SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -86874,6 +86938,10 @@ export namespace Prisma {
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
+    businessType?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    setupSteps?: JsonNullableWithAggregatesFilter<"Business">
+    setupConfirmations?: JsonWithAggregatesFilter<"Business">
+    setupCompletedAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     localPresence?: StringWithAggregatesFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -93445,6 +93513,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93564,6 +93636,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93683,6 +93759,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -93802,6 +93882,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -93921,6 +94005,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93999,6 +94087,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -94077,6 +94169,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -101536,14 +101632,6 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -101566,6 +101654,14 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -101951,6 +102047,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupSteps?: SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -102042,6 +102142,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
@@ -102112,6 +102214,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
@@ -112444,6 +112548,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -112562,6 +112670,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -112747,6 +112859,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -112865,6 +112981,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -116699,6 +116819,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -116817,6 +116941,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -116951,6 +117079,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117069,6 +117201,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117187,6 +117323,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117305,6 +117445,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117439,6 +117583,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117557,6 +117705,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117724,6 +117876,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117842,6 +117998,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -118405,6 +118565,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -118523,6 +118687,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -119286,6 +119454,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -119404,6 +119576,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -119560,6 +119736,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -119678,6 +119858,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -120104,6 +120288,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120222,6 +120410,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120408,6 +120600,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -120526,6 +120722,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -120777,6 +120977,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120895,6 +121099,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121029,6 +121237,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121147,6 +121359,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121265,6 +121481,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121383,6 +121603,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121565,6 +121789,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121683,6 +121911,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121852,6 +122084,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121970,6 +122206,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122145,6 +122385,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122263,6 +122507,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122482,6 +122730,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122600,6 +122852,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122841,6 +123097,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122959,6 +123219,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -123122,6 +123386,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -123240,6 +123508,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -123953,6 +124225,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -124071,6 +124347,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -124813,6 +125093,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -124931,6 +125215,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -125535,6 +125823,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -125653,6 +125945,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -126692,6 +126988,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -126810,6 +127110,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -127071,6 +127375,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -127189,6 +127497,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -127555,6 +127867,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -127673,6 +127989,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -128185,6 +128505,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -128303,6 +128627,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -128608,6 +128936,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -128726,6 +129058,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -129044,6 +129380,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129162,6 +129502,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129328,6 +129672,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -129446,6 +129794,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -129703,6 +130055,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129821,6 +130177,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130059,6 +130419,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130177,6 +130541,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130403,6 +130771,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130521,6 +130893,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130694,6 +131070,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130812,6 +131192,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130946,6 +131330,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131064,6 +131452,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131182,6 +131574,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131300,6 +131696,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131434,6 +131834,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131552,6 +131956,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131670,6 +132078,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131788,6 +132200,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131967,6 +132383,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132085,6 +132505,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132254,6 +132678,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132372,6 +132800,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132506,6 +132938,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132624,6 +133060,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132742,6 +133182,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132860,6 +133304,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -133026,6 +133474,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133144,6 +133596,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133377,6 +133833,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -133495,6 +133955,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -133694,6 +134158,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133812,6 +134280,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -134001,6 +134473,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -134119,6 +134595,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -134318,6 +134798,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -134436,6 +134920,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -135315,6 +135803,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -135433,6 +135925,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -135612,6 +136108,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -135730,6 +136230,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -135899,6 +136403,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136017,6 +136525,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136151,6 +136663,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136269,6 +136785,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136387,6 +136907,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136505,6 +137029,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136661,6 +137189,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136779,6 +137311,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -137072,6 +137608,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137190,6 +137730,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137431,6 +137975,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -137549,6 +138097,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -137667,6 +138219,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137785,6 +138341,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137971,6 +138531,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138089,6 +138653,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138312,6 +138880,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138430,6 +139002,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138611,6 +139187,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138729,6 +139309,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138847,6 +139431,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138965,6 +139553,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139137,6 +139729,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139255,6 +139851,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139414,6 +140014,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139532,6 +140136,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139697,6 +140305,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139815,6 +140427,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139933,6 +140549,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140051,6 +140671,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140185,6 +140809,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140303,6 +140931,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140421,6 +141053,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140539,6 +141175,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140720,6 +141360,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140838,6 +141482,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141009,6 +141657,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141127,6 +141779,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141261,6 +141917,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141379,6 +142039,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141497,6 +142161,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141615,6 +142283,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141878,6 +142550,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141996,6 +142672,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -142325,6 +143005,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -142443,6 +143127,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -142678,6 +143366,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -142796,6 +143488,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -143110,6 +143806,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -143228,6 +143928,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -143704,6 +144408,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -143822,6 +144530,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -144230,6 +144942,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144348,6 +145064,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144482,6 +145202,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -144600,6 +145324,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -144718,6 +145446,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144836,6 +145568,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -145008,6 +145744,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145126,6 +145866,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145366,6 +146110,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -145484,6 +146232,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -145815,6 +146567,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145933,6 +146689,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]

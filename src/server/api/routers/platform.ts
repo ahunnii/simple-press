@@ -1,14 +1,24 @@
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  BUSINESS_TYPE_IDS,
+  FEATURE_PRESETS,
+  SETUP_PRESETS,
+  SETUP_STEP_KEYS,
+  SETUP_STEP_LEVELS,
+} from "~/lib/admin/setup-plan";
 import {
   FEATURE_REGISTRY,
   getDefaultFlags,
   getDisabledDueToDependency,
 } from "~/lib/features/registry";
 import { buildBusinessBrief } from "~/lib/platform/business-brief";
+import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
+import { createTeamInvite } from "~/server/team/invites";
 
 export const platformRouter = createTRPCRouter({
   // User Management
@@ -483,6 +493,15 @@ export const platformRouter = createTRPCRouter({
           ),
         templateId: z.string().default("modern"),
         ownerEmail: z.string().email().optional(),
+        businessType: z.enum(BUSINESS_TYPE_IDS).default("products"),
+        // Partial map, merged over the type's preset — the saved value is
+        // always the full map (see setup-plan.ts).
+        setupSteps: z
+          .record(z.enum(SETUP_STEP_KEYS), z.enum(SETUP_STEP_LEVELS))
+          .optional(),
+        // Overrides only, layered over registry defaults. Omitted → the
+        // type's FEATURE_PRESETS.
+        featureFlags: z.record(z.string(), z.boolean()).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -492,6 +511,32 @@ export const platformRouter = createTRPCRouter({
           message: "This subdomain is reserved",
         });
       }
+
+      // Same check as `platformBusiness.setTemplate`: commercial templates are
+      // locked to their owning subdomain — here, the one being created.
+      if (!isTemplateAvailableForSubdomain(input.templateId, input.subdomain)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This template is not available for this subdomain.",
+        });
+      }
+
+      const featureFlags =
+        input.featureFlags ?? FEATURE_PRESETS[input.businessType];
+      const unknownKeys = Object.keys(featureFlags).filter(
+        (key) => !FEATURE_REGISTRY[key],
+      );
+      if (unknownKeys.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Unknown feature flag(s): ${unknownKeys.join(", ")}`,
+        });
+      }
+
+      const setupSteps = {
+        ...SETUP_PRESETS[input.businessType],
+        ...input.setupSteps,
+      };
 
       const existing = await ctx.db.business.findUnique({
         where: { subdomain: input.subdomain },
@@ -505,17 +550,33 @@ export const platformRouter = createTRPCRouter({
         });
       }
 
+      // `Business.slug` is unique — suffix until free (same loop as
+      // self-serve onboarding).
+      const baseSlug = slugify(input.name) || "store";
+      let slug = baseSlug;
+      for (let counter = 1; counter <= 100; counter++) {
+        const slugTaken = await ctx.db.business.findUnique({
+          where: { slug },
+          select: { id: true },
+        });
+        if (!slugTaken) break;
+        slug = `${baseSlug}-${counter}`;
+      }
+
       const business = await ctx.db.$transaction(async (tx) => {
         const newBusiness = await tx.business.create({
           data: {
             name: input.name,
-            slug: slugify(input.name),
+            slug,
             subdomain: input.subdomain,
             templateId: input.templateId,
             ownerEmail: input.ownerEmail ?? "",
             status: "active",
             onboardingComplete: false,
             domainStatus: "NONE",
+            businessType: input.businessType,
+            setupSteps,
+            featureFlags,
           },
         });
 
@@ -534,10 +595,43 @@ export const platformRouter = createTRPCRouter({
         return newBusiness;
       });
 
+      // Invite after the commit (it sends an email). The store already
+      // exists at this point, so a failed invite is reported back rather
+      // than failing the create — the admin can re-invite from its page.
+      let invite: { emailSent: boolean; inviteUrl: string } | null = null;
+      let inviteError: string | undefined;
+      if (input.ownerEmail) {
+        try {
+          const result = await createTeamInvite(ctx.db, {
+            businessId: business.id,
+            actorUserId: ctx.session.user.id,
+            email: input.ownerEmail,
+            role: "OWNER",
+          });
+          invite = { emailSent: result.emailSent, inviteUrl: result.inviteUrl };
+        } catch (err) {
+          if (!(err instanceof TRPCError)) {
+            Sentry.captureException(err, {
+              tags: {
+                "trpc.procedure": "platform.createBusiness",
+                step: "owner-invite",
+                businessId: business.id,
+              },
+            });
+          }
+          inviteError =
+            err instanceof TRPCError
+              ? err.message
+              : "Could not create the owner invite";
+        }
+      }
+
       return {
         id: business.id,
         name: business.name,
         subdomain: business.subdomain,
+        invite,
+        inviteError,
       };
     }),
 

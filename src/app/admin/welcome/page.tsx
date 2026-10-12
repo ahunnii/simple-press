@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 import { env } from "~/env";
-import { computeSetupStatus } from "~/lib/admin/setup-steps";
+import { loadSetupStatus } from "~/lib/admin/setup-status.server";
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
@@ -19,28 +19,38 @@ export default async function AdminWelcomePage() {
   const businessId = await checkBusiness();
   const session = await getSession();
 
-  const business = await db.business.findUnique({
-    where: { id: businessId?.id },
-    include: {
-      siteContent: true,
-      _count: {
-        select: { products: true, orders: true },
-      },
-    },
-  });
-
-  if (!business) {
+  if (!businessId) {
     return notFound();
   }
 
-  // Setup completion — shared with the dashboard's "Finish setting up" card.
-  // domainConfigured requires an actual custom domain; the subdomain is temporary.
-  const setupStatus = computeSetupStatus({
-    stripeAccountId: business.stripeAccountId,
-    customDomain: business.customDomain,
-    productCount: business._count.products,
-    siteContent: business.siteContent,
-  });
+  // Setup completion — shared with the dashboard's "Finish setting up" card,
+  // the sidebar nudge, and the /admin redirect gate. Which steps show (and
+  // which are required) comes from the store's business type; flags resolve
+  // from the same row. The business read is only the columns the checklist
+  // rows and Quick Actions show — everything else comes from `setup`.
+  const [business, setup] = await Promise.all([
+    db.business.findUnique({
+      where: { id: businessId.id },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        customDomain: true,
+        domainStatus: true,
+        stripeAccountId: true,
+      },
+    }),
+    loadSetupStatus(businessId.id),
+  ]);
+
+  if (!business || !setup) {
+    return notFound();
+  }
+
+  const setupStatus = setup.status;
+  // The Tax Guide sits under Finances, whose layout needs payments or donations.
+  const showTaxGuide =
+    setup.flags.isEnabled("payments") || setup.flags.isEnabled("donations");
 
   return (
     <>
@@ -50,6 +60,9 @@ export default async function AdminWelcomePage() {
           businessName={business.name}
           userName={session?.user.name ?? session?.user.email ?? ""}
           isComplete={setupStatus.isComplete}
+          requiredComplete={setupStatus.requiredComplete}
+          requiredRemaining={setupStatus.requiredRemaining}
+          launched={setup.gateComplete}
         />
 
         {/* Escape hatch: let owners operate the store while finishing setup */}
@@ -68,6 +81,8 @@ export default async function AdminWelcomePage() {
             <SetupChecklist
               business={business}
               status={setupStatus}
+              facts={setup.facts}
+              showTaxGuide={showTaxGuide}
               vpsIp={env.VPS_IP}
             />
           </div>

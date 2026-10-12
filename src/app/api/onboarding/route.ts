@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { SETUP_PRESETS } from "~/lib/admin/setup-plan";
 import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
 import {
   MERCHANT_TERMS_VERSION,
@@ -403,6 +404,10 @@ export async function POST(req: NextRequest) {
           ownerEmail: email,
           status: "active",
           onboardingComplete: false,
+          // Self-serve signup is always a product store. Feature flags stay on
+          // registry defaults, which is exactly the products preset.
+          businessType: "products",
+          setupSteps: SETUP_PRESETS.products,
         },
       });
 

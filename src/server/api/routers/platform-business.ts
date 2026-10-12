@@ -1,6 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  BUSINESS_TYPE_IDS,
+  FEATURE_PRESETS,
+  SETUP_PRESETS,
+  SETUP_STEP_KEYS,
+  SETUP_STEP_LEVELS,
+} from "~/lib/admin/setup-plan";
+import { loadSetupStatus } from "~/lib/admin/setup-status.server";
 import { TEMPLATES } from "~/lib/constants";
 import { updateBusinessBasicsSchema } from "~/lib/validators/platform";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
@@ -98,4 +106,76 @@ export const platformBusinessRouter = createTRPCRouter({
     .query(({ ctx, input }) =>
       getTemplateOptionsForBusiness(ctx.db, input.businessId),
     ),
+
+  /**
+   * The setup checklist as the owner sees it, plus the stored plan (type +
+   * per-step levels) the hub's edit dialog needs. Legacy stores report
+   * `businessType: null` and the legacy levels.
+   */
+  getSetupStatus: platformAdminProcedure
+    .input(businessIdInput)
+    .query(async ({ input }) => {
+      const loaded = await loadSetupStatus(input.businessId);
+
+      if (!loaded) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      return {
+        status: loaded.status,
+        plan: loaded.plan,
+        setupCompletedAt: loaded.setupCompletedAt,
+      };
+    }),
+
+  setSetupPlan: platformAdminProcedure
+    .input(
+      businessIdInput.extend({
+        businessType: z.enum(BUSINESS_TYPE_IDS),
+        // Partial: merged over the type's preset, then saved as the full map.
+        setupSteps: z.record(
+          z.enum(SETUP_STEP_KEYS),
+          z.enum(SETUP_STEP_LEVELS),
+        ),
+        applyFeatureDefaults: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { featureFlags: true },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const setupSteps = {
+        ...SETUP_PRESETS[input.businessType],
+        ...input.setupSteps,
+      };
+
+      // Same merge as platform.setBusinessFlags: presets over stored overrides.
+      const current = (business.featureFlags as Record<string, boolean>) ?? {};
+      const featureFlags = input.applyFeatureDefaults
+        ? { ...current, ...FEATURE_PRESETS[input.businessType] }
+        : undefined;
+
+      await ctx.db.business.update({
+        where: { id: input.businessId },
+        data: {
+          businessType: input.businessType,
+          setupSteps,
+          ...(featureFlags && { featureFlags }),
+        },
+      });
+
+      return { success: true };
+    }),
 });

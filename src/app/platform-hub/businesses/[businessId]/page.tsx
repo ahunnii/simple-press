@@ -22,6 +22,10 @@ import { BusinessTemplateControl } from "./_components/business-template-control
 import { CopyBusinessContextButton } from "./_components/copy-business-context-button";
 import { EditBusinessBasicsDialog } from "./_components/edit-business-basics-dialog";
 import { InviteMemberButton } from "./_components/invite-member-button";
+import {
+  describeRequiredProgress,
+  SetupChecklistCard,
+} from "./_components/setup-checklist-card";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -35,12 +39,12 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
     notFound();
   }
 
-  const [{ flags }, templateOptions, invites] =
-    await Promise.all([
-      api.platform.getBusinessFlags({ businessId }),
-      api.platformBusiness.listTemplateOptions({ businessId }),
-      api.platformInvites.list({ businessId }),
-    ]);
+  const [{ flags }, templateOptions, invites, setup] = await Promise.all([
+    api.platform.getBusinessFlags({ businessId }),
+    api.platformBusiness.listTemplateOptions({ businessId }),
+    api.platformInvites.list({ businessId }),
+    api.platformBusiness.getSetupStatus({ businessId }),
+  ]);
 
   return (
     <>
@@ -145,11 +149,9 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
                   <dd className="mt-1">{business.supportEmail ?? "None"}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground font-medium">
-                    Onboarding Complete
-                  </dt>
+                  <dt className="text-muted-foreground font-medium">Setup</dt>
                   <dd className="mt-1">
-                    {business.onboardingComplete ? "Yes" : "No"}
+                    {describeRequiredProgress(setup.status)}
                   </dd>
                 </div>
                 <div>
@@ -165,6 +167,14 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
           </Card>
 
           <BusinessHealthCard businessId={business.id} />
+
+          <SetupChecklistCard
+            businessId={business.id}
+            status={setup.status}
+            plan={setup.plan}
+            setupCompletedAt={setup.setupCompletedAt}
+            flags={flags}
+          />
 
           <Card>
             <CardHeader>

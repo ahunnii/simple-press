@@ -109,10 +109,9 @@ export function OwnerTermsGateScreen({
         <CardHeader>
           <CardTitle>One thing before you continue</CardTitle>
           <CardDescription>
-            Nothing is wrong with your store. We added written terms for store
-            owners after {businessName} was set up, so we never recorded your
-            agreement to them — please review and accept them now to keep using
-            your dashboard.
+            Nothing is wrong with your store. As the owner of {businessName},
+            we need your agreement to our terms for store owners on record —
+            please review and accept them to continue to your dashboard.
           </CardDescription>
         </CardHeader>
 
