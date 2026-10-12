@@ -12,7 +12,6 @@ import {
   zonedCalendarDate,
 } from "~/lib/calendar-date";
 import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
-import { parseZonedDateTime } from "~/lib/events/normalize";
 import {
   applyMovement,
   EMPTY_POOL_SALES,
@@ -35,6 +34,7 @@ import {
   parseInventoryCsv,
   planInventoryImport,
 } from "~/lib/inventory/csv";
+import { zonedDayStart } from "~/lib/zoned-day";
 import {
   createTRPCRouter,
   featureGate,
@@ -127,15 +127,6 @@ async function loadTimeZone(db: DbClient, businessId: string) {
     select: { timeZone: true },
   });
   return business?.timeZone ?? "UTC";
-}
-
-/** Local midnight of `ymd` in `timeZone`; UTC midnight if the zone is bad. */
-function zonedDayStart(ymd: string, timeZone: string): Date {
-  try {
-    return parseZonedDateTime(ymd, timeZone);
-  } catch {
-    return new Date(`${ymd}T00:00:00Z`);
-  }
 }
 
 function historyWhere(

@@ -2188,6 +2188,7 @@ model InvoiceEvent {
   metadata    Json? // non-sensitive only
 
   @@index([invoiceId, createdAt]) // invoice detail activity timeline
+  @@index([businessId, createdAt]) // store-wide Invoices → Activity log
 }
 
 /// One customer's subscription to a recurring product purchase (Stripe Billing

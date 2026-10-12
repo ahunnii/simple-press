@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -98,6 +99,8 @@ type ConnectionData =
   RouterOutputs["quickbooks"]["getConnection"]["connection"];
 
 type Props = {
+  /** Invoices / Activity route tabs — rendered first in the container, above the header. */
+  routeTabs?: ReactNode;
   rows: UnifiedInvoiceRow[];
   /** Set when the QuickBooks 1000-row cap (`QBO_INVOICE_LIST_MAX_ROWS`) trimmed older QuickBooks invoices. */
   qboListCap: { shown: number; total: number } | null;
@@ -258,6 +261,7 @@ function StatusTabs({ status }: { status: InvoiceListStatusFilter }) {
 }
 
 export function InvoicesClient({
+  routeTabs,
   rows,
   qboListCap,
   totalCount,
@@ -363,6 +367,8 @@ export function InvoicesClient({
 
   return (
     <div className="admin-container">
+      {routeTabs}
+
       <div className="admin-header">
         <div>
           <h1>Invoices</h1>
