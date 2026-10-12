@@ -4,10 +4,15 @@ import type {
   FormDefinition,
   FormField,
   FormFieldType,
+  FormPictureChoiceField,
   PublicFormDefinition,
 } from "~/lib/validators/form";
 import { isRealCalendarDate, localCalendarDate } from "~/lib/calendar-date";
-import { FORM_FIELD_TYPE_VALUES, labelKey } from "~/lib/validators/form";
+import {
+  FORM_FIELD_TYPE_VALUES,
+  FORM_PICTURE_MAX_QUANTITY,
+  labelKey,
+} from "~/lib/validators/form";
 
 /**
  * Answer validation + snapshot helpers for Forms.
@@ -23,7 +28,25 @@ import { FORM_FIELD_TYPE_VALUES, labelKey } from "~/lib/validators/form";
  * which is the behavior an owner reading an old entry expects.
  */
 
-export type FormAnswerValue = string | string[] | boolean | number | null;
+/**
+ * One tile of a picture-choice answer in `"quantity"` mode. `option` is the
+ * option LABEL (like every other choice answer); `quantity` is 1–999. An
+ * answer lists items in option order, with no zero items and no repeats.
+ */
+export type FormQuantityItem = { option: string; quantity: number };
+
+/**
+ * A stored answer. Picture choice reuses the radio (`string`) and checkboxes
+ * (`string[]`) shapes for its `"one"`/`"many"` modes; `FormQuantityItem[]`
+ * is its `"quantity"` mode.
+ */
+export type FormAnswerValue =
+  | string
+  | string[]
+  | FormQuantityItem[]
+  | boolean
+  | number
+  | null;
 
 export type FormAnswerSnapshot = {
   fieldId: string;
@@ -124,8 +147,39 @@ export function formatTimeForDisplay(value: string): string {
   return `${hours % 12 === 0 ? 12 : hours % 12}:${minutes} ${hours < 12 ? "AM" : "PM"}`;
 }
 
+/** `true` for a `"quantity"` picture-choice value (a non-empty item list). */
+export function isQuantityItems(
+  value: FormAnswerValue | undefined,
+): value is FormQuantityItem[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => typeof item === "object")
+  );
+}
+
+/** `[{Red,3},{Gold,2}]` → `"Red × 3; Gold × 2"` (the CSV import reads it back). */
+export function formatQuantityItems(items: FormQuantityItem[]): string {
+  return items.map((item) => `${item.option} × ${item.quantity}`).join("; ");
+}
+
+/**
+ * One `"Label x N"` / `"Label × N"` part of a quantity cell. Greedy, so the
+ * LAST ` x N` wins and a label that itself contains " x " ("2 x 4 x 3")
+ * still parses.
+ */
+const QUANTITY_PART_RE = /^(.*\S)\s+[x×]\s*(\d+)$/i;
+
+type ResolvedOptions = Required<
+  Pick<ValidateFormAnswersOptions, "relaxRequired" | "optionMatch">
+> & {
+  today: string | undefined;
+};
+
+type FieldOption = { id: string; label: string };
+
 function findOption(
-  options: { id: string; label: string }[],
+  options: FieldOption[],
   value: string,
   optionMatch: "id" | "label",
 ) {
@@ -134,14 +188,173 @@ function findOption(
   return options.find((o) => labelKey(o.label) === key);
 }
 
+/** Single-answer choice (select, radio, picture choice "one") → the label. */
+function validateOneOption(
+  options: FieldOption[],
+  raw: unknown,
+  opts: ResolvedOptions,
+  missing: () => FieldResult,
+): FieldResult {
+  const value = toTrimmedString(raw);
+  if (value === undefined) return { error: "Pick one of the options." };
+  if (value === null) return missing();
+  const option = findOption(options, value, opts.optionMatch);
+  if (!option) {
+    return opts.optionMatch === "label"
+      ? { error: `"${value}" isn't one of the options.` }
+      : { error: "Pick one of the options." };
+  }
+  return { value: option.label };
+}
+
+/**
+ * Multi-answer choice (checkboxes, picture choice "many") → labels in
+ * definition order, deduped. Accepts an array or a `;`-separated string.
+ */
+function validateManyOptions(
+  options: FieldOption[],
+  raw: unknown,
+  opts: ResolvedOptions,
+  missing: () => FieldResult,
+): FieldResult {
+  let items: string[];
+  if (Array.isArray(raw)) {
+    if (!raw.every((item): item is string => typeof item === "string")) {
+      return { error: "Pick from the listed options." };
+    }
+    items = raw;
+  } else if (typeof raw === "string") {
+    items = raw.split(";");
+  } else if (raw === undefined || raw === null) {
+    items = [];
+  } else {
+    return { error: "Pick from the listed options." };
+  }
+  const trimmed = items.map((item) => item.trim()).filter(Boolean);
+  if (trimmed.length === 0) return missing();
+  const chosen = new Set<string>();
+  for (const item of trimmed) {
+    const option = findOption(options, item, opts.optionMatch);
+    if (!option) {
+      return opts.optionMatch === "label"
+        ? { error: `"${item}" isn't one of the options.` }
+        : { error: "Pick from the listed options." };
+    }
+    chosen.add(option.id);
+  }
+  // Definition order, deduped — independent of click/cell order.
+  return {
+    value: options
+      .filter((option) => chosen.has(option.id))
+      .map((option) => option.label),
+  };
+}
+
+const QUANTITY_SHAPE_ERROR = "Choose quantities from the listed options.";
+
+/**
+ * Picture choice in `"quantity"` mode. Accepts:
+ * - `{ option, quantity }[]` (what the storefront sends),
+ * - a `{ [option]: quantity }` record (zero entries are skipped),
+ * - a CSV cell, `"Red x 3; Gold × 2"` (`x` or `×`, as exported).
+ * `option` is an id or a label per `optionMatch`; `quantity` a whole number
+ * (or digit string) from 0 to `FORM_PICTURE_MAX_QUANTITY`. Zeros are
+ * dropped and repeats of one option are SUMMED. Output: items in option
+ * order, then the field's `minTotal`/`maxTotal` apply to the summed total.
+ */
+function validateQuantities(
+  field: FormPictureChoiceField,
+  raw: unknown,
+  opts: ResolvedOptions,
+  missing: () => FieldResult,
+): FieldResult {
+  const pairs: { name: string; quantity: unknown }[] = [];
+  if (raw === undefined || raw === null) {
+    // No answer.
+  } else if (typeof raw === "string") {
+    for (const part of raw.split(";")) {
+      const text = part.trim();
+      if (text === "") continue;
+      const match = QUANTITY_PART_RE.exec(text);
+      if (!match) {
+        return { error: `"${text}" needs a quantity, like "${text} x 2".` };
+      }
+      pairs.push({ name: match[1]!.trim(), quantity: match[2] });
+    }
+  } else if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (
+        item === null ||
+        typeof item !== "object" ||
+        typeof (item as { option?: unknown }).option !== "string"
+      ) {
+        return { error: QUANTITY_SHAPE_ERROR };
+      }
+      const entry = item as { option: string; quantity?: unknown };
+      pairs.push({ name: entry.option.trim(), quantity: entry.quantity });
+    }
+  } else if (typeof raw === "object") {
+    for (const [name, quantity] of Object.entries(raw)) {
+      pairs.push({ name: name.trim(), quantity });
+    }
+  } else {
+    return { error: QUANTITY_SHAPE_ERROR };
+  }
+
+  const totals = new Map<string, number>(); // option id → quantity
+  for (const pair of pairs) {
+    const option = findOption(field.options, pair.name, opts.optionMatch);
+    if (!option) {
+      return opts.optionMatch === "label"
+        ? { error: `"${pair.name}" isn't one of the options.` }
+        : { error: QUANTITY_SHAPE_ERROR };
+    }
+    const quantity =
+      typeof pair.quantity === "number"
+        ? pair.quantity
+        : typeof pair.quantity === "string" && /^\s*\d+\s*$/.test(pair.quantity)
+          ? Number(pair.quantity)
+          : NaN;
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 0 ||
+      quantity > FORM_PICTURE_MAX_QUANTITY
+    ) {
+      return {
+        error: `Enter a whole number from 1 to ${FORM_PICTURE_MAX_QUANTITY} for ${option.label}.`,
+      };
+    }
+    const sum = (totals.get(option.id) ?? 0) + quantity;
+    if (sum > FORM_PICTURE_MAX_QUANTITY) {
+      return {
+        error: `Enter ${FORM_PICTURE_MAX_QUANTITY} or fewer for ${option.label}.`,
+      };
+    }
+    totals.set(option.id, sum);
+  }
+
+  const items: FormQuantityItem[] = field.options
+    .filter((option) => (totals.get(option.id) ?? 0) > 0)
+    .map((option) => ({
+      option: option.label,
+      quantity: totals.get(option.id)!,
+    }));
+  if (items.length === 0) return missing();
+
+  const total = items.reduce((sum, item) => sum + item.quantity, 0);
+  if (field.minTotal != null && total < field.minTotal) {
+    return { error: `Choose at least ${field.minTotal} in total.` };
+  }
+  if (field.maxTotal != null && total > field.maxTotal) {
+    return { error: `Choose no more than ${field.maxTotal} in total.` };
+  }
+  return { value: items };
+}
+
 function validateField(
   field: FormField,
   raw: unknown,
-  opts: Required<
-    Pick<ValidateFormAnswersOptions, "relaxRequired" | "optionMatch">
-  > & {
-    today: string | undefined;
-  },
+  opts: ResolvedOptions,
 ): FieldResult {
   const required = field.required && !opts.relaxRequired;
   const missing = (): FieldResult =>
@@ -217,51 +430,33 @@ function validateField(
     }
 
     case "select":
-    case "radio": {
-      const value = toTrimmedString(raw);
-      if (value === undefined) return { error: "Pick one of the options." };
-      if (value === null) return missing();
-      const option = findOption(field.options, value, opts.optionMatch);
-      if (!option) {
-        return opts.optionMatch === "label"
-          ? { error: `"${value}" isn't one of the options.` }
-          : { error: "Pick one of the options." };
-      }
-      return { value: option.label };
-    }
+    case "radio":
+      return validateOneOption(field.options, raw, opts, missing);
 
-    case "checkboxes": {
-      let items: string[];
-      if (Array.isArray(raw)) {
-        if (!raw.every((item): item is string => typeof item === "string")) {
-          return { error: "Pick from the listed options." };
-        }
-        items = raw;
-      } else if (typeof raw === "string") {
-        items = raw.split(";");
-      } else if (raw === undefined || raw === null) {
-        items = [];
-      } else {
-        return { error: "Pick from the listed options." };
+    case "checkboxes":
+      return validateManyOptions(field.options, raw, opts, missing);
+
+    case "picturechoice": {
+      if (field.selection === "one") {
+        return validateOneOption(field.options, raw, opts, missing);
       }
-      const trimmed = items.map((item) => item.trim()).filter(Boolean);
-      if (trimmed.length === 0) return missing();
-      const chosen = new Set<string>();
-      for (const item of trimmed) {
-        const option = findOption(field.options, item, opts.optionMatch);
-        if (!option) {
-          return opts.optionMatch === "label"
-            ? { error: `"${item}" isn't one of the options.` }
-            : { error: "Pick from the listed options." };
-        }
-        chosen.add(option.id);
+      if (field.selection === "quantity") {
+        return validateQuantities(field, raw, opts, missing);
       }
-      // Definition order, deduped — independent of click/cell order.
-      return {
-        value: field.options
-          .filter((option) => chosen.has(option.id))
-          .map((option) => option.label),
-      };
+      const result = validateManyOptions(field.options, raw, opts, missing);
+      if ("error" in result || !Array.isArray(result.value)) return result;
+      const count = result.value.length;
+      if (field.minTotal != null && count < field.minTotal) {
+        return {
+          error: `Pick at least ${field.minTotal} ${field.minTotal === 1 ? "option" : "options"}.`,
+        };
+      }
+      if (field.maxTotal != null && count > field.maxTotal) {
+        return {
+          error: `Pick no more than ${field.maxTotal} ${field.maxTotal === 1 ? "option" : "options"}.`,
+        };
+      }
+      return result;
     }
 
     case "checkbox": {
@@ -291,8 +486,8 @@ function validateField(
  * Validate + normalize raw answers (keyed by field id) against a form's
  * fields. Strings are trimmed, blanks become `null`, numbers are coerced,
  * choice answers become option LABELS (`string` for select/radio, `string[]`
- * in definition order for checkboxes), dates become `YYYY-MM-DD`, times become
- * 24h `HH:mm`. Keys that aren't field ids are ignored. On failure, every
+ * in definition order for checkboxes; picture choice per its `selection`, see
+ * `FormAnswerValue`), dates become `YYYY-MM-DD`, times become 24h `HH:mm`. Keys that aren't field ids are ignored. On failure, every
  * failing field gets one friendly message.
  */
 export function validateFormAnswers(
@@ -337,7 +532,8 @@ export function toAnswerSnapshot(
 
 /**
  * One answer as plain text: `null` → `""`, booleans → "Yes"/"No", arrays →
- * "; "-joined (the CSV multi-value separator), numbers → `String(n)`.
+ * "; "-joined (the CSV multi-value separator), quantity items →
+ * "Red × 3; Gold × 2", numbers → `String(n)`.
  * Accepts a bare value or a whole snapshot. A `time` snapshot reads as 12h
  * ("2:30 PM"); a bare value (CSV export, search) stays the stored `HH:mm`.
  */
@@ -352,6 +548,7 @@ export function formatAnswerForDisplay(
     return formatTimeForDisplay(value);
   }
   if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (isQuantityItems(value)) return formatQuantityItems(value);
   if (Array.isArray(value)) return value.join("; ");
   return String(value);
 }
@@ -364,9 +561,12 @@ export function formatAnswerOrDash(
   return text === "" ? "—" : text;
 }
 
+// Every `FormAnswerValue` shape must be listed, or `parseAnswersJson`
+// silently drops entries that use it.
 const answerValueSchema = z.union([
   z.string(),
   z.array(z.string()),
+  z.array(z.object({ option: z.string(), quantity: z.number() })),
   z.boolean(),
   z.number(),
   z.null(),
@@ -407,6 +607,19 @@ export function serializeAnswers(snapshots: FormAnswerSnapshot[]): string {
 }
 
 /**
+ * The option labels a choice answer names: a single label, a label list, or
+ * the options of quantity items. Anything else → `[]`.
+ */
+export function answerLabels(value: FormAnswerValue): string[] {
+  if (typeof value === "string") return [value];
+  if (isQuantityItems(value)) return value.map((item) => item.option);
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+  return [];
+}
+
+/**
  * Case-insensitive substring match over every snapshot's label and formatted
  * value (a time matches on both its stored `14:30` and displayed `2:30 PM`
  * forms). A blank query matches everything.
@@ -427,8 +640,9 @@ export function snapshotMatchesSearch(
 
 /**
  * Whether the answer to `fieldId` matches a filter value (case-insensitive):
- * select/radio → exact label; checkboxes → contains that label; checkbox →
- * same yes/no; everything else → substring. A blank filter matches all.
+ * select/radio → exact label; checkboxes → contains that label; picture
+ * choice → that label was picked (in any mode); checkbox → same yes/no;
+ * everything else → substring. A blank filter matches all.
  */
 export function snapshotMatchesFieldFilter(
   snapshots: FormAnswerSnapshot[],
@@ -447,7 +661,13 @@ export function snapshotMatchesFieldFilter(
     case "checkboxes":
       return (
         Array.isArray(snapshot.value) &&
-        snapshot.value.some((item) => item.toLowerCase() === needle)
+        answerLabels(snapshot.value).some(
+          (label) => label.toLowerCase() === needle,
+        )
+      );
+    case "picturechoice":
+      return answerLabels(snapshot.value).some(
+        (label) => label.toLowerCase() === needle,
       );
     case "checkbox": {
       const wanted = TRUE_STRINGS.has(needle)

@@ -19040,6 +19040,500 @@ body:has(.pollen) {
   box-shadow: var(--dream-shadow-card);
 }
 
+/* ── Forms block: "Picture choice" field (2026-10-12) — fieldset of tiles
+   (`src/components/forms/picture-choice-field.tsx`). Every hook is a
+   `data-slot="picture-choice*"` value, so none of the generic rules above
+   (exact `[data-slot="label" | "input" | "button" | "radio-group" | …]`) match
+   it; the only shared rules it deliberately inherits are `legend`,
+   `.text-red-500`, `[id$="-description"]` and `p[role="alert"]`. Rules here
+   are unlayered (win over the component's Tailwind utilities). Tiles:
+   one/many + small image/colour = borderless balloon swatches; large and
+   quantity tiles = `.dream-card` photo cards; label-only tiles = pills like
+   `DreamRadioPills`; the stepper mirrors `DreamQuantityStepper`. ── */
+.dream .sp-form-block [data-slot="picture-choice"] {
+  --pc-gap: var(--dream-paper);
+  --pc-swatch: 56px;
+  --pc-step: 32px;
+  --pc-step-input: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.dream .sp-form-block [data-slot="picture-choice"][data-selection="quantity"] {
+  --pc-gap: var(--dream-white);
+  --pc-swatch: 64px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice"][data-tile-size="large"] {
+  --pc-step: 40px;
+  --pc-step-input: 32px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-reference"] img {
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-card);
+  background: var(--dream-white);
+  box-shadow: var(--dream-shadow-card);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-grid"] {
+  gap: 12px;
+}
+
+/* Tile (card by default: hairline gold, white, 20px radius). */
+.dream .sp-form-block [data-slot="picture-choice-option"] {
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-card);
+  background: var(--dream-white);
+  color: var(--dream-ink);
+  box-shadow: none;
+  outline: none;
+  transition:
+    transform var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  label[data-slot="picture-choice-option"][data-selected="false"]:where(
+    :not(:has(input:disabled))
+  ):hover {
+  border-color: var(--dream-gold);
+  box-shadow: var(--dream-shadow-card);
+  transform: translateY(-2px);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  [data-slot="picture-choice-option"][data-selected="true"] {
+  border-color: var(--dream-rose);
+  box-shadow:
+    0 0 0 1px var(--dream-rose),
+    var(--dream-shadow-card);
+}
+
+/* Keyboard focus lands on the visually-hidden input; ring the whole tile.
+   Quantity tiles skip this: their own buttons / input show the global rose
+   outline, so a tile ring would double up (and fire on mouse clicks). */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  label[data-slot="picture-choice-option"]:has(input:focus-visible) {
+  outline: 2px solid var(--dream-rose);
+  outline-offset: 2px;
+}
+
+/* A failed submit marks the unpicked tiles, like the unchecked radio pills. */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:has([aria-invalid="true"])
+  [data-slot="picture-choice-option"][data-selected="false"] {
+  border-color: var(--dream-error);
+}
+
+/* Photo / colour inside a card tile. */
+.dream .sp-form-block [data-slot="picture-choice-swatch"] {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-swatch"][data-kind="image"]
+  > img {
+  border-radius: 14px;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="large"]
+  [data-slot="picture-choice-swatch"][data-kind="color"]
+  > span {
+  border: 1px solid rgba(43, 33, 29, 0.1);
+  border-radius: 14px;
+}
+
+/* Small tiles: balloon-round swatches with a soft drop shadow (and a glossy
+   highlight on colours). */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  [data-slot="picture-choice-swatch"]
+  > :is(img, span) {
+  display: block;
+  width: var(--pc-swatch);
+  height: var(--pc-swatch);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 12px 18px -10px rgba(43, 33, 29, 0.5);
+  transition:
+    transform var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  [data-slot="picture-choice-swatch"][data-kind="image"]
+  > img {
+  border: 3px solid var(--dream-white);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  [data-slot="picture-choice-swatch"][data-kind="color"]
+  > span {
+  border: 1px solid rgba(43, 33, 29, 0.12);
+  background-image: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 38%
+  );
+  box-shadow:
+    inset -5px -7px 12px rgba(43, 33, 29, 0.14),
+    0 12px 18px -10px rgba(43, 33, 29, 0.5);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  label[data-slot="picture-choice-option"]:where(
+    :not(:has(input:disabled))
+  ):hover
+  [data-slot="picture-choice-swatch"]
+  > :is(img, span),
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  button[data-slot="picture-choice-swatch"]:not(:disabled):hover
+  > :is(img, span) {
+  transform: translateY(-3px);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  [data-slot="picture-choice-option"][data-selected="true"]
+  [data-slot="picture-choice-swatch"]
+  > :is(img, span) {
+  box-shadow:
+    0 0 0 3px var(--pc-gap),
+    0 0 0 5px var(--dream-rose),
+    0 12px 18px -10px rgba(43, 33, 29, 0.5);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="small"]
+  [data-slot="picture-choice-option"][data-selected="true"]
+  [data-slot="picture-choice-swatch"][data-kind="color"]
+  > span {
+  box-shadow:
+    inset -5px -7px 12px rgba(43, 33, 29, 0.14),
+    0 0 0 3px var(--pc-gap),
+    0 0 0 5px var(--dream-rose),
+    0 12px 18px -10px rgba(43, 33, 29, 0.5);
+}
+
+/* One / many, small, with a picture: no card — just the balloon. The check
+   sits on the balloon's top-right edge. (Higher specificity than the card
+   state rules above, so it wins their border / shadow / hover lift.) */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )[data-tile-size="small"]
+  [data-slot="picture-choice-option"]:not([data-kind="label"]) {
+  padding: 6px;
+  border-color: transparent;
+  border-radius: 18px;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )[data-tile-size="small"]:has([aria-invalid="true"])
+  [data-slot="picture-choice-option"]:not(
+    [data-kind="label"]
+  )[data-selected="false"] {
+  border-color: var(--dream-error);
+}
+
+/* Labels under the picture; label-only tiles carry their own text (chip). */
+.dream .sp-form-block [data-slot="picture-choice-label"] {
+  color: var(--dream-soft-sky);
+  font-family: var(--font-dream-body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-tile-size="large"]
+  [data-slot="picture-choice-label"] {
+  font-size: 14px;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-option"][data-selected="true"]
+  [data-slot="picture-choice-label"] {
+  color: var(--dream-ink);
+  font-weight: 600;
+}
+
+/* Label-only tiles: plain centred text in a card (quantity) … */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-option"][data-kind="label"]
+  [data-slot="picture-choice-label"] {
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--dream-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* … and pills (one / many), echoing `DreamRadioPills`: paper + gold hairline,
+   ink when chosen. */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )
+  [data-slot="picture-choice-option"][data-kind="label"] {
+  min-height: 44px;
+  padding: 0 16px;
+  justify-content: center;
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-paper);
+  color: var(--dream-soft-sky);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )
+  [data-slot="picture-choice-option"][data-kind="label"][data-selected="false"]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )
+  [data-slot="picture-choice-option"][data-kind="label"][data-selected="true"] {
+  border-color: var(--dream-ink);
+  background: var(--dream-ink);
+  box-shadow: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )
+  [data-slot="picture-choice-option"][data-kind="label"][data-selected="true"]
+  [data-slot="picture-choice-label"] {
+  color: var(--dream-paper);
+}
+
+/* Selected badge: rose disc, paper check, white keyline. */
+.dream .sp-form-block [data-slot="picture-choice-check"] {
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--dream-white);
+  background: var(--dream-rose);
+  color: var(--dream-paper);
+  box-shadow: 0 6px 12px -6px rgba(43, 33, 29, 0.55);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )[data-tile-size="small"]
+  [data-slot="picture-choice-option"]:not([data-kind="label"])
+  [data-slot="picture-choice-check"] {
+  top: 2px;
+  right: auto;
+  left: calc(50% + 10px);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:is(
+    [data-selection="one"],
+    [data-selection="many"]
+  )
+  [data-slot="picture-choice-option"][data-kind="label"]
+  [data-slot="picture-choice-check"] {
+  top: -8px;
+  right: -4px;
+}
+
+/* Quantity stepper — `DreamQuantityStepper`: paper pill, gold hairline, ink
+   +/- glyphs, 15px/600 tabular count. The count is a real number input, so it
+   gets the dream focus ring on the pill (inputs always match :focus-visible). */
+.dream .sp-form-block [data-slot="picture-choice-stepper"] {
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  gap: 0;
+  height: calc(var(--pc-step) + 6px);
+  padding: 2px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-paper);
+  transition:
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-stepper"]:has(input:focus-visible) {
+  border-color: var(--dream-rose);
+  box-shadow: 0 0 0 3px var(--dream-rose-soft);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-step"] {
+  width: var(--pc-step);
+  height: var(--pc-step);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dream-ink);
+  transition: background var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-step"]:hover {
+  background: rgba(199, 154, 45, 0.16);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-step"]:focus-visible {
+  outline-offset: -2px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-step"]:disabled {
+  background: transparent;
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-stepper"] input {
+  flex: 1 1 0;
+  width: 0;
+  min-width: var(--pc-step-input);
+  height: var(--pc-step);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Running total + clear link. */
+.dream .sp-form-block [data-slot="picture-choice-total"] {
+  color: var(--dream-soft-sky);
+  font-size: 14px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-clear"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--dream-rose);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-clear"]:hover {
+  color: var(--dream-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice"]
+    :is(
+      [data-slot="picture-choice-option"],
+      [data-slot="picture-choice-swatch"] > :is(img, span),
+      [data-slot="picture-choice-stepper"],
+      [data-slot="picture-choice-step"]
+    ) {
+    transition: none;
+  }
+
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice"]
+    label[data-slot="picture-choice-option"]:hover,
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice"]
+    [data-slot="picture-choice-swatch"]
+    > :is(img, span) {
+    transform: none !important;
+  }
+}
+
+/* Windows high-contrast: fills vanish, so mark the chosen tile, and keep the
+   colour swatches' own colours. */
+@media (forced-colors: active) {
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice-option"][data-selected="true"] {
+    outline: 2px solid Highlight;
+  }
+
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice-swatch"][data-kind="color"]
+    > span {
+    forced-color-adjust: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dream
     .sp-form-block

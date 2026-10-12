@@ -3,14 +3,15 @@ import { notFound } from "next/navigation";
 import { TRPCError } from "@trpc/server";
 import { AlertTriangle } from "lucide-react";
 
+import type { FormDefinitionInput } from "../_components/builder-shared";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
-import type { FormDefinitionInput } from "../_components/builder-shared";
+import { FormBuilder } from "../_components/form-builder";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { TrailHeader } from "../../_components/trail-header";
-import { FormBuilder } from "../_components/form-builder";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -32,7 +33,7 @@ async function loadForm(id: string) {
 
 export default async function EditFormPage({ params }: PageProps) {
   const { id } = await params;
-  const form = await loadForm(id);
+  const [form, flags] = await Promise.all([loadForm(id), getBusinessFlags()]);
 
   const breadcrumbs = [
     { label: "Forms", href: LIST_PATH },
@@ -68,6 +69,7 @@ export default async function EditFormPage({ params }: PageProps) {
     <>
       <TrailHeader breadcrumbs={breadcrumbs} />
       <FormBuilder
+        mediaLibraryEnabled={flags.isEnabled("media")}
         form={{
           id: form.id,
           name: form.name,

@@ -8,8 +8,12 @@ import { toast } from "sonner";
 
 import type { FormAnswerSnapshot } from "~/lib/forms/answers";
 import type { FormSource, FormStatus } from "~/lib/validators/form";
-import { formatAnswerOrDash } from "~/lib/forms/answers";
 import { formatDate } from "~/lib/format-date";
+import {
+  answerLabels,
+  formatAnswerOrDash,
+  isQuantityItems,
+} from "~/lib/forms/answers";
 import { FORM_STATUS_LABELS, FORM_STATUS_VALUES } from "~/lib/validators/form";
 import { api } from "~/trpc/react";
 import {
@@ -50,12 +54,27 @@ export type EntryDetailData = {
   answers: FormAnswerSnapshot[];
 };
 
+/** Visual for a picture-choice option, from the form's CURRENT definition. */
+export type PictureOptionVisual = {
+  color?: string | null;
+  imageUrl?: string | null;
+};
+
+/** fieldId → lowercased option label → visual. */
+export type PictureOptionVisuals = Record<
+  string,
+  Record<string, PictureOptionVisual>
+>;
+
 type Props = {
   formId: string;
   entry: EntryDetailData;
   /** Ids of fields still on the form — an answer whose fieldId isn't in here
    *  was captured against a field the owner has since removed. */
   currentFieldIds: Set<string>;
+  /** Swatch / photo per picture-choice option, looked up by label. Options
+   *  that were deleted or renamed since the entry fell back to a text chip. */
+  pictureVisuals?: PictureOptionVisuals;
   /** Mirrors `formSubmission.bulkDelete`'s `ownerOnlyProcedure`. */
   canDelete: boolean;
 };
@@ -64,12 +83,83 @@ function basePath(formId: string) {
   return `/admin/forms/${formId}/entries`;
 }
 
+function PictureChoiceValue({
+  answer,
+  visuals,
+}: {
+  answer: FormAnswerSnapshot;
+  visuals: Record<string, PictureOptionVisual> | undefined;
+}) {
+  const labels = answerLabels(answer.value);
+  const items = isQuantityItems(answer.value) ? answer.value : null;
+  if (labels.length === 0) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+  const total = items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  return (
+    <div className="space-y-1.5">
+      <ul className="flex flex-wrap gap-1.5">
+        {labels.map((label, index) => {
+          const visual = visuals?.[label.trim().toLowerCase()];
+          const quantity = items?.[index]?.quantity;
+          return (
+            <li
+              key={`${label}-${index}`}
+              className="text-foreground bg-muted inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2.5 pl-1 text-sm"
+            >
+              {visual?.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- owner-uploaded option photo, tiny admin thumbnail
+                <img
+                  src={visual.imageUrl}
+                  alt=""
+                  className="size-5 shrink-0 rounded-full border object-cover"
+                />
+              ) : visual?.color ? (
+                <span
+                  aria-hidden
+                  className="size-5 shrink-0 rounded-full border"
+                  style={{ backgroundColor: visual.color }}
+                />
+              ) : (
+                <span className="w-1.5" aria-hidden />
+              )}
+              <span>{label}</span>
+              {quantity != null && (
+                <span className="text-muted-foreground tabular-nums">
+                  × {quantity}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {items && (
+        <p className="text-xs font-medium tabular-nums">Total: {total}</p>
+      )}
+    </div>
+  );
+}
+
 /** `label:value` → `mailto:`/`tel:` link when the field type warrants it,
  *  plain text otherwise. Long text preserves line breaks. */
-function AnswerValue({ answer }: { answer: FormAnswerSnapshot }) {
+function AnswerValue({
+  answer,
+  pictureVisuals,
+}: {
+  answer: FormAnswerSnapshot;
+  pictureVisuals?: PictureOptionVisuals;
+}) {
   const text = formatAnswerOrDash(answer);
   if (answer.value == null) {
     return <span className="text-muted-foreground">{text}</span>;
+  }
+  if (answer.type === "picturechoice") {
+    return (
+      <PictureChoiceValue
+        answer={answer}
+        visuals={pictureVisuals?.[answer.fieldId]}
+      />
+    );
   }
   if (answer.type === "email" && typeof answer.value === "string") {
     return (
@@ -91,7 +181,13 @@ function AnswerValue({ answer }: { answer: FormAnswerSnapshot }) {
   return <span>{text}</span>;
 }
 
-export function EntryDetail({ formId, entry, currentFieldIds, canDelete }: Props) {
+export function EntryDetail({
+  formId,
+  entry,
+  currentFieldIds,
+  pictureVisuals,
+  canDelete,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -294,7 +390,10 @@ export function EntryDetail({ formId, entry, currentFieldIds, canDelete }: Props
                       >
                         <dt className="text-sm font-medium">{answer.label}</dt>
                         <dd className="text-muted-foreground text-sm sm:col-span-2">
-                          <AnswerValue answer={answer} />
+                          <AnswerValue
+                            answer={answer}
+                            pictureVisuals={pictureVisuals}
+                          />
                           {!currentFieldIds.has(answer.fieldId) && (
                             <span className="ml-2 text-xs italic">
                               Field removed from form
@@ -341,11 +440,7 @@ export function EntryDetail({ formId, entry, currentFieldIds, canDelete }: Props
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="outline"
-                        className="gap-1 pr-1"
-                      >
+                      <Badge key={tag} variant="outline" className="gap-1 pr-1">
                         {tag}
                         <button
                           type="button"
@@ -392,7 +487,7 @@ export function EntryDetail({ formId, entry, currentFieldIds, canDelete }: Props
                         type="button"
                         onClick={() => handleAddTag(tag)}
                         disabled={tagsPending}
-                        className="bg-transparent hover:bg-accent rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
+                        className="hover:bg-accent rounded-full border bg-transparent px-2.5 py-1 text-xs font-medium transition-colors"
                       >
                         {tag}
                       </button>

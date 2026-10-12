@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORM_DEFAULT_SUBMIT_LABEL,
   FORM_DEFAULT_SUCCESS_MESSAGE,
+  FORM_PICTURE_MAX_OPTIONS,
   formBulkAddTagsSchema,
   formBulkDeleteSchema,
   formCreateSchema,
@@ -10,6 +11,8 @@ import {
   formSettingsSchema,
   formSubmissionListSchema,
   formSubmitSchema,
+  isFormChoiceField,
+  isPictureChoiceField,
   makeEmptyFormDefinition,
   normalizeTags,
   parseStoredFormDefinition,
@@ -187,6 +190,196 @@ describe("formDefinitionSchema", () => {
     const def = baseDefinition();
     def.fields[0]!.type = "signature";
     expect(formDefinitionSchema.safeParse(def).success).toBe(false);
+  });
+});
+
+describe("picturechoice fields", () => {
+  const tiles = [
+    { id: "p_red", label: "Red", color: "#FF0000" },
+    { id: "p_gold", label: "Gold", imageUrl: "https://cdn.example.com/g.jpg" },
+    { id: "p_7", label: "7" }, // neither color nor photo → a label chip
+  ];
+
+  function withPicture(overrides: RawField = {}) {
+    const def = baseDefinition();
+    def.fields.push({
+      id: "f_pic",
+      type: "picturechoice",
+      label: "Balloon colors",
+      options: tiles,
+      ...overrides,
+    });
+    return def;
+  }
+
+  function parsePicture(overrides: RawField = {}) {
+    const result = formDefinitionSchema.safeParse(withPicture(overrides));
+    expect(result.success).toBe(true);
+    if (!result.success) throw result.error;
+    const field = result.data.fields.at(-1)!;
+    if (!isPictureChoiceField(field)) throw new Error("not a picture field");
+    return field;
+  }
+
+  it("fills defaults and lower-cases colors", () => {
+    const field = parsePicture();
+    expect(field).toMatchObject({
+      selection: "one",
+      tileSize: "small",
+      showLabels: true,
+      required: false,
+    });
+    expect(field.options[0]!.color).toBe("#ff0000");
+    expect(field.options[2]).toEqual({ id: "p_7", label: "7" });
+    expect(isFormChoiceField(field)).toBe(false);
+  });
+
+  it("accepts null color/photo/reference/limits (builder clears to null)", () => {
+    const field = parsePicture({
+      selection: "quantity",
+      tileSize: "large",
+      showLabels: false,
+      referenceImageUrl: null,
+      minTotal: null,
+      maxTotal: null,
+      options: tiles.map((tile) => ({ ...tile, color: null, imageUrl: null })),
+    });
+    expect(field.options[0]).toMatchObject({ color: null, imageUrl: null });
+  });
+
+  it("rejects a bad color, image URL, or reference URL", () => {
+    const issues = issuePaths(
+      withPicture({
+        referenceImageUrl: "not a url",
+        options: [
+          { id: "a", label: "A", color: "red" },
+          { id: "b", label: "B", color: "#fff" },
+          { id: "c", label: "C", imageUrl: "/relative.jpg" },
+          {
+            id: "d",
+            label: "D",
+            imageUrl: `https://x.com/${"a".repeat(2050)}`,
+          },
+        ],
+      }),
+    ).map((issue) => issue.path);
+    expect(issues).toEqual(
+      expect.arrayContaining([
+        "fields.3.referenceImageUrl",
+        "fields.3.options.0.color",
+        "fields.3.options.1.color",
+        "fields.3.options.2.imageUrl",
+        "fields.3.options.3.imageUrl",
+      ]),
+    );
+  });
+
+  it("keeps the option label rules (unique, no semicolons)", () => {
+    const issues = issuePaths(
+      withPicture({
+        options: [
+          { id: "a", label: "Red" },
+          { id: "b", label: " red " },
+          { id: "c", label: "Red; Gold" },
+        ],
+      }),
+    );
+    expect(issues).toEqual(
+      expect.arrayContaining([
+        {
+          path: "fields.3.options.1.label",
+          message: "Each option needs a different label",
+        },
+        {
+          path: "fields.3.options.2.label",
+          message: "Option labels can't contain semicolons",
+        },
+      ]),
+    );
+  });
+
+  it(`allows up to ${FORM_PICTURE_MAX_OPTIONS} options (more than other choice fields)`, () => {
+    const many = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `o${i}`,
+        label: String(i + 1),
+      }));
+    expect(
+      formDefinitionSchema.safeParse(
+        withPicture({ options: many(FORM_PICTURE_MAX_OPTIONS) }),
+      ).success,
+    ).toBe(true);
+    expect(issuePaths(withPicture({ options: many(61) }))).toEqual([
+      {
+        path: "fields.3.options",
+        message: `A field can have at most ${FORM_PICTURE_MAX_OPTIONS} options`,
+      },
+    ]);
+    expect(issuePaths(withPicture({ options: many(1) }))[0]!.message).toBe(
+      "Add at least 2 options",
+    );
+  });
+
+  it("rejects non-positive, fractional, or over-cap totals", () => {
+    const paths = issuePaths(
+      withPicture({ selection: "quantity", minTotal: 0, maxTotal: 1000 }),
+    ).map((issue) => issue.path);
+    expect(paths).toEqual(["fields.3.minTotal", "fields.3.maxTotal"]);
+    expect(
+      issuePaths(withPicture({ selection: "quantity", minTotal: 1.5 }))[0]!
+        .path,
+    ).toBe("fields.3.minTotal");
+  });
+
+  it("requires minTotal <= maxTotal outside 'one' mode", () => {
+    expect(
+      issuePaths(
+        withPicture({ selection: "quantity", minTotal: 12, maxTotal: 6 }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.maxTotal",
+        message: "Minimum can't be greater than maximum",
+      },
+    ]);
+    // Quantity totals may exceed the option count.
+    expect(
+      parsePicture({ selection: "quantity", minTotal: 12, maxTotal: 12 }),
+    ).toMatchObject({ minTotal: 12, maxTotal: 12 });
+  });
+
+  it("caps 'many' limits at the number of options", () => {
+    expect(
+      issuePaths(withPicture({ selection: "many", minTotal: 4, maxTotal: 5 })),
+    ).toEqual([
+      {
+        path: "fields.3.minTotal",
+        message: "Can't be more than the number of options (3)",
+      },
+      {
+        path: "fields.3.maxTotal",
+        message: "Can't be more than the number of options (3)",
+      },
+    ]);
+    expect(
+      parsePicture({ selection: "many", minTotal: 1, maxTotal: 3 }),
+    ).toMatchObject({ minTotal: 1, maxTotal: 3 });
+  });
+
+  it("ignores limits in 'one' mode", () => {
+    expect(
+      parsePicture({ selection: "one", minTotal: 50, maxTotal: 10 }),
+    ).toMatchObject({ selection: "one" });
+  });
+
+  it("passes through the public projection", () => {
+    const def = formDefinitionSchema.parse(
+      withPicture({ referenceImageUrl: "https://cdn.example.com/c.jpg" }),
+    );
+    expect(toPublicFormDefinition(def).fields.at(-1)).toMatchObject({
+      type: "picturechoice",
+      referenceImageUrl: "https://cdn.example.com/c.jpg",
+    });
   });
 });
 

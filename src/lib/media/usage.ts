@@ -24,6 +24,10 @@ import { isStorageUrl } from "~/lib/s3/url";
 import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
+import {
+  isPictureChoiceField,
+  parseStoredFormDefinition,
+} from "~/lib/validators/form";
 import { STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
 import { db } from "~/server/db";
 
@@ -992,6 +996,61 @@ async function scanMediaReferences(
       }
     });
 
+  // ── 10b. Forms (picture-choice option photos + reference image) ─────────────
+  // `Form.definition` is a JSON blob. Only `picturechoice` fields carry media:
+  // each option's `imageUrl` and the field's `referenceImageUrl`.
+  const formsPromise = db.form
+    .findMany({
+      where: { businessId },
+      select: { id: true, name: true, definition: true },
+    })
+    .then((forms) => {
+      for (const form of forms) {
+        const formUsage = (location: string): MediaUsage => ({
+          url: "",
+          location,
+          entityType: "form",
+          entityId: form.id,
+          entityLabel: form.name,
+          adminHref: `/admin/forms/${form.id}`,
+        });
+        const parsed = parseStoredFormDefinition(form.definition);
+        if (!parsed.success) {
+          // A definition that no longer validates still holds live photos —
+          // fall back to a generic walk so they never read as unused.
+          deepWalkJson(
+            form.definition,
+            (url) =>
+              addUsage(map, url, {
+                ...formUsage(`Form: ${form.name}`),
+                url,
+              }),
+            () => undefined,
+          );
+          continue;
+        }
+        for (const field of parsed.data.fields) {
+          if (!isPictureChoiceField(field)) continue;
+          const fieldLabel = field.label || "Picture choice";
+          if (field.referenceImageUrl) {
+            addUsage(map, field.referenceImageUrl, {
+              ...formUsage(
+                `Form: ${form.name} — ${fieldLabel} (reference image)`,
+              ),
+              url: field.referenceImageUrl,
+            });
+          }
+          for (const option of field.options) {
+            if (!option.imageUrl) continue;
+            addUsage(map, option.imageUrl, {
+              ...formUsage(`Form: ${form.name} — ${fieldLabel}`),
+              url: option.imageUrl,
+            });
+          }
+        }
+      }
+    });
+
   // Run all independent queries in parallel
   await Promise.all([
     siteContentPromise,
@@ -1007,6 +1066,7 @@ async function scanMediaReferences(
     galleryImagesPromise,
     testimonialsPromise,
     reviewsPromise,
+    formsPromise,
   ]);
 
   return { map, galleryRefs };

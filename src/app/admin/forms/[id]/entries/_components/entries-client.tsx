@@ -26,8 +26,8 @@ import type {
 } from "~/lib/validators/form";
 import type { RouterOutputs } from "~/trpc/react";
 import { downloadCsv } from "~/lib/csv-download";
-import { formatAnswerOrDash } from "~/lib/forms/answers";
 import { formatDate } from "~/lib/format-date";
+import { formatAnswerOrDash } from "~/lib/forms/answers";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -160,7 +160,9 @@ function toFormStatus(status: string): FormStatus {
 
 /** The value a per-field filter matches against — an option's label for a
  *  choice field, "Yes"/"No" for a checkbox (mirrors `snapshotMatchesFieldFilter`). */
-function filterValueOptions(field: FormField): { value: string; label: string }[] {
+function filterValueOptions(
+  field: FormField,
+): { value: string; label: string }[] {
   if (field.type === "checkbox") {
     return [
       { value: "Yes", label: "Yes" },
@@ -547,7 +549,7 @@ export function EntriesClient({
           {/* More filters — tags, date range, per-field — AdminFilters only
               supports single-value selects, so these live in a small popover
               beside it and write the same URL params. */}
-          <div className="mb-6 -mt-3 flex flex-wrap items-center gap-2">
+          <div className="-mt-3 mb-6 flex flex-wrap items-center gap-2">
             <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -846,7 +848,8 @@ export function EntriesClient({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedCount} {selectedCount === 1 ? "entry" : "entries"}?
+              Delete {selectedCount} {selectedCount === 1 ? "entry" : "entries"}
+              ?
             </AlertDialogTitle>
             <AlertDialogDescription>
               This will delete{" "}
@@ -1003,7 +1006,7 @@ function MoreFiltersForm({
                 className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                   tags.includes(tag)
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-transparent hover:bg-accent"
+                    : "hover:bg-accent bg-transparent"
                 }`}
               >
                 {tag}
@@ -1057,7 +1060,10 @@ function MoreFiltersForm({
           </Select>
 
           {filterField && (
-            <Select value={filterValue || "none"} onValueChange={setFilterValue}>
+            <Select
+              value={filterValue || "none"}
+              onValueChange={setFilterValue}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a value" />
               </SelectTrigger>
@@ -1153,7 +1159,7 @@ function TagMutationDialog({
                   className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                     trimmed === option
                       ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent hover:bg-accent"
+                      : "hover:bg-accent bg-transparent"
                   }`}
                 >
                   {option}

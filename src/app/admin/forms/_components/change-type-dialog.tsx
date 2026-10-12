@@ -50,12 +50,19 @@ export function ChangeTypeDialog({
               <p className="text-foreground font-medium">
                 {fromLabel} → {toLabel}
               </p>
-              {!impact.optionsDiscarded && !impact.wasConfirmationTarget ? (
+              {!impact.optionsDiscarded &&
+              !impact.picturesDiscarded &&
+              !impact.wasConfirmationTarget ? (
                 <p>Label, help text, required and placeholder carry over.</p>
               ) : (
                 <ul className="list-disc space-y-1 pl-5">
                   {impact.optionsDiscarded && (
                     <li>Its options will be removed.</li>
+                  )}
+                  {impact.picturesDiscarded && (
+                    <li>
+                      Colors and photos will be removed (the labels stay).
+                    </li>
                   )}
                   {impact.wasConfirmationTarget && (
                     <li>

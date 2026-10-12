@@ -22,7 +22,8 @@ import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
  *    LABEL (not its id — ids are meaningless once the option is deleted), and
  *    import matches a cell to an option by label. So option labels are unique
  *    per field (case-insensitive) and may not contain `;`, the separator used
- *    for multi-choice cells.
+ *    for multi-choice cells. Picture-choice quantity answers name their
+ *    option by label too (`{ option: label, quantity }`).
  * 3. **The client never sees owner-only settings.** `toPublicFormDefinition`
  *    builds its output field-by-field (not by omission) so a setting added
  *    later cannot leak to the storefront by default.
@@ -42,11 +43,16 @@ export const FORM_FIELD_TYPE_VALUES = [
   "checkbox", // single yes/no box; the label is the statement
   "date",
   "time", // wall-clock time of day, stored as 24h `HH:mm`
+  "picturechoice", // tiles (color swatch / photo / label chip); see below
 ] as const;
 
 export type FormFieldType = (typeof FORM_FIELD_TYPE_VALUES)[number];
 
-/** Field types whose answer is chosen from `options`. */
+/**
+ * Field types whose answer is chosen from `options` and rendered as a native
+ * `<select>`/radio/checkbox list. `picturechoice` also has options but is NOT
+ * listed: it has its own renderer and a mode-dependent answer shape.
+ */
 export const FORM_CHOICE_FIELD_TYPES = [
   "select",
   "radio",
@@ -76,6 +82,10 @@ export type FormSource = (typeof FORM_SOURCE_VALUES)[number];
 export const FORM_ID_MAX_LENGTH = 64;
 export const FORM_MAX_FIELDS = 50;
 export const FORM_MAX_OPTIONS = 30;
+/** Picture-choice palettes (e.g. balloon colors) run longer than a dropdown. */
+export const FORM_PICTURE_MAX_OPTIONS = 60;
+/** Cap on one tile's quantity, and on a picture-choice min/max total. */
+export const FORM_PICTURE_MAX_QUANTITY = 999;
 export const FORM_MAX_TAGS = 20;
 export const FORM_TAG_MAX_LENGTH = 40;
 /** Cap on ids per bulk inbox action. */
@@ -146,33 +156,73 @@ const formFieldBaseShape = {
     .optional(),
 };
 
+/** Option ids and (case-insensitive) labels are unique within a field. */
+function refineUniqueOptions(
+  options: { id: string; label: string }[],
+  ctx: z.RefinementCtx,
+) {
+  const seenIds = new Set<string>();
+  const seenLabels = new Set<string>();
+  options.forEach((option, index) => {
+    if (seenIds.has(option.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Duplicate option id",
+        path: [index, "id"],
+      });
+    }
+    seenIds.add(option.id);
+    const key = labelKey(option.label);
+    if (seenLabels.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Each option needs a different label",
+        path: [index, "label"],
+      });
+    }
+    seenLabels.add(key);
+  });
+}
+
 const formOptionsField = z
   .array(formFieldOptionSchema)
   .min(2, "Add at least 2 options")
   .max(FORM_MAX_OPTIONS, `A field can have at most ${FORM_MAX_OPTIONS} options`)
-  .superRefine((options, ctx) => {
-    const seenIds = new Set<string>();
-    const seenLabels = new Set<string>();
-    options.forEach((option, index) => {
-      if (seenIds.has(option.id)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Duplicate option id",
-          path: [index, "id"],
-        });
-      }
-      seenIds.add(option.id);
-      const key = labelKey(option.label);
-      if (seenLabels.has(key)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Each option needs a different label",
-          path: [index, "label"],
-        });
-      }
-      seenLabels.add(key);
-    });
-  });
+  .superRefine(refineUniqueOptions);
+
+/**
+ * A picture-choice tile. The LABEL stays the stored key (invariant 2), so
+ * the label rules are unchanged; `color` and `imageUrl` are presentation
+ * only. A tile with neither renders as a plain label chip (e.g. "7"); the
+ * renderer prefers the photo, then the color, then the label alone.
+ */
+export const formPictureOptionSchema = formFieldOptionSchema.extend({
+  /** `#rrggbb`, stored lower-case (what `<input type="color">` emits). */
+  color: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-f]{6}$/i, "Enter a color like #ff8800")
+    .transform((value) => value.toLowerCase())
+    .nullable()
+    .optional(),
+  imageUrl: z
+    .string()
+    .url("Enter a valid image URL")
+    .max(2048, "Image URL is too long")
+    .nullable()
+    .optional(),
+});
+
+export type FormPictureOption = z.infer<typeof formPictureOptionSchema>;
+
+const formPictureOptionsField = z
+  .array(formPictureOptionSchema)
+  .min(2, "Add at least 2 options")
+  .max(
+    FORM_PICTURE_MAX_OPTIONS,
+    `A field can have at most ${FORM_PICTURE_MAX_OPTIONS} options`,
+  )
+  .superRefine(refineUniqueOptions);
 
 export const formTextFieldSchema = z.object({
   type: z.literal("text"),
@@ -228,6 +278,54 @@ export const formCheckboxesFieldSchema = z.object({
   options: formOptionsField,
 });
 
+export const FORM_PICTURE_SELECTION_VALUES = [
+  "one",
+  "many",
+  "quantity",
+] as const;
+export type FormPictureSelection =
+  (typeof FORM_PICTURE_SELECTION_VALUES)[number];
+
+export const FORM_PICTURE_TILE_SIZE_VALUES = ["small", "large"] as const;
+export type FormPictureTileSize =
+  (typeof FORM_PICTURE_TILE_SIZE_VALUES)[number];
+
+const formPictureTotalField = z
+  .number()
+  .int("Enter a whole number")
+  .positive("Enter 1 or more")
+  .max(FORM_PICTURE_MAX_QUANTITY, `Enter ${FORM_PICTURE_MAX_QUANTITY} or less`)
+  .nullable()
+  .optional();
+
+/**
+ * Tiles of color swatches, photos or label chips. `selection` picks the
+ * answer shape (see `FormAnswerValue` in `~/lib/forms/answers`):
+ * `"one"` → a label (like radio), `"many"` → labels (like checkboxes),
+ * `"quantity"` → `{ option, quantity }[]`.
+ *
+ * `minTotal`/`maxTotal` bound the number of picks (`"many"`) or the summed
+ * quantity (`"quantity"`) and are ignored in `"one"`. Their cross-field rules
+ * live in the definition's `superRefine` (same ZodEffects reason as number).
+ */
+export const formPictureChoiceFieldSchema = z.object({
+  type: z.literal("picturechoice"),
+  ...formFieldBaseShape,
+  options: formPictureOptionsField,
+  selection: z.enum(FORM_PICTURE_SELECTION_VALUES).default("one"),
+  tileSize: z.enum(FORM_PICTURE_TILE_SIZE_VALUES).default("small"),
+  showLabels: z.boolean().default(true),
+  /** Optional picture above the tiles (e.g. a numbered collage). */
+  referenceImageUrl: z
+    .string()
+    .url("Enter a valid image URL")
+    .max(2048, "Image URL is too long")
+    .nullable()
+    .optional(),
+  minTotal: formPictureTotalField,
+  maxTotal: formPictureTotalField,
+});
+
 /** A single yes/no box. The label is the statement ("I agree to…"). */
 export const formCheckboxFieldSchema = z.object({
   type: z.literal("checkbox"),
@@ -263,14 +361,26 @@ export const formFieldSchema = z.discriminatedUnion("type", [
   formCheckboxFieldSchema,
   formDateFieldSchema,
   formTimeFieldSchema,
+  formPictureChoiceFieldSchema,
 ]);
 
 export type FormField = z.infer<typeof formFieldSchema>;
 export type FormFieldInput = z.input<typeof formFieldSchema>;
 export type FormChoiceField = Extract<FormField, { type: FormChoiceFieldType }>;
 
+export type FormPictureChoiceField = Extract<
+  FormField,
+  { type: "picturechoice" }
+>;
+
 export function isFormChoiceField(field: FormField): field is FormChoiceField {
   return (FORM_CHOICE_FIELD_TYPES as readonly string[]).includes(field.type);
+}
+
+export function isPictureChoiceField(
+  field: FormField,
+): field is FormPictureChoiceField {
+  return field.type === "picturechoice";
 }
 
 // ─── Settings ───────────────────────────────────────────────────────────────
@@ -368,6 +478,37 @@ function refineDefinition(
         message: "Minimum can't be greater than maximum",
         path: ["fields", index, "max"],
       });
+    }
+
+    // Picture-choice limits only mean something once more than one tile can
+    // be picked; in "one" mode they are ignored (the builder hides them).
+    if (field.type === "picturechoice" && field.selection !== "one") {
+      const { minTotal, maxTotal } = field;
+      if (minTotal != null && maxTotal != null && minTotal > maxTotal) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Minimum can't be greater than maximum",
+          path: ["fields", index, "maxTotal"],
+        });
+      }
+      if (field.selection === "many") {
+        const count = field.options.length;
+        const tooMany = `Can't be more than the number of options (${count})`;
+        if (minTotal != null && minTotal > count) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: tooMany,
+            path: ["fields", index, "minTotal"],
+          });
+        }
+        if (maxTotal != null && maxTotal > count) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: tooMany,
+            path: ["fields", index, "maxTotal"],
+          });
+        }
+      }
     }
   });
 

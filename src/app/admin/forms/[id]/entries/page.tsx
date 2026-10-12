@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 
-import type { FormDefinition } from "~/lib/validators/form";
-import { isFormChoiceField } from "~/lib/validators/form";
+import type {
+  FormDefinition,
+  FormStatusFilterValue,
+} from "~/lib/validators/form";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
   FORM_STATUS_FILTER_VALUES,
-  type FormStatusFilterValue,
+  isFormChoiceField,
+  isPictureChoiceField,
 } from "~/lib/validators/form";
 import { api } from "~/trpc/server";
 
@@ -65,7 +68,9 @@ export default async function FormEntriesPage({ params, searchParams }: Props) {
     session.user.platformRole === "PLATFORM_ADMIN" ||
     membershipRole === "OWNER";
 
-  const form = await api.form.getById({ id }).catch(rethrowTrpcForErrorBoundary);
+  const form = await api.form
+    .getById({ id })
+    .catch(rethrowTrpcForErrorBoundary);
   if (!form) notFound();
 
   // A corrupted/legacy definition still opens (definitionValid === false) —
@@ -78,7 +83,10 @@ export default async function FormEntriesPage({ params, searchParams }: Props) {
     ? (form.definition as FormDefinition).fields
     : [];
   const filterableFields = fields.filter(
-    (field) => isFormChoiceField(field) || field.type === "checkbox",
+    (field) =>
+      isFormChoiceField(field) ||
+      isPictureChoiceField(field) ||
+      field.type === "checkbox",
   );
 
   const search = sp.search?.trim() ?? "";
@@ -113,7 +121,9 @@ export default async function FormEntriesPage({ params, searchParams }: Props) {
         pageSize: PAGE_SIZE,
       })
       .catch(rethrowTrpcForErrorBoundary),
-    api.formSubmission.listTags({ formId: id }).catch(rethrowTrpcForErrorBoundary),
+    api.formSubmission
+      .listTags({ formId: id })
+      .catch(rethrowTrpcForErrorBoundary),
   ]);
 
   return (
@@ -145,7 +155,9 @@ export default async function FormEntriesPage({ params, searchParams }: Props) {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const form = await api.form.getById({ id }).catch(rethrowTrpcForErrorBoundary);
+  const form = await api.form
+    .getById({ id })
+    .catch(rethrowTrpcForErrorBoundary);
   if (!form) return { title: "Entries" };
   return { title: `${form.name} — Entries` };
 }

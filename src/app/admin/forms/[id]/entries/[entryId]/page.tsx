@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
 
+import type { PictureOptionVisuals } from "./_components/entry-detail";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
-import { FORM_SOURCE_VALUES, FORM_STATUS_VALUES } from "~/lib/validators/form";
+import {
+  FORM_SOURCE_VALUES,
+  FORM_STATUS_VALUES,
+  isPictureChoiceField,
+} from "~/lib/validators/form";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../../../../_components/trail-header";
@@ -18,7 +23,9 @@ type PageProps = {
  *  default rather than throwing on a corrupted row. */
 function toFormStatus(status: string): "NEW" | "READ" | "ARCHIVED" {
   const values: readonly string[] = FORM_STATUS_VALUES;
-  return values.includes(status) ? (status as "NEW" | "READ" | "ARCHIVED") : "NEW";
+  return values.includes(status)
+    ? (status as "NEW" | "READ" | "ARCHIVED")
+    : "NEW";
 }
 
 function toFormSource(source: string): "WEB" | "IMPORT" {
@@ -49,6 +56,19 @@ export default async function FormEntryDetailPage({ params }: PageProps) {
     submission.definition?.fields.map((field) => field.id) ?? [],
   );
 
+  // Picture-choice answers store option LABELS, so swatches/photos are looked
+  // up by label (case-insensitive) in the form's current definition.
+  const pictureVisuals: PictureOptionVisuals = {};
+  for (const field of submission.definition?.fields ?? []) {
+    if (!isPictureChoiceField(field)) continue;
+    pictureVisuals[field.id] = Object.fromEntries(
+      field.options.map((option) => [
+        option.label.trim().toLowerCase(),
+        { color: option.color, imageUrl: option.imageUrl },
+      ]),
+    );
+  }
+
   return (
     <>
       <TrailHeader
@@ -56,7 +76,9 @@ export default async function FormEntryDetailPage({ params }: PageProps) {
           { label: "Forms", href: "/admin/forms" },
           { label: submission.formName, href: `/admin/forms/${id}` },
           { label: "Entries", href: `/admin/forms/${id}/entries` },
-          { label: `Entry — ${new Date(submission.submittedAt).toLocaleDateString()}` },
+          {
+            label: `Entry — ${new Date(submission.submittedAt).toLocaleDateString()}`,
+          },
         ]}
       />
       <EntryDetail
@@ -70,6 +92,7 @@ export default async function FormEntryDetailPage({ params }: PageProps) {
           answers: submission.answers,
         }}
         currentFieldIds={currentFieldIds}
+        pictureVisuals={pictureVisuals}
         canDelete={canDelete}
       />
     </>

@@ -69,6 +69,8 @@ const LIST_PATH = "/admin/forms";
 const MAX_FIELDS = 50;
 
 type Props = {
+  /** `media` flag on — lets picture-choice tiles pick from the library. */
+  mediaLibraryEnabled?: boolean;
   /** Present in edit mode, absent when creating. */
   form?: {
     id: string;
@@ -79,7 +81,10 @@ type Props = {
   };
 };
 
-export function FormBuilder({ form: existingForm }: Props) {
+export function FormBuilder({
+  form: existingForm,
+  mediaLibraryEnabled = false,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -429,6 +434,7 @@ export function FormBuilder({ form: existingForm }: Props) {
                             index={index}
                             field={field}
                             confirmationFieldId={confirmationFieldId}
+                            mediaLibraryEnabled={mediaLibraryEnabled}
                             open={openFieldIds.includes(field.id)}
                             onOpenChange={(next) =>
                               setOpenFieldIds((previous) =>

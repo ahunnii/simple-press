@@ -13,6 +13,8 @@
  *    key, so any other image URL in that free-form blob was invisible
  *  - `SiteContent.pageMeta` / `popupConfig`, `Page.previewDraft` and
  *    `Business.maintenanceImage` / `maintenanceMessage` were not scanned at all
+ *  - `Form.definition` picture-choice option photos / reference image were not
+ *    scanned at all
  *
  * `~/server/db` is mocked, so this runs in the `unit` project (`pnpm test:nodb`)
  * with no Postgres. The service-template registry is NOT mocked — resolving a
@@ -37,6 +39,7 @@ vi.mock("~/server/db", () => ({
     gallery: { findMany: vi.fn() },
     testimonial: { findMany: vi.fn() },
     productReview: { findMany: vi.fn() },
+    form: { findMany: vi.fn() },
   },
 }));
 
@@ -70,6 +73,7 @@ const EMPTY_TABLES = [
   db.gallery.findMany,
   db.testimonial.findMany,
   db.productReview.findMany,
+  db.form.findMany,
 ];
 
 beforeEach(() => {
@@ -472,6 +476,95 @@ describe("buildUsedMediaIndex — Business maintenance page", () => {
 });
 
 // ─── buildGalleryExternalUsage ────────────────────────────────────────────────
+
+// ─── Form.definition (picture choice) ─────────────────────────────────────────
+
+describe("buildUsedMediaIndex — Form picture-choice media", () => {
+  const optionUrl = keyToPublicUrl(`${BUSINESS_ID}/image-form-gold.jpg`);
+  const referenceUrl = keyToPublicUrl(`${BUSINESS_ID}/image-form-ref.jpg`);
+
+  function formRow(definition: unknown) {
+    return { id: "form_1", name: "Order Form", definition };
+  }
+
+  it("reports option photos and the reference image under the field label", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [
+          {
+            id: "f1",
+            type: "picturechoice",
+            label: "Finish",
+            required: false,
+            selection: "one",
+            referenceImageUrl: referenceUrl,
+            options: [
+              { id: "o1", label: "Gold", imageUrl: optionUrl },
+              { id: "o2", label: "Red", color: "#ff0000" },
+            ],
+          },
+        ],
+        settings: {},
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(optionUrl)).toEqual([
+      {
+        url: optionUrl,
+        location: "Form: Order Form — Finish",
+        entityType: "form",
+        entityId: "form_1",
+        entityLabel: "Order Form",
+        adminHref: "/admin/forms/form_1",
+      },
+    ]);
+    expect(index.get(referenceUrl)).toHaveLength(1);
+    expect(index.get(referenceUrl)?.[0]?.location).toContain("Finish");
+  });
+
+  it("still reports media from a definition that no longer validates", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({ fields: [{ options: [{ imageUrl: optionUrl }] }] }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(optionUrl)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+    });
+  });
+
+  it("ignores external URLs and non-object definitions", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow(null),
+      formRow({
+        version: 1,
+        fields: [
+          {
+            id: "f1",
+            type: "picturechoice",
+            label: "Finish",
+            required: false,
+            selection: "one",
+            options: [
+              { id: "o1", label: "A", imageUrl: "https://example.com/a.jpg" },
+              { id: "o2", label: "B" },
+            ],
+          },
+        ],
+        settings: {},
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(0);
+  });
+});
 
 describe("buildGalleryExternalUsage", () => {
   function pageRow(content: unknown, id = "page_1", title = "About") {
