@@ -129,11 +129,16 @@ export async function POST(req: Request) {
     const business = await getBusinessByDomain(domain);
 
     if (!business) {
+      // Null means an unknown host OR a suspended/closed store
+      // (`getBusinessByDomain` is active-only).
       reportDonationBlocked("business-not-found", {
         host: domain,
         extra: { host: domain },
       });
-      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Donations are not available for this store." },
+        { status: 404 },
+      );
     }
 
     errorContext.businessId = business.id;

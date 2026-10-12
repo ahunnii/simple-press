@@ -40,6 +40,7 @@ import {
 
 const CODE_TONE: Record<string, GloveStatusTone> = {
   active: "success",
+  pending: "muted",
   used: "muted",
   expired: "alert",
   inactive: "muted",

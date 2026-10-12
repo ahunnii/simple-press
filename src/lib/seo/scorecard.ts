@@ -5,6 +5,7 @@ import type { Prisma } from "generated/prisma";
 import type { ChecklistItem, ChecklistSummary } from "~/lib/admin/checklist";
 import { summarizeChecklist } from "~/lib/admin/checklist";
 import { parseBusinessHours } from "~/lib/business-hours";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { preferNonBlank } from "~/lib/seo/blank";
 import { parseLocalPresence } from "~/lib/seo/local-presence";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
@@ -170,6 +171,13 @@ function coverage(
   };
 }
 
+/** Rows whose alt text is a real description (blank and file-name values don't count). */
+function countMeaningfulAlt(rows: { altText: string | null }[]): number {
+  let n = 0;
+  for (const row of rows) if (meaningfulAltText(row.altText) !== null) n++;
+  return n;
+}
+
 /** Count a query only when the owning feature is on; otherwise skip the round-trip. */
 function countIf(
   enabled: boolean,
@@ -301,13 +309,20 @@ export async function computeSeoScorecard({
     countIf(productsEnabled, () =>
       db.image.count({ where: { product: { businessId, published: true } } }),
     ),
-    countIf(productsEnabled, () =>
-      db.image.count({
-        where: {
-          product: { businessId, published: true },
-          altText: NON_BLANK,
-        },
-      }),
+    // Counted in JS, not SQL: older uploads stored the FILE NAME as alt text
+    // ("download-9.png"), which `NON_BLANK` accepts but is not a description.
+    // Postgres can't express "looks like a file name" through Prisma, so fetch
+    // only the non-blank alt strings and let `meaningfulAltText` decide.
+    countIf(productsEnabled, async () =>
+      countMeaningfulAlt(
+        await db.image.findMany({
+          where: {
+            product: { businessId, published: true },
+            altText: NON_BLANK,
+          },
+          select: { altText: true },
+        }),
+      ),
     ),
 
     countIf(collectionsEnabled, () =>
@@ -396,10 +411,13 @@ export async function computeSeoScorecard({
     countIf(galleriesEnabled, () =>
       db.galleryImage.count({ where: { gallery: { businessId } } }),
     ),
-    countIf(galleriesEnabled, () =>
-      db.galleryImage.count({
-        where: { gallery: { businessId }, altText: NON_BLANK },
-      }),
+    countIf(galleriesEnabled, async () =>
+      countMeaningfulAlt(
+        await db.galleryImage.findMany({
+          where: { gallery: { businessId }, altText: NON_BLANK },
+          select: { altText: true },
+        }),
+      ),
     ),
   ]);
 

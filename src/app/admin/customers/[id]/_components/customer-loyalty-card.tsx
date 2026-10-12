@@ -58,6 +58,8 @@ type DiscountCodeSummary = {
   code: string;
   expiresAt: Date | null;
   usageCount: number;
+  /** Uses inside `usageCount` held by a checkout still in progress. */
+  heldUses: number;
   active: boolean;
 };
 
@@ -82,7 +84,14 @@ function activityLabel(type: string): string {
 
 function CodeStatusBadge({ code }: { code: DiscountCodeSummary }) {
   if (!code.active) return <Badge variant="secondary">Inactive</Badge>;
-  if (code.usageCount >= 1) return <Badge variant="outline">Used</Badge>;
+  // A use is counted from checkout start; one still held by an open checkout
+  // (e.g. a bank payment clearing) isn't spent yet — see `rewardCodeStatus`.
+  if (code.usageCount >= 1)
+    return (
+      <Badge variant="outline">
+        {code.usageCount - code.heldUses >= 1 ? "Used" : "Pending"}
+      </Badge>
+    );
   if (code.expiresAt && code.expiresAt.getTime() < Date.now())
     return <Badge variant="destructive">Expired</Badge>;
   return <Badge variant="success">Active</Badge>;

@@ -13,6 +13,12 @@ import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_LABEL,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
 
 import { GloveButton } from "../shared/glove-button";
@@ -213,8 +219,12 @@ export function GloveOrderConfirmation({
   const total = orderDetails
     ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
     : null;
-  const paymentLabel =
-    orderDetails?.payment_status === "paid"
+  // A delayed bank payment (`unpaid`) is still clearing: no order yet, no
+  // receipt email, nothing to track — say "Processing", never "Unpaid".
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  const paymentLabel = processing
+    ? PAYMENT_PROCESSING_LABEL
+    : orderDetails?.payment_status === "paid"
       ? "Paid"
       : (orderDetails?.payment_status ?? "");
   const deliveryLabel =
@@ -225,7 +235,10 @@ export function GloveOrderConfirmation({
         : "";
 
   const meta = [
-    { label: "Receipt sent to", value: orderDetails?.customer_email ?? "" },
+    {
+      label: processing ? "Receipt will be sent to" : "Receipt sent to",
+      value: orderDetails?.customer_email ?? "",
+    },
     { label: "Total", value: total ?? "" },
     { label: "Payment", value: paymentLabel },
     { label: "Delivery", value: deliveryLabel },
@@ -258,9 +271,16 @@ export function GloveOrderConfirmation({
             className="glove-display mt-6 text-[28px] leading-tight font-medium text-[var(--glove-ink)] md:text-[40px]"
             {...fieldAttr("glove.checkout.confirmation-heading")}
           >
-            {heading}
+            {processing ? PAYMENT_PROCESSING_HEADING : heading}
           </h1>
-          {body ? (
+          {processing ? (
+            <p
+              role="status"
+              className="mt-3 max-w-xl text-[17px] text-[var(--glove-text)]"
+            >
+              {PAYMENT_PROCESSING_MESSAGE}
+            </p>
+          ) : body ? (
             <p
               className="mt-3 max-w-xl text-[17px] text-[var(--glove-text)]"
               {...fieldAttr("glove.checkout.confirmation-body")}
@@ -361,7 +381,7 @@ export function GloveOrderConfirmation({
 
         <div className="mt-10 flex flex-col items-center gap-4">
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {trackLabel ? (
+            {trackLabel && !processing ? (
               <GloveButton href="/order-status" variant="woo">
                 <span {...fieldAttr("glove.checkout.confirmation-track-label")}>
                   {trackLabel}

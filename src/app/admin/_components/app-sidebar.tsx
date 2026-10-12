@@ -194,7 +194,10 @@ export function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <WelcomeNotification setupComplete={setupComplete ?? false} />
+        {/* STAFF can't open /admin/welcome (they bounce to Orders), so skip the prompt. */}
+        {roleForFiltering !== "STAFF" && (
+          <WelcomeNotification setupComplete={setupComplete ?? false} />
+        )}
         <NavUser />
       </SidebarFooter>
     </Sidebar>

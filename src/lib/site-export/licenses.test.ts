@@ -60,7 +60,7 @@ describe("buildLicenseFiles", () => {
   it("NOTICE lists the platform support email, not the store's", async () => {
     const files = await buildLicenseFiles(business);
     const notice = findFile(files, NOTICE_PATH);
-    expect(notice).toContain("csdt@generativejustice.org");
+    expect(notice).toContain("help@generativejustice.org");
     expect(notice).not.toContain("owner@sunnymug.example.com");
   });
 

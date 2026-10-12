@@ -32,9 +32,13 @@ import {
   summarizeOrderMoney,
 } from "~/lib/orders/order-money";
 import { stripeClient } from "~/lib/stripe/client";
-import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  featureGateAny,
+  ownerAdminProcedure,
+} from "~/server/api/trpc";
 
-const rangeKeySchema = z.enum(["7d", "30d", "90d", "ytd", "year"]);
+const rangeKeySchema = z.enum(["7d", "30d", "90d", "ytd", "year", "lastYear"]);
 type RangeKey = z.infer<typeof rangeKeySchema>;
 
 /** Hard cap on auto-paged balance transactions; surfaced as `truncated`. */
@@ -92,6 +96,15 @@ function resolveRange(key: RangeKey, now = new Date()): FinanceRange {
       label: `Calendar year ${now.getFullYear()}`,
       start: new Date(now.getFullYear(), 0, 1),
       endExclusive: new Date(now.getFullYear() + 1, 0, 1),
+    };
+  }
+
+  if (key === "lastYear") {
+    return {
+      key,
+      label: `Calendar year ${now.getFullYear() - 1}`,
+      start: new Date(now.getFullYear() - 1, 0, 1),
+      endExclusive: new Date(now.getFullYear(), 0, 1),
     };
   }
 
@@ -175,8 +188,12 @@ export const financeRouter = createTRPCRouter({
    * `src/server/api/routers/donation.ts`:6-23): a donation is a money
    * record, and it must stay readable here even after the owner turns the
    * feature back off.
+   * The procedure itself is gated on payments OR donations (a donations-only
+   * store still needs its finance breakdown); with neither enabled it is
+   * FORBIDDEN, matching the admin nav item and the /admin/finances layout.
    */
   getBreakdown: ownerAdminProcedure
+    .use(featureGateAny(["payments", "donations"]))
     .input(z.object({ range: rangeKeySchema.default("30d") }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -450,6 +467,8 @@ export const financeRouter = createTRPCRouter({
         orders,
         stripe,
         taxCollectedYtdCents,
+        // Year the YTD tile covers (the server's current year, whatever range is shown).
+        taxCollectedYtdYear: ytdWindow.start.getFullYear(),
         stripeAutoTaxEnabled: business?.stripeAutoTaxEnabled ?? false,
         isStripeConnected: !!accountId,
         stripeError,

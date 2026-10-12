@@ -22,6 +22,11 @@ import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { FadeIn } from "~/components/page-animations";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
 type DeliveryMethod = "ship" | "pickup" | null;
@@ -220,7 +225,12 @@ export function PollenOrderConfirmation({
     text: copy.receiptStep,
     fieldKey: "pollen.checkout.confirmation-receipt-step",
   };
-  const steps = [receiptStep, fulfilmentStep].filter((step) => step.text);
+  // While a bank payment clears no receipt has gone out yet — the processing
+  // notice replaces the intro and the "receipt is on its way" step is dropped.
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  const steps = (
+    processing ? [fulfilmentStep] : [receiptStep, fulfilmentStep]
+  ).filter((step) => step.text);
 
   const total =
     typeof orderDetails?.amount_total === "number"
@@ -266,9 +276,16 @@ export function PollenOrderConfirmation({
                 {...fieldAttr("pollen.checkout.confirmation-heading")}
                 className="text-2xl font-bold text-[#2a351f] md:text-3xl"
               >
-                {copy.heading}
+                {processing ? PAYMENT_PROCESSING_HEADING : copy.heading}
               </h2>
-              {copy.intro ? (
+              {processing ? (
+                <p
+                  role="status"
+                  className="mt-2 max-w-xl leading-relaxed text-[#4c566a]"
+                >
+                  {PAYMENT_PROCESSING_MESSAGE}
+                </p>
+              ) : copy.intro ? (
                 <p
                   {...fieldAttr("pollen.checkout.confirmation-intro")}
                   className="mt-2 max-w-xl leading-relaxed whitespace-pre-line text-[#4c566a]"
@@ -391,7 +408,11 @@ export function PollenOrderConfirmation({
                   ) : null}
                   {email ? (
                     <div className="border-t border-[#2a351f]/10 pt-3">
-                      <dt className="text-[#4c566a]">Receipt sent to</dt>
+                      <dt className="text-[#4c566a]">
+                        {processing
+                          ? "Receipt will be sent to"
+                          : "Receipt sent to"}
+                      </dt>
                       <dd className="mt-0.5 font-medium break-all text-[#2a351f]">
                         {email}
                       </dd>

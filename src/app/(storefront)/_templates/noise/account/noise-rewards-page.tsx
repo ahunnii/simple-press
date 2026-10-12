@@ -37,6 +37,7 @@ function codeStatusStyle(status: RewardCodeStatus): React.CSSProperties {
       return { borderColor: "#16a34a", color: "#16a34a" };
     case "expired":
       return { borderColor: "#dc2626", color: "#dc2626" };
+    case "pending":
     case "used":
     case "inactive":
       return { color: "var(--vn-steel-mist)", borderColor: "var(--vn-rule)" };

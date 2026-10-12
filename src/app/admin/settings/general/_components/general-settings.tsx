@@ -349,15 +349,15 @@ export function GeneralSettings({ business }: Props) {
                       </Select>
                       <FormDescription>
                         Used when showing event dates and times to you and your
-                        shoppers. Pick the zone your shop actually operates in —
-                        this also applies to the hours shown on{" "}
+                        shoppers. Pick the zone your shop actually operates in.{" "}
                         <Link
                           href="/admin/settings/hours"
                           className="underline underline-offset-2"
                         >
                           Business Hours
-                        </Link>
-                        .
+                        </Link>{" "}
+                        are shown exactly as you type them and aren&apos;t
+                        converted.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

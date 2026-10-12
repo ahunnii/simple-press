@@ -6,6 +6,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 
 import { AdminThumb } from "../../_components/admin-thumb";
 
@@ -41,7 +42,7 @@ export function SortableImage({ image, index, onDelete, onEdit }: Props) {
     >
       <AdminThumb
         src={image.url}
-        alt={image.altText ?? ""}
+        alt={meaningfulAltText(image.altText) ?? ""}
         loading="lazy"
         className="h-full w-full object-cover"
       />
@@ -83,8 +84,8 @@ export function SortableImage({ image, index, onDelete, onEdit }: Props) {
         </div>
       )}
 
-      {/* Alt Text Indicator */}
-      {image.altText && (
+      {/* Alt Text Indicator — a leftover file name doesn't count */}
+      {meaningfulAltText(image.altText) && (
         <div className="absolute bottom-0 left-0 rounded-tr bg-blue-600 px-2 py-0.5 text-xs text-white">
           ALT
         </div>

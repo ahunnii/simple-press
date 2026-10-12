@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { Product } from "~/types";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { formatProductDisplayPrice } from "~/lib/prices";
 
 import { DreamPhoto } from "../shared/dream-photo";
@@ -13,7 +14,7 @@ import { DreamPhoto } from "../shared/dream-photo";
  */
 export function DreamRelatedCard({ product }: { product: Product }) {
   const image = product.images[0];
-  const alt = image?.altText?.trim() ? image.altText : product.name;
+  const alt = meaningfulAltText(image?.altText) ?? product.name;
 
   return (
     <Link

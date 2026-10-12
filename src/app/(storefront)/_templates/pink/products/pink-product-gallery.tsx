@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
@@ -204,7 +205,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
               />
               <Image
                 src={img.url}
-                alt={img.altText ?? productName}
+                alt={meaningfulAltText(img.altText) ?? productName}
                 fill
                 priority={i === 0}
                 className="object-contain"
@@ -282,7 +283,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
           >
             <Image
               src={activeImage?.url ?? "/placeholder.svg"}
-              alt={activeImage?.altText ?? productName}
+              alt={meaningfulAltText(activeImage?.altText) ?? productName}
               width={1400}
               height={1750}
               className="max-h-[90vh] max-w-[90vw] object-contain"

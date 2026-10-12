@@ -10,6 +10,10 @@ import { listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import {
   SLEDGE_CONFIRMATION_NOTES_KEY,
@@ -52,6 +56,9 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
   const h1Ref = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  // While a bank payment clears no email has gone out yet — skip that step.
+  const nextSteps = processing ? NEXT_STEPS.slice(1) : NEXT_STEPS;
 
   useEffect(() => {
     if (!sessionId) {
@@ -143,9 +150,18 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
           >
             Order Placed!
           </h1>
-          <p className="sl-eyebrow mx-auto mt-5 max-w-lg font-sans text-sm leading-relaxed md:text-base">
-            Your order is confirmed and queued for preparation. We&apos;ll have
-            everything packed and on its way soon.
+          <p
+            role={processing ? "status" : undefined}
+            className="sl-eyebrow mx-auto mt-5 max-w-lg font-sans text-sm leading-relaxed md:text-base"
+          >
+            {processing ? (
+              PAYMENT_PROCESSING_MESSAGE
+            ) : (
+              <>
+                Your order is confirmed and queued for preparation. We&apos;ll
+                have everything packed and on its way soon.
+              </>
+            )}
           </p>
 
           {orderDetails?.amount_total ? (
@@ -167,7 +183,9 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
             <div className="sl-card-panel sl-card-shadow rounded-sm p-6">
               {/* M-3: coral on white at 10px → coral-aa */}
               <h2 className="mb-3 font-sans text-[10px] tracking-[0.18em] text-[var(--sl-coral-aa)] uppercase">
-                Confirmation sent to
+                {processing
+                  ? "Confirmation will be sent to"
+                  : "Confirmation sent to"}
               </h2>
               <p className="font-sans text-sm text-[var(--sl-ink)]">
                 {orderDetails.customer_email}
@@ -181,7 +199,7 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
               What happens next
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              {NEXT_STEPS.map((step) => (
+              {nextSteps.map((step) => (
                 <div key={step.icon} className="flex items-start gap-3">
                   {/* N-1: decorative glyph */}
                   <span

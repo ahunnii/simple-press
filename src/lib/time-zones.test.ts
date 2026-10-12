@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { COMMON_TIME_ZONES, isValidTimeZone } from "./time-zones";
+import {
+  COMMON_TIME_ZONES,
+  getTimeZoneLabel,
+  isValidTimeZone,
+} from "./time-zones";
 
 describe("isValidTimeZone", () => {
   it("accepts the platform default zone", () => {
@@ -56,5 +60,28 @@ describe("COMMON_TIME_ZONES", () => {
       expect(zone.label, zone.value).not.toContain("/");
       expect(zone.label.length, zone.value).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("getTimeZoneLabel", () => {
+  it("returns the curated label for a curated zone", () => {
+    expect(getTimeZoneLabel("America/Detroit")).toBe("Eastern Time — Detroit");
+    expect(getTimeZoneLabel("Europe/Paris")).toBe(
+      "Central European Time — Paris",
+    );
+  });
+
+  it("falls back to a readable city name for a non-curated zone", () => {
+    expect(getTimeZoneLabel("Pacific/Auckland")).toBe("Auckland");
+    expect(getTimeZoneLabel("America/Argentina/Buenos_Aires")).toBe(
+      "Buenos Aires",
+    );
+    expect(getTimeZoneLabel("UTC")).toBe("UTC");
+  });
+
+  it("never throws on an invalid string", () => {
+    expect(getTimeZoneLabel("Mars/Olympus_Mons")).toBe("Olympus Mons");
+    expect(getTimeZoneLabel("not a zone")).toBe("not a zone");
+    expect(getTimeZoneLabel("")).toBe("");
   });
 });

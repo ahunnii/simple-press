@@ -28,6 +28,7 @@ import type { ImageUploaderHandle } from "./image-uploader";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { isFilenameAltText } from "~/lib/images/alt-text";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseProductIntervals } from "~/lib/subscriptions/intervals";
@@ -666,7 +667,8 @@ export function ProductForm({
     let resolvedImages = images.map((img, idx) => ({
       id: img.id,
       url: img.url,
-      altText: img.altText,
+      // A file name left over from an old upload isn't a description; clear it.
+      altText: isFilenameAltText(img.altText) ? "" : img.altText,
       sortOrder: idx,
     }));
     if (pendingImages.length > 0) {
@@ -691,7 +693,7 @@ export function ProductForm({
       resolvedImages = images.map((img, idx) => ({
         id: img.id,
         url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
-        altText: img.altText,
+        altText: isFilenameAltText(img.altText) ? "" : img.altText,
         sortOrder: idx,
       }));
       if (resolvedImages.some((i) => !i.url)) {

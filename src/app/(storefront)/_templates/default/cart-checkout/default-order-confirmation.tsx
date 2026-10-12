@@ -13,6 +13,11 @@ import {
 import { Button } from "~/components/ui/button";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import {
   CHECKOUT_CONFIRMATION_CONTINUE_BUTTON_DEFAULT,
@@ -74,6 +79,7 @@ export function DefaultOrderConfirmation({
 
   const sessionId = searchParams.get("session_id");
   const primaryColor = business.siteContent?.primaryColor ?? "#2563eb";
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
 
   useEffect(() => {
     if (!sessionId) {
@@ -161,7 +167,7 @@ export function DefaultOrderConfirmation({
           {...fieldAttr("default.checkout.confirmation-heading")}
           className="mb-2 text-3xl font-bold text-[#0a0a0a]"
         >
-          {heading}
+          {processing ? PAYMENT_PROCESSING_HEADING : heading}
         </h1>
         <p className="text-lg text-[#6b6b6b]">
           <span {...fieldAttr("default.checkout.confirmation-thanks-prefix")}>
@@ -170,6 +176,15 @@ export function DefaultOrderConfirmation({
           {business.name}
         </p>
       </div>
+
+      {processing && (
+        <div
+          role="status"
+          className="mb-6 rounded-lg border border-[#e5e5e5] bg-white p-4 text-sm text-[#0a0a0a]"
+        >
+          {PAYMENT_PROCESSING_MESSAGE}
+        </div>
+      )}
 
       <div className="mb-6 rounded-lg bg-[#f6f6f6] p-6">
         <div className="mb-4 flex items-start gap-4">
@@ -200,7 +215,7 @@ export function DefaultOrderConfirmation({
         {orderDetails?.customer_email && (
           <div className="mt-4 border-t pt-4 text-sm text-[#6b6b6b]">
             <p>
-              Confirmation sent to:{" "}
+              {processing ? "We'll email" : "Confirmation sent to:"}{" "}
               <strong>{orderDetails.customer_email}</strong>
             </p>
           </div>

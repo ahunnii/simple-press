@@ -9,6 +9,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { sendLoyaltyRewardRedeemedEmail } from "~/lib/email/templates";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { countHeldDiscountUses } from "~/lib/inventory/reservation";
 import {
   ensureLoyaltyCustomer,
   LoyaltyCustomerConflictError,
@@ -373,6 +374,7 @@ export const loyaltyRouter = createTRPCRouter({
               reason: true,
               discountCode: {
                 select: {
+                  id: true,
                   code: true,
                   expiresAt: true,
                   usageCount: true,
@@ -392,6 +394,17 @@ export const loyaltyRouter = createTRPCRouter({
         ])
       : [[], [], []];
 
+    // Reward codes are single-use and the use is counted when checkout
+    // STARTS; `heldUses` marks one whose checkout is still open (e.g. a bank
+    // payment clearing) so it reads "Pending", not "Used", until it settles.
+    const heldUses = await countHeldDiscountUses(ctx.db, {
+      businessId,
+      discountCodeIds: redeemRows.flatMap((e) =>
+        e.discountCode && e.discountCode.usageCount > 0
+          ? [e.discountCode.id]
+          : [],
+      ),
+    });
     const codes = redeemRows.flatMap((e) => {
       if (!e.discountCode) return [];
       return [
@@ -401,6 +414,7 @@ export const loyaltyRouter = createTRPCRouter({
           code: e.discountCode.code,
           expiresAt: e.discountCode.expiresAt,
           usageCount: e.discountCode.usageCount,
+          heldUses: heldUses.get(e.discountCode.id) ?? 0,
           active: e.discountCode.active,
           reason: e.reason,
         },

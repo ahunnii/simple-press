@@ -1,7 +1,12 @@
 import type { NextRequest } from "next/server";
+import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import {
+  legacyBareCookieAllowed,
+  matchPendingSessionCookie,
+} from "~/lib/checkout/pending-session-cookie";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
 
@@ -29,23 +34,59 @@ export async function GET(req: NextRequest) {
     }
 
     // Verify the requesting browser is the one that initiated this checkout.
-    // The checkout form sets a `pending_session` cookie with the session ID
-    // before redirecting to Stripe. Anyone who obtained the URL from elsewhere
-    // (shared link, browser history) won't have this cookie.
-    const cookieHeader = req.headers.get("cookie") ?? "";
-    const pendingSession = cookieHeader
-      .split(";")
-      .map((c) => c.trim())
-      .find((c) => c.startsWith("pending_session="))
-      ?.split("=")[1];
+    // create-session sets a signed `pending_session` cookie naming the
+    // session before redirecting to Stripe. Anyone who obtained the URL from
+    // elsewhere (shared link, browser history) won't have this cookie.
+    //
+    // Legacy bare-cookie fallback (cookies set before the cookie was signed)
+    // switches itself off about an hour after the signed-cookie deploy. A bare
+    // value is accepted only for a session that (a) lacks
+    // `metadata.pendingCookie` — every session create-session makes from the
+    // deploy on carries it, and for those only a SIGNED cookie works — and
+    // (b) was created within the cookie's lifetime (+ clock-skew slack). A
+    // genuine bare cookie can never be older than
+    // PENDING_SESSION_COOKIE_MAX_AGE, and Stripe keeps completed Checkout
+    // Sessions retrievable indefinitely, so without (b) every pre-deploy order
+    // would stay readable with nothing but its id. Once an hour has passed
+    // since the deploy no unmarked session is young enough, and the fallback
+    // rejects everything. The signed path has no age limit: the shopper can
+    // revisit the confirmation page for as long as the cookie lives.
+    const cookie = matchPendingSessionCookie(
+      req.headers,
+      business.id,
+      sessionId,
+    );
+    const signedOk = cookie?.signed === true;
 
-    if (!pendingSession || pendingSession !== sessionId) {
+    // No cookie for this session at all: refuse before touching Stripe.
+    if (!cookie) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const session = await stripeClient.checkout.sessions.retrieve(sessionId, {
-      stripeAccount: business.stripeAccountId,
-    });
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripeClient.checkout.sessions.retrieve(sessionId, {
+        stripeAccount: business.stripeAccountId,
+      });
+    } catch (retrieveError) {
+      // A bare-cookie caller must not be able to tell a session that does not
+      // exist from one that is not theirs: both are 403, as before this
+      // lookup moved ahead of the ownership decision.
+      if (
+        !signedOk &&
+        (retrieveError as { type?: unknown } | null)?.type ===
+          "StripeInvalidRequestError"
+      ) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
+      throw retrieveError;
+    }
+
+    // Bare cookie only: not accepted for a marked session, nor for one too old
+    // to have been started with a bare cookie (see above).
+    if (!signedOk && !legacyBareCookieAllowed(session)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     // The cookie is intentionally NOT cleared here: it expires on its own
     // (maxAge set at checkout), and keeping it lets the shopper refresh or

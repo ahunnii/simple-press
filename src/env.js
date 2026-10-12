@@ -145,7 +145,7 @@ export const env = createEnv({
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL: z
       .string()
       .email()
-      .default("csdt@generativejustice.org"),
+      .default("help@generativejustice.org"),
   },
 
   /**

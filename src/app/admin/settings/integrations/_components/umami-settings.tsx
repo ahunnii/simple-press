@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle,
-  ExternalLink,
   Loader2,
   Save,
   XCircle,
@@ -29,16 +28,18 @@ import { Switch } from "~/components/ui/switch";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
-  // Sourced from the server-only `UMAMI_BASE_URL` and passed down from the
-  // server component, since this file is `"use client"` and can't read it.
-  umamiBaseUrl: string;
 };
 
 // Umami website IDs are UUIDs (e.g. "abc123-def456-...").
 const UMAMI_WEBSITE_ID_REGEX = /^[a-zA-Z0-9-]+$/;
 
-export function UmamiSettings({ business, umamiBaseUrl }: Props) {
+export function UmamiSettings({ business }: Props) {
   const router = useRouter();
+
+  // The header badge reflects what is SAVED (props, refreshed by
+  // router.refresh() after a save), not the unsaved form state below.
+  const savedEnabled = business.umamiEnabled;
+  const savedWebsiteId = business.umamiWebsiteId ?? "";
 
   // Form state
   const [umamiWebsiteId, setUmamiWebsiteId] = useState(
@@ -46,6 +47,10 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
   );
   const [umamiEnabled, setUmamiEnabled] = useState(business.umamiEnabled);
   const [websiteIdError, setWebsiteIdError] = useState<string | null>(null);
+
+  const isDirty =
+    umamiEnabled !== savedEnabled ||
+    umamiWebsiteId.trim() !== savedWebsiteId.trim();
 
   const validateWebsiteId = (
     value: string,
@@ -118,7 +123,7 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                   .
                 </CardDescription>
               </div>
-              {umamiEnabled && umamiWebsiteId ? (
+              {savedEnabled && savedWebsiteId ? (
                 <Badge variant="default" className="gap-1">
                   <CheckCircle className="h-3 w-3" />
                   Enabled
@@ -155,11 +160,16 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                 </p>
               ) : (
                 <p className="text-muted-foreground mt-1 text-sm">
-                  SimplePress runs its own Umami instance — you can&apos;t
-                  create this yourself. Ask your SimplePress administrator to
-                  add your storefront domain, and they&apos;ll give you the
-                  Website ID to paste here. Not your Umami account ID or API
-                  key.
+                  SimplePress runs its own Umami analytics — you can&apos;t
+                  create a Website ID yourself. Email{" "}
+                  <a
+                    href="mailto:help@generativejustice.org"
+                    className="text-primary underline underline-offset-2"
+                  >
+                    help@generativejustice.org
+                  </a>{" "}
+                  with your storefront domain and we&apos;ll send you the
+                  Website ID to paste here.
                 </p>
               )}
             </div>
@@ -184,8 +194,9 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                   feature flag controls whether the in-admin Analytics dashboard
                   is visible. Turning this on without the feature flag enabled
                   means data is collected but you can&apos;t view it in-app yet;
-                  turning the feature flag on without this toggle enabled shows
-                  an empty dashboard.
+                  turning the feature flag on without this toggle enabled (or
+                  without a Website ID saved) shows an &quot;Analytics not
+                  connected&quot; notice instead of data.
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   The tracking script and event data are proxied through your
@@ -202,22 +213,6 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                   setWebsiteIdError(validateWebsiteId(umamiWebsiteId, checked));
                 }}
               />
-            </div>
-
-            <div className="border-t pt-2">
-              <p className="text-muted-foreground mb-2 text-sm">
-                Need your Website ID, or want to see the raw data yourself?
-              </p>
-              <Button type="button" variant="outline" size="sm" asChild>
-                <a
-                  href={umamiBaseUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open your Umami dashboard
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
             </div>
 
             <div className="border-t pt-4">
@@ -237,6 +232,11 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                   </>
                 )}
               </Button>
+              {isDirty && !updateIntegrationsMutation.isPending ? (
+                <span className="text-muted-foreground ml-3 text-sm">
+                  Unsaved changes
+                </span>
+              ) : null}
             </div>
           </CardContent>
         </Card>

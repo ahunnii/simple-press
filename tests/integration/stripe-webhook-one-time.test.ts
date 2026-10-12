@@ -333,8 +333,9 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       expect(order.customerEmail).toBe("jane@shopper.test"); // normalized
       expect(order.customerName).toBe("Jane Doe");
       expect(order.discountCodeId).toBeNull();
-      // Platform-terms acceptance is stamped at order creation.
-      expect(order.termsAcceptedAt).toBeInstanceOf(Date);
+      // Platform-terms acceptance is dated from checkout start (Stripe's
+      // `session.created`), not from when the webhook wrote the order.
+      expect(order.termsAcceptedAt).toEqual(new Date(session.created * 1000));
       expect(order.termsVersion).not.toBeNull();
 
       // --- Items (mapped out of the expanded line items' product metadata) ---
@@ -627,8 +628,16 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       expect(await db.order.count()).toBe(0);
     });
 
-    it("refuses to create an order for an unpaid (async payment) session", async () => {
+    // The ONE deliberate change to this characterization file: this test used
+    // to pin a 500 for an unpaid session (so Stripe retried it for ~3 days and
+    // the shopper's bank payment never became an order). Delayed payment
+    // methods are now supported end-to-end — completed+unpaid acks 200,
+    // creates nothing and keeps the stock held until
+    // `checkout.session.async_payment_succeeded` / `_failed` settles it. The
+    // full lifecycle lives in `stripe-webhook-async-payment.test.ts`.
+    it("creates no order for an unpaid (async payment) session, but acks 200 and keeps the stock held", async () => {
       const store = await setupStore();
+      const reservation = await reserveFor(store, "cs_test_unpaid");
       const built = makeCheckoutSession({
         id: "cs_test_unpaid",
         mode: "payment",
@@ -650,12 +659,18 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       stripeMocks.sessionsRetrieve.mockResolvedValue(built.fullSession);
 
       const res = await postWebhookEvent(event);
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(200);
       expect(await db.order.count()).toBe(0);
+      expect(await db.customer.count()).toBe(0);
       const productAfter = await db.product.findUniqueOrThrow({
         where: { id: store.product.id },
       });
       expect(productAfter.inventoryQty).toBe(10);
+      expect(productAfter.reservedQty).toBe(2);
+      const reservationAfter = await db.inventoryReservation.findUniqueOrThrow({
+        where: { id: reservation.id },
+      });
+      expect(reservationAfter.status).toBe("active");
     });
   });
 
@@ -732,9 +747,10 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
 
       expect(emailCategories()).toEqual(["abandoned_checkout"]);
       const abandoned = emailCallWithCategory("abandoned_checkout")!;
-      // NOTE: unlike the order path, the abandoned-checkout email uses the raw
-      // Stripe-supplied address without `normalizeEmail`.
-      expect(abandoned.to).toBe("Jane@Shopper.Test");
+      // Intentional change (2026-10-11): the abandoned-checkout email now uses
+      // `sessionShopperEmail`, the same precedence + `normalizeEmail` as the
+      // order path, so the address arrives lowercased.
+      expect(abandoned.to).toBe("jane@shopper.test");
       expect(abandoned.idempotencyKey).toBe(`abandoned-checkout-${session.id}`);
       expect(abandonedItemsProp()).toEqual([
         {

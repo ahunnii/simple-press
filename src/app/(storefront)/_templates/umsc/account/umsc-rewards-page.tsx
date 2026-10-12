@@ -32,6 +32,7 @@ import { UmscAccountLayout } from "./umsc-account-layout";
 
 const CODE_STATUS_COLOR: Record<RewardCodeStatus, string> = {
   active: "var(--umsc-success)",
+  pending: "var(--umsc-muted)",
   used: "var(--umsc-muted)",
   expired: "var(--umsc-error)",
   inactive: "var(--umsc-muted)",

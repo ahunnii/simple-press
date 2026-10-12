@@ -309,7 +309,31 @@ export function useCheckoutForm(
   const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   const [isProcessing, setIsProcessing] = useState(false);
+  // Synchronous re-entrancy guard for `handleSubmit`. `isProcessing` only
+  // reaches the buttons after React re-renders, so two clicks / Enter presses
+  // in the same tick would both pass a state check and send two create-session
+  // requests (the second can then collide with the first's fresh discount
+  // hold). A ref flips immediately.
+  const submitInFlightRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+
+  // A successful submit deliberately leaves `submitInFlightRef` and
+  // `isProcessing` set while the page navigates to Stripe. If the shopper
+  // presses Back, the browser may restore this page from the back/forward
+  // cache with that state frozen in place, leaving Continue dead until a
+  // manual reload. `pageshow` with `persisted` is the bfcache-restore signal;
+  // reset so the Back-then-retry path (which create-session's supersede logic
+  // supports) works. A normal load has `persisted === false` and is left alone.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      submitInFlightRef.current = false;
+      setIsProcessing(false);
+      setError(null);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -575,6 +599,8 @@ export function useCheckoutForm(
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
     setError(null);
     setIsProcessing(true);
 
@@ -707,6 +733,7 @@ export function useCheckoutForm(
         } else {
           setError(data.error ?? "Failed to create checkout session");
         }
+        submitInFlightRef.current = false;
         setIsProcessing(false);
         return;
       }
@@ -731,10 +758,14 @@ export function useCheckoutForm(
           },
         });
         setError("Failed to create checkout session");
+        submitInFlightRef.current = false;
         setIsProcessing(false);
         return;
       }
 
+      // Success: the page navigates away to Stripe, so the guard stays set
+      // (a late second submit must not create another session). The
+      // assignment throwing is handled by the catch below.
       window.location.href = sessionUrl;
     } catch (err: unknown) {
       // Only report once the request was actually attempted: a network failure
@@ -761,6 +792,7 @@ export function useCheckoutForm(
         });
       }
       setError((err as Error).message ?? "Failed to create checkout session");
+      submitInFlightRef.current = false;
       setIsProcessing(false);
     }
   };

@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { MarkReadyForPickup } from "../_components/mark-ready-for-pickup";
 import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
@@ -46,6 +47,7 @@ export default async function OrderDetailPage({ params }: Props) {
   }
 
   const isStaffViewer = membershipRole === "STAFF";
+  const pickupLocation = resolvePickupLocation(business);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -450,9 +452,9 @@ export default async function OrderDetailPage({ params }: Props) {
                   <CardTitle>Pickup Location</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {(business?.pickupLocation ?? business?.businessAddress) ? (
+                  {pickupLocation ? (
                     <p className="text-foreground text-sm font-medium">
-                      {business?.pickupLocation ?? business?.businessAddress}
+                      {pickupLocation}
                     </p>
                   ) : (
                     <p className="text-muted-foreground text-sm">

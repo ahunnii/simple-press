@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
 import {
@@ -174,7 +175,7 @@ export async function ServiceTemplateTwo({
                 >
                   <Image
                     src={img.url}
-                    alt={img.altText ?? ""}
+                    alt={meaningfulAltText(img.altText) ?? ""}
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"

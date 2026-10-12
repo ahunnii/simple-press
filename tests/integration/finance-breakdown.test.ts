@@ -446,3 +446,60 @@ describe("finance.getBreakdown — donations block", () => {
     expect(result.donations.count).toBe(1);
   });
 });
+
+describe("finance.getBreakdown — feature gate (payments OR donations)", () => {
+  beforeEach(async () => {
+    await resetDb();
+    reqHost.value = "finance-biz.simplepress.test";
+  });
+
+  async function setupBusiness(
+    opts: Parameters<typeof createBusiness>[0] = {},
+  ) {
+    const business = await createBusiness(opts);
+    const owner = await createOwnerUser(business.id);
+    reqHost.value = `${business.subdomain}.simplepress.test`;
+    const caller = createTestCaller({ userId: owner.id });
+    return { caller };
+  }
+
+  it("rejects with FORBIDDEN when neither payments nor donations is enabled", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: false, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("passes for a donations-only store (payments off)", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: false, donations: true },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).resolves.toMatchObject({ donations: { enabled: true } });
+  });
+
+  it("passes for a payments-only store (donations off)", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: true, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).resolves.toBeDefined();
+  });
+
+  it("treats payments switched off by a dependency (orders off) as off", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { orders: false, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+});

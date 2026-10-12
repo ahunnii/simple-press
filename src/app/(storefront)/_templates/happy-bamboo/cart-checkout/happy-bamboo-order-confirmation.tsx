@@ -11,6 +11,11 @@ import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
 type DeliveryMethod = "ship" | "pickup" | null;
@@ -168,7 +173,12 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
     );
   }
 
-  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null);
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  // While a bank payment clears, no email has gone out yet — drop the
+  // "you'll receive an email confirmation shortly" line (the notice covers it).
+  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null).slice(
+    processing ? 1 : 0,
+  );
   const showPickupLocation =
     orderDetails?.delivery_method === "pickup" &&
     !!business.pickupLocation?.trim();
@@ -188,12 +198,21 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
           <CheckCircle2 className="text-primary size-8" aria-hidden="true" />
         </div>
         <h1 className="text-foreground font-serif text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-          Order Confirmed!
+          {processing ? PAYMENT_PROCESSING_HEADING : "Order Confirmed!"}
         </h1>
         <p className="text-muted-foreground mt-3 text-lg">
           Thank you for your purchase from {business.name}
         </p>
       </div>
+
+      {processing && (
+        <div
+          role="status"
+          className="border-primary/20 bg-primary/5 text-foreground mb-8 rounded-xl border p-6 text-center"
+        >
+          {PAYMENT_PROCESSING_MESSAGE}
+        </div>
+      )}
 
       {/* Order Details Card */}
       <Card className="border-primary/20 bg-primary/5 mb-8">
@@ -238,7 +257,7 @@ export function HappyBambooOrderConfirmation({ business }: Props) {
           {orderDetails?.customer_email && (
             <div className="border-border mt-6 border-t pt-6 text-sm">
               <p className="text-muted-foreground">
-                Confirmation sent to:{" "}
+                {processing ? "We'll email" : "Confirmation sent to:"}{" "}
                 <span className="text-foreground font-semibold">
                   {orderDetails.customer_email}
                 </span>

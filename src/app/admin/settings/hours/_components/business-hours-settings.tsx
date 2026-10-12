@@ -206,14 +206,19 @@ export function BusinessHoursSettings({ business }: Props) {
               <CardHeader>
                 <CardTitle>Business Hours</CardTitle>
                 <CardDescription>
-                  Shown on your storefront contact page and embedded as
-                  structured data (schema.org openingHoursSpecification) so
-                  search engines can display your hours directly in search
-                  results. Each row can cover one or more days, but a day can
-                  only belong to one row — rows display on your storefront in
-                  the order listed below. Structured data appears in search
-                  results only when &ldquo;Show as a local business&rdquo; is
-                  enabled in Content → SEO & Meta.
+                  Shown on your storefront contact page. Each row can cover one
+                  or more days, but a day can only belong to one row — rows
+                  display on your storefront in the order listed below. Your
+                  hours are also added to your site&apos;s search data so search
+                  engines can show them, when Local presence is set to Service
+                  area or Storefront in{" "}
+                  <Link
+                    href="/admin/content/seo"
+                    className="underline underline-offset-2"
+                  >
+                    SEO &amp; Meta
+                  </Link>
+                  .
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -410,12 +415,6 @@ export function BusinessHoursSettings({ business }: Props) {
                         </div>
                       )}
 
-                      {/* Row-level errors (days array duplicate, etc.) */}
-                      {form.formState.errors.rows?.[i]?.days && (
-                        <p className="text-destructive text-sm font-medium">
-                          {form.formState.errors.rows[i]?.days?.message}
-                        </p>
-                      )}
                     </div>
                   );
                 })}

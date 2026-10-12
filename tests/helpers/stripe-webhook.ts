@@ -95,6 +95,8 @@ export type CheckoutSessionFixtureOpts = {
   /** Rendered as `collected_information.shipping_details` on the full session. */
   shippingAddress?: AddressFixture | null;
   shippingName?: string | null;
+  /** `session.created` (Unix seconds) — when checkout started. Defaults to now. */
+  created?: number;
 };
 
 export type CheckoutSessionFixture = {
@@ -140,6 +142,7 @@ export function makeCheckoutSession(
   const base = {
     id,
     object: "checkout.session",
+    created: opts.created ?? Math.floor(Date.now() / 1000),
     mode: opts.mode ?? "payment",
     metadata: opts.metadata ?? {},
     customer_email: null,
@@ -252,6 +255,30 @@ export function makeCheckoutExpiredEvent(
 ): Stripe.Event {
   return makeEvent({
     type: "checkout.session.expired",
+    object: session,
+    account,
+  });
+}
+
+/** A delayed payment method settled: the session now reports "paid". */
+export function makeCheckoutAsyncPaymentSucceededEvent(
+  session: Stripe.Checkout.Session,
+  account: string | null,
+): Stripe.Event {
+  return makeEvent({
+    type: "checkout.session.async_payment_succeeded",
+    object: session,
+    account,
+  });
+}
+
+/** A delayed payment method failed: the session stays "unpaid". */
+export function makeCheckoutAsyncPaymentFailedEvent(
+  session: Stripe.Checkout.Session,
+  account: string | null,
+): Stripe.Event {
+  return makeEvent({
+    type: "checkout.session.async_payment_failed",
     object: session,
     account,
   });

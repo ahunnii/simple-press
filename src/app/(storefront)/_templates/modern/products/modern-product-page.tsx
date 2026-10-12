@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
@@ -107,7 +108,7 @@ export function ModernProductPage({
               {selectedImage ? (
                 <Image
                   src={selectedImage.url}
-                  alt={selectedImage.altText ?? product.name}
+                  alt={meaningfulAltText(selectedImage.altText) ?? product.name}
                   fill
                   className="object-cover"
                   priority
@@ -140,7 +141,10 @@ export function ModernProductPage({
                   >
                     <Image
                       src={image.url}
-                      alt={image.altText ?? `${product.name} ${index + 1}`}
+                      alt={
+                        meaningfulAltText(image.altText) ??
+                        `${product.name} ${index + 1}`
+                      }
                       fill
                       className="object-cover"
                       sizes="64px"

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { Product } from "~/types";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
@@ -45,7 +46,7 @@ export function DreamShopCard({ product, priority }: Props) {
   });
 
   const image = product.images[0];
-  const alt = image?.altText?.trim() ? image.altText : product.name;
+  const alt = meaningfulAltText(image?.altText) ?? product.name;
   const onSale = status.isOnSale && !!status.displayCompareAtPrice;
   const chip = status.isOutOfStock
     ? "Sold out"

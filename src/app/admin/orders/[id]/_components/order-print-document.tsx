@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { RouterOutputs } from "~/trpc/react";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
@@ -105,9 +106,9 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
             <div className="text-sm">
               <p className="font-medium">{order.customerName}</p>
               <p>In-store pickup</p>
-              {(business?.pickupLocation ?? business?.businessAddress) && (
+              {resolvePickupLocation(business) && (
                 <p className="whitespace-pre-line">
-                  {business?.pickupLocation ?? business?.businessAddress}
+                  {resolvePickupLocation(business)}
                 </p>
               )}
             </div>

@@ -9,6 +9,12 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_LABEL,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import {
   OliveButton,
@@ -280,6 +286,10 @@ export function OliveOrderConfirmation({
     ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
     : null;
 
+  // A delayed bank payment (`unpaid`) is still clearing: no receipt has gone
+  // out yet, so say "Processing" rather than "Paid" / "confirmed".
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+
   return (
     <OliveSection
       bleed
@@ -308,6 +318,11 @@ export function OliveOrderConfirmation({
               // design.md asks for a sage chip here, and `label` carries the
               // word the shopper actually needs to read.
               <OliveStatusBadge status="active" label="Paid" />
+            ) : processing ? (
+              <OliveStatusBadge
+                status="processing"
+                label={PAYMENT_PROCESSING_LABEL}
+              />
             ) : null}
           </div>
 
@@ -317,9 +332,17 @@ export function OliveOrderConfirmation({
               className="olive-display"
               {...fieldAttr("olive.checkout.success-heading")}
             >
-              {heading}
+              {processing ? PAYMENT_PROCESSING_HEADING : heading}
             </h1>
-            {body ? (
+            {processing ? (
+              <p
+                role="status"
+                className="max-w-[52ch] text-[1rem] leading-relaxed"
+                style={{ color: "var(--olive-ink-soft)" }}
+              >
+                {PAYMENT_PROCESSING_MESSAGE}
+              </p>
+            ) : body ? (
               <p
                 className="max-w-[52ch] text-[1rem] leading-relaxed"
                 style={{ color: "var(--olive-ink-soft)" }}
@@ -337,7 +360,9 @@ export function OliveOrderConfirmation({
                   className="flex flex-wrap items-baseline justify-between gap-3 py-3"
                   style={{ borderTop: "1px solid var(--olive-hairline)" }}
                 >
-                  <dt className="olive-label">Receipt sent to</dt>
+                  <dt className="olive-label">
+                    {processing ? "Receipt will be sent to" : "Receipt sent to"}
+                  </dt>
                   <dd className="olive-price break-all">
                     {orderDetails.customer_email}
                   </dd>

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
-  "csdt@generativejustice.org";
+  "help@generativejustice.org";
 
 export default function AccessibilityStatementPage() {
   return (

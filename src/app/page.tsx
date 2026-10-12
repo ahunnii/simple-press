@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost, getCanonicalUrl } from "~/lib/canonical";
+import { checkBusinessAnyStatus } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
 import { parseLocalPresence } from "~/lib/seo/local-presence";
@@ -36,6 +37,8 @@ import { DreamHomepage } from "./(storefront)/_templates/dream/homepage/dream-ho
 import { DreamLayout } from "./(storefront)/_templates/dream/layout/dream-layout";
 import { ElegantHomePage } from "./(storefront)/_templates/elegant/homepage/elegant-homepage";
 import { ElegantLayout } from "./(storefront)/_templates/elegant/layout/elegant-layout";
+import { GloveHomepage } from "./(storefront)/_templates/glove/homepage/glove-homepage";
+import { GloveLayout } from "./(storefront)/_templates/glove/layout/glove-layout";
 import { HappyBambooHomepage } from "./(storefront)/_templates/happy-bamboo/homepage/happy-bamboo-homepage";
 import { HappyBambooLayout } from "./(storefront)/_templates/happy-bamboo/layout/happy-bamboo-layout";
 import { ModernHomePage } from "./(storefront)/_templates/modern/homepage/modern-home-page";
@@ -44,8 +47,6 @@ import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-ho
 import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
 import { OliveHomepage } from "./(storefront)/_templates/olive/homepage/olive-homepage";
 import { OliveLayout } from "./(storefront)/_templates/olive/layout/olive-layout";
-import { GloveHomepage } from "./(storefront)/_templates/glove/homepage/glove-homepage";
-import { GloveLayout } from "./(storefront)/_templates/glove/layout/glove-layout";
 import { PinkHomepage } from "./(storefront)/_templates/pink/homepage/pink-homepage";
 import { PinkLayout } from "./(storefront)/_templates/pink/layout/pink-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
@@ -75,6 +76,10 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   const business = await api.business.simplifiedGetWithProducts();
 
   if (!business) {
+    // The tenant lookup is active-only, so a suspended/closed store lands here
+    // too. If the host still resolves to a store, 404 (as the storefront layout
+    // does); otherwise it's the platform apex / an unknown host.
+    if (await checkBusinessAnyStatus()) notFound();
     return <PlatformLandingPageComponent />;
   }
 

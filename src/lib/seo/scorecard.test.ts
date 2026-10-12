@@ -29,10 +29,10 @@ vi.mock("~/server/db", () => ({
     faqItem: { count: vi.fn() },
     page: { count: vi.fn() },
     product: { count: vi.fn() },
-    image: { count: vi.fn() },
+    image: { count: vi.fn(), findMany: vi.fn() },
     collection: { count: vi.fn() },
     service: { count: vi.fn() },
-    galleryImage: { count: vi.fn() },
+    galleryImage: { count: vi.fn(), findMany: vi.fn() },
   },
 }));
 
@@ -55,6 +55,8 @@ const ZERO_TABLES = [
 
 beforeEach(() => {
   for (const fn of ZERO_TABLES) asMock(fn).mockResolvedValue(0);
+  (db.image.findMany as unknown as Mock).mockResolvedValue([]);
+  (db.galleryImage.findMany as unknown as Mock).mockResolvedValue([]);
 });
 
 const NEVER_ENABLED = () => false;
@@ -408,6 +410,53 @@ describe("computeSeoScorecard — catalog shareable image", () => {
     expect(item?.score).toBe(1);
     expect(item?.detail).toBe("1 of 1 products");
     expect(item?.label).toBe("Products with a shareable image");
+  });
+});
+
+function altItem(scorecard: Scorecard, key: string) {
+  return scorecard.groups
+    .find((g) => g.id === "alt-text")
+    ?.items.find((i) => i.key === key);
+}
+
+describe("computeSeoScorecard — image alt text", () => {
+  it("does not count file-name alt text on gallery images", async () => {
+    asMock(db.galleryImage.count).mockResolvedValue(5);
+    (db.galleryImage.findMany as unknown as Mock).mockResolvedValue([
+      { altText: "download-9.png" },
+      { altText: "a9fe57_faf3d13345b74dd18294d9b2a01c54edmv2.webp" },
+      { altText: "IMG_1234.JPG" },
+      { altText: "A red mug on a shelf" },
+      { altText: "  Our shop front  " },
+    ]);
+
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "galleries",
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = altItem(scorecard, "alt-gallery-images");
+    expect(item?.detail).toBe("2 of 5 gallery images");
+    expect(item?.score).toBeCloseTo(0.4);
+  });
+
+  it("does not count file-name alt text on product images", async () => {
+    asMock(db.image.count).mockResolvedValue(3);
+    (db.image.findMany as unknown as Mock).mockResolvedValue([
+      { altText: "download-9.png" },
+      { altText: "Hand-thrown blue mug" },
+      { altText: null },
+    ]);
+
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "products",
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = altItem(scorecard, "alt-product-images");
+    expect(item?.detail).toBe("1 of 3 product images");
   });
 });
 

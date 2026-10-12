@@ -1456,7 +1456,20 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
               image={editingImage}
               isOpen={true}
               onClose={() => setEditingImage(null)}
-              onSuccess={() => router.refresh()}
+              onSuccess={(updated) => {
+                setImages((prev) =>
+                  prev.map((img) =>
+                    img.id === updated.id
+                      ? {
+                          ...img,
+                          altText: updated.altText,
+                          caption: updated.caption,
+                        }
+                      : img,
+                  ),
+                );
+                router.refresh();
+              }}
             />
           )}
         </div>

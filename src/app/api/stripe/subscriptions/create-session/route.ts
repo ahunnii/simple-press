@@ -10,6 +10,11 @@ import type { SupportedCountry } from "~/lib/geo/regions";
 import { env } from "~/env";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
+  PENDING_SESSION_COOKIE_MAX_AGE,
+  signPendingSessionCookie,
+  SUBSCRIPTION_PENDING_COOKIE,
+} from "~/lib/checkout/pending-session-cookie";
+import {
   checkCartAvailability,
   computePoolDemand,
 } from "~/lib/checkout/validate-cart";
@@ -190,19 +195,31 @@ export async function POST(req: Request) {
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);
 
-    if (!business?.stripeAccountId) {
+    if (!business) {
+      // Null means an unknown host OR a suspended/closed store
+      // (`getBusinessByDomain` is active-only).
+      reportSubscriptionBlocked("business-not-found", {
+        host: domain,
+        extra: { host: domain },
+      });
+      return NextResponse.json(
+        { error: "Subscriptions are not available for this store." },
+        { status: 404 },
+      );
+    }
+
+    if (!business.stripeAccountId) {
       // Subscriptions are billed as direct charges on the store's own account.
       // Without Connect onboarding there is nowhere for the money to go, and
       // the storefront gives no hint of it.
       reportSubscriptionBlocked("stripe-not-connected", {
-        businessId: business?.id,
-        templateId: business?.templateId,
+        businessId: business.id,
+        templateId: business.templateId,
         host: domain,
         extra: {
           host: domain,
-          businessResolved: !!business,
-          hasStripeAccountId: !!business?.stripeAccountId,
-          stripeChargesEnabled: business?.stripeChargesEnabled ?? null,
+          hasStripeAccountId: false,
+          stripeChargesEnabled: business.stripeChargesEnabled,
         },
       });
       return NextResponse.json(
@@ -695,13 +712,24 @@ export async function POST(req: Request) {
       // are never sent on cross-site navigations — the one-time
       // `pending_session` cookie stays `strict` because it's read via a
       // same-site client fetch to `/api/stripe/session`, not a redirect.
-      response.cookies.set("pending_subscription_session", session.id, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 3600,
-      });
+      //
+      // SIGNED (`<sessionId>.<hmac>`, bound to this store and to the
+      // subscription cookie's own signature context): a Stripe session id is
+      // not a secret, so a bare id would let anyone who saw it set the cookie
+      // and read the subscriber's details. See pending-session-cookie.ts.
+      response.cookies.set(
+        SUBSCRIPTION_PENDING_COOKIE.name,
+        signPendingSessionCookie(session.id, business.id, {
+          kind: SUBSCRIPTION_PENDING_COOKIE,
+        }),
+        {
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: PENDING_SESSION_COOKIE_MAX_AGE,
+        },
+      );
       return response;
     } catch (stripeErr) {
       // Roll the placeholder back. An `incomplete` row with no Stripe

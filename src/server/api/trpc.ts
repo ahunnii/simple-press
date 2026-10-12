@@ -393,39 +393,65 @@ export const platformAdminProcedure = t.procedure
     });
   });
 
+/**
+ * Resolve the tenant's feature flags for a feature-gate middleware.
+ *
+ * `getBusinessFlags()` resolves the tenant via `checkBusiness()`, which only
+ * sees ACTIVE stores — so on a suspended store it throws NOT_FOUND before the
+ * flag check even runs. Platform admins must still be able to reach
+ * feature-gated tenant procedures to remediate a suspension, so retry the
+ * lookup without the status filter for them (live DB role read, never cookie
+ * cache). Everyone else keeps the clean 404.
+ */
+async function resolveGateFlags(ctx: {
+  session: { user?: { id?: string } | null } | null;
+}) {
+  try {
+    return await getBusinessFlags();
+  } catch (err) {
+    const userId = ctx.session?.user?.id;
+    if (
+      err instanceof TRPCError &&
+      err.code === "NOT_FOUND" &&
+      userId &&
+      (await isPlatformAdmin(userId))
+    ) {
+      return await getBusinessFlags({ includeInactive: true });
+    }
+    throw err;
+  }
+}
+
 export const featureGate = (featureKey: string) =>
   t.middleware(async ({ ctx, next }) => {
-    // 1. Get the flags using your existing helper.
-    //
-    // `getBusinessFlags()` resolves the tenant via `checkBusiness()`, which
-    // only sees ACTIVE stores — so on a suspended store it throws NOT_FOUND
-    // before the flag check even runs. Platform admins must still be able to
-    // reach feature-gated tenant procedures to remediate a suspension, so
-    // retry the lookup without the status filter for them (live DB role read,
-    // never cookie cache). Everyone else keeps the clean 404.
-    let flags: Awaited<ReturnType<typeof getBusinessFlags>>;
-    try {
-      flags = await getBusinessFlags();
-    } catch (err) {
-      const userId = ctx.session?.user?.id;
-      if (
-        err instanceof TRPCError &&
-        err.code === "NOT_FOUND" &&
-        userId &&
-        (await isPlatformAdmin(userId))
-      ) {
-        flags = await getBusinessFlags({ includeInactive: true });
-      } else {
-        throw err;
-      }
-    }
-    const { isEnabled, disabledByDependency } = flags;
+    const { isEnabled, disabledByDependency } = await resolveGateFlags(ctx);
 
-    // 2. Check if the feature is active
+    // Check if the feature is active
     if (!isEnabled(featureKey) || disabledByDependency.has(featureKey)) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: `The ${featureKey} feature is not enabled for this business. To enable it, head to the Features page found in the Settings section of the admin dashboard.`,
+      });
+    }
+
+    return next();
+  });
+
+/**
+ * "Any of" variant of `featureGate`: passes when AT LEAST ONE of the given
+ * features is active (e.g. Finances is reachable with payments OR donations).
+ */
+export const featureGateAny = (featureKeys: string[]) =>
+  t.middleware(async ({ ctx, next }) => {
+    const { isEnabled, disabledByDependency } = await resolveGateFlags(ctx);
+
+    const anyEnabled = featureKeys.some(
+      (key) => isEnabled(key) && !disabledByDependency.has(key),
+    );
+    if (!anyEnabled) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `None of the ${featureKeys.join(", ")} features are enabled for this business. To enable one, head to the Features page found in the Settings section of the admin dashboard.`,
       });
     }
 

@@ -38,6 +38,7 @@ import { OliveAccountLayout } from "./olive-account-layout";
 /** Colour per reward-code status — the leaf-bright field is reserved for "Active". */
 const CODE_STATUS_COLOR: Record<RewardCodeStatus, string> = {
   active: "var(--olive-sage-bright)",
+  pending: "var(--olive-slate)",
   used: "var(--olive-slate)",
   expired: "var(--olive-error)",
   inactive: "var(--olive-ink-soft)",

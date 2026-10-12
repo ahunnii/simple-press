@@ -15,9 +15,10 @@ const RANGES = [
   { value: "30d", label: "Last 30 days" },
   { value: "90d", label: "Last 90 days" },
   { value: "ytd", label: "Year to date" },
-  // Label filled in per render with the current year so it matches the
-  // server's page label ("Calendar year 2026").
+  // Labels filled in per render with the year so they match the server's page
+  // label ("Calendar year 2026"; "lastYear" is the year before).
   { value: "year", label: "Calendar year" },
+  { value: "lastYear", label: "Calendar year" },
 ] as const;
 
 type Range = (typeof RANGES)[number]["value"];
@@ -41,13 +42,17 @@ export function RangeSelector({
 
   return (
     <Select value={current} onValueChange={handleChange}>
-      <SelectTrigger className="w-40">
+      <SelectTrigger className="w-48">
         <SelectValue placeholder="Select range" />
       </SelectTrigger>
       <SelectContent>
         {RANGES.map((r) => (
           <SelectItem key={r.value} value={r.value}>
-            {r.value === "year" ? `${r.label} ${year}` : r.label}
+            {r.value === "year"
+              ? `${r.label} ${year}`
+              : r.value === "lastYear"
+                ? `${r.label} ${year - 1}`
+                : r.label}
           </SelectItem>
         ))}
       </SelectContent>

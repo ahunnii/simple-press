@@ -18,6 +18,7 @@ import {
   maintenanceCtaSchema,
   normalizeMaintenanceMessage,
 } from "~/lib/maintenance-config";
+import { getTimeZoneLabel } from "~/lib/time-zones";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import {
@@ -628,10 +629,17 @@ export function AvailabilityEditor({
                   </div>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  Times are in {timeZone}. When set, the page shows the date and
-                  a live countdown. The countdown reaching zero does not turn
-                  maintenance mode off — come back here and switch it off when
-                  you open.
+                  Times are in {getTimeZoneLabel(timeZone)} (your store&apos;s
+                  time zone in{" "}
+                  <Link
+                    href="/admin/settings/general"
+                    className="underline underline-offset-2"
+                  >
+                    General settings
+                  </Link>
+                  ). When set, the page shows the date and a live countdown. The
+                  countdown reaching zero does not turn maintenance mode off —
+                  come back here and switch it off when you open.
                 </p>
               </div>
 
@@ -869,8 +877,9 @@ export function AvailabilityEditor({
             </>
           )}
 
-          {/* Active warning */}
-          {maintenanceMode && (
+          {/* Offline status — driven by the SAVED state, not the switch, so
+              flipping the switch never claims the store is already offline. */}
+          {savedState.maintenanceMode && maintenanceMode && (
             <Alert variant="destructive">
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Storefront is currently offline</AlertTitle>
@@ -891,6 +900,37 @@ export function AvailabilityEditor({
                   </Link>
                 </Button>
               </AlertAction>
+            </Alert>
+          )}
+          {!savedState.maintenanceMode && maintenanceMode && (
+            <Alert variant="warning">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>
+                Your storefront will go offline when you save
+              </AlertTitle>
+              <AlertDescription>
+                Until you save, your store is still live. Once saved, visitors
+                will see the{" "}
+                {maintenanceVariant === "coming_soon"
+                  ? "coming soon"
+                  : "maintenance"}{" "}
+                page.
+              </AlertDescription>
+            </Alert>
+          )}
+          {savedState.maintenanceMode && !maintenanceMode && (
+            <Alert variant="warning">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>
+                Your storefront will come back online when you save
+              </AlertTitle>
+              <AlertDescription>
+                Until you save, visitors still see the{" "}
+                {savedState.maintenanceVariant === "coming_soon"
+                  ? "coming soon"
+                  : "maintenance"}{" "}
+                page.
+              </AlertDescription>
             </Alert>
           )}
 

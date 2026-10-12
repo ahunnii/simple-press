@@ -523,10 +523,17 @@ export const galleryRouter = createTRPCRouter({
     .input(galleryUpdateImageSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { id, ...data } = input;
+      const { id, altText, caption } = input;
+      // Blank clears the field (stored as null so storefront `?? fallback`
+      // works); undefined means the field was omitted and stays unchanged.
+      const blankToNull = (v: string | undefined) => {
+        if (v === undefined) return undefined;
+        const trimmed = v.trim();
+        return trimmed === "" ? null : trimmed;
+      };
       const image = await ctx.db.galleryImage.update({
         where: { id, gallery: { businessId } },
-        data,
+        data: { altText: blankToNull(altText), caption: blankToNull(caption) },
       });
       return { data: image, message: "Image updated successfully!" };
     }),

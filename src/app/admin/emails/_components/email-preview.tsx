@@ -21,6 +21,9 @@ import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderPaymentFailedEmail from "~/emails/order-payment-failed";
+import OrderPaymentFailedOwnerEmail from "~/emails/order-payment-failed-owner";
+import OrderPaymentProcessingEmail from "~/emails/order-payment-processing";
 import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
@@ -44,6 +47,15 @@ import {
   applySubjectTemplate,
   CUSTOMIZABLE_EMAILS,
 } from "~/lib/email/customization";
+import {
+  orderConfirmationDefaultSubject,
+  orderPaymentFailedDefaultSubject,
+  orderPaymentProcessingDefaultSubject,
+  subscriptionCancelledDefaultSubject,
+  subscriptionPaymentFailedDefaultSubject,
+  subscriptionStartedDefaultSubject,
+  subscriptionUpdatedDefaultSubject,
+} from "~/lib/email/default-subjects";
 import { renderEmail } from "~/lib/email/render";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -68,6 +80,13 @@ type PreviewDef = {
   label: string;
   /** When set, this preview belongs to a customizable transactional email. */
   overrideId?: string;
+  /**
+   * The subject the real send path produces for this sample when the owner
+   * has no custom subject. Built with the same helpers the senders call
+   * (`~/lib/email/default-subjects`). Omit to fall back to the registry's
+   * static `defaultSubject` pattern.
+   */
+  defaultSubject?: string;
   build: (introText?: string) => ReactElement;
 };
 
@@ -138,6 +157,18 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
     });
     const logoUrl = business.siteContent?.logoUrl ?? "";
 
+    // Sample cart shared by the bank-payment previews (cents).
+    const bankPaymentSampleItems = [
+      {
+        name: "Sample Product",
+        variantName: "Medium / Blue",
+        quantity: 2,
+        unitAmount: 2999,
+      },
+      { name: "Another Item", quantity: 1, unitAmount: 1500 },
+    ];
+    const bankPaymentSampleTotal = 7498;
+
     return [
       {
         key: "order-confirmation",
@@ -180,6 +211,10 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "order-confirmation-pickup",
         label: "Order Confirmation (pickup)",
         overrideId: "order-confirmation",
+        defaultSubject: orderConfirmationDefaultSubject({
+          orderNumber: sampleOrder?.orderNumber ?? 1001,
+          isPickup: true,
+        }),
         build: (introText) =>
           OrderConfirmationEmail({
             orderNumber: sampleOrder?.orderNumber ?? 1001,
@@ -384,6 +419,41 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
           }),
       },
       {
+        key: "order-payment-processing",
+        label: "Bank Payment Processing",
+        overrideId: "order-payment-processing",
+        defaultSubject: orderPaymentProcessingDefaultSubject({
+          businessName: business.name,
+        }),
+        build: (introText) =>
+          OrderPaymentProcessingEmail({
+            customerName: "John Doe",
+            introText,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            items: bankPaymentSampleItems,
+            amountTotal: bankPaymentSampleTotal,
+          }),
+      },
+      {
+        key: "order-payment-failed",
+        label: "Bank Payment Failed",
+        overrideId: "order-payment-failed",
+        defaultSubject: orderPaymentFailedDefaultSubject({
+          businessName: business.name,
+        }),
+        build: (introText) =>
+          OrderPaymentFailedEmail({
+            customerName: "John Doe",
+            introText,
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            businessUrl,
+            items: bankPaymentSampleItems,
+            amountTotal: bankPaymentSampleTotal,
+          }),
+      },
+      {
         // Not owner-customizable: sendBackInStockEmail builds its own subject
         // ("<item> is back in stock") and reads no email override.
         key: "back-in-stock",
@@ -465,8 +535,16 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             amountDueCents: 168000,
             dueDateLabel: "October 15, 2026",
             lineItems: [
-              { description: "Design consultation", quantity: 2, amountCents: 30000 },
-              { description: "Website build", quantity: 1, amountCents: 140000 },
+              {
+                description: "Design consultation",
+                quantity: 2,
+                amountCents: 30000,
+              },
+              {
+                description: "Website build",
+                quantity: 1,
+                amountCents: 140000,
+              },
             ],
             subtotalCents: 170000,
             discountCents: 8500,
@@ -486,13 +564,22 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             businessName: business.name,
             businessLogoUrl: logoUrl,
             isOverdue: true,
-            message: "Just a friendly nudge — let us know if you have questions.",
+            message:
+              "Just a friendly nudge — let us know if you have questions.",
             invoiceNumber: "INV-0012",
             amountDueCents: 168000,
             dueDateLabel: "October 15, 2026",
             lineItems: [
-              { description: "Design consultation", quantity: 2, amountCents: 30000 },
-              { description: "Website build", quantity: 1, amountCents: 140000 },
+              {
+                description: "Design consultation",
+                quantity: 2,
+                amountCents: 30000,
+              },
+              {
+                description: "Website build",
+                quantity: 1,
+                amountCents: 140000,
+              },
             ],
             totalCents: 168000,
             balanceCents: 168000,
@@ -509,7 +596,8 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             businessName: business.name,
             businessLogoUrl: logoUrl,
             invoiceNumber: "INV-0012",
-            reason: "The project scope changed, so we're issuing a new invoice.",
+            reason:
+              "The project scope changed, so we're issuing a new invoice.",
             amountPaidCents: 0,
           }),
       },
@@ -746,6 +834,9 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "subscription-started",
         label: "Subscription Started",
         overrideId: "subscription-started",
+        defaultSubject: subscriptionStartedDefaultSubject({
+          productName: "Premium Coffee Pack",
+        }),
         build: (_introText) =>
           SubscriptionStartedEmail({
             businessName: business.name,
@@ -770,6 +861,9 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "subscription-payment-failed",
         label: "Subscription Payment Failed",
         overrideId: "subscription-payment-failed",
+        defaultSubject: subscriptionPaymentFailedDefaultSubject({
+          productName: "Premium Coffee Pack",
+        }),
         build: (_introText) =>
           SubscriptionPaymentFailedEmail({
             businessName: business.name,
@@ -786,6 +880,9 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "subscription-cancelled",
         label: "Subscription Cancelled",
         overrideId: "subscription-cancelled",
+        defaultSubject: subscriptionCancelledDefaultSubject({
+          productName: "Premium Coffee Pack",
+        }),
         build: (_introText) =>
           SubscriptionCancelledEmail({
             businessName: business.name,
@@ -802,6 +899,9 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "subscription-updated-paused",
         label: "Subscription Updated (Paused)",
         overrideId: "subscription-updated",
+        defaultSubject: subscriptionUpdatedDefaultSubject({
+          variant: "paused",
+        }),
         build: (_introText) =>
           SubscriptionUpdatedEmail({
             businessName: business.name,
@@ -819,6 +919,9 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         key: "subscription-updated-resumed",
         label: "Subscription Updated (Resumed)",
         overrideId: "subscription-updated",
+        defaultSubject: subscriptionUpdatedDefaultSubject({
+          variant: "resumed",
+        }),
         build: (_introText) =>
           SubscriptionUpdatedEmail({
             businessName: business.name,
@@ -913,6 +1016,20 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             adminUrl: `${businessUrl}/admin/subscriptions/sample`,
           }),
       },
+      {
+        key: "order-payment-failed-owner",
+        label: "Bank Payment Failed (owner)",
+        build: () =>
+          OrderPaymentFailedOwnerEmail({
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            customerName: "John Doe",
+            customerEmail: "john@example.com",
+            items: bankPaymentSampleItems,
+            amountTotal: bankPaymentSampleTotal,
+            stripeSessionId: "cs_test_a1B2c3D4e5F6g7H8i9J0",
+          }),
+      },
     ];
   }, [business, sampleOrder]);
 
@@ -946,10 +1063,16 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
     JSON.stringify(cleanOverrides(drafts)) !==
     JSON.stringify(cleanOverrides(savedState));
 
+  // What the real sender uses with no custom subject: the preview's own
+  // sample-specific default when it has one, else the registry pattern.
+  const defaultSubject =
+    selected?.defaultSubject ?? customizable?.defaultSubject ?? "";
+
   const subjectPreview = customizable
-    ? applySubjectTemplate(draftSubject.trim() || customizable.defaultSubject, {
+    ? applySubjectTemplate(draftSubject.trim() || defaultSubject, {
         orderNumber: sampleOrder?.orderNumber ?? 1001,
         businessName: business.name,
+        invoiceNumber: "INV-0012",
       })
     : null;
 
@@ -1044,7 +1167,7 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
                     id="email-override-subject"
                     value={draftSubject}
                     maxLength={150}
-                    placeholder={customizable.defaultSubject}
+                    placeholder={defaultSubject}
                     onChange={(e) => setDraftField("subject", e.target.value)}
                   />
                   <p className="text-muted-foreground text-xs">

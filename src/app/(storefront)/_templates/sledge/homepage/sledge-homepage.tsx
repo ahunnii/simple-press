@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
@@ -63,7 +64,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
   const introImages =
     introGallery?.images.map((img) => ({
       url: img.url,
-      altText: img.altText,
+      altText: meaningfulAltText(img.altText),
     })) ?? [];
 
   const logoUrl = homepage?.siteContent?.logoUrl ?? undefined;

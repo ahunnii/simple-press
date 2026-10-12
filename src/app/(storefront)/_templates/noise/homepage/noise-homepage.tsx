@@ -2,6 +2,7 @@ import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { isPreviewRequest } from "~/lib/preview/preview-context";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -157,7 +158,7 @@ export async function NoiseHomepage(props?: DefaultHomepageTemplateProps) {
   const introImages =
     introGallery?.images.map((img) => ({
       url: img.url,
-      altText: img.altText,
+      altText: meaningfulAltText(img.altText),
     })) ?? [];
 
   // Both fetches are feature-gated server-side (FORBIDDEN when the flag is

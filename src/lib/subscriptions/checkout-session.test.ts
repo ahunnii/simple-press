@@ -186,6 +186,7 @@ describe("buildSubscriptionCheckoutParams — ship + shipping (primary case)", (
         businessId: "biz_1",
         subscriptionId: "sub_row_1",
         kind: "subscription",
+        pendingCookie: "signed-v1",
       },
       success_url:
         "https://shop.example.com/subscribe/success?session_id={CHECKOUT_SESSION_ID}",

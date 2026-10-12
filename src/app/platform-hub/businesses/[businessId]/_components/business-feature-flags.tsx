@@ -9,6 +9,7 @@ import type { FeatureCategory } from "~/lib/features/registry";
 import {
   CATEGORY_META,
   FEATURE_REGISTRY,
+  getBlockingDependencyLabels,
   getDisabledDueToDependency,
 } from "~/lib/features/registry";
 import { api } from "~/trpc/react";
@@ -61,14 +62,6 @@ export function BusinessFeatureFlags({ businessId, initialFlags }: Props) {
       toast.error(error.message || "Failed to save feature flags");
     },
   });
-
-  const getDependencyLabel = (key: string): string | undefined => {
-    const feature = FEATURE_REGISTRY[key];
-    if (!feature?.dependsOn) return undefined;
-    const missingDep = feature.dependsOn.find((dep) => !draft[dep]);
-    if (!missingDep) return undefined;
-    return FEATURE_REGISTRY[missingDep]?.label;
-  };
 
   const handleToggle = (key: string, enabled: boolean) => {
     setDraft((prev) => ({ ...prev, [key]: enabled }));
@@ -133,7 +126,10 @@ export function BusinessFeatureFlags({ businessId, initialFlags }: Props) {
                 <div className="divide-y rounded-md border px-4">
                   {featuresInCategory.map((feature) => {
                     const blockedByDep = disabledByDependency.has(feature.key);
-                    const depLabel = getDependencyLabel(feature.key);
+                    const blockers = getBlockingDependencyLabels(
+                      feature.key,
+                      draft,
+                    );
                     const enabled =
                       !blockedByDep && (draft[feature.key] ?? false);
 
@@ -172,12 +168,15 @@ export function BusinessFeatureFlags({ businessId, initialFlags }: Props) {
                                     className="gap-1 text-xs"
                                   >
                                     <Info className="h-3 w-3" />
-                                    Requires {depLabel}
+                                    Requires {blockers.join(", ")}
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  Enable &quot;{depLabel}&quot; first to use
-                                  this feature
+                                  Enable{" "}
+                                  {blockers
+                                    .map((label) => `"${label}"`)
+                                    .join(" and ")}{" "}
+                                  first to use this feature
                                 </TooltipContent>
                               </Tooltip>
                             )}

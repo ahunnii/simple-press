@@ -67,13 +67,21 @@ function StatTile({
   );
 }
 
-export function FinanceBreakdown({ data }: { data: Data }) {
+export function FinanceBreakdown({
+  data,
+  showTaxGuide = true,
+}: {
+  data: Data;
+  /** Hide Tax Guide links when payments is off (the guide is gated on it). */
+  showTaxGuide?: boolean;
+}) {
   const {
     range,
     orders,
     stripe,
     donations,
     taxCollectedYtdCents,
+    taxCollectedYtdYear,
     stripeAutoTaxEnabled,
     isStripeConnected,
     stripeError,
@@ -93,12 +101,14 @@ export function FinanceBreakdown({ data }: { data: Data }) {
           <p>{range.label} — where every dollar collected actually went</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/admin/finances/tax-guide">
-              <BookOpen className="h-4 w-4" />
-              Tax Guide
-            </Link>
-          </Button>
+          {showTaxGuide && (
+            <Button variant="outline" asChild>
+              <Link href="/admin/finances/tax-guide">
+                <BookOpen className="h-4 w-4" />
+                Tax Guide
+              </Link>
+            </Button>
+          )}
           <RangeSelector current={range.key} basePath="/admin/finances" />
         </div>
       </div>
@@ -413,7 +423,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
             </div>
             <div className="rounded-lg border p-4">
               <p className="text-muted-foreground text-sm">
-                Tax collected — calendar year to date
+                Tax collected — {taxCollectedYtdYear} year to date
               </p>
               <p className="mt-1 text-2xl font-semibold">
                 {formatCurrency(taxCollectedYtdCents)}
@@ -435,28 +445,41 @@ export function FinanceBreakdown({ data }: { data: Data }) {
                 >
                   Settings → Integrations
                 </Link>{" "}
-                once Stripe Tax is set up — see the{" "}
-                <Link
-                  href="/admin/finances/tax-guide"
-                  className="underline underline-offset-2"
-                >
-                  Tax Guide
-                </Link>{" "}
-                for the steps.
+                once Stripe Tax is set up
+                {showTaxGuide ? (
+                  <>
+                    {" "}
+                    — see the{" "}
+                    <Link
+                      href="/admin/finances/tax-guide"
+                      className="underline underline-offset-2"
+                    >
+                      Tax Guide
+                    </Link>{" "}
+                    for the steps
+                  </>
+                ) : null}
+                .
               </AlertDescription>
             </Alert>
           )}
 
           <p className="text-muted-foreground text-xs">
             Sales tax isn&apos;t your money — you collect it on the state&apos;s
-            behalf and remit it. See the{" "}
-            <Link
-              href="/admin/finances/tax-guide"
-              className="underline underline-offset-2"
-            >
-              tax guide
-            </Link>{" "}
-            for nexus thresholds and remittance steps.
+            behalf and remit it.
+            {showTaxGuide && (
+              <>
+                {" "}
+                See the{" "}
+                <Link
+                  href="/admin/finances/tax-guide"
+                  className="underline underline-offset-2"
+                >
+                  tax guide
+                </Link>{" "}
+                for nexus thresholds and remittance steps.
+              </>
+            )}
           </p>
         </CardContent>
       </Card>

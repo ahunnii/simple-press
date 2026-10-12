@@ -14,6 +14,11 @@ import {
 import { Button } from "~/components/ui/button";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import { DARK_TREND_CONFIRMATION_STEPS_KEY } from "./order-fields";
 
@@ -54,6 +59,7 @@ export function DarkTrendOrderConfirmation({
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
 
   useEffect(() => {
     if (!sessionId) {
@@ -150,12 +156,21 @@ export function DarkTrendOrderConfirmation({
           {...fieldAttr("dark-trend.checkout.confirmation-heading")}
           className="mb-4 text-4xl font-bold text-white lg:text-5xl"
         >
-          {heading}
+          {processing ? PAYMENT_PROCESSING_HEADING : heading}
         </h1>
         <p className="text-lg text-white/70">
           Thank you for your purchase from {business.name}
         </p>
       </div>
+
+      {processing && (
+        <p
+          role="status"
+          className="mb-8 rounded-sm border border-white/10 bg-zinc-900/30 p-6 text-center text-white/80"
+        >
+          {PAYMENT_PROCESSING_MESSAGE}
+        </p>
+      )}
 
       {/* Order Details Card */}
       <div className="mb-8 rounded-sm bg-zinc-900/30 p-8">
@@ -190,7 +205,7 @@ export function DarkTrendOrderConfirmation({
         {orderDetails?.customer_email && (
           <div className="mt-6 border-t border-white/10 pt-6 text-sm">
             <p className="text-white/70">
-              Confirmation sent to:{" "}
+              {processing ? "We'll email" : "Confirmation sent to:"}{" "}
               <span className="font-semibold text-white">
                 {orderDetails.customer_email}
               </span>

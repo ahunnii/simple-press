@@ -13,10 +13,10 @@
 
 /** ISO `YYYY-MM-DD`, one per policy document. */
 export const POLICY_LAST_UPDATED = {
-  termsOfService: "2026-09-22",
+  termsOfService: "2026-10-11",
   privacyPolicy: "2026-09-22",
   cookie: "2026-09-22",
-  sellerMerchant: "2026-05-29",
+  sellerMerchant: "2026-10-11",
   acceptableUse: "2026-05-29",
   dmca: "2026-05-29",
   accessibility: "2026-06-07",

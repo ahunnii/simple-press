@@ -9,6 +9,11 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatCurrency } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 type DeliveryMethod = "ship" | "pickup" | null;
 
@@ -184,7 +189,12 @@ export function ElegantOrderConfirmation({
     );
   }
 
-  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null);
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  // While a bank payment clears, no email has gone out yet — drop the
+  // "you'll receive an email confirmation shortly" line (the notice covers it).
+  const bullets = nextStepsBullets(orderDetails?.delivery_method ?? null).slice(
+    processing ? 1 : 0,
+  );
   const showPickupLocation =
     orderDetails?.delivery_method === "pickup" &&
     !!business.pickupLocation?.trim();
@@ -260,10 +270,22 @@ export function ElegantOrderConfirmation({
               outline: "none",
             }}
           >
-            {heading}
+            {processing ? PAYMENT_PROCESSING_HEADING : heading}
           </h1>
 
-          {body ? (
+          {processing ? (
+            <p
+              role="status"
+              style={{
+                fontSize: 17,
+                color: "var(--el-ink-soft, #6b6659)",
+                lineHeight: 1.65,
+                fontFamily: "var(--font-sans, sans-serif)",
+              }}
+            >
+              {PAYMENT_PROCESSING_MESSAGE}
+            </p>
+          ) : body ? (
             <p
               {...fieldAttr("elegant.checkout.success-body")}
               style={{
@@ -444,7 +466,7 @@ export function ElegantOrderConfirmation({
                   )}
                   {orderDetails.customer_email && (
                     <p style={{ margin: 0 }}>
-                      Confirmation sent to:{" "}
+                      {processing ? "We'll email" : "Confirmation sent to:"}{" "}
                       <span
                         style={{
                           color: "var(--el-ink, #1c1a17)",

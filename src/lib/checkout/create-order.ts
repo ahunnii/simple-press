@@ -122,10 +122,14 @@ export async function createOrderFromCheckout(
   // decrement stock before payment succeeds. Reject "unpaid" so no order is
   // created for it.
   //
-  // NOTE: Fully supporting async payments requires the webhook to also handle
-  // `checkout.session.async_payment_succeeded` (create the order then) and
-  // `checkout.session.async_payment_failed` (release any reservation). Until
-  // that's wired up, async-payment sessions will not produce an order.
+  // NOTE: the webhook never reaches this with an unpaid session in the normal
+  // flow — this gate is defense in depth. For delayed methods the route
+  // handles `checkout.session.completed` + "unpaid" itself (extends the stock
+  // hold, emails the shopper that payment is processing, creates nothing),
+  // then `checkout.session.async_payment_succeeded` — which carries "paid" —
+  // runs the ordinary order path through here, and
+  // `checkout.session.async_payment_failed` releases the hold (see
+  // `src/lib/checkout/async-payment-webhook.ts`).
   if (session.payment_status === "unpaid") {
     throw new Error(
       `[Webhook] Refusing to create order for unpaid session ${session.id} (payment_status=unpaid)`,

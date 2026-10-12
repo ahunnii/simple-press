@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { GenericFeatureDisabledPage } from "~/components/shared/generic-feature-disabled-page";
 
 import { TrailHeader } from "../../_components/trail-header";
 
@@ -15,7 +17,14 @@ export const metadata = {
   title: "Tax Guide",
 };
 
-export default function TaxGuidePage() {
+export default async function TaxGuidePage() {
+  // The Finances layout admits donations-only stores; the Tax Guide is about
+  // sales tax on orders, so it needs payments (matches the nav palette gate).
+  const flags = await getBusinessFlags();
+  if (!flags.isEnabled("payments")) {
+    return <GenericFeatureDisabledPage featureName="Payments" />;
+  }
+
   return (
     <>
       <TrailHeader

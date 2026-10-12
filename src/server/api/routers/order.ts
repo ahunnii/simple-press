@@ -13,6 +13,7 @@ import type { PoolDeductionResult } from "~/lib/inventory/pool-deduction";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import type { FulfillmentEmailKind } from "~/lib/orders/fulfillment-email";
 import type { OrderSortValue } from "~/lib/validators/order";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
   sendOrderCancelled,
@@ -403,10 +404,7 @@ export const orderRouter = createTRPCRouter({
           to: order.customerEmail,
           orderNumber: order.orderNumber,
           customerName: order.customerName ?? undefined,
-          pickupLocation:
-            order.business.pickupLocation ??
-            order.business.businessAddress ??
-            undefined,
+          pickupLocation: resolvePickupLocation(order.business) ?? undefined,
           pickupInstructions: order.business.pickupInstructions ?? undefined,
           business: {
             name: order.business.name,

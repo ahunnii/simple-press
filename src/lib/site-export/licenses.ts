@@ -16,7 +16,7 @@ import { SITE_EXPORT_DIRS } from "./types";
 const LICENSE_FALLBACK =
   "GNU Affero General Public License v3.0 — full text: https://www.gnu.org/licenses/agpl-3.0.txt";
 
-const PLATFORM_SUPPORT_EMAIL = "csdt@generativejustice.org";
+const PLATFORM_SUPPORT_EMAIL = "help@generativejustice.org";
 
 const NOTICE_WIDTH = 80;
 

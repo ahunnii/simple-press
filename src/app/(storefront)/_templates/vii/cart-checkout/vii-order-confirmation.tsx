@@ -10,6 +10,10 @@ import { cn } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -388,6 +392,7 @@ export function ViiOrderConfirmation({
   // ── Success state — deep-navy "room" ──────────────────────────────────────
 
   const deliveryMethod = orderDetails?.delivery_method ?? null;
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
 
   // PF22 — split the delivery-method-specific next-steps copy into lines.
   const nextStepsLines = (
@@ -534,6 +539,29 @@ export function ViiOrderConfirmation({
             }
           />
 
+          {/* Delayed bank payment still clearing — no receipt has gone out yet */}
+          {processing && (
+            <p
+              role="status"
+              className="vii-reveal-item"
+              style={
+                {
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 15,
+                  lineHeight: 1.6,
+                  color: "var(--vii-paper)",
+                  opacity: 0.9,
+                  maxWidth: 520,
+                  margin: "0 auto 40px",
+                  letterSpacing: "0.02em",
+                  "--i": 5,
+                } as React.CSSProperties
+              }
+            >
+              {PAYMENT_PROCESSING_MESSAGE}
+            </p>
+          )}
+
           {/* Order details — email + total */}
           {(orderDetails?.customer_email ?? formattedTotal) && (
             <div
@@ -561,7 +589,9 @@ export function ViiOrderConfirmation({
                     letterSpacing: "0.02em",
                   }}
                 >
-                  Confirmation sent to{" "}
+                  {processing
+                    ? "Confirmation will be sent to"
+                    : "Confirmation sent to"}{" "}
                   <strong style={{ fontWeight: 500, opacity: 1 }}>
                     {orderDetails.customer_email}
                   </strong>

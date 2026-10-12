@@ -7,6 +7,11 @@ import { useSearchParams } from "next/navigation";
 import { cn } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_HEADING,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import { BambooEdge } from "../shared/bamboo-edge";
 import { BambooGlyph } from "../shared/bamboo-glyph";
@@ -83,6 +88,7 @@ export function BambooOrderConfirmation({ business }: Props) {
   const confirmedHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
 
   useEffect(() => {
     if (!sessionId) {
@@ -191,11 +197,19 @@ export function BambooOrderConfirmation({ business }: Props) {
             tabIndex={-1}
             className="font-heading text-[clamp(2.3rem,5vw,3.6rem)] leading-[1.06] font-bold tracking-tight text-[var(--bamboo-pine)] outline-none"
           >
-            Order Confirmed!
+            {processing ? PAYMENT_PROCESSING_HEADING : "Order Confirmed!"}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[1.08rem] text-[var(--bamboo-ink-soft)]">
             Thank you for your purchase from {business.name}
           </p>
+          {processing && (
+            <p
+              role="status"
+              className="mx-auto mt-4 max-w-xl text-[1.02rem] text-[var(--bamboo-pine)]"
+            >
+              {PAYMENT_PROCESSING_MESSAGE}
+            </p>
+          )}
         </div>
       </section>
 
@@ -215,17 +229,19 @@ export function BambooOrderConfirmation({ business }: Props) {
                   What happens next?
                 </h2>
                 <ul className="flex flex-col gap-2 text-[var(--bamboo-ink-soft)]">
-                  <li className="flex items-start gap-2">
-                    <span
-                      className="text-[var(--bamboo-terracotta-deep)]"
-                      aria-hidden="true"
-                    >
-                      •
-                    </span>
-                    <span>
-                      You&apos;ll receive an email confirmation shortly
-                    </span>
-                  </li>
+                  {!processing && (
+                    <li className="flex items-start gap-2">
+                      <span
+                        className="text-[var(--bamboo-terracotta-deep)]"
+                        aria-hidden="true"
+                      >
+                        •
+                      </span>
+                      <span>
+                        You&apos;ll receive an email confirmation shortly
+                      </span>
+                    </li>
+                  )}
                   <li className="flex items-start gap-2">
                     <span
                       className="text-[var(--bamboo-terracotta-deep)]"
@@ -268,7 +284,7 @@ export function BambooOrderConfirmation({ business }: Props) {
                     style={PERFORATION_RULE}
                   />
                   <p className="text-[var(--bamboo-ink-soft)]">
-                    Confirmation sent to:{" "}
+                    {processing ? "We'll email" : "Confirmation sent to:"}{" "}
                     <span className="font-semibold text-[var(--bamboo-pine)]">
                       {orderDetails.customer_email}
                     </span>

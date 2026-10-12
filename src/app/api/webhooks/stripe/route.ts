@@ -11,9 +11,17 @@ import type { ReservationEntry } from "~/lib/inventory/reservation";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
+import {
+  handleCartAsyncPaymentFailed,
+  handleCheckoutAwaitingPayment,
+} from "~/lib/checkout/async-payment-webhook";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
+import { SUPERSEDED_METADATA_KEY } from "~/lib/checkout/discount-holds";
+import { listCheckoutSessionEmailItems } from "~/lib/checkout/session-email-items";
+import { sessionShopperEmail } from "~/lib/checkout/session-shopper-email";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import { splitCustomerName } from "~/lib/customer-name";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { handleDonationCheckoutCompleted } from "~/lib/donations/webhook";
 import { getBusinessAlertRecipients } from "~/lib/email/alert-recipients";
 import {
@@ -43,7 +51,6 @@ import {
   handleSubscriptionDeleted,
   handleSubscriptionUpdated,
 } from "~/lib/subscriptions/webhook";
-import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
 
 type NotificationCandidate = {
@@ -83,24 +90,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
-    // Handle checkout.session.completed
-    if (event.type === "checkout.session.completed") {
+    // Handle checkout.session.completed — and its delayed-payment twin,
+    // checkout.session.async_payment_succeeded.
+    //
+    // A delayed payment method (ACH bank debit, bank transfer, voucher)
+    // completes the session as "unpaid" and settles days later: the completed
+    // event only stretches the stock hold and tells the shopper (see
+    // `handleCheckoutAwaitingPayment` below), and `async_payment_succeeded`
+    // (session now "paid") runs this exact cart-order path to create the
+    // order. Both are keyed on the same `stripeSessionId`, so the idempotency
+    // guard + P2002 catch below cover duplicate deliveries of either event.
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
       const session = event.data.object;
 
       // Subscription sessions are a parallel lane, not a branch inside this one:
       // they create no order here (`invoice.paid` does, once per paid invoice) and
       // hold no inventory reservation, and the one-time idempotency guard keyed on
-      // `stripeSessionId` must never see them.
-      if (session.mode === "subscription")
+      // `stripeSessionId` must never see them. For the same reason a delayed
+      // first payment settling on a subscription is a no-op here — its
+      // `invoice.paid` is what creates the order.
+      if (session.mode === "subscription") {
+        if (event.type === "checkout.session.async_payment_succeeded")
+          return NextResponse.json({ received: true });
         return handleSubscriptionCheckoutCompleted(event);
+      }
 
       // Donations are a third parallel lane. Same `mode: "payment"` as a cart
       // checkout, so the discriminator is metadata rather than mode — and the
       // guard must sit ABOVE the `metadata.businessId` read below, because a
       // donation session carries that key too but has no cart, no line items to
-      // turn into an Order and no reservation to settle.
-      if (session.metadata?.kind === "donation")
+      // turn into an Order and no reservation to settle. Donations are
+      // card-only (delayed methods are out of scope; the donation handler
+      // ignores an unpaid session), so an async outcome event is acked as a
+      // no-op.
+      if (session.metadata?.kind === "donation") {
+        if (event.type === "checkout.session.async_payment_succeeded")
+          return NextResponse.json({ received: true });
         return handleDonationCheckoutCompleted(event);
+      }
 
       try {
         // Get business ID from metadata
@@ -138,6 +168,10 @@ export async function POST(req: NextRequest) {
             pickupLocation: true,
             pickupInstructions: true,
             businessAddress: true,
+            addressStreet: true,
+            addressCity: true,
+            addressState: true,
+            addressPostalCode: true,
             siteContent: {
               select: {
                 logoUrl: true,
@@ -186,6 +220,27 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ received: true });
         }
 
+        // Delayed payment method: checkout completed but the money hasn't
+        // moved yet. No order, no customer row, no address — nothing is
+        // written until `async_payment_succeeded` arrives (it carries "paid"
+        // and runs this path in full). Here we only keep the stock held and
+        // tell the shopper their payment is processing. Sits after the
+        // idempotency guard on purpose: if the success was processed first
+        // (out-of-order delivery), the guard already returned and no
+        // "processing" email goes out. Scoped to the completed event — an
+        // `async_payment_succeeded` that still says "unpaid" would be a Stripe
+        // contract break and falls through to create-order's own gate.
+        if (
+          event.type === "checkout.session.completed" &&
+          session.payment_status === "unpaid"
+        ) {
+          return handleCheckoutAwaitingPayment({
+            session,
+            business,
+            stripeAccountId,
+          });
+        }
+
         // 🔑 Retrieve full session using business's Stripe account
         const fullSession = await stripeClient.checkout.sessions.retrieve(
           session.id,
@@ -207,11 +262,8 @@ export async function POST(req: NextRequest) {
 
         // Get or create customer
         let customer = null;
-        const customerEmail = normalizeEmail(
-          session.customer_email ??
-            session.customer_details?.email ??
-            "unknown@example.com",
-        );
+        const customerEmail =
+          sessionShopperEmail(session) ?? "unknown@example.com";
 
         if (customerEmail === "unknown@example.com") {
           Sentry.withScope((scope) => {
@@ -322,10 +374,24 @@ export async function POST(req: NextRequest) {
         const deliveryMethod =
           session.metadata?.deliveryMethod === "pickup" ? "pickup" : "ship";
 
+        // Terms are agreed when the shopper starts checkout, which for a
+        // delayed (bank) payment is days before this order is written. So
+        // acceptance is dated from `session.created` — set by Stripe, unlike
+        // session metadata, which the merchant can edit. (Falls back to now
+        // only if Stripe ever omitted it.)
+        const checkoutStartedAt =
+          typeof session.created === "number"
+            ? new Date(session.created * 1000)
+            : new Date();
+
         // Merchant-terms acceptance is agreed at checkout (see the Order
         // model docblock) — `merchantTermsUpdatedAt` snapshots the
         // terms-of-service Page's `updatedAt` so we can later tell which
-        // wording was actually in force. Isolated in its own try/catch, same
+        // wording was actually in force. Only a page last edited at or before
+        // checkout start is the wording the shopper saw; one edited since
+        // (possible during a days-long bank payment) means we no longer know
+        // which version they agreed to, so null ("unknown") is recorded rather
+        // than the wrong version. Isolated in its own try/catch, same
         // convention as the other non-critical steps in this handler (e.g.
         // customer-metrics below): a lookup failure must never block order
         // creation, it just means this order records no `merchantTermsUpdatedAt`.
@@ -341,7 +407,12 @@ export async function POST(req: NextRequest) {
             },
             select: { updatedAt: true },
           });
-          merchantTermsUpdatedAt = merchantTermsPage?.updatedAt ?? null;
+          const pageUpdatedAt = merchantTermsPage?.updatedAt ?? null;
+          merchantTermsUpdatedAt =
+            pageUpdatedAt &&
+            pageUpdatedAt.getTime() <= checkoutStartedAt.getTime()
+              ? pageUpdatedAt
+              : null;
         } catch (termsLookupError) {
           Sentry.withScope((scope) => {
             scope.setTag("webhook.step", "merchant-terms-lookup");
@@ -360,7 +431,9 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId,
           discountAmount,
           deliveryMethod,
-          termsAcceptedAt: new Date(),
+          termsAcceptedAt: checkoutStartedAt,
+          // The platform terms version in force NOW. A platform terms bump
+          // between checkout start and settlement isn't distinguishable here.
           termsVersion: PLATFORM_TERMS_VERSION,
           merchantTermsUpdatedAt,
         });
@@ -426,39 +499,14 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Increment discount code usage.
-        // Use updateMany with a WHERE guard so two concurrent webhooks racing
-        // on the last available slot can't both increment past usageLimit.
-        // The conditional UPDATE is evaluated atomically by the DB.
-        if (verifiedDiscountCodeId) {
-          try {
-            const dc = await db.discountCode.findUnique({
-              where: { id: verifiedDiscountCodeId },
-              select: { usageLimit: true },
-            });
-            await db.discountCode.updateMany({
-              where: {
-                id: verifiedDiscountCodeId,
-                ...(dc?.usageLimit != null
-                  ? { usageCount: { lt: dc.usageLimit } }
-                  : {}),
-              },
-              data: {
-                usageCount: { increment: 1 },
-              },
-            });
-          } catch (discountError) {
-            Sentry.withScope((scope) => {
-              scope.setTag("webhook.step", "discount-increment");
-              scope.setTag("businessId", businessId);
-              Sentry.captureException(discountError);
-            });
-          }
-        }
-
         // Deduct inventory
         const notificationCandidates: NotificationCandidate[] = [];
         const poolNotificationCandidates: PoolDeductionResult[] = [];
+        // Discount codes whose use was claimed at checkout start (a discount
+        // entry on the reservation) and made final by the consume step below.
+        // Filled only once that step has actually run; cleared if the
+        // transaction that ran it fails.
+        const consumedDiscountCodeIds = new Set<string>();
 
         try {
           await db.$transaction(async (tx) => {
@@ -803,12 +851,30 @@ export async function POST(req: NextRequest) {
                 }
               }
               if (reservation) {
-                const entries = reservation.items as ReservationEntry[];
-                await releaseReservation(tx, { items: entries });
-                await tx.inventoryReservation.update({
-                  where: { id: reservation.id },
+                // Conditional `active → consumed` flip first: if the stale
+                // sweeper or an expired/failed event released the hold
+                // between the read above and here, it already decremented
+                // reservedQty — releasing again would double-decrement.
+                const flipped = await tx.inventoryReservation.updateMany({
+                  where: { id: reservation.id, status: "active" },
                   data: { status: "consumed" },
                 });
+                if (flipped.count === 1) {
+                  const entries = reservation.items as ReservationEntry[];
+                  // "consume": drop reservedQty (the real deduction happened
+                  // above) but keep the discount use counted at checkout
+                  // start — the order makes it final.
+                  await releaseReservation(
+                    tx,
+                    { items: entries },
+                    { mode: "consume" },
+                  );
+                  for (const entry of entries) {
+                    if (entry.discountCodeId) {
+                      consumedDiscountCodeIds.add(entry.discountCodeId);
+                    }
+                  }
+                }
               }
             } catch (reservationErr) {
               Sentry.withScope((scope) => {
@@ -820,12 +886,54 @@ export async function POST(req: NextRequest) {
             }
           });
         } catch (inventoryError) {
+          // Rolled back: the reservation was not consumed after all (it stays
+          // active, and its eventual release gives the discount use back), so
+          // the increment below must count this order's use.
+          consumedDiscountCodeIds.clear();
           Sentry.withScope((scope) => {
             scope.setTag("webhook.step", "inventory-deduction");
             scope.setTag("businessId", businessId);
             Sentry.captureException(inventoryError);
           });
           // Don't fail webhook - order is still created
+        }
+
+        // Count the discount code use — unless the reservation consumed above
+        // carried this code's use, which create-session already counted at
+        // checkout start. Decided from what the consume step did, not from
+        // metadata: sessions created before uses were held at checkout, and
+        // holds swept/released before a late payment success (the release
+        // gave the use back), still increment here.
+        // Use updateMany with a WHERE guard so two concurrent webhooks racing
+        // on the last available slot can't both increment past usageLimit.
+        // The conditional UPDATE is evaluated atomically by the DB.
+        if (
+          verifiedDiscountCodeId &&
+          !consumedDiscountCodeIds.has(verifiedDiscountCodeId)
+        ) {
+          try {
+            const dc = await db.discountCode.findUnique({
+              where: { id: verifiedDiscountCodeId },
+              select: { usageLimit: true },
+            });
+            await db.discountCode.updateMany({
+              where: {
+                id: verifiedDiscountCodeId,
+                ...(dc?.usageLimit != null
+                  ? { usageCount: { lt: dc.usageLimit } }
+                  : {}),
+              },
+              data: {
+                usageCount: { increment: 1 },
+              },
+            });
+          } catch (discountError) {
+            Sentry.withScope((scope) => {
+              scope.setTag("webhook.step", "discount-increment");
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(discountError);
+            });
+          }
         }
 
         // Send inventory alert notifications
@@ -1008,9 +1116,7 @@ export async function POST(req: NextRequest) {
               ...(order.deliveryMethod === "pickup"
                 ? {
                     pickupLocation:
-                      business.pickupLocation ??
-                      business.businessAddress ??
-                      undefined,
+                      resolvePickupLocation(business) ?? undefined,
                     pickupInstructions:
                       business.pickupInstructions ?? undefined,
                   }
@@ -1170,13 +1276,21 @@ export async function POST(req: NextRequest) {
             },
           );
         } else if (reservation) {
+          // Conditional `active → released` flip is the gate: only the
+          // writer that wins it (this event, the stale sweeper, or a
+          // completed/failed event racing it) decrements reservedQty.
           await db.$transaction(async (tx) => {
-            const entries = reservation.items as ReservationEntry[];
-            await releaseReservation(tx, { items: entries });
-            await tx.inventoryReservation.update({
-              where: { id: reservation.id },
+            const flipped = await tx.inventoryReservation.updateMany({
+              where: { id: reservation.id, status: "active" },
               data: { status: "released" },
             });
+            if (flipped.count === 0) return;
+            // Abandoned checkout: stock AND any held discount use go back.
+            await releaseReservation(
+              tx,
+              { items: reservation.items as ReservationEntry[] },
+              { mode: "release" },
+            );
           });
         }
       } catch (expiredErr) {
@@ -1199,12 +1313,20 @@ export async function POST(req: NextRequest) {
       // is sent. Stripe sends checkout.session.expired once per session, so no
       // extra idempotency guard is needed; the Resend idempotency key covers
       // redelivered webhook events. Failures never fail the webhook.
+      //
+      // Skipped for a session create-session SUPERSEDED (expired because the
+      // same browser started a new checkout — the shopper pressed Back and
+      // continued to payment again): they are checking out right now, so a
+      // "you left something in your cart" email would be wrong. Its hold was
+      // released by create-session already; anything still active was
+      // released above, gated by the flip as usual.
       try {
+        const superseded = !!expiredSession.metadata?.[SUPERSEDED_METADATA_KEY];
         const abandonedBusinessId = expiredSession.metadata?.businessId;
-        const abandonedEmail =
-          expiredSession.customer_details?.email ??
-          expiredSession.customer_email;
-        if (abandonedBusinessId && abandonedEmail) {
+        // Same address precedence as the order path and the bank-payment
+        // emails, so every email about one checkout reaches the same inbox.
+        const abandonedEmail = sessionShopperEmail(expiredSession);
+        if (!superseded && abandonedBusinessId && abandonedEmail) {
           const abandonedBusiness = await db.business.findUnique({
             where: { id: abandonedBusinessId },
             select: {
@@ -1236,36 +1358,10 @@ export async function POST(req: NextRequest) {
             } else {
               let items: AbandonedCheckoutItem[] | undefined;
               try {
-                const lineItems =
-                  await stripeClient.checkout.sessions.listLineItems(
-                    expiredSession.id,
-                    { limit: 100, expand: ["data.price.product"] },
-                    { stripeAccount: event.account },
-                  );
-                const logoUrl = abandonedBusiness.siteContent?.logoUrl;
-                items = lineItems.data.map((line) => {
-                  const product =
-                    line.price?.product &&
-                    typeof line.price.product !== "string" &&
-                    !("deleted" in line.price.product)
-                      ? line.price.product
-                      : undefined;
-                  const quantity = line.quantity ?? 1;
-                  // create-session falls back to the business logo when a
-                  // product has no image — not a useful thumbnail, so drop it.
-                  const image = product?.images[0];
-                  const variantName = product?.metadata.variantName;
-                  return {
-                    name: product?.name ?? line.description ?? "Item",
-                    variantName: variantName?.length ? variantName : undefined,
-                    quantity,
-                    unitAmount:
-                      line.price?.unit_amount ??
-                      (quantity
-                        ? Math.round(line.amount_subtotal / quantity)
-                        : line.amount_subtotal),
-                    imageUrl: image && image !== logoUrl ? image : undefined,
-                  };
+                items = await listCheckoutSessionEmailItems({
+                  sessionId: expiredSession.id,
+                  stripeAccount: event.account,
+                  logoUrl: abandonedBusiness.siteContent?.logoUrl,
                 });
               } catch (lineItemsErr) {
                 Sentry.captureException(lineItemsErr, {
@@ -1289,6 +1385,28 @@ export async function POST(req: NextRequest) {
         });
       }
       return NextResponse.json({ received: true });
+    }
+
+    // Handle checkout.session.async_payment_failed — a delayed payment method
+    // (ACH bank debit, bank transfer, voucher) did not complete. No order was
+    // ever created for the session (orders exist only once money clears), so
+    // the cart lane releases the stock hold and emails the shopper + owner.
+    if (event.type === "checkout.session.async_payment_failed") {
+      const failedSession = event.data.object;
+
+      // Subscriptions: a failed first payment surfaces through the invoice
+      // events (`invoice.payment_failed`) the subscription lane already
+      // handles; no cart reservation exists.
+      if (failedSession.mode === "subscription")
+        return NextResponse.json({ received: true });
+
+      // Donations are card-only — delayed methods are out of scope for the
+      // donation lane (`src/lib/donations/webhook.ts` ignores unpaid donation
+      // sessions), so there is nothing to undo.
+      if (failedSession.metadata?.kind === "donation")
+        return NextResponse.json({ received: true });
+
+      return handleCartAsyncPaymentFailed(event);
     }
 
     // Handle charge.refunded — covers refunds issued from the Stripe Dashboard

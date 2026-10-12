@@ -5,6 +5,7 @@ import Image from "next/image";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 import {
   Dialog,
@@ -79,7 +80,8 @@ function aspectValue(ratio: string | null | undefined): string | undefined {
 
 /** Accessible name for a lightbox tile button — mirrors `imageButtonLabel`. */
 function tileLabel(image: UmscGalleryImage, index: number): string {
-  const name = image.altText ?? image.caption ?? `image ${index + 1}`;
+  const name =
+    meaningfulAltText(image.altText) ?? image.caption ?? `image ${index + 1}`;
   return `View ${name} larger`;
 }
 
@@ -144,6 +146,7 @@ export function UmscGallery({ gallery, label, className }: Props) {
 
   const active = index !== null ? images[index] : null;
   const galleryName = label ?? gallery.name ?? "Gallery";
+  const activeAlt = meaningfulAltText(active?.altText);
 
   return (
     <div ref={rootRef} className="umsc-gallery-root">
@@ -173,7 +176,7 @@ export function UmscGallery({ gallery, label, className }: Props) {
           const picture = aspect ? (
             <Image
               src={image.url}
-              alt={image.altText ?? ""}
+              alt={meaningfulAltText(image.altText) ?? ""}
               fill
               sizes={tileSizes(i)}
               loading="lazy"
@@ -182,7 +185,7 @@ export function UmscGallery({ gallery, label, className }: Props) {
           ) : (
             <Image
               src={image.url}
-              alt={image.altText ?? ""}
+              alt={meaningfulAltText(image.altText) ?? ""}
               width={1600}
               height={1200}
               sizes={tileSizes(i)}
@@ -261,7 +264,7 @@ export function UmscGallery({ gallery, label, className }: Props) {
             >
               <DialogTitle className="sr-only">
                 {`${galleryName} — image ${(index ?? 0) + 1} of ${count}${
-                  active?.altText ? `: ${active.altText}` : ""
+                  activeAlt ? `: ${activeAlt}` : ""
                 }`}
               </DialogTitle>
 
@@ -285,7 +288,7 @@ export function UmscGallery({ gallery, label, className }: Props) {
                   <Image
                     key={active.id}
                     src={active.url}
-                    alt={active.altText ?? ""}
+                    alt={meaningfulAltText(active.altText) ?? ""}
                     fill
                     sizes="100vw"
                     priority

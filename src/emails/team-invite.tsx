@@ -18,7 +18,11 @@ export function TeamInviteEmail({
   ownerEmail,
 }: TeamInviteEmailProps) {
   const roleLabel =
-    role === "OWNER" ? "Owner" : role === "STAFF" ? "Staff" : "Manager";
+    role === "OWNER"
+      ? "an Owner"
+      : role === "STAFF"
+        ? "a Staff member"
+        : "a Manager";
 
   return (
     <EmailLayout
@@ -34,7 +38,7 @@ export function TeamInviteEmail({
       <Text style={text}>Hi there,</Text>
 
       <Text style={text}>
-        You&apos;ve been invited to join <strong>{businessName}</strong> as a{" "}
+        You&apos;ve been invited to join <strong>{businessName}</strong> as{" "}
         <strong>{roleLabel}</strong> on SimplePress.
       </Text>
 

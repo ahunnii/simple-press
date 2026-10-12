@@ -6,6 +6,7 @@ import Image from "next/image";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -47,7 +48,7 @@ export function GloveProductGallery({ images, productName }: Props) {
   const count = list.length;
   const current = list[Math.min(index, count - 1)] ?? list[0];
   const altFor = (img: GalleryImage | undefined, i: number) => {
-    const own = img?.altText?.trim() ?? "";
+    const own = meaningfulAltText(img?.altText) ?? "";
     if (own !== "") return own;
     return count > 1
       ? `${productName}, photo ${i + 1} of ${count}`

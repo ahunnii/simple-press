@@ -467,7 +467,9 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/finances",
     icon: IconReportMoney,
     section: "insights",
-    featureKey: "payments",
+    // Donations has no dependsOn, so a donations-only store (Products/Orders
+    // off, which cascades Payments off) still needs its finance breakdown.
+    featureKeysAny: ["payments", "donations"],
     keywords: [
       "revenue",
       "tax",

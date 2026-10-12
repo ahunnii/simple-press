@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
@@ -89,7 +90,8 @@ function imageButtonLabel(
   image: { altText?: string | null; caption?: string | null },
   index: number,
 ): string {
-  const name = image.altText ?? image.caption ?? `image ${index + 1}`;
+  const name =
+    meaningfulAltText(image.altText) ?? image.caption ?? `image ${index + 1}`;
   return `View ${name} larger`;
 }
 
@@ -164,6 +166,11 @@ export function GalleryRenderer({
 
   const currentImage =
     lightboxIndex !== null ? gallery.images[lightboxIndex] : null;
+  const lightboxLabel = currentImage
+    ? (meaningfulAltText(currentImage.altText) ??
+      currentImage.caption ??
+      gallery.name)
+    : undefined;
 
   return (
     <div className="not-prose gallery-container">
@@ -186,12 +193,12 @@ export function GalleryRenderer({
         <Dialog open={true} onOpenChange={closeLightbox}>
           <DialogContent className="max-w-7xl p-0">
             <DialogTitle className="sr-only">
-              {`Image ${lightboxIndex + 1} of ${gallery.images.length}${(currentImage.altText ?? currentImage.caption ?? gallery.name) ? `: ${currentImage.altText ?? currentImage.caption ?? gallery.name}` : ""}`}
+              {`Image ${lightboxIndex + 1} of ${gallery.images.length}${lightboxLabel ? `: ${lightboxLabel}` : ""}`}
             </DialogTitle>
             <div className="relative">
               <img
                 src={currentImage.url}
-                alt={currentImage.altText ?? ""}
+                alt={meaningfulAltText(currentImage.altText) ?? ""}
                 className="h-auto max-h-[90vh] w-full object-contain"
               />
 
@@ -285,7 +292,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-lg object-cover"
@@ -298,7 +305,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
             <div className={`relative overflow-hidden rounded-lg ${ratio}`}>
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-lg object-cover"
@@ -360,7 +367,7 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
@@ -373,7 +380,7 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
             <div className="relative overflow-hidden rounded-lg">
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-auto w-full rounded-[inherit] transition-transform group-hover:scale-110"
@@ -422,7 +429,7 @@ function CarouselLayout({
         >
           <img
             src={currentImage.url}
-            alt={currentImage.altText ?? ""}
+            alt={meaningfulAltText(currentImage.altText) ?? ""}
             className="h-full w-full object-cover transition-transform duration-300"
           />
         </button>
@@ -430,7 +437,7 @@ function CarouselLayout({
         <div className="aspect-video overflow-hidden rounded-lg">
           <img
             src={currentImage.url}
-            alt={currentImage.altText ?? ""}
+            alt={meaningfulAltText(currentImage.altText) ?? ""}
             className="h-full w-full object-cover transition-transform duration-300"
           />
         </div>
@@ -521,7 +528,7 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
@@ -541,7 +548,7 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
@@ -595,7 +602,7 @@ function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"
@@ -615,7 +622,7 @@ function JustifiedLayout({ gallery, onImageClick }: LayoutProps) {
             >
               <img
                 src={image.url}
-                alt={image.altText ?? ""}
+                alt={meaningfulAltText(image.altText) ?? ""}
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full rounded-[inherit] object-cover transition-transform group-hover:scale-110"

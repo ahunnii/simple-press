@@ -7,6 +7,7 @@
  * `homepage/vii-homepage.tsx` (Instagram strip).
  */
 import type { ServicesGalleryImage } from "./vii-services-index-client";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import type { RouterOutputs } from "~/trpc/react";
 import { db } from "~/server/db";
 
@@ -36,7 +37,7 @@ export async function ViiServicesIndexPage({ business, services }: Props) {
     gallery && gallery.businessId === business.id
       ? gallery.images.map((img) => ({
           url: img.url,
-          altText: img.altText ?? "",
+          altText: meaningfulAltText(img.altText) ?? "",
         }))
       : [];
 
