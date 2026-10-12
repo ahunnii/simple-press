@@ -9037,6 +9037,7 @@ export namespace Prisma {
     role: number
     merchantTermsAcceptedAt: number
     merchantTermsVersion: number
+    dashboardLayout: number
     _all: number
   }
 
@@ -9069,6 +9070,7 @@ export namespace Prisma {
     role?: true
     merchantTermsAcceptedAt?: true
     merchantTermsVersion?: true
+    dashboardLayout?: true
     _all?: true
   }
 
@@ -9152,6 +9154,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt: Date | null
     merchantTermsVersion: string | null
+    dashboardLayout: JsonValue | null
     _count: BusinessMembershipCountAggregateOutputType | null
     _min: BusinessMembershipMinAggregateOutputType | null
     _max: BusinessMembershipMaxAggregateOutputType | null
@@ -9179,6 +9182,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9191,6 +9195,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9203,6 +9208,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9215,9 +9221,10 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
   }
 
-  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion", ExtArgs["result"]["businessMembership"]>
+  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion" | "dashboardLayout", ExtArgs["result"]["businessMembership"]>
   export type BusinessMembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -9245,6 +9252,7 @@ export namespace Prisma {
       role: $Enums.BusinessRole
       merchantTermsAcceptedAt: Date | null
       merchantTermsVersion: string | null
+      dashboardLayout: Prisma.JsonValue | null
     }, ExtArgs["result"]["businessMembership"]>
     composites: {}
   }
@@ -9677,6 +9685,7 @@ export namespace Prisma {
     readonly role: FieldRef<"BusinessMembership", 'BusinessRole'>
     readonly merchantTermsAcceptedAt: FieldRef<"BusinessMembership", 'DateTime'>
     readonly merchantTermsVersion: FieldRef<"BusinessMembership", 'String'>
+    readonly dashboardLayout: FieldRef<"BusinessMembership", 'Json'>
   }
     
 
@@ -84510,7 +84519,8 @@ export namespace Prisma {
     businessId: 'businessId',
     role: 'role',
     merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
-    merchantTermsVersion: 'merchantTermsVersion'
+    merchantTermsVersion: 'merchantTermsVersion',
+    dashboardLayout: 'dashboardLayout'
   };
 
   export type BusinessMembershipScalarFieldEnum = (typeof BusinessMembershipScalarFieldEnum)[keyof typeof BusinessMembershipScalarFieldEnum]
@@ -85898,6 +85908,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'BusinessDomainStatus'
    */
   export type EnumBusinessDomainStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BusinessDomainStatus'>
@@ -85922,20 +85946,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -86068,6 +86078,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -86080,6 +86091,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrderInput | SortOrder
     merchantTermsVersion?: SortOrderInput | SortOrder
+    dashboardLayout?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
   }
@@ -86096,6 +86108,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "userId_businessId">
@@ -86108,6 +86121,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrderInput | SortOrder
     merchantTermsVersion?: SortOrderInput | SortOrder
+    dashboardLayout?: SortOrderInput | SortOrder
     _count?: BusinessMembershipCountOrderByAggregateInput
     _max?: BusinessMembershipMaxOrderByAggregateInput
     _min?: BusinessMembershipMinOrderByAggregateInput
@@ -86124,6 +86138,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleWithAggregatesFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableWithAggregatesFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableWithAggregatesFilter<"BusinessMembership">
   }
 
   export type SessionWhereInput = {
@@ -93041,6 +93056,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutMembershipsInput
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
@@ -93053,6 +93069,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUpdateInput = {
@@ -93061,6 +93078,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
@@ -93073,6 +93091,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateManyInput = {
@@ -93083,6 +93102,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUpdateManyMutationInput = {
@@ -93091,6 +93111,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyInput = {
@@ -93101,6 +93122,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SessionCreateInput = {
@@ -101271,6 +101293,29 @@ export namespace Prisma {
     notIn?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
     not?: NestedEnumBusinessRoleFilter<$PrismaModel> | $Enums.BusinessRole
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
@@ -101295,6 +101340,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrder
     merchantTermsVersion?: SortOrder
+    dashboardLayout?: SortOrder
   }
 
   export type BusinessMembershipMaxOrderByAggregateInput = {
@@ -101325,6 +101371,32 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type SessionCountOrderByAggregateInput = {
@@ -101463,29 +101535,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -102132,32 +102181,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -111564,6 +111587,29 @@ export namespace Prisma {
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedEnumBusinessDomainStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessDomainStatus | EnumBusinessDomainStatusFieldRefInput<$PrismaModel>
@@ -111607,29 +111653,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -111798,6 +111821,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
 
@@ -111808,6 +111832,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateOrConnectWithoutUserInput = {
@@ -112148,6 +112173,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
   }
 
   export type CustomerUpsertWithWhereUniqueWithoutUserInput = {
@@ -114172,6 +114198,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutMembershipsInput
   }
 
@@ -114182,6 +114209,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateOrConnectWithoutBusinessInput = {
@@ -146232,6 +146260,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CustomerCreateManyUserInput = {
@@ -146408,6 +146437,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -146418,6 +146448,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -146427,6 +146458,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CustomerUpdateWithoutUserInput = {
@@ -147058,6 +147090,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ShippingZoneCreateManyBusinessInput = {
@@ -148497,6 +148530,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -148507,6 +148541,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutBusinessInput = {
@@ -148516,6 +148551,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ShippingZoneUpdateWithoutBusinessInput = {

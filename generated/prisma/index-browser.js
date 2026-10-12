@@ -141,7 +141,8 @@ exports.Prisma.BusinessMembershipScalarFieldEnum = {
   businessId: 'businessId',
   role: 'role',
   merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
-  merchantTermsVersion: 'merchantTermsVersion'
+  merchantTermsVersion: 'merchantTermsVersion',
+  dashboardLayout: 'dashboardLayout'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {

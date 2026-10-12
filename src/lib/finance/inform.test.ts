@@ -84,27 +84,53 @@ describe("informBarTone", () => {
 });
 
 describe("resolveInformWindow", () => {
-  it("is the trailing 12 months, today inclusive, midnight-aligned", () => {
+  const TZ = "America/Detroit";
+
+  it("is the trailing 12 months, today inclusive, aligned to store midnights", () => {
+    // 2026-10-10 15:30 in Detroit (EDT, UTC-4).
     const { start, endExclusive } = resolveInformWindow(
-      new Date(2026, 9, 10, 15, 30),
+      new Date("2026-10-10T19:30:00Z"),
+      TZ,
     );
-    expect(endExclusive).toEqual(new Date(2026, 9, 11));
-    expect(start).toEqual(new Date(2025, 9, 11));
+    expect(endExclusive).toEqual(new Date("2026-10-11T04:00:00Z"));
+    expect(start).toEqual(new Date("2025-10-11T04:00:00Z"));
+  });
+
+  it("uses the store's calendar day, not the server's or UTC's", () => {
+    // 2026-10-11 02:00 UTC is still Oct 10 (10pm) in Detroit.
+    const { endExclusive } = resolveInformWindow(
+      new Date("2026-10-11T02:00:00Z"),
+      TZ,
+    );
+    expect(endExclusive).toEqual(new Date("2026-10-11T04:00:00Z"));
   });
 
   it("rolls over the year boundary", () => {
+    // 2026-12-31 23:59 in Detroit (EST, UTC-5).
     const { start, endExclusive } = resolveInformWindow(
-      new Date(2026, 11, 31, 23, 59),
+      new Date("2027-01-01T04:59:00Z"),
+      TZ,
     );
-    expect(endExclusive).toEqual(new Date(2027, 0, 1));
-    expect(start).toEqual(new Date(2026, 0, 1));
+    expect(endExclusive).toEqual(new Date("2027-01-01T05:00:00Z"));
+    expect(start).toEqual(new Date("2026-01-01T05:00:00Z"));
   });
 
-  it("stays at local midnight across a DST change", () => {
-    // March 2026 (US DST starts Mar 8) back to March 2025 (Mar 9).
-    const { start } = resolveInformWindow(new Date(2026, 2, 20, 9));
-    expect(start.getHours()).toBe(0);
-    expect(start.getMinutes()).toBe(0);
-    expect(start).toEqual(new Date(2025, 2, 21));
+  it("stays at store midnight across a DST change", () => {
+    // March 2026 (US DST starts Mar 8, EDT) back to March 2025 (EDT from Mar 9).
+    const { start, endExclusive } = resolveInformWindow(
+      new Date("2026-03-20T13:00:00Z"),
+      TZ,
+    );
+    expect(endExclusive).toEqual(new Date("2026-03-21T04:00:00Z"));
+    expect(start).toEqual(new Date("2025-03-21T04:00:00Z"));
+  });
+
+  it("falls back to UTC midnights without a valid zone", () => {
+    const { start, endExclusive } = resolveInformWindow(
+      new Date("2026-10-10T19:30:00Z"),
+      "Not/AZone",
+    );
+    expect(endExclusive).toEqual(new Date("2026-10-11T00:00:00Z"));
+    expect(start).toEqual(new Date("2025-10-11T00:00:00Z"));
   });
 });

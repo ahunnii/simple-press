@@ -1,5 +1,5 @@
 /**
- * INFORM Consumers Act gauge — pure, no I/O, no Prisma imports.
+ * INFORM Consumers Act gauge — pure, no I/O, no Prisma imports (client-safe).
  *
  * The FTC treats an online-marketplace seller as "high-volume" at 200+
  * discrete sales AND $5,000+ gross revenue in any continuous 12-month period
@@ -8,6 +8,10 @@
  * router (counts + `thresholdReached`) and the INFORM card/alerts (bars, tone,
  * early warning) so the two can never disagree on a threshold.
  */
+
+import { addCalendarDays, zonedCalendarDate } from "~/lib/calendar-date";
+import { normalizeTimeZone } from "~/lib/dashboard/ranges";
+import { zonedDayStart } from "~/lib/zoned-day";
 
 /** 200+ discrete sales in the window… */
 export const INFORM_TRANSACTION_THRESHOLD = 200;
@@ -41,29 +45,32 @@ export type InformStatus = {
 };
 
 /**
- * Trailing 12 months ending today, as a local-midnight half-open window.
+ * Trailing 12 months ending today, as a half-open window aligned to midnights
+ * in the STORE's zone (`Business.timeZone`; missing/invalid → UTC), the same
+ * zone the finance router's `resolveRange` uses.
  *
- * Uses `setDate`/`setMonth` rather than epoch-ms subtraction so DST cannot
- * shift the window by an hour (same approach as the finance router's
- * `resolveRange`).
+ * Day math is on calendar-date strings and each boundary becomes an instant
+ * via `zonedDayStart`, so DST cannot shift the window by an hour. The start is
+ * the same month/day one year before tomorrow (Feb 29 rolls to Mar 1, as
+ * `Date#setMonth` would).
  */
-export function resolveInformWindow(now = new Date()): {
+export function resolveInformWindow(
+  now = new Date(),
+  timeZone?: string | null,
+): {
   start: Date;
   endExclusive: Date;
 } {
-  const endExclusive = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0,
-    0,
-    0,
-    0,
-  );
-  endExclusive.setDate(endExclusive.getDate() + 1);
-  const start = new Date(endExclusive);
-  start.setMonth(start.getMonth() - 12);
-  return { start, endExclusive };
+  const tz = normalizeTimeZone(timeZone);
+  const tomorrow = addCalendarDays(zonedCalendarDate(now, tz), 1);
+  const [y, m, d] = tomorrow.split("-").map(Number) as [number, number, number];
+  const yearAgo = new Date(Date.UTC(y - 1, m - 1, d))
+    .toISOString()
+    .slice(0, 10);
+  return {
+    start: zonedDayStart(yearAgo, tz),
+    endExclusive: zonedDayStart(tomorrow, tz),
+  };
 }
 
 function pct(value: number, threshold: number): number {

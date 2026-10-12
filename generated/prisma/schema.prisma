@@ -90,6 +90,10 @@ model BusinessMembership {
   merchantTermsAcceptedAt DateTime?
   merchantTermsVersion    String?
 
+  // Per-person dashboard layout for this store. Versioned JSON, parsed by
+  // src/lib/dashboard/layout-schema.ts. `null` = default layout.
+  dashboardLayout Json?
+
   @@unique([userId, businessId])
   // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
   @@index([businessId])

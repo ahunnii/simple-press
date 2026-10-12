@@ -9,6 +9,7 @@ import { collectionsRouter } from "./routers/collections";
 import { contactRouter } from "./routers/contact";
 import { contentRouter } from "./routers/content";
 import { customerRouter } from "./routers/customer";
+import { dashboardRouter } from "./routers/dashboard";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { donationRouter } from "./routers/donation";
@@ -58,6 +59,7 @@ import { videosRouter } from "./routers/videos";
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   backInStock: backInStockRouter,
+  dashboard: dashboardRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
   domain: domainRouter,
   discount: discountRouter,

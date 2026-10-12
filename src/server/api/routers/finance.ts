@@ -21,17 +21,21 @@ import type { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 
+import type { BalanceTxnSummary } from "~/lib/finance/stripe-summary";
+import type { OrdersBreakdown } from "~/lib/orders/order-money";
+import { addCalendarDays, zonedCalendarDate } from "~/lib/calendar-date";
+import { normalizeTimeZone } from "~/lib/dashboard/ranges";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { evaluateInform, resolveInformWindow } from "~/lib/finance/inform";
-import type { BalanceTxnSummary } from "~/lib/finance/stripe-summary";
+import { financeOrderScope } from "~/lib/finance/order-scope";
 import { summarizeBalanceTransactions } from "~/lib/finance/stripe-summary";
-import type { OrdersBreakdown } from "~/lib/orders/order-money";
 import {
   EMPTY_ORDERS_BREAKDOWN,
   summarizeOrderMoney,
 } from "~/lib/orders/order-money";
 import { stripeClient } from "~/lib/stripe/client";
+import { zonedDayStart } from "~/lib/zoned-day";
 import {
   createTRPCRouter,
   featureGateAny,
@@ -63,29 +67,38 @@ export type FinanceRange = {
 };
 
 /**
- * Resolve a range key to a local-time, midnight-aligned half-open window.
+ * Resolve a range key to a half-open window aligned to midnights in the
+ * STORE's time zone (`Business.timeZone`; a missing/invalid zone falls back to
+ * UTC), so Finances and the dashboard agree on which orders a range holds.
  *
- * All arithmetic uses `setDate`/`setHours` rather than epoch-ms subtraction so
- * DST transitions do not shift the window by an hour.
+ * Day math happens on calendar-date strings (`addCalendarDays`) and each
+ * boundary becomes an instant via `zonedDayStart`, so DST transitions never
+ * shift a boundary by an hour.
+ *
+ * "Last N days" is N store-calendar days INCLUDING today, exactly like the
+ * dashboard's `resolveDashboardRange` ("30d" here === "30d" there). The one
+ * difference is the upper bound: Finances ends at the store's NEXT midnight
+ * (Stripe balance transactions are fetched for whole days), the dashboard
+ * ends at `now`. Orders can't be created in the future, so both bounds
+ * select the same orders.
  */
-function resolveRange(key: RangeKey, now = new Date()): FinanceRange {
-  const todayStart = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0,
-    0,
-    0,
-    0,
-  );
-  const tomorrowStart = new Date(todayStart);
-  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+function resolveRange(
+  key: RangeKey,
+  timeZone: string | null | undefined,
+  now = new Date(),
+): FinanceRange {
+  const tz = normalizeTimeZone(timeZone);
+  const today = zonedCalendarDate(now, tz);
+  const year = Number(today.slice(0, 4));
+  const tomorrowStart = zonedDayStart(addCalendarDays(today, 1), tz);
+  const jan1 = (y: number) =>
+    zonedDayStart(`${String(y).padStart(4, "0")}-01-01`, tz);
 
   if (key === "ytd") {
     return {
       key,
       label: "Year to date",
-      start: new Date(now.getFullYear(), 0, 1),
+      start: jan1(year),
       endExclusive: tomorrowStart,
     };
   }
@@ -93,41 +106,51 @@ function resolveRange(key: RangeKey, now = new Date()): FinanceRange {
   if (key === "year") {
     return {
       key,
-      label: `Calendar year ${now.getFullYear()}`,
-      start: new Date(now.getFullYear(), 0, 1),
-      endExclusive: new Date(now.getFullYear() + 1, 0, 1),
+      label: `Calendar year ${year}`,
+      start: jan1(year),
+      endExclusive: jan1(year + 1),
     };
   }
 
   if (key === "lastYear") {
     return {
       key,
-      label: `Calendar year ${now.getFullYear() - 1}`,
-      start: new Date(now.getFullYear() - 1, 0, 1),
-      endExclusive: new Date(now.getFullYear(), 0, 1),
+      label: `Calendar year ${year - 1}`,
+      start: jan1(year - 1),
+      endExclusive: jan1(year),
     };
   }
 
   const days = key === "7d" ? 7 : key === "30d" ? 30 : 90;
-  const start = new Date(todayStart);
-  // Trailing N *whole* local days, today inclusive.
-  start.setDate(start.getDate() - (days - 1));
-
   return {
     key,
     label: `Last ${days} days`,
-    start,
+    // Trailing N *whole* store-local days, today inclusive.
+    start: zonedDayStart(addCalendarDays(today, -(days - 1)), tz),
     endExclusive: tomorrowStart,
   };
 }
 
-/** Local midnight of Jan 1 this year, and of tomorrow — for the YTD tax figure. */
-function resolveYtdWindow(now = new Date()): {
+/**
+ * Store-zone midnight of Jan 1 this year, and of tomorrow — for the YTD tax
+ * figure — plus the store-local year it covers.
+ */
+function resolveYtdWindow(
+  timeZone: string | null | undefined,
+  now = new Date(),
+): {
   start: Date;
   endExclusive: Date;
+  year: number;
 } {
-  const ytd = resolveRange("ytd", now);
-  return { start: ytd.start, endExclusive: ytd.endExclusive };
+  const ytd = resolveRange("ytd", timeZone, now);
+  return {
+    start: ytd.start,
+    endExclusive: ytd.endExclusive,
+    year: Number(
+      zonedCalendarDate(now, normalizeTimeZone(timeZone)).slice(0, 4),
+    ),
+  };
 }
 
 function toUnixSeconds(d: Date): number {
@@ -198,11 +221,11 @@ export const financeRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const now = new Date();
-      const range = resolveRange(input.range, now);
 
       const business = await ctx.db.business.findFirst({
         where: { id: businessId },
         select: {
+          timeZone: true,
           stripeAccountId: true,
           stripeAutoTaxEnabled: true,
           donationLabel: true,
@@ -212,23 +235,22 @@ export const financeRouter = createTRPCRouter({
         },
       });
 
-      // Order scope for the Finances page. Deliberately STRICTER than the
-      // dashboard's revenue scope (which does not exclude cancelled orders) —
-      // that difference is a known dashboard bug we are not fixing here.
-      const orderScope: Prisma.OrderWhereInput = {
-        businessId,
-        createdAt: { gte: range.start, lt: range.endExclusive },
-        paymentStatus: { in: ["paid", "refunded", "disputed"] },
-        status: { not: "cancelled" },
-      };
+      // Every window is in the store's zone (see `resolveRange`).
+      const timeZone = business?.timeZone ?? null;
+      const range = resolveRange(input.range, timeZone, now);
 
-      const ytdWindow = resolveYtdWindow(now);
-      const ytdOrderScope: Prisma.OrderWhereInput = {
-        businessId,
-        createdAt: { gte: ytdWindow.start, lt: ytdWindow.endExclusive },
-        paymentStatus: { in: ["paid", "refunded", "disputed"] },
-        status: { not: "cancelled" },
-      };
+      // Order scope for the Finances page — the shared definition of revenue
+      // (paid/refunded/disputed, not cancelled) also used by the dashboard.
+      const orderScope = financeOrderScope(businessId, {
+        start: range.start,
+        endExclusive: range.endExclusive,
+      });
+
+      const ytdWindow = resolveYtdWindow(timeZone, now);
+      const ytdOrderScope = financeOrderScope(businessId, {
+        start: ytdWindow.start,
+        endExclusive: ytdWindow.endExclusive,
+      });
 
       // INFORM Act scope — trailing 12 months ending today, and deliberately
       // NOT the finance scopes above. The thresholds measure sales *made*, not
@@ -236,13 +258,8 @@ export const financeRouter = createTRPCRouter({
       // was later refunded or disputed, while one that was never paid
       // (pending/failed) or was cancelled does not. Manual orders count — they
       // are sales too. Gross, not net of refunds.
-      const informWindow = resolveInformWindow(now);
-      const informOrderScope: Prisma.OrderWhereInput = {
-        businessId,
-        createdAt: { gte: informWindow.start, lt: informWindow.endExclusive },
-        paymentStatus: { in: ["paid", "refunded", "disputed"] },
-        status: { not: "cancelled" },
-      };
+      const informWindow = resolveInformWindow(now, timeZone);
+      const informOrderScope = financeOrderScope(businessId, informWindow);
 
       const orderMoneySelect = {
         total: true,
@@ -253,40 +270,45 @@ export const financeRouter = createTRPCRouter({
         paymentMethod: true,
       } satisfies Prisma.OrderSelect;
 
-      const [orderRows, ytdTaxRows, informAgg, donationAgg, allTimeDonationCount] =
-        await Promise.all([
-          ctx.db.order.findMany({
-            where: orderScope,
-            select: orderMoneySelect,
-          }),
-          // Row-level (not `_sum.tax`) so YTD tax gets the same refund
-          // proration as the range tile. Untaxed orders contribute 0, so
-          // they are skipped to keep the read small.
-          ctx.db.order.findMany({
-            where: { ...ytdOrderScope, tax: { gt: 0 } },
-            select: orderMoneySelect,
-          }),
-          ctx.db.order.aggregate({
-            where: informOrderScope,
-            _count: { id: true },
-            _sum: { total: true },
-          }),
-          // Range-scoped donation totals for the new donations card. Gross
-          // (Stripe amount_total) only — refunds are not tracked on donations,
-          // unlike orders, so there is no net figure to compute here.
-          ctx.db.donation.aggregate({
-            where: {
-              businessId,
-              createdAt: { gte: range.start, lt: range.endExclusive },
-            },
-            _sum: { amountCents: true },
-            _count: true,
-          }),
-          // All-time count, independent of `range` — drives the card's
-          // visibility client-side (show once a business has ANY donation
-          // history, not just within the selected window).
-          ctx.db.donation.count({ where: { businessId } }),
-        ]);
+      const [
+        orderRows,
+        ytdTaxRows,
+        informAgg,
+        donationAgg,
+        allTimeDonationCount,
+      ] = await Promise.all([
+        ctx.db.order.findMany({
+          where: orderScope,
+          select: orderMoneySelect,
+        }),
+        // Row-level (not `_sum.tax`) so YTD tax gets the same refund
+        // proration as the range tile. Untaxed orders contribute 0, so
+        // they are skipped to keep the read small.
+        ctx.db.order.findMany({
+          where: { ...ytdOrderScope, tax: { gt: 0 } },
+          select: orderMoneySelect,
+        }),
+        ctx.db.order.aggregate({
+          where: informOrderScope,
+          _count: { id: true },
+          _sum: { total: true },
+        }),
+        // Range-scoped donation totals for the new donations card. Gross
+        // (Stripe amount_total) only — refunds are not tracked on donations,
+        // unlike orders, so there is no net figure to compute here.
+        ctx.db.donation.aggregate({
+          where: {
+            businessId,
+            createdAt: { gte: range.start, lt: range.endExclusive },
+          },
+          _sum: { amountCents: true },
+          _count: true,
+        }),
+        // All-time count, independent of `range` — drives the card's
+        // visibility client-side (show once a business has ANY donation
+        // history, not just within the selected window).
+        ctx.db.donation.count({ where: { businessId } }),
+      ]);
 
       const orders: OrdersBreakdown =
         orderRows.length > 0
@@ -467,8 +489,8 @@ export const financeRouter = createTRPCRouter({
         orders,
         stripe,
         taxCollectedYtdCents,
-        // Year the YTD tile covers (the server's current year, whatever range is shown).
-        taxCollectedYtdYear: ytdWindow.start.getFullYear(),
+        // Year the YTD tile covers (the store's current year, whatever range is shown).
+        taxCollectedYtdYear: ytdWindow.year,
         stripeAutoTaxEnabled: business?.stripeAutoTaxEnabled ?? false,
         isStripeConnected: !!accountId,
         stripeError,
@@ -485,9 +507,7 @@ export const financeRouter = createTRPCRouter({
           // `donations` feature-flag state; donation data may exist while
           // the flag is off (see the JSDoc above for why this block is
           // returned regardless).
-          enabled: resolveFlags(business?.featureFlags).isEnabled(
-            "donations",
-          ),
+          enabled: resolveFlags(business?.featureFlags).isEnabled("donations"),
           // Owner's chosen noun: "Donation" | "Tip" | "Contribution".
           labelNoun: resolveDonationLabel(business?.donationLabel).noun,
           hasOffPlatformHandles: !!(

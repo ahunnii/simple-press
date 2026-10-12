@@ -61,11 +61,11 @@ import {
   isInvoiceOverdue,
   REMINDER_COOLDOWN_MS,
   resolveDueDateYmd,
-  todayUtcMidnight,
   toInvoiceStatus,
   utcMidnightToYmd,
   ymdToUtcMidnight,
 } from "~/lib/invoices/status";
+import { computeInvoiceSummary } from "~/lib/invoices/summary";
 import { createInvoiceToken, invoiceViewPath } from "~/lib/invoices/token";
 import { balanceDueCents, computeInvoiceTotals } from "~/lib/invoices/totals";
 import {
@@ -98,10 +98,7 @@ import {
   recordPaymentSchema,
   sendReminderSchema,
 } from "~/lib/validators/invoice";
-import {
-  parseBillingAddressJson,
-  QBO_OPEN_INVOICE_STATUSES,
-} from "~/lib/validators/quickbooks";
+import { parseBillingAddressJson } from "~/lib/validators/quickbooks";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { zonedDayStart } from "~/lib/zoned-day";
 import {
@@ -547,107 +544,11 @@ export const invoiceRouter = createTRPCRouter({
    * (`mapQboRow`). "Paid in the last 30 days" is money COLLECTED: native
    * payments with `paidOn` in the window (including payments on invoices
    * later cancelled), plus QuickBooks invoices marked paid in the window.
+   * The body lives in `~/lib/invoices/summary` so the dashboard shares it.
    */
-  summary: invRead.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-    const now = new Date();
-    const { business, qboEnabled } = await loadBusinessContext(
-      ctx.db,
-      businessId,
-    );
-    const today = todayUtcMidnight(now, business.timeZone);
-    const windowStart = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    const [outstanding, overdue, collected, qboCount] = await Promise.all([
-      ctx.db.invoice.aggregate({
-        where: { businessId, status: { in: OPEN_STATUSES } },
-        _sum: { totalCents: true, amountPaidCents: true },
-        _count: { _all: true },
-      }),
-      ctx.db.invoice.aggregate({
-        where: {
-          businessId,
-          status: { in: OPEN_STATUSES },
-          dueDate: { lt: today },
-        },
-        _sum: { totalCents: true, amountPaidCents: true },
-        _count: { _all: true },
-      }),
-      ctx.db.invoicePayment.aggregate({
-        where: { businessId, paidOn: { gte: windowStart } },
-        _sum: { amountCents: true },
-      }),
-      ctx.db.quickBooksInvoice.count({ where: { businessId } }),
-    ]);
-
-    let outstandingCents =
-      (outstanding._sum.totalCents ?? 0) -
-      (outstanding._sum.amountPaidCents ?? 0);
-    let outstandingCount = outstanding._count._all;
-    let overdueCents =
-      (overdue._sum.totalCents ?? 0) - (overdue._sum.amountPaidCents ?? 0);
-    let overdueCount = overdue._count._all;
-    let paidLast30Cents = collected._sum.amountCents ?? 0;
-
-    if (qboEnabled || qboCount > 0) {
-      const qboRows = await ctx.db.quickBooksInvoice.findMany({
-        where: {
-          businessId,
-          OR: [
-            { status: { in: [...QBO_OPEN_INVOICE_STATUSES] } },
-            { status: "paid", paidAt: { gte: windowStart } },
-          ],
-        },
-        take: QBO_INVOICE_LIST_MAX_ROWS,
-        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-        select: {
-          id: true,
-          createdAt: true,
-          amountCents: true,
-          balanceCents: true,
-          status: true,
-          dueDate: true,
-          qboDocNumber: true,
-        },
-      });
-      for (const raw of qboRows) {
-        if (raw.status === "paid") {
-          paidLast30Cents += raw.amountCents;
-          continue;
-        }
-        // Customer fields and the `qbo` detail don't affect money or overdue;
-        // skip decrypting/loading them here (they cost 1 row's worth of joins
-        // × up to `QBO_INVOICE_LIST_MAX_ROWS`, and nothing below reads them).
-        const row = mapQboRow(
-          {
-            ...raw,
-            customerName: "",
-            customerEmail: "",
-            kind: "custom",
-            qboInvoiceId: null,
-            lastError: null,
-            quoteSubmission: null,
-          },
-          now,
-          business.timeZone,
-        );
-        outstandingCents += row.balanceCents;
-        outstandingCount += 1;
-        if (row.isOverdue) {
-          overdueCents += row.balanceCents;
-          overdueCount += 1;
-        }
-      }
-    }
-
-    return {
-      outstandingCents,
-      outstandingCount,
-      overdueCents,
-      overdueCount,
-      paidLast30Cents,
-    };
-  }),
+  summary: invRead.query(({ ctx }) =>
+    computeInvoiceSummary(ctx.db, ctx.businessId, new Date()),
+  ),
 
   /** One invoice for the admin detail page, with payments, timeline and capabilities. */
   getById: invRead.input(invoiceIdSchema).query(async ({ ctx, input }) => {

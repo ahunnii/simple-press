@@ -17,7 +17,7 @@ import { HideSearchReadinessButton } from "./hide-search-readiness-button";
  * the full report on /admin/content/seo.
  *
  * Async server component rendered inside its own `<Suspense fallback={null}>`
- * by the dashboard page (same treatment as `ConversionCard`), so its ~20 counts
+ * by the dashboard page, so its ~20 counts
  * never delay first paint.
  *
  * Takes already-fetched rows: the dashboard has the business and the widened

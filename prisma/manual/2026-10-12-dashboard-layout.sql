@@ -1,0 +1,24 @@
+-- 2026-10-12-dashboard-layout.sql — 2026-10-12
+--
+-- Adds an optional per-person dashboard layout to BusinessMembership. Each
+-- person can arrange their own store dashboard; the layout is stored per
+-- membership (one person, one store), not per user.
+--
+-- Covers:
+--   * BusinessMembership."dashboardLayout" — nullable JSONB.
+--     Versioned JSON, parsed by src/lib/dashboard/layout-schema.ts.
+--     NULL = default layout, which is what every existing membership gets.
+--     Referenced by the dashboard on every admin load, so the column MUST
+--     exist before code deploy.
+--
+-- No data backfill: existing rows land NULL, which means the default layout.
+--
+-- `pnpm db:push` produces the same column; this file is only needed where
+-- db:push isn't used. Either way, the column must exist BEFORE deploying
+-- the code — the generated client selects it on every dashboard read.
+--
+--   psql "$DATABASE_URL" -f prisma/manual/2026-10-12-dashboard-layout.sql
+--
+-- Idempotent: ADDs are guarded with IF NOT EXISTS.
+
+ALTER TABLE "BusinessMembership" ADD COLUMN IF NOT EXISTS "dashboardLayout" JSONB;
