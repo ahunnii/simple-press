@@ -624,6 +624,51 @@ describe("discount-code uses are held at checkout start", () => {
       expect(product.reservedQty).toBe(0);
     });
 
+    it("the inventory transaction fails: the order stands, the hold is still consumed, and the sweeper cannot give the use back", async () => {
+      const store = await setupStore();
+      const code = await createDiscount(store.business.id, { usageLimit: 1 });
+      const { sessionId, metadata } = await startCheckout(store, {
+        discountCodeId: code.id,
+      });
+      expect(await usageOf(code.id)).toBe(1);
+
+      // Fail the stock deduction inside the webhook's transaction (its sale
+      // history row), which rolls the in-transaction consume back with it.
+      await db.$executeRawUnsafe(`
+        CREATE OR REPLACE FUNCTION fail_sale_history() RETURNS trigger AS $$
+        BEGIN RAISE EXCEPTION 'injected inventory failure'; END;
+        $$ LANGUAGE plpgsql`);
+      await db.$executeRawUnsafe(`
+        CREATE TRIGGER fail_sale_history BEFORE INSERT ON "InventoryHistory"
+        FOR EACH ROW EXECUTE FUNCTION fail_sale_history()`);
+      try {
+        const paid = webhookSession(store, sessionId, metadata, "paid");
+        stripeMocks.sessionsRetrieve.mockResolvedValue(paid.fullSession);
+        await post(makeCheckoutCompletedEvent(paid.session, ACCOUNT_ID));
+      } finally {
+        await db.$executeRawUnsafe(
+          `DROP TRIGGER IF EXISTS fail_sale_history ON "InventoryHistory"`,
+        );
+        await db.$executeRawUnsafe(`DROP FUNCTION IF EXISTS fail_sale_history`);
+      }
+
+      expect(await db.order.count()).toBe(1);
+      // The failure was reported; the standalone consume then settled the hold.
+      expect(sentryMocks.captureException).toHaveBeenCalledTimes(1);
+      expect((await reservationFor(sessionId)).status).toBe("consumed");
+      expect(await usageOf(code.id)).toBe(1);
+
+      // Nothing is left active for the sweeper to release.
+      await db.inventoryReservation.update({
+        where: { stripeSessionId: sessionId },
+        data: { expiresAt: new Date(Date.now() - 1000) },
+      });
+      expect(
+        await sweepStaleReservations(db, { businessId: store.business.id }),
+      ).toBe(0);
+      expect(await usageOf(code.id)).toBe(1);
+    });
+
     it("legacy session (reservation without a discount entry): the order path still increments", async () => {
       const store = await setupStore();
       const code = await createDiscount(store.business.id, { usageLimit: 3 });

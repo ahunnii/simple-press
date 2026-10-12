@@ -9,6 +9,7 @@ import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import type { PoolDeductionResult } from "~/lib/inventory";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
+import type { TxClient } from "~/server/db";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
 import {
@@ -63,6 +64,80 @@ type NotificationCandidate = {
   allowBackorders: boolean;
   lowInventoryThreshold: number | null;
 };
+
+/**
+ * Settles the checkout session's active stock/discount hold once its order
+ * exists: the conditional `active → consumed` flip, then reservedQty drops and
+ * the discount use counted at checkout start becomes final. Returns the
+ * discount code ids it consumed (empty if no active reservation / flip lost).
+ *
+ * Must run inside a db.$transaction.
+ */
+async function consumeCheckoutReservation(
+  tx: TxClient,
+  {
+    businessId,
+    session,
+  }: { businessId: string; session: Stripe.Checkout.Session },
+): Promise<Set<string>> {
+  const consumed = new Set<string>();
+  // Look up by stripeSessionId first, fall back to metadata.reservationId.
+  // metadata.reservationId is attacker-controllable by any connected merchant
+  // (they can set arbitrary metadata on their own checkout sessions), so the
+  // lookup is scoped to the verified business — otherwise a merchant could
+  // consume another tenant's active stock hold. A reservationId that belongs
+  // to a different business is left untouched and logged as a warning.
+  const reservationId = session.metadata?.reservationId;
+  const reservation = await tx.inventoryReservation.findFirst({
+    where: {
+      businessId,
+      OR: [
+        { stripeSessionId: session.id },
+        ...(reservationId ? [{ id: reservationId }] : []),
+      ],
+      status: "active",
+    },
+  });
+  if (reservationId && reservation?.id !== reservationId) {
+    const other = await tx.inventoryReservation.findUnique({
+      where: { id: reservationId },
+      select: { businessId: true },
+    });
+    if (other && other.businessId !== businessId) {
+      Sentry.captureMessage(
+        `[Webhook] metadata.reservationId ${reservationId} belongs to business ${other.businessId}, not ${businessId}; reservation left untouched`,
+        {
+          level: "warning",
+          tags: {
+            "webhook.step": "reservation-release-business-mismatch",
+            businessId,
+          },
+        },
+      );
+    }
+  }
+  if (reservation) {
+    // Conditional `active → consumed` flip first: if the stale
+    // sweeper or an expired/failed event released the hold
+    // between the read above and here, it already decremented
+    // reservedQty — releasing again would double-decrement.
+    const flipped = await tx.inventoryReservation.updateMany({
+      where: { id: reservation.id, status: "active" },
+      data: { status: "consumed" },
+    });
+    if (flipped.count === 1) {
+      const entries = reservation.items as ReservationEntry[];
+      // "consume": drop reservedQty (the real deduction happened
+      // above) but keep the discount use counted at checkout
+      // start — the order makes it final.
+      await releaseReservation(tx, { items: entries }, { mode: "consume" });
+      for (const entry of entries) {
+        if (entry.discountCodeId) consumed.add(entry.discountCodeId);
+      }
+    }
+  }
+  return consumed;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -810,72 +885,14 @@ export async function POST(req: NextRequest) {
             }
 
             // Release the inventory reservation now that physical inventory has
-            // been deducted. Look up by stripeSessionId first, fall back to
-            // metadata.reservationId. Guard so a missing/already-consumed
-            // reservation never breaks order creation. metadata.reservationId
-            // is attacker-controllable by any connected merchant (they can set
-            // arbitrary metadata on their own checkout sessions), so the lookup
-            // is scoped to the verified business — otherwise a merchant could
-            // consume another tenant's active stock hold. A reservationId that
-            // belongs to a different business is left untouched and logged as a
-            // warning.
+            // been deducted. Guard so a missing/already-consumed reservation
+            // never breaks order creation.
             try {
-              const reservationId = session.metadata?.reservationId;
-              const reservation = await tx.inventoryReservation.findFirst({
-                where: {
-                  businessId,
-                  OR: [
-                    { stripeSessionId: session.id },
-                    ...(reservationId ? [{ id: reservationId }] : []),
-                  ],
-                  status: "active",
-                },
+              const consumed = await consumeCheckoutReservation(tx, {
+                businessId,
+                session,
               });
-              if (reservationId && reservation?.id !== reservationId) {
-                const other = await tx.inventoryReservation.findUnique({
-                  where: { id: reservationId },
-                  select: { businessId: true },
-                });
-                if (other && other.businessId !== businessId) {
-                  Sentry.captureMessage(
-                    `[Webhook] metadata.reservationId ${reservationId} belongs to business ${other.businessId}, not ${businessId}; reservation left untouched`,
-                    {
-                      level: "warning",
-                      tags: {
-                        "webhook.step":
-                          "reservation-release-business-mismatch",
-                        businessId,
-                      },
-                    },
-                  );
-                }
-              }
-              if (reservation) {
-                // Conditional `active → consumed` flip first: if the stale
-                // sweeper or an expired/failed event released the hold
-                // between the read above and here, it already decremented
-                // reservedQty — releasing again would double-decrement.
-                const flipped = await tx.inventoryReservation.updateMany({
-                  where: { id: reservation.id, status: "active" },
-                  data: { status: "consumed" },
-                });
-                if (flipped.count === 1) {
-                  const entries = reservation.items as ReservationEntry[];
-                  // "consume": drop reservedQty (the real deduction happened
-                  // above) but keep the discount use counted at checkout
-                  // start — the order makes it final.
-                  await releaseReservation(
-                    tx,
-                    { items: entries },
-                    { mode: "consume" },
-                  );
-                  for (const entry of entries) {
-                    if (entry.discountCodeId) {
-                      consumedDiscountCodeIds.add(entry.discountCodeId);
-                    }
-                  }
-                }
-              }
+              for (const id of consumed) consumedDiscountCodeIds.add(id);
             } catch (reservationErr) {
               Sentry.withScope((scope) => {
                 scope.setTag("webhook.step", "reservation-release-completed");
@@ -886,9 +903,7 @@ export async function POST(req: NextRequest) {
             }
           });
         } catch (inventoryError) {
-          // Rolled back: the reservation was not consumed after all (it stays
-          // active, and its eventual release gives the discount use back), so
-          // the increment below must count this order's use.
+          // Rolled back: the reservation was not consumed with it.
           consumedDiscountCodeIds.clear();
           Sentry.withScope((scope) => {
             scope.setTag("webhook.step", "inventory-deduction");
@@ -896,6 +911,27 @@ export async function POST(req: NextRequest) {
             Sentry.captureException(inventoryError);
           });
           // Don't fail webhook - order is still created
+          // The order exists, so the held discount use must become final:
+          // left active, the sweeper would release the hold and give the use
+          // back. Consuming the reservation on its own also drops reservedQty
+          // (what the sweeper would have done, minus giving the use back).
+          // Physical stock deduction still failed and is reported above.
+          try {
+            const consumed = await db.$transaction((tx) =>
+              consumeCheckoutReservation(tx, { businessId, session }),
+            );
+            for (const id of consumed) consumedDiscountCodeIds.add(id);
+          } catch (consumeError) {
+            // Stays active; the guarded increment below still runs.
+            Sentry.withScope((scope) => {
+              scope.setTag(
+                "webhook.step",
+                "reservation-consume-after-rollback",
+              );
+              scope.setTag("businessId", businessId);
+              Sentry.captureException(consumeError);
+            });
+          }
         }
 
         // Count the discount code use — unless the reservation consumed above
