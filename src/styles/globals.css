@@ -16447,6 +16447,13 @@ body:has(.pollen) {
   --dream-gold: #c79a2d;
   --dream-gold-ink: #8a6a14;
   --dream-gold-soft: #f5df96;
+  /* 2026-10-12: balloon-only pastels (hero balloons, ≤.6 opacity over
+     --dream-sky-hero → --dream-peach). Decorative; never text or fills. */
+  --dream-balloon-lilac: #d9c4f0;
+  --dream-balloon-mint: #bfe6d2;
+  --dream-balloon-peach: #f8cba4;
+  --dream-balloon-blush: #f6c1d4;
+  --dream-balloon-periwinkle: #aab9f0;
   --dream-line: rgba(183, 132, 36, 0.24);
   --dream-hairline: color-mix(in srgb, var(--dream-ink) 10%, transparent);
   --dream-veil: rgba(255, 250, 244, 0.92);
@@ -17439,14 +17446,25 @@ body:has(.pollen) {
   z-index: 1;
 }
 
+/* Data-driven (dream-balloons.tsx): each span carries --b-inset / --b-dur /
+   --b-delay / --bx / --b-color inline. 2026-10-12: 8 balloons rising over
+   16–21s with negative delays spread across a cycle, so 4–5 are in flight
+   at first paint. */
 .dream .dream-balloon {
   position: absolute;
   bottom: -100px;
   width: 30px;
   height: 40px;
   border-radius: 50% 50% 46% 46%;
+  background: var(--b-color);
   opacity: 0;
-  animation: dream-balloon-rise 26s ease-in infinite;
+  animation: dream-balloon-rise var(--b-dur, 18s) ease-in infinite;
+  animation-delay: var(--b-delay, 0s);
+}
+
+/* Paper (white) balloon keeps the hairline the old --paper modifier gave it. */
+.dream .dream-balloon[data-tone="paper"] {
+  border: 1px solid var(--dream-line);
 }
 
 .dream .dream-balloon::after {
@@ -17464,46 +17482,52 @@ body:has(.pollen) {
   animation-play-state: paused;
 }
 
-/* No side lanes below 960px: the protected center column is up to 640px
-   wide (plus its veil), so on phones AND tablets every lane crossed the
-   hero copy — e.g. at 768 the 84% lane sits mid-lede (2026-10-05
-   post-launch review; brief: "side lanes only, never the protected
-   center"). */
+/* Lanes cannot enter the center by construction (2026-10-12; the
+   2026-10-05 five-balloon pass was cut because two eyeballed lanes crossed
+   the copy). Each balloon is placed from its own outer edge and clamped to
+   `50% - 380px`: the protected center column is up to 640px wide plus its
+   veil, so past 760px of hero width the lane can never move inward of
+   380px from the middle. Sway (--bx) is signed outward in the data, so
+   the drift never carries a balloon toward the copy either. */
+.dream .dream-balloon[data-side="left"] {
+  left: min(var(--b-inset), calc(50% - 380px));
+}
+
+.dream .dream-balloon[data-side="right"] {
+  right: min(var(--b-inset), calc(50% - 380px));
+}
+
+/* Below 960px the clamp would go negative (50% - 380px < 0 on phones), and
+   no lane clears the copy anyway — so only the 3 `data-mobile` balloons
+   stay: small (≈70%: 21×28px, shorter string), hugging the gutters at
+   the 2–4% insets, swaying ≤16px outward, with a lower peak opacity.
+   The layer sits at z-index 1 behind the copy (z-index 3), so any overlap
+   passes under the text, never over it. */
 @media (max-width: 959px) {
-  .dream .dream-balloons {
+  .dream .dream-balloon:not([data-mobile]) {
     display: none;
   }
-}
 
-/* Positions are the side lanes only (6% left; 84% / 92% right) — never the
-   protected center — with negative delays so two are mid-flight at first
-   paint. 2026-10-05: back to 3 balloons (brief: "2–3, low opacity"; the
-   2026-09-17 five-balloon pass read as overload) — the 74% lane drifted
-   into the text column on its -54px sway and the 17% lane doubled up the
-   left; `--gold` took the old `--gold-2` 84% lane. */
-.dream .dream-balloon--rose {
-  left: 6%;
-  background: var(--dream-rose-soft);
-  --bx: 34px;
-  animation-duration: 22s;
-  animation-delay: -3s;
-}
+  .dream .dream-balloon {
+    width: 21px;
+    height: 28px;
+    --b-peak: 0.45;
+    /* `--bx` is set inline, which beats this rule, so the small mobile
+       sway rides its own var that the keyframe reads first. */
+    --b-sway: var(--bx-m, 12px);
+  }
 
-.dream .dream-balloon--paper {
-  left: 92%;
-  background: var(--dream-white);
-  border: 1px solid var(--dream-line);
-  --bx: 42px;
-  animation-duration: 26s;
-  animation-delay: -12s;
-}
+  .dream .dream-balloon::after {
+    height: 36px;
+  }
 
-.dream .dream-balloon--gold {
-  left: 84%;
-  background: var(--dream-gold-soft);
-  --bx: 48px;
-  animation-duration: 25s;
-  animation-delay: -16s;
+  .dream .dream-balloon[data-side="left"] {
+    left: var(--b-inset-m, 3%);
+  }
+
+  .dream .dream-balloon[data-side="right"] {
+    right: var(--b-inset-m, 3%);
+  }
 }
 
 /* ── Steps (numbered list — the one place section numbers are allowed) ── */
@@ -18579,8 +18603,10 @@ body:has(.pollen) {
    — the hero is up to 860px tall, so -1050px clears it with margin.
    Opacity starts and ends at 0 (fades in by 8%, back out by 100%) so the
    container's `overflow: hidden` never clips a visibly-opaque balloon at
-   either edge. `translateX` drifts sideways via each color's own `--bx`
-   (±40px) and `rotate` turns from -2deg to 8deg over the same span. */
+   either edge. `translateX` drifts sideways via each balloon's own `--bx`
+   (outward only, 20–44px; set inline from dream-balloons.tsx), or the
+   mobile `--b-sway` override when the <960px rule sets one,
+   and `rotate` turns from -2deg to 8deg over the same span. */
 /* Opacity stays 0 through the first 10% (≈105px of the 1050px rise): the
    balloon starts at bottom:-100px inside a layer that is clipped at the
    shelf's top edge, and balloon + string are ~90px tall, so the whole
@@ -18595,14 +18621,14 @@ body:has(.pollen) {
     opacity: 0;
   }
   16% {
-    opacity: 0.6;
+    opacity: var(--b-peak, 0.6);
   }
   55% {
-    opacity: 0.55;
+    opacity: calc(var(--b-peak, 0.6) * 0.92);
   }
   100% {
     opacity: 0;
-    transform: translateY(-1050px) translateX(var(--bx, 40px)) rotate(8deg);
+    transform: translateY(-1050px) translateX(var(--b-sway, var(--bx, 40px))) rotate(8deg);
   }
 }
 
