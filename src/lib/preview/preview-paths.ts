@@ -17,6 +17,9 @@ export const PAGE_PREVIEW_PATHS: Record<string, string> = {
   events: "/events",
   videos: "/videos",
   faq: "/faq",
+  // wealth's Impact Report: a CMS page with slug "impact" that the template
+  // renders from these fields. Only offered for templates declaring the fields.
+  impact: "/impact",
   // Synthetic page: the auth image / logo-size fields are declared on the
   // `global` page (they are site-wide), but they only ever RENDER on the
   // shared auth shell. `/auth/sign-in` previews that shell — every auth screen

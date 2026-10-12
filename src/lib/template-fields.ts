@@ -104,7 +104,9 @@ export type TemplatePage =
   | "cart"
   | "checkout"
   | "global"
-  | "testimonials";
+  | "testimonials"
+  // wealth Impact Report (GenericPage slug "impact") — see preview-paths.ts.
+  | "impact";
 
 export type TemplateListItemField = {
   key: string;
@@ -1242,6 +1244,11 @@ export const PAGE_METADATA = {
     title: "Donate",
     description: "Donations/tips page content",
     icon: "💝",
+  },
+  impact: {
+    title: "Impact Report",
+    description: "Annual impact report page (/impact)",
+    icon: "📊",
   },
   // Not a `TemplatePage` value — no field declares `page: "authentication"`.
   // The auth fields live on the `global` page; this entry exists so the visual

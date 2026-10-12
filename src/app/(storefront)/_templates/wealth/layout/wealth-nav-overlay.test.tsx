@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import { WealthNavOverlay } from "./wealth-nav-overlay";
@@ -54,7 +55,14 @@ vi.mock("~/components/auth/user/user-button", () => ({
 function renderOverlay({
   flags = [],
   accountsEnabled = true,
-}: { flags?: string[]; accountsEnabled?: boolean } = {}) {
+  items = [{ label: "Home", href: "/" }],
+  donate = null,
+}: {
+  flags?: string[];
+  accountsEnabled?: boolean;
+  items?: NavItem[];
+  donate?: { label: string; href: string } | null;
+} = {}) {
   const onClose = vi.fn();
   const enabled = new Set(flags);
   const overlay = (open: boolean) => (
@@ -62,7 +70,8 @@ function renderOverlay({
       open={open}
       onClose={onClose}
       triggerRef={{ current: null }}
-      items={[{ type: "link", label: "Home", href: "/" }]}
+      items={items}
+      donate={donate}
       businessName="Wealth Test Co"
       logoAlt="Wealth Test Co"
       isEnabled={(flag) => enabled.has(flag)}
@@ -189,5 +198,71 @@ describe("WealthNavOverlay account block", () => {
     expect(document.activeElement).toBe(
       within(dialog).getByRole("button", { name: "Close menu" }),
     );
+  });
+});
+
+describe("WealthNavOverlay links (shared NavItem shape)", () => {
+  it("prepends Home when the nav has no '/' entry", () => {
+    const { dialog } = renderOverlay({
+      items: [{ label: "About Us", href: "/about" }],
+    });
+    const nav = within(dialog).getByRole("navigation", {
+      name: "Primary navigation",
+    });
+    const hrefs = Array.from(nav.querySelectorAll("a"), (a) =>
+      a.getAttribute("href"),
+    );
+    expect(hrefs).toEqual(["/", "/about"]);
+    // Home is the current page here (pathname mock = "/").
+    expect(within(nav).getByRole("link", { name: "Home" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("renders a group as a collapsed accordion that expands in place", () => {
+    const { dialog } = renderOverlay({
+      items: [
+        {
+          label: "Programs",
+          href: "",
+          children: [
+            { label: "All Programs", href: "/services" },
+            {
+              label: "CEND",
+              href: "https://www.cendetroit.com",
+              external: true,
+            },
+          ],
+        },
+      ],
+    });
+    const toggle = within(dialog).getByRole("button", { name: /Programs/ });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    // Collapsed children stay out of the tab order.
+    const cend = within(dialog).getByRole("link", { name: /CEND/ });
+    expect(cend).toHaveAttribute("tabindex", "-1");
+    expect(cend).toHaveAttribute("target", "_blank");
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(cend).not.toHaveAttribute("tabindex");
+  });
+
+  it("renders the donate line only when the header passes it", () => {
+    const without = renderOverlay();
+    expect(
+      within(without.dialog).queryByRole("link", { name: "Donate" }),
+    ).toBeNull();
+  });
+
+  it("renders the donate CTA with the owner's label", () => {
+    const { dialog, onClose } = renderOverlay({
+      donate: { label: "Donate", href: "/donate" },
+    });
+    const donate = within(dialog).getByRole("link", { name: "Donate" });
+    expect(donate).toHaveAttribute("href", "/donate");
+    fireEvent.click(donate);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

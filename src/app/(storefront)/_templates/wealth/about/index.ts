@@ -1,14 +1,47 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
-// ─── About DCWF (hero) — NOT hideable ──────────────────────────────────────
+// ─── About DCWF (hero + story) — NOT hideable ──────────────────────────────
 
 const aboutHeroData: TemplateField[] = [
+  {
+    key: "wealth.about.hero-image",
+    label: "Hero Photo",
+    description:
+      "Optional photo shown beside the page heading, with a tint. Leave blank for a full-width heading panel with no photo.",
+    type: "image",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "wealth.about.hero-image-alt",
+    label: "Hero Photo Alt Text",
+    description:
+      "Describes the hero photo for screen readers. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "wealth.about.hero-eyebrow",
+    label: "Small Label",
+    description:
+      "Short uppercase label above the page heading. Leave blank to hide.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Who we are",
+  },
   {
     key: "wealth.about.hero-heading",
     label: "Page Heading",
     description:
-      "Centered italic heading at the top of the About page (also the page's H1).",
+      "The page's main heading (H1), shown large at the top of the About page.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -18,7 +51,8 @@ const aboutHeroData: TemplateField[] = [
   {
     key: "wealth.about.hero-paragraph-1",
     label: "Story — Paragraph 1",
-    description: "First paragraph of DCWF's story (founding, mission).",
+    description:
+      "First paragraph of DCWF's story (founding, mission). Shown larger as the lead; wrap a phrase in **double asterisks** to bold it.",
     type: "textarea",
     page: "about",
     group: "about.hero",
@@ -163,13 +197,25 @@ const aboutBoardData: TemplateField[] = [
   },
 ];
 
-// ─── Closing contact CTA — hideable ────────────────────────────────────────
+// ─── Closing CTA band — hideable ───────────────────────────────────────────
 
 const aboutCtaData: TemplateField[] = [
   {
+    key: "wealth.about.cta-heading",
+    label: "CTA Heading",
+    description:
+      "Italic line in the closing band at the bottom of the page. Leave blank to show only the button.",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "We love talking co-ops & community ownership.",
+  },
+  {
     key: "wealth.about.cta-label",
     label: "CTA Label",
-    description: "Text for the quiet closing link to the Contact page.",
+    description:
+      "Text for the closing button that links to the Contact page. Leave blank to hide the button.",
     type: "text",
     page: "about",
     group: "about.cta",
@@ -179,7 +225,7 @@ const aboutCtaData: TemplateField[] = [
   {
     key: "wealth.about.cta-url",
     label: "CTA Link",
-    description: "Where the closing link sends visitors.",
+    description: "Where the closing button sends visitors.",
     type: "url",
     page: "about",
     group: "about.cta",
@@ -201,7 +247,8 @@ export const wealthAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
     title: "About DCWF",
-    description: "Page heading and the three-paragraph story of DCWF",
+    description:
+      "Photo, label and heading at the top, then the three-paragraph story of DCWF",
     icon: "🌱",
     columns: 2,
   },
@@ -221,8 +268,8 @@ export const wealthAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.cta",
-    title: "Closing Contact Link",
-    description: "Quiet closing link pointing at the Contact page",
+    title: "Closing Contact Band",
+    description: "Closing band with a line and a button pointing at Contact",
     icon: "✉️",
     columns: 2,
   },
@@ -233,7 +280,7 @@ export const wealthAboutSections: TemplateSection[] = [
     id: "about.hero",
     page: "about",
     title: "About DCWF",
-    description: "Page heading and the three-paragraph story",
+    description: "Hero heading and the three-paragraph story",
     groupIds: ["about.hero"],
     order: 0,
     hideable: false,
@@ -259,8 +306,8 @@ export const wealthAboutSections: TemplateSection[] = [
   {
     id: "about.cta",
     page: "about",
-    title: "Closing Contact Link",
-    description: "Quiet link to the Contact page",
+    title: "Closing Contact Band",
+    description: "Closing band with a button to the Contact page",
     groupIds: ["about.cta"],
     order: 3,
     hideable: true,

@@ -8,6 +8,7 @@ import { resolveBanner } from "~/lib/site-banner/resolve";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
+import { hasImpactPage } from "../lib/has-impact-page";
 import { WealthFooter } from "./wealth-footer";
 import { WealthHeader } from "./wealth-header";
 
@@ -46,9 +47,10 @@ export async function WealthLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const [session, { isEnabled }] = await Promise.all([
+  const [session, { isEnabled }, impactPageExists] = await Promise.all([
     getSession(),
     getBusinessFlags(),
+    hasImpactPage(),
   ]);
 
   const banner = resolveBanner(business.siteContent, isEnabled);
@@ -71,9 +73,12 @@ export async function WealthLayout({
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:shadow-lg"
         style={{
-          background: "var(--wealth-paper)",
-          color: "var(--wealth-ink)",
-          fontFamily: "var(--font-wealth-body)",
+          background: "var(--wealth-forest)",
+          color: "var(--wealth-on-dark)",
+          fontFamily: "var(--font-wealth-mono)",
+          fontSize: "13px",
+          letterSpacing: "1.6px",
+          textTransform: "uppercase",
         }}
       >
         Skip to main content
@@ -83,13 +88,14 @@ export async function WealthLayout({
         business={business}
         initialSession={session ?? null}
         banner={banner}
+        hasImpactPage={impactPageExists}
       />
 
       <main id="main-content" className="flex-1">
         {children}
       </main>
 
-      <WealthFooter business={business} />
+      <WealthFooter business={business} initialSession={session ?? null} />
     </div>
   );
 }

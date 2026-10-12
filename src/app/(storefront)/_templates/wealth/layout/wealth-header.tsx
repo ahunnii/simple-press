@@ -3,168 +3,308 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Package, UserRound } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import type { BannerConfig } from "~/lib/validators/site-banner";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { UserButton } from "~/components/auth/user/user-button";
+import {
+  activeEntryIndex,
+  donateLinkOptions,
+  externalLinkProps,
+  filterNavByFlags,
+  getAccountNavLinks,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+} from "~/app/(storefront)/_components/nav";
+import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
 
 import { resolveWealthFields } from "../lib/resolve-fields";
+import { wealthLedgeButtonClasses } from "../shared/wealth-ledge-button";
 import { WealthAnnouncementBar } from "./wealth-announcement-bar";
-import type { WealthNavItem } from "./wealth-nav-overlay";
-import { WealthNavOverlay } from "./wealth-nav-overlay";
+import { wealthNavDefaults } from "./wealth-nav";
+import { WEALTH_NAV_OVERLAY_ID, WealthNavOverlay } from "./wealth-nav-overlay";
 
+const DEFAULT_LOGO = "/templates/wealth/images/logo.png";
+
+/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <Package className="h-4 w-4" />,
+  admin: <LayoutDashboard className="h-4 w-4" />,
+};
+
+const externalHint = <span className="sr-only"> (opens in new tab)</span>;
+
+function Chevron() {
+  return (
+    <svg
+      viewBox="0 0 10 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M1.5 3.5L5 7l3.5-3.5" />
+    </svg>
+  );
+}
+
+/**
+ * Wealth redesign header (design.md Chrome "Redesign"): white, sticky,
+ * 77px / 97px incl. hairline.
+ * - ≥1100px: logo left · inline nav with dropdowns (shared `useNavDropdown`:
+ *   hover + click + keyboard, Esc / outside-pointer / route-change close) ·
+ *   account entry · DONATE ledge button.
+ * - <1100px: hamburger left · logo centered · DONATE right; the hamburger
+ *   opens `WealthNavOverlay`, fed from the same resolved nav.
+ *
+ * Nav = `filterNavByFlags(resolveNav(navigationItems, defaults), isEnabled)`.
+ * Donate is a chrome CTA (Pink's pattern), never appended to the inline nav;
+ * it hides when the owner already put /donate in their own menu.
+ */
 export function WealthHeader({
   business,
   initialSession,
   banner,
-}: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
+  hasImpactPage = true,
+}: DefaultHeaderTemplateProps & {
+  banner?: BannerConfig | null;
+  /** Server-computed (layout): is there a published `/impact` page? Drives the
+   *  default nav only; an owner-saved menu is never filtered by it. */
+  hasImpactPage?: boolean;
+}) {
+  const pathname = usePathname();
+  const dd = useNavDropdown(pathname, "wealth-nav");
   const [open, setOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const { data: session, isPending } = useHydratedSession(initialSession);
 
-  // Flags come from `business.featureFlags` — already loaded with the
-  // business prop, so gating donate/services links here is free (no extra
-  // fetch), following the same client-side pattern `vii-header.tsx` uses
-  // for its `products`/`blog` nav gates.
+  // Same resolved flags every wealth chrome piece reads (business prop →
+  // resolveFlags, dependsOn cascades applied).
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
 
-  const customFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
-  const f = resolveWealthFields(customFields, ["wealth.global.nav-resources-url"]);
+  const f = resolveWealthFields(business?.siteContent?.customFields, [
+    "wealth.global.nav-resources-url",
+  ]);
   const resourcesUrl = f["wealth.global.nav-resources-url"] ?? "/resources";
 
+  const nav = filterNavByFlags(
+    resolveNav(
+      business?.siteContent?.navigationItems,
+      wealthNavDefaults(resourcesUrl, hasImpactPage),
+    ),
+    isEnabled,
+  );
+
+  const donate = donateLinkOptions(business, isEnabled, "header");
+  const navHasDonate = nav.some(
+    (item) =>
+      item.href === "/donate" ||
+      (item.children?.some((c) => c.href === "/donate") ?? false),
+  );
+  const showDonate = donate.show && !navHasDonate;
+
   const businessName = business?.name ?? "";
-  const logoUrl = business?.siteContent?.logoUrl ?? "/templates/wealth/images/logo.png";
-  const logoAlt = resolveLogoAlt(business?.siteContent?.logoAltText, businessName);
+  const logoUrl = business?.siteContent?.logoUrl ?? DEFAULT_LOGO;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
+  const social = resolveSocialLinks(business?.siteContent?.socialLinks);
 
-  const socialLinks = business?.siteContent?.socialLinks as
-    | { facebook?: string; instagram?: string }
-    | undefined;
+  const accountsEnabled = isEnabled("customerAccounts");
+  const user = session?.user;
+  const isAdmin =
+    user?.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
+  // Settings is dropped: `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+    isEnabled,
+    includeAdmin: isAdmin,
+  })
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
 
-  const navItems: WealthNavItem[] = [
-    { type: "link", label: "Home", href: "/" },
-    { type: "link", label: "About Us", href: "/about" },
-    {
-      type: "group",
-      label: "News & Resources",
-      children: [
-        { label: "Resources", href: resourcesUrl },
-        { label: "News", href: "/blog" },
-      ],
-    },
-    ...(isEnabled("services")
-      ? [
-          {
-            type: "group" as const,
-            label: "Programs",
-            children: [
-              { label: "All Programs", href: "/services" },
-              {
-                label: "CEND",
-                href: "https://www.cendetroit.com",
-                external: true,
-              },
-            ],
-          },
-        ]
-      : [
-          {
-            type: "group" as const,
-            label: "Programs",
-            children: [
-              {
-                label: "CEND",
-                href: "https://www.cendetroit.com",
-                external: true,
-              },
-            ],
-          },
-        ]),
-    { type: "link", label: "Contact & Office Hours", href: "/contact" },
-    // Donations on AND the owner's "show in header" switch on. Label stays
-    // "Support DCWF" (client copy), not the owner's Donate/Tip/Support verb.
-    ...(isEnabled("donations") && business?.donationShowInHeader
-      ? [{ type: "link" as const, label: "Support DCWF", href: "/donate" }]
-      : []),
-  ];
+  const logo = (
+    <Link
+      href="/"
+      className="wealth-header__logo"
+      aria-current={pathname === "/" ? "page" : undefined}
+    >
+      {logoUrl ? (
+        <Image src={logoUrl} alt={logoAlt} fill sizes="176px" priority />
+      ) : (
+        <span className="wealth-header__logo-text">{businessName}</span>
+      )}
+    </Link>
+  );
 
   return (
     <>
+      {banner ? <WealthAnnouncementBar banner={banner} /> : null}
+
       <header
-        className="relative z-50 w-full bg-[var(--wealth-paper)]"
+        className="wealth-header"
         {...sectionGroupAttr("global", "branding")}
       >
-        {banner ? <WealthAnnouncementBar banner={banner} /> : null}
-
-        <div
-          className="mx-auto flex w-full items-center justify-between gap-4 px-[var(--wealth-gutter)] [height:var(--wealth-header-h-mobile)] md:[height:var(--wealth-header-h)]"
-          style={{ maxWidth: "var(--wealth-container)" }}
-        >
-          {/* Left: hamburger */}
+        <div className="wealth-container wealth-header__bar">
           <button
             ref={hamburgerRef}
             type="button"
+            className="wealth-burger"
             aria-label="Open menu"
             aria-expanded={open}
+            aria-controls={open ? WEALTH_NAV_OVERLAY_ID : undefined}
             onClick={() => setOpen(true)}
-            className="flex flex-col justify-center gap-[5px] p-2"
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
           >
-            <span
+            <svg
+              viewBox="0 0 26 26"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
               aria-hidden="true"
-              className="block h-px w-6"
-              style={{ background: "var(--wealth-ink)" }}
-            />
-            <span
-              aria-hidden="true"
-              className="block h-px w-6"
-              style={{ background: "var(--wealth-ink)" }}
-            />
+            >
+              <path d="M3 9h20M3 17h20" />
+            </svg>
           </button>
 
-          {/* Center: logo */}
-          <Link
-            href="/"
-            aria-label={`${businessName} — Home`}
-            className="relative h-10 w-32 shrink-0 md:h-14 md:w-44"
-          >
-            <Image
-              src={logoUrl}
-              alt={logoAlt}
-              fill
-              sizes="176px"
-              className="object-contain"
-              priority
-            />
-          </Link>
+          {logo}
 
-          {/* Right: social icons */}
-          <div className="flex items-center justify-end gap-4">
-            {socialLinks?.facebook ? (
-              <a
-                href={socialLinks.facebook}
-                aria-label="Facebook"
-                className="-m-2 flex items-center justify-center p-2"
-                style={{ color: "var(--wealth-ink)" }}
-              >
-                <FacebookIcon className="h-4 w-4" />
-              </a>
+          <nav className="wealth-nav" aria-label="Main">
+            <ul
+              ref={dd.containerRef as React.RefObject<HTMLUListElement | null>}
+              className="wealth-nav__list"
+            >
+              {nav.map((item, i) => {
+                if (item.children?.length) {
+                  const isOpen = dd.openIndex === i;
+                  const entries = navGroupEntries(item);
+                  const activeEntry = activeEntryIndex(pathname, entries);
+                  const groupActive = isNavItemActive(pathname, item);
+                  return (
+                    <li
+                      key={`${item.label}-${i}`}
+                      className="wealth-nav__item"
+                      data-open={isOpen ? "true" : undefined}
+                      {...dd.groupProps(i)}
+                    >
+                      {/* The trigger never navigates; a non-empty parent
+                          href is the panel's first entry. */}
+                      <button
+                        {...dd.triggerProps(i)}
+                        className="wealth-nav__trigger"
+                        data-active={groupActive ? "true" : undefined}
+                      >
+                        {item.label}
+                        <Chevron />
+                      </button>
+                      <ul id={dd.panelId(i)} className="wealth-nav__menu">
+                        {entries.map((child, j) => (
+                          <li key={`${child.href}-${j}`}>
+                            <Link
+                              href={child.href}
+                              {...externalLinkProps(child.external)}
+                              aria-current={
+                                j === activeEntry ? "page" : undefined
+                              }
+                              onClick={() => dd.close()}
+                            >
+                              <span>
+                                {child.label}
+                                {child.external ? externalHint : null}
+                              </span>
+                              {child.external ? (
+                                <span
+                                  className="wealth-nav__ext"
+                                  aria-hidden="true"
+                                >
+                                  &#8599;
+                                </span>
+                              ) : null}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  );
+                }
+
+                const active = isNavItemActive(pathname, item);
+                return (
+                  <li key={`${item.label}-${i}`} className="wealth-nav__item">
+                    <Link
+                      href={item.href}
+                      {...externalLinkProps(item.external)}
+                      aria-current={active ? "page" : undefined}
+                      className="wealth-nav__link"
+                    >
+                      {item.label}
+                      {item.external ? (
+                        <>
+                          <span className="wealth-nav__ext" aria-hidden="true">
+                            &#8599;
+                          </span>
+                          {externalHint}
+                        </>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className="wealth-header__end">
+            {/* Desktop account entry (B4); on phones it lives in the overlay. */}
+            {accountsEnabled ? (
+              <div className="wealth-header__account">
+                {isPending ? (
+                  <span
+                    className="wealth-header__account-pending"
+                    aria-hidden="true"
+                  />
+                ) : user ? (
+                  <UserButton
+                    size="icon"
+                    avatarClassName="size-10"
+                    links={userButtonLinks}
+                  />
+                ) : (
+                  <Link
+                    href="/auth/sign-in"
+                    className="wealth-header__signin"
+                    aria-label="Sign in"
+                  >
+                    <UserRound aria-hidden="true" strokeWidth={1.5} />
+                  </Link>
+                )}
+              </div>
             ) : null}
-            {socialLinks?.instagram ? (
-              <a
-                href={socialLinks.instagram}
-                aria-label="Instagram"
-                className="-m-2 flex items-center justify-center p-2"
-                style={{ color: "var(--wealth-ink)" }}
+
+            {showDonate ? (
+              <Link
+                href="/donate"
+                className={wealthLedgeButtonClasses({
+                  variant: "donate",
+                  className: "wealth-header__donate",
+                })}
+                aria-current={pathname === "/donate" ? "page" : undefined}
               >
-                <InstagramIcon className="h-4 w-4" />
-              </a>
+                {donate.label}
+              </Link>
             ) : null}
           </div>
         </div>
@@ -174,14 +314,15 @@ export function WealthHeader({
         open={open}
         onClose={() => setOpen(false)}
         triggerRef={hamburgerRef}
-        items={navItems}
+        items={nav}
+        donate={showDonate ? { label: donate.label, href: "/donate" } : null}
         businessName={businessName}
-        logoUrl={business?.siteContent?.logoUrl}
+        logoUrl={logoUrl}
         logoAlt={logoAlt}
-        socialLinks={socialLinks}
+        social={social}
         initialSession={initialSession}
         isEnabled={isEnabled}
-        accountsEnabled={isEnabled("customerAccounts")}
+        accountsEnabled={accountsEnabled}
       />
     </>
   );

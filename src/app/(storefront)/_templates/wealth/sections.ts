@@ -6,6 +6,7 @@ import { wealthContactSections } from "./contact";
 import { wealthDonateSections } from "./donate";
 import { wealthGenericSections } from "./generic";
 import { wealthHomepageSections } from "./homepage";
+import { wealthImpactSections } from "./impact";
 import { wealthServicesSections } from "./services";
 import { wealthTestimonialsSections } from "./testimonials";
 
@@ -48,5 +49,6 @@ export const wealthSections: Record<string, TemplateSection[]> = {
     ...wealthDonateSections,
     ...wealthBlogSections,
     ...wealthGenericSections,
+    ...wealthImpactSections,
   ],
 };

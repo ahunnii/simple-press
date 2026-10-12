@@ -11,20 +11,15 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * spread `wealthBlogData` / `wealthBlogFieldGroups` / `wealthBlogSections`
  * into their own aggregation, mirroring `pink/blog/index.ts`.
  *
- * Group naming: `blog.index` (index masthead heading/intro + designed empty
- * state) and `blog.cta` (the post-footer CTA, shared across every post) —
- * chosen over vii's `blog.hero`/`blog.cta` naming because "index" reads more
- * accurately for a page whose hero IS the index masthead (no separate cover
- * story). Field granularity mirrors vii's blog domain (4 index fields + 6 CTA
- * fields = 10 total).
- *
- * The blog-post-context section keeps the platform-wide `blog.post` id
- * convention (asserted by `template-sections.test.ts` for curated templates)
- * even though its single group is named `blog.cta`.
+ * Group naming: `blog.index` (index hero heading/intro/optional photo +
+ * designed empty state) and `blog.post` (the post-footer CTA, shared across
+ * every post). 2026-10-12 redesign: the CTA group was renamed `blog.cta` →
+ * `blog.post` so section id, group id and `data-sp-group` match (field KEYS
+ * are unchanged), and `hero-image` (+ `-alt`) was added.
  */
 
 export const wealthBlogData: TemplateField[] = [
-  // ── blog.index (not hideable — heading/intro/empty state) ────────────────
+  // ── blog.index (not hideable — hero/empty state) ─────────────────────────
   {
     key: "wealth.blog.heading",
     label: "Blog Heading",
@@ -46,6 +41,28 @@ export const wealthBlogData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue:
       "Updates on our lending, our members, and the movement for community-controlled wealth in Detroit.",
+  },
+  {
+    key: "wealth.blog.hero-image",
+    label: "Header photo",
+    description:
+      "Optional photo beside the title on the News + Notes page. It is tinted green so the text stays readable. Leave blank for a plain green header.",
+    type: "image",
+    page: "blog",
+    group: "blog.index",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "wealth.blog.hero-image-alt",
+    label: "Header photo alt text",
+    description:
+      "Describes the header photo for screen readers. Leave blank if the photo is only decoration.",
+    type: "text",
+    page: "blog",
+    group: "blog.index",
+    gridColumn: "col-span-full",
+    defaultValue: "",
   },
   {
     key: "wealth.blog.empty-heading",
@@ -79,7 +96,7 @@ export const wealthBlogData: TemplateField[] = [
     defaultValue: "Back to the homepage",
   },
 
-  // ── blog.cta (hideable, renders at the end of every post) ────────────────
+  // ── blog.post (hideable, renders at the end of every post) ───────────────
   {
     key: "wealth.blog.cta-enabled",
     label: "Show Post CTA",
@@ -87,7 +104,7 @@ export const wealthBlogData: TemplateField[] = [
       "Toggle the call-to-action block shown at the bottom of every blog post.",
     type: "boolean",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-full",
     defaultValue: "true",
   },
@@ -97,7 +114,7 @@ export const wealthBlogData: TemplateField[] = [
     description: "Small uppercase mono label above the CTA heading.",
     type: "text",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-1",
     defaultValue: "Get Involved",
   },
@@ -107,7 +124,7 @@ export const wealthBlogData: TemplateField[] = [
     description: "Italic heading in the call-to-action block after posts.",
     type: "text",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-1",
     defaultValue: "Let's build wealth together.",
   },
@@ -117,7 +134,7 @@ export const wealthBlogData: TemplateField[] = [
     description: "One or two sentences inviting the reader to reach out.",
     type: "textarea",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-full",
     defaultValue:
       "Reach out to learn about financing, membership, and partnership with DCWF.",
@@ -128,7 +145,7 @@ export const wealthBlogData: TemplateField[] = [
     description: "Label for the call-to-action button.",
     type: "text",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-1",
     defaultValue: "Contact Us",
   },
@@ -138,7 +155,7 @@ export const wealthBlogData: TemplateField[] = [
     description: "URL the CTA button links to.",
     type: "url",
     page: "blog",
-    group: "blog.cta",
+    group: "blog.post",
     gridColumn: "col-span-1",
     defaultValue: "/contact",
   },
@@ -149,12 +166,12 @@ export const wealthBlogFieldGroups: TemplateFieldGroup[] = [
     id: "blog.index",
     title: "Blog Index",
     description:
-      "Heading, intro, and the designed empty state shown on the News + Notes index page.",
+      "Heading, intro, optional header photo, and the designed empty state shown on the News + Notes index page.",
     icon: "📰",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
-    id: "blog.cta",
+    id: "blog.post",
     title: "Blog Post Call to Action",
     description:
       "A call-to-action shown at the bottom of every blog post. Configure the overline, heading, body copy, and button.",
@@ -168,23 +185,25 @@ export const wealthBlogSections: TemplateSection[] = [
     id: "blog.index",
     page: "blog",
     title: "Blog Index",
-    description: "Heading, intro, and the empty state on the News + Notes page.",
+    description:
+      "Header (heading, intro, optional photo) and the empty state on the News + Notes page.",
     groupIds: ["blog.index"],
     order: 0,
     hideable: false,
     links: [SECTION_LINKS.blog],
   },
-  // Blog-post context is ONE section by platform convention — the id must
-  // stay `blog.post` even though its single group is `blog.cta` (see
-  // `template-sections.test.ts`'s "exactly one blog-post-context section
-  // with id 'blog.post'" assertion for curated templates).
+  // Blog-post context is ONE section by platform convention — the id is
+  // `blog.post` (see `template-sections.test.ts`'s "exactly one
+  // blog-post-context section with id 'blog.post'" assertion). Its single
+  // field group shares that id (triple-match: section id == group id ==
+  // `data-sp-group`; the editor resolves a hotspot by section id).
   {
     id: "blog.post",
     page: "blog",
     renderContext: "blog-post",
     title: "Blog Post — Call to Action",
     description: "The closing call-to-action shown at the end of every post.",
-    groupIds: ["blog.cta"],
+    groupIds: ["blog.post"],
     order: 1,
     hideable: true,
   },

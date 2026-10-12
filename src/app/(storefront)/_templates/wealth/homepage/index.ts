@@ -1,28 +1,44 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
- * Field + section definitions for the wealth homepage. Copy defaults are
- * verbatim from the compiled DCWF clone
- * (`detroitcommunitywealth/app/src/app/page.tsx`) per design.md's "Copy
- * voice" must-keep-verbatim list. Image defaults point at the real
- * `/templates/wealth/images/*` assets named in the build brief.
+ * Field + section definitions for the wealth homepage (2026-10-12 redesign).
  *
- * `homepage.news-items` (a `list` field) intentionally carries no
- * `defaultValue` — the schema doesn't support one for list fields. Its
- * fallback rows live in `./wealth-homepage-news.ts` instead (kept out of
- * this module so the field registry stays free of the `~/lib/template-fields`
- * *runtime* import that a list-row parser needs — see that file's header
- * comment for why that import would be circular here).
+ * Section order (== group order == render order):
+ *   mission (split hero) · intro · programs · quotes · stats · coops · news ·
+ *   support.
+ *
+ * Copy defaults are DCWF's real copy (verbatim from the compiled site clone
+ * `detroitcommunitywealth/app/src/app/page.tsx` and the approved mock
+ * `checkpoint/redesign/_pages/home.body.html`). Image defaults point at the
+ * real `/templates/wealth/images/*` assets.
+ *
+ * Two lists:
+ * - `homepage.news-items` (press fallback rows) intentionally carries no
+ *   `defaultValue`; its fallback rows live in `./wealth-homepage-news.ts`.
+ * - `homepage.stats-items` ships NO rows at all: the By-the-numbers section
+ *   renders only once the owner enters a real figure (no sample numbers).
+ *
+ * Runtime parsers for both lists live in `./wealth-homepage-news.ts` and
+ * `./wealth-homepage-rows.ts` — NOT here — so this module stays type-only
+ * toward `~/lib/template-fields` (a runtime import would be circular: that
+ * module aggregates every template's root `index.ts`, which imports this one).
+ * `~/lib/section-links` is a leaf module and safe to import.
+ *
+ * `**double asterisks**` markup is supported in the intro paragraph and the
+ * cooperative footnote (see `./wealth-bold-markup.tsx`); those two fields say
+ * so in their descriptions.
  */
 
-// ─── Mission (not hideable) ─────────────────────────────────────────────────
+// ─── Split hero (not hideable) ──────────────────────────────────────────────
 
 const missionData: TemplateField[] = [
   {
     key: "wealth.homepage.mission-image",
-    label: "Mission Photo",
-    description: "Photo of community members for the mission overlap hero.",
+    label: "Photo",
+    description:
+      "Large photo on the left of the opening banner. It is tinted green so the text beside it stays readable.",
     type: "image",
     page: "homepage",
     group: "homepage.mission",
@@ -31,19 +47,19 @@ const missionData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.mission-image-alt",
-    label: "Mission Photo Alt Text",
-    description: "Describes the mission photo for screen readers.",
+    label: "Photo alt text",
+    description: "Describes the photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.mission",
-    gridColumn: "col-span-1",
+    gridColumn: "col-span-full",
     defaultValue:
       "Members of the Detroit Community Wealth Fund community gathered around a table",
   },
   {
     key: "wealth.homepage.mission-eyebrow",
-    label: "Eyebrow",
-    description: "Small italic label above the mission statement.",
+    label: "Label above statement",
+    description: "Small label above the mission statement.",
     type: "text",
     page: "homepage",
     group: "homepage.mission",
@@ -52,7 +68,7 @@ const missionData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.mission-statement",
-    label: "Mission Statement",
+    label: "Mission statement",
     description: "The organization's mission statement, set in italic.",
     type: "textarea",
     page: "homepage",
@@ -61,92 +77,98 @@ const missionData: TemplateField[] = [
     defaultValue:
       "DCWF exists to build equitable employment and community-controlled wealth among Black and historically marginalized Detroiters through accessible financing and ongoing support.",
   },
-];
-
-// ─── Support DCWF (hideable — auto-hidden when the `donations` flag is off) ─
-
-const supportData: TemplateField[] = [
   {
-    key: "wealth.homepage.support-heading",
-    label: "Heading",
-    description: "Italic heading for the Support DCWF band.",
+    key: "wealth.homepage.mission-cta-label",
+    label: "Button label",
+    description: "Label for the button under the mission statement.",
     type: "text",
     page: "homepage",
-    group: "homepage.support",
+    group: "homepage.mission",
     gridColumn: "col-span-1",
-    defaultValue: "Support DCWF",
+    defaultValue: "Learn more",
   },
   {
-    key: "wealth.homepage.support-body",
-    label: "Body",
-    description: "Short paragraph explaining what a contribution funds.",
+    key: "wealth.homepage.mission-cta-url",
+    label: "Button link",
+    description:
+      "Where the button goes. The button hides if this points at a part of the site that is switched off.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.mission",
+    gridColumn: "col-span-1",
+    defaultValue: "/about",
+  },
+  {
+    key: "wealth.homepage.mission-link-label",
+    label: "Second link label",
+    description:
+      "Text link beside the button. Leave blank to show only the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.mission",
+    gridColumn: "col-span-1",
+    defaultValue: "Our programs",
+  },
+  {
+    key: "wealth.homepage.mission-link-url",
+    label: "Second link address",
+    description:
+      "Where the text link goes. It hides if this points at a part of the site that is switched off.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.mission",
+    gridColumn: "col-span-1",
+    defaultValue: "/services",
+  },
+];
+
+// ─── Intro (hideable) ───────────────────────────────────────────────────────
+
+const introData: TemplateField[] = [
+  {
+    key: "wealth.homepage.intro-eyebrow",
+    label: "Label above heading",
+    description: "Small label centered above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "What we do",
+  },
+  {
+    key: "wealth.homepage.intro-heading",
+    label: "Heading",
+    description: "Italic heading above the introduction.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.intro",
+    gridColumn: "col-span-full",
+    defaultValue: "Building community-controlled wealth",
+  },
+  {
+    // Key predates the redesign (it used to sit in "Our Programs"); kept so
+    // saved owner copy carries over.
+    key: "wealth.homepage.programs-intro",
+    label: "Introduction",
+    description:
+      "Short paragraph under the heading. Wrap a phrase in **double asterisks** to make it bold, for example **non-extractive financing**.",
     type: "textarea",
     page: "homepage",
-    group: "homepage.support",
+    group: "homepage.intro",
     gridColumn: "col-span-full",
     defaultValue:
-      "Your contribution will enable DCWF to provide free technical assistance, educational programming and resources to emerging and existing democratically owned businesses in Detroit, to support Black business ownership, community wealth building, and community economic control.",
-  },
-  {
-    key: "wealth.homepage.support-button-label",
-    label: "Donate Button Label",
-    description: "Label for the button linking to the donate page.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.support",
-    gridColumn: "col-span-1",
-    defaultValue: "Donate",
+      "We provide **non-extractive financing** for start-ups, existing businesses, and for **ownership transitions**. We also run ongoing workshops and an annual **Co-op Incubator**, and opportunities for co-ops to **build community with one another**.",
   },
 ];
 
-// ─── Our Programs (hideable) ────────────────────────────────────────────────
+// ─── Programs: 4 cards + cooperative footnote (hideable) ────────────────────
 
 const programsData: TemplateField[] = [
-  {
-    key: "wealth.homepage.programs-heading",
-    label: "Heading",
-    description: "Italic heading for the programs section.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-1",
-    defaultValue: "Our Programs",
-  },
-  {
-    key: "wealth.homepage.programs-intro",
-    label: "Intro",
-    description: "Short paragraph describing the programs offered.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "We provide non-extractive financing for start-ups, existing businesses, and for ownership transitions. We also run ongoing workshops and an annual Co-op Incubator, and opportunities for co-ops to build community with one another.",
-  },
-  {
-    key: "wealth.homepage.programs-leadin",
-    label: "Lead-in Line",
-    description: "Underlined line just above the program tiles.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-full",
-    defaultValue: "Click the icons below to learn more about our programs.",
-  },
-  {
-    key: "wealth.homepage.programs-tile-lending-image",
-    label: "Tile 1 Image — Non-Extractive Financing",
-    description: "Square image for the lending program tile.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-1",
-    defaultValue: "/templates/wealth/images/tile-lending.png",
-  },
+  // Card 1 — forest
   {
     key: "wealth.homepage.programs-tile-lending-label",
-    label: "Tile 1 Label — Non-Extractive Financing",
-    description: "Used for the tile's alt text and accessible label.",
+    label: "Card 1 title",
+    description: "Title of the first program card.",
     type: "text",
     page: "homepage",
     group: "homepage.programs",
@@ -154,29 +176,32 @@ const programsData: TemplateField[] = [
     defaultValue: "Non-Extractive Financing",
   },
   {
+    key: "wealth.homepage.programs-tile-lending-copy",
+    label: "Card 1 description",
+    description: "One or two sentences under the first card's title.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.programs",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Loans for start-ups, existing businesses and ownership transitions, on terms built around the business — not the lender.",
+  },
+  {
     key: "wealth.homepage.programs-tile-lending-url",
-    label: "Tile 1 Link — Non-Extractive Financing",
-    description: "Where the lending tile links to.",
+    label: "Card 1 link",
+    description:
+      "Where the first card's button goes. The button hides if this points at a part of the site that is switched off.",
     type: "url",
     page: "homepage",
     group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "/services",
   },
-  {
-    key: "wealth.homepage.programs-tile-incubator-image",
-    label: "Tile 2 Image — Co-op Incubator",
-    description: "Square image for the incubator program tile.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-1",
-    defaultValue: "/templates/wealth/images/tile-incubator.png",
-  },
+  // Card 2 — primary
   {
     key: "wealth.homepage.programs-tile-incubator-label",
-    label: "Tile 2 Label — Co-op Incubator",
-    description: "Used for the tile's alt text and accessible label.",
+    label: "Card 2 title",
+    description: "Title of the second program card.",
     type: "text",
     page: "homepage",
     group: "homepage.programs",
@@ -184,29 +209,32 @@ const programsData: TemplateField[] = [
     defaultValue: "Co-op Incubator",
   },
   {
+    key: "wealth.homepage.programs-tile-incubator-copy",
+    label: "Card 2 description",
+    description: "One or two sentences under the second card's title.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.programs",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "An annual cohort that takes founding teams from a shared idea to a democratically governed, incorporated business.",
+  },
+  {
     key: "wealth.homepage.programs-tile-incubator-url",
-    label: "Tile 2 Link — Co-op Incubator",
-    description: "Where the incubator tile links to.",
+    label: "Card 2 link",
+    description:
+      "Where the second card's button goes. The button hides if this points at a part of the site that is switched off.",
     type: "url",
     page: "homepage",
     group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "/services",
   },
-  {
-    key: "wealth.homepage.programs-tile-transitions-image",
-    label: "Tile 3 Image — Ownership Transitions",
-    description: "Square image for the ownership-transitions program tile.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-1",
-    defaultValue: "/templates/wealth/images/tile-transitions.png",
-  },
+  // Card 3 — sage
   {
     key: "wealth.homepage.programs-tile-transitions-label",
-    label: "Tile 3 Label — Ownership Transitions",
-    description: "Used for the tile's alt text and accessible label.",
+    label: "Card 3 title",
+    description: "Title of the third program card.",
     type: "text",
     page: "homepage",
     group: "homepage.programs",
@@ -214,29 +242,32 @@ const programsData: TemplateField[] = [
     defaultValue: "Ownership Transitions",
   },
   {
+    key: "wealth.homepage.programs-tile-transitions-copy",
+    label: "Card 3 description",
+    description: "One or two sentences under the third card's title.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.programs",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Helping retiring owners sell to the people who already run the business, so jobs and wealth stay in Detroit.",
+  },
+  {
     key: "wealth.homepage.programs-tile-transitions-url",
-    label: "Tile 3 Link — Ownership Transitions",
-    description: "Where the ownership-transitions tile links to.",
+    label: "Card 3 link",
+    description:
+      "Where the third card's button goes. The button hides if this points at a part of the site that is switched off.",
     type: "url",
     page: "homepage",
     group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "/services",
   },
-  {
-    key: "wealth.homepage.programs-tile-cend-image",
-    label: "Tile 4 Image — CEND",
-    description: "Square image for the CEND partner tile.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.programs",
-    gridColumn: "col-span-1",
-    defaultValue: "/templates/wealth/images/tile-cend.png",
-  },
+  // Card 4 — surface
   {
     key: "wealth.homepage.programs-tile-cend-label",
-    label: "Tile 4 Label — CEND",
-    description: "Used for the tile's alt text and accessible label.",
+    label: "Card 4 title",
+    description: "Title of the fourth program card.",
     type: "text",
     page: "homepage",
     group: "homepage.programs",
@@ -244,95 +275,221 @@ const programsData: TemplateField[] = [
     defaultValue: "CEND",
   },
   {
+    key: "wealth.homepage.programs-tile-cend-copy",
+    label: "Card 4 description",
+    description: "One or two sentences under the fourth card's title.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.programs",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Workshops, gatherings and peer community for Detroit’s cooperators and the people starting the next co-op.",
+  },
+  {
     key: "wealth.homepage.programs-tile-cend-url",
-    label: "Tile 4 Link — CEND",
-    description: "External CEND Detroit website.",
+    label: "Card 4 link",
+    description:
+      "Where the fourth card's button goes (opens in a new tab when it is a full web address).",
     type: "url",
     page: "homepage",
     group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "https://www.cendetroit.com/",
   },
-];
-
-// ─── Photo band (hideable) ──────────────────────────────────────────────────
-
-const bandData: TemplateField[] = [
   {
-    key: "wealth.homepage.band-image",
-    label: "Photo",
-    description: "Full-bleed community-event photo.",
-    type: "image",
-    page: "homepage",
-    group: "homepage.band",
-    gridColumn: "col-span-full",
-    defaultValue: "/templates/wealth/images/event-band.jpg",
-  },
-  {
-    key: "wealth.homepage.band-image-alt",
-    label: "Photo Alt Text",
-    description: "Describes the photo for screen readers.",
+    key: "wealth.homepage.programs-cta-label",
+    label: "Button label (cards 1–3)",
+    description: "Label on the buttons of the first three cards.",
     type: "text",
     page: "homepage",
-    group: "homepage.band",
-    gridColumn: "col-span-full",
-    defaultValue: "Community members gathered at a DCWF event",
+    group: "homepage.programs",
+    gridColumn: "col-span-1",
+    defaultValue: "Learn more",
   },
-];
-
-// ─── What Is a Cooperative? (hideable) ──────────────────────────────────────
-
-const cooperativeData: TemplateField[] = [
+  {
+    key: "wealth.homepage.programs-cend-cta-label",
+    label: "Button label (card 4)",
+    description: "Label on the fourth card's button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.programs",
+    gridColumn: "col-span-1",
+    defaultValue: "Visit CEND",
+  },
+  // Footnote
   {
     key: "wealth.homepage.cooperative-heading",
-    label: "Heading",
-    description: "Italic heading introducing the definition.",
+    label: "Footnote lead-in",
+    description:
+      "Bold words that open the line under the cards. Leave blank to start with the text below.",
     type: "text",
     page: "homepage",
-    group: "homepage.cooperative",
+    group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "What Is a Cooperative?",
   },
   {
     key: "wealth.homepage.cooperative-body",
-    label: "Body",
-    description: "Definition of a cooperative.",
+    label: "Footnote text",
+    description:
+      "Definition shown under the cards. Wrap a phrase in **double asterisks** to make it bold. Leave blank to hide the whole footnote.",
     type: "textarea",
     page: "homepage",
-    group: "homepage.cooperative",
+    group: "homepage.programs",
     gridColumn: "col-span-full",
     defaultValue:
-      "Cooperatives are people-centered enterprises owned, controlled and run by and for their members to realize their common economic, social, and cultural needs and aspirations. (ica.coop)",
+      "Cooperatives are **people-centered enterprises** owned, controlled and run by and for their members to realize their common economic, social, and cultural needs and aspirations. (ica.coop)",
   },
   {
     key: "wealth.homepage.cooperative-link-label",
-    label: "Link Label",
-    description: "Label for the link to the resources page.",
+    label: "Footnote link label",
+    description: "Label for the link at the end of the footnote.",
     type: "text",
     page: "homepage",
-    group: "homepage.cooperative",
+    group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "Resources »",
   },
   {
     key: "wealth.homepage.cooperative-link-url",
-    label: "Link URL",
-    description: "Where the resources link points to.",
+    label: "Footnote link address",
+    description:
+      "Where the footnote link goes. It hides if this points at a part of the site that is switched off.",
     type: "url",
     page: "homepage",
-    group: "homepage.cooperative",
+    group: "homepage.programs",
     gridColumn: "col-span-1",
     defaultValue: "/resources",
   },
 ];
 
-// ─── Meet the Co-ops (hideable) ─────────────────────────────────────────────
+// ─── From our co-ops: approved testimonials (hideable) ──────────────────────
+
+const quotesData: TemplateField[] = [
+  {
+    key: "wealth.homepage.quotes-eyebrow",
+    label: "Label above heading",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.quotes",
+    gridColumn: "col-span-1",
+    defaultValue: "In their words",
+  },
+  {
+    key: "wealth.homepage.quotes-heading",
+    label: "Heading",
+    description:
+      "Heading above the quotes. The quotes themselves are your approved testimonials (Admin → Testimonials); the section stays hidden until you have at least one.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.quotes",
+    gridColumn: "col-span-1",
+    defaultValue: "From our co-ops",
+  },
+];
+
+// ─── By the numbers: stats split (hideable; hidden until a figure exists) ───
+
+const statsData: TemplateField[] = [
+  {
+    key: "wealth.homepage.band-image",
+    label: "Photo",
+    description:
+      "Community-event photo beside the numbers. It is toned to match the site's greens.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/wealth/images/event-band.jpg",
+  },
+  {
+    key: "wealth.homepage.band-image-alt",
+    label: "Photo alt text",
+    description: "Describes the photo for screen readers.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-full",
+    defaultValue: "Community members gathered at a DCWF event",
+  },
+  {
+    key: "wealth.homepage.stats-eyebrow",
+    label: "Label above heading",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-1",
+    defaultValue: "By the numbers",
+  },
+  {
+    key: "wealth.homepage.stats-heading",
+    label: "Heading",
+    description: "Large italic heading above the numbers.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-1",
+    defaultValue: "Capital that stays in Detroit.",
+  },
+  {
+    key: "wealth.homepage.stats-items",
+    label: "Numbers",
+    description:
+      "Up to 3 figures, each a big number and a short caption. This section stays hidden until at least one number is entered, so nothing placeholder ever shows on your site.",
+    type: "list",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-full",
+    maxItems: 3,
+    itemLabel: "number",
+    summaryKey: "value",
+    itemSchema: [
+      {
+        key: "value",
+        label: "Number",
+        type: "text",
+        placeholder: "e.g. a dollar amount, a count, or a percentage",
+      },
+      {
+        key: "caption",
+        label: "Caption",
+        type: "text",
+        placeholder: "What the number measures",
+        optional: true,
+      },
+    ],
+  },
+  {
+    key: "wealth.homepage.stats-link-label",
+    label: "Button label",
+    description: "Label for the button under the numbers. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-1",
+    defaultValue: "See our impact report",
+  },
+  {
+    key: "wealth.homepage.stats-link-url",
+    label: "Button link",
+    description: "Where the button goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.stats",
+    gridColumn: "col-span-1",
+    defaultValue: "/impact",
+  },
+];
+
+// ─── Meet the Co-ops: mirrored overlap card + logo strip (hideable) ─────────
 
 const coopsData: TemplateField[] = [
   {
     key: "wealth.homepage.coops-image",
     label: "Photo",
-    description: "Photo for the mirrored Meet the Co-ops overlap hero.",
+    description: "Photo beside the Meet the Co-ops card.",
     type: "image",
     page: "homepage",
     group: "homepage.coops",
@@ -341,18 +498,28 @@ const coopsData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.coops-image-alt",
-    label: "Photo Alt Text",
+    label: "Photo alt text",
     description: "Describes the photo for screen readers.",
     type: "text",
     page: "homepage",
     group: "homepage.coops",
-    gridColumn: "col-span-1",
+    gridColumn: "col-span-full",
     defaultValue: "A carpenter working in a co-op woodworking shop",
+  },
+  {
+    key: "wealth.homepage.coops-eyebrow",
+    label: "Label above heading",
+    description: "Small label above the card's heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.coops",
+    gridColumn: "col-span-1",
+    defaultValue: "Co-ops we support",
   },
   {
     key: "wealth.homepage.coops-heading",
     label: "Heading",
-    description: "Large italic display heading.",
+    description: "Large italic heading on the card.",
     type: "text",
     page: "homepage",
     group: "homepage.coops",
@@ -361,8 +528,9 @@ const coopsData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.coops-body",
-    label: "Body",
-    description: "Short line introducing the co-ops directory.",
+    label: "Description",
+    description:
+      "Short line under the heading. A new line in this text becomes a line break.",
     type: "textarea",
     page: "homepage",
     group: "homepage.coops",
@@ -372,8 +540,8 @@ const coopsData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.coops-button-label",
-    label: "Button Label",
-    description: "Label for the button linking to the co-ops directory.",
+    label: "Button label",
+    description: "Label for the button on the card.",
     type: "text",
     page: "homepage",
     group: "homepage.coops",
@@ -382,8 +550,9 @@ const coopsData: TemplateField[] = [
   },
   {
     key: "wealth.homepage.coops-button-url",
-    label: "Button URL",
-    description: "Where the button links to.",
+    label: "Button link",
+    description:
+      "Where the button goes. It hides if the Testimonials page is switched off.",
     type: "url",
     page: "homepage",
     group: "homepage.coops",
@@ -392,45 +561,89 @@ const coopsData: TemplateField[] = [
   },
 ];
 
-// ─── In the News (hideable) ─────────────────────────────────────────────────
+// ─── News & Notes (hideable) ────────────────────────────────────────────────
 
 const newsData: TemplateField[] = [
   {
-    key: "wealth.homepage.news-heading",
-    label: "Heading",
-    description: "Bold italic heading for the press section.",
+    key: "wealth.homepage.news-eyebrow",
+    label: "Label above heading",
+    description: "Small label above the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.news",
     gridColumn: "col-span-1",
-    defaultValue: "In the News",
+    defaultValue: "Stories & press",
+  },
+  {
+    // Key predates the redesign ("In the News"); kept so a saved heading
+    // carries over.
+    key: "wealth.homepage.news-heading",
+    label: "Heading",
+    description: "Heading above the three news cards.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.news",
+    gridColumn: "col-span-1",
+    defaultValue: "News & Notes",
+  },
+  {
+    key: "wealth.homepage.news-link-label",
+    label: "All-news link label",
+    description:
+      "Text link to the full blog, on the right of the heading. Leave blank to hide. It also hides when the Blog is switched off.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.news",
+    gridColumn: "col-span-1",
+    defaultValue: "All news",
+  },
+  {
+    key: "wealth.homepage.news-link-url",
+    label: "All-news link address",
+    description: "Where the all-news link goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.news",
+    gridColumn: "col-span-1",
+    defaultValue: "/blog",
+  },
+  {
+    key: "wealth.homepage.news-button-label",
+    label: "Card button label",
+    description: "Label on each news card's button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.news",
+    gridColumn: "col-span-1",
+    defaultValue: "Read more",
   },
   {
     key: "wealth.homepage.news-items",
-    label: "Press Items",
+    label: "Press mentions",
     description:
-      "Up to 8 press mentions, each with a title, source/date citation, and external link. Leave empty to use DCWF's real press coverage.",
+      "Shown as cards only while you have no published blog posts (your three newest posts take over as soon as there are any). The first three rows are shown. Leave empty to use DCWF's real press coverage.",
     type: "list",
     page: "homepage",
     group: "homepage.news",
     gridColumn: "col-span-full",
     maxItems: 8,
+    itemLabel: "press mention",
     itemSchema: [
       {
         key: "title",
         label: "Title",
         type: "text",
-        placeholder: "e.g. Six Ways to Make Workers Business Owners",
+        placeholder: "e.g. Headline of the article",
       },
       {
         key: "source",
-        label: "Source & Date",
+        label: "Source and date",
         type: "text",
-        placeholder: "e.g. Non-Profit Quarterly, October 24, 2025",
+        placeholder: "e.g. Publication name, month and year",
       },
       {
         key: "url",
-        label: "URL",
+        label: "Link",
         type: "url",
         placeholder: "https://…",
       },
@@ -438,66 +651,138 @@ const newsData: TemplateField[] = [
   },
 ];
 
+// ─── Support band (hideable; auto-hidden when donations are off) ────────────
+
+const supportData: TemplateField[] = [
+  {
+    key: "wealth.homepage.support-eyebrow",
+    label: "Label above heading",
+    description: "Small label above the heading. Leave blank to hide.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.support",
+    gridColumn: "col-span-1",
+    defaultValue: "Support DCWF",
+  },
+  {
+    key: "wealth.homepage.support-heading",
+    label: "Heading",
+    description: "Large italic line on the donate band.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.support",
+    gridColumn: "col-span-full",
+    defaultValue: "Support worker-ownership in and around metro Detroit.",
+  },
+  {
+    key: "wealth.homepage.support-body",
+    label: "Description",
+    description: "Short paragraph explaining what a gift pays for.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.support",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Your donation goes directly towards educational workshops, trainings, public programming, co-op game nights, and providing technical assistance and loan development to cooperatives.",
+  },
+  {
+    key: "wealth.homepage.support-button-label",
+    label: "Button label",
+    description:
+      "Label for the button that opens your donate page. The button follows your donation settings.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.support",
+    gridColumn: "col-span-1",
+    defaultValue: "Donate",
+  },
+  {
+    key: "wealth.homepage.support-image",
+    label: "Background photo",
+    description:
+      "Faint grayscale photo behind the band. It is decorative, so it has no alt text. Leave blank for a plain band.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.support",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/wealth/images/program-hero.jpg",
+  },
+];
+
 export const wealthHomepageData: TemplateField[] = [
   ...missionData,
-  ...supportData,
+  ...introData,
   ...programsData,
-  ...bandData,
-  ...cooperativeData,
+  ...quotesData,
+  ...statsData,
   ...coopsData,
   ...newsData,
+  ...supportData,
 ];
 
 export const wealthHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.mission",
-    title: "Mission",
-    description: "Overlap hero with the mission statement — always shown.",
+    title: "Opening banner",
+    description:
+      "Photo and mission statement at the very top of the page, with two links. Always shown.",
     icon: "🌱",
     columns: 2,
   },
   {
-    id: "homepage.support",
-    title: "Support DCWF",
-    description:
-      "Narrow donate callout. Hidden automatically when donations are turned off.",
-    icon: "💚",
+    id: "homepage.intro",
+    title: "What we do",
+    description: "Centered heading and introduction above the program cards.",
+    icon: "✍️",
     columns: 1,
   },
   {
     id: "homepage.programs",
-    title: "Our Programs",
-    description: "Intro copy plus the four program tiles.",
+    title: "Programs",
+    description:
+      "Four color cards (financing, incubator, transitions, CEND) and a short cooperative footnote.",
     icon: "🧩",
     columns: 2,
   },
   {
-    id: "homepage.band",
-    title: "Photo Band",
-    description: "Full-bleed community photo.",
-    icon: "🖼️",
-    columns: 1,
+    id: "homepage.quotes",
+    title: "From our co-ops",
+    description:
+      "A quote carousel built from your approved testimonials. Hidden until you have at least one.",
+    icon: "💬",
+    columns: 2,
   },
   {
-    id: "homepage.cooperative",
-    title: "What Is a Cooperative?",
-    description: "Definition copy and a link to Resources.",
-    icon: "🤝",
+    id: "homepage.stats",
+    title: "By the numbers",
+    description:
+      "Photo plus up to three big numbers. Hidden until you enter at least one number.",
+    icon: "📊",
     columns: 2,
   },
   {
     id: "homepage.coops",
     title: "Meet the Co-ops",
-    description: "Mirrored overlap hero linking to the co-ops directory.",
+    description:
+      "Photo card linking to the co-ops page, with a strip of co-op logos beneath.",
     icon: "🧑‍🤝‍🧑",
     columns: 2,
   },
   {
     id: "homepage.news",
-    title: "In the News",
-    description: "Heading plus up to 8 press mentions.",
+    title: "News & Notes",
+    description:
+      "Your three newest blog posts, or press mentions when there are no posts yet.",
     icon: "📰",
-    columns: 1,
+    columns: 2,
+  },
+  {
+    id: "homepage.support",
+    title: "Support band",
+    description:
+      "Donate band near the bottom of the page. Hidden automatically when donations are turned off.",
+    icon: "💚",
+    columns: 2,
   },
 ];
 
@@ -505,45 +790,46 @@ export const wealthHomepageSections: TemplateSection[] = [
   {
     id: "homepage.mission",
     page: "homepage",
-    title: "Mission",
-    description: "Overlap hero with the mission statement",
+    title: "Opening banner",
+    description: "Mission photo and statement with two links",
     groupIds: ["homepage.mission"],
     order: 0,
     hideable: false,
   },
   {
-    id: "homepage.support",
+    id: "homepage.intro",
     page: "homepage",
-    title: "Support DCWF",
-    description: "Narrow donate callout with a link to /donate",
-    groupIds: ["homepage.support"],
+    title: "What we do",
+    description: "Centered heading and introduction",
+    groupIds: ["homepage.intro"],
     order: 1,
     hideable: true,
   },
   {
     id: "homepage.programs",
     page: "homepage",
-    title: "Our Programs",
-    description: "Intro copy and the four program tiles",
+    title: "Programs",
+    description: "Four program cards and the cooperative footnote",
     groupIds: ["homepage.programs"],
     order: 2,
     hideable: true,
   },
   {
-    id: "homepage.band",
+    id: "homepage.quotes",
     page: "homepage",
-    title: "Photo Band",
-    description: "Full-bleed community photo",
-    groupIds: ["homepage.band"],
+    title: "From our co-ops",
+    description: "Quote carousel from approved testimonials",
+    groupIds: ["homepage.quotes"],
     order: 3,
     hideable: true,
+    links: [SECTION_LINKS.testimonials],
   },
   {
-    id: "homepage.cooperative",
+    id: "homepage.stats",
     page: "homepage",
-    title: "What Is a Cooperative?",
-    description: "Definition copy and a Resources link",
-    groupIds: ["homepage.cooperative"],
+    title: "By the numbers",
+    description: "Photo and big numbers; hidden until a number is entered",
+    groupIds: ["homepage.stats"],
     order: 4,
     hideable: true,
   },
@@ -551,7 +837,7 @@ export const wealthHomepageSections: TemplateSection[] = [
     id: "homepage.coops",
     page: "homepage",
     title: "Meet the Co-ops",
-    description: "Mirrored overlap hero linking to the co-ops directory",
+    description: "Photo card plus co-op logo strip",
     groupIds: ["homepage.coops"],
     order: 5,
     hideable: true,
@@ -559,10 +845,21 @@ export const wealthHomepageSections: TemplateSection[] = [
   {
     id: "homepage.news",
     page: "homepage",
-    title: "In the News",
-    description: "Heading plus stacked press mentions",
+    title: "News & Notes",
+    description: "Three newest blog posts, or press mentions as a fallback",
     groupIds: ["homepage.news"],
     order: 6,
     hideable: true,
+    links: [SECTION_LINKS.blog],
+  },
+  {
+    id: "homepage.support",
+    page: "homepage",
+    title: "Support band",
+    description: "Donate band with a link to /donate",
+    groupIds: ["homepage.support"],
+    order: 7,
+    hideable: true,
+    links: [SECTION_LINKS.donations],
   },
 ];

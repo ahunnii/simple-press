@@ -4,7 +4,6 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
-import { WealthHr } from "../shared/wealth-hr";
 import { WealthAboutBoard } from "./wealth-about-board";
 import { WealthAboutCta } from "./wealth-about-cta";
 import { WealthAboutDirector } from "./wealth-about-director";
@@ -24,6 +23,9 @@ export function WealthAboutPage({ business }: DefaultAboutPageTemplateProps) {
     | undefined;
 
   const f = resolveFields(customFields, [
+    "wealth.about.hero-image",
+    "wealth.about.hero-image-alt",
+    "wealth.about.hero-eyebrow",
     "wealth.about.hero-heading",
     "wealth.about.hero-paragraph-1",
     "wealth.about.hero-paragraph-2",
@@ -36,6 +38,7 @@ export function WealthAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "wealth.about.director-bio-3",
     "wealth.about.director-email",
     "wealth.about.board-heading",
+    "wealth.about.cta-heading",
     "wealth.about.cta-label",
     "wealth.about.cta-url",
   ]);
@@ -47,50 +50,48 @@ export function WealthAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
   return (
     <div>
-      {/* 1. About DCWF — H1 + verbatim story (not hideable) */}
+      {/* 1-2. Hero + story — not hideable */}
       <WealthAboutHero
+        eyebrow={f["wealth.about.hero-eyebrow"] ?? ""}
         heading={f["wealth.about.hero-heading"] ?? "About DCWF"}
+        image={f["wealth.about.hero-image"] ?? ""}
+        imageAlt={f["wealth.about.hero-image-alt"] ?? ""}
         paragraph1={f["wealth.about.hero-paragraph-1"] ?? ""}
         paragraph2={f["wealth.about.hero-paragraph-2"] ?? ""}
         paragraph3={f["wealth.about.hero-paragraph-3"] ?? ""}
       />
 
+      {/* 3. Director spotlight */}
       {isSectionVisible(customFields, "wealth", "about.director") && (
-        <>
-          <WealthHr />
-          <WealthAboutDirector
-            image={
-              f["wealth.about.director-image"] ??
-              "/templates/wealth/images/director.jpg"
-            }
-            imageAlt={f["wealth.about.director-image-alt"] ?? ""}
-            nameTitle={f["wealth.about.director-name-title"] ?? ""}
-            bio1={f["wealth.about.director-bio-1"] ?? ""}
-            bio2={f["wealth.about.director-bio-2"] ?? ""}
-            bio3={f["wealth.about.director-bio-3"] ?? ""}
-            email={f["wealth.about.director-email"] ?? ""}
-          />
-        </>
+        <WealthAboutDirector
+          image={
+            f["wealth.about.director-image"] ??
+            "/templates/wealth/images/director.jpg"
+          }
+          imageAlt={f["wealth.about.director-image-alt"] ?? ""}
+          nameTitle={f["wealth.about.director-name-title"] ?? ""}
+          bio1={f["wealth.about.director-bio-1"] ?? ""}
+          bio2={f["wealth.about.director-bio-2"] ?? ""}
+          bio3={f["wealth.about.director-bio-3"] ?? ""}
+          email={f["wealth.about.director-email"] ?? ""}
+        />
       )}
 
+      {/* 4. Board of Directors */}
       {isSectionVisible(customFields, "wealth", "about.board") && (
-        <>
-          <WealthHr />
-          <WealthAboutBoard
-            heading={f["wealth.about.board-heading"] ?? "Board of Directors"}
-            members={board}
-          />
-        </>
+        <WealthAboutBoard
+          heading={f["wealth.about.board-heading"] ?? "Board of Directors"}
+          members={board}
+        />
       )}
 
+      {/* 5. Closing CTA band */}
       {isSectionVisible(customFields, "wealth", "about.cta") && (
-        <>
-          <WealthHr />
-          <WealthAboutCta
-            label={f["wealth.about.cta-label"] ?? ""}
-            url={f["wealth.about.cta-url"] ?? "/contact"}
-          />
-        </>
+        <WealthAboutCta
+          heading={f["wealth.about.cta-heading"] ?? ""}
+          label={f["wealth.about.cta-label"] ?? ""}
+          url={f["wealth.about.cta-url"] ?? "/contact"}
+        />
       )}
     </div>
   );

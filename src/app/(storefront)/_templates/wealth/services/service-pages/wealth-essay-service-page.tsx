@@ -1,7 +1,10 @@
 /**
  * `wealth-essay` — long-form editorial service detail page, seeded with the
- * real DCWF "Non-Extractive Financing" (Lending) page (design.md →
- * "wealth-essay service variant").
+ * real DCWF "Non-Extractive Financing" (Lending) page. Redesign pass 2
+ * (2026-10-12): split hero (service photo when present, else a full-width
+ * forest panel), paper prose + priorities, a surface block with numbered
+ * badge steps, forest loan-terms and sage shared-values blocks, then a
+ * forest closing band (design.md → "wealth-essay service variant").
  *
  * Fields live on `Service.customFields`, edited at `/admin/services/[id]` —
  * NOT the visual editor (there is no `sections.ts` entry for a service
@@ -13,13 +16,11 @@ import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_servic
 import type { TemplateListRow } from "~/lib/template-fields";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
-import { WealthEyebrow } from "../../shared/wealth-eyebrow";
-import { WealthH1 } from "../../shared/wealth-h1";
-import { WealthHr } from "../../shared/wealth-hr";
+import { WealthBlock } from "../../shared/wealth-block";
+import { WealthCtaBand } from "../../shared/wealth-cta-band";
 import { WealthLedgeButton } from "../../shared/wealth-ledge-button";
 import { WealthReveal } from "../../shared/wealth-reveal";
-import { WealthSection } from "../../shared/wealth-section";
-import { WealthSectionHeading } from "../../shared/wealth-section-heading";
+import { WealthSplitHero } from "../../shared/wealth-split-hero";
 import { resolveWealthEssayFields } from "./fields";
 
 // `parseTemplateListRows` reads `customFields` directly and ignores a list
@@ -107,7 +108,7 @@ const DEFAULT_VALUES: TemplateListRow[] = [
 
 function str(row: TemplateListRow, key: string): string {
   const value = row[key];
-  return typeof value === "string" ? value : "";
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function rows(raw: unknown, fallback: TemplateListRow[]): TemplateListRow[] {
@@ -115,101 +116,73 @@ function rows(raw: unknown, fallback: TemplateListRow[]): TemplateListRow[] {
   return parsed.length > 0 ? parsed : fallback;
 }
 
-// ─── PlainBulletList ────────────────────────────────────────────────────────
+// ─── Lists ──────────────────────────────────────────────────────────────────
 
-function PlainBulletList({ items }: { items: TemplateListRow[] }) {
+/** Plain sentence bullets: forest squares, two columns on wide screens. */
+function PriorityList({ items }: { items: TemplateListRow[] }) {
+  const shown = items.filter((row) => str(row, "text") !== "");
+  if (shown.length === 0) return null;
   return (
-    <ul
-      className="marker:text-[var(--wealth-primary)]"
-      style={{
-        listStyle: "disc",
-        paddingLeft: "1.25em",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.6em",
-        margin: "16px 0 0",
-      }}
-    >
-      {items.map((row, i) => (
-        <li key={row._id ?? i} style={{ lineHeight: 1.7 }}>
-          {str(row, "text")}
-        </li>
+    <ul className="wealth-essay-bullets">
+      {shown.map((row, i) => (
+        <li key={row._id ?? i}>{str(row, "text")}</li>
       ))}
     </ul>
   );
 }
 
-// ─── BoldLeadBulletList ─────────────────────────────────────────────────────
-
-function BoldLeadBulletList({ items }: { items: TemplateListRow[] }) {
-  return (
-    <ul
-      style={{
-        listStyle: "none",
-        padding: 0,
-        margin: "16px 0 0",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.9em",
-      }}
-    >
-      {items.map((row, i) => {
-        const lead = str(row, "lead");
-        const body = str(row, "body");
-        return (
-          <li key={row._id ?? i} style={{ lineHeight: 1.7 }}>
-            {lead && <strong style={{ fontWeight: 700 }}>{lead}</strong>}
-            {lead && body ? " — " : ""}
-            {body}
-          </li>
-        );
-      })}
-    </ul>
+/** Square numeral badges joined by a hairline (the `.wealth-prose` ol look). */
+function ProcessSteps({ items }: { items: TemplateListRow[] }) {
+  const shown = items.filter(
+    (row) => str(row, "lead") !== "" || str(row, "body") !== "",
   );
-}
-
-// ─── NumberedSteps ──────────────────────────────────────────────────────────
-
-function NumberedSteps({ items }: { items: TemplateListRow[] }) {
+  if (shown.length === 0) return null;
   return (
-    <ol
-      style={{
-        listStyle: "none",
-        padding: 0,
-        margin: "24px 0 0",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1.4em",
-      }}
-    >
-      {items.map((row, i) => {
+    <ol className="wealth-essay-steps">
+      {shown.map((row, i) => {
         const lead = str(row, "lead");
         const body = str(row, "body");
         return (
-          <li
-            key={row._id ?? i}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2.4em 1fr",
-              gap: "0.75em",
-            }}
-          >
-            <span
-              aria-hidden="true"
-              className="wealth-eyebrow"
-              style={{ color: "var(--wealth-primary)" }}
-            >
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <p style={{ margin: 0, lineHeight: 1.7 }}>
-              {lead && <strong style={{ fontWeight: 700 }}>{lead}</strong>}
-              {lead && body ? " — " : ""}
-              {body}
-            </p>
+          <li key={row._id ?? i}>
+            {lead ? (
+              <strong className="wealth-essay-steps__lead">{lead}</strong>
+            ) : null}
+            {body ? <p className="wealth-essay-steps__body">{body}</p> : null}
           </li>
         );
       })}
     </ol>
+  );
+}
+
+/** Bold-lead items in a grid between hairlines (terms + shared values). */
+function LeadGrid({ items }: { items: TemplateListRow[] }) {
+  const shown = items.filter(
+    (row) => str(row, "lead") !== "" || str(row, "body") !== "",
+  );
+  if (shown.length === 0) return null;
+  // Exactly three items sit as one row on wide screens instead of 2 + 1.
+  return (
+    <ul
+      className={
+        shown.length === 3
+          ? "wealth-essay-grid wealth-essay-grid--3"
+          : "wealth-essay-grid"
+      }
+    >
+      {shown.map((row, i) => {
+        const lead = str(row, "lead");
+        const body = str(row, "body");
+        return (
+          <li key={row._id ?? i}>
+            {lead ? (
+              <strong className="wealth-essay-grid__lead">{lead}</strong>
+            ) : null}
+            {body ? <p className="wealth-essay-grid__body">{body}</p> : null}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -231,6 +204,7 @@ export function WealthEssayServicePage({ service }: ServiceTemplateProps) {
     "wealth-essay.process-intro",
     "wealth-essay.terms-eyebrow",
     "wealth-essay.values-eyebrow",
+    "wealth-essay.cta-heading",
     "wealth-essay.cta-label",
     "wealth-essay.cta-url",
   ]);
@@ -246,106 +220,191 @@ export function WealthEssayServicePage({ service }: ServiceTemplateProps) {
   const terms = rows(raw?.["wealth-essay.terms-list"], DEFAULT_TERMS);
   const values = rows(raw?.["wealth-essay.values-list"], DEFAULT_VALUES);
 
-  const hasCta = !!f["wealth-essay.cta-label"] && !!f["wealth-essay.cta-url"];
+  const title = (f["wealth-essay.title"] ?? "").trim() || service.name;
+  const deck = (f["wealth-essay.deck"] ?? "").trim();
+  const heroImage = service.image?.trim() ?? "";
+
+  const lendHeading = (f["wealth-essay.lend-to-heading"] ?? "").trim();
+  const lendP1 = (f["wealth-essay.lend-to-paragraph-1"] ?? "").trim();
+  const lendP2 = (f["wealth-essay.lend-to-paragraph-2"] ?? "").trim();
+  const showLend = lendHeading !== "" || lendP1 !== "" || lendP2 !== "";
+
+  const prioritiesHeading = (f["wealth-essay.priorities-heading"] ?? "").trim();
+  const prioritiesLead = (f["wealth-essay.priorities-lead"] ?? "").trim();
+  const showPriorities =
+    prioritiesHeading !== "" || prioritiesLead !== "" || priorities.length > 0;
+
+  const processHeading = (f["wealth-essay.process-heading"] ?? "").trim();
+  const processIntro = (f["wealth-essay.process-intro"] ?? "").trim();
+
+  const termsEyebrow = (f["wealth-essay.terms-eyebrow"] ?? "").trim();
+  const valuesEyebrow = (f["wealth-essay.values-eyebrow"] ?? "").trim();
+
+  const ctaHeading = (f["wealth-essay.cta-heading"] ?? "").trim();
+  const ctaLabel = (f["wealth-essay.cta-label"] ?? "").trim();
+  const ctaUrl = f["wealth-essay.cta-url"] ?? "";
+  const hasCtaButton = ctaLabel !== "" && ctaUrl !== "";
 
   return (
     <article>
-      <WealthReveal>
-        <WealthSection className="text-center" reveal={false}>
-          <div style={{ maxWidth: 760, margin: "0 auto" }}>
-            <WealthH1>
-              {f["wealth-essay.title"] ?? service.name}
-            </WealthH1>
-            {f["wealth-essay.deck"] && (
-              <p
-                className="wealth-section-heading"
-                style={{ margin: "16px 0 0" }}
+      {/* 1. Hero — service photo (split) or a full-width panel */}
+      <WealthSplitHero
+        as="header"
+        ratio="sixty"
+        image={heroImage || null}
+        imageAlt={service.name}
+        aria-labelledby="wealth-essay-title"
+      >
+        <WealthReveal>
+          <h1 id="wealth-essay-title" className="wealth-hero__title">
+            {title}
+          </h1>
+        </WealthReveal>
+        {deck ? (
+          <>
+            <WealthReveal delay={1}>
+              <hr className="wealth-hero__rule" />
+            </WealthReveal>
+            <WealthReveal delay={2}>
+              <p className="wealth-hero__excerpt">{deck}</p>
+            </WealthReveal>
+          </>
+        ) : null}
+      </WealthSplitHero>
+
+      {/* 2. Who we lend to — paper prose column */}
+      {showLend ? (
+        <WealthBlock
+          tone="paper"
+          container="narrow"
+          spacing="flush-bottom"
+          aria-labelledby={lendHeading ? "wealth-essay-lend-h" : undefined}
+          className="wealth-essay-lend"
+        >
+          <WealthReveal threshold={0}>
+            {lendHeading ? (
+              <h2 id="wealth-essay-lend-h" className="wealth-essay-h2">
+                {lendHeading}
+              </h2>
+            ) : null}
+            <div className="wealth-essay-copy">
+              {lendP1 ? <p className="wealth-lead">{lendP1}</p> : null}
+              {lendP2 ? <p>{lendP2}</p> : null}
+            </div>
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
+
+      {/* 3. Priorities — paper */}
+      {showPriorities ? (
+        <WealthBlock
+          tone="paper"
+          container="narrow"
+          aria-labelledby={
+            prioritiesHeading ? "wealth-essay-priorities-h" : undefined
+          }
+          className="wealth-essay-priorities"
+        >
+          <WealthReveal threshold={0}>
+            <div className="wealth-essay-head">
+              {prioritiesHeading ? (
+                <h2 id="wealth-essay-priorities-h" className="wealth-essay-h2">
+                  {prioritiesHeading}
+                </h2>
+              ) : null}
+              {prioritiesLead ? (
+                <p className="wealth-essay-lead">{prioritiesLead}</p>
+              ) : null}
+            </div>
+            <PriorityList items={priorities} />
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
+
+      {/* 4. Our process — surface block */}
+      {processHeading || processIntro || processSteps.length > 0 ? (
+        <WealthBlock
+          tone="surface"
+          container="narrow"
+          aria-labelledby={
+            processHeading ? "wealth-essay-process-h" : undefined
+          }
+          className="wealth-essay-process"
+        >
+          <WealthReveal threshold={0}>
+            <div className="wealth-essay-head">
+              {processHeading ? (
+                <h2 id="wealth-essay-process-h" className="wealth-essay-h2">
+                  {processHeading}
+                </h2>
+              ) : null}
+              {processIntro ? (
+                <p className="wealth-essay-lead">{processIntro}</p>
+              ) : null}
+            </div>
+            <ProcessSteps items={processSteps} />
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
+
+      {/* 5. Loan terms — forest block */}
+      {terms.length > 0 ? (
+        <WealthBlock
+          tone="forest"
+          aria-labelledby={termsEyebrow ? "wealth-essay-terms-h" : undefined}
+          className="wealth-essay-terms"
+        >
+          <WealthReveal threshold={0}>
+            {termsEyebrow ? (
+              <h2
+                id="wealth-essay-terms-h"
+                className="wealth-eyebrow wealth-eyebrow--block"
               >
-                {f["wealth-essay.deck"]}
-              </p>
-            )}
-          </div>
-        </WealthSection>
-      </WealthReveal>
+                {termsEyebrow}
+              </h2>
+            ) : null}
+            <LeadGrid items={terms} />
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
 
-      <WealthHr />
+      {/* 6. Shared values — sage block */}
+      {values.length > 0 ? (
+        <WealthBlock
+          tone="sage"
+          aria-labelledby={valuesEyebrow ? "wealth-essay-values-h" : undefined}
+          className="wealth-essay-values"
+        >
+          <WealthReveal threshold={0}>
+            {valuesEyebrow ? (
+              <h2
+                id="wealth-essay-values-h"
+                className="wealth-eyebrow wealth-eyebrow--block"
+              >
+                {valuesEyebrow}
+              </h2>
+            ) : null}
+            <LeadGrid items={values} />
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
 
-      {/* Who we lend to */}
-      <WealthSection>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <WealthSectionHeading>
-            {f["wealth-essay.lend-to-heading"]}
-          </WealthSectionHeading>
-          <p style={{ margin: "16px 0 0", lineHeight: 1.7 }}>
-            {f["wealth-essay.lend-to-paragraph-1"]}
-          </p>
-          <p style={{ margin: "16px 0 0", lineHeight: 1.7 }}>
-            {f["wealth-essay.lend-to-paragraph-2"]}
-          </p>
-        </div>
-      </WealthSection>
-
-      {/* Our priorities */}
-      <WealthSection>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <WealthSectionHeading>
-            {f["wealth-essay.priorities-heading"]}
-          </WealthSectionHeading>
-          <p style={{ margin: "16px 0 0", lineHeight: 1.7 }}>
-            {f["wealth-essay.priorities-lead"]}
-          </p>
-          <PlainBulletList items={priorities} />
-        </div>
-      </WealthSection>
-
-      {/* Our process */}
-      <WealthSection>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <WealthSectionHeading>
-            {f["wealth-essay.process-heading"]}
-          </WealthSectionHeading>
-          <p style={{ margin: "16px 0 0", lineHeight: 1.7 }}>
-            {f["wealth-essay.process-intro"]}
-          </p>
-          <NumberedSteps items={processSteps} />
-        </div>
-      </WealthSection>
-
-      <WealthHr />
-
-      {/* Loan terms band */}
-      <WealthSection>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <WealthEyebrow as="p">{f["wealth-essay.terms-eyebrow"]}</WealthEyebrow>
-          <BoldLeadBulletList items={terms} />
-        </div>
-      </WealthSection>
-
-      <WealthHr />
-
-      {/* Shared values band */}
-      <WealthSection>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <WealthEyebrow as="p">
-            {f["wealth-essay.values-eyebrow"]}
-          </WealthEyebrow>
-          <BoldLeadBulletList items={values} />
-        </div>
-      </WealthSection>
-
-      <WealthHr />
-
-      {/* Closing CTA — hidden when label or url is blank */}
-      {hasCta && (
-        <WealthSection className="text-center">
-          <WealthLedgeButton
-            href={f["wealth-essay.cta-url"] ?? "/contact"}
-            variant="accent"
-          >
-            {f["wealth-essay.cta-label"]}
-          </WealthLedgeButton>
-        </WealthSection>
-      )}
+      {/* 7. Closing band — hidden when the button label/url is blank (the
+          long-standing way to hide the closing CTA) */}
+      {hasCtaButton ? (
+        <WealthReveal>
+          <WealthCtaBand
+            aria-labelledby={ctaHeading ? "wealth-essay-cta-h" : undefined}
+            headingId="wealth-essay-cta-h"
+            heading={ctaHeading}
+            action={
+              <WealthLedgeButton onDark href={ctaUrl}>
+                {ctaLabel}
+              </WealthLedgeButton>
+            }
+          />
+        </WealthReveal>
+      ) : null}
     </article>
   );
 }

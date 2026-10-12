@@ -6,42 +6,42 @@ type Props = {
   appointmentLabel: string;
 };
 
-/** Address note block. Hideable (contact.info). */
+/**
+ * Office note — address + "By Appointment Only" as a hairline-topped aside,
+ * rendered inside the form block's left column. Hideable (contact.info).
+ */
 export function WealthContactInfo({
   addressLine1,
   addressLine2,
   appointmentLabel,
 }: Props) {
+  if (!addressLine1.trim() && !addressLine2.trim() && !appointmentLabel.trim())
+    return null;
   return (
-    <section
-      aria-label="Office address"
+    <div
+      className="wealth-contact-note"
       {...sectionGroupAttr("contact", "info")}
-      className="py-[calc(var(--wealth-rhythm)*2)]"
     >
-      <div className="mx-auto w-full max-w-[720px] px-[var(--wealth-gutter)] text-center">
-        {addressLine1 ? (
-          <p {...fieldAttr("wealth.contact.info-address-line1")}>
+      <address className="wealth-contact-note__address">
+        {addressLine1.trim() ? (
+          <span {...fieldAttr("wealth.contact.info-address-line1")}>
             {addressLine1}
-          </p>
+          </span>
         ) : null}
-        {addressLine2 ? (
-          <p
-            {...fieldAttr("wealth.contact.info-address-line2")}
-            className="mt-1"
-          >
+        {addressLine2.trim() ? (
+          <span {...fieldAttr("wealth.contact.info-address-line2")}>
             {addressLine2}
-          </p>
+          </span>
         ) : null}
-        {appointmentLabel ? (
-          <p
-            {...fieldAttr("wealth.contact.info-appointment-label")}
-            className="mt-[var(--wealth-rhythm)] italic"
-            style={{ fontFamily: "var(--font-wealth-sub)" }}
-          >
-            {appointmentLabel}
-          </p>
-        ) : null}
-      </div>
-    </section>
+      </address>
+      {appointmentLabel.trim() ? (
+        <p
+          className="wealth-contact-note__appt"
+          {...fieldAttr("wealth.contact.info-appointment-label")}
+        >
+          {appointmentLabel}
+        </p>
+      ) : null}
+    </div>
   );
 }

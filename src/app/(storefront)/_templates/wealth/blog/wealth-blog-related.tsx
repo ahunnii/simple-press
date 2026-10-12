@@ -1,45 +1,49 @@
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 
-import { WealthRevealGroup } from "../shared/wealth-reveal";
-import { WealthSectionHeading } from "../shared/wealth-section-heading";
+import { WealthArrowLink } from "../shared/wealth-arrow-link";
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthReveal, WealthRevealGroup } from "../shared/wealth-reveal";
 import { WealthBlogCard } from "./wealth-blog-card";
-import { WealthBlogReadLink } from "./wealth-blog-read-link";
 
 type Props = {
   posts: DefaultBlogPostPageTemplateProps["relatedPosts"];
   currentSlug: string;
+  /** The blog index heading (`wealth.blog.heading`), so the band names the blog. */
+  blogName: string;
 };
 
-/** Related posts at the foot of a blog post — the same bar-card language as the index grid, capped to 3. */
-export function WealthBlogRelated({ posts, currentSlug }: Props) {
+/** Related posts at the foot of a blog post: up to 3 post cards on a surface band. */
+export function WealthBlogRelated({ posts, currentSlug, blogName }: Props) {
   const others = posts.filter((p) => p.slug !== currentSlug).slice(0, 3);
 
   if (others.length === 0) return null;
 
   return (
-    <div
-      style={{
-        background: "var(--wealth-surface)",
-        padding: "calc(var(--wealth-rhythm) * 2) var(--wealth-gutter)",
-      }}
+    <WealthBlock
+      tone="surface"
+      aria-labelledby="wealth-blog-related-title"
+      className="wealth-blog-related"
     >
-      <div className="mx-auto" style={{ maxWidth: "var(--wealth-container)" }}>
-        <div
-          className="flex flex-wrap items-end justify-between gap-4"
-          style={{ marginBottom: "calc(var(--wealth-rhythm) * 1.5)" }}
-        >
-          <WealthSectionHeading>More from News + Notes</WealthSectionHeading>
-          <WealthBlogReadLink as="link" href="/blog">
-            All posts
-          </WealthBlogReadLink>
-        </div>
+      <WealthReveal
+        threshold={0}
+        className="wealth-section-head wealth-section-head--split"
+      >
+        <h2 id="wealth-blog-related-title" className="wealth-h2">
+          {blogName ? `More from ${blogName}` : "More news"}
+        </h2>
+        <WealthArrowLink href="/blog">All news</WealthArrowLink>
+      </WealthReveal>
 
-        <WealthRevealGroup className="grid grid-cols-1 gap-x-[var(--wealth-gutter)] gap-y-[calc(var(--wealth-rhythm)*1.5)] sm:grid-cols-3">
-          {others.map((post, i) => (
-            <WealthBlogCard key={post.slug} post={post} index={i} excerptLength={120} />
-          ))}
-        </WealthRevealGroup>
-      </div>
-    </div>
+      <WealthRevealGroup threshold={0} className="wealth-posts">
+        {others.map((post, i) => (
+          <WealthBlogCard
+            key={post.slug}
+            post={post}
+            index={i}
+            excerptLength={120}
+          />
+        ))}
+      </WealthRevealGroup>
+    </WealthBlock>
   );
 }

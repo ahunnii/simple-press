@@ -1,314 +1,232 @@
-import Image from "next/image";
-import Link from "next/link";
-
 import type { RouterOutputs } from "~/trpc/react";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { routeEnabled, routeFlags } from "~/lib/features/route-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
+import { renderBoldMarkup } from "../homepage/wealth-bold-markup";
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthCtaBand } from "../shared/wealth-cta-band";
 import { WealthLedgeButton } from "../shared/wealth-ledge-button";
-import { WealthLink } from "../shared/wealth-link";
-import { WealthSection } from "../shared/wealth-section";
-import { WealthSectionHeading } from "../shared/wealth-section-heading";
+import {
+  WEALTH_PROGRAM_TONES,
+  WealthProgramCard,
+} from "../shared/wealth-program-card";
+import { WealthReveal, WealthRevealGroup } from "../shared/wealth-reveal";
+import { WealthSplitHero } from "../shared/wealth-split-hero";
+import { wealthServicesData } from "./index";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   services: RouterOutputs["services"]["getAllPublic"];
 };
 
-// ─── ProgramCard ────────────────────────────────────────────────────────────
-// Square image card, bottom scrim, mono-caps label — the "homepage-tile
-// visual language" design.md calls for (see homepage's "Our Programs" tiles).
+const FIELD_KEYS = [
+  "wealth.services.hero-heading",
+  "wealth.services.hero-intro",
+  "wealth.services.hero-leadin",
+  "wealth.services.hero-image",
+  "wealth.services.hero-image-alt",
+  "wealth.services.grid-empty-message",
+  "wealth.services.grid-empty-cta-label",
+  "wealth.services.grid-empty-cta-url",
+  "wealth.services.cta-heading",
+  "wealth.services.cta-label",
+  "wealth.services.cta-url",
+];
 
-function ProgramCard({
-  service,
-  index,
-}: {
-  service: Props["services"][number];
-  index: number;
-}) {
-  const initial = service.name.charAt(0).toUpperCase();
+/** An owner who blanks the heading still gets the page's one <h1>: fall back
+ *  to the field's own declared default (no second copy of the string). */
+const HEADING_DEFAULT =
+  wealthServicesData.find(
+    (field) => field.key === "wealth.services.hero-heading",
+  )?.defaultValue ?? "";
 
-  return (
-    <Link
-      href={`/services/${service.slug}`}
-      aria-label={`Learn more about ${service.name}`}
-      className="wealth-program-card"
-      style={{ "--i": Math.min(index, 7) } as React.CSSProperties}
-    >
-      <div className="wealth-program-card__media">
-        {service.image ? (
-          <Image
-            src={service.image}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="wealth-program-card__img"
-            style={{ objectFit: "cover" }}
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "var(--wealth-surface)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-wealth-sub)",
-                fontStyle: "italic",
-                fontSize: "clamp(56px, 12vw, 120px)",
-                color: "var(--wealth-primary)",
-                opacity: 0.25,
-                lineHeight: 1,
-                userSelect: "none",
-              }}
-            >
-              {initial}
-            </span>
-          </div>
-        )}
-
-        <div aria-hidden="true" className="wealth-program-card__scrim" />
-        <div aria-hidden="true" className="wealth-program-card__hover-tint" />
-
-        <div className="wealth-program-card__content">
-          <span className="wealth-eyebrow" style={{ color: "var(--wealth-paper)" }}>
-            {service.name}
-          </span>
-          {service.description && (
-            <p className="wealth-program-card__desc">{service.description}</p>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// ─── EmptyState ─────────────────────────────────────────────────────────────
-
-function EmptyProgramsState({
-  message,
-  ctaLabel,
-  ctaUrl,
-}: {
-  message: string;
-  ctaLabel: string;
-  ctaUrl: string;
-}) {
-  return (
-    <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-      <p
-        {...fieldAttr("wealth.services.grid-empty-message")}
-        style={{
-          fontSize: "17px",
-          lineHeight: 1.6,
-          color: "var(--wealth-ink)",
-          margin: "0 0 16px",
-        }}
-      >
-        {message}
-      </p>
-      {ctaLabel && (
-        <WealthLink href={ctaUrl || "/contact"}>
-          <span {...fieldAttr("wealth.services.grid-empty-cta-label")}>
-            {ctaLabel}
-          </span>
-        </WealthLink>
-      )}
-    </div>
-  );
-}
-
-// ─── Main component ─────────────────────────────────────────────────────────
-
+/**
+ * Programs index (`/services`) — redesign pass 2 (2026-10-12):
+ *   1. forest hero (optional photo), 2. centered lead-in, 3. one solid color
+ *   program card per service record (forest / primary / sage / surface,
+ *   cycling) or the designed empty state, 4. forest closing CTA band.
+ * Service photos are intentionally not used on the index (detail pages show
+ * them). Server component.
+ */
 export async function WealthServicesIndexPage({ business, services }: Props) {
   const customFields = business.siteContent?.customFields;
+  const f = resolveFields(customFields, FIELD_KEYS);
 
-  const f = resolveFields(customFields, [
-    "wealth.services.hero-heading",
-    "wealth.services.hero-intro",
-    "wealth.services.hero-leadin",
-    "wealth.services.grid-empty-message",
-    "wealth.services.grid-empty-cta-label",
-    "wealth.services.grid-empty-cta-url",
-    "wealth.services.cta-heading",
-    "wealth.services.cta-label",
-    "wealth.services.cta-url",
-  ]);
+  const heading =
+    (f["wealth.services.hero-heading"] ?? "").trim() || HEADING_DEFAULT;
+  const intro = (f["wealth.services.hero-intro"] ?? "").trim();
+  const leadin = (f["wealth.services.hero-leadin"] ?? "").trim();
+  const heroImage = (f["wealth.services.hero-image"] ?? "").trim();
+
+  const emptyCtaLabel = (
+    f["wealth.services.grid-empty-cta-label"] ?? ""
+  ).trim();
+  const emptyCtaUrl =
+    (f["wealth.services.grid-empty-cta-url"] ?? "").trim() || "/contact";
+  const ctaHeading = (f["wealth.services.cta-heading"] ?? "").trim();
+  const ctaLabel = (f["wealth.services.cta-label"] ?? "").trim();
+  const ctaUrl = f["wealth.services.cta-url"] ?? "";
+
+  // An owner-typed link to a feature that is switched off would 404: drop the
+  // button instead. Flags are only fetched when a link actually points at a
+  // gated route (a plain /contact default needs no lookup beyond its flag).
+  const gated = [emptyCtaUrl, ctaUrl].some((h) => routeFlags(h).length > 0);
+  const isEnabled = gated ? (await getBusinessFlags()).isEnabled : () => true;
+  const emptyCtaLive = routeEnabled(emptyCtaUrl, isEnabled);
+  const ctaLive = ctaUrl !== "" && routeEnabled(ctaUrl, isEnabled);
+  const showCtaButton = ctaLabel !== "" && ctaLive;
+
+  const hasCards = services.length > 0;
+  const showCta =
+    (ctaHeading !== "" || showCtaButton) &&
+    isSectionVisible(customFields, "wealth", "services.cta");
+  // 3-up desktop when the count divides evenly into threes, else 2-up.
+  const threeUp = services.length === 3 || services.length === 6;
 
   return (
     <>
-      {/* ── 1. Hero — not hideable: this owns the page's sole <h1> ────────── */}
-      <WealthSection
-        sectionAttrs={sectionGroupAttr("services", "hero")}
-        className="text-center"
+      {/* ── 1. Hero — not hideable: owns the page's sole <h1> ───────────── */}
+      <WealthSplitHero
+        ratio="sixty"
+        image={heroImage || null}
+        imageAlt={f["wealth.services.hero-image-alt"] ?? ""}
+        aria-labelledby="wealth-services-title"
+        className="wealth-services-hero"
+        {...sectionGroupAttr("services", "hero")}
       >
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <WealthReveal>
           <h1
+            id="wealth-services-title"
+            className="wealth-hero__title"
             {...fieldAttr("wealth.services.hero-heading")}
-            style={{
-              fontFamily: "var(--font-wealth-sub)",
-              fontStyle: "italic",
-              fontWeight: 400,
-              fontSize: "clamp(32px, 5vw, 48px)",
-              lineHeight: 1.2,
-              letterSpacing: "0.21px",
-              color: "var(--wealth-ink)",
-              margin: "0 0 20px",
-            }}
           >
-            {f["wealth.services.hero-heading"] ?? "Our Programs"}
+            {heading}
           </h1>
-
-          {f["wealth.services.hero-intro"] && (
+        </WealthReveal>
+        {intro ? (
+          <WealthReveal delay={1}>
             <p
+              className="wealth-hero__excerpt"
               {...fieldAttr("wealth.services.hero-intro")}
-              style={{
-                fontSize: "17px",
-                lineHeight: 1.7,
-                color: "var(--wealth-ink)",
-                margin: "0 auto 24px",
-                maxWidth: "62ch",
-              }}
             >
-              {f["wealth.services.hero-intro"]}
+              {intro}
             </p>
-          )}
+          </WealthReveal>
+        ) : null}
+      </WealthSplitHero>
 
-          {f["wealth.services.hero-leadin"] && (
-            <p
-              {...fieldAttr("wealth.services.hero-leadin")}
-              style={{
-                display: "inline-block",
-                borderBottom: "1px solid var(--wealth-primary)",
-                paddingBottom: "2px",
-                fontSize: "15px",
-                color: "var(--wealth-ink)",
-              }}
-            >
-              {f["wealth.services.hero-leadin"]}
-            </p>
-          )}
-        </div>
-      </WealthSection>
-
-      {/* ── 2. Grid — or its designed empty state ──────────────────────────── */}
-      <WealthSection sectionAttrs={sectionGroupAttr("services", "grid")}>
-        <style>{`
-          .wealth-program-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: clamp(16px, 3vw, 32px);
-          }
-          @media (min-width: 640px) {
-            .wealth-program-grid { grid-template-columns: 1fr 1fr; }
-          }
-          @media (min-width: 1024px) {
-            .wealth-program-grid { grid-template-columns: 1fr 1fr 1fr; }
-          }
-          .wealth-program-card {
-            display: block;
-            text-decoration: none;
-          }
-          .wealth-program-card__media {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-          }
-          .wealth-program-card__scrim {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(
-              to top,
-              color-mix(in srgb, var(--wealth-ink) 82%, transparent) 0%,
-              color-mix(in srgb, var(--wealth-ink) 18%, transparent) 55%,
-              transparent 100%
-            );
-          }
-          /* Hover/focus treatment matches the homepage program tiles exactly
-             (design.md Motion: "color/border-color .1s ease-in-out... no
-             transforms on hover, no parallax") — a sage tint, not a zoom. */
-          .wealth-program-card__hover-tint {
-            position: absolute;
-            inset: 0;
-            background: transparent;
-            transition: background-color var(--wealth-dur-hover) var(--wealth-ease-hover);
-          }
-          .wealth-program-card:hover .wealth-program-card__hover-tint,
-          .wealth-program-card:focus-visible .wealth-program-card__hover-tint {
-            background: color-mix(in srgb, var(--wealth-primary) 22%, transparent);
-          }
-          .wealth-program-card__content {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: clamp(16px, 3vw, 28px);
-            gap: 8px;
-          }
-          .wealth-program-card__desc {
-            font-size: 14px;
-            line-height: 1.6;
-            color: color-mix(in srgb, var(--wealth-paper) 85%, transparent);
-            margin: 0;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .wealth-program-card__hover-tint { transition: none !important; }
-          }
-        `}</style>
-
-        {services.length > 0 ? (
-          <div className="wealth-program-grid">
-            {services.map((service, i) => (
-              <ProgramCard key={service.id} service={service} index={i} />
-            ))}
-          </div>
-        ) : (
-          <EmptyProgramsState
-            message={f["wealth.services.grid-empty-message"] ?? ""}
-            ctaLabel={f["wealth.services.grid-empty-cta-label"] ?? ""}
-            ctaUrl={f["wealth.services.grid-empty-cta-url"] ?? "/contact"}
-          />
-        )}
-      </WealthSection>
-
-      {/* ── 3. Closing CTA — hideable ───────────────────────────────────────── */}
-      {isSectionVisible(customFields, "wealth", "services.cta") && (
-        <WealthSection
-          sectionAttrs={sectionGroupAttr("services", "cta")}
-          className="text-center"
+      {/* ── 2. Lead-in — still the `services.hero` group ───────────────── */}
+      {leadin ? (
+        <WealthBlock
+          tone="paper"
+          container="narrow"
+          spacing={hasCards ? "flush-bottom" : "default"}
+          className="wealth-services-intro"
+          {...sectionGroupAttr("services", "hero")}
         >
-          {f["wealth.services.cta-heading"] && (
-            <WealthSectionHeading className="mx-auto mb-6">
-              <span {...fieldAttr("wealth.services.cta-heading")}>
-                {f["wealth.services.cta-heading"]}
-              </span>
-            </WealthSectionHeading>
-          )}
-          {f["wealth.services.cta-label"] && f["wealth.services.cta-url"] && (
-            <WealthLedgeButton
-              href={f["wealth.services.cta-url"] ?? "/contact"}
-              variant="accent"
+          <WealthReveal className="wealth-center">
+            {/* No fieldAttr: transformed text (`**` → <strong>). */}
+            <p className="wealth-lead">{renderBoldMarkup(leadin)}</p>
+          </WealthReveal>
+        </WealthBlock>
+      ) : null}
+
+      {/* ── 3. Program cards — or the designed empty state ──────────────── */}
+      {hasCards ? (
+        <WealthBlock
+          tone="paper"
+          aria-label="Programs"
+          className="wealth-services-list"
+          {...sectionGroupAttr("services", "grid")}
+        >
+          <WealthRevealGroup
+            threshold={0}
+            className={
+              threeUp
+                ? "wealth-services-cards wealth-services-cards--3"
+                : "wealth-services-cards"
+            }
+          >
+            {services.map((service, i) => {
+              const tone =
+                WEALTH_PROGRAM_TONES[i % WEALTH_PROGRAM_TONES.length] ??
+                "forest";
+              return (
+                <WealthProgramCard
+                  key={service.id}
+                  className="wealth-reveal-item"
+                  style={{ "--i": Math.min(i, 7) } as React.CSSProperties}
+                  tone={tone}
+                  titleAs="h2"
+                  number={String(i + 1).padStart(2, "0")}
+                  title={service.name}
+                  copy={service.description}
+                  cta={{
+                    href: `/services/${service.slug}`,
+                    label: (
+                      <>
+                        Learn more
+                        <span className="sr-only"> about {service.name}</span>
+                      </>
+                    ),
+                  }}
+                />
+              );
+            })}
+          </WealthRevealGroup>
+        </WealthBlock>
+      ) : (
+        <WealthBlock
+          tone="surface"
+          container="narrow"
+          aria-label="Programs"
+          className="wealth-services-empty"
+          {...sectionGroupAttr("services", "grid")}
+        >
+          <WealthReveal className="wealth-center">
+            <p
+              className="wealth-lead"
+              {...fieldAttr("wealth.services.grid-empty-message")}
             >
-              <span {...fieldAttr("wealth.services.cta-label")}>
-                {f["wealth.services.cta-label"]}
-              </span>
-            </WealthLedgeButton>
-          )}
-        </WealthSection>
+              {f["wealth.services.grid-empty-message"] ?? ""}
+            </p>
+            {emptyCtaLabel !== "" && emptyCtaLive ? (
+              <div className="wealth-btn-row wealth-btn-row--center wealth-services-empty__cta">
+                <WealthLedgeButton href={emptyCtaUrl}>
+                  <span {...fieldAttr("wealth.services.grid-empty-cta-label")}>
+                    {emptyCtaLabel}
+                  </span>
+                </WealthLedgeButton>
+              </div>
+            ) : null}
+          </WealthReveal>
+        </WealthBlock>
       )}
+
+      {/* ── 4. Closing CTA band — hideable ─────────────────────────────── */}
+      {showCta ? (
+        <WealthReveal>
+          <WealthCtaBand
+            aria-labelledby={ctaHeading ? "wealth-services-cta-h" : undefined}
+            headingId="wealth-services-cta-h"
+            heading={ctaHeading}
+            headingProps={fieldAttr("wealth.services.cta-heading")}
+            action={
+              showCtaButton ? (
+                <WealthLedgeButton onDark href={ctaUrl}>
+                  <span {...fieldAttr("wealth.services.cta-label")}>
+                    {ctaLabel}
+                  </span>
+                </WealthLedgeButton>
+              ) : undefined
+            }
+            {...sectionGroupAttr("services", "cta")}
+          />
+        </WealthReveal>
+      ) : null}
     </>
   );
 }
