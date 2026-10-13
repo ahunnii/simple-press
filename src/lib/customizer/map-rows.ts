@@ -194,7 +194,7 @@ export function mapLinked(
   });
 
   // Missing, or another tenant's product (never trust the FK alone).
-  if (!product || product.businessId !== businessId) return dead();
+  if (product?.businessId !== businessId) return dead();
 
   const comingSoon =
     parseCardAdditionalFields(product.additionalFields).comingSoon === true;
