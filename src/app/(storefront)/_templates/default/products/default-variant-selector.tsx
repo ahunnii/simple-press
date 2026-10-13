@@ -1,12 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -21,12 +24,22 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the parent, which also renders the
+   * price). When enabled, Add to cart first requires a complete build and
+   * then adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the qty / Add to cart row. */
+  customizerSlot?: ReactNode;
 };
 
 export function DefaultVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
@@ -68,9 +81,12 @@ export function DefaultVariantSelector({
   const handleAddToCart = () => {
     if (!cartEnabled || !selectedVariant) return;
     if (addToCartDisabled) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity,
     );
 
@@ -149,6 +165,8 @@ export function DefaultVariantSelector({
           })}
         </div>
       </div>
+
+      {customizerSlot}
 
       {/* Qty + Add to cart (only shown when a variant is selected) */}
       {selectedVariant && (

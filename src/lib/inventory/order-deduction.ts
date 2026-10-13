@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import type { PoolDeductionResult } from "~/lib/inventory/pool-deduction";
 import type { DbClient, TxClient } from "~/server/db";
 import { getBusinessUrl } from "~/lib/business-url";
+import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
 import {
   sendBackorderAlert,
   sendLowInventoryAlert,
@@ -43,6 +44,12 @@ export type OrderDeductionItem = {
   quantity: number;
   /** Snapshot name from the order line — used only for log/alert context when the live row is gone. */
   productName: string;
+  /**
+   * `OrderItem.customization` (product customizer snapshot). Its linked
+   * components are deducted alongside the line — see
+   * `expandOrderItemsForInventory`.
+   */
+  customization?: unknown;
 };
 
 /**
@@ -110,7 +117,7 @@ export async function deductInventoryForOrderItems(
     }
   >();
 
-  for (const item of items) {
+  for (const item of expandOrderItemsForInventory(items)) {
     const qty = item.quantity;
 
     if (item.productVariantId) {

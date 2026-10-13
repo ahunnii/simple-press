@@ -29,6 +29,7 @@ vi.mock("~/server/db", () => ({
     business: { findUnique: vi.fn() },
     product: { findMany: vi.fn() },
     productVariant: { findMany: vi.fn() },
+    productOptionValue: { findMany: vi.fn() },
     collection: { findMany: vi.fn() },
     service: { findMany: vi.fn() },
     event: { findMany: vi.fn() },
@@ -63,6 +64,7 @@ const asMock = (fn: unknown) =>
 const EMPTY_TABLES = [
   db.product.findMany,
   db.productVariant.findMany,
+  db.productOptionValue.findMany,
   db.collection.findMany,
   db.service.findMany,
   db.event.findMany,
@@ -292,6 +294,26 @@ describe("buildUsedMediaIndex — Product.additionalFields", () => {
     ]);
 
     await expect(buildUsedMediaIndex(BUSINESS_ID)).resolves.toBeInstanceOf(Map);
+  });
+});
+
+// ─── ProductOptionValue.imageUrl ──────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — product option values", () => {
+  it("indexes customizer value images so product deletes don't reap them", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-heart-charm.jpg`);
+    asMock(db.productOptionValue.findMany).mockResolvedValue([
+      { id: "val_1", label: "Heart", imageUrl: url, group: { name: "Charms" } },
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)?.[0]).toMatchObject({
+      entityType: "productOptionValue",
+      entityId: "val_1",
+      entityLabel: "Heart",
+      location: 'Product option "Charms"',
+    });
   });
 });
 

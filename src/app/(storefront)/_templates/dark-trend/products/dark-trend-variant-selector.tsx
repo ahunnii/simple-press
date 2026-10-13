@@ -1,13 +1,16 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -22,12 +25,21 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Customizer state (owned by the parent, which renders the price). When
+   * set, Add to Cart needs a complete build and adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the quantity stepper. */
+  customizerSlot?: ReactNode;
 };
 
 export function DarkTrendVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
@@ -63,9 +75,12 @@ export function DarkTrendVariantSelector({
 
   const handleAddToCart = () => {
     if (!cartEnabled || !selectedVariant) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity, // ← Add specified quantity
     );
 
@@ -143,6 +158,8 @@ export function DarkTrendVariantSelector({
           </div>
         </div>
       </div>
+
+      {customizerSlot && <div className="mb-6">{customizerSlot}</div>}
 
       {/* Catalog mode (B6.11): no qty stepper when `cart` is off — stock stays */}
       {selectedVariant &&

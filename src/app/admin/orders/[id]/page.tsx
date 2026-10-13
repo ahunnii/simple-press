@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Package, ReceiptText } from "lucide-react";
 
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatDate } from "~/lib/format-date";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
@@ -17,8 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
-import { resolvePickupLocation } from "~/lib/address/pickup";
 import { MarkReadyForPickup } from "../_components/mark-ready-for-pickup";
+import { OrderItemOptions } from "../_components/order-item-options";
 import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
 import { RefundHandler } from "../_components/refund-handler";
@@ -217,6 +218,9 @@ export default async function OrderDetailPage({ params }: Props) {
                               {item.variantName}
                             </p>
                           )}
+                          <OrderItemOptions
+                            customization={item.customization}
+                          />
                           {item.sku && (
                             <p className="text-muted-foreground mt-1 text-xs">
                               SKU: {item.sku}
@@ -367,6 +371,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     variantName: item.variantName,
                     quantity: item.quantity,
                     fulfilledQuantity: item.fulfilledQuantity,
+                    customization: item.customization,
                   }))}
                 />
               )
@@ -413,6 +418,7 @@ export default async function OrderDetailPage({ params }: Props) {
                         id: item.id,
                         productName: item.productName,
                         variantName: item.variantName,
+                        customization: item.customization,
                       }))}
                       canAddTracking={order.fulfillmentStatus === "fulfilled"}
                     />

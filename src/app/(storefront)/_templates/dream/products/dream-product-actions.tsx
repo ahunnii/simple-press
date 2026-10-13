@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -8,10 +8,15 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { useProduct } from "~/hooks/use-product";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
 import {
+  DREAM_CUSTOMIZER_CLASSNAMES,
+  DREAM_CUSTOMIZER_TRAY_CLASSNAMES,
   DREAM_NOTIFY_BUTTON_CLASSNAME,
   DREAM_NOTIFY_INPUT_CLASSNAME,
   DREAM_SUBSCRIBE_CTA_CLASSNAME,
@@ -31,6 +36,14 @@ type DreamProductActionsProps = {
   comingSoonHeading: string;
   /** Resolved `dream.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
 };
 
 /**
@@ -67,11 +80,15 @@ export function DreamProductActions({
   state,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: DreamProductActionsProps) {
   const {
     inStock,
     variantOptions,
     handleAddToCart,
+    handleAddToCartWith,
+    displayPrice,
+    displayCompareAtPrice,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -92,6 +109,54 @@ export function DreamProductActions({
   // variant products) — mirror it so SubscribePanel links with the real qty.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer): null when the feature is off or the
+  // product has no groups, and then nothing below changes. `displayPrice`
+  // follows the selected variant. Catalog mode (`cart` off) has no way to
+  // add, so it shows no builder either.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer
+      controller={customizer}
+      classNames={DREAM_CUSTOMIZER_CLASSNAMES}
+      trayClassNames={DREAM_CUSTOMIZER_TRAY_CLASSNAMES}
+    />
+  ) : null;
+
+  const handleSimpleAdd = () => {
+    if (customizerOn) {
+      // Incomplete build: show the errors (and focus the first) instead.
+      if (!customizer.revealErrors()) return;
+      handleAddToCartWith((item) =>
+        applyCustomizerToCartItem(item, customizer),
+      );
+    } else {
+      handleAddToCart();
+    }
+    setAdded(true);
+  };
 
   // Catalog mode leaves only the stock notes under the (hidden) buy row.
   const showStockLines =
@@ -136,6 +201,8 @@ export function DreamProductActions({
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
           onAdded={() => setAdded(true)}
+          customizer={customizerOn ? customizer : undefined}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -156,6 +223,9 @@ export function DreamProductActions({
         </div>
       ) : canAddMore && (cartEnabled || showStockLines) ? (
         <div className="flex flex-col gap-2.5">
+          {customizerElement ? (
+            <div className="mb-2.5">{customizerElement}</div>
+          ) : null}
           {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
           {cartEnabled ? (
             <div className="flex flex-wrap items-center gap-3">
@@ -169,10 +239,7 @@ export function DreamProductActions({
               />
               <button
                 type="button"
-                onClick={() => {
-                  handleAddToCart();
-                  setAdded(true);
-                }}
+                onClick={handleSimpleAdd}
                 className="dream-btn h-12 min-w-[12rem] flex-1"
               >
                 Add to cart

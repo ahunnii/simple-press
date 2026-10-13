@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -17,17 +20,28 @@ type SledgeProductActionsProps = DefaultProductPageTemplateProps & {
   comingSoonHeading: string;
   /** Resolved `sledge.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
 };
 
 export function SledgeProductActions({
   product,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: SledgeProductActionsProps) {
   const {
     inStock,
     variantOptions,
-    handleAddToCart,
+    handleAddToCartWith,
+    displayPrice,
+    displayCompareAtPrice,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -47,6 +61,43 @@ export function SledgeProductActions({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  // Catalog mode (`cart` off) has no way to add, so it shows no builder.
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer controller={customizer} className="sledge-customizer" />
+  ) : null;
+
+  const handleAddToCart = () => {
+    if (customizerOn && !customizer.revealErrors()) return;
+    handleAddToCartWith((item) =>
+      customizerOn ? applyCustomizerToCartItem(item, customizer) : item,
+    );
+  };
 
   const stockQty = product.trackInventory ? (product.inventoryQty ?? 0) : null;
   const showStockCount = stockQty !== null && stockQty > 0 && inStock;
@@ -100,6 +151,8 @@ export function SledgeProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizer}
+          customizerSlot={customizerElement}
         />
         {subscribePanel}
       </>
@@ -126,6 +179,8 @@ export function SledgeProductActions({
             Backordered — ships when available
           </p>
         )}
+
+      {inStock && customizerElement}
 
       {/* Catalog mode (B6.11): no qty or Add To Cart when `cart` is off */}
       {cartEnabled && inStock && canAddMore && (

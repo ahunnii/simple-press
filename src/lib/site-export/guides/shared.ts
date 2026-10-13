@@ -172,6 +172,10 @@ export function byHandSection(
     items.push(
       `<strong>Forms</strong> (you have ${count(c.forms, "form")}). Rebuild them with your new platform's form tool. Past entries are saved in the ${folder(SITE_EXPORT_DIRS.spreadsheets)} folder.`,
     );
+  if ((c.optionGroups ?? 0) > 0)
+    items.push(
+      `<strong>Product options</strong> (you have ${count(c.optionGroups ?? 0, "option group")}, such as add-on choices or engraving). The import files cannot carry these, so products arrive without them. Each order line in the ${folder(SITE_EXPORT_DIRS.spreadsheets)} folder lists what the customer chose, and the products spreadsheet shows which options each product had. Recreate them with your new platform's product options or add-ons feature.`,
+    );
   if (c.faqs > 0)
     items.push(
       `<strong>Frequently asked questions</strong> (${count(c.faqs, "question")}). Copy them from ${siteDetailsLink(docPath)} or the pages that show them.`,

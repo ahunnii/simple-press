@@ -3010,6 +3010,48 @@ body:has(.pollen) {
   --radius: 0.75rem;
 }
 
+/* Product options (`ProductCustomizer`, shared) read shadcn tokens only —
+   remap them to pollen's literal palette on the customizer root. */
+.pollen .pollen-customizer {
+  --background: #ffffff;
+  --foreground: #2a351f;
+  --input: rgb(42 53 31 / 0.25);
+  --muted: #f5f2ee;
+  --muted-foreground: #4c566a;
+  --primary: #215935;
+  --primary-foreground: #ffffff;
+  --ring: #215935;
+  --destructive: #b91c1c;
+  color: #2a351f;
+}
+
+.pollen .pollen-customizer [data-slot="customizer-legend"] {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.pollen .pollen-customizer [data-slot="customizer-value"] {
+  border-radius: 0.375rem;
+}
+
+.pollen .pollen-customizer [data-slot="customizer-value-price"] {
+  color: #215935;
+  font-weight: 500;
+}
+
+.pollen
+  .pollen-customizer
+  [data-disabled="true"]
+  [data-slot="customizer-value-price"] {
+  color: #4c566a;
+}
+
+.pollen .pollen-customizer [data-slot="customizer-tray-item"] {
+  background: #f5f2ee;
+}
+
 .elegant {
   /* Tailwind-mapped theme tokens */
   --background: oklch(0.963 0.018 80); /* cream #f5f1ea */
@@ -4976,6 +5018,69 @@ body:has(.pollen) {
   @apply max-w-7xl;
 }
 
+/* Product options (`ProductCustomizer`, shared) read shadcn tokens only —
+   sledge never remaps those globally, so scope the remap to the customizer
+   root (unlayered: the property tweaks below must beat Tailwind utilities). */
+.sledge .sledge-customizer {
+  --background: #ffffff;
+  --foreground: var(--sl-ink);
+  --input: var(--sl-border-input);
+  --muted: var(--sl-cream);
+  --muted-foreground: var(--sl-ink-soft);
+  --primary: var(--sl-ink);
+  --primary-foreground: #ffffff;
+  --ring: var(--sl-coral-aa);
+  --destructive: var(--sl-red);
+  color: var(--sl-ink);
+  font-family: var(--font-sans);
+}
+
+.sledge .sledge-customizer [data-slot="customizer-legend"] {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sledge .sledge-customizer [data-slot="customizer-value"] {
+  border-radius: 0.125rem;
+}
+
+.sledge
+  .sledge-customizer
+  [data-slot="customizer-value"][data-selected="false"] {
+  border-color: var(--sl-border-input);
+}
+
+.sledge .sledge-customizer [data-slot="customizer-value-label"] {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sledge .sledge-customizer [data-slot="customizer-value-price"] {
+  color: var(--sl-coral-aa);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.sledge
+  .sledge-customizer
+  [data-disabled="true"]
+  [data-slot="customizer-value-price"] {
+  color: var(--sl-ink-soft);
+}
+
+.sledge .sledge-customizer [data-slot="customizer-tray-item"] {
+  background: var(--sl-cream);
+  border-color: transparent;
+  border-radius: 0.125rem;
+}
+
+.sledge .sledge-line-options {
+  font-size: 0.75rem;
+}
+
 @layer admin {
   .admin-header {
     @apply mb-8 flex items-center justify-between;
@@ -5389,6 +5494,53 @@ body:has(.pollen) {
   --primary-foreground: var(--vii-paper);
   --ring: var(--vii-copper);
   --radius: 0.2rem;
+}
+
+/* Product options (`ProductCustomizer`, shared) read shadcn tokens only —
+   remap them to vii's palette on the customizer root. Navy selection
+   (matches the variant pills), copper focus + prices. */
+.vii .vii-customizer {
+  --background: var(--vii-paper);
+  --foreground: var(--vii-navy);
+  --input: var(--vii-hairline-strong);
+  --muted: var(--vii-cream);
+  --muted-foreground: var(--vii-ink-soft);
+  --primary: var(--vii-navy);
+  --primary-foreground: var(--vii-paper);
+  --ring: var(--vii-copper);
+  --destructive: var(--vii-error);
+  --radius: 0.2rem;
+  color: var(--vii-navy);
+  font-family: var(--font-sans);
+}
+
+.vii .vii-customizer [data-slot="customizer-legend"] {
+  color: var(--vii-ink-soft);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.vii .vii-customizer [data-slot="customizer-value"],
+.vii .vii-customizer [data-slot="customizer-value-image"] {
+  border-radius: var(--radius);
+}
+
+.vii .vii-customizer [data-slot="customizer-value-price"] {
+  color: var(--vii-copper-deep);
+}
+
+.vii
+  .vii-customizer
+  [data-disabled="true"]
+  [data-slot="customizer-value-price"] {
+  color: var(--vii-ink-soft);
+}
+
+.vii .vii-customizer [data-slot="customizer-tray-item"] {
+  background: var(--vii-cream);
+  border-color: var(--vii-hairline);
 }
 
 /* Matches the Add to cart pill's inline styles (`vii-product-actions.tsx` /
@@ -20127,6 +20279,56 @@ body:has(.pollen) {
   --primary-foreground: var(--umsc-black);
   --ring: var(--umsc-gold-ink);
   --radius: 0.2rem;
+}
+
+/* Product options (`ProductCustomizer`, shared) read shadcn tokens only —
+   remap them to umsc's palette on the customizer root. Square tiles, ink
+   selection (matches the variant pills), gold-ink prices. */
+.umsc .umsc-customizer {
+  --background: var(--umsc-white);
+  --foreground: var(--umsc-ink);
+  --input: var(--umsc-line);
+  --muted: var(--umsc-cream);
+  --muted-foreground: var(--umsc-muted);
+  --primary: var(--umsc-ink);
+  --primary-foreground: var(--umsc-paper);
+  --ring: var(--umsc-gold-ink);
+  --destructive: #a32d2d;
+  --radius: 0;
+  color: var(--umsc-ink);
+  font-family: var(--font-sans);
+}
+
+.umsc .umsc-customizer [data-slot="customizer-legend"] {
+  color: var(--umsc-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.umsc .umsc-customizer [data-slot="customizer-value"],
+.umsc .umsc-customizer [data-slot="customizer-value-image"],
+.umsc .umsc-customizer [data-slot="customizer-text"] input {
+  border-radius: 0;
+}
+
+.umsc .umsc-customizer [data-slot="customizer-value-price"] {
+  color: var(--umsc-gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.umsc
+  .umsc-customizer
+  [data-disabled="true"]
+  [data-slot="customizer-value-price"] {
+  color: var(--umsc-muted);
+}
+
+.umsc .umsc-customizer [data-slot="customizer-tray-item"] {
+  background: var(--umsc-cream);
+  border-color: var(--umsc-line);
+  border-radius: 0;
 }
 
 /* ── Product card (design.md "UmscProductCard") ── */

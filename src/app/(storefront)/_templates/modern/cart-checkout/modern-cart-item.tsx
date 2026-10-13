@@ -6,19 +6,20 @@ import { Minus, Plus, X } from "lucide-react";
 
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type Props = {
   item: CartItemType;
 };
 
 export function ModernCartItem({ item }: Props) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
+  const lineId = cartItemId(item);
 
   const {
     productId,
     productSlug,
-    variantId,
     productName,
     variantName,
     price,
@@ -61,6 +62,7 @@ export function ModernCartItem({ item }: Props) {
                 {variantName}
               </p>
             )}
+            <CartLineOptions item={item} className="mt-1" />
 
             <p className="text-muted-foreground text-xs sm:text-sm">
               {isOnSale ? (
@@ -80,7 +82,7 @@ export function ModernCartItem({ item }: Props) {
           </div>
           <button
             type="button"
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label={`Remove ${productName} from cart`}
           >
@@ -96,7 +98,7 @@ export function ModernCartItem({ item }: Props) {
           >
             <button
               type="button"
-              onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+              onClick={() => updateLineQuantity(lineId, quantity - 1)}
               className="text-foreground hover:bg-muted flex h-8 w-8 items-center justify-center transition-colors"
               aria-label={`Decrease quantity of ${productName}`}
             >
@@ -110,7 +112,7 @@ export function ModernCartItem({ item }: Props) {
             </span>
             <button
               type="button"
-              onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+              onClick={() => updateLineQuantity(lineId, quantity + 1)}
               className="text-foreground hover:bg-muted flex h-8 w-8 items-center justify-center transition-colors"
               aria-label={`Increase quantity of ${productName}`}
             >

@@ -1,12 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useId, useState } from "react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { cn } from "~/lib/utils";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -34,6 +37,13 @@ type Props = {
    * confirmation instead.
    */
   onAdded?: () => void;
+  /**
+   * Customizer state (owned by the parent, which renders the price). When
+   * set, Add to cart needs a complete build and adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the quantity / Add to cart row. */
+  customizerSlot?: ReactNode;
 };
 
 /**
@@ -48,6 +58,8 @@ export function DreamVariantSelector({
   setSelectedVariantId,
   onQuantityChange,
   onAdded,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
@@ -88,8 +100,11 @@ export function DreamVariantSelector({
 
   const handleAddToCart = () => {
     if (!cartEnabled || !selectedVariant || addToCartDisabled) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity,
     );
     setQuantity(1);
@@ -150,6 +165,8 @@ export function DreamVariantSelector({
           })}
         </div>
       </div>
+
+      {customizerSlot}
 
       {selectedVariant ? (
         <div className="flex flex-col gap-2.5">

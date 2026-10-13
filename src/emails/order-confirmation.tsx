@@ -1,11 +1,14 @@
 import { Button, Column, Row, Section, Text } from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
+import { OrderItemOptions } from "./components/order-item-options";
 
 type OrderItem = {
   productName: string;
   variantName: string | null;
   quantity: number;
+  /** `OrderItem.customization` (product customizer snapshot JSON). */
+  customization?: unknown;
   price: number;
   total: number;
 };
@@ -107,6 +110,7 @@ export default function OrderConfirmationEmail({
                 {item.productName}
                 {item.variantName && ` - ${item.variantName}`}
               </Text>
+              <OrderItemOptions customization={item.customization} />
               <Text style={itemQty}>Qty: {item.quantity}</Text>
             </Column>
             <Column style={itemPrice}>
@@ -176,8 +180,8 @@ export default function OrderConfirmationEmail({
       {loyalty && loyalty.earned > 0 && (
         <Section style={loyaltySection}>
           <Text style={loyaltyNote}>
-            You earned {loyalty.earned} points on this order — your balance
-            is {loyalty.balance}.{" "}
+            You earned {loyalty.earned} points on this order — your balance is{" "}
+            {loyalty.balance}.{" "}
             <a href={loyalty.rewardsUrl} style={statusLink}>
               View your rewards
             </a>

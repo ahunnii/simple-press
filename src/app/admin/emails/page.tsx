@@ -4,10 +4,11 @@ import { TrailHeader } from "../_components/trail-header";
 import { EmailPreview } from "./_components/email-preview";
 
 export default async function EmailPreviewPage() {
-  const [{ business, sampleOrder }, emailOverrides] = await Promise.all([
-    api.business.getForEmailPreview(),
-    api.business.getEmailOverrides(),
-  ]);
+  const [{ business, sampleOrder, productOptionsEnabled }, emailOverrides] =
+    await Promise.all([
+      api.business.getForEmailPreview(),
+      api.business.getEmailOverrides(),
+    ]);
 
   return (
     <>
@@ -15,6 +16,7 @@ export default async function EmailPreviewPage() {
       <EmailPreview
         business={business}
         sampleOrder={sampleOrder}
+        productOptionsEnabled={productOptionsEnabled}
         savedOverrides={emailOverrides}
       />
     </>

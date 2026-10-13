@@ -341,6 +341,7 @@ model Business {
   donations              Donation[]
   loyaltyProgram         LoyaltyProgram?
   loyaltyLedger          LoyaltyLedger[]
+  productOptionGroups    ProductOptionGroup[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -517,6 +518,10 @@ model Product {
   backInStockRequests BackInStockRequest[]
   subscriptions       Subscription[]
 
+  // Product customizer (option groups attached to this product; values linked to this product)
+  optionGroups       ProductOptionGroupOnProduct[]
+  linkedOptionValues ProductOptionValue[]          @relation("OptionValueLinkedProduct")
+
   // Computed fields (can be calculated on demand)
   averageRating Float?
   reviewCount   Int    @default(0)
@@ -563,7 +568,90 @@ model ProductVariant {
   orderItems       OrderItem[]
   subscriptions    Subscription[]
 
+  // Product customizer option values linked to this variant
+  linkedOptionValues ProductOptionValue[] @relation("OptionValueLinkedVariant")
+
   @@index([productId])
+}
+
+// ============================================
+// PRODUCT CUSTOMIZER (options layered beside variants)
+// ============================================
+
+// A shared (per-business) group of choices or a free-text input, attached to
+// products through ProductOptionGroupOnProduct. All money is integer cents.
+model ProductOptionGroup {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name       String // Shown to customers, e.g. "Charms"
+  adminLabel String? // Internal disambiguator in the admin
+  helpText   String? @db.Text
+  kind       String  @default("choice") // choice | text
+  required   Boolean @default(false)
+
+  // kind = choice
+  minSelections Int    @default(0)
+  maxSelections Int    @default(1)
+  includedCount Int    @default(0) // the N cheapest picks are free
+  display       String @default("tiles") // tiles | swatches | list
+
+  // kind = text
+  maxLength      Int?
+  placeholder    String?
+  textPriceCents Int     @default(0) // charged when the text is non-empty
+
+  values   ProductOptionValue[]
+  products ProductOptionGroupOnProduct[]
+
+  @@index([businessId])
+}
+
+model ProductOptionGroupOnProduct {
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   ProductOptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@id([productId, groupId])
+  @@index([groupId])
+}
+
+model ProductOptionValue {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  groupId String
+  group   ProductOptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  label       String
+  imageUrl    String?
+  swatchColor String?
+
+  priceDelta    Int  @default(0) // cents added to the unit price
+  priceOverride Int? // cents; linked values only; null = linked product's price
+
+  // Optional link to a stocked product/variant (price + stock come from it)
+  linkedProductId String?
+  linkedProduct   Product?        @relation("OptionValueLinkedProduct", fields: [linkedProductId], references: [id], onDelete: Cascade)
+  linkedVariantId String?
+  linkedVariant   ProductVariant? @relation("OptionValueLinkedVariant", fields: [linkedVariantId], references: [id], onDelete: SetNull)
+
+  available Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  @@index([groupId])
+  @@index([linkedProductId])
+  @@index([linkedVariantId])
 }
 
 model Collection {
@@ -1134,6 +1222,9 @@ model OrderItem {
   product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
   productVariant ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
 
+  // Product customizer snapshot (v1) — see src/lib/customizer/types.ts
+  customization Json?
+
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
@@ -1373,6 +1464,9 @@ model InventoryReservation {
 
   // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
   items Json
+
+  // Customizer selections keyed by checkout lineKey; read by the Stripe webhook
+  lineConfigs Json?
   // NOTE: no @@index([stripeSessionId]) — already @unique (own index).
 
   @@index([businessId])

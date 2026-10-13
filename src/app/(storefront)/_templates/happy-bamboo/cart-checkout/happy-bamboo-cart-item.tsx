@@ -6,17 +6,18 @@ import { Minus, Plus, X } from "lucide-react";
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type Props = {
   item: CartItemType;
 };
 
 export function HappyBambooCartItem({ item }: Props) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
+  // Line-id APIs: each configured build is its own line.
+  const lineId = cartItemId(item);
   const {
-    productId,
-    variantId,
     productName,
     variantName,
     price,
@@ -50,6 +51,7 @@ export function HappyBambooCartItem({ item }: Props) {
                 {variantName}
               </p>
             )}
+            <CartLineOptions item={item} className="mt-0.5 sm:text-sm" />
             <p className="text-muted-foreground text-xs sm:text-sm">
               {isOnSale ? (
                 <>
@@ -70,7 +72,7 @@ export function HappyBambooCartItem({ item }: Props) {
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:text-destructive size-8 shrink-0"
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             aria-label={`Remove ${productName} from cart`}
           >
             <X className="size-4" />
@@ -82,7 +84,7 @@ export function HappyBambooCartItem({ item }: Props) {
               variant="ghost"
               size="icon"
               className="size-8"
-              onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+              onClick={() => updateLineQuantity(lineId, quantity - 1)}
               disabled={quantity <= 1}
               aria-label="Decrease quantity"
             >
@@ -95,7 +97,7 @@ export function HappyBambooCartItem({ item }: Props) {
               variant="ghost"
               size="icon"
               className="size-8"
-              onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+              onClick={() => updateLineQuantity(lineId, quantity + 1)}
               aria-label="Increase quantity"
             >
               <Plus className="size-3" />

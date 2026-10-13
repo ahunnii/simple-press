@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { carrierLabel } from "~/data/fulfillment-constants";
 import { z } from "zod";
 
+import type { CustomizationSnapshot } from "~/lib/customizer/types";
 import type {
   LowStockCandidate,
   OrderDeductionItem,
@@ -13,8 +14,19 @@ import type { PoolDeductionResult } from "~/lib/inventory/pool-deduction";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import type { FulfillmentEmailKind } from "~/lib/orders/fulfillment-email";
 import type { OrderSortValue } from "~/lib/validators/order";
-import { resolvePickupLocation } from "~/lib/address/pickup";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
+import { resolvePickupLocation } from "~/lib/address/pickup";
+import { withoutStockLimits } from "~/lib/checkout/customizer-checkout";
+import {
+  isEmptySelection,
+  normalizeSelection,
+} from "~/lib/customizer/canonical";
+import { priceConfiguration } from "~/lib/customizer/evaluate";
+import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
+import {
+  isProductOptionsEnabled,
+  loadCustomizerDefinitions,
+} from "~/lib/customizer/load";
 import {
   sendOrderCancelled,
   sendOrderConfirmation,
@@ -1163,7 +1175,10 @@ export const orderRouter = createTRPCRouter({
       ) {
         try {
           await ctx.db.$transaction(async (tx) => {
-            for (const item of updatedOrder.items) {
+            // Configured lines also return their linked option values.
+            for (const item of expandOrderItemsForInventory(
+              updatedOrder.items,
+            )) {
               if (item.productVariantId) {
                 const variant = await tx.productVariant.findUnique({
                   where: { id: item.productVariantId },
@@ -1436,7 +1451,8 @@ export const orderRouter = createTRPCRouter({
         if (input.restockItems && hadInventoryDeducted) {
           try {
             await ctx.db.$transaction(async (tx) => {
-              for (const item of order.items) {
+              // Configured lines also return their linked option values.
+              for (const item of expandOrderItemsForInventory(order.items)) {
                 if (item.productVariantId) {
                   const variant = await tx.productVariant.findUnique({
                     where: { id: item.productVariantId },
@@ -1746,6 +1762,8 @@ export const orderRouter = createTRPCRouter({
                   productVariantId: true,
                   quantity: true,
                   productName: true,
+                  // Linked option values are deducted with the line.
+                  customization: true,
                 },
               })
             ).map((item) => ({
@@ -1753,6 +1771,7 @@ export const orderRouter = createTRPCRouter({
               productVariantId: item.productVariantId,
               quantity: item.quantity,
               productName: item.productName,
+              customization: item.customization,
             }));
             const result = await ctx.db.$transaction(async (tx) =>
               deductInventoryForOrderItems(tx, {
@@ -1824,12 +1843,6 @@ export const orderRouter = createTRPCRouter({
     .input(manualOrderInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-
-      // Authoritative money. The client sends items and charges, never the
-      // resulting subtotal/total — those used to come straight off the request
-      // and be written verbatim, so a crafted payload could record a $500 order
-      // as `total: 0` and silently skew the Finances page.
-      const totals = computeManualOrderTotals(input);
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
@@ -1917,6 +1930,74 @@ export const orderRouter = createTRPCRouter({
           message: `Choose a variant for "${name}".`,
         });
       }
+
+      // Product customizer builds, priced on the server from ids: the
+      // admin-typed `price` is the line's base, the stored price is base +
+      // add-ons, and the snapshot is frozen onto the order item. Stock is not
+      // checked (a manual order records a sale that already happened — the
+      // deduction's oversell guard handles shortfalls, as for plain lines).
+      const configuredIndexes = input.items.flatMap((item, index) =>
+        item.configuration && !isEmptySelection(item.configuration)
+          ? [index]
+          : [],
+      );
+      const configuredLines = new Map<
+        number,
+        { unitPrice: number; snapshot: CustomizationSnapshot }
+      >();
+      if (configuredIndexes.length > 0) {
+        if (!(await isProductOptionsEnabled(businessId))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product options are turned off for this store.",
+          });
+        }
+        const definitions = await loadCustomizerDefinitions(
+          ctx.db,
+          businessId,
+          configuredIndexes.map((index) => input.items[index]!.productId),
+        );
+        for (const index of configuredIndexes) {
+          const item = input.items[index]!;
+          const definition = definitions.get(item.productId);
+          if (!definition) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `"${item.productName}" has no options to choose.`,
+            });
+          }
+          const priced = priceConfiguration(
+            withoutStockLimits(definition),
+            normalizeSelection(item.configuration),
+            { basePrice: Math.round(item.price), lineQty: item.quantity },
+          );
+          if (!priced.ok) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `${item.productName}: ${priced.errors
+                .map((e) => e.message)
+                .join("; ")}`,
+            });
+          }
+          configuredLines.set(index, {
+            unitPrice: priced.unitPrice,
+            snapshot: priced.snapshot,
+          });
+        }
+      }
+      const pricedItems = input.items.map((item, index) => ({
+        ...item,
+        price: configuredLines.get(index)?.unitPrice ?? item.price,
+      }));
+
+      // Authoritative money. The client sends items and charges, never the
+      // resulting subtotal/total — those used to come straight off the request
+      // and be written verbatim, so a crafted payload could record a $500 order
+      // as `total: 0` and silently skew the Finances page.
+      const totals = computeManualOrderTotals({
+        ...input,
+        items: pricedItems,
+      });
 
       const nameParts = input.customerName.trim().split(" ");
       const firstName = nameParts[0] ?? "Guest";
@@ -2028,7 +2109,7 @@ export const orderRouter = createTRPCRouter({
                 internalNote,
 
                 items: {
-                  create: input.items.map((item) => ({
+                  create: pricedItems.map((item, index) => ({
                     productId: item.productId,
                     productName: item.productName,
                     productVariantId: item.productVariantId,
@@ -2041,6 +2122,12 @@ export const orderRouter = createTRPCRouter({
                     quantity: item.quantity,
                     price: item.price,
                     total: Math.round(item.price * item.quantity),
+                    ...(configuredLines.has(index)
+                      ? {
+                          customization: configuredLines.get(index)!
+                            .snapshot as Prisma.InputJsonValue,
+                        }
+                      : {}),
                   })),
                 },
               },
@@ -2152,7 +2239,8 @@ export const orderRouter = createTRPCRouter({
               }
             >();
 
-            for (const item of order.items) {
+            // Configured lines also deduct their linked option values.
+            for (const item of expandOrderItemsForInventory(order.items)) {
               const qty = item.quantity;
 
               if (item.productVariantId) {
@@ -2570,7 +2658,8 @@ export const orderRouter = createTRPCRouter({
       ) {
         try {
           await ctx.db.$transaction(async (tx) => {
-            for (const item of order.items) {
+            // Configured lines also return their linked option values.
+            for (const item of expandOrderItemsForInventory(order.items)) {
               if (item.productVariantId) {
                 const variant = await tx.productVariant.findUnique({
                   where: { id: item.productVariantId },

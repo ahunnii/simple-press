@@ -5,6 +5,18 @@ import { cartLineKey } from "~/providers/cart-context";
 
 import { groupGloveCartLines } from "./glove-cart-groups";
 
+const CONFIG = {
+  configuration: {
+    choices: [{ groupId: "charms", valueIds: ["heart"] }],
+    texts: [],
+  },
+  configKey: "c:heart",
+  customization: {
+    summary: "Charms: Heart",
+    lines: [{ label: "Charms", value: "Heart", price: 3500 }],
+  },
+};
+
 function line(
   productId: string,
   variantId: string | null,
@@ -63,5 +75,41 @@ describe("groupGloveCartLines", () => {
     ]);
     expect(groups).toHaveLength(2);
     expect(groups[0]?.addOns).toEqual([]);
+  });
+
+  describe("configured lines (product options)", () => {
+    it("keeps each build a top-level row of its own", () => {
+      const groups = groupGloveCartLines([
+        line("glove", "purple", 19500, CONFIG),
+        line("glove", "purple", 16000),
+        line("glove", "purple", 19500, {
+          ...CONFIG,
+          configKey: "c:star",
+        }),
+      ]);
+      expect(groups).toHaveLength(3);
+      expect(groups.every((g) => g.addOns.length === 0)).toBe(true);
+      expect(groups.map((g) => g.total)).toEqual([19500, 16000, 19500]);
+    });
+
+    it("never adopts legacy add-ons; a plain line of the variant still does", () => {
+      const groups = groupGloveCartLines([
+        line("glove", "purple", 19500, CONFIG),
+        line("glove", "purple", 16000),
+        line("chain", null, 2500, { addOnFor: A }),
+      ]);
+      expect(groups).toHaveLength(2);
+      expect(groups[0]?.addOns).toEqual([]);
+      expect(groups[1]?.addOns.map((a) => a.productId)).toEqual(["chain"]);
+      expect(groups[1]?.total).toBe(16000 + 2500);
+    });
+
+    it("leaves a legacy add-on top-level when only a configured glove remains", () => {
+      const groups = groupGloveCartLines([
+        line("glove", "purple", 19500, CONFIG),
+        line("chain", null, 2500, { addOnFor: A }),
+      ]);
+      expect(groups.map((g) => g.item.productId)).toEqual(["glove", "chain"]);
+    });
   });
 });

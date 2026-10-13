@@ -15,6 +15,8 @@ import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { cn } from "~/lib/utils";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { cartLineKey, useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -24,6 +26,7 @@ import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist
 import { gloveButtonClass, GlovePrice } from "../shared";
 import { GloveAddOnPicker } from "./glove-addon-picker";
 import { variantOptionGroups } from "./glove-color";
+import { GloveCustomizer } from "./glove-customizer";
 import { gloveStepPlan, orderGloveGroups } from "./glove-steps";
 import { gloveConfiguredTotal } from "./glove-total";
 import { GloveVariantSelector } from "./glove-variant-selector";
@@ -54,9 +57,20 @@ type Props = {
   numbered: boolean;
   /** Notice, short description and attribute table (server-rendered). */
   intro: ReactNode;
-  /** Chains/charms for the picker; null hides it. */
+  /**
+   * LEGACY chains/charms (two collections) for the old picker; null hides it.
+   * Ignored when the product has a `customizer` (product options), which
+   * takes over the whole add-on area. TODO: retire with the collection-slug
+   * fields (plan: ~/.claude/plans/i-need-to-add-noble-volcano.md, Phase 6).
+   */
   addOns: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null;
   addOnSectionAttrs?: Record<string, string>;
+  /**
+   * Show the product-options picker (the owner can hide the "add-ons"
+   * section; the page keeps it visible when a group is required). Default
+   * true.
+   */
+  customizerVisible?: boolean;
   categories: { name: string; slug: string }[];
   /** Link category names to their collection pages (collections flag on). */
   linkCategories: boolean;
@@ -76,6 +90,11 @@ type Props = {
  * qty stepper + full-width ADD TO CART, then wishlist beside one quiet
  * category/SKU line.
  *
+ * Two add-on paths. A product with `product.customizer` (product options)
+ * renders `GloveCustomizer` over `useProductCustomizer` and adds ONE
+ * configured line (`applyCustomizerToCartItem`). Without one, the legacy
+ * collection-based `GloveAddOnPicker` adds separate `addOnFor` lines.
+ *
  * Built on the shared `useProduct` hook (selection, quantity, the plain
  * add-to-cart path) and `buildVariantCartItem` for variants. Coming-soon is
  * checked first and shows no purchase UI at all. The button is only ever
@@ -87,6 +106,7 @@ export function GloveBuyBox({
   intro,
   addOns,
   addOnSectionAttrs,
+  customizerVisible = true,
   categories,
   linkCategories,
   cartEnabled,
@@ -107,6 +127,7 @@ export function GloveBuyBox({
     cartQuantity,
     remainingStock,
     handleAddToCart,
+    handleAddToCartWith,
   } = useProduct(product);
   const { addItem, setIsOpen } = useCart();
   const { setVariantImageUrl } = useVariantImage();
@@ -114,6 +135,16 @@ export function GloveBuyBox({
   const [chainId, setChainId] = useState<string | null>(null);
   const [charmIds, setCharmIds] = useState<string[]>([]);
   const [announce, setAnnounce] = useState("");
+
+  // Product options. `product.customizer` is null with the feature off or no
+  // groups attached; then `customizer.enabled` is false and the legacy
+  // add-on path below applies unchanged.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: quantity,
+  });
+  const useOptions = customizer.enabled;
 
   const hasVariants = product.variants.length > 0;
   const comingSoon = additionalFields?.comingSoon === true;
@@ -188,17 +219,32 @@ export function GloveBuyBox({
 
   const onAdd = () => {
     if (!cartEnabled || blockedReason || productSoldOut) return;
+    // A build with a missing required pick (or a too-long engraving) does not
+    // add; the customizer shows what is wrong and moves focus to it.
+    if (useOptions && !customizer.revealErrors()) return;
     const qty = Math.min(quantity, Math.max(1, maxQty));
     let gloveKey: string;
     if (hasVariants && selectedVariant) {
-      addItem(buildVariantCartItem(product, selectedVariant, variantMax), qty);
+      const line = buildVariantCartItem(product, selectedVariant, variantMax);
+      // ONE configured line: the options ride on it (price + configuration).
+      addItem(
+        useOptions ? applyCustomizerToCartItem(line, customizer) : line,
+        qty,
+      );
       gloveKey = cartLineKey(product.id, selectedVariant.id);
       setQuantity(1);
+    } else if (useOptions) {
+      handleAddToCartWith((line) =>
+        applyCustomizerToCartItem(line, customizer),
+      );
+      gloveKey = cartLineKey(product.id, selectedVariantId);
     } else {
       handleAddToCart();
       gloveKey = cartLineKey(product.id, selectedVariantId);
     }
-    if (addOns) {
+    if (useOptions) {
+      customizer.reset();
+    } else if (addOns) {
       // Tied to the glove line so the cart nests them under it (and the same
       // chain picked for two gloves stays two lines).
       const chain = addOns.chains.find((c) => c.id === chainId);
@@ -222,12 +268,20 @@ export function GloveBuyBox({
   };
 
   const sku = (selectedVariant?.sku ?? product.sku)?.trim() ?? "";
-  const showPicker =
+  const showLegacyPicker =
+    !useOptions &&
     cartEnabled &&
     addOns !== null &&
     (addOns.chains.length > 0 || addOns.charms.length > 0) &&
     !comingSoon &&
     !productSoldOut;
+  const showCustomizer =
+    useOptions &&
+    customizerVisible &&
+    cartEnabled &&
+    !comingSoon &&
+    !productSoldOut;
+  const showPicker = showLegacyPicker || showCustomizer;
   const showAddButton = cartEnabled && !comingSoon && !productSoldOut;
 
   // One price: with a chain or charm chosen, the price spots show the
@@ -237,14 +291,23 @@ export function GloveBuyBox({
   // chosen) the glove has no single price, so the range stays and the add-ons
   // are named on their own.
   const gloveAmount = displayPrice * quantity;
-  const config = gloveConfiguredTotal({
+  const legacyConfig = gloveConfiguredTotal({
     gloveAmount,
     quantity,
-    chains: addOns?.chains ?? [],
-    charms: addOns?.charms ?? [],
+    chains: showLegacyPicker ? (addOns?.chains ?? []) : [],
+    charms: showLegacyPicker ? (addOns?.charms ?? []) : [],
     chainId,
     charmIds,
   });
+  // Options path: the same shape, from the customizer's live price. Picks
+  // that cost nothing (an included charm) leave the glove price as it is.
+  const config = showCustomizer
+    ? {
+        total: customizer.unitPrice * quantity,
+        addOnsAmount: customizer.addOnTotal * quantity,
+        hasAddOns: customizer.addOnTotal > 0,
+      }
+    : legacyConfig;
   const configured = showPicker && config.hasAddOns;
   const rangeOpen = range !== null && !selectedVariant;
   const gloveSubLine = `${copy.addOns.gloveLine} ${formatPrice(gloveAmount)}`;
@@ -381,7 +444,18 @@ export function GloveBuyBox({
             </div>
           ) : null}
 
-          {showPicker ? (
+          {showCustomizer ? (
+            <GloveCustomizer
+              controller={customizer}
+              gloveAmount={gloveAmount}
+              quantity={quantity}
+              copy={copy.addOns}
+              sectionAttrs={addOnSectionAttrs}
+              firstStep={numbered ? stepPlan.next : null}
+            />
+          ) : null}
+
+          {showLegacyPicker && addOns ? (
             <GloveAddOnPicker
               chains={addOns.chains}
               charms={addOns.charms}

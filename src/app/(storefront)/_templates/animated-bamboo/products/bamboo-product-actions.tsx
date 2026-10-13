@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
+import {
+  BAMBOO_CUSTOMIZER_CLASSNAMES,
+  BAMBOO_CUSTOMIZER_TRAY_CLASSNAMES,
+} from "./bamboo-customizer-styles";
 import { BambooVariantSelector } from "./bamboo-variant-selector";
 
 /**
@@ -19,15 +26,28 @@ import { BambooVariantSelector } from "./bamboo-variant-selector";
  * wiring (`useProduct`, `handleAddToCart`, `canAddMore`, stock math) is
  * unchanged.
  */
+type BambooProductActionsProps = DefaultProductPageTemplateProps & {
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, and `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
+};
+
 export function BambooProductActions({
   product,
-}: DefaultProductPageTemplateProps) {
+  onConfiguredPriceChange,
+}: BambooProductActionsProps) {
   const {
     formatPrice,
     inStock,
     variantOptions,
     displayPrice,
-    handleAddToCart,
+    displayCompareAtPrice,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -50,6 +70,50 @@ export function BambooProductActions({
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups; then none of this shows.
+  // `displayPrice` follows the selected variant (the selector reports it
+  // through `setSelectedVariantId`).
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const configuredPrice = customizer.enabled
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizer.enabled &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizer.enabled ? (
+    <ProductCustomizer
+      controller={customizer}
+      classNames={BAMBOO_CUSTOMIZER_CLASSNAMES}
+      trayClassNames={BAMBOO_CUSTOMIZER_TRAY_CLASSNAMES}
+    />
+  ) : null;
+
+  const handleSimpleAdd = () => {
+    if (!customizer.enabled) {
+      handleAddToCartWith((item) => item);
+      return;
+    }
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
+
   return (
     <>
       {additionalFields?.comingSoon ? (
@@ -66,6 +130,8 @@ export function BambooProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizer}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -87,6 +153,7 @@ export function BambooProductActions({
         </div>
       ) : (
         <>
+          {customizerElement && <div className="mb-5">{customizerElement}</div>}
           {canAddMore && (
             <>
               {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
@@ -120,7 +187,7 @@ export function BambooProductActions({
                   </div>
                   <button
                     type="button"
-                    onClick={handleAddToCart}
+                    onClick={handleSimpleAdd}
                     className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 sm:flex-none"
                   >
                     {justAdded ? (
@@ -131,7 +198,8 @@ export function BambooProductActions({
                     ) : (
                       <>
                         <ShoppingBag className="size-5" aria-hidden="true" />
-                        Add to Cart - {formatPrice(displayPrice)}
+                        Add to Cart -{" "}
+                        {formatPrice(configuredPrice ?? displayPrice)}
                       </>
                     )}
                   </button>

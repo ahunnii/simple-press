@@ -12,7 +12,7 @@ import {
 } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import {
   SLEDGE_PAGE_CONTAINER,
@@ -136,10 +136,7 @@ export function SledgeCartContents({
             </div>
 
             {items.map((item) => (
-              <SledgeCartItem
-                key={`${item.productId}-${item.variantId ?? "base"}`}
-                item={item}
-              />
+              <SledgeCartItem key={cartItemId(item)} item={item} />
             ))}
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">

@@ -6,18 +6,19 @@ import { Minus, Plus } from "lucide-react";
 
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type Props = {
   item: CartItemType;
 };
 
 export function SledgeCartItem({ item }: Props) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
+  const lineId = cartItemId(item);
   const {
     productId,
     productSlug,
-    variantId,
     productName,
     variantName,
     price,
@@ -60,9 +61,13 @@ export function SledgeCartItem({ item }: Props) {
               </>
             )}
           </div>
+          <CartLineOptions
+            item={item}
+            className="sledge-line-options font-sans text-xs tracking-[0.08em] text-[var(--sl-ink-soft)]"
+          />
           {/* C-3: coral on white → coral-aa */}
           <button
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             className="mt-1 w-fit font-sans text-xs tracking-[0.12em] text-[var(--sl-coral-aa)] uppercase transition-opacity hover:opacity-60"
             aria-label={`Remove ${productName}`}
           >
@@ -84,7 +89,7 @@ export function SledgeCartItem({ item }: Props) {
         >
           <button
             className="sl-qty-btn flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-            onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+            onClick={() => updateLineQuantity(lineId, quantity - 1)}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
           >
@@ -98,7 +103,7 @@ export function SledgeCartItem({ item }: Props) {
           </span>
           <button
             className="sl-qty-btn flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-            onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+            onClick={() => updateLineQuantity(lineId, quantity + 1)}
             aria-label="Increase quantity"
           >
             <Plus className="size-3" />
@@ -111,7 +116,7 @@ export function SledgeCartItem({ item }: Props) {
         </div>
 
         <button
-          onClick={() => removeItem(productId, variantId)}
+          onClick={() => removeLine(lineId)}
           className="self-center text-lg leading-none text-[var(--sl-ink-soft)] transition-opacity hover:opacity-50"
           aria-label={`Remove ${productName}`}
         >
@@ -144,9 +149,13 @@ export function SledgeCartItem({ item }: Props) {
                   {variantName}
                 </span>
               )}
+              <CartLineOptions
+                item={item}
+                className="sledge-line-options font-sans text-xs tracking-[0.08em] text-[var(--sl-ink-soft)]"
+              />
             </div>
             <button
-              onClick={() => removeItem(productId, variantId)}
+              onClick={() => removeLine(lineId)}
               className="flex-shrink-0 text-lg leading-none text-[var(--sl-ink-soft)] transition-opacity hover:opacity-50"
               aria-label={`Remove ${productName}`}
             >
@@ -163,9 +172,7 @@ export function SledgeCartItem({ item }: Props) {
             >
               <button
                 className="sl-qty-btn-sm flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-                onClick={() =>
-                  updateQuantity(productId, variantId, quantity - 1)
-                }
+                onClick={() => updateLineQuantity(lineId, quantity - 1)}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
               >
@@ -179,9 +186,7 @@ export function SledgeCartItem({ item }: Props) {
               </span>
               <button
                 className="sl-qty-btn-sm flex items-center justify-center font-sans transition-colors hover:bg-[var(--sl-cream)]"
-                onClick={() =>
-                  updateQuantity(productId, variantId, quantity + 1)
-                }
+                onClick={() => updateLineQuantity(lineId, quantity + 1)}
                 aria-label="Increase quantity"
               >
                 <Plus className="size-3" />

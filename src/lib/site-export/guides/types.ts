@@ -22,6 +22,8 @@ export interface SiteExportSummary {
     customers: number;
     orders: number;
     forms: number;
+    /** Product-customizer option groups (charms, engraving, ...). Optional: absent = 0. */
+    optionGroups?: number;
     invoices: number;
     subscriptions: number;
     loyaltyMembers: number;

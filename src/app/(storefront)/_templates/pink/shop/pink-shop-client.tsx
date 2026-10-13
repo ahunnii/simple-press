@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
@@ -76,19 +77,24 @@ function AddToBasketButton({
 }) {
   const { addItem, getItemQuantity } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const [justAdded, setJustAdded] = useState(false);
 
   // Catalog mode (B6.11): no quick-add / "Choose options" when `cart` is off
   if (!cartEnabled) return null;
 
-  const hasVariants = product.variants.length > 0;
+  // Option groups (product customizer) need a build first, so a product that
+  // has them links to its page like a variant product does.
+  const needsChoice =
+    product.variants.length > 0 ||
+    (isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0);
   const soldOut =
-    !hasVariants &&
+    !needsChoice &&
     product.trackInventory &&
     !product.allowBackorders &&
     (product.inventoryQty ?? 0) - getItemQuantity(product.id, null) <= 0;
 
-  if (hasVariants) {
+  if (needsChoice) {
     return (
       <Link
         href={`/shop/${product.slug}`}

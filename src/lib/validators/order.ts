@@ -2,6 +2,7 @@ import type { Prisma } from "generated/prisma";
 import { z } from "zod";
 
 import { isSafeHref, SAFE_HREF_MESSAGE } from "~/lib/safe-href";
+import { customizerSelectionSchema } from "~/lib/validators/product-options";
 
 /**
  * The accepted values for the admin Orders list's filter params.
@@ -237,6 +238,21 @@ const manualOrderItemSchema = z.object({
   // unorderable — `computeManualOrderTotals` rounds each line anyway, so the
   // stored Int totals come out whole regardless.
   price: z.coerce.number().nonnegative(),
+  /**
+   * Product customizer build for this line (ids + raw text). When present,
+   * `order.createManual` prices it server-side: `price` is taken as the
+   * line's BASE unit price (admin-typed, as for any manual line) and the
+   * stored price becomes base + the options' add-ons; the build is
+   * snapshotted onto `OrderItem.customization`. Absent/empty = plain line.
+   */
+  // Same bounds as the shopper wire format, minus its `[]` defaults, so the
+  // schema's input and output types match (the admin form resolves with it).
+  configuration: z
+    .object({
+      choices: customizerSelectionSchema.shape.choices.removeDefault(),
+      texts: customizerSelectionSchema.shape.texts.removeDefault(),
+    })
+    .optional(),
 });
 
 export const shipmentItemInputSchema = z.object({

@@ -8,12 +8,15 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
+import { PinkProductCustomizer } from "./pink-product-customizer";
 import { PinkProductVariantPills } from "./pink-product-variant-pills";
 
 type Props = {
@@ -54,6 +57,7 @@ export function PinkProductActions({
     displayCompareAtPrice,
     isOnSale,
     handleAddToCart,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -73,6 +77,33 @@ export function PinkProductActions({
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
   }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  // Called before the coming-soon early return (rules of hooks).
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: quantity,
+  });
+  const configured = customizer.enabled;
+  const shownPrice = configured ? customizer.unitPrice : displayPrice;
+  const shownCompareAt =
+    isOnSale && displayCompareAtPrice
+      ? configured
+        ? displayCompareAtPrice + customizer.addOnTotal
+        : displayCompareAtPrice
+      : null;
+
+  const handleAdd = () => {
+    if (!configured) {
+      handleAddToCart();
+      return;
+    }
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
 
   if (additionalFields?.comingSoon) {
     return (
@@ -111,15 +142,18 @@ export function PinkProductActions({
         <span
           className="pink-display"
           style={{ fontSize: "26px", fontWeight: 600 }}
+          // Announce the build's price as options change it.
+          aria-live={configured ? "polite" : undefined}
+          aria-atomic={configured ? "true" : undefined}
         >
-          {formatPrice(displayPrice)}
+          {formatPrice(shownPrice)}
         </span>
-        {isOnSale && displayCompareAtPrice && (
+        {shownCompareAt != null && (
           <span
             className="text-[16px] line-through"
             style={{ color: "var(--pink-subtle)" }}
           >
-            {formatPrice(displayCompareAtPrice)}
+            {formatPrice(shownCompareAt)}
           </span>
         )}
       </div>
@@ -131,6 +165,11 @@ export function PinkProductActions({
           onSelect={handleOptionSelect}
         />
       )}
+
+      {/* Options sit between the variant pills and the buy row. */}
+      {cartEnabled && inStock ? (
+        <PinkProductCustomizer controller={customizer} />
+      ) : null}
 
       {!inStock ? (
         <div className="flex flex-col gap-4">
@@ -205,7 +244,7 @@ export function PinkProductActions({
 
                   <button
                     type="button"
-                    onClick={handleAddToCart}
+                    onClick={handleAdd}
                     disabled={!canAddMore}
                     className="flex flex-1 items-center justify-center px-6 text-[15px] font-semibold transition-colors"
                     style={{

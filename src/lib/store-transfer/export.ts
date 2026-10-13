@@ -26,6 +26,8 @@ import type {
   ExportedLoyaltyRewardTier,
   ExportedPage,
   ExportedProduct,
+  ExportedProductOptionGroup,
+  ExportedProductOptionValue,
   ExportedProductReview,
   ExportedProductVariant,
   ExportedQuoteCalculator,
@@ -260,6 +262,48 @@ function mapProduct(
     images: p.images.map(mapImage),
     variants: p.variants.map(mapVariant),
     ownerReviews: p.reviews.filter((r) => r.source === "owner").map(mapReview),
+    optionGroupAttachments: p.optionGroups.map((a) => ({
+      exportGroupId: a.groupId,
+      sortOrder: a.sortOrder,
+    })),
+  };
+}
+
+function mapOptionValue(
+  v: Awaited<ReturnType<typeof fetchOptionGroups>>[number]["values"][number],
+): ExportedProductOptionValue {
+  return {
+    exportId: v.id,
+    label: v.label,
+    imageUrl: v.imageUrl,
+    swatchColor: v.swatchColor,
+    priceDelta: v.priceDelta,
+    priceOverride: v.priceOverride,
+    exportLinkedProductId: v.linkedProductId,
+    exportLinkedVariantId: v.linkedVariantId,
+    available: v.available,
+    sortOrder: v.sortOrder,
+  };
+}
+
+function mapOptionGroup(
+  g: Awaited<ReturnType<typeof fetchOptionGroups>>[number],
+): ExportedProductOptionGroup {
+  return {
+    exportId: g.id,
+    name: g.name,
+    adminLabel: g.adminLabel,
+    helpText: g.helpText,
+    kind: g.kind,
+    required: g.required,
+    minSelections: g.minSelections,
+    maxSelections: g.maxSelections,
+    includedCount: g.includedCount,
+    display: g.display,
+    maxLength: g.maxLength,
+    placeholder: g.placeholder,
+    textPriceCents: g.textPriceCents,
+    values: g.values.map(mapOptionValue),
   };
 }
 
@@ -776,6 +820,10 @@ async function fetchProducts(businessId: string) {
         },
         orderBy: { createdAt: "asc" },
       },
+      optionGroups: {
+        select: { groupId: true, sortOrder: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      },
       reviews: {
         where: { source: "owner" },
         select: {
@@ -1064,6 +1112,43 @@ async function fetchForms(businessId: string) {
   });
 }
 
+async function fetchOptionGroups(businessId: string) {
+  return db.productOptionGroup.findMany({
+    where: { businessId },
+    select: {
+      id: true,
+      name: true,
+      adminLabel: true,
+      helpText: true,
+      kind: true,
+      required: true,
+      minSelections: true,
+      maxSelections: true,
+      includedCount: true,
+      display: true,
+      maxLength: true,
+      placeholder: true,
+      textPriceCents: true,
+      values: {
+        select: {
+          id: true,
+          label: true,
+          imageUrl: true,
+          swatchColor: true,
+          priceDelta: true,
+          priceOverride: true,
+          linkedProductId: true,
+          linkedVariantId: true,
+          available: true,
+          sortOrder: true,
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
 async function fetchQuoteCalculators(businessId: string) {
   return db.quoteCalculator.findMany({
     where: { businessId },
@@ -1163,6 +1248,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     quoteCalculatorsRaw,
     loyaltyProgramRaw,
     invoiceSettingsRaw,
+    optionGroupsRaw,
   ] = await Promise.all([
     fetchBusiness(businessId),
     fetchSiteContent(businessId),
@@ -1184,6 +1270,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     fetchQuoteCalculators(businessId),
     fetchLoyaltyProgram(businessId),
     fetchInvoiceSettings(businessId),
+    fetchOptionGroups(businessId),
   ]);
 
   const manifestContent: StoreTransferContent = {
@@ -1207,6 +1294,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     quoteCalculators: quoteCalculatorsRaw.map(mapQuoteCalculator),
     loyaltyProgram: mapLoyaltyProgram(loyaltyProgramRaw),
     invoiceSettings: mapInvoiceSettings(invoiceSettingsRaw),
+    optionGroups: optionGroupsRaw.map(mapOptionGroup),
   };
 
   return {

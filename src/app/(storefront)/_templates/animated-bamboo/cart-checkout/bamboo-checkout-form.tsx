@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -539,10 +541,7 @@ export function CheckoutForm({
           <div className="mt-5 flex flex-col gap-4">
             <div className="max-h-64 space-y-3 overflow-y-auto">
               {items.map((item) => (
-                <div
-                  key={`${item.productId}-${item.variantId}`}
-                  className="flex items-center gap-3"
-                >
+                <div key={cartItemId(item)} className="flex items-center gap-3">
                   <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-[var(--bamboo-paper)] ring-2 ring-[var(--bamboo-outline)]">
                     {item.imageUrl ? (
                       <Image
@@ -567,6 +566,11 @@ export function CheckoutForm({
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      showPrices={false}
+                      className="text-[var(--bamboo-ink-soft)]"
+                    />
                     <p className="text-xs text-[var(--bamboo-muted)]">
                       Qty: {item.quantity}
                     </p>

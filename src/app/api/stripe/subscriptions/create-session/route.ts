@@ -20,6 +20,7 @@ import {
 } from "~/lib/checkout/validate-cart";
 import { splitCustomerName } from "~/lib/customer-name";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { PRODUCT_OPTIONS_FEATURE_KEY } from "~/lib/customizer/load";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
@@ -296,6 +297,25 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+    // Product customizer: a configured product can't be subscribed to in v1
+    // (a subscription renews one fixed SKU; there is nowhere to keep a build
+    // and nothing would re-price it each cycle). Only while the store has
+    // options on — off, the product sells plain everywhere.
+    if (isEnabled(PRODUCT_OPTIONS_FEATURE_KEY)) {
+      const optionGroupCount = await db.productOptionGroupOnProduct.count({
+        where: { productId: product.id, group: { businessId: business.id } },
+      });
+      if (optionGroupCount > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "This product has options to choose, so it can't be bought as a subscription. Add it to your cart instead.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // Guaranteed present: `intervals` is filtered against the same catalog.
     const cadence = getInterval(body.intervalKey);
     if (!cadence) {

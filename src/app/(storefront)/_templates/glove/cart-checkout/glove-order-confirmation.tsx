@@ -11,7 +11,7 @@ import type { Session } from "~/server/better-auth/config";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import {
   isPaymentProcessing,
@@ -23,6 +23,7 @@ import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-
 
 import { GloveButton } from "../shared/glove-button";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
+import { GloveLineOptions } from "../shared/glove-line-options";
 import { GloveMedallion } from "../shared/glove-medallion";
 import { GloveMistPanel } from "../shared/glove-mist-panel";
 import { GloveRevealGroup } from "../shared/glove-reveal";
@@ -312,7 +313,7 @@ export function GloveOrderConfirmation({
             <ul className="m-0 mt-4 flex list-none flex-col p-0">
               {purchased.map((item) => (
                 <li
-                  key={`${item.productId}-${item.variantId ?? "base"}`}
+                  key={cartItemId(item)}
                   className="flex items-center gap-4 border-b border-[var(--glove-mist-line)] py-3 last:border-b-0"
                 >
                   <div className="relative size-14 shrink-0 overflow-hidden bg-[var(--glove-paper)]">
@@ -332,6 +333,7 @@ export function GloveOrderConfirmation({
                       {item.variantName ? `${item.variantName} · ` : ""}
                       Qty {item.quantity}
                     </p>
+                    <GloveLineOptions item={item} />
                   </div>
                   <span className="glove-body shrink-0 text-[15px] font-bold text-[var(--glove-ink)]">
                     {formatPrice(item.price * item.quantity)}

@@ -110,6 +110,19 @@ export function HappyBambooProductPage({
   const { isEnabled } = useStorefrontFlags();
   const reviewsEnabled = isEnabled("reviews");
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  // Live configured price from the buy box (product options); null for a
+  // product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
 
   // A product's own features (Products → features) win; otherwise the
   // store-wide badges from the editor. No built-in fallback rows — an empty
@@ -190,22 +203,27 @@ export function HappyBambooProductPage({
             </div>
 
             <div className="flex flex-wrap items-baseline gap-3">
-              {isOnSale && displayCompareAtPrice && (
+              {shownOnSale && shownCompareAt != null && (
                 <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-sm font-semibold text-white">
                   {computeSavingsLabel(
-                    displayPrice,
-                    displayCompareAtPrice,
+                    shownPrice,
+                    shownCompareAt,
                     saleBadgeFormat,
                   )}
                 </span>
               )}
               <div className="flex items-baseline gap-2">
-                <span className="text-foreground text-3xl font-bold">
-                  {formatPrice(displayPrice)}
+                <span
+                  className="text-foreground text-3xl font-bold"
+                  // Announce the build's price as options change it.
+                  aria-live={configured ? "polite" : undefined}
+                  aria-atomic={configured ? "true" : undefined}
+                >
+                  {formatPrice(shownPrice)}
                 </span>
-                {isOnSale && displayCompareAtPrice && (
+                {shownOnSale && shownCompareAt != null && (
                   <span className="text-muted-foreground text-xl line-through">
-                    {formatPrice(displayCompareAtPrice)}
+                    {formatPrice(shownCompareAt)}
                   </span>
                 )}
               </div>
@@ -246,6 +264,7 @@ export function HappyBambooProductPage({
                 comingSoonBody={
                   fields["happy-bamboo.product.coming-soon-body"] ?? ""
                 }
+                onConfiguredPriceChange={setConfigured}
               />
 
               {/* Trust / Feature badges */}

@@ -19,6 +19,13 @@ export type ProductStatusInput = {
     compareAtPrice: number | null;
     inventoryQty: number;
   }>;
+  /**
+   * The product has product-customizer option groups attached (from the
+   * `_count.optionGroups` the card queries select). Callers must pass this
+   * only when the `productOptions` feature is on. Optional so every existing
+   * caller is unchanged.
+   */
+  hasOptions?: boolean;
 };
 
 export type ProductStatus = {
@@ -27,6 +34,8 @@ export type ProductStatus = {
   isBackorder: boolean;
   comingSoon: boolean;
   hasVariants: boolean;
+  /** Needs a choice before it can be bought: variants OR option groups. Cards should link to the product page instead of quick-adding. */
+  chooseOptions: boolean;
   poolEffectiveMaxQty: number | null;
   /** "Coming Soon" | "Sale" | "Out of Stock" | "Pre-order" | null */
   badgeLabel: string | null;
@@ -81,7 +90,8 @@ export function checkProductStatus(product: ProductStatusInput): ProductStatus {
     !!product.allowBackorders &&
     (product.inventoryQty ?? 0) === 0;
 
-  const disableCart = !!comingSoon || isOutOfStock || hasVariants;
+  const chooseOptions = hasVariants || !!product.hasOptions;
+  const disableCart = !!comingSoon || isOutOfStock || chooseOptions;
 
   // True when variants exist and not all share the same price
   const variantPrices = product.variants.map((v) => v.price ?? product.price);
@@ -111,6 +121,7 @@ export function checkProductStatus(product: ProductStatusInput): ProductStatus {
     isBackorder,
     comingSoon: !!comingSoon,
     hasVariants,
+    chooseOptions,
     poolEffectiveMaxQty,
     badgeLabel,
     savingsLabel,

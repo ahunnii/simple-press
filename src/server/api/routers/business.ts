@@ -13,6 +13,7 @@ import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
 import { parseZonedDateTime } from "~/lib/events/normalize";
+import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
@@ -502,7 +503,13 @@ export const businessRouter = createTRPCRouter({
         shippingAddress: true,
       },
     });
-    return { business, sampleOrder };
+    // Lets the preview show a sample customized item only to stores that
+    // actually use product options.
+    const productOptionsEnabled = await isFeatureEnabledForBusiness(
+      businessId,
+      "productOptions",
+    );
+    return { business, sampleOrder, productOptionsEnabled };
   }),
 
   // Owner-customized transactional email copy (subject + intro text).
@@ -663,6 +670,9 @@ export const businessRouter = createTRPCRouter({
               baseInventoryUnit: {
                 select: { inventoryQty: true, allowBackorders: true },
               },
+              // Product customizer: cards link to the product page instead
+              // of quick-adding. Callers gate it on the `productOptions` flag.
+              _count: { select: { optionGroups: true } },
             },
             orderBy: { createdAt: "desc" },
             // Payload ceiling: the shop page serializes every product to the

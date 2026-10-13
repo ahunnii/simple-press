@@ -1,13 +1,16 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -23,6 +26,13 @@ type VariantSelectorProps = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Customizer state (owned by the parent, which renders the price). When
+   * set, Add to bag needs a complete build and adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant chips and the quantity stepper. */
+  customizerSlot?: ReactNode;
 };
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -31,6 +41,8 @@ export function ElegantVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: VariantSelectorProps) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
@@ -65,8 +77,11 @@ export function ElegantVariantSelector({
 
   const handleAddToCart = () => {
     if (!cartEnabled || !selectedVariant) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity,
     );
     setQuantity(1);
@@ -74,7 +89,10 @@ export function ElegantVariantSelector({
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const price = selectedVariant?.price ?? product.price;
+  // With a customizer the button shows the build's price (variant + options).
+  const price = customizer?.enabled
+    ? customizer.unitPrice
+    : (selectedVariant?.price ?? product.price);
 
   return (
     <div>
@@ -128,6 +146,10 @@ export function ElegantVariantSelector({
           })}
         </div>
       </div>
+
+      {customizerSlot && (
+        <div style={{ marginBottom: 24 }}>{customizerSlot}</div>
+      )}
 
       {/* Qty stepper — catalog mode (B6.11): hidden when `cart` is off */}
       {cartEnabled && selectedVariant && effectiveMax > 0 && (

@@ -13,6 +13,8 @@ import { EmailLayout } from "./components/layout";
 export type AbandonedCheckoutItem = {
   name: string;
   variantName?: string;
+  /** Product customizer build, e.g. "Chain: Gold · Charms: Heart, Star". */
+  optionsSummary?: string;
   quantity: number;
   unitAmount: number;
   imageUrl?: string;
@@ -93,6 +95,9 @@ export default function AbandonedCheckoutEmail({
                   <Text style={itemName}>{item.name}</Text>
                   {item.variantName && (
                     <Text style={itemMeta}>{item.variantName}</Text>
+                  )}
+                  {item.optionsSummary && (
+                    <Text style={itemMeta}>{item.optionsSummary}</Text>
                   )}
                   <Text style={itemMeta}>Qty: {item.quantity}</Text>
                 </Column>

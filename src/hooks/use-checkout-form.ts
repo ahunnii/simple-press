@@ -9,6 +9,7 @@ import type {
   DefaultCheckoutPageTemplateProps,
 } from "~/app/(storefront)/_templates/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
+import type { CartItem } from "~/providers/cart-context";
 import {
   getAllowedCountries, // used at runtime inside useCheckoutForm
 } from "~/lib/geo/regions";
@@ -19,7 +20,13 @@ import {
 } from "~/lib/shipping-utils";
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
-import { useCart } from "~/providers/cart-context";
+import {
+  cartItemId,
+  checkoutLineKey,
+  findLineByCheckoutKey,
+  matchesCartLine,
+  useCart,
+} from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useDiscountCode } from "./use-discount-code";
@@ -98,10 +105,59 @@ const noopApplyDiscount = () => {
 type CreateSessionResponse = {
   error?: string;
   unavailableItems?: string[];
-  unavailableItemIds?: { productId: string; variantId: string | null }[];
+  // `lineKey` echoes the `lineKey` this client sent for the rejected line.
+  // Older servers omit it — read defensively.
+  unavailableItemIds?: {
+    productId: string;
+    variantId: string | null;
+    lineKey?: unknown;
+  }[];
   sessionUrl?: string;
   sessionId?: string;
 };
+
+/**
+ * One cart line as posted to `create-session`: the cart fields plus the
+ * line's `lineKey` (echoed back on rejection). The display-only
+ * `customization` and the derived `configKey` stay in the browser — the
+ * server re-prices `configuration` from ids.
+ */
+function toCheckoutItem(item: CartItem) {
+  const line: Partial<CartItem> & { lineKey: string } = {
+    ...item,
+    lineKey: checkoutLineKey(item),
+  };
+  delete line.customization;
+  delete line.configKey;
+  return line;
+}
+
+/**
+ * The cart line ids to drop for a rejected checkout. A row that echoes our
+ * `lineKey` removes exactly that line (so one sold-out build doesn't take
+ * the shopper's other builds of the same glove with it). A row without one
+ * (an older server) falls back to the old rule: every line of that
+ * product/variant, configured lines included.
+ */
+export function linesToRemoveForRejection(
+  items: readonly CartItem[],
+  rows: NonNullable<CreateSessionResponse["unavailableItemIds"]>,
+): string[] {
+  const ids = new Set<string>();
+  for (const row of rows) {
+    if (typeof row.lineKey === "string" && row.lineKey !== "") {
+      const line = findLineByCheckoutKey(items, row.lineKey);
+      if (line) ids.add(cartItemId(line));
+      continue;
+    }
+    for (const item of items) {
+      if (matchesCartLine(item, row.productId, row.variantId ?? null)) {
+        ids.add(cartItemId(item));
+      }
+    }
+  }
+  return [...ids];
+}
 
 // Shown to the shopper when the checkout endpoint answers with something that
 // is not JSON (a 502 HTML page, a WAF challenge, a proxy interstitial). Before
@@ -304,7 +360,7 @@ export function useCheckoutForm(
 ): UseCheckoutFormReturn {
   const { isEnabled } = useStorefrontFlags();
   const couponsEnabled = isEnabled("coupons");
-  const { items, removeItem, subtotal } = useCart();
+  const { items, removeLine, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
@@ -674,7 +730,7 @@ export function useCheckoutForm(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items,
+          items: items.map(toCheckoutItem),
           deliveryMethod,
           customerInfo: {
             email,
@@ -720,8 +776,11 @@ export function useCheckoutForm(
         });
 
         if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
+          for (const lineId of linesToRemoveForRejection(
+            items,
+            data.unavailableItemIds,
+          )) {
+            removeLine(lineId);
           }
         }
         if (data.unavailableItems && data.unavailableItems.length > 0) {

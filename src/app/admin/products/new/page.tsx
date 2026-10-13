@@ -30,6 +30,10 @@ export default async function NewProductPage() {
         formsEnabled={flags.isEnabled("forms")}
         collectionsEnabled={flags.isEnabled("collections")}
         subscriptionsEnabled={flags.isEnabled("subscriptions")}
+        productOptionsEnabled={
+          flags.isEnabled("productOptions") &&
+          !flags.disabledByDependency.has("productOptions")
+        }
         mediaEnabled={flags.isEnabled("media")}
         allCollections={allCollections}
         pools={pools}

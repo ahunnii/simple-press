@@ -99,6 +99,52 @@ describe("productsSheet", () => {
     });
   });
 
+  it("lists attached option groups in order on the first row only", () => {
+    const { rows } = productsSheet(
+      [
+        product({
+          optionGroups: [
+            { sortOrder: 2, group: { name: "Engraving", adminLabel: null } },
+            {
+              sortOrder: 1,
+              group: { name: "Charms", adminLabel: "Glove charms" },
+            },
+          ],
+          variants: [
+            {
+              name: "Small",
+              sku: null,
+              barcode: null,
+              price: null,
+              compareAtPrice: null,
+              inventoryQty: 1,
+              options: {},
+              imageUrl: null,
+            },
+            {
+              name: "Large",
+              sku: null,
+              barcode: null,
+              price: null,
+              compareAtPrice: null,
+              inventoryQty: 1,
+              options: {},
+              imageUrl: null,
+            },
+          ],
+        }),
+      ],
+      ctx,
+    );
+    expect(rows[0]?.["Option groups"]).toBe("Charms (Glove charms); Engraving");
+    expect(rows[1]?.["Option groups"]).toBe("");
+  });
+
+  it("leaves Option groups blank when none are attached", () => {
+    const { rows } = productsSheet([product()], ctx);
+    expect(rows[0]?.["Option groups"]).toBe("");
+  });
+
   it("expands one row per variant, with heavy cells on the first row only", () => {
     const { rows } = productsSheet(
       [
@@ -371,6 +417,73 @@ describe("orders", () => {
       "Line total": "50.00",
       "Quantity shipped": 1,
     });
+  });
+
+  it("lists product-customizer choices in an Options column and leaves plain lines blank", () => {
+    const customization = {
+      v: 1,
+      basePrice: 5000,
+      addOnTotal: 1700,
+      summary: "Charms: Star, Moon; Engraving: AB",
+      groups: [
+        {
+          groupId: "g1",
+          name: "Charms",
+          kind: "choice",
+          selections: [
+            {
+              valueId: "v1",
+              label: "Star",
+              imageUrl: null,
+              swatchColor: null,
+              price: 0,
+              included: true,
+              linkedProductId: null,
+              linkedVariantId: null,
+              sku: null,
+            },
+            {
+              valueId: "v2",
+              label: "Moon",
+              imageUrl: null,
+              swatchColor: null,
+              price: 1200,
+              included: false,
+              linkedProductId: null,
+              linkedVariantId: null,
+              sku: null,
+            },
+          ],
+        },
+        {
+          groupId: "g2",
+          name: "Engraving",
+          kind: "text",
+          text: "AB",
+          price: 500,
+        },
+      ],
+      components: [],
+    };
+    const { columns, rows } = orderItemsSheet(
+      [
+        {
+          ...order,
+          items: [
+            { ...order.items[0]!, customization },
+            { ...order.items[0]!, customization: null },
+            order.items[0]!,
+          ],
+        },
+      ],
+      ctx,
+    );
+    expect(columns).toContain("Options");
+    expect(rows[0]?.Options).toBe(
+      "Charms: Star (included), Moon; Engraving: “AB”",
+    );
+    expect(rows[1]?.Options).toBe("");
+    expect(rows[2]?.Options).toBe("");
   });
 
   it("keeps a header for a store with no orders", () => {

@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -843,7 +845,7 @@ export function ViiCheckoutForm({
               >
                 {f.items.map((item) => (
                   <div
-                    key={`${item.productId}-${item.variantId}`}
+                    key={cartItemId(item)}
                     style={{
                       display: "flex",
                       gap: 12,
@@ -930,6 +932,11 @@ export function ViiCheckoutForm({
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="text-[12px] text-[var(--vii-ink-soft)]"
+                      />
                       <p
                         style={{
                           fontFamily: "var(--font-sans)",

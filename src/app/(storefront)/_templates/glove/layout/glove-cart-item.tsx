@@ -8,9 +8,14 @@ import type { CartItem } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
+import { GloveLineOptions } from "../shared/glove-line-options";
+
 type GloveCartItemProps = {
   item: CartItem;
-  /** Chains/charms picked for this line on its product page, nested under it. */
+  /**
+   * LEGACY chains/charms (separate `addOnFor` lines) picked for this line,
+   * nested under it. A configured line lists its options itself.
+   */
   addOns?: CartItem[];
   /** This line plus its add-ons, shown under them when there are any. */
   groupTotal?: number;
@@ -63,18 +68,16 @@ function QtyControl({
   /** Button edge in px: 36 for gloves, 32 inside the add-on panel. */
   size: "md" | "sm";
 }) {
-  const { updateQuantity } = useCart();
-  const { productId, variantId, productName, quantity, maxInventory } = item;
-  const scope = item.addOnFor ?? null;
+  const { updateLineQuantity } = useCart();
+  const { productName, quantity, maxInventory } = item;
+  const lineId = cartItemId(item);
   const atMax = maxInventory !== undefined && quantity >= maxInventory;
   const button = size === "md" ? "size-9" : "size-8";
   return (
     <div className="inline-flex items-center rounded-[3px] border border-[var(--glove-line)] bg-[var(--glove-paper)]">
       <button
         type="button"
-        onClick={() =>
-          updateQuantity(productId, variantId, quantity - 1, scope)
-        }
+        onClick={() => updateLineQuantity(lineId, quantity - 1)}
         disabled={quantity <= 1}
         aria-label={`Decrease quantity of ${productName}`}
         className={`inline-flex ${button} items-center justify-center text-[var(--glove-ink)] transition-colors hover:text-[var(--glove-primary)] disabled:opacity-40`}
@@ -90,9 +93,7 @@ function QtyControl({
       </span>
       <button
         type="button"
-        onClick={() =>
-          updateQuantity(productId, variantId, quantity + 1, scope)
-        }
+        onClick={() => updateLineQuantity(lineId, quantity + 1)}
         disabled={atMax}
         aria-label={`Increase quantity of ${productName}`}
         className={`inline-flex ${button} items-center justify-center text-[var(--glove-ink)] transition-colors hover:text-[var(--glove-primary)] disabled:opacity-40`}
@@ -115,7 +116,7 @@ export function GloveCartItem({
   groupTotal,
   onNavigate,
 }: GloveCartItemProps) {
-  const { removeItem, removeItemWithAddOns } = useCart();
+  const { removeLine, removeItemWithAddOns } = useCart();
   const { productId, variantId, productName, variantName, imageUrl } = item;
   const hasAddOns = addOns.length > 0;
   const panelId = `glove-drawer-addons-${cartItemId(item)}`;
@@ -143,13 +144,14 @@ export function GloveCartItem({
                   {variantName}
                 </p>
               ) : null}
+              <GloveLineOptions item={item} size="sm" />
             </div>
             <button
               type="button"
               onClick={() =>
                 hasAddOns
                   ? removeItemWithAddOns(productId, variantId)
-                  : removeItem(productId, variantId, item.addOnFor ?? null)
+                  : removeLine(cartItemId(item))
               }
               aria-label={
                 hasAddOns
@@ -207,13 +209,7 @@ export function GloveCartItem({
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
-                        removeItem(
-                          addOn.productId,
-                          addOn.variantId,
-                          addOn.addOnFor ?? null,
-                        )
-                      }
+                      onClick={() => removeLine(cartItemId(addOn))}
                       aria-label={`Remove ${addOn.productName} from cart`}
                       className="-mt-2 -mr-2.5 inline-flex size-11 shrink-0 items-center justify-center text-[var(--glove-muted)] transition-colors hover:text-[var(--glove-alert)]"
                     >

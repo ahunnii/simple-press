@@ -68,6 +68,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     dependsOn: ["inventory"],
   },
+  productOptions: {
+    key: "productOptions",
+    label: "Product options & personalization",
+    description:
+      "Let customers build or personalize a product: pick from groups of options (colors, charms, add-ons) that can add to the price, and type custom text such as an engraving. Set it up under Products → edit → Options. Turning this off hides the options on your storefront and blocks new configured purchases; existing orders keep their choices.",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["products", "cart"],
+  },
   coupons: {
     key: "coupons",
     label: "Coupons & Discounts",

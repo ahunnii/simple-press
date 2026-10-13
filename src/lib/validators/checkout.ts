@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { customizerSelectionSchema } from "~/lib/validators/product-options";
+
 const checkoutShippingAddressSchema = z.object({
   line1: z.string().min(1).max(200),
   line2: z.string().max(200).optional().nullable(),
@@ -21,6 +23,14 @@ const checkoutItemSchema = z.object({
   quantity: z.number().int().min(1).max(100),
   imageUrl: z.string().max(2048).nullable(),
   sku: z.string().max(120).nullable().optional(),
+  // Product customizer choices (ids + raw engraving text only). The server
+  // re-prices them against the stored definition; nothing here can set a
+  // price. Absent or empty = a plain line, exactly as before options existed.
+  configuration: customizerSelectionSchema.optional(),
+  // The client's own id for this cart line, echoed back on rejection so the
+  // exact line (not every line of the product) can be removed. Opaque to the
+  // server — never used as a storage key.
+  lineKey: z.string().min(1).max(64).optional(),
 });
 
 const checkoutCustomerInfoSchema = z.object({

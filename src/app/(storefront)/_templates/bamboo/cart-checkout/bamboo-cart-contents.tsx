@@ -12,7 +12,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { BAMBOO_EMBLEM_CLEAR } from "../shared/bamboo-emblem-clearance";
 import { BambooPageShelf } from "../shared/bamboo-page-shelf";
@@ -89,7 +89,7 @@ export function BambooCartContents({ business }: Props) {
             staggerDelay={0.08}
           >
             {items.map((item) => (
-              <StaggerItem key={item.productId}>
+              <StaggerItem key={cartItemId(item)}>
                 <BambooCartItem item={item} />
               </StaggerItem>
             ))}

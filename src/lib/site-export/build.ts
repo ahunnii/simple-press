@@ -146,6 +146,7 @@ interface LoadedBusiness {
   hasStripe: boolean;
   hasCustomDomain: boolean;
   formCount: number;
+  optionGroupCount: number;
 }
 
 async function loadBusiness(businessId: string): Promise<LoadedBusiness> {
@@ -161,7 +162,7 @@ async function loadBusiness(businessId: string): Promise<LoadedBusiness> {
       customDomain: true,
       domainStatus: true,
       stripeAccountId: true,
-      _count: { select: { forms: true } },
+      _count: { select: { forms: true, productOptionGroups: true } },
     },
   });
   if (!row) throw new Error("Business not found");
@@ -181,6 +182,7 @@ async function loadBusiness(businessId: string): Promise<LoadedBusiness> {
     hasStripe: !!row.stripeAccountId,
     hasCustomDomain,
     formCount: row._count.forms,
+    optionGroupCount: row._count.productOptionGroups ?? 0,
   };
 }
 
@@ -552,6 +554,7 @@ export async function buildSiteExport(
           f.path.startsWith(`${SITE_EXPORT_DIRS.spreadsheets}/Form entries/`),
         ).length,
       ),
+      optionGroups: loaded.optionGroupCount,
       invoices: sc.invoices ?? 0,
       subscriptions: sc.subscriptions ?? 0,
       loyaltyMembers: sc["loyalty-members"] ?? 0,

@@ -1,11 +1,13 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -32,6 +34,14 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the page, which also shows the
+   * price). When enabled, Add to bag first requires a complete build, then
+   * adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant choice and the qty / Add to bag row. */
+  customizerSlot?: ReactNode;
 };
 
 /** `{ size: "M", colour: "Sage" }`, with the junk dropped. */
@@ -70,6 +80,8 @@ export function OliveVariantSelector({
   selectedVariantId,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
@@ -155,7 +167,13 @@ export function OliveVariantSelector({
 
   const onAdd = () => {
     if (!cartEnabled || !selected || soldOut) return;
-    addItem(buildVariantCartItem(product, selected, effectiveMax), quantity);
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
+    const line = buildVariantCartItem(product, selected, effectiveMax);
+    addItem(
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
+      quantity,
+    );
     setQuantity(1);
     announceOliveCartAdded(`${product.name} — ${selected.name}`);
   };
@@ -232,6 +250,8 @@ export function OliveVariantSelector({
           );
         })
       )}
+
+      {!soldOut && cartEnabled ? customizerSlot : null}
 
       {soldOut ? (
         <div className="flex flex-col gap-3">

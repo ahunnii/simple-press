@@ -11,6 +11,7 @@
  * "YYYY-MM-DD", booleans are "Yes"/"No".
  */
 import type { Row, Sheet } from "./format";
+import { orderItemOptionLines } from "~/lib/customizer/display";
 
 import {
   centsToMoney,
@@ -81,6 +82,11 @@ export interface ProductSheetProduct {
   images: Array<{ url: string; sortOrder: number }>;
   variants: ProductSheetVariant[];
   collectionProducts: Array<{ collection: { name: string } }>;
+  /** Product customizer groups attached to this product (optional: absent = none). */
+  optionGroups?: Array<{
+    sortOrder: number;
+    group: { name: string; adminLabel: string | null };
+  }>;
 }
 
 export const PRODUCT_COLUMNS = [
@@ -101,6 +107,7 @@ export const PRODUCT_COLUMNS = [
   "Weight",
   "Weight unit",
   "Collections",
+  "Option groups",
   "Short description",
   "Description",
   "Image URLs",
@@ -159,6 +166,15 @@ export function productsSheet(
       .map((cp) => cp.collection.name)
       .join("; ");
 
+    // Customizer groups (charms, engraving, ...). "Name (internal label)"
+    // when the owner gave the group an admin label.
+    const optionGroups = [...(product.optionGroups ?? [])]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map(({ group }) =>
+        group.adminLabel ? `${group.name} (${group.adminLabel})` : group.name,
+      )
+      .join("; ");
+
     const shared = {
       "Product name": product.name,
       "Web address ending (slug)": product.slug,
@@ -179,12 +195,14 @@ export function productsSheet(
       Description: plainText(product.description),
       "Image URLs": images,
       Collections: collections,
+      "Option groups": optionGroups,
     };
     const blankHeavy = {
       "Short description": "",
       Description: "",
       "Image URLs": "",
       Collections: "",
+      "Option groups": "",
     };
 
     if (product.variants.length === 0) {
@@ -406,6 +424,8 @@ export interface OrderSheetItem {
   /** Cents. */
   total: number;
   fulfilledQuantity: number;
+  /** Product-customizer snapshot JSON (optional: absent/null = plain line). */
+  customization?: unknown;
 }
 
 export interface OrderSheetOrder {
@@ -544,6 +564,7 @@ export const ORDER_ITEM_COLUMNS = [
   "Order date",
   "Product",
   "Variant",
+  "Options",
   "SKU",
   "Unit price",
   "Quantity",
@@ -563,6 +584,10 @@ export function orderItemsSheet(
         "Order date": formatDateTime(o.createdAt, ctx.timeZone),
         Product: item.productName,
         Variant: item.variantName ?? "",
+        // Product-customizer choices as "Charms: Star, Moon; Engraving: “AB”".
+        Options: orderItemOptionLines(item.customization)
+          .map((line) => `${line.label}: ${line.value}`)
+          .join("; "),
         SKU: item.sku ?? "",
         "Unit price": centsToMoney(item.price),
         Quantity: item.quantity,

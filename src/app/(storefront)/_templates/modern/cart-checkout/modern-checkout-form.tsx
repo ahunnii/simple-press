@@ -13,6 +13,8 @@ import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -474,10 +476,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
 
           <div className="mt-6 flex flex-col gap-4">
             {f.items.map((item) => (
-              <div
-                key={`${item.productId}-${item.variantId}`}
-                className="flex gap-4"
-              >
+              <div key={cartItemId(item)} className="flex gap-4">
                 <div className="bg-muted relative h-16 w-16 shrink-0 overflow-hidden rounded-sm">
                   <Image
                     src={item.imageUrl ?? "/placeholder.svg"}
@@ -497,6 +496,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions item={item} showPrices={false} />
                     <p className="text-muted-foreground text-xs">
                       Qty: {item.quantity}
                     </p>

@@ -11,7 +11,8 @@ import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -433,10 +434,7 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
 
         <ul className="m-0 flex max-h-72 list-none flex-col gap-4 overflow-y-auto p-0">
           {f.items.map((item) => (
-            <li
-              key={`${item.productId}-${item.variantId ?? "base"}`}
-              className="flex items-center gap-3"
-            >
+            <li key={cartItemId(item)} className="flex items-center gap-3">
               <DreamLineThumb
                 src={item.imageUrl}
                 className="size-14 rounded-[var(--dream-radius-input)]"
@@ -449,6 +447,11 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
                   {item.variantName ? `${item.variantName} · ` : ""}
                   Qty {item.quantity}
                 </p>
+                <CartLineOptions
+                  item={item}
+                  showPrices={false}
+                  className="text-[13px] text-[color:var(--dream-soft)]"
+                />
               </div>
               <p className="shrink-0 text-[15px] text-[var(--dream-ink)] tabular-nums">
                 {formatPrice(item.price * item.quantity)}

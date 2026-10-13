@@ -52,6 +52,18 @@ export function ModernProductPage({
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
 
   const { isEnabled } = useStorefrontFlags();
   const reviewsEnabled = isEnabled("reviews");
@@ -167,12 +179,17 @@ export function ModernProductPage({
               </p>
             )}
             <div className="mb-8 flex items-center gap-3">
-              <p className="text-foreground mt-4 text-2xl font-light">
-                {formatPrice(displayPrice)}
+              <p
+                className="text-foreground mt-4 text-2xl font-light"
+                // Announce the build's price as options change it.
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                {formatPrice(shownPrice)}
               </p>
-              {isOnSale && displayCompareAtPrice && (
+              {shownCompareAt != null && shownCompareAt > shownPrice && (
                 <span className="text-muted-foreground text-xl line-through">
-                  {formatPrice(displayCompareAtPrice)}
+                  {formatPrice(shownCompareAt)}
                 </span>
               )}
             </div>
@@ -187,6 +204,7 @@ export function ModernProductPage({
                   f["modern.product.coming-soon-heading"] ?? ""
                 }
                 comingSoonBody={f["modern.product.coming-soon-body"] ?? ""}
+                onConfiguredPriceChange={setConfigured}
               />
 
               {/* Trust / Feature badges */}

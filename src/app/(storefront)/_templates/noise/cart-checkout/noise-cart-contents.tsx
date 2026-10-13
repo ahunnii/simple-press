@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import { navHrefFlag, navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -13,8 +12,12 @@ import {
   shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
 import { FadeIn, PageTransition } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  navHrefFlag,
+  navHrefOffFlag,
+} from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveNoiseCartCopy } from "./noise-cart-copy";
 import { NoiseCartItem } from "./noise-cart-item";
@@ -219,11 +222,7 @@ export function NoiseCartContents({ business }: Props) {
 
           {/* Items */}
           {items.map((item, i) => (
-            <NoiseCartItem
-              key={`${item.productId}-${item.variantId ?? "base"}`}
-              item={item}
-              index={i}
-            />
+            <NoiseCartItem key={cartItemId(item)} item={item} index={i} />
           ))}
 
           {/* Continue shopping — hidden when `products` is off (PF8) */}

@@ -114,6 +114,7 @@ import {
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
+import { OptionUsageWarning } from "./option-usage-warning";
 import {
   effectiveVariantPricesCents,
   formatMarginRange,
@@ -121,6 +122,7 @@ import {
   PricingHelper,
 } from "./pricing-helper";
 import { ProductFeaturesField } from "./product-features-field";
+import { ProductOptionsCard } from "./product-options-card";
 import { ProductSubscriptionCard } from "./product-subscription-card";
 import { VariantManager } from "./variant-manager";
 
@@ -134,6 +136,9 @@ type Props = {
   /** `subscriptions` feature flag, resolved server-side — gates whether the
    *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
   subscriptionsEnabled?: boolean;
+  /** `productOptions` feature flag — gates the Options card (option groups
+   *  customers choose from on this product). */
+  productOptionsEnabled?: boolean;
   /** `media` feature flag — gates "Choose from library" on gallery + OG. */
   mediaEnabled?: boolean;
   allCollections?: RouterOutputs["collections"]["getAll"];
@@ -248,6 +253,7 @@ export function ProductForm({
   formsEnabled,
   collectionsEnabled,
   subscriptionsEnabled,
+  productOptionsEnabled,
   mediaEnabled,
   allCollections = [],
   pools = [],
@@ -1492,6 +1498,15 @@ export function ProductForm({
                       <ProductSubscriptionCard form={form} />
                     )}
 
+                    {/* Options — own mutations, not part of this form's
+                        Save. Needs a saved product to attach groups to. */}
+                    {productOptionsEnabled && (
+                      <ProductOptionsCard
+                        productId={product?.id ?? null}
+                        mediaLibraryEnabled={mediaEnabled}
+                      />
+                    )}
+
                     {/* Shipping weight */}
                     <Card>
                       <CardHeader>
@@ -2236,6 +2251,7 @@ export function ProductForm({
               Are you sure you want to delete &quot;{form.watch("name")}&quot;?
               This action cannot be undone.
             </AlertDialogDescription>
+            {showDeleteDialog && <OptionUsageWarning productId={product?.id} />}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>

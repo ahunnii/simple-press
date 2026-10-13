@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { hasCustomImage, UmscImageFallback } from "./umsc-image-fallback";
@@ -25,6 +26,7 @@ type Props = {
  */
 export function UmscProductCard({ product }: Props) {
   const { addItem } = useCart();
+  const { isEnabled } = useStorefrontFlags();
   const cartEnabled = useCartEnabled();
   const [isAdded, setIsAdded] = useState(false);
 
@@ -44,6 +46,10 @@ export function UmscProductCard({ product }: Props) {
       compareAtPrice: v.compareAtPrice,
       inventoryQty: v.inventoryQty,
     })),
+    // Products with option groups need a choice first (like variants), so
+    // the quick-add is dropped for them.
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
   });
 
   const image = product.images[0]?.url ?? "/placeholder.svg";

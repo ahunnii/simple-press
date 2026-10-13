@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
+import type { CustomizerSelection } from "~/lib/customizer";
 import { api } from "~/trpc/react";
-import { useCart } from "~/providers/cart-context";
+import { lineConfigKey, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /**
@@ -14,8 +15,11 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
  * both <CartProvider> and <TRPCReactProvider>.
  *
  * Loop-safety:
- * - The query input is keyed by (productId, variantId) IDs only — prices are
- *   excluded so a reconcile-driven price update never re-triggers the query.
+ * - The query input is keyed by (productId, variantId, configKey) only —
+ *   prices are excluded so a reconcile-driven price update never re-triggers
+ *   the query. A configured line also sends its `configuration` (so the
+ *   server can price the build); results come back with a `configKey` and
+ *   `reconcile` matches them to lines by it.
  * - `reconcile()` guards setItems: it returns the existing array reference
  *   unchanged when nothing has changed, preventing unnecessary re-renders.
  *
@@ -33,15 +37,25 @@ export function CartRevalidator() {
   // We memoize manually using a ref so that price/qty changes (driven by
   // reconcile itself) don't produce a new array reference and re-fire the query.
   const prevKeyRef = useRef<string>("");
-  const idsRef = useRef<{ productId: string; variantId: string | null }[]>([]);
+  const idsRef = useRef<
+    {
+      productId: string;
+      variantId: string | null;
+      configuration?: CustomizerSelection;
+    }[]
+  >([]);
   const currentKey = items
-    .map((i) => `${i.productId}:${i.variantId ?? ""}`)
+    .map((i) => `${i.productId}:${i.variantId ?? ""}:${lineConfigKey(i)}`)
     .join(",");
   if (currentKey !== prevKeyRef.current) {
     prevKeyRef.current = currentKey;
     idsRef.current = items.map((i) => ({
       productId: i.productId,
       variantId: i.variantId,
+      // Plain lines keep their exact old input shape.
+      ...(i.configuration && lineConfigKey(i)
+        ? { configuration: i.configuration }
+        : {}),
     }));
   }
   const ids = idsRef.current;

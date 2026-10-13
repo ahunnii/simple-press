@@ -57,8 +57,11 @@ export function InvoiceSummary({
   const visibleLineItems = lineItems.slice(0, 5);
   const hiddenCount = lineItems.length - visibleLineItems.length;
 
-  const totalsRows: Array<{ label: string; value: string; emphasize?: boolean }> =
-    [];
+  const totalsRows: Array<{
+    label: string;
+    value: string;
+    emphasize?: boolean;
+  }> = [];
   if (subtotalCents) {
     totalsRows.push({ label: "Subtotal", value: formatPrice(subtotalCents) });
   }

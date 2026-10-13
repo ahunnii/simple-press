@@ -373,6 +373,48 @@ exports.Prisma.ProductVariantScalarFieldEnum = {
   productId: 'productId'
 };
 
+exports.Prisma.ProductOptionGroupScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  name: 'name',
+  adminLabel: 'adminLabel',
+  helpText: 'helpText',
+  kind: 'kind',
+  required: 'required',
+  minSelections: 'minSelections',
+  maxSelections: 'maxSelections',
+  includedCount: 'includedCount',
+  display: 'display',
+  maxLength: 'maxLength',
+  placeholder: 'placeholder',
+  textPriceCents: 'textPriceCents'
+};
+
+exports.Prisma.ProductOptionGroupOnProductScalarFieldEnum = {
+  productId: 'productId',
+  groupId: 'groupId',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ProductOptionValueScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  groupId: 'groupId',
+  label: 'label',
+  imageUrl: 'imageUrl',
+  swatchColor: 'swatchColor',
+  priceDelta: 'priceDelta',
+  priceOverride: 'priceOverride',
+  linkedProductId: 'linkedProductId',
+  linkedVariantId: 'linkedVariantId',
+  available: 'available',
+  sortOrder: 'sortOrder'
+};
+
 exports.Prisma.CollectionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -608,6 +650,7 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   fulfilledQuantity: 'fulfilledQuantity',
   productId: 'productId',
   productVariantId: 'productVariantId',
+  customization: 'customization',
   orderId: 'orderId'
 };
 
@@ -714,7 +757,8 @@ exports.Prisma.InventoryReservationScalarFieldEnum = {
   stripeSessionId: 'stripeSessionId',
   status: 'status',
   expiresAt: 'expiresAt',
-  items: 'items'
+  items: 'items',
+  lineConfigs: 'lineConfigs'
 };
 
 exports.Prisma.PageScalarFieldEnum = {
@@ -1297,6 +1341,9 @@ exports.Prisma.ModelName = {
   FaqItem: 'FaqItem',
   Product: 'Product',
   ProductVariant: 'ProductVariant',
+  ProductOptionGroup: 'ProductOptionGroup',
+  ProductOptionGroupOnProduct: 'ProductOptionGroupOnProduct',
+  ProductOptionValue: 'ProductOptionValue',
   Collection: 'Collection',
   CollectionProduct: 'CollectionProduct',
   Service: 'Service',

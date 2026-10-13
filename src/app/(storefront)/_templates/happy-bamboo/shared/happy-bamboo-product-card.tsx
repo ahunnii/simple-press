@@ -13,6 +13,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
@@ -27,11 +28,16 @@ export function HappyBambooProductCard({
 }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const { productTagline } = parseCardAdditionalFields(
     product.additionalFields,
   );
 
+  // Products with option groups need a choice first (like variants).
+  const hasOptions =
+    isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0;
   const productStatus = checkProductStatus({
+    hasOptions,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
@@ -194,7 +200,7 @@ export function HappyBambooProductCard({
             </div>
             <div className="flex flex-wrap gap-2">
               {/* Catalog mode (B6.11): no quick-add when `cart` is off */}
-              {cartEnabled && !productStatus.hasVariants && (
+              {cartEnabled && !productStatus.chooseOptions && (
                 <Button
                   type="button"
                   size="sm"
@@ -223,7 +229,9 @@ export function HappyBambooProductCard({
               <Button variant="outline" size="sm" className="gap-1.5" asChild>
                 <Link href={productHref}>
                   <Eye className="size-4 shrink-0" aria-hidden />
-                  Details
+                  {hasOptions && !productStatus.hasVariants
+                    ? "Choose options"
+                    : "Details"}
                   <ArrowRight className="size-3.5 opacity-60" aria-hidden />
                 </Link>
               </Button>

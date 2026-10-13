@@ -124,6 +124,19 @@ export function DefaultProductPage({
   const { isEnabled } = useStorefrontFlags();
   const reviewsEnabled = isEnabled("reviews");
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -243,16 +256,21 @@ export function DefaultProductPage({
                 </p>
               )}
               <div className="flex items-center gap-4">
-                <span className="text-[22px] font-medium">
-                  {formatPrice(displayPrice)}
+                <span
+                  className="text-[22px] font-medium"
+                  // Announce the build's price as options change it.
+                  aria-live={configured ? "polite" : undefined}
+                  aria-atomic={configured ? "true" : undefined}
+                >
+                  {formatPrice(shownPrice)}
                 </span>
-                {isOnSale && displayCompareAtPrice && (
+                {shownOnSale && shownCompareAt != null && (
                   <>
                     <span className="text-[18px] text-[#6b6b6b] line-through">
-                      {formatPrice(displayCompareAtPrice)}
+                      {formatPrice(shownCompareAt)}
                     </span>
                     <span className="inline-flex items-center rounded-[2px] bg-[#0a0a0a] px-2 py-0.5 text-[10px] font-medium tracking-[0.14em] text-white uppercase">
-                      {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
+                      {computeSavingsLabel(shownPrice, shownCompareAt)}
                     </span>
                   </>
                 )}
@@ -272,6 +290,7 @@ export function DefaultProductPage({
               business={business}
               comingSoonHeading={f["default.product.coming-soon-heading"] ?? ""}
               comingSoonBody={f["default.product.coming-soon-body"] ?? ""}
+              onConfiguredPriceChange={setConfigured}
             />
 
             {/* Trust signals */}

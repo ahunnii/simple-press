@@ -111,7 +111,7 @@ function setup(opts: { media?: MediaIndex; products?: number } = {}) {
     customDomain: "bluemug.com",
     domainStatus: "ACTIVE",
     stripeAccountId: "acct_123",
-    _count: { forms: 3 },
+    _count: { forms: 3, productOptionGroups: 2 },
   });
   mocks.buildMediaIndex.mockResolvedValue(opts.media ?? mediaIndex());
   mocks.buildReadableDocuments.mockResolvedValue({
@@ -247,7 +247,7 @@ describe("buildSiteExport", () => {
       customDomain: "x.com",
       domainStatus: "PENDING_DNS",
       stripeAccountId: null,
-      _count: { forms: 0 },
+      _count: { forms: 0, productOptionGroups: 0 },
     });
     const { summary } = await buildSiteExport(BIZ);
     expect(summary.business.customDomain).toBeNull();
@@ -311,6 +311,7 @@ describe("buildSiteExport", () => {
       customers: 1,
       orders: 0,
       forms: 3, // all forms (db), not just the 1 with entries
+      optionGroups: 2,
       invoices: 6,
       subscriptions: 2,
       loyaltyMembers: 9,

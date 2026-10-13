@@ -11,6 +11,7 @@ import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
@@ -21,9 +22,14 @@ type Props = {
 export function NoiseProductCard({ product, index }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
+    // Products with option groups need a choice first (like variants), so
+    // the card's quick-add bar hides and the whole card links to the page.
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,

@@ -10,6 +10,7 @@ import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 
 export function SledgeProductCard({ product, index: _index }: Props) {
   const { addItem } = useCart();
+  const { isEnabled } = useStorefrontFlags();
   const cartEnabled = useCartEnabled();
   // S-2: announce add-to-cart feedback to screen readers
   const [announce, setAnnounce] = useState("");
@@ -39,6 +41,10 @@ export function SledgeProductCard({ product, index: _index }: Props) {
       compareAtPrice: v.compareAtPrice,
       inventoryQty: v.inventoryQty,
     })),
+    // Products with option groups need a choice first (like variants), so
+    // the quick-add is dropped for them.
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
   });
 
   const productImage = product.images[0]?.url ?? "/placeholder.svg";

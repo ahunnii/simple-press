@@ -1,4 +1,5 @@
 import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
+import { OPTIONS_SUMMARY_METADATA_KEY } from "~/lib/checkout/customizer-checkout";
 import { stripeClient } from "~/lib/stripe/client";
 
 /**
@@ -35,9 +36,14 @@ export async function listCheckoutSessionEmailItems(params: {
     // image — not a useful thumbnail, so drop it.
     const image = product?.images[0];
     const variantName = product?.metadata.variantName;
+    // Product customizer: the build's one-line summary (create-session
+    // writes it on configured lines only).
+    const optionsSummary =
+      product?.metadata[OPTIONS_SUMMARY_METADATA_KEY]?.trim();
     return {
       name: product?.name ?? line.description ?? "Item",
       variantName: variantName?.length ? variantName : undefined,
+      ...(optionsSummary ? { optionsSummary } : {}),
       quantity,
       unitAmount:
         line.price?.unit_amount ??

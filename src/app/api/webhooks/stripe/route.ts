@@ -11,18 +11,23 @@ import type { ReservationEntry } from "~/lib/inventory/reservation";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
 import type { TxClient } from "~/server/db";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { getBusinessUrl } from "~/lib/business-url";
 import {
   handleCartAsyncPaymentFailed,
   handleCheckoutAwaitingPayment,
 } from "~/lib/checkout/async-payment-webhook";
-import { createOrderFromCheckout } from "~/lib/checkout/create-order";
+import {
+  createOrderFromCheckout,
+  hasConfiguredLines,
+  loadCheckoutLineConfigs,
+} from "~/lib/checkout/create-order";
 import { SUPERSEDED_METADATA_KEY } from "~/lib/checkout/discount-holds";
 import { listCheckoutSessionEmailItems } from "~/lib/checkout/session-email-items";
 import { sessionShopperEmail } from "~/lib/checkout/session-shopper-email";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import { splitCustomerName } from "~/lib/customer-name";
-import { resolvePickupLocation } from "~/lib/address/pickup";
+import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
 import { handleDonationCheckoutCompleted } from "~/lib/donations/webhook";
 import { getBusinessAlertRecipients } from "~/lib/email/alert-recipients";
 import {
@@ -496,6 +501,20 @@ export async function POST(req: NextRequest) {
           });
         }
 
+        // Product customizer builds stored at checkout
+        // (`InventoryReservation.lineConfigs`), only when a line carries one.
+        // No status filter inside: a delayed payment whose hold was already
+        // swept still gets its builds. A lookup failure is NOT swallowed:
+        // nothing irreversible has happened yet (the customer/address writes
+        // above are idempotent), so the 500 makes Stripe retry rather than
+        // writing an order whose builds are degraded to summaries for good.
+        const lineConfigs = hasConfiguredLines(fullSession)
+          ? await loadCheckoutLineConfigs(db, {
+              businessId: business.id,
+              session,
+            })
+          : undefined;
+
         const order = await createOrderFromCheckout(db, {
           business,
           customer,
@@ -511,6 +530,7 @@ export async function POST(req: NextRequest) {
           // between checkout start and settlement isn't distinguishable here.
           termsVersion: PLATFORM_TERMS_VERSION,
           merchantTermsUpdatedAt,
+          lineConfigs,
         });
 
         // orderNumber is used by the inventory-deduction block below for log
@@ -594,7 +614,10 @@ export async function POST(req: NextRequest) {
               }
             >();
 
-            for (const item of order.items) {
+            // Configured lines expand into their linked option values
+            // (`snapshot.components`), deducted exactly like cart lines; the
+            // reservation consumed below drops their holds.
+            for (const item of expandOrderItemsForInventory(order.items)) {
               const qty = item.quantity;
 
               // Handle variant inventory
@@ -1141,6 +1164,7 @@ export async function POST(req: NextRequest) {
                 quantity: item.quantity,
                 price: item.price,
                 total: item.total,
+                customization: item.customization,
               })),
               subtotal: order.subtotal,
               shipping: order.shipping,
@@ -1200,6 +1224,7 @@ export async function POST(req: NextRequest) {
               variantName: item.variantName,
               quantity: item.quantity,
               total: Math.round(item.total),
+              customization: item.customization,
             })),
             subtotal: order.subtotal,
             shipping: order.shipping,

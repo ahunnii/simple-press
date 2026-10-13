@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -631,7 +633,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
           >
             {f.items.map((item) => (
               <div
-                key={`${item.productId}-${item.variantId}`}
+                key={cartItemId(item)}
                 style={{ display: "flex", alignItems: "center", gap: 12 }}
               >
                 <div
@@ -681,6 +683,11 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                       {item.variantName}
                     </p>
                   )}
+                  <CartLineOptions
+                    item={item}
+                    showPrices={false}
+                    className="font-mono text-[10px] tracking-[0.1em] text-[color:var(--el-ink-soft)]"
+                  />
                   <p
                     style={{
                       fontFamily: "var(--font-mono, ui-monospace)",

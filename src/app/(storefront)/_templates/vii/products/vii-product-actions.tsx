@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
+import {
+  resolveVariantCompareAtPrice,
+  resolveVariantPrice,
+} from "~/lib/variant-price";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -16,6 +24,14 @@ type ViiProductActionsProps = DefaultProductPageTemplateProps & {
   setSelectedVariantId: (variantId: string | null) => void;
   comingSoonHeading: string;
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
 };
 
 export function ViiProductActions({
@@ -24,11 +40,12 @@ export function ViiProductActions({
   setSelectedVariantId,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: ViiProductActionsProps) {
   const {
     inStock,
     variantOptions,
-    handleAddToCart,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -47,6 +64,52 @@ export function ViiProductActions({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  // The variant lives on the page (`selectedVariantId` prop), so resolve the
+  // base price from it rather than from this hook's own selection.
+  const pickedVariant = product.variants.find(
+    (v) => v.id === selectedVariantId,
+  );
+  const basePrice = resolveVariantPrice(pickedVariant?.price, product.price);
+  const baseCompareAt = resolveVariantCompareAtPrice(
+    pickedVariant?.price,
+    pickedVariant?.compareAtPrice,
+    product.compareAtPrice,
+  );
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice,
+    lineQty: subscribeQuantity,
+  });
+  // Catalog mode (`cart` off) has no way to add, so it shows no builder.
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? basePrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn && baseCompareAt != null && baseCompareAt > basePrice
+      ? baseCompareAt + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer controller={customizer} className="vii-customizer" />
+  ) : null;
+
+  const handleAddToCart = () => {
+    if (customizerOn && !customizer.revealErrors()) return;
+    handleAddToCartWith((item) =>
+      customizerOn ? applyCustomizerToCartItem(item, customizer) : item,
+    );
+  };
 
   const subscribePanel = (
     <SubscribePanel
@@ -109,6 +172,8 @@ export function ViiProductActions({
           selectedVariantId={selectedVariantId}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizer}
+          customizerSlot={customizerElement}
         />
         {subscribePanel}
       </>
@@ -156,6 +221,7 @@ export function ViiProductActions({
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {customizerElement}
         {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
         {cartEnabled && canAddMore && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -261,6 +327,8 @@ export function ViiProductActions({
                   <Check style={{ width: 16, height: 16 }} aria-hidden="true" />
                   Added to bag
                 </>
+              ) : configuredPrice !== null ? (
+                `Add to cart · ${formatPrice(configuredPrice)}`
               ) : (
                 "Add to cart"
               )}

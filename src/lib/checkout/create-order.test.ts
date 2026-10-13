@@ -1,7 +1,10 @@
 import type Stripe from "stripe";
 import { describe, expect, it } from "vitest";
 
+import type { CustomizationSnapshot } from "~/lib/customizer/types";
+
 import {
+  findMissingLineConfigs,
   mapStripeLineItemsToOrderItems,
   parseFreeShippingDiscountCents,
 } from "./create-order";
@@ -227,5 +230,88 @@ describe("parseFreeShippingDiscountCents", () => {
         withMetadata(null),
       ),
     ).toBe(0);
+  });
+});
+
+describe("mapStripeLineItemsToOrderItems — product customizer", () => {
+  const snapshot: CustomizationSnapshot = {
+    v: 1,
+    basePrice: 4000,
+    addOnTotal: 2500,
+    summary: "Chain: Gold",
+    groups: [
+      {
+        groupId: "chain",
+        name: "Chain",
+        kind: "choice",
+        selections: [
+          {
+            valueId: "gold",
+            label: "Gold",
+            imageUrl: null,
+            swatchColor: null,
+            price: 2500,
+            included: false,
+            linkedProductId: "prod-chain",
+            linkedVariantId: "var-gold",
+            sku: null,
+          },
+        ],
+      },
+    ],
+    components: [
+      {
+        productId: "prod-chain",
+        variantId: "var-gold",
+        qtyPerUnit: 1,
+        name: "Chain — Gold",
+      },
+    ],
+  };
+
+  it("copies the stored snapshot verbatim and keeps Stripe's charged price", () => {
+    const session = makeSession([
+      makeLineItem({
+        unitAmount: 6400, // charged — deliberately != basePrice + addOnTotal
+        productMetadata: {
+          productId: "prod-glove",
+          lineConfig: "L0-abc",
+          optionsSummary: "Chain: Gold",
+        },
+      }),
+      makeLineItem({ productMetadata: { productId: "plain" } }),
+    ]);
+    const items = mapStripeLineItemsToOrderItems(
+      session,
+      new Map([["L0-abc", snapshot]]),
+    );
+    expect(items[0]).toMatchObject({ price: 6400, customization: snapshot });
+    expect(items[1]).not.toHaveProperty("customization");
+  });
+
+  it("degrades to a summary-only snapshot when the stored build is missing", () => {
+    const session = makeSession([
+      makeLineItem({
+        unitAmount: 6500,
+        productMetadata: {
+          productId: "prod-glove",
+          lineConfig: "L0-gone",
+          optionsSummary: " Chain: Gold ",
+        },
+      }),
+    ]);
+    const items = mapStripeLineItemsToOrderItems(session, new Map());
+    expect(items[0]?.customization).toEqual({
+      v: 1,
+      basePrice: 6500,
+      addOnTotal: 0,
+      summary: "Chain: Gold",
+      groups: [],
+      components: [],
+    });
+    expect(findMissingLineConfigs(session, new Map())).toEqual(["L0-gone"]);
+    expect(
+      findMissingLineConfigs(session, new Map([["L0-gone", snapshot]])),
+    ).toEqual([]);
   });
 });

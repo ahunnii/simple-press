@@ -4,6 +4,7 @@ import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { Card, CardContent } from "~/components/ui/card";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { HappyBambooAccountLayout } from "./happy-bamboo-account-layout";
@@ -76,6 +77,10 @@ export function HappyBambooOrderDetailPage({
                                 {item.variantName}
                               </p>
                             )}
+                            <OrderItemOptions
+                              customization={item.customization}
+                              className="mt-1 text-sm"
+                            />
                             <p className="text-muted-foreground mt-1 text-sm">
                               Qty: {item.quantity} × {formatPrice(item.price)}
                             </p>

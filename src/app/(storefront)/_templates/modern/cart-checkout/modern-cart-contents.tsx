@@ -5,7 +5,7 @@ import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { ModernCartItem } from "./modern-cart-item";
 import { ModernCartSummary } from "./modern-cart-summary";
@@ -76,10 +76,7 @@ export function ModernCartContents({
       <div className="lg:col-span-2">
         <div className="flex flex-col">
           {items.map((item) => (
-            <ModernCartItem
-              key={`${item.productId}-${item.variantId ?? "base"}`}
-              item={item}
-            />
+            <ModernCartItem key={cartItemId(item)} item={item} />
           ))}
         </div>
       </div>

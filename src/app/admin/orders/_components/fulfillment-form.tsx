@@ -36,12 +36,16 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import { OrderItemOptions } from "./order-item-options";
+
 type OrderItemInfo = {
   id: string;
   productName: string;
   variantName: string | null;
   quantity: number;
   fulfilledQuantity: number;
+  /** `OrderItem.customization` — the build to pack (product customizer). */
+  customization?: unknown;
 };
 
 type Props = {
@@ -402,9 +406,16 @@ function PackageItemsSelector({
                   className="h-4 w-4 shrink-0 text-green-600"
                   aria-hidden="true"
                 />
-                <span className="truncate">
-                  {item.productName}
-                  {item.variantName ? ` — ${item.variantName}` : ""}
+                <span className="min-w-0">
+                  <span className="block truncate">
+                    {item.productName}
+                    {item.variantName ? ` — ${item.variantName}` : ""}
+                  </span>
+                  <OrderItemOptions
+                    customization={item.customization}
+                    showPrices={false}
+                    className="mt-0 text-xs"
+                  />
                 </span>
               </span>
               <span className="shrink-0 text-xs">
@@ -429,6 +440,11 @@ function PackageItemsSelector({
                   ? `${item.fulfilledQuantity} of ${item.quantity} already shipped`
                   : `${item.quantity} ordered`}
               </p>
+              <OrderItemOptions
+                customization={item.customization}
+                showPrices={false}
+                className="text-xs"
+              />
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <Input

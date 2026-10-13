@@ -6,7 +6,12 @@ import { Minus, Plus } from "lucide-react";
 
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
+
+/** Chosen product options under a row, in noise's mono-caps voice. */
+const OPTIONS_CLASS =
+  "font-mono text-[9.5px] tracking-[0.1em] uppercase text-[var(--vn-ink-soft)]";
 
 type Props = {
   item: CartItemType;
@@ -14,11 +19,10 @@ type Props = {
 };
 
 export function NoiseCartItem({ item, index }: Props) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
   const {
     productId,
     productSlug,
-    variantId,
     productName,
     variantName,
     price,
@@ -28,6 +32,8 @@ export function NoiseCartItem({ item, index }: Props) {
   } = item;
 
   const lineTotal = price * quantity;
+  // Line-id APIs: each configured build is its own line.
+  const lineId = cartItemId(item);
 
   return (
     <div
@@ -86,8 +92,9 @@ export function NoiseCartItem({ item, index }: Props) {
               </>
             )}
           </div>
+          <CartLineOptions item={item} className={OPTIONS_CLASS} />
           <button
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             className="mt-1 w-fit font-mono text-[9.5px] tracking-[0.14em] uppercase transition-opacity hover:opacity-60"
             style={{ color: "var(--vn-steel-mist)" }}
             aria-label={`Remove ${productName}`}
@@ -112,7 +119,7 @@ export function NoiseCartItem({ item, index }: Props) {
           <button
             className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
             style={{ width: "44px", height: "44px" }}
-            onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+            onClick={() => updateLineQuantity(lineId, quantity - 1)}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
           >
@@ -129,7 +136,7 @@ export function NoiseCartItem({ item, index }: Props) {
           <button
             className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
             style={{ width: "44px", height: "44px" }}
-            onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+            onClick={() => updateLineQuantity(lineId, quantity + 1)}
             aria-label="Increase quantity"
           >
             <Plus className="size-3" />
@@ -146,7 +153,7 @@ export function NoiseCartItem({ item, index }: Props) {
 
         {/* Remove × */}
         <button
-          onClick={() => removeItem(productId, variantId)}
+          onClick={() => removeLine(lineId)}
           className="flex items-center justify-center self-center font-mono text-lg leading-none transition-opacity hover:opacity-50"
           style={{
             color: "var(--vn-steel-mist)",
@@ -205,9 +212,10 @@ export function NoiseCartItem({ item, index }: Props) {
                   {variantName}
                 </span>
               )}
+              <CartLineOptions item={item} className={OPTIONS_CLASS} />
             </div>
             <button
-              onClick={() => removeItem(productId, variantId)}
+              onClick={() => removeLine(lineId)}
               className="flex flex-shrink-0 items-center justify-center font-mono text-lg leading-none transition-opacity hover:opacity-50"
               style={{
                 color: "var(--vn-steel-mist)",
@@ -229,9 +237,7 @@ export function NoiseCartItem({ item, index }: Props) {
               <button
                 className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
                 style={{ width: "44px", height: "44px" }}
-                onClick={() =>
-                  updateQuantity(productId, variantId, quantity - 1)
-                }
+                onClick={() => updateLineQuantity(lineId, quantity - 1)}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
               >
@@ -248,9 +254,7 @@ export function NoiseCartItem({ item, index }: Props) {
               <button
                 className="hover:bg-foreground hover:text-background flex items-center justify-center font-mono transition-colors"
                 style={{ width: "44px", height: "44px" }}
-                onClick={() =>
-                  updateQuantity(productId, variantId, quantity + 1)
-                }
+                onClick={() => updateLineQuantity(lineId, quantity + 1)}
                 aria-label="Increase quantity"
               >
                 <Plus className="size-3" />

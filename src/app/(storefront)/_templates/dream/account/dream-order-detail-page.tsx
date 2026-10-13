@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { DreamLink } from "../shared/dream-link";
 import { DreamReveal, DreamRevealGroup } from "../shared/dream-reveal";
@@ -123,6 +124,10 @@ export function DreamOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               {item.variantName}
                             </p>
                           ) : null}
+                          <OrderItemOptions
+                            customization={item.customization}
+                            className="mb-1 text-[13px] text-[color:var(--dream-soft)]"
+                          />
                           <p className="m-0 text-[13px] text-[var(--dream-soft)] tabular-nums">
                             Qty {item.quantity} × {formatPrice(item.price)}
                           </p>

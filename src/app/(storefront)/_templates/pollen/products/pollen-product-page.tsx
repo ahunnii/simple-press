@@ -56,6 +56,20 @@ export function PollenProductPage({
     isOnSale,
   } = useProduct(product);
 
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
+
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, [
     "pollen.product.shipping-summary",
@@ -175,17 +189,22 @@ export function PollenProductPage({
 
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-3">
-              {isOnSale && displayCompareAtPrice && (
+              {shownOnSale && (
                 <span className="inline-flex items-center rounded-full bg-[#215935] px-3 py-1 text-sm font-semibold text-white">
                   Sale
                 </span>
               )}
-              <span className="text-3xl font-bold text-[#215935]">
-                {formatPrice(displayPrice)}
+              <span
+                className="text-3xl font-bold text-[#215935]"
+                // Announce the build's price as options change it.
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                {formatPrice(shownPrice)}
               </span>
-              {isOnSale && displayCompareAtPrice && (
+              {shownOnSale && shownCompareAt != null && (
                 <span className="text-xl text-[#4c566a] line-through">
-                  {formatPrice(displayCompareAtPrice)}
+                  {formatPrice(shownCompareAt)}
                 </span>
               )}
             </div>
@@ -222,6 +241,7 @@ export function PollenProductPage({
                   f["pollen.product.coming-soon-heading"] ?? ""
                 }
                 comingSoonBody={f["pollen.product.coming-soon-body"] ?? ""}
+                onConfiguredPriceChange={setConfigured}
               />
 
               {/* Trust / feature badges */}

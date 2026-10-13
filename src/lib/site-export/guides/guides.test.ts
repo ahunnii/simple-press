@@ -43,6 +43,18 @@ describe("buildGuides", () => {
     expect(shopify.toLowerCase()).not.toContain("upload and continue");
   });
 
+  it("tells owners with product options that import files cannot carry them", () => {
+    const withOptions = buildGuides(
+      makeSummary({ counts: { ...makeSummary().counts, optionGroups: 2 } }),
+    );
+    for (const guide of withOptions.slice(0, 5)) {
+      expect(text(guide)).toContain("Product options");
+      expect(text(guide)).toContain("2 option groups");
+    }
+    const without = buildGuides(makeSummary());
+    for (const guide of without) expect(text(guide)).not.toContain("Product options");
+  });
+
   it("only links to the import files that exist", () => {
     const summary = makeSummary({ importFiles: ["Import files/Wix/products.csv"] });
     const guides = buildGuides(summary);

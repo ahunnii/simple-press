@@ -7,6 +7,7 @@ import type { CartItem } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
+import { GloveLineOptions } from "../shared/glove-line-options";
 import { GlovePrice } from "../shared/glove-price";
 import { GloveQtyStepper } from "./glove-qty-stepper";
 
@@ -14,7 +15,10 @@ type RowLabels = { price: string; quantity: string; subtotal: string };
 
 type GloveCartRowProps = {
   item: CartItem;
-  /** Chains/charms picked for this line on its product page, nested under it. */
+  /**
+   * LEGACY chains/charms (separate `addOnFor` lines) picked for this line,
+   * nested under it. A configured line carries its options itself.
+   */
   addOns?: CartItem[];
   /** This line plus its add-ons, shown under them when there are any. */
   groupTotal?: number;
@@ -41,7 +45,8 @@ function ProductName({ item }: { item: CartItem }) {
  * on a second row on phones and become right-hand columns from `md`. No
  * visible column labels: the configured headings stay as screen-reader text.
  *
- * A glove with add-ons carries them in a mist panel under its text column
+ * A configured glove (product options) is one row with its chain, charms and
+ * engraving listed under the variant. A legacy glove with add-on lines carries them in a mist panel under its text column
  * (its rows go side by side only once the panel itself is wide enough),
  * then a "Total with add-ons" line. Its Remove takes the add-ons with it (they
  * were picked for this glove); each add-on keeps its own Remove.
@@ -52,7 +57,7 @@ export function GloveCartRow({
   groupTotal,
   labels,
 }: GloveCartRowProps) {
-  const { updateQuantity, removeItem, removeItemWithAddOns } = useCart();
+  const { updateLineQuantity, removeLine, removeItemWithAddOns } = useCart();
   const {
     productId,
     variantId,
@@ -64,7 +69,7 @@ export function GloveCartRow({
     imageUrl,
     maxInventory,
   } = item;
-  const scope = item.addOnFor ?? null;
+  const lineId = cartItemId(item);
   const hasAddOns = addOns.length > 0;
 
   return (
@@ -88,6 +93,7 @@ export function GloveCartRow({
             {variantName}
           </p>
         ) : null}
+        <GloveLineOptions item={item} />
         <p className="mt-1">
           <span className="sr-only">{labels.price}: </span>
           <GlovePrice price={price} compareAtPrice={compareAtPrice} size="sm" />
@@ -97,7 +103,7 @@ export function GloveCartRow({
           onClick={() =>
             hasAddOns
               ? removeItemWithAddOns(productId, variantId)
-              : removeItem(productId, variantId, scope)
+              : removeLine(lineId)
           }
           aria-label={
             hasAddOns
@@ -117,12 +123,8 @@ export function GloveCartRow({
             value={quantity}
             itemLabel={productName}
             max={maxInventory}
-            onDecrement={() =>
-              updateQuantity(productId, variantId, quantity - 1, scope)
-            }
-            onIncrement={() =>
-              updateQuantity(productId, variantId, quantity + 1, scope)
-            }
+            onDecrement={() => updateLineQuantity(lineId, quantity - 1)}
+            onIncrement={() => updateLineQuantity(lineId, quantity + 1)}
           />
         </div>
         <p className="glove-body m-0 text-right text-[17px] font-bold text-[var(--glove-ink)]">
@@ -175,10 +177,8 @@ function GloveCartAddOnRow({
   item: CartItem;
   labels: RowLabels;
 }) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
   const {
-    productId,
-    variantId,
     productName,
     variantName,
     price,
@@ -187,7 +187,7 @@ function GloveCartAddOnRow({
     imageUrl,
     maxInventory,
   } = item;
-  const scope = item.addOnFor ?? null;
+  const lineId = cartItemId(item);
 
   return (
     <li className="grid grid-cols-[56px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 border-b border-[var(--glove-mist-line)] py-3 last:border-b-0 @md:grid-cols-[56px_minmax(0,1fr)_auto_88px] @md:items-center @md:gap-x-5">
@@ -214,7 +214,7 @@ function GloveCartAddOnRow({
         </p>
         <button
           type="button"
-          onClick={() => removeItem(productId, variantId, scope)}
+          onClick={() => removeLine(lineId)}
           aria-label={`Remove ${productName} from cart`}
           className="-ml-2 inline-flex min-h-11 items-center px-2 text-[14px] text-[var(--glove-muted)] underline underline-offset-4 transition-colors hover:text-[var(--glove-ink)] @md:min-h-9"
         >
@@ -228,12 +228,8 @@ function GloveCartAddOnRow({
             value={quantity}
             itemLabel={productName}
             max={maxInventory}
-            onDecrement={() =>
-              updateQuantity(productId, variantId, quantity - 1, scope)
-            }
-            onIncrement={() =>
-              updateQuantity(productId, variantId, quantity + 1, scope)
-            }
+            onDecrement={() => updateLineQuantity(lineId, quantity - 1)}
+            onIncrement={() => updateLineQuantity(lineId, quantity + 1)}
           />
         </div>
         <p className="glove-body m-0 text-right text-[15px] font-bold text-[var(--glove-ink)]">

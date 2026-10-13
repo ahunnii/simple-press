@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -17,17 +20,38 @@ type Props = {
   comingSoonHeading: string;
   /** Resolved `modern.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
+};
+
+// Modern is square-cornered with small-caps labels: re-skin the shared
+// customizer's slots to match the variant pills and quantity stepper.
+const MODERN_CUSTOMIZER_CLASSNAMES = {
+  legend: "text-foreground text-xs font-semibold tracking-widest uppercase",
+  value: "rounded-sm",
+  valueImage: "rounded-sm",
+  textInput: "rounded-none",
 };
 
 export function ModernProductActions({
   product,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: Props) {
   const {
     inStock,
     variantOptions,
     handleAddToCart,
+    handleAddToCartWith,
+    displayPrice,
+    displayCompareAtPrice,
     remainingStock,
     canAddMore,
     handleDecrement,
@@ -48,6 +72,49 @@ export function ModernProductActions({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer): null when the feature is off or the
+  // product has no groups, and then nothing below changes. `displayPrice`
+  // follows the selected variant. Catalog mode (`cart` off) has no way to
+  // add, so it shows no builder either.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer
+      controller={customizer}
+      classNames={MODERN_CUSTOMIZER_CLASSNAMES}
+    />
+  ) : null;
+
+  const handleSimpleAdd = () => {
+    if (!customizerOn) {
+      handleAddToCart();
+      return;
+    }
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
 
   return (
     <div className="mt-8">
@@ -73,6 +140,8 @@ export function ModernProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizerOn ? customizer : undefined}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -99,6 +168,9 @@ export function ModernProductActions({
               {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
               {cartEnabled && (
                 <>
+                  {customizerElement && (
+                    <div className="mb-6">{customizerElement}</div>
+                  )}
                   {/* Quantity Selector */}
                   <div
                     role="group"
@@ -144,7 +216,7 @@ export function ModernProductActions({
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <button
                       type="button"
-                      onClick={handleAddToCart}
+                      onClick={handleSimpleAdd}
                       disabled={!canAddMore}
                       className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
                     >

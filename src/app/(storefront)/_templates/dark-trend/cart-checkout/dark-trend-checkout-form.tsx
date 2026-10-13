@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -386,10 +388,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               {/* Items */}
               <div className="max-h-64 space-y-3 overflow-y-auto">
                 {f.items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.variantId}`}
-                    className="flex gap-3"
-                  >
+                  <div key={cartItemId(item)} className="flex gap-3">
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-zinc-900">
                       {item.imageUrl ? (
                         <Image
@@ -414,6 +413,11 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="text-xs text-white/60"
+                      />
                       <p className="text-xs text-white/60">
                         Qty: {item.quantity}
                       </p>

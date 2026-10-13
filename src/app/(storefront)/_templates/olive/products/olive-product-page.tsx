@@ -24,6 +24,8 @@ import { api } from "~/trpc/react";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { ProductReviews } from "~/components/product-reviews";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
@@ -49,6 +51,7 @@ import {
   resolveChipColor,
 } from "../shared";
 import { announceOliveCartAdded, OliveBuyRow } from "./olive-buy-row";
+import { OliveProductCustomizer } from "./olive-product-customizer";
 import { OliveVariantSelector } from "./olive-variant-selector";
 
 /** At or below this many left, the stock line stops being reassuring. */
@@ -124,6 +127,7 @@ export function OliveProductPage({
     displayPrice,
     displayTrustBadges,
     handleAddToCart,
+    handleAddToCartWith,
     handleQuantityChange,
     inStock,
     isInventoryTracked,
@@ -152,6 +156,26 @@ export function OliveProductPage({
   // picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  // `displayPrice` follows the selected variant.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const configured = customizer.enabled;
+  const shownPrice = configured ? customizer.unitPrice : displayPrice;
+  const shownCompareAt =
+    isOnSale && displayCompareAtPrice
+      ? configured
+        ? displayCompareAtPrice + customizer.addOnTotal
+        : displayCompareAtPrice
+      : null;
+  const customizerSlot = configured ? (
+    <OliveProductCustomizer controller={customizer} />
+  ) : null;
 
   // ── The swatch turn ─────────────────────────────────────────────────────
   //
@@ -307,7 +331,15 @@ export function OliveProductPage({
 
   const onAddSimple = () => {
     if (!cartEnabled || !canAddMore) return;
-    handleAddToCart();
+    if (configured) {
+      // Incomplete build: show the errors (and focus the first) instead.
+      if (!customizer.revealErrors()) return;
+      handleAddToCartWith((item) =>
+        applyCustomizerToCartItem(item, customizer),
+      );
+    } else {
+      handleAddToCart();
+    }
     announceOliveCartAdded(product.name);
   };
 
@@ -367,10 +399,16 @@ export function OliveProductPage({
                 </p>
               ) : null}
 
-              <OlivePrice
-                price={displayPrice}
-                compareAtPrice={isOnSale ? displayCompareAtPrice : null}
-              />
+              {/* Announce the build's price as options change it. */}
+              <div
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                <OlivePrice
+                  price={shownPrice}
+                  compareAtPrice={shownCompareAt}
+                />
+              </div>
             </div>
 
             {product.description ? (
@@ -433,6 +471,8 @@ export function OliveProductPage({
                 selectedVariantId={selectedVariantId}
                 setSelectedVariantId={setSelectedVariantId}
                 onQuantityChange={setVariantQuantity}
+                customizer={customizer}
+                customizerSlot={customizerSlot}
               />
             ) : !inStock ? (
               <div className="flex flex-col gap-3">
@@ -447,6 +487,7 @@ export function OliveProductPage({
               </div>
             ) : cartEnabled || hasStockLine ? (
               <div className="flex flex-col gap-3">
+                {cartEnabled ? customizerSlot : null}
                 {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
                 {cartEnabled ? (
                   <OliveBuyRow

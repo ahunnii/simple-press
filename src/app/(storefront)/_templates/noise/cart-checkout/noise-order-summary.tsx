@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
   deliveryMethod: "ship" | "pickup";
@@ -49,10 +50,7 @@ export function NoiseOrderSummary({
       {/* Line items */}
       <div className="border-foreground/15 flex flex-col gap-3 border-b px-5 py-4">
         {items.map((item) => (
-          <div
-            key={`${item.productId}-${item.variantId ?? "base"}`}
-            className="flex items-center gap-3"
-          >
+          <div key={cartItemId(item)} className="flex items-center gap-3">
             {/* Thumbnail */}
             <div
               className="border-foreground/20 relative flex-shrink-0 overflow-hidden border"
@@ -98,6 +96,11 @@ export function NoiseOrderSummary({
                   {item.variantName}
                 </p>
               )}
+              <CartLineOptions
+                item={item}
+                showPrices={false}
+                className="mt-0.5 font-mono text-[9px] tracking-[0.1em] text-[var(--vn-ink-soft)] uppercase"
+              />
               <p
                 className="mt-0.5 font-mono text-[9px] tracking-[0.14em] uppercase"
                 style={{ color: "var(--vn-steel-mist)" }}

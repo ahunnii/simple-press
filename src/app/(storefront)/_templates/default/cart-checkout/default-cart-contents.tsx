@@ -5,7 +5,8 @@ import Link from "next/link";
 import { ShoppingBag, X } from "lucide-react";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import {
   CART_EMPTY_BODY_DEFAULT,
@@ -49,7 +50,7 @@ export function DefaultCartContents({
   summaryHeading = CART_SUMMARY_HEADING_DEFAULT,
   summaryCheckoutButton = CART_SUMMARY_CHECKOUT_BUTTON_DEFAULT,
 }: Props) {
-  const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
+  const { items, updateLineQuantity, removeLine, total, isHydrated } =
     useCart();
 
   // Avoid an empty→filled flash while the cart loads from localStorage
@@ -96,102 +97,107 @@ export function DefaultCartContents({
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_340px]">
       {/* Line items */}
       <div className="flex flex-col divide-y divide-[#e8e8e8]">
-        {items.map((item) => (
-          <div
-            key={`${item.productId}-${item.variantId}`}
-            className="flex gap-5 py-6 first:pt-0"
-          >
-            {/* Image */}
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
-              {item.imageUrl ? (
-                <Image
-                  src={item.imageUrl}
-                  alt={item.productName}
-                  width={96}
-                  height={96}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <ShoppingBag
-                    className="h-6 w-6 text-[#6b6b6b]"
-                    aria-hidden="true"
+        {items.map((item) => {
+          // Line-id APIs: each configured build is its own line.
+          const lineId = cartItemId(item);
+          return (
+            <div key={lineId} className="flex gap-5 py-6 first:pt-0">
+              {/* Image */}
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
+                {item.imageUrl ? (
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    width={96}
+                    height={96}
+                    className="h-full w-full object-cover"
                   />
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-serif text-[15px] leading-snug font-medium">
-                    {item.productName}
-                  </h3>
-                  {item.variantName && (
-                    <p className="text-[13px] text-[#6b6b6b]">
-                      {item.variantName}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.productId, item.variantId)}
-                  aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from cart`}
-                  className="shrink-0 text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ShoppingBag
+                      className="h-6 w-6 text-[#6b6b6b]"
+                      aria-hidden="true"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="mt-auto flex items-center justify-between gap-4">
-                {/* Qty stepper */}
-                <div
-                  role="group"
-                  aria-label={`Quantity for ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""}`}
-                  className="inline-flex h-9 w-[108px] items-center rounded-[var(--radius)] border border-[#e8e8e8]"
-                >
+              {/* Info */}
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-serif text-[15px] leading-snug font-medium">
+                      {item.productName}
+                    </h3>
+                    {item.variantName && (
+                      <p className="text-[13px] text-[#6b6b6b]">
+                        {item.variantName}
+                      </p>
+                    )}
+                    <CartLineOptions
+                      item={item}
+                      className="mt-1 text-[12px] text-[#6b6b6b]"
+                    />
+                  </div>
                   <button
                     type="button"
-                    onClick={() =>
-                      decrementItem(item.productId, item.variantId)
-                    }
-                    disabled={item.quantity <= 1}
-                    aria-label={`Decrease quantity of ${item.productName}`}
-                    className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
+                    onClick={() => removeLine(lineId)}
+                    aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from cart`}
+                    className="shrink-0 text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
                   >
-                    <span aria-hidden="true">−</span>
-                  </button>
-                  <span
-                    className="w-8 text-center text-sm font-medium"
-                    aria-live="polite"
-                    aria-atomic="true"
-                  >
-                    {item.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      incrementItem(item.productId, item.variantId)
-                    }
-                    disabled={
-                      item.maxInventory !== undefined &&
-                      item.quantity >= item.maxInventory
-                    }
-                    aria-label={`Increase quantity of ${item.productName}`}
-                    className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6]"
-                  >
-                    <span aria-hidden="true">+</span>
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
 
-                <p className="text-sm font-medium">
-                  {fmt(item.price * item.quantity)}
-                </p>
+                <div className="mt-auto flex items-center justify-between gap-4">
+                  {/* Qty stepper */}
+                  <div
+                    role="group"
+                    aria-label={`Quantity for ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""}`}
+                    className="inline-flex h-9 w-[108px] items-center rounded-[var(--radius)] border border-[#e8e8e8]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateLineQuantity(lineId, item.quantity - 1)
+                      }
+                      disabled={item.quantity <= 1}
+                      aria-label={`Decrease quantity of ${item.productName}`}
+                      className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
+                    >
+                      <span aria-hidden="true">−</span>
+                    </button>
+                    <span
+                      className="w-8 text-center text-sm font-medium"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateLineQuantity(lineId, item.quantity + 1)
+                      }
+                      disabled={
+                        item.maxInventory !== undefined &&
+                        item.quantity >= item.maxInventory
+                      }
+                      aria-label={`Increase quantity of ${item.productName}`}
+                      className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-base font-light transition-colors hover:bg-[#f6f6f6]"
+                    >
+                      <span aria-hidden="true">+</span>
+                    </button>
+                  </div>
+
+                  <p className="text-sm font-medium">
+                    {fmt(item.price * item.quantity)}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Order summary */}

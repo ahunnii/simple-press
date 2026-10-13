@@ -48,7 +48,9 @@ type Props = {
  *
  * Renders nothing unless the `subscriptions` flag is on, the product has
  * subscriptions enabled with at least one configured cadence, the product
- * isn't marked "coming soon", and the current selection is in stock (`available`)
+ * isn't marked "coming soon", the product has no customizer (product options
+ * are excluded from subscriptions in v1), and the current selection is in
+ * stock (`available`)
  * — the same eligibility rule the `/subscribe` page and the checkout route
  * enforce server-side. Hiding this panel is a UX courtesy only; every real
  * gate lives server-side.
@@ -73,6 +75,8 @@ export function SubscribePanel({
 
   const eligible =
     isEnabled("subscriptions") &&
+    // Configured (customizer) products can't be subscribed to in v1.
+    !product.customizer &&
     offer.enabled &&
     !additionalFields.comingSoon &&
     offer.intervals.length > 0 &&

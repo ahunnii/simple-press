@@ -13,6 +13,9 @@ import {
 import { computeSavingsLabel } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
@@ -76,7 +79,6 @@ export function UmscProductInfo({
     formatPrice,
     displayPrice,
     additionalFields,
-    isOnSale,
     displayCompareAtPrice,
     displayTrustBadges,
     selectedVariantId,
@@ -87,7 +89,7 @@ export function UmscProductInfo({
     quantity,
     handleIncrement,
     handleDecrement,
-    handleAddToCart,
+    handleAddToCartWith,
     justAdded,
     cartEnabled,
   } = useProduct(product);
@@ -112,6 +114,39 @@ export function UmscProductInfo({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  // `displayPrice` follows the selected variant.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  // Catalog mode (`cart` off) has no way to add, so it shows no builder.
+  const configured = customizer.enabled && cartEnabled;
+  const shownPrice = configured
+    ? displayPrice + customizer.addOnTotal
+    : displayPrice;
+  const shownCompareAt = !(
+    displayCompareAtPrice != null && displayCompareAtPrice > displayPrice
+  )
+    ? null
+    : configured
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : displayCompareAtPrice;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
+
+  const customizerElement = configured ? (
+    <ProductCustomizer controller={customizer} className="umsc-customizer" />
+  ) : null;
+
+  const handleAddToCart = () => {
+    if (configured && !customizer.revealErrors()) return;
+    handleAddToCartWith((item) =>
+      configured ? applyCustomizerToCartItem(item, customizer) : item,
+    );
+  };
 
   return (
     <UmscSection
@@ -147,20 +182,23 @@ export function UmscProductInfo({
               {product.name}
             </h1>
             <div className="flex flex-wrap items-center gap-3">
-              {isOnSale && displayCompareAtPrice && (
-                <span className="sr-only">Sale price </span>
-              )}
-              <span className="umsc-tabular umsc-sans text-[22px] font-medium text-[var(--umsc-gold-ink)]">
-                {formatPrice(displayPrice)}
+              {shownOnSale && <span className="sr-only">Sale price </span>}
+              <span
+                className="umsc-tabular umsc-sans text-[22px] font-medium text-[var(--umsc-gold-ink)]"
+                // Announce the build's price as options change it.
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                {formatPrice(shownPrice)}
               </span>
-              {isOnSale && displayCompareAtPrice && (
+              {shownOnSale && shownCompareAt != null && (
                 <>
                   <span className="sr-only">Original price </span>
                   <span className="umsc-tabular umsc-sans text-[16px] text-[var(--umsc-muted)] line-through">
-                    {formatPrice(displayCompareAtPrice)}
+                    {formatPrice(shownCompareAt)}
                   </span>
                   <span className="umsc-sans inline-flex items-center bg-[var(--umsc-purple)] px-2 py-1 text-[10px] font-medium tracking-[0.14em] text-white uppercase">
-                    {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
+                    {computeSavingsLabel(shownPrice, shownCompareAt)}
                   </span>
                 </>
               )}
@@ -196,6 +234,8 @@ export function UmscProductInfo({
               selectedVariantId={selectedVariantId}
               setSelectedVariantId={setSelectedVariantId}
               onQuantityChange={setVariantQuantity}
+              customizer={customizer}
+              customizerSlot={customizerElement}
               wishlistSlot={
                 <UmscWishlistHeart product={product} price={displayPrice} />
               }
@@ -220,6 +260,9 @@ export function UmscProductInfo({
             </div>
           ) : (
             <div className="flex flex-col gap-3">
+              {customizerElement && (
+                <div className="mb-2">{customizerElement}</div>
+              )}
               {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
               {!cartEnabled ? (
                 <div className="flex flex-wrap items-center gap-3 empty:hidden">
@@ -269,7 +312,7 @@ export function UmscProductInfo({
                         Added
                       </>
                     ) : (
-                      <>Add to cart · {formatPrice(displayPrice)}</>
+                      <>Add to cart · {formatPrice(shownPrice)}</>
                     )}
                   </button>
 

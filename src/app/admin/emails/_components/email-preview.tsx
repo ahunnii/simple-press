@@ -40,6 +40,7 @@ import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
 import { toast } from "sonner";
 
+import type { CustomizationSnapshot } from "~/lib/customizer/types";
 import type { EmailOverride } from "~/lib/email/customization";
 import type { RouterOutputs } from "~/trpc/react";
 import { getBusinessUrl } from "~/lib/business-url";
@@ -65,6 +66,75 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
+/**
+ * Sample product-customizer build shown on one sample item so owners can see
+ * how options print in order emails. Shape: `CustomizationSnapshot` v1.
+ */
+const SAMPLE_CUSTOMIZATION: CustomizationSnapshot = {
+  v: 1,
+  basePrice: 5998,
+  addOnTotal: 1700,
+  summary: "Charms: Heart (included), Star; Engraving: Amy",
+  groups: [
+    {
+      groupId: "sample-charms",
+      name: "Charms",
+      kind: "choice",
+      selections: [
+        {
+          valueId: "sample-heart",
+          label: "Heart",
+          imageUrl: null,
+          swatchColor: null,
+          price: 0,
+          included: true,
+          linkedProductId: null,
+          linkedVariantId: null,
+          sku: null,
+        },
+        {
+          valueId: "sample-star",
+          label: "Star",
+          imageUrl: null,
+          swatchColor: null,
+          price: 1200,
+          included: false,
+          linkedProductId: null,
+          linkedVariantId: null,
+          sku: null,
+        },
+      ],
+    },
+    {
+      groupId: "sample-engraving",
+      name: "Engraving",
+      kind: "text",
+      text: "Amy",
+      price: 500,
+    },
+  ],
+  components: [],
+};
+
+/**
+ * Attach the sample build to the first item when no item already carries a
+ * real one (an owner's latest order may predate options). Preview only.
+ */
+function withSampleCustomization<A extends object[]>(
+  items: A,
+  enabled: boolean,
+): A {
+  if (!enabled || items.length === 0) return items;
+  if (
+    items.some((item) => (item as { customization?: unknown }).customization)
+  ) {
+    return items;
+  }
+  return items.map((item, index) =>
+    index === 0 ? { ...item, customization: SAMPLE_CUSTOMIZATION } : item,
+  ) as A;
+}
+
 type Props = {
   business: NonNullable<
     RouterOutputs["business"]["getForEmailPreview"]
@@ -73,6 +143,8 @@ type Props = {
     RouterOutputs["business"]["getForEmailPreview"]
   >["sampleOrder"];
   savedOverrides: Record<string, EmailOverride>;
+  /** Store has the product options feature on. */
+  productOptionsEnabled?: boolean;
 };
 
 type PreviewDef = {
@@ -104,7 +176,12 @@ function cleanOverrides(
   return cleaned;
 }
 
-export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
+export function EmailPreview({
+  business,
+  sampleOrder,
+  savedOverrides,
+  productOptionsEnabled = false,
+}: Props) {
   const [html, setHtml] = useState<string>("");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [drafts, setDrafts] =
@@ -179,15 +256,18 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             orderNumber: sampleOrder?.orderNumber ?? 1001,
             customerName: "John Doe",
             introText,
-            items: sampleOrder?.items ?? [
-              {
-                productName: "Sample Product",
-                variantName: "Medium / Blue",
-                quantity: 2,
-                price: 2999,
-                total: 5998,
-              },
-            ],
+            items: withSampleCustomization(
+              sampleOrder?.items ?? [
+                {
+                  productName: "Sample Product",
+                  variantName: "Medium / Blue",
+                  quantity: 2,
+                  price: 2999,
+                  total: 5998,
+                },
+              ],
+              productOptionsEnabled,
+            ),
             subtotal: 5998,
             shipping: 500,
             tax: 540,
@@ -286,19 +366,23 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             orderNumber: sampleOrder?.orderNumber ?? 1001,
             customerName: "John Doe",
             customerEmail: "john@example.com",
-            items: sampleOrder?.items?.map((item) => ({
-              productName: item.productName,
-              variantName: item.variantName,
-              quantity: item.quantity,
-              total: Math.round(item.total),
-            })) ?? [
-              {
-                productName: "Sample Product",
-                variantName: "Medium / Blue",
-                quantity: 2,
-                total: 5998,
-              },
-            ],
+            items: withSampleCustomization(
+              sampleOrder?.items?.map((item) => ({
+                productName: item.productName,
+                variantName: item.variantName,
+                quantity: item.quantity,
+                total: Math.round(item.total),
+                customization: item.customization,
+              })) ?? [
+                {
+                  productName: "Sample Product",
+                  variantName: "Medium / Blue",
+                  quantity: 2,
+                  total: 5998,
+                },
+              ],
+              productOptionsEnabled,
+            ),
             subtotal: sampleOrder?.subtotal ?? 5998,
             shipping: sampleOrder?.shipping ?? 500,
             tax: sampleOrder?.tax ?? 540,
@@ -1031,7 +1115,7 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
           }),
       },
     ];
-  }, [business, sampleOrder]);
+  }, [business, sampleOrder, productOptionsEnabled]);
 
   const selected = previews.find((p) => p.key === selectedKey) ?? null;
   const customizable = selected?.overrideId

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -16,17 +19,51 @@ type DarkTrendProductActionsProps = DefaultProductPageTemplateProps & {
   comingSoonHeading: string;
   /** Resolved `dark-trend.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
+};
+
+// Dark surfaces: cards on the near-black page, white text, violet-400 for the
+// selected ring (violet-600 is under 3:1 against the page background) and a
+// white focus outline matching `.dark-trend *:focus-visible`.
+const DARK_TREND_CUSTOMIZER_CLASSNAMES = {
+  legend: "text-sm font-medium text-white",
+  help: "text-white/70",
+  count: "text-white/70",
+  value:
+    "bg-card rounded-md border-white/30 text-white hover:bg-white/10 data-[selected=true]:border-violet-400 data-[selected=true]:ring-violet-400 has-[:focus-visible]:outline-white",
+  valueImage: "rounded-sm",
+  valuePrice: "text-white/70",
+  clear: "text-white/70 hover:text-white",
+  limit: "text-white/70",
+  textInput:
+    "bg-card rounded-md border-white/30 text-white placeholder:text-white/40",
+  textCounter: "text-white/70",
+};
+
+const DARK_TREND_TRAY_CLASSNAMES = {
+  item: "bg-card border-white/20 text-white",
 };
 
 export function DarkTrendProductActions({
   product,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: DarkTrendProductActionsProps) {
   const {
     inStock,
     variantOptions,
     handleAddToCart,
+    handleAddToCartWith,
+    displayPrice,
+    displayCompareAtPrice,
     remainingStock,
     canAddMore,
     handleDecrement,
@@ -56,9 +93,52 @@ export function DarkTrendProductActions({
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
+  // Product options (customizer): null when the feature is off or the
+  // product has no groups, and then nothing below changes. `displayPrice`
+  // follows the selected variant. Catalog mode (`cart` off) has no way to
+  // add, so it shows no builder either.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer
+      controller={customizer}
+      classNames={DARK_TREND_CUSTOMIZER_CLASSNAMES}
+      trayClassNames={DARK_TREND_TRAY_CLASSNAMES}
+    />
+  ) : null;
+
   const addToCart = () => {
     if (!cartEnabled || !canAddMore) return;
-    handleAddToCart();
+    if (customizerOn) {
+      // Incomplete build: show the errors (and focus the first) instead.
+      if (!customizer.revealErrors()) return;
+      handleAddToCartWith((item) =>
+        applyCustomizerToCartItem(item, customizer),
+      );
+    } else {
+      handleAddToCart();
+    }
     setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
     setTimeout(() => {
       setLiveMessage("");
@@ -89,6 +169,8 @@ export function DarkTrendProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizerOn ? customizer : undefined}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -125,6 +207,9 @@ export function DarkTrendProductActions({
 
           {canAddMore && (
             <>
+              {customizerElement && (
+                <div className="mb-8">{customizerElement}</div>
+              )}
               {/* Quantity Selector */}
               {cartEnabled && (
                 <div className="mb-8">

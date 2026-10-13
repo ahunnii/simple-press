@@ -13,6 +13,8 @@ import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -646,10 +648,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                 className="flex max-h-[19rem] flex-col gap-4 overflow-y-auto pr-1"
               >
                 {form.items.map((item) => (
-                  <li
-                    key={`${item.productId}-${item.variantId ?? "base"}`}
-                    className="flex items-start gap-3"
-                  >
+                  <li key={cartItemId(item)} className="flex items-start gap-3">
                     <div
                       className="relative size-14 shrink-0 overflow-hidden"
                       style={{
@@ -679,6 +678,11 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                           {item.variantName}
                         </p>
                       ) : null}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="olive-caption"
+                      />
                       <p className="olive-caption">Qty {item.quantity}</p>
                     </div>
 

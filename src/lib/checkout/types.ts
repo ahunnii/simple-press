@@ -15,6 +15,8 @@ export interface CartLineItem {
   productName: string;
   variantName: string | null;
   quantity: number;
+  /** The client's id for this line (configured lines); echoed on rejection. */
+  lineKey?: string | null;
 }
 
 /** Fields read off a `ProductVariant` (and its parent product). */

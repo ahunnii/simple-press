@@ -4,6 +4,8 @@ import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
+import { OrderItemOptions } from "../../_components/order-item-options";
+
 type Order = NonNullable<RouterOutputs["order"]["getById"]>;
 type Business = RouterOutputs["business"]["simplifiedGet"];
 
@@ -172,6 +174,13 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
                     {item.variantName}
                   </span>
                 )}
+                {/* The build to pack (product customizer). Prices only on
+                    the invoice — the packing slip goes in the box. */}
+                <OrderItemOptions
+                  customization={item.customization}
+                  showPrices={isInvoice}
+                  className="mt-0.5 text-xs text-neutral-600"
+                />
               </td>
               <td className="py-2.5 pr-4 font-mono text-xs">
                 {item.sku ?? "—"}

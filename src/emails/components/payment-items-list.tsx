@@ -52,6 +52,9 @@ export function PaymentItemsList({
                 {item.variantName && (
                   <Text style={itemMeta}>{item.variantName}</Text>
                 )}
+                {item.optionsSummary && (
+                  <Text style={itemMeta}>{item.optionsSummary}</Text>
+                )}
                 <Text style={itemMeta}>Qty: {item.quantity}</Text>
               </Column>
               <Column style={itemPrice}>

@@ -15,6 +15,7 @@ import {
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { OLIVE_CART_ADDED_EVENT } from "../layout/olive-toast";
 import { OliveChip } from "./olive-chip";
@@ -66,6 +67,8 @@ export type OliveCardProduct = {
   images: { url: string; altText?: string | null }[];
   /** Absent on `simplifiedGetWithProducts`, which selects no variants. */
   variants?: OliveCardVariant[];
+  /** Product-options groups attached (`_count.optionGroups`); absent on queries that do not select it. */
+  _count?: { optionGroups?: number | null } | null;
 };
 
 type OliveProductCardProps = {
@@ -240,6 +243,7 @@ export function OliveProductCard({
   const NameHeading = headingLevel === 2 ? "h2" : "h3";
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const reducedMotion = useReducedMotion();
 
   const [hovered, setHovered] = useState(false);
@@ -258,7 +262,13 @@ export function OliveProductCard({
   const sheetId = useId();
 
   const variants = product.variants ?? [];
+  // A product with option groups needs a build before it can be bought, so
+  // quick-add (including the one-dimension variant sheet) hands off to the
+  // product page, like a two-dimension variant product.
+  const hasOptions =
+    isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0;
   const status = checkProductStatus({
+    hasOptions,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
@@ -280,7 +290,7 @@ export function OliveProductCard({
   const swatches = cardSwatches(variants, trackStock);
   const visibleSwatches = swatches.slice(0, MAX_CARD_SWATCHES);
   const hiddenSwatches = swatches.length - visibleSwatches.length;
-  const choices = singleDimensionChoices(variants);
+  const choices = hasOptions ? null : singleDimensionChoices(variants);
 
   const blocked = status.comingSoon || status.isOutOfStock;
   const href = `/shop/${product.slug}`;
@@ -566,7 +576,7 @@ export function OliveProductCard({
               onAddSimple={addSimple}
               onAddVariant={addVariant}
               onToggleSheet={() => setSheetOpen((open) => !open)}
-              hasVariants={variants.length > 0}
+              hasVariants={variants.length > 0 || hasOptions}
             />
           ) : null}
         </div>

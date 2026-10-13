@@ -86,6 +86,18 @@ export function ElegantProductPage({
   const hasRefundPolicy = productPolicies?.hasRefundPolicy ?? false;
 
   const [shown, setShown] = useState(false);
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
 
@@ -372,6 +384,9 @@ export function ElegantProductPage({
                   }}
                 >
                   <span
+                    // Announce the build's price as options change it.
+                    aria-live={configured ? "polite" : undefined}
+                    aria-atomic={configured ? "true" : undefined}
                     style={{
                       fontFamily:
                         "var(--font-serif, 'Cormorant Garamond', serif)",
@@ -380,9 +395,9 @@ export function ElegantProductPage({
                       color: "var(--el-ink, #1c1a17)",
                     }}
                   >
-                    {formatPrice(displayPrice)}
+                    {formatPrice(shownPrice)}
                   </span>
-                  {isOnSale && displayCompareAtPrice && (
+                  {shownCompareAt != null && shownCompareAt > shownPrice && (
                     <span
                       style={{
                         fontSize: 18,
@@ -391,7 +406,7 @@ export function ElegantProductPage({
                       }}
                     >
                       <span className="sr-only">Original price: </span>
-                      {formatPrice(displayCompareAtPrice)}
+                      {formatPrice(shownCompareAt)}
                     </span>
                   )}
                 </div>
@@ -409,6 +424,7 @@ export function ElegantProductPage({
                       f["elegant.product.coming-soon-heading"] ?? ""
                     }
                     comingSoonBody={f["elegant.product.coming-soon-body"] ?? ""}
+                    onConfiguredPriceChange={setConfigured}
                   />
                 </div>
 

@@ -7,7 +7,8 @@ import { ArrowRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -33,8 +34,8 @@ export function ElegantCartDrawer({
 }: Props) {
   const {
     items,
-    removeItem,
-    updateQuantity,
+    removeLine,
+    updateLineQuantity,
     isOpen,
     setIsOpen,
     itemCount,
@@ -300,7 +301,7 @@ export function ElegantCartDrawer({
           ) : (
             items.map((item) => (
               <div
-                key={`${item.productId}-${item.variantId}`}
+                key={cartItemId(item)}
                 style={{
                   display: "flex",
                   gap: 16,
@@ -366,6 +367,10 @@ export function ElegantCartDrawer({
                       {item.variantName}
                     </div>
                   )}
+                  <CartLineOptions
+                    item={item}
+                    className="mt-1 font-mono text-[10px] tracking-[0.1em] text-[color:var(--el-ink-soft)] uppercase"
+                  />
                   {/* Qty stepper */}
                   <div
                     style={{
@@ -383,11 +388,7 @@ export function ElegantCartDrawer({
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(
-                          item.productId,
-                          item.variantId,
-                          item.quantity - 1,
-                        )
+                        updateLineQuantity(cartItemId(item), item.quantity - 1)
                       }
                       aria-label={`Decrease quantity of ${item.productName}`}
                       style={{
@@ -419,11 +420,7 @@ export function ElegantCartDrawer({
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(
-                          item.productId,
-                          item.variantId,
-                          item.quantity + 1,
-                        )
+                        updateLineQuantity(cartItemId(item), item.quantity + 1)
                       }
                       aria-label={`Increase quantity of ${item.productName}`}
                       style={{
@@ -459,7 +456,7 @@ export function ElegantCartDrawer({
                 >
                   <button
                     type="button"
-                    onClick={() => removeItem(item.productId, item.variantId)}
+                    onClick={() => removeLine(cartItemId(item))}
                     aria-label={`Remove ${item.productName}`}
                     style={{
                       fontSize: 11,

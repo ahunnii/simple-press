@@ -5,6 +5,7 @@ import type { OrderDetailPageTemplateProps } from "../../types";
 import type { OliveStatus } from "../shared";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import {
   OliveBreadcrumb,
@@ -120,6 +121,10 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               {item.variantName}
                             </p>
                           ) : null}
+                          <OrderItemOptions
+                            customization={item.customization}
+                            className="olive-caption"
+                          />
                           <p className="olive-caption" style={{ margin: 0 }}>
                             Qty {item.quantity} × {formatPrice(item.price)}
                           </p>

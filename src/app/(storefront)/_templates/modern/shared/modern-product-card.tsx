@@ -12,6 +12,7 @@ import { cn } from "~/lib/utils";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
@@ -21,9 +22,13 @@ type Props = {
 export function ModernProductCard({ product }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const [isAdded, setIsAdded] = useState(false);
 
   const productStatus = checkProductStatus({
+    // Products with option groups need a choice first (like variants).
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
@@ -115,7 +120,7 @@ export function ModernProductCard({ product }: Props) {
           </div>
         </div>
 
-        {productStatus.hasVariants ? (
+        {productStatus.chooseOptions ? (
           <Link
             href={`/shop/${product.slug}`}
             aria-label={`View ${product.name}`}

@@ -847,6 +847,9 @@ export async function importStoreBundle(args: {
 
   // ── 3f. Products — upsert [businessId, slug] → productMap
   const productMap = new Map<string, string>(); // exportId → newId
+  // Variant exportId → new id. Used by the option-group step (3g2) to
+  // remap values linked to a specific variant.
+  const variantMap = new Map<string, string>();
 
   for (const prod of content.products) {
     try {
@@ -1000,6 +1003,7 @@ export async function importStoreBundle(args: {
         for (const variant of prod.variants) {
           const existingVariantId = variantByName.get(variant.name);
           if (existingVariantId) {
+            variantMap.set(variant.exportId, existingVariantId);
             await db.productVariant.update({
               where: { id: existingVariantId },
               data: {
@@ -1016,7 +1020,7 @@ export async function importStoreBundle(args: {
               },
             });
           } else {
-            await db.productVariant.create({
+            const createdVariant = await db.productVariant.create({
               data: {
                 productId: newId,
                 name: variant.name,
@@ -1031,7 +1035,9 @@ export async function importStoreBundle(args: {
                 inventoryQty: 0,
                 reservedQty: 0,
               },
+              select: { id: true },
             });
+            variantMap.set(variant.exportId, createdVariant.id);
           }
         }
       } catch (err) {
@@ -1121,6 +1127,202 @@ export async function importStoreBundle(args: {
       }
     } catch (err) {
       result.warnings.push(`CollectionProduct join failed: ${String(err)}`);
+    }
+  }
+
+  // ── 3g2. Product customizer option groups, values and product attachments.
+  // Runs after products + variants so linked product/variant ids can be
+  // remapped. Groups match on (businessId, name, adminLabel); values match on
+  // label within the group (update-else-create, never deleting extras — the
+  // same non-destructive approach as variants). A value whose linked
+  // product/variant did not import loses the link AND is marked unavailable
+  // (a link-less value would otherwise be sold free, since its price came
+  // from the linked product). Absent in bundles exported before 2026-10-12
+  // (`content.optionGroups` defaults to []); a product with no
+  // `optionGroupAttachments` key keeps whatever the target already has.
+  const optionGroupMap = new Map<string, string>(); // exportId → newId
+  const matchedGroupIds = new Set<string>();
+  const CHOICE_DISPLAYS = new Set(["tiles", "swatches", "list"]);
+
+  for (const group of content.optionGroups) {
+    try {
+      const kind = group.kind === "text" ? "text" : "choice";
+      const display = CHOICE_DISPLAYS.has(group.display)
+        ? group.display
+        : "tiles";
+      const groupData = {
+        name: group.name,
+        adminLabel: group.adminLabel ?? null,
+        helpText: group.helpText ?? null,
+        kind,
+        required: group.required,
+        minSelections: group.minSelections,
+        maxSelections: group.maxSelections,
+        includedCount: group.includedCount,
+        display,
+        maxLength: group.maxLength ?? null,
+        placeholder: group.placeholder ?? null,
+        textPriceCents: group.textPriceCents,
+      };
+
+      const candidates = await db.productOptionGroup.findMany({
+        where: {
+          businessId: targetBusinessId,
+          name: group.name,
+          adminLabel: group.adminLabel ?? null,
+        },
+        select: { id: true },
+        orderBy: { createdAt: "asc" },
+      });
+      const existing = candidates.find((c) => !matchedGroupIds.has(c.id));
+
+      let groupId: string;
+      if (existing) {
+        await db.productOptionGroup.update({
+          where: { id: existing.id },
+          data: groupData,
+        });
+        groupId = existing.id;
+        track("ProductOptionGroup", false);
+      } else {
+        const created = await db.productOptionGroup.create({
+          data: { businessId: targetBusinessId, ...groupData },
+          select: { id: true },
+        });
+        groupId = created.id;
+        track("ProductOptionGroup", true);
+      }
+      matchedGroupIds.add(groupId);
+      optionGroupMap.set(group.exportId, groupId);
+
+      // Values: label → queue of existing ids (labels may repeat).
+      const existingValues = await db.productOptionValue.findMany({
+        where: { groupId },
+        select: { id: true, label: true },
+        orderBy: { createdAt: "asc" },
+      });
+      const valueQueue = new Map<string, string[]>();
+      for (const v of existingValues) {
+        const q = valueQueue.get(v.label) ?? [];
+        q.push(v.id);
+        valueQueue.set(v.label, q);
+      }
+
+      for (const value of group.values) {
+        try {
+          let linkedProductId: string | null = null;
+          let linkedVariantId: string | null = null;
+          let available = value.available;
+          let linkDropped = false;
+
+          if (value.exportLinkedProductId) {
+            linkedProductId =
+              productMap.get(value.exportLinkedProductId) ?? null;
+            if (!linkedProductId) linkDropped = true;
+          }
+          if (value.exportLinkedVariantId) {
+            linkedVariantId =
+              variantMap.get(value.exportLinkedVariantId) ?? null;
+            if (!linkedVariantId) linkDropped = true;
+          }
+          if (linkDropped) {
+            // Drop the whole link: a variant without its product is
+            // meaningless, and a product without its variant would change
+            // which SKU is charged/decremented.
+            linkedProductId = null;
+            linkedVariantId = null;
+            available = false;
+            result.warnings.push(
+              `Option value "${value.label}" in group "${group.name}" lost its linked product/variant (not part of this import) and was marked unavailable`,
+            );
+          }
+
+          const valueData = {
+            label: value.label,
+            imageUrl: value.imageUrl
+              ? rewriteUrl(value.imageUrl, urlMap)
+              : null,
+            swatchColor: value.swatchColor ?? null,
+            priceDelta: value.priceDelta,
+            priceOverride: value.priceOverride ?? null,
+            linkedProductId,
+            linkedVariantId,
+            available,
+            sortOrder: value.sortOrder,
+          };
+
+          const existingValueId = valueQueue.get(value.label)?.shift();
+          if (existingValueId) {
+            await db.productOptionValue.update({
+              where: { id: existingValueId },
+              data: valueData,
+            });
+            track("ProductOptionValue", false);
+          } else {
+            await db.productOptionValue.create({
+              data: { groupId, ...valueData },
+            });
+            track("ProductOptionValue", true);
+          }
+        } catch (err) {
+          result.warnings.push(
+            `Option value "${value.label}" in group "${group.name}" failed: ${String(err)}`,
+          );
+        }
+      }
+    } catch (err) {
+      result.warnings.push(
+        `Option group "${group.name}" failed: ${String(err)}`,
+      );
+    }
+  }
+
+  // Product ↔ group attachments. Only products that carry the key are
+  // touched; for those, the attachment set is replaced with the imported one.
+  for (const prod of content.products) {
+    if (prod.optionGroupAttachments === undefined) continue;
+    const newProductId = productMap.get(prod.exportId);
+    if (!newProductId) continue;
+    try {
+      const wanted = new Map<string, number>(); // new groupId → sortOrder
+      for (const att of prod.optionGroupAttachments) {
+        const groupId = optionGroupMap.get(att.exportGroupId);
+        if (!groupId) {
+          result.warnings.push(
+            `Option group attachment skipped for product "${prod.slug}" — group ${att.exportGroupId} did not import`,
+          );
+          continue;
+        }
+        wanted.set(groupId, att.sortOrder);
+      }
+      await db.productOptionGroupOnProduct.deleteMany({
+        where: {
+          productId: newProductId,
+          groupId: { notIn: [...wanted.keys()] },
+        },
+      });
+      for (const [groupId, sortOrder] of wanted) {
+        const existing = await db.productOptionGroupOnProduct.findUnique({
+          where: { productId_groupId: { productId: newProductId, groupId } },
+          select: { productId: true },
+        });
+        if (existing) {
+          await db.productOptionGroupOnProduct.update({
+            where: { productId_groupId: { productId: newProductId, groupId } },
+            data: { sortOrder },
+          });
+          track("ProductOptionGroupOnProduct", false);
+        } else {
+          await db.productOptionGroupOnProduct.create({
+            data: { productId: newProductId, groupId, sortOrder },
+          });
+          track("ProductOptionGroupOnProduct", true);
+        }
+      }
+    } catch (err) {
+      result.warnings.push(
+        `Option group attachments for "${prod.slug}" failed: ${String(err)}`,
+      );
     }
   }
 

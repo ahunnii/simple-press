@@ -180,6 +180,8 @@ export async function sendNewOrderNotification(params: {
     variantName: string | null;
     quantity: number;
     total: number;
+    /** `OrderItem.customization` — printed as option lines under the item. */
+    customization?: unknown;
   }>;
   subtotal: number;
   shipping: number;

@@ -1,4 +1,11 @@
-import { Button, Column, Link, Row, Section, Text } from "@react-email/components";
+import {
+  Button,
+  Column,
+  Link,
+  Row,
+  Section,
+  Text,
+} from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
 
@@ -46,8 +53,7 @@ export default function InvoiceOverdueOwnerEmail({
       </Text>
       <Text style={paragraph}>
         The following invoice{count === 1 ? "" : "s"} from {businessName}{" "}
-        {count === 1 ? "has" : "have"} passed its due date without full
-        payment.
+        {count === 1 ? "has" : "have"} passed its due date without full payment.
       </Text>
 
       <Section style={listSection}>

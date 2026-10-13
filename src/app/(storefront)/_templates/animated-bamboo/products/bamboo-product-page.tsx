@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -47,6 +47,19 @@ export function BambooProductPage({
     remainingStock,
     isInventoryTracked,
   } = useProduct(product);
+
+  // Live configured price from the buy box (product options); null for a
+  // product without a customizer, which keeps the "From" price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
 
   const customFields = business.siteContent?.customFields;
   const f = resolveFields(customFields, [
@@ -153,16 +166,25 @@ export function BambooProductPage({
             ) : null}
 
             <p className="mt-5 flex flex-wrap items-baseline gap-[0.6rem]">
-              <span className="text-[0.8rem] font-medium tracking-[0.1em] text-[var(--bamboo-muted)] uppercase">
-                From
-              </span>
-              <b className="font-heading text-[2.15rem] leading-none font-bold tracking-[-0.022em] text-[var(--bamboo-ink)]">
-                {formatPrice(displayPrice)}
+              {/* "From" only while the price is a starting point; a build's
+                  total is exact. */}
+              {!configured && (
+                <span className="text-[0.8rem] font-medium tracking-[0.1em] text-[var(--bamboo-muted)] uppercase">
+                  From
+                </span>
+              )}
+              <b
+                className="font-heading text-[2.15rem] leading-none font-bold tracking-[-0.022em] text-[var(--bamboo-ink)]"
+                // Announce the build's price as options change it.
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                {formatPrice(shownPrice)}
               </b>
-              {isOnSale && displayCompareAtPrice ? (
+              {shownCompareAt != null && shownCompareAt > shownPrice ? (
                 <span className="text-lg text-[var(--bamboo-muted)] line-through">
                   <span className="sr-only">Original price: </span>
-                  {formatPrice(displayCompareAtPrice)}
+                  {formatPrice(shownCompareAt)}
                 </span>
               ) : null}
             </p>
@@ -187,7 +209,11 @@ export function BambooProductPage({
             )}
 
             <div className="mt-7">
-              <BambooProductActions product={product} business={business} />
+              <BambooProductActions
+                product={product}
+                business={business}
+                onConfiguredPriceChange={setConfigured}
+              />
             </div>
 
             {benefits.length > 0 ? (

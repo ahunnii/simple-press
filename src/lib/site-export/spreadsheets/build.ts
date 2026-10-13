@@ -150,6 +150,13 @@ export async function buildSpreadsheets(
         images: { orderBy: { sortOrder: "asc" } },
         variants: { orderBy: { createdAt: "asc" } },
         baseInventoryUnit: { select: { name: true } },
+        optionGroups: {
+          select: {
+            sortOrder: true,
+            group: { select: { name: true, adminLabel: true } },
+          },
+          orderBy: { sortOrder: "asc" },
+        },
         collectionProducts: {
           include: { collection: { select: { name: true } } },
         },

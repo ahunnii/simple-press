@@ -4,20 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import type { Session } from "~/server/better-auth/config";
 import type { CartItem } from "~/providers/cart-context";
-import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
+import type { Session } from "~/server/better-auth/config";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import {
   isPaymentProcessing,
   PAYMENT_PROCESSING_LABEL,
   PAYMENT_PROCESSING_MESSAGE,
 } from "~/app/(storefront)/_components/checkout/payment-status";
+import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkFactRows } from "../shared/pink-fact-rows";
@@ -338,7 +339,7 @@ export function PinkOrderConfirmation({
             {orderedItems && orderedItems.length > 0 ? (
               orderedItems.map((item, index) => (
                 <div
-                  key={`${item.productId}-${item.variantId ?? "no-variant"}`}
+                  key={cartItemId(item)}
                   className="flex items-center justify-between gap-4 py-4"
                   style={{
                     borderTop:
@@ -358,6 +359,11 @@ export function PinkOrderConfirmation({
                       {item.variantName ? `${item.variantName} · ` : ""}Qty{" "}
                       {item.quantity}
                     </p>
+                    <CartLineOptions
+                      item={item}
+                      showPrices={false}
+                      className="mt-0.5 text-[13px] text-[var(--pink-subtle)]"
+                    />
                   </div>
                   <span
                     className="pink-display shrink-0"

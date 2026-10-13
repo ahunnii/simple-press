@@ -10,6 +10,7 @@ import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type _HomepageProduct = NonNullable<
@@ -41,6 +42,9 @@ type CardProduct = Pick<
   }[];
   // baseInventoryUnit is not included in getRelated, so make it optional
   baseInventoryUnit?: { inventoryQty: number; allowBackorders: boolean } | null;
+  // Present on card queries; a product with option groups needs a choice
+  // before it can be bought, like one with variants.
+  _count?: { optionGroups: number };
 };
 
 type Props = {
@@ -55,11 +59,14 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const reducedMotion = useReducedMotion();
 
   const productStatus = checkProductStatus({
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
@@ -197,7 +204,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
             zIndex: 3,
           }}
         >
-          {productStatus.hasVariants ? (
+          {productStatus.chooseOptions ? (
             <Link
               href={`/shop/${product.slug}`}
               aria-label={`View options for ${product.name}`}

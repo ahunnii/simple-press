@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 import { ViiAccountLayout } from "./vii-account-layout";
@@ -228,6 +229,10 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               {item.variantName}
                             </p>
                           )}
+                          <OrderItemOptions
+                            customization={item.customization}
+                            className="mb-1 text-[13px] text-[var(--vii-ink-soft)]"
+                          />
                           <p
                             style={{
                               fontFamily: "var(--font-sans)",

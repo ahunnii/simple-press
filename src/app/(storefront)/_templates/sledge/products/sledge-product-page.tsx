@@ -104,6 +104,20 @@ export function SledgeProductPage({
 
   const prefersReducedMotion = useReducedMotion();
 
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
+
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "additional">(
@@ -356,13 +370,18 @@ export function SledgeProductPage({
             ) : null}
 
             <div className="flex flex-wrap items-baseline gap-3 border-t border-[var(--sl-border)] pt-5">
-              <span className="sledge-card-price font-mono text-xl">
-                {formatPrice(displayPrice)}
-                {product.variants.length > 1 ? "+" : ""}
+              <span
+                className="sledge-card-price font-mono text-xl"
+                // Announce the build's price as options change it.
+                aria-live={configured ? "polite" : undefined}
+                aria-atomic={configured ? "true" : undefined}
+              >
+                {formatPrice(shownPrice)}
+                {!configured && product.variants.length > 1 ? "+" : ""}
               </span>
-              {isOnSale && displayCompareAtPrice ? (
+              {shownOnSale && shownCompareAt != null ? (
                 <span className="sledge-price-compare font-mono text-base line-through">
-                  {formatPrice(displayCompareAtPrice)}
+                  {formatPrice(shownCompareAt)}
                 </span>
               ) : null}
               {product.sku ? (
@@ -429,6 +448,7 @@ export function SledgeProductPage({
               business={business}
               comingSoonHeading={f["sledge.product.coming-soon-heading"] ?? ""}
               comingSoonBody={f["sledge.product.coming-soon-body"] ?? ""}
+              onConfiguredPriceChange={setConfigured}
             />
 
             {hasSidebarAccordions ? (

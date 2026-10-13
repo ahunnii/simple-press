@@ -8,6 +8,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
+import { GloveLineOptions } from "../shared/glove-line-options";
 import { groupGloveCartLines } from "./glove-cart-groups";
 
 type GloveOrderSummaryProps = {
@@ -28,7 +29,10 @@ const ROW =
 const DT = "glove-display text-[15px] font-medium text-[var(--glove-ink)]";
 const DD = "glove-body m-0 text-[15px] font-bold text-[var(--glove-ink)]";
 
-/** One order line: thumbnail with a quantity badge, name / variant, line total. */
+/**
+ * One order line: thumbnail with a quantity badge, name / variant / chosen
+ * options (a configured line), line total.
+ */
 function SummaryLine({
   item,
   compact = false,
@@ -70,6 +74,7 @@ function SummaryLine({
             {item.variantName}
           </p>
         ) : null}
+        <GloveLineOptions item={item} size="sm" />
       </div>
       <span
         className={`glove-body shrink-0 font-bold text-[var(--glove-ink)] ${compact ? "text-[14px]" : "text-[15px]"}`}

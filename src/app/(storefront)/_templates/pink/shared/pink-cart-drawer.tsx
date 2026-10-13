@@ -12,7 +12,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "../index";
@@ -55,7 +56,7 @@ export function PinkCartDrawer({
   themeVars,
   customFields,
 }: PinkCartDrawerProps) {
-  const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
+  const { items, subtotal, isOpen, setIsOpen, updateLineQuantity, removeLine } =
     useCart();
   const { isEnabled } = useStorefrontFlags();
   const f = resolveFields(customFields, CART_FIELD_KEYS);
@@ -156,7 +157,7 @@ export function PinkCartDrawer({
             <div className="flex-1 overflow-y-auto">
               {items.map((item) => (
                 <div
-                  key={`${item.productId}-${item.variantId ?? "base"}`}
+                  key={cartItemId(item)}
                   className="grid items-start gap-3.5 px-6 py-4"
                   style={{
                     gridTemplateColumns: "64px 1fr auto",
@@ -195,6 +196,10 @@ export function PinkCartDrawer({
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      className="text-[11px] text-[var(--pink-ink-subtle)]"
+                    />
                     <div
                       className="mt-1 flex w-fit items-center"
                       style={{
@@ -204,9 +209,8 @@ export function PinkCartDrawer({
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(
-                            item.productId,
-                            item.variantId,
+                          updateLineQuantity(
+                            cartItemId(item),
                             item.quantity - 1,
                           )
                         }
@@ -228,9 +232,8 @@ export function PinkCartDrawer({
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(
-                            item.productId,
-                            item.variantId,
+                          updateLineQuantity(
+                            cartItemId(item),
                             item.quantity + 1,
                           )
                         }
@@ -243,7 +246,7 @@ export function PinkCartDrawer({
                     </div>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId, item.variantId)}
+                      onClick={() => removeLine(cartItemId(item))}
                       className="mt-0.5 w-fit text-[11px] underline underline-offset-2 transition-opacity hover:opacity-70"
                       style={{ color: "var(--pink-ink-muted)" }}
                     >

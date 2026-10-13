@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { PageTransition } from "~/components/page-animations";
 
 import { PinkBadge } from "../shared/pink-badge";
@@ -78,6 +79,10 @@ export function PinkOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   {item.variantName && (
                     <p className="pink-label mt-1">{item.variantName}</p>
                   )}
+                  <OrderItemOptions
+                    customization={item.customization}
+                    className="mt-1 text-[13px] text-[var(--pink-subtle)]"
+                  />
                   <p
                     className="mt-1 text-[13px]"
                     style={{ color: "var(--pink-subtle)" }}

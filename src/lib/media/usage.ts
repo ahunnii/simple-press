@@ -536,6 +536,32 @@ async function scanMediaReferences(
       }
     });
 
+  // ── 3b. Product option values (customizer tile images) ─────────────────────
+  const optionValuesPromise = db.productOptionValue
+    .findMany({
+      where: { group: { businessId }, imageUrl: { not: null } },
+      select: {
+        id: true,
+        label: true,
+        imageUrl: true,
+        group: { select: { name: true } },
+      },
+    })
+    .then((values) => {
+      for (const v of values) {
+        if (v.imageUrl) {
+          addUsage(map, v.imageUrl, {
+            url: v.imageUrl,
+            location: `Product option "${v.group.name}"`,
+            entityType: "productOptionValue",
+            entityId: v.id,
+            entityLabel: v.label,
+            adminHref: "/admin/products",
+          });
+        }
+      }
+    });
+
   // ── 4. Collections ─────────────────────────────────────────────────────────
   const collectionsPromise = db.collection
     .findMany({
@@ -1056,6 +1082,7 @@ async function scanMediaReferences(
     siteContentPromise,
     productsPromise,
     variantsPromise,
+    optionValuesPromise,
     collectionsPromise,
     servicesPromise,
     eventsPromise,

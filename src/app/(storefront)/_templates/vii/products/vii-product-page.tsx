@@ -8,7 +8,11 @@ import { Check } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
-import { fieldAttr, listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -71,6 +75,20 @@ export function ViiProductPage({
     selectedVariantId,
     setSelectedVariantId,
   } = useProduct(product);
+
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -270,10 +288,11 @@ export function ViiProductPage({
                 </p>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                {isOnSale && displayCompareAtPrice && (
-                  <span className="sr-only">Sale price </span>
-                )}
+                {shownOnSale && <span className="sr-only">Sale price </span>}
                 <span
+                  // Announce the build's price as options change it.
+                  aria-live={configured ? "polite" : undefined}
+                  aria-atomic={configured ? "true" : undefined}
                   style={{
                     fontFamily: "var(--font-sans)",
                     fontSize: 22,
@@ -281,9 +300,9 @@ export function ViiProductPage({
                     color: "var(--vii-navy)",
                   }}
                 >
-                  {formatPrice(displayPrice)}
+                  {formatPrice(shownPrice)}
                 </span>
-                {isOnSale && displayCompareAtPrice && (
+                {shownOnSale && shownCompareAt != null && (
                   <>
                     <span className="sr-only">Original price </span>
                     <span
@@ -294,7 +313,7 @@ export function ViiProductPage({
                         textDecoration: "line-through",
                       }}
                     >
-                      {formatPrice(displayCompareAtPrice)}
+                      {formatPrice(shownCompareAt)}
                     </span>
                     <span
                       style={{
@@ -311,7 +330,7 @@ export function ViiProductPage({
                         textTransform: "uppercase",
                       }}
                     >
-                      {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
+                      {computeSavingsLabel(shownPrice, shownCompareAt)}
                     </span>
                   </>
                 )}
@@ -363,6 +382,7 @@ export function ViiProductPage({
                 setSelectedVariantId={setSelectedVariantId}
                 comingSoonHeading={f["vii.product.coming-soon-heading"] ?? ""}
                 comingSoonBody={f["vii.product.coming-soon-body"] ?? ""}
+                onConfiguredPriceChange={setConfigured}
               />
 
               {/* Trust signals — a product's own features win; otherwise the

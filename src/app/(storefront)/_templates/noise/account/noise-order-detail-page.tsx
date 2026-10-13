@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { PageTransition } from "~/components/page-animations";
 
 import { NoiseAccountLayout } from "./noise-account-layout";
@@ -123,6 +124,10 @@ export function NoiseOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="mt-1 font-mono text-[9.5px] tracking-[0.1em] text-[var(--vn-ink-soft)] uppercase"
+                      />
                     </div>
                     <span className="font-mono text-[11px] tracking-[0.1em]">
                       ×{item.quantity}

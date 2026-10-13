@@ -8,7 +8,8 @@ import type { CartItem } from "~/providers/cart-context";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { calculateShipping, SHIPPING_TYPES } from "~/lib/shipping-utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
@@ -60,9 +61,8 @@ function itemLabel(item: CartItem): string {
 export function DreamCartContents({ copy, shippingConfig }: Props) {
   const {
     items,
-    incrementItem,
-    decrementItem,
-    removeItem,
+    updateLineQuantity,
+    removeLine,
     subtotal,
     itemCount,
     isHydrated,
@@ -106,6 +106,8 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
         <h2 className="sr-only">Items in your cart</h2>
         <ul className="m-0 list-none border-t border-[var(--dream-line)] p-0">
           {items.map((item) => {
+            // Line-id APIs: each configured build is its own line.
+            const lineId = cartItemId(item);
             const label = itemLabel(item);
             const productHref =
               item.productSlug && shopEnabled
@@ -119,7 +121,7 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
 
             return (
               <li
-                key={`${item.productId}-${item.variantId ?? "base"}`}
+                key={lineId}
                 className="flex gap-4 border-b border-[var(--dream-line)] py-6 sm:gap-6"
               >
                 <DreamLineThumb
@@ -147,6 +149,10 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
                           {item.variantName}
                         </p>
                       ) : null}
+                      <CartLineOptions
+                        item={item}
+                        className="mt-1 text-[14px] text-[color:var(--dream-soft)]"
+                      />
                       <p className="mt-1 text-[14px] text-[var(--dream-soft)] tabular-nums">
                         {formatPrice(item.price)} each
                         {onSale && item.compareAtPrice != null ? (
@@ -171,7 +177,7 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
                       <button
                         type="button"
                         onClick={() =>
-                          decrementItem(item.productId, item.variantId)
+                          updateLineQuantity(lineId, item.quantity - 1)
                         }
                         disabled={item.quantity <= 1}
                         aria-label={`Decrease quantity of ${label}`}
@@ -193,7 +199,7 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
                       <button
                         type="button"
                         onClick={() =>
-                          incrementItem(item.productId, item.variantId)
+                          updateLineQuantity(lineId, item.quantity + 1)
                         }
                         disabled={atMax}
                         aria-label={`Increase quantity of ${label}`}
@@ -208,7 +214,7 @@ export function DreamCartContents({ copy, shippingConfig }: Props) {
                     </div>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId, item.variantId)}
+                      onClick={() => removeLine(lineId)}
                       aria-label={`Remove ${label} from cart`}
                       className="dream-link inline-flex items-center gap-1.5 bg-transparent p-0 text-[14px]"
                     >

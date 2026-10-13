@@ -66,6 +66,8 @@ export type LineItemFixture = {
   productVariantId?: string;
   variantName?: string;
   sku?: string;
+  /** Any other product metadata (e.g. the customizer's `lineConfig`). */
+  extraMetadata?: Record<string, string>;
 };
 
 export type AddressFixture = {
@@ -179,6 +181,7 @@ export function makeCheckoutSession(
             : {}),
           ...(li.variantName ? { variantName: li.variantName } : {}),
           ...(li.sku ? { sku: li.sku } : {}),
+          ...(li.extraMetadata ?? {}),
         },
       },
     },

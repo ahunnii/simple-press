@@ -21,12 +21,12 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product-page/product-gallery-horizontal";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
+import { resolveDreamProductFields } from ".";
 import { DREAM_PROSE_CLASSNAME } from "../generic/dream-generic-page";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamPhoto } from "../shared/dream-photo";
 import { DreamReveal } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
-import { resolveDreamProductFields } from ".";
 import { DreamProductActions } from "./dream-product-actions";
 import { DreamRelatedCard } from "./dream-related-card";
 
@@ -111,6 +111,19 @@ export function DreamProductPage({
     isOnSale,
   } = state;
 
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+
   const customFields = business?.siteContent?.customFields;
   const f = resolveDreamProductFields(customFields, FIELD_KEYS);
   const shippingNote = (f["dream.product.shipping-note"] ?? "").trim();
@@ -143,8 +156,9 @@ export function DreamProductPage({
   });
   const related = (relatedProducts ?? []) as Product[];
 
-  const additionalInformation =
-    additionalFields?.additionalInformation as TiptapJSON | undefined;
+  const additionalInformation = additionalFields?.additionalInformation as
+    | TiptapJSON
+    | undefined;
   const details =
     additionalInformation && !isContentEmpty(additionalInformation)
       ? additionalInformation
@@ -254,20 +268,22 @@ export function DreamProductPage({
                   </p>
                 ) : null}
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-[24px] font-medium text-[var(--dream-ink)] tabular-nums">
-                    {formatPrice(displayPrice)}
+                  <span
+                    className="text-[24px] font-medium text-[var(--dream-ink)] tabular-nums"
+                    // Announce the build's price as options change it.
+                    aria-live={configured ? "polite" : undefined}
+                    aria-atomic={configured ? "true" : undefined}
+                  >
+                    {formatPrice(shownPrice)}
                   </span>
-                  {isOnSale && displayCompareAtPrice ? (
+                  {shownCompareAt != null && shownCompareAt > shownPrice ? (
                     <>
-                      <span className="text-[18px] text-[var(--dream-soft)] line-through tabular-nums">
+                      <span className="text-[18px] text-[var(--dream-soft)] tabular-nums line-through">
                         <span className="sr-only">Original price: </span>
-                        {formatPrice(displayCompareAtPrice)}
+                        {formatPrice(shownCompareAt)}
                       </span>
                       <span className="inline-flex items-center rounded-[var(--dream-radius-pill)] bg-[var(--dream-gold-soft)] px-3 py-1 text-[13px] font-semibold text-[var(--dream-ink)]">
-                        {computeSavingsLabel(
-                          displayPrice,
-                          displayCompareAtPrice,
-                        )}
+                        {computeSavingsLabel(shownPrice, shownCompareAt)}
                       </span>
                     </>
                   ) : null}
@@ -298,6 +314,7 @@ export function DreamProductPage({
                       f["dream.product.coming-soon-heading"] ?? ""
                     }
                     comingSoonBody={f["dream.product.coming-soon-body"] ?? ""}
+                    onConfiguredPriceChange={setConfigured}
                   />
                 </div>
 
@@ -353,10 +370,7 @@ export function DreamProductPage({
       {details ? (
         <DreamSection aria-label="Details">
           <h2 className={SMALL_H2}>Details</h2>
-          <TiptapRenderer
-            content={details}
-            className={DREAM_PROSE_CLASSNAME}
-          />
+          <TiptapRenderer content={details} className={DREAM_PROSE_CLASSNAME} />
         </DreamSection>
       ) : null}
 
