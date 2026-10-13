@@ -14,6 +14,7 @@
 
 import { z } from "zod";
 
+import type { OrderOptionsHint } from "~/lib/customizer/display";
 import type { DashboardCard } from "~/lib/dashboard/layout-schema";
 import type { DashboardRangeKey } from "~/lib/dashboard/ranges";
 import type { WidgetFormat, WidgetId } from "~/lib/dashboard/widgets";
@@ -109,6 +110,8 @@ export type RecentOrderRow = {
   paymentStatus: string;
   /** ISO */
   createdAt: string;
+  /** Set when a line carries product-customizer options. */
+  optionsHint: OrderOptionsHint | null;
 };
 
 export type RecentOrdersCardData = {

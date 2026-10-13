@@ -136,7 +136,7 @@ type Props = {
   /** `subscriptions` feature flag, resolved server-side — gates whether the
    *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
   subscriptionsEnabled?: boolean;
-  /** `productOptions` feature flag — gates the Options card (option groups
+  /** `productOptions` feature flag — gates the Options tab (option groups
    *  customers choose from on this product). */
   productOptionsEnabled?: boolean;
   /** `media` feature flag — gates "Choose from library" on gallery + OG. */
@@ -150,7 +150,12 @@ type Props = {
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
-type ProductFormTab = "basics" | "collections" | "seo" | "additional";
+type ProductFormTab =
+  | "basics"
+  | "collections"
+  | "options"
+  | "seo"
+  | "additional";
 
 const SEO_TAB_FIELDS = new Set<string>([
   "slug",
@@ -1255,13 +1260,18 @@ export function ProductForm({
               onValueChange={(value) => setActiveTab(value as ProductFormTab)}
               className="w-full"
             >
-              <TabsList>
+              {/* Up to five tabs: scroll sideways on a phone instead of
+                  spilling past the page edge. */}
+              <TabsList className="no-scrollbar max-w-full justify-start overflow-x-auto">
                 <TabsTrigger value="basics">
                   Basics
                   {erroredTabs.has("basics") && <TabErrorDot />}
                 </TabsTrigger>
                 {collectionsEnabled && (
                   <TabsTrigger value="collections">Collections</TabsTrigger>
+                )}
+                {productOptionsEnabled && (
+                  <TabsTrigger value="options">Options</TabsTrigger>
                 )}
                 <TabsTrigger value="seo">
                   SEO
@@ -1496,15 +1506,6 @@ export function ProductForm({
                         (resolved server-side, threaded through as a prop). */}
                     {subscriptionsEnabled && (
                       <ProductSubscriptionCard form={form} />
-                    )}
-
-                    {/* Options — own mutations, not part of this form's
-                        Save. Needs a saved product to attach groups to. */}
-                    {productOptionsEnabled && (
-                      <ProductOptionsCard
-                        productId={product?.id ?? null}
-                        mediaLibraryEnabled={mediaEnabled}
-                      />
                     )}
 
                     {/* Shipping weight */}
@@ -1975,6 +1976,18 @@ export function ProductForm({
                       )}
                     </CardContent>
                   </Card>
+                </TabsContent>
+              )}
+
+              {/* Options — own mutations, not part of this form's Save (no
+                  RHF fields, so `tabForField` never points here). Needs a
+                  saved product to attach groups to. */}
+              {productOptionsEnabled && (
+                <TabsContent value="options" className="space-y-6">
+                  <ProductOptionsCard
+                    productId={product?.id ?? null}
+                    mediaLibraryEnabled={mediaEnabled}
+                  />
                 </TabsContent>
               )}
 

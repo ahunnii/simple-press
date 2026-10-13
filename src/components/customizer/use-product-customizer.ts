@@ -48,6 +48,11 @@ export type UseProductCustomizerInput = {
   basePrice: number;
   /** The quantity the shopper is about to add (stock checks). Default 1. */
   lineQty?: number;
+  /**
+   * Picks to start from (re-editing a saved build, e.g. the admin manual
+   * order dialog). Read on mount only; a different product starts empty.
+   */
+  initialSelection?: CustomizerSelection;
 };
 
 /** One chosen value, for a "your build" tray. */
@@ -154,10 +159,13 @@ function identityOf(def: PublicCustomizerDefinition | null | undefined) {
   return `${def.productId}|${def.groups.map((g) => g.id).join(",")}`;
 }
 
-function initialState(identity: string): State {
+function initialState(
+  identity: string,
+  selection: CustomizerSelection = EMPTY_SELECTION,
+): State {
   return {
     identity,
-    selection: EMPTY_SELECTION,
+    selection,
     touched: [],
     attempt: 0,
     limitMessages: {},
@@ -240,12 +248,20 @@ export function useProductCustomizer({
   customizer,
   basePrice,
   lineQty = 1,
+  initialSelection,
 }: UseProductCustomizerInput): ProductCustomizerController {
   const definition =
     customizer && customizer.groups.length > 0 ? customizer : null;
   const identity = identityOf(definition);
 
-  const [state, setState] = useState<State>(() => initialState(identity));
+  const [state, setState] = useState<State>(() =>
+    initialState(
+      identity,
+      identity && initialSelection
+        ? normalizeSelection(initialSelection)
+        : undefined,
+    ),
+  );
   // A different product (or a different set of groups): start over. Done
   // during render — React's pattern for resetting state on a prop change.
   let current = state;

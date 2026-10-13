@@ -11,8 +11,8 @@ import {
 } from "~/lib/checkout/customizer-checkout";
 
 /**
- * Maps Stripe line items from a fully-expanded checkout session into the shape
- * expected by `db.order.create({ data: { items: { create: [...] } } })`.
+ * Maps Stripe line items from a checkout session (its complete `line_items`
+ * list) into the shape expected by `db.order.create({ data: { items: { create: [...] } } })`.
  *
  * `lineConfigs` (from `loadCheckoutLineConfigs`) attaches the product
  * customizer build to every line create-session tagged with
@@ -22,12 +22,15 @@ import {
  *   never re-priced here — the owner may have edited or deleted the options
  *   since (a bank payment can settle days later) — and the item's `price` is
  *   always Stripe's `unit_amount`, i.e. what was actually charged.
- * - Degraded path (the stored build is missing — only possible if the
- *   reservation row is gone, or a merchant hand-built the session): a
- *   summary-only snapshot from Stripe's `metadata.optionsSummary`, with no
- *   groups and NO components. The fulfiller still sees the build as text;
- *   the linked option stock is simply not deducted (there is nothing
- *   trustworthy to deduct from). Reported via `findMissingLineConfigs`.
+ * - Degraded path (the stored build is missing — effectively unreachable:
+ *   create-session writes the builds in the same transaction as the
+ *   reservation row, and those rows are never deleted; a merchant
+ *   hand-building a session is the realistic way in): a summary-only
+ *   snapshot from Stripe's `metadata.optionsSummary`, with no groups and NO
+ *   components. The fulfiller still sees the build as text; the linked
+ *   option stock is NOT deducted (there is nothing trustworthy to deduct
+ *   from). `createOrderFromCheckout` reports it to Sentry as an error and
+ *   tells the owner on the order (`missingLineConfigNote`).
  *
  * This is a pure function — it performs no I/O and can be tested without a DB.
  */
@@ -106,6 +109,30 @@ export function findMissingLineConfigs(
     .filter((key) => key !== "" && !lineConfigs.has(key));
 }
 
+/**
+ * The owner-facing order note for lines that took the degraded path (see
+ * `mapStripeLineItemsToOrderItems`): their linked option stock was not
+ * deducted, so the owner must check it by hand. `null` when every configured
+ * line has its stored build.
+ */
+export function missingLineConfigNote(
+  fullSession: Stripe.Checkout.Session,
+  lineConfigs: ReadonlyMap<string, CustomizationSnapshot>,
+): string | null {
+  const names = (fullSession.line_items?.data ?? [])
+    .filter((item) => {
+      const key = lineMetadata(item)[LINE_CONFIG_METADATA_KEY]?.trim() ?? "";
+      return key !== "" && !lineConfigs.has(key);
+    })
+    .map((item) => item.description ?? "Unknown Product");
+  if (names.length === 0) return null;
+  return (
+    "Some options on this order couldn't be matched to stock, so linked " +
+    "option inventory (e.g. charms) was not deducted. Check and adjust " +
+    `inventory for: ${[...new Set(names)].join(", ")}.`
+  );
+}
+
 /** Does any line of the session carry a customizer build (`lineConfig`)? */
 export function hasConfiguredLines(
   fullSession: Stripe.Checkout.Session,
@@ -171,7 +198,11 @@ export type CreateOrderParams = {
   customerEmail: string;
   /** The base session object from the webhook event (unexpanded). */
   session: Stripe.Checkout.Session;
-  /** The fully-expanded session (with line_items, total_details, etc.). */
+  /**
+   * The retrieved session with total_details expanded and the COMPLETE
+   * `line_items` list set on it (the webhook pages them in; an expanded
+   * `line_items` alone is only the first 10).
+   */
   fullSession: Stripe.Checkout.Session;
   verifiedDiscountCodeId: string | null;
   discountAmount: number;
@@ -224,14 +255,16 @@ export async function createOrderFromCheckout(
 
   // A configured line whose stored build is gone still becomes an order item
   // (the money was taken) with a summary-only snapshot — see
-  // `mapStripeLineItemsToOrderItems`. Worth knowing: its option stock was
-  // not deducted.
+  // `mapStripeLineItemsToOrderItems`. Its linked option stock is NOT
+  // deducted, so this is an error (it should never happen) and the owner is
+  // told on the order itself (`internalNote`) which products to recount.
   const missingLineConfigs = findMissingLineConfigs(fullSession, lineConfigs);
+  const missingBuildNote = missingLineConfigNote(fullSession, lineConfigs);
   if (missingLineConfigs.length > 0) {
     Sentry.captureMessage(
-      `[Webhook] Configured line(s) without a stored build on session ${session.id}; order items get a summary-only snapshot`,
+      `[Webhook] Configured line(s) without a stored build on session ${session.id}; order items get a summary-only snapshot and linked option stock is not deducted`,
       {
-        level: "warning",
+        level: "error",
         tags: {
           "webhook.step": "customizer-line-config-missing",
           businessId: business.id,
@@ -318,6 +351,9 @@ export async function createOrderFromCheckout(
             fulfillmentStatus: "unfulfilled",
 
             deliveryMethod,
+
+            // Owner-only; set only on the degraded customizer path above.
+            ...(missingBuildNote ? { internalNote: missingBuildNote } : {}),
 
             // Merchant-terms acceptance — see the Order model docblock.
             termsAcceptedAt,

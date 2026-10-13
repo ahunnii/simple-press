@@ -13,6 +13,7 @@ import {
   createProduct,
   createVariant,
 } from "../helpers/factories";
+import { fakeListLineItems } from "../helpers/stripe-line-items";
 import {
   makeCheckoutAsyncPaymentFailedEvent,
   makeCheckoutAsyncPaymentSucceededEvent,
@@ -274,7 +275,9 @@ describe("stripe webhook — delayed (async) payment methods, cart lane", () => 
     stripeMocks.constructEvent.mockReset();
     stripeMocks.sessionsRetrieve.mockReset();
     stripeMocks.listLineItems.mockReset();
-    stripeMocks.listLineItems.mockResolvedValue(LINE_ITEMS);
+    stripeMocks.listLineItems.mockImplementation((...args: unknown[]) =>
+      fakeListLineItems(...args),
+    );
     vi.mocked(Sentry.captureMessage).mockClear();
     emailMocks.sendEmail.mockReset();
     emailMocks.sendEmail.mockResolvedValue({ success: true, id: "test" });

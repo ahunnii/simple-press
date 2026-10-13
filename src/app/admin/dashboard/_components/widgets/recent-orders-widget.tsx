@@ -55,6 +55,12 @@ export function RecentOrdersWidget({
                 <span suppressHydrationWarning>
                   {formatRelative(order.createdAt)}
                 </span>
+                {order.optionsHint && (
+                  <>
+                    <span aria-hidden="true"> · </span>
+                    <span title={order.optionsHint.summary}>with options</span>
+                  </>
+                )}
               </p>
             </div>
             <p className="text-sm font-semibold tabular-nums">

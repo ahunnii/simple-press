@@ -21,6 +21,10 @@ import type { LocalPresence } from "~/lib/seo/local-presence";
 import type { EmbedIdMaps } from "~/lib/store-transfer/rewrite";
 import type { ExportedBusiness } from "~/lib/store-transfer/types";
 import {
+  CUSTOMIZER_MAX_VALUES_PER_GROUP,
+  CUSTOMIZER_TEXT_MAX_LENGTH,
+} from "~/lib/customizer/types";
+import {
   normalizeMaintenanceMessage,
   normalizeMaintenanceText,
 } from "~/lib/maintenance-config";
@@ -47,6 +51,7 @@ import {
   stripEmptyPlaceholdersInFields,
 } from "~/lib/tiptap/strip-empty-placeholders";
 import { parseStoredFormDefinition } from "~/lib/validators/form";
+import { OPTION_PRICE_MAX_CENTS } from "~/lib/validators/product-options";
 import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 import { parseManifest } from "~/lib/validators/store-transfer";
 import { db } from "~/server/db";
@@ -80,6 +85,138 @@ function resolveImportedLocalPresence(biz: ExportedBusiness): LocalPresence {
     return parseLocalPresence(biz.localPresence);
   }
   return biz.localBusinessEnabled === true ? "storefront" : "none";
+}
+
+// ─── Product customizer number sanitizing ─────────────────────────────────────
+
+/**
+ * Bundle schemas accept any integer for option prices and counts, but the
+ * admin editor only allows 0..OPTION_PRICE_MAX_CENTS prices and sane counts.
+ * A hand-edited bundle must not store values the admin would reject: a
+ * negative `textPriceCents` would lower the item price at checkout.
+ */
+
+function clampInt(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+export function sanitizeOptionPrice(cents: number): number {
+  return clampInt(cents, 0, OPTION_PRICE_MAX_CENTS);
+}
+
+export interface OptionGroupNumbers {
+  kind: "choice" | "text";
+  minSelections: number;
+  maxSelections: number;
+  includedCount: number;
+  maxLength: number | null;
+  textPriceCents: number;
+}
+
+/**
+ * Clamp a group's counts and prices into the admin's ranges. Text groups get
+ * the same resets the admin's upsertGroup applies (no picks, one "pick",
+ * no included count). `changed` is true when any stored number differs.
+ */
+export function sanitizeOptionGroupNumbers(group: OptionGroupNumbers): {
+  value: OptionGroupNumbers;
+  changed: boolean;
+} {
+  const maxLength =
+    group.maxLength === null
+      ? null
+      : clampInt(group.maxLength, 1, CUSTOMIZER_TEXT_MAX_LENGTH);
+  const textPriceCents = sanitizeOptionPrice(group.textPriceCents);
+
+  let value: OptionGroupNumbers;
+  if (group.kind === "text") {
+    value = {
+      kind: "text",
+      minSelections: 0,
+      maxSelections: 1,
+      includedCount: 0,
+      maxLength,
+      textPriceCents,
+    };
+  } else {
+    const maxSelections = clampInt(
+      group.maxSelections,
+      1,
+      CUSTOMIZER_MAX_VALUES_PER_GROUP,
+    );
+    value = {
+      kind: "choice",
+      minSelections: clampInt(group.minSelections, 0, maxSelections),
+      maxSelections,
+      includedCount: clampInt(group.includedCount, 0, maxSelections),
+      maxLength,
+      textPriceCents,
+    };
+  }
+
+  const changed =
+    value.minSelections !== group.minSelections ||
+    value.maxSelections !== group.maxSelections ||
+    value.includedCount !== group.includedCount ||
+    value.maxLength !== group.maxLength ||
+    value.textPriceCents !== group.textPriceCents;
+  return { value, changed };
+}
+
+/**
+ * Resolve a bundle value's product/variant links against the imported ids.
+ * Any link that did not import drops the whole link. So does a variant
+ * without its product (the admin refine forbids that pairing), since the
+ * variant would otherwise be charged/decremented without its product.
+ */
+export function resolveOptionValueLinks(
+  value: {
+    exportLinkedProductId?: string | null;
+    exportLinkedVariantId?: string | null;
+  },
+  productMap: ReadonlyMap<string, string>,
+  variantMap: ReadonlyMap<string, string>,
+): {
+  linkedProductId: string | null;
+  linkedVariantId: string | null;
+  linkDropped: boolean;
+} {
+  let linkedProductId: string | null = null;
+  let linkedVariantId: string | null = null;
+  let linkDropped = false;
+
+  if (value.exportLinkedProductId) {
+    linkedProductId = productMap.get(value.exportLinkedProductId) ?? null;
+    if (!linkedProductId) linkDropped = true;
+  }
+  if (value.exportLinkedVariantId) {
+    linkedVariantId = variantMap.get(value.exportLinkedVariantId) ?? null;
+    if (!linkedVariantId || !value.exportLinkedProductId) linkDropped = true;
+  }
+  if (linkDropped) {
+    return { linkedProductId: null, linkedVariantId: null, linkDropped };
+  }
+  return { linkedProductId, linkedVariantId, linkDropped };
+}
+
+/**
+ * Clamp a value's prices. `priceOverride` only applies to a linked value
+ * (the admin refines this), so an unlinked value stores `null`.
+ */
+export function sanitizeOptionValuePrices(
+  value: { priceDelta: number; priceOverride?: number | null },
+  linked: boolean,
+): { priceDelta: number; priceOverride: number | null; changed: boolean } {
+  const priceDelta = sanitizeOptionPrice(value.priceDelta);
+  const original = value.priceOverride ?? null;
+  const priceOverride =
+    linked && original !== null ? sanitizeOptionPrice(original) : null;
+  return {
+    priceDelta,
+    priceOverride,
+    changed: priceDelta !== value.priceDelta || priceOverride !== original,
+  };
 }
 
 // ─── Bounded concurrency helper ───────────────────────────────────────────────
@@ -1150,19 +1287,29 @@ export async function importStoreBundle(args: {
       const display = CHOICE_DISPLAYS.has(group.display)
         ? group.display
         : "tiles";
+      const sanitizedGroup = sanitizeOptionGroupNumbers({
+        kind,
+        minSelections: group.minSelections,
+        maxSelections: group.maxSelections,
+        includedCount: group.includedCount,
+        maxLength: group.maxLength ?? null,
+        textPriceCents: group.textPriceCents,
+      });
+      let groupSanitized = sanitizedGroup.changed;
+      const groupNumbers = sanitizedGroup.value;
       const groupData = {
         name: group.name,
         adminLabel: group.adminLabel ?? null,
         helpText: group.helpText ?? null,
         kind,
         required: group.required,
-        minSelections: group.minSelections,
-        maxSelections: group.maxSelections,
-        includedCount: group.includedCount,
+        minSelections: groupNumbers.minSelections,
+        maxSelections: groupNumbers.maxSelections,
+        includedCount: groupNumbers.includedCount,
         display,
-        maxLength: group.maxLength ?? null,
+        maxLength: groupNumbers.maxLength,
         placeholder: group.placeholder ?? null,
-        textPriceCents: group.textPriceCents,
+        textPriceCents: groupNumbers.textPriceCents,
       };
 
       const candidates = await db.productOptionGroup.findMany({
@@ -1210,32 +1357,27 @@ export async function importStoreBundle(args: {
 
       for (const value of group.values) {
         try {
-          let linkedProductId: string | null = null;
-          let linkedVariantId: string | null = null;
+          const links = resolveOptionValueLinks(value, productMap, variantMap);
+          const { linkedProductId, linkedVariantId } = links;
           let available = value.available;
-          let linkDropped = false;
 
-          if (value.exportLinkedProductId) {
-            linkedProductId =
-              productMap.get(value.exportLinkedProductId) ?? null;
-            if (!linkedProductId) linkDropped = true;
-          }
-          if (value.exportLinkedVariantId) {
-            linkedVariantId =
-              variantMap.get(value.exportLinkedVariantId) ?? null;
-            if (!linkedVariantId) linkDropped = true;
-          }
-          if (linkDropped) {
-            // Drop the whole link: a variant without its product is
-            // meaningless, and a product without its variant would change
-            // which SKU is charged/decremented.
-            linkedProductId = null;
-            linkedVariantId = null;
+          if (links.linkDropped) {
+            // The whole link is dropped (see resolveOptionValueLinks): a
+            // product without its variant would change which SKU is
+            // charged/decremented.
             available = false;
             result.warnings.push(
               `Option value "${value.label}" in group "${group.name}" lost its linked product/variant (not part of this import) and was marked unavailable`,
             );
           }
+
+          // Prices are sanitized after link resolution: a dropped link
+          // also drops any override.
+          const sanitizedPrices = sanitizeOptionValuePrices(
+            value,
+            linkedProductId !== null,
+          );
+          if (sanitizedPrices.changed) groupSanitized = true;
 
           const valueData = {
             label: value.label,
@@ -1243,8 +1385,8 @@ export async function importStoreBundle(args: {
               ? rewriteUrl(value.imageUrl, urlMap)
               : null,
             swatchColor: value.swatchColor ?? null,
-            priceDelta: value.priceDelta,
-            priceOverride: value.priceOverride ?? null,
+            priceDelta: sanitizedPrices.priceDelta,
+            priceOverride: sanitizedPrices.priceOverride,
             linkedProductId,
             linkedVariantId,
             available,
@@ -1269,6 +1411,11 @@ export async function importStoreBundle(args: {
             `Option value "${value.label}" in group "${group.name}" failed: ${String(err)}`,
           );
         }
+      }
+      if (groupSanitized) {
+        result.warnings.push(
+          `Option group "${group.name}" had invalid prices or limits that were corrected`,
+        );
       }
     } catch (err) {
       result.warnings.push(

@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { StoredLineConfigs } from "~/lib/checkout/customizer-checkout";
+import type * as ReservationModule from "~/lib/inventory/reservation";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { readCustomizationSnapshot } from "~/lib/customizer/display";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
@@ -16,6 +17,7 @@ import {
   createProduct,
   createVariant,
 } from "../helpers/factories";
+import { fakeListLineItems } from "../helpers/stripe-line-items";
 import {
   makeCheckoutAsyncPaymentSucceededEvent,
   makeCheckoutCompletedEvent,
@@ -112,6 +114,29 @@ vi.mock("~/lib/email/send", () => ({
     SUPPORT: "support@test.dev",
   },
 }));
+
+// The reservation race: `beforeReserve` runs inside create-session's
+// reserve transaction, after its availability check — the moment another
+// shopper's checkout can win. Returning a result skips the real claim.
+const reserveHooks = vi.hoisted(() => ({
+  beforeReserve: null as
+    | null
+    | (() => Promise<{ ok: false; reason: "stock" } | void>),
+}));
+vi.mock("~/lib/inventory/reservation", async (importOriginal) => {
+  const actual = await importOriginal<typeof ReservationModule>();
+  return {
+    ...actual,
+    reserveInventory: async (
+      ...args: Parameters<typeof actual.reserveInventory>
+    ) => {
+      const hook = reserveHooks.beforeReserve;
+      reserveHooks.beforeReserve = null;
+      const forced = hook ? await hook() : undefined;
+      return forced ?? actual.reserveInventory(...args);
+    },
+  };
+});
 
 const BASE_FLAGS = {
   products: true,
@@ -379,10 +404,13 @@ describe("product customizer checkout", () => {
   beforeEach(async () => {
     await resetDb();
     for (const mock of Object.values(stripeMocks)) mock.mockReset();
-    stripeMocks.listLineItems.mockResolvedValue({ data: [] });
+    stripeMocks.listLineItems.mockImplementation((...args: unknown[]) =>
+      fakeListLineItems(...args),
+    );
     stripeMocks.customersCreate.mockResolvedValue({ id: "cus_test" });
     emailMocks.sendEmail.mockReset();
     emailMocks.sendEmail.mockResolvedValue({ success: true, id: "test" });
+    reserveHooks.beforeReserve = null;
   });
 
   describe("create-session", () => {
@@ -569,6 +597,66 @@ describe("product customizer checkout", () => {
       expect(body.unavailableItemIds).toEqual([
         { productId: store.glove.id, variantId: store.pink.id, lineKey: "b" },
       ]);
+    });
+
+    it("losing the reservation race removes only the line that is now short", async () => {
+      const store = await setupStore({ beeQty: 1 });
+      // Another checkout takes the last Bee after this one's availability
+      // check passed.
+      reserveHooks.beforeReserve = async () => {
+        await db.productVariant.update({
+          where: { id: store.bee.id },
+          data: { reservedQty: 1 },
+        });
+      };
+      const { res, body } = await startCheckout([
+        {
+          productId: store.glove.id,
+          variantId: store.pink.id,
+          lineKey: "engraved",
+          configuration: build(store, {
+            charms: [store.heartValue.id],
+            engraving: "Amy",
+          }),
+        },
+        {
+          productId: store.glove.id,
+          variantId: store.pink.id,
+          lineKey: "bee",
+          configuration: build(store, { charms: [store.beeValue.id] }),
+        },
+      ]);
+      expect(res.status).toBe(400);
+      expect(body.error).toBe(UNAVAILABLE_ERROR);
+      expect(body.unavailableItemIds).toEqual([
+        { productId: store.glove.id, variantId: store.pink.id, lineKey: "bee" },
+      ]);
+      expect(stripeMocks.sessionsCreate).not.toHaveBeenCalled();
+      // The rolled-back claim left nothing behind.
+      expect(await db.inventoryReservation.count()).toBe(0);
+      expect((await stockOf(store.pink.id)).reservedQty).toBe(0);
+      expect((await stockOf(store.heart.id)).reservedQty).toBe(0);
+    });
+
+    it("a lost race whose competing hold is gone names no line, so the cart is kept", async () => {
+      const store = await setupStore();
+      reserveHooks.beforeReserve = () =>
+        Promise.resolve({ ok: false, reason: "stock" });
+      const { res, body } = await startCheckout([
+        {
+          productId: store.glove.id,
+          variantId: store.pink.id,
+          lineKey: "k1",
+          configuration: build(store, { charms: [store.beeValue.id] }),
+        },
+      ]);
+      expect(res.status).toBe(409);
+      expect(body.error).toBe(
+        "Stock changed while you were checking out. Please try again.",
+      );
+      expect(body).not.toHaveProperty("unavailableItemIds");
+      expect(body).not.toHaveProperty("unavailableItems");
+      expect(stripeMocks.sessionsCreate).not.toHaveBeenCalled();
     });
 
     it("a subscription checkout rejects a product with options", async () => {
@@ -826,6 +914,40 @@ describe("product customizer checkout", () => {
         readCustomizationSnapshot(order.items[0]!.customization)?.basePrice,
       ).toBe(3500);
       expect((await stockOf(store.bee.id)).inventoryQty).toBe(0);
+
+      // List views carry a compact hint, not the snapshot.
+      const list = await caller.order.getAll({});
+      expect(list.orders[0]!.optionsHint).toEqual({
+        count: 1,
+        summary: expect.stringContaining("Bee") as string,
+      });
+      expect(list.orders[0]).not.toHaveProperty("items");
+      const recent = await caller.dashboard.cardData({
+        widget: "recent-orders",
+        range: null,
+        compare: false,
+        series: false,
+      });
+      expect(
+        recent.kind === "recentOrders" && recent.orders[0]!.optionsHint?.count,
+      ).toBe(1);
+    });
+
+    it("hands the manual order form stock-free definitions", async () => {
+      const store = await setupStore({ beeQty: 0 });
+      const owner = await createOwnerUser(store.business.id);
+      const caller = createTestCaller({ userId: owner.id });
+      const definitions = await caller.productOption.forManualOrder();
+      expect(Object.keys(definitions)).toEqual([store.glove.id]);
+      const bee = definitions[store.glove.id]!.groups.flatMap(
+        (group) => group.values,
+      ).find((value) => value.id === store.beeValue.id);
+      // Sold out on the storefront, still choosable for a recorded sale.
+      expect(bee).toMatchObject({ available: true, maxQty: null });
+      // No link ids or skus leave the server.
+      const json = JSON.stringify(definitions);
+      expect(json).not.toContain(store.charm.id);
+      expect(json).not.toContain(store.bee.id);
     });
 
     it("rejects an invalid build", async () => {

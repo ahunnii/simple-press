@@ -21,6 +21,7 @@ import {
   isEmptySelection,
   normalizeSelection,
 } from "~/lib/customizer/canonical";
+import { orderOptionsHint } from "~/lib/customizer/display";
 import { priceConfiguration } from "~/lib/customizer/evaluate";
 import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
 import {
@@ -87,6 +88,12 @@ const LIST_INCLUDE = {
       items: true,
       inventoryHistory: { where: { reason: "oversell" } },
     },
+  },
+  // Only customized lines, and only their snapshot — turned into the row's
+  // compact `optionsHint` and dropped before the response leaves.
+  items: {
+    where: { customization: { not: Prisma.DbNull } },
+    select: { customization: true },
   },
 } satisfies Prisma.OrderInclude;
 
@@ -909,10 +916,13 @@ export const orderRouter = createTRPCRouter({
       const isStaff = ctx.membershipRole === "STAFF";
 
       return {
-        orders: pageOrders.map(({ _count, ...order }) => ({
+        orders: pageOrders.map(({ _count, items, ...order }) => ({
           ...redactOrderForStaff(order, isStaff),
           itemCount: _count.items,
           hasOversell: _count.inventoryHistory > 0,
+          optionsHint: orderOptionsHint(
+            items.map((item) => item.customization),
+          ),
         })),
         totalCount,
         page: clampedPage,

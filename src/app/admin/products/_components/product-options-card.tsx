@@ -35,8 +35,9 @@ type Props = {
 type EditorTarget = { groupId: string | null } | null;
 
 /**
- * The product form's "Options" card: which option groups (colors, charms,
- * engraving…) customers can choose from on this product.
+ * The product form's "Options" tab: which option groups (colors, charms,
+ * engraving…) customers can choose from on this product. Its header is the
+ * tab's plain-language intro.
  *
  * It saves on its own — every action here is an immediate mutation — and is
  * deliberately not part of the product form's react-hook-form state or its
@@ -50,12 +51,7 @@ export function ProductOptionsCard({ productId, mediaLibraryEnabled }: Props) {
   if (!productId) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Options</CardTitle>
-          <CardDescription>
-            Let customers choose colors, add-ons or type a personal message
-          </CardDescription>
-        </CardHeader>
+        <OptionsIntro saved={false} />
         <CardContent>
           <p className="text-muted-foreground text-sm">
             Save this product first, then come back to add options.
@@ -69,6 +65,31 @@ export function ProductOptionsCard({ productId, mediaLibraryEnabled }: Props) {
       productId={productId}
       mediaLibraryEnabled={mediaLibraryEnabled}
     />
+  );
+}
+
+function OptionsIntro({ saved }: { saved: boolean }) {
+  return (
+    <CardHeader>
+      <CardTitle>Options</CardTitle>
+      <CardDescription className="space-y-2">
+        <p>
+          Let customers personalize this product: pick from choices like a chain
+          or a charm, or type a message such as an engraving.
+        </p>
+        <p>
+          Options are set per product, so a glove and a hat can have completely
+          different ones. You can also reuse an option you made for another
+          product, but you don&apos;t have to.
+        </p>
+        {saved && (
+          <p>
+            Changes on this tab save right away. You don&apos;t need to press
+            Save on the product.
+          </p>
+        )}
+      </CardDescription>
+    </CardHeader>
   );
 }
 
@@ -126,14 +147,7 @@ function SavedProductOptions({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Options</CardTitle>
-        <CardDescription>
-          Let customers choose colors, add-ons or type a personal message.
-          Changes here save right away. You don&apos;t need to press Save on the
-          product.
-        </CardDescription>
-      </CardHeader>
+      <OptionsIntro saved />
       <CardContent className="space-y-4">
         {attached.isError ? (
           <p className="text-destructive text-sm" role="alert">

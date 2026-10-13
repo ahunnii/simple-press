@@ -34,3 +34,45 @@ export function OptionUsageWarning({
     </p>
   );
 }
+
+/**
+ * The bulk-delete version: products deleted together don't count as losing
+ * an option (the server leaves them out of `productCount`). Same ungated
+ * read, so it renders null with the flag off. Callers keep `productIds`
+ * within `ADMIN_BULK_DELETE_LIMIT` — over the cap the delete can't run anyway.
+ */
+export function BulkOptionUsageWarning({
+  productIds,
+  enabled = true,
+}: {
+  productIds: string[];
+  enabled?: boolean;
+}) {
+  const usage = api.productOption.usageForProducts.useQuery(
+    { productIds },
+    { enabled: enabled && productIds.length > 0 },
+  );
+
+  const data = usage.data;
+  if (!data || data.usedCount === 0) return null;
+
+  const one = data.usedCount === 1;
+  const subject = one
+    ? "One of these products is"
+    : `${data.usedCount} of these products are`;
+  return (
+    <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+      {data.productCount > 0
+        ? `${subject} used as ${one ? "an option" : "options"} on ${
+            data.productCount
+          } other ${data.productCount === 1 ? "product" : "products"}. Deleting ${
+            one ? "it removes that option" : "them removes those options"
+          }.`
+        : `${subject} used as ${
+            one ? "a choice" : "choices"
+          } in your product options. Deleting ${
+            one ? "it removes that choice" : "them removes those choices"
+          }.`}
+    </p>
+  );
+}

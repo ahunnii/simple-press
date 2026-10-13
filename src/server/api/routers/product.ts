@@ -8,8 +8,10 @@ import type {
   PublicCustomizerDefinition,
 } from "~/lib/customizer";
 import type { ProductSortValue } from "~/lib/validators/product";
+import { customizerFailureReason } from "~/lib/checkout/customizer-checkout";
 import {
   configKey,
+  customizationLines,
   isEmptySelection,
   normalizeSelection,
   priceConfiguration,
@@ -1409,6 +1411,8 @@ export const productRouter = createTRPCRouter({
           baseInventoryUnit: {
             select: { inventoryQty: true, allowBackorders: true },
           },
+          // Plain lines are checked against required options too.
+          _count: { select: { optionGroups: true } },
         },
       });
 
@@ -1537,28 +1541,58 @@ export const productRouter = createTRPCRouter({
         }
       };
 
-      // ── Configured lines (product customizer) ───────────────────────────
-      // Only touched when at least one line carries a non-empty selection, so
-      // plain carts pay for nothing and keep their exact old results.
+      // ── Product customizer ───────────────────────────────────────────────
+      // Definitions load for configured lines AND for plain lines of products
+      // that have option groups (a required group makes a plain line
+      // unorderable, which checkout would otherwise be first to say). Plain
+      // carts of products without groups pay for nothing and keep their exact
+      // old results.
       const isConfigured = (item: (typeof items)[number]) =>
         !!item.configuration && !isEmptySelection(item.configuration);
-      const configuredProductIds = [
-        ...new Set(items.filter(isConfigured).map((i) => i.productId)),
+      const optionProductIds = [
+        ...new Set(
+          items
+            .filter(
+              (i) =>
+                isConfigured(i) ||
+                (productMap.get(i.productId)?._count.optionGroups ?? 0) > 0,
+            )
+            .map((i) => i.productId),
+        ),
       ];
       const optionsEnabled =
-        configuredProductIds.length > 0 &&
+        optionProductIds.length > 0 &&
         (await isProductOptionsEnabled(businessId));
       const definitions = optionsEnabled
-        ? await loadCustomizerDefinitions(
-            ctx.db,
-            businessId,
-            configuredProductIds,
-          )
+        ? await loadCustomizerDefinitions(ctx.db, businessId, optionProductIds)
         : new Map<string, CustomizerDefinition>();
 
       return items.map((item): CartItemStatus => {
         const base = baseStatus(item);
-        if (!isConfigured(item)) return { ...base, configKey: "" };
+        if (!isConfigured(item)) {
+          // Same rule as checkout: an empty build must satisfy every
+          // required group, or the line can never be bought as it sits.
+          const definition = base.available
+            ? definitions.get(item.productId)
+            : undefined;
+          if (definition) {
+            const empty = priceConfiguration(
+              definition,
+              { choices: [], texts: [] },
+              { basePrice: base.price, lineQty: 1 },
+            );
+            if (!empty.ok) {
+              return {
+                ...base,
+                configKey: "",
+                available: false,
+                reason: "configuration-invalid",
+                errors: empty.errors.map((e) => e.message),
+              };
+            }
+          }
+          return { ...base, configKey: "" };
+        }
 
         const selection = normalizeSelection(item.configuration);
         const key = configKey(selection);
@@ -1587,11 +1621,8 @@ export const productRouter = createTRPCRouter({
           lineQty: 1,
         });
         if (!priced.ok) {
-          const outOfStock = priced.errors.every(
-            (e) => e.code === "value-out-of-stock",
-          );
           return invalid(
-            outOfStock ? "option-out-of-stock" : "configuration-invalid",
+            customizerFailureReason(priced.errors),
             priced.errors.map((e) => e.message),
           );
         }
@@ -1639,6 +1670,12 @@ export const productRouter = createTRPCRouter({
               ? base.compareAtPrice + priced.addOnTotal
               : null,
           maxQuantity,
+          // The server's own rendering of the build, so the cart's breakdown
+          // follows the owner's current prices.
+          customization: {
+            summary: priced.snapshot.summary,
+            lines: customizationLines(priced.snapshot),
+          },
         };
       });
     }),
@@ -1660,4 +1697,9 @@ type CartItemStatus = {
   slug: string | null;
   reason?: "configuration-invalid" | "option-out-of-stock";
   errors?: string[];
+  /** Configured, available lines only: the build as currently priced. */
+  customization?: {
+    summary: string;
+    lines: { label: string; value: string; price: number }[];
+  };
 };

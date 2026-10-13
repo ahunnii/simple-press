@@ -8,6 +8,10 @@ import {
   createVariant,
 } from "../helpers/factories";
 import {
+  fakeListLineItems,
+  setFakeLineItemsPageSize,
+} from "../helpers/stripe-line-items";
+import {
   makeCheckoutCompletedEvent,
   makeCheckoutExpiredEvent,
   makeCheckoutSession,
@@ -275,13 +279,118 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
     stripeMocks.constructEvent.mockReset();
     stripeMocks.sessionsRetrieve.mockReset();
     stripeMocks.listLineItems.mockReset();
+    stripeMocks.listLineItems.mockImplementation((...args: unknown[]) =>
+      fakeListLineItems(...args),
+    );
     abandonedTemplate.props.mockReset();
     vi.mocked(Sentry.captureMessage).mockClear();
     emailMocks.sendEmail.mockReset();
     emailMocks.sendEmail.mockResolvedValue({ success: true, id: "test" });
+    setFakeLineItemsPageSize();
   });
 
   describe("checkout.session.completed", () => {
+    it("500s (so Stripe retries) and writes no order when listing the line items fails", async () => {
+      const store = await setupStore();
+      const { session, fullSession } = buildPaidSession(store);
+      await reserveFor(store, session.id);
+      const event = makeCheckoutCompletedEvent(session, ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+      stripeMocks.sessionsRetrieve.mockResolvedValue(fullSession);
+      stripeMocks.listLineItems.mockRejectedValue(new Error("stripe down"));
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(500);
+      expect(await db.order.count()).toBe(0);
+      const productAfter = await db.product.findUniqueOrThrow({
+        where: { id: store.product.id },
+      });
+      expect(productAfter.inventoryQty).toBe(10);
+    });
+
+    it("keeps every line of a cart bigger than one page of line items", async () => {
+      const store = await setupStore();
+      // Stripe pages of 10 (the expand default): 11 tee lines + the mug = 12
+      // lines across two pages, with the variant line (and its stock) on page 2.
+      setFakeLineItemsPageSize(10);
+      await db.product.update({
+        where: { id: store.product.id },
+        data: { inventoryQty: 50 },
+      });
+      const teeLines = Array.from({ length: 11 }, () => ({
+        description: "Cotton Tee",
+        quantity: 1,
+        unitAmount: 1500,
+        productId: store.product.id,
+      }));
+      const { session, fullSession } = makeCheckoutSession({
+        id: "cs_test_onetime_big",
+        mode: "payment",
+        metadata: {
+          businessId: store.business.id,
+          deliveryMethod: "ship",
+        },
+        paymentIntentId: "pi_test_onetime_big",
+        amountSubtotal: 11 * 1500 + 2500,
+        lineItems: [
+          ...teeLines,
+          {
+            description: "Stoneware Mug",
+            quantity: 1,
+            unitAmount: 2500,
+            productId: store.variantProduct.id,
+            productVariantId: store.variant.id,
+            variantName: "Large",
+            sku: "MUG-L",
+          },
+        ],
+        shippingAddress: {
+          line1: "123 Main St",
+          city: "Detroit",
+          state: "MI",
+          postal_code: "48201",
+          country: "US",
+        },
+      });
+      const event = makeCheckoutCompletedEvent(session, ACCOUNT_ID);
+      stripeMocks.constructEvent.mockReturnValue(event);
+      // The retrieved session carries no line_items of its own (the fake
+      // listLineItems serves them, paged).
+      stripeMocks.sessionsRetrieve.mockResolvedValue({
+        ...fullSession,
+        line_items: undefined,
+      });
+
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+
+      // Two pages were listed, the second continuing after the 10th line.
+      expect(stripeMocks.listLineItems).toHaveBeenCalledTimes(2);
+      expect(stripeMocks.listLineItems.mock.calls[1]![1]).toMatchObject({
+        starting_after: "li_9",
+      });
+
+      const order = await db.order.findUniqueOrThrow({
+        where: { stripeSessionId: session.id },
+        include: { items: true },
+      });
+      expect(order.items).toHaveLength(12);
+      const mug = order.items.find(
+        (i) => i.productVariantId === store.variant.id,
+      )!;
+      expect(mug.productName).toBe("Stoneware Mug");
+
+      // Page-2 stock is deducted: the mug variant, and the tee lines on both pages.
+      const variantAfter = await db.productVariant.findUniqueOrThrow({
+        where: { id: store.variant.id },
+      });
+      const productAfter = await db.product.findUniqueOrThrow({
+        where: { id: store.product.id },
+      });
+      expect(variantAfter.inventoryQty).toBe(4);
+      expect(productAfter.inventoryQty).toBe(39);
+    });
+
     it("creates the order, decrements inventory, consumes the reservation and emails both parties", async () => {
       const store = await setupStore();
       const { session, fullSession } = buildPaidSession(store);
@@ -296,19 +405,21 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
       expect(await res.json()).toEqual({ received: true });
 
       // The session is re-read on the connected account, with the expansions
-      // the order/address code depends on.
+      // the order/address code depends on. Line items are NOT expanded here
+      // (that is only the first page): they are paged in via listLineItems.
       expect(stripeMocks.sessionsRetrieve).toHaveBeenCalledTimes(1);
       const retrieveArgs = stripeMocks.sessionsRetrieve.mock.calls[0]!;
       expect(retrieveArgs[0]).toBe(session.id);
       expect(retrieveArgs[1]).toEqual({
-        expand: [
-          "line_items",
-          "line_items.data.price.product",
-          "total_details",
-          "payment_intent",
-        ],
+        expand: ["total_details", "payment_intent"],
       });
       expect(retrieveArgs[2]).toEqual({ stripeAccount: ACCOUNT_ID });
+      expect(stripeMocks.listLineItems).toHaveBeenCalledTimes(1);
+      expect(stripeMocks.listLineItems).toHaveBeenCalledWith(
+        session.id,
+        { limit: 100, expand: ["data.price.product"] },
+        { stripeAccount: ACCOUNT_ID },
+      );
 
       // --- Order ---
       const orders = await db.order.findMany({

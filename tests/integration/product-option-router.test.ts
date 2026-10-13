@@ -341,6 +341,22 @@ describe("productOption router", () => {
       groupCount: 1,
       productCount: 2,
     });
+    // Bulk delete: products deleted together don't count as losing it.
+    expect(
+      await caller.productOption.usageForProducts({
+        productIds: [charm.id, gloveA.id],
+      }),
+    ).toEqual({
+      valueCount: 1,
+      groupCount: 1,
+      productCount: 1,
+      usedCount: 1,
+    });
+    expect(
+      await caller.productOption.usageForProducts({
+        productIds: [gloveA.id, gloveB.id],
+      }),
+    ).toMatchObject({ usedCount: 0, productCount: 0 });
 
     const hits = await caller.productOption.searchLinkTargets({
       query: "charm",

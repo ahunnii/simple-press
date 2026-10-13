@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import {
   Package,
   Plus,
   Save,
+  SlidersHorizontal,
   Store,
   Truck,
   X,
@@ -19,6 +20,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { PickableProduct } from "./product-picker";
+import type { PublicCustomizerDefinition } from "~/lib/customizer";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ManualOrderFormValues } from "~/lib/validators/order";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
@@ -63,13 +65,25 @@ import {
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
+import {
+  ChooseOptionsDialog,
+  configuredLinePreview,
+} from "./choose-options-dialog";
 import { CustomerPicker } from "./customer-picker";
 import { ProductPicker } from "./product-picker";
 
 type Props = {
   products: PickableProduct[];
   allowedCountries: SupportedCountry[];
+  /**
+   * Product customizer definitions by product id (`productOption.
+   * forManualOrder`) — empty with the `productOptions` flag off, which
+   * leaves the form exactly as it was.
+   */
+  customizers?: Record<string, PublicCustomizerDefinition>;
 };
+
+const NO_CUSTOMIZERS: Record<string, PublicCustomizerDefinition> = {};
 
 /**
  * `Order.status` is derived rather than chosen: it is a roll-up of the payment
@@ -92,10 +106,16 @@ function deriveStatus(
   return "open" as const;
 }
 
-export function ManualOrderForm({ products, allowedCountries }: Props) {
+export function ManualOrderForm({
+  products,
+  allowedCountries,
+  customizers = NO_CUSTOMIZERS,
+}: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const utils = api.useUtils();
+  /** The line whose "Choose options" dialog is open. */
+  const [optionsIndex, setOptionsIndex] = useState<number | null>(null);
 
   const form = useForm<ManualOrderFormValues>({
     resolver: zodResolver(manualOrderFormSchema),
@@ -157,6 +177,25 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
   const isPickup = deliveryMethod === "pickup";
 
   /**
+   * A line of a product with options: its configured unit price (base +
+   * add-ons), summary and validity. `null` for a plain product. `price` on
+   * the line stays the BASE — that is what `createManual` expects.
+   */
+  const previewLine = useCallback(
+    (item: ManualOrderFormValues["items"][number]) => {
+      const definition = customizers[item.productId];
+      if (!definition) return null;
+      return configuredLinePreview(
+        definition,
+        item.configuration,
+        Math.round(item.price),
+        item.quantity,
+      );
+    },
+    [customizers],
+  );
+
+  /**
    * The preview the admin sees, computed by the same function the server uses
    * to decide what actually gets stored — so the number on screen can't drift
    * from the number in the database.
@@ -166,7 +205,10 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
       computeManualOrderTotals({
         items: useDirectSubtotal
           ? []
-          : items.map((i) => ({ price: i.price, quantity: i.quantity })),
+          : items.map((i) => ({
+              price: previewLine(i)?.unitPrice ?? i.price,
+              quantity: i.quantity,
+            })),
         directSubtotal: useDirectSubtotal
           ? dollarsToCents(String(directSubtotal ?? 0))
           : undefined,
@@ -174,7 +216,15 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
         tax: dollarsToCents(String(tax ?? 0)),
         discount: dollarsToCents(String(discount ?? 0)),
       }),
-    [items, useDirectSubtotal, directSubtotal, shipping, tax, discount],
+    [
+      items,
+      useDirectSubtotal,
+      directSubtotal,
+      shipping,
+      tax,
+      discount,
+      previewLine,
+    ],
   );
 
   const createManualOrderMutation = api.order.createManual.useMutation({
@@ -211,6 +261,24 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
       });
       if (missingVariant) {
         toast.error("Pick a variant for every product that has them.");
+        return;
+      }
+
+      // Same idea for product options: a build missing a required pick (or
+      // one the owner's later edits broke) would be refused by the server's
+      // re-pricing, so flag the row here instead.
+      let invalidOptions = false;
+      data.items.forEach((item, index) => {
+        if (previewLine(item)?.invalid) {
+          form.setError(`items.${index}.configuration`, {
+            type: "manual",
+            message: "Choose options",
+          });
+          invalidOptions = true;
+        }
+      });
+      if (invalidOptions) {
+        toast.error("Choose options for every product that needs them.");
         return;
       }
     }
@@ -273,6 +341,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
   useDirtyForm(isDirty);
 
   const itemsError = form.formState.errors.items?.message;
+  const optionsLine =
+    optionsIndex === null ? null : (items[optionsIndex] ?? null);
 
   return (
     <Form {...form}>
@@ -915,6 +985,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                       (p) => p.id === item?.productId,
                     );
                     const rowErrors = form.formState.errors.items?.[index];
+                    const preview = item ? previewLine(item) : null;
+                    const unitPrice = preview?.unitPrice ?? item?.price ?? 0;
 
                     return (
                       <div
@@ -950,12 +1022,19 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                                       sku: picked.sku ?? null,
                                       quantity: item?.quantity ?? 1,
                                       price: picked.price,
+                                      // Options belong to the old product too.
+                                      configuration: undefined,
                                     },
                                     {
                                       shouldDirty: true,
                                       shouldValidate: true,
                                     },
                                   );
+                                  // Straight into the options, the way the
+                                  // product page presents them.
+                                  if (customizers[picked.id]) {
+                                    setOptionsIndex(index);
+                                  }
                                 }}
                               />
                             </div>
@@ -1013,6 +1092,9 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                                         variant.price,
                                         product.price,
                                       ),
+                                      // Options are per product, not per
+                                      // variant — a variant change keeps them.
+                                      configuration: item?.configuration,
                                     },
                                     {
                                       shouldDirty: true,
@@ -1096,16 +1178,42 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                             <Input
                               className="mt-1"
                               value={formatPrice(
-                                Math.round(
-                                  (item?.price ?? 0) * (item?.quantity ?? 0),
-                                ),
+                                Math.round(unitPrice * (item?.quantity ?? 0)),
                               )}
                               disabled
                             />
                             <p className="text-muted-foreground mt-1.5 text-xs">
-                              {formatPrice(item?.price ?? 0)} each
+                              {formatPrice(unitPrice)} each
+                              {preview?.summary ? " with options" : ""}
                             </p>
                           </div>
+
+                          {preview && item && (
+                            <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t pt-3 lg:col-span-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                aria-invalid={!!rowErrors?.configuration}
+                                onClick={() => setOptionsIndex(index)}
+                              >
+                                <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                                {preview.summary
+                                  ? "Edit options"
+                                  : "Choose options"}
+                              </Button>
+                              <p className="text-muted-foreground min-w-0 text-sm break-words">
+                                {preview.summary || "No options chosen"}
+                              </p>
+                              {rowErrors?.configuration && (
+                                <p className="text-destructive w-full text-xs">
+                                  {preview.summary
+                                    ? "These options need attention — open them to fix."
+                                    : rowErrors.configuration.message}
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <Button
@@ -1140,6 +1248,31 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                   {itemsError && (
                     <p className="text-destructive text-sm">{itemsError}</p>
                   )}
+
+                  <ChooseOptionsDialog
+                    open={optionsLine !== null}
+                    onOpenChange={(open) => {
+                      if (!open) setOptionsIndex(null);
+                    }}
+                    productName={optionsLine?.productName ?? ""}
+                    definition={
+                      optionsLine
+                        ? (customizers[optionsLine.productId] ?? null)
+                        : null
+                    }
+                    basePrice={Math.round(optionsLine?.price ?? 0)}
+                    quantity={optionsLine?.quantity ?? 1}
+                    initialSelection={optionsLine?.configuration}
+                    onSave={(configuration) => {
+                      if (optionsIndex === null) return;
+                      form.setValue(
+                        `items.${optionsIndex}.configuration`,
+                        configuration,
+                        { shouldDirty: true },
+                      );
+                      form.clearErrors(`items.${optionsIndex}.configuration`);
+                    }}
+                  />
                 </>
               )}
             </CardContent>

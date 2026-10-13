@@ -381,50 +381,68 @@ function available(hold: ReservationEntry, rows: StockRows): number | null {
 }
 
 /**
- * Cross-line stock check: sums every line's demand per stock row (variant,
- * product or pool) and finds the lines that push a row past what is
- * available — e.g. two gloves each with the last Bee charm, or a glove using
- * a charm also bought on its own.
+ * Cross-line stock check: finds the lines whose demand (own product plus
+ * option components) cannot all be met from what each stock row (variant,
+ * product or pool) has available — e.g. two gloves each with the last Bee
+ * charm, or a glove using a charm also bought on its own.
  *
- * Blame is assigned so the cart keeps as much as can be sold: per row, plain
- * demand (a line's own product) counts first, then option components, each
- * in cart order; every line whose demand lands past the limit is rejected —
- * `option-out-of-stock` when the overdrawn demand is one of its components,
- * else `out-of-stock`.
+ * Admission is per line and greedy, so the cart keeps as much as can be sold:
+ * lines with no component demand go first, then lines with components, each
+ * in cart order. A line is admitted only if ALL of its demands fit what is
+ * left; an admitted line uses up its stock, a rejected one uses none (so a
+ * build rejected on one charm never blocks a later line on another). A
+ * rejected line is `out-of-stock` when its own product overdraws, else
+ * `option-out-of-stock`. Rows with no known limit are unlimited.
  */
 export function findOverdrawnLines(
   demands: readonly LineDemand[],
   rows: StockRows,
 ): LineFailure[] {
-  const byKey = new Map<string, LineDemand[]>();
+  type Need = { qty: number; limit: number | null; component: boolean };
+  // Per line: summed demand per stock row (a component and the line's own
+  // product can share a row; the row overdraws as non-component then).
+  const byLine = new Map<number, Map<string, Need>>();
   for (const demand of demands) {
     const key = holdKey(demand.hold);
     if (!key) continue;
-    const list = byKey.get(key) ?? [];
-    list.push(demand);
-    byKey.set(key, list);
+    const needs = byLine.get(demand.lineIndex) ?? new Map<string, Need>();
+    const need = needs.get(key);
+    if (need) {
+      need.qty += demand.hold.qty;
+      need.component &&= demand.component;
+    } else {
+      needs.set(key, {
+        qty: demand.hold.qty,
+        limit: available(demand.hold, rows),
+        component: demand.component,
+      });
+    }
+    byLine.set(demand.lineIndex, needs);
   }
 
-  const failures = new Map<number, UnavailableReason>();
-  for (const list of byKey.values()) {
-    const limit = available(list[0]!.hold, rows);
-    if (limit === null) continue;
-    const ordered = [...list].sort(
-      (a, b) =>
-        Number(a.component) - Number(b.component) || a.lineIndex - b.lineIndex,
+  const hasComponent = (needs: Map<string, Need>) =>
+    [...needs.values()].some((n) => n.component);
+  const ordered = [...byLine].sort(
+    ([a, aNeeds], [b, bNeeds]) =>
+      Number(hasComponent(aNeeds)) - Number(hasComponent(bNeeds)) || a - b,
+  );
+
+  const used = new Map<string, number>();
+  const failures: LineFailure[] = [];
+  for (const [lineIndex, needs] of ordered) {
+    const over = [...needs].filter(
+      ([key, n]) => n.limit !== null && (used.get(key) ?? 0) + n.qty > n.limit,
     );
-    let used = 0;
-    for (const demand of ordered) {
-      used += demand.hold.qty;
-      if (used <= limit) continue;
-      const reason = demand.component ? "option-out-of-stock" : "out-of-stock";
-      // A line rejected for its own product stays `out-of-stock`.
-      if (failures.get(demand.lineIndex) !== "out-of-stock") {
-        failures.set(demand.lineIndex, reason);
-      }
+    if (over.length === 0) {
+      for (const [key, n] of needs) used.set(key, (used.get(key) ?? 0) + n.qty);
+      continue;
     }
+    failures.push({
+      lineIndex,
+      reason: over.some(([, n]) => !n.component)
+        ? "out-of-stock"
+        : "option-out-of-stock",
+    });
   }
-  return [...failures]
-    .sort(([a], [b]) => a - b)
-    .map(([lineIndex, reason]) => ({ lineIndex, reason }));
+  return failures.sort((a, b) => a.lineIndex - b.lineIndex);
 }

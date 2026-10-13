@@ -2,7 +2,16 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { PublicCustomizerDefinition } from "~/lib/customizer/types";
+import type { DbClient } from "~/server/db";
+import { withoutStockLimits } from "~/lib/checkout/customizer-checkout";
+import {
+  isProductOptionsEnabled,
+  loadCustomizerDefinitions,
+} from "~/lib/customizer/load";
+import { toPublicCustomizerDefinition } from "~/lib/customizer/public";
 import { CUSTOMIZER_MAX_VALUES_PER_GROUP } from "~/lib/customizer/types";
+import { ADMIN_BULK_DELETE_LIMIT } from "~/lib/validators/admin-table";
 import {
   optionGroupInputBaseSchema,
   optionValueInputBaseSchema,
@@ -51,6 +60,43 @@ function currentPriceCents(
   variantPrice: number | null | undefined,
 ) {
   return Math.round(variantPrice ?? productPrice);
+}
+
+/**
+ * Option values linked to any of `productIds`, and the OTHER products those
+ * values' groups are attached to — what deleting `productIds` takes away.
+ */
+async function optionUsage(
+  db: DbClient,
+  businessId: string,
+  productIds: string[],
+) {
+  const values = await db.productOptionValue.findMany({
+    where: {
+      linkedProductId: { in: productIds },
+      group: { businessId },
+    },
+    select: { groupId: true, linkedProductId: true },
+  });
+  if (values.length === 0) {
+    return { valueCount: 0, groupCount: 0, productCount: 0, usedCount: 0 };
+  }
+  const groupIds = [...new Set(values.map((value) => value.groupId))];
+  const attached = await db.productOptionGroupOnProduct.findMany({
+    where: {
+      groupId: { in: groupIds },
+      productId: { notIn: productIds },
+      product: { businessId },
+    },
+    select: { productId: true },
+    distinct: ["productId"],
+  });
+  return {
+    valueCount: values.length,
+    groupCount: groupIds.length,
+    productCount: attached.length,
+    usedCount: new Set(values.map((value) => value.linkedProductId)).size,
+  };
 }
 
 export const productOptionRouter = createTRPCRouter({
@@ -147,6 +193,36 @@ export const productOptionRouter = createTRPCRouter({
         }),
       };
     }),
+
+  /**
+   * Customizer definitions for the manual order form: every product in the
+   * business with options attached, keyed by product id, projected public
+   * and with stock limits lifted — a manual order records a sale that
+   * already happened, and `order.createManual` prices it the same way.
+   * `{}` with the flag off (not an error), so the page can always ask.
+   */
+  forManualOrder: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    if (!(await isProductOptionsEnabled(businessId))) return {};
+    const attached = await ctx.db.productOptionGroupOnProduct.findMany({
+      where: { product: { businessId }, group: { businessId } },
+      select: { productId: true },
+      distinct: ["productId"],
+    });
+    const definitions = await loadCustomizerDefinitions(
+      ctx.db,
+      businessId,
+      attached.map((row) => row.productId),
+    );
+    const result: Record<string, PublicCustomizerDefinition> = {};
+    for (const [productId, definition] of definitions) {
+      const projected = toPublicCustomizerDefinition(
+        withoutStockLimits(definition),
+      );
+      if (projected.groups.length > 0) result[productId] = projected;
+    }
+    return result;
+  }),
 
   /** The groups attached to one product, in the order shoppers see them. */
   listForProduct: ownerAdminProcedure
@@ -245,32 +321,32 @@ export const productOptionRouter = createTRPCRouter({
   usageForProduct: ownerAdminProcedure
     .input(z.object({ productId: idSchema }))
     .query(async ({ ctx, input }) => {
-      const values = await ctx.db.productOptionValue.findMany({
-        where: {
-          linkedProductId: input.productId,
-          group: { businessId: ctx.businessId },
-        },
-        select: { groupId: true },
-      });
-      if (values.length === 0) {
-        return { valueCount: 0, groupCount: 0, productCount: 0 };
-      }
-      const groupIds = [...new Set(values.map((value) => value.groupId))];
-      const attached = await ctx.db.productOptionGroupOnProduct.findMany({
-        where: {
-          groupId: { in: groupIds },
-          productId: { not: input.productId },
-          product: { businessId: ctx.businessId },
-        },
-        select: { productId: true },
-        distinct: ["productId"],
-      });
+      const usage = await optionUsage(ctx.db, ctx.businessId, [
+        input.productId,
+      ]);
       return {
-        valueCount: values.length,
-        groupCount: groupIds.length,
-        productCount: attached.length,
+        valueCount: usage.valueCount,
+        groupCount: usage.groupCount,
+        productCount: usage.productCount,
       };
     }),
+
+  /**
+   * `usageForProduct` for the products list's bulk delete: the products
+   * being deleted together are excluded from `productCount` (an option on a
+   * product that is going away too is no loss), and `usedCount` says how
+   * many of the selection are option choices at all. Ungated for the same
+   * reason as the single read.
+   */
+  usageForProducts: ownerAdminProcedure
+    .input(
+      z.object({
+        productIds: z.array(idSchema).min(1).max(ADMIN_BULK_DELETE_LIMIT),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      optionUsage(ctx.db, ctx.businessId, input.productIds),
+    ),
 
   // ─── Group writes ───────────────────────────────────────────────────────
 

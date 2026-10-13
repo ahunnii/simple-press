@@ -10,6 +10,7 @@ import {
   cartItemId,
   cartLineKey,
   CartProvider,
+  checkoutLineKey,
   parseStoredCartItems,
   useCart,
 } from "./cart-context";
@@ -611,6 +612,63 @@ describe("CartProvider configured lines (product customizer)", () => {
     ]);
   });
 
+  it("replaces a configured line's breakdown with the server's, keeping a plain line plain", async () => {
+    await renderCapture();
+    act(() => {
+      cart.addItem(heartLine);
+      cart.addItem(GLOVE);
+    });
+    const fresh = {
+      summary: "Charms: Heart",
+      lines: [{ label: "Charms", value: "Heart", price: 800 }],
+    };
+    const snap = (key: string, price: number, extra = {}) => ({
+      productId: "glove",
+      variantId: "g-purple",
+      configKey: key,
+      available: true,
+      price,
+      compareAtPrice: null,
+      maxQuantity: null,
+      ...extra,
+    });
+    act(() =>
+      cart.reconcile([
+        snap(configKey(HEART), 4800, { customization: fresh }),
+        // A stray customization on a plain snapshot must not attach.
+        snap("", 4000, { customization: fresh }),
+      ]),
+    );
+    const configured = cart.items.find((i) => i.configKey);
+    expect(configured).toMatchObject({ price: 4800, customization: fresh });
+    expect(cart.items.find((i) => !i.configKey)?.customization).toBeUndefined();
+  });
+
+  it("keeps the stored breakdown when the snapshot has none or reads the same", async () => {
+    await renderCapture();
+    act(() => cart.addItem(heartLine));
+    const before = cart.items[0]!.customization;
+    const snap = {
+      productId: "glove",
+      variantId: "g-purple",
+      configKey: configKey(HEART),
+      available: true,
+      price: 4500,
+      compareAtPrice: null,
+      maxQuantity: null,
+    };
+    act(() => cart.reconcile([snap]));
+    expect(cart.items[0]!.customization).toBe(before);
+    const itemsBefore = cart.items;
+    act(() =>
+      cart.reconcile([
+        { ...snap, customization: structuredClone(custom("Heart")) },
+      ]),
+    );
+    // Equal content: same line objects, no needless re-render.
+    expect(cart.items).toBe(itemsBefore);
+  });
+
   it("drops a configured line whose snapshot is missing (plain snapshot only)", async () => {
     await renderCapture();
     act(() => {
@@ -645,6 +703,41 @@ describe("CartProvider configured lines (product customizer)", () => {
       configKey: configKey(HEART),
       customization: custom("Heart"),
     });
+  });
+});
+
+describe("checkoutLineKey", () => {
+  // The pre-refactor hash, kept inline: lineKeys already in flight and carts
+  // in localStorage must keep matching.
+  const fnv1a = (input: string, seed: number) => {
+    let hash = seed >>> 0;
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return hash.toString(16).padStart(8, "0");
+  };
+
+  it("is the line id when it fits the 64-char cap", () => {
+    const item = { productId: "p1", variantId: "v1" };
+    expect(checkoutLineKey(item)).toBe(cartItemId(item));
+  });
+
+  it("hashes a long id byte-identically to the original algorithm", () => {
+    const item = {
+      productId: "clxproduct0000000000000001",
+      variantId: "clxvariant00000000000000001",
+      configuration: {
+        choices: [{ groupId: "charms", valueIds: ["star"] }],
+        texts: [],
+      },
+    };
+    const id = cartItemId(item);
+    expect(id.length).toBeGreaterThan(64);
+    expect(checkoutLineKey(item)).toBe(
+      `h:${fnv1a(id, 0x811c9dc5)}${fnv1a(id, 0x050c5d1f)}`,
+    );
+    expect(checkoutLineKey(item)).toMatch(/^h:[0-9a-f]{16}$/);
   });
 });
 

@@ -1552,22 +1552,24 @@ export async function POST(req: NextRequest) {
           // Correct, expected behavior on a store selling the last unit — the
           // system is protecting stock, not failing. The owner-fault causes of
           // an unsellable cart were already reported at the availability check.
+          //
+          // The failed claim doesn't say WHICH line lost, so re-read stock
+          // (the transaction rolled back, so neither this cart's holds nor its
+          // discount use are counted) and reject only the lines that are now
+          // short — the client removes exactly those (`rejectUnavailable`
+          // stays silent on pure scarcity). If the re-read finds
+          // nothing short (the competing hold already went away), no line is
+          // named: the client keeps the cart and shows the message.
+          const fresh = await assessCart(await loadCart());
+          if (fresh.availability.unavailableItems.length > 0) {
+            return rejectUnavailable(fresh.availability);
+          }
           return NextResponse.json(
             {
               error:
-                "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
-              unavailableItems: itemList.map((i) =>
-                i.variantName
-                  ? `${i.productName} (${i.variantName})`
-                  : i.productName,
-              ),
-              unavailableItemIds: itemList.map((i) => ({
-                productId: i.productId,
-                variantId: i.variantId ?? null,
-                ...(i.lineKey ? { lineKey: i.lineKey } : {}),
-              })),
+                "Stock changed while you were checking out. Please try again.",
             },
-            { status: 400 },
+            { status: 409 },
           );
         }
         throw reserveErr;

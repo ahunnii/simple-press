@@ -347,6 +347,80 @@ describe("findOverdrawnLines", () => {
       ),
     ).toEqual([{ lineIndex: 1, reason: "out-of-stock" }]);
   });
+
+  describe("line-level admission", () => {
+    const tracked = (inventoryQty: number) => ({
+      trackInventory: true,
+      allowBackorders: false,
+      inventoryQty,
+      reservedQty: 0,
+      baseInventoryUnitId: null,
+      baseUnitsConsumed: null,
+    });
+    const stock: StockRows = {
+      variants: new Map(),
+      products: new Map([
+        ["prod-bee", tracked(1)],
+        ["prod-star", tracked(1)],
+      ]),
+      pools: new Map(),
+    };
+    const bee = (lineIndex: number, component: boolean) => ({
+      lineIndex,
+      hold: { productId: "prod-bee", qty: 1 },
+      component,
+    });
+    const star = (lineIndex: number) => ({
+      lineIndex,
+      hold: { productId: "prod-star", qty: 1 },
+      component: true,
+    });
+
+    it("a line rejected on one row uses no stock on its other rows", () => {
+      // Plain Bee, a glove with Bee + Star, a glove with Star: the middle
+      // glove loses the Bee, so its Star is free for the last glove.
+      expect(
+        findOverdrawnLines(
+          [bee(0, false), bee(1, true), star(1), star(2)],
+          stock,
+        ),
+      ).toEqual([{ lineIndex: 1, reason: "option-out-of-stock" }]);
+    });
+
+    it("rejects the second build wanting the last charm", () => {
+      expect(findOverdrawnLines([bee(0, true), bee(1, true)], stock)).toEqual([
+        { lineIndex: 1, reason: "option-out-of-stock" },
+      ]);
+    });
+
+    it("a plain line beats an earlier build for the same stock", () => {
+      expect(findOverdrawnLines([bee(0, true), bee(1, false)], stock)).toEqual([
+        { lineIndex: 0, reason: "option-out-of-stock" },
+      ]);
+    });
+
+    it("blames the line's own product when that overdraws", () => {
+      expect(
+        findOverdrawnLines([bee(0, false), bee(1, false), star(1)], stock),
+      ).toEqual([{ lineIndex: 1, reason: "out-of-stock" }]);
+    });
+
+    it("treats rows with no known limit as unlimited", () => {
+      expect(
+        findOverdrawnLines(
+          [
+            {
+              lineIndex: 0,
+              hold: { productId: "unknown", qty: 99 },
+              component: true,
+            },
+            bee(0, true),
+          ],
+          stock,
+        ),
+      ).toEqual([]);
+    });
+  });
 });
 
 describe("readLineConfigSnapshots", () => {

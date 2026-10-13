@@ -13,6 +13,7 @@ import type {
 } from "~/lib/dashboard/card-data";
 import type { DashboardRangeGranularity } from "~/lib/dashboard/ranges";
 import type { TxClient } from "~/server/db";
+import { orderOptionsHint } from "~/lib/customizer/display";
 import {
   financeOrderScope,
   financeOrderStatusSql,
@@ -348,6 +349,10 @@ export async function recentOrders(
       status: true,
       paymentStatus: true,
       createdAt: true,
+      items: {
+        where: { customization: { not: Prisma.DbNull } },
+        select: { customization: true },
+      },
     },
   });
   return {
@@ -360,6 +365,9 @@ export async function recentOrders(
       status: order.status,
       paymentStatus: order.paymentStatus,
       createdAt: order.createdAt.toISOString(),
+      optionsHint: orderOptionsHint(
+        order.items.map((item) => item.customization),
+      ),
     })),
   };
 }

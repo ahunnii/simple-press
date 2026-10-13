@@ -373,6 +373,72 @@ describe("customizer links to unpublished products without leaking them", () => 
     });
   });
 
+  it("flags a plain line of a product whose option group became required", async () => {
+    const { parent, group, standaloneValue, caller } = await seedCustomizer({
+      productOptions: true,
+    });
+    const items = [{ productId: parent.id, variantId: null }];
+
+    // All-optional product: the plain line is untouched.
+    const [optional] = await caller.product.getCartItemsStatus({ items });
+    expect(optional).toMatchObject({
+      available: true,
+      price: 10000,
+      configKey: "",
+    });
+    expect(optional!.reason).toBeUndefined();
+
+    // The owner makes the group required: a plain line can no longer be
+    // bought, and the cart says so before checkout does.
+    await db.productOptionGroup.update({
+      where: { id: group.id },
+      data: { required: true },
+    });
+    const [required] = await caller.product.getCartItemsStatus({ items });
+    expect(required).toMatchObject({
+      available: false,
+      reason: "configuration-invalid",
+      configKey: "",
+    });
+
+    // The same product with a build that satisfies the group stays fine, and
+    // carries the server's own rendering of the build for the cart.
+    const [configured] = await caller.product.getCartItemsStatus({
+      items: [
+        {
+          productId: parent.id,
+          variantId: null,
+          configuration: {
+            choices: [{ groupId: group.id, valueIds: [standaloneValue.id] }],
+            texts: [],
+          },
+        },
+      ],
+    });
+    expect(configured).toMatchObject({
+      available: true,
+      price: 10500,
+      customization: {
+        summary: expect.stringContaining("Plain star") as string,
+        lines: [{ label: "Charms", value: "Plain star", price: 500 }],
+      },
+    });
+  });
+
+  it("does not flag a plain line of a required-option product when the flag is off", async () => {
+    const { parent, group, caller } = await seedCustomizer({
+      productOptions: false,
+    });
+    await db.productOptionGroup.update({
+      where: { id: group.id },
+      data: { required: true },
+    });
+    const [result] = await caller.product.getCartItemsStatus({
+      items: [{ productId: parent.id, variantId: null }],
+    });
+    expect(result).toMatchObject({ available: true, configKey: "" });
+  });
+
   it("rejects a posted configuration when the flag is off", async () => {
     const { parent, group, standaloneValue, caller } = await seedCustomizer({
       productOptions: false,

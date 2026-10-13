@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { orderOptionsHint } from "~/lib/customizer/display";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
@@ -112,6 +113,9 @@ export default async function CustomerDetailPage({ params }: Props) {
                     // `hasOversell`, so the Oversold badge simply never
                     // showed on a customer's order history before either.
                     hasOversell: false,
+                    optionsHint: orderOptionsHint(
+                      items.map((item) => item.customization),
+                    ),
                   }),
                 )}
               />

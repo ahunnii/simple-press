@@ -36,6 +36,7 @@ import {
   createDiscount,
   createProduct,
 } from "../helpers/factories";
+import { fakeListLineItems } from "../helpers/stripe-line-items";
 import {
   makeCheckoutAsyncPaymentFailedEvent,
   makeCheckoutAsyncPaymentSucceededEvent,
@@ -320,7 +321,9 @@ describe("discount-code uses are held at checkout start", () => {
     await resetDb();
     for (const mock of Object.values(stripeMocks)) mock.mockReset();
     stripeMocks.couponsCreate.mockResolvedValue({ id: "coupon_test" });
-    stripeMocks.listLineItems.mockResolvedValue({ data: [] });
+    stripeMocks.listLineItems.mockImplementation((...args: unknown[]) =>
+      fakeListLineItems(...args),
+    );
     emailMocks.sendEmail.mockReset();
     emailMocks.sendEmail.mockResolvedValue({ success: true, id: "test" });
     sentryMocks.captureException.mockReset();

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   customizationLines,
+  ORDER_OPTIONS_HINT_MAX_LENGTH,
   orderItemOptionLines,
+  orderOptionsHint,
   readCustomizationSnapshot,
 } from "./display";
 import { priceConfiguration } from "./evaluate";
@@ -95,5 +97,37 @@ describe("orderItemOptionLines", () => {
         components: [],
       }),
     ).toEqual([{ label: "Options", value: "Chain: Gold", price: 0 }]);
+  });
+});
+
+describe("orderOptionsHint", () => {
+  it("is null when no line carries a readable build", () => {
+    expect(orderOptionsHint([])).toBeNull();
+    expect(orderOptionsHint([null, undefined, { v: 9 }])).toBeNull();
+  });
+
+  it("counts customized lines and joins their summaries", () => {
+    const short = {
+      v: 1,
+      basePrice: 100,
+      addOnTotal: 0,
+      summary: "Chain: Gold",
+      groups: [],
+      components: [],
+    };
+    expect(orderOptionsHint([null, short, short])).toEqual({
+      count: 2,
+      summary: "Chain: Gold; Chain: Gold",
+    });
+  });
+
+  it("truncates a long summary with an ellipsis", () => {
+    const hint = orderOptionsHint([snapshot(), snapshot()]);
+    expect(hint?.count).toBe(2);
+    expect(Array.from(hint!.summary)).toHaveLength(
+      ORDER_OPTIONS_HINT_MAX_LENGTH,
+    );
+    expect(hint!.summary.endsWith("…")).toBe(true);
+    expect(hint!.summary.startsWith(snapshot().summary)).toBe(true);
   });
 });

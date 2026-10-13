@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { configKey, isEmptySelection, normalizeSelection } from "./canonical";
+import {
+  configKey,
+  isEmptySelection,
+  normalizeSelection,
+  stableHash16,
+} from "./canonical";
 
 describe("normalizeSelection", () => {
   it("sorts, dedupes, merges, cleans and drops empties", () => {
@@ -83,5 +88,28 @@ describe("configKey", () => {
         texts: [{ groupId: "t", text: " " }],
       }),
     ).toBe("");
+  });
+});
+
+describe("stableHash16", () => {
+  it("is two 32-bit FNV-1a passes (seeds 0x811c9dc5, 0x050c5d1f)", () => {
+    // Pinned: saved carts embed these (configKey, hashed checkout line keys).
+    expect(stableHash16("abc")).toBe("1a47e90bb9de7311");
+    expect(stableHash16("")).toBe("811c9dc5050c5d1f");
+  });
+
+  it("is 16 hex chars and sensitive to the input", () => {
+    expect(stableHash16("glove-a")).toMatch(/^[0-9a-f]{16}$/);
+    expect(stableHash16("glove-a")).not.toBe(stableHash16("glove-b"));
+  });
+
+  it("is what configKey hashes: the JSON of the normalized selection", () => {
+    const selection = {
+      choices: [{ groupId: "charms", valueIds: ["star"] }],
+      texts: [],
+    };
+    expect(configKey(selection)).toBe(
+      stableHash16(JSON.stringify(normalizeSelection(selection))),
+    );
   });
 });

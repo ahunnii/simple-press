@@ -6,6 +6,7 @@ import type { CustomizationSnapshot } from "~/lib/customizer/types";
 import {
   findMissingLineConfigs,
   mapStripeLineItemsToOrderItems,
+  missingLineConfigNote,
   parseFreeShippingDiscountCents,
 } from "./create-order";
 
@@ -313,5 +314,39 @@ describe("mapStripeLineItemsToOrderItems — product customizer", () => {
     expect(
       findMissingLineConfigs(session, new Map([["L0-gone", snapshot]])),
     ).toEqual([]);
+  });
+
+  it("names the degraded lines' products in an owner note", () => {
+    const glove = (lineConfig: string) =>
+      makeLineItem({
+        description: "Client name glove",
+        productMetadata: { productId: "prod-glove", lineConfig },
+      });
+    const session = makeSession([
+      glove("L0-gone"),
+      glove("L1-gone"),
+      makeLineItem({
+        description: "Necklace",
+        productMetadata: { productId: "prod-neck", lineConfig: "L2-kept" },
+      }),
+      makeLineItem({ description: "Plain", productMetadata: {} }),
+    ]);
+    const note = missingLineConfigNote(
+      session,
+      new Map([["L2-kept", snapshot]]),
+    );
+    expect(note).toContain("was not deducted");
+    // De-duplicated; only the lines whose build is missing.
+    expect(note).toMatch(/inventory for: Client name glove\.$/);
+    expect(
+      missingLineConfigNote(
+        session,
+        new Map([
+          ["L0-gone", snapshot],
+          ["L1-gone", snapshot],
+          ["L2-kept", snapshot],
+        ]),
+      ),
+    ).toBe(null);
   });
 });

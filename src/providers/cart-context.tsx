@@ -14,6 +14,7 @@ import type { CustomizerSelection } from "~/lib/customizer";
 import {
   configKey as computeConfigKey,
   normalizeSelection,
+  stableHash16,
 } from "~/lib/customizer";
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { customizerSelectionSchema } from "~/lib/validators/product-options";
@@ -138,7 +139,7 @@ export function checkoutLineKey(
 ) {
   const id = cartItemId(item);
   if (id.length <= CHECKOUT_LINE_KEY_MAX) return id;
-  return `h:${fnv1a(id, 0x811c9dc5)}${fnv1a(id, 0x050c5d1f)}`;
+  return `h:${stableHash16(id)}`;
 }
 
 export function findLineByCheckoutKey<T extends CartItem>(
@@ -146,15 +147,6 @@ export function findLineByCheckoutKey<T extends CartItem>(
   lineKey: string,
 ): T | undefined {
   return items.find((item) => checkoutLineKey(item) === lineKey);
-}
-
-function fnv1a(input: string, seed: number): string {
-  let hash = seed >>> 0;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, "0");
 }
 
 /**
@@ -241,6 +233,12 @@ export type CartItemSnapshot = {
   compareAtPrice: number | null;
   maxQuantity: number | null;
   slug?: string | null;
+  /**
+   * The server's own rendering of a configured, available line's build
+   * (priced from the current option definitions). Replaces the line's
+   * stored `customization` so the breakdown follows owner price edits.
+   */
+  customization?: CartItemCustomization;
 };
 
 type CartContextType = {
@@ -367,6 +365,23 @@ export function parseStoredCartItems(raw: string | null): CartItem[] | null {
   } catch {
     return null;
   }
+}
+
+function sameCustomization(
+  a: CartItemCustomization | undefined,
+  b: CartItemCustomization,
+): boolean {
+  if (a?.summary !== b.summary || a.lines.length !== b.lines.length) {
+    return false;
+  }
+  return a.lines.every((line, i) => {
+    const other = b.lines[i];
+    return (
+      line.label === other?.label &&
+      line.value === other?.value &&
+      line.price === other?.price
+    );
+  });
 }
 
 function isCustomization(value: unknown): value is CartItemCustomization {
@@ -814,6 +829,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           compareAtPrice: newCompare,
           maxInventory: newMaxInv,
           quantity: clampedQty,
+          // Keep the stored object when the build reads the same, so an
+          // unchanged cart stays reference-stable.
+          ...(snap.customization &&
+          item.configuration &&
+          !sameCustomization(item.customization, snap.customization)
+            ? { customization: snap.customization }
+            : {}),
         });
       }
 
@@ -827,7 +849,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const unchanged = next.every(
           (n, i) =>
             n.quantity === currentItems[i]?.quantity &&
-            (n.productSlug ?? null) === (currentItems[i]?.productSlug ?? null),
+            (n.productSlug ?? null) ===
+              (currentItems[i]?.productSlug ?? null) &&
+            n.customization === currentItems[i]?.customization,
         );
         if (unchanged) return currentItems;
       }

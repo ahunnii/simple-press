@@ -68,8 +68,16 @@ export function configKey(selection: SelectionInput): string {
   if (normalized.choices.length === 0 && normalized.texts.length === 0) {
     return "";
   }
-  const json = JSON.stringify(normalized);
-  return fnv1a(json, 0x811c9dc5) + fnv1a(json, 0x050c5d1f);
+  return stableHash16(JSON.stringify(normalized));
+}
+
+/**
+ * 16 hex chars from two 32-bit FNV-1a passes with different seeds. Stable
+ * across runtimes and releases (saved carts embed it), so never change the
+ * seeds or the pass order. Not cryptographic: identity only.
+ */
+export function stableHash16(input: string): string {
+  return fnv1a(input, 0x811c9dc5) + fnv1a(input, 0x050c5d1f);
 }
 
 function fnv1a(input: string, seed: number): string {

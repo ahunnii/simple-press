@@ -1,6 +1,6 @@
 import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import { OPTIONS_SUMMARY_METADATA_KEY } from "~/lib/checkout/customizer-checkout";
-import { stripeClient } from "~/lib/stripe/client";
+import { listAllSessionLineItems } from "~/lib/checkout/list-session-line-items";
 
 /**
  * The line items of a cart Checkout Session, shaped for the shopper/owner
@@ -8,7 +8,8 @@ import { stripeClient } from "~/lib/stripe/client";
  * bank payment still processing, bank payment failed).
  *
  * Webhook session payloads do not include `line_items` (they need expansion),
- * so the items are listed on the connected account that owns the session.
+ * so the items are listed (every page, via `listAllSessionLineItems`) on the
+ * connected account that owns the session.
  * Throws whatever Stripe throws — every caller treats the list as optional,
  * catches, reports under its own `webhook.step` tag and sends the email
  * without items.
@@ -19,12 +20,11 @@ export async function listCheckoutSessionEmailItems(params: {
   /** The store logo, so a logo-as-thumbnail fallback can be dropped. */
   logoUrl?: string | null;
 }): Promise<AbandonedCheckoutItem[]> {
-  const lineItems = await stripeClient.checkout.sessions.listLineItems(
-    params.sessionId,
-    { limit: 100, expand: ["data.price.product"] },
-    { stripeAccount: params.stripeAccount },
-  );
-  return lineItems.data.map((line) => {
+  const lineItems = await listAllSessionLineItems({
+    sessionId: params.sessionId,
+    stripeAccount: params.stripeAccount,
+  });
+  return lineItems.map((line) => {
     const product =
       line.price?.product &&
       typeof line.price.product !== "string" &&

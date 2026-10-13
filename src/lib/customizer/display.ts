@@ -2,6 +2,7 @@ import type {
   CustomizationSnapshot,
   CustomizationSnapshotGroup,
 } from "~/lib/customizer/types";
+import { truncateCodePoints } from "~/lib/customizer/text";
 
 /**
  * Order-side display of a stored `CustomizationSnapshot` — the admin order
@@ -65,6 +66,50 @@ export function orderItemOptionLines(json: unknown): CustomizationLine[] {
   return snapshot.summary
     ? [{ label: "Options", value: snapshot.summary, price: 0 }]
     : [];
+}
+
+/** Longest `OrderOptionsHint.summary` a list row carries. */
+export const ORDER_OPTIONS_HINT_MAX_LENGTH = 80;
+
+export type OrderOptionsHint = {
+  /** How many of the order's lines carry a readable build. */
+  count: number;
+  /** Their snapshot summaries joined, truncated with "…". */
+  summary: string;
+};
+
+/**
+ * The compact "with options" hint for an order in a list (admin orders
+ * table, dashboard recent orders) — rows there show counts, not lines, so
+ * this says only that some lines were customized plus a short summary for
+ * a tooltip. `null` when no line has a readable snapshot.
+ */
+export function orderOptionsHint(
+  customizations: readonly unknown[],
+): OrderOptionsHint | null {
+  const summaries: string[] = [];
+  let count = 0;
+  for (const json of customizations) {
+    const lines = orderItemOptionLines(json);
+    if (lines.length === 0) continue;
+    count += 1;
+    // A blank stored summary (hand-edited data) falls back to the lines.
+    const summary = readCustomizationSnapshot(json)?.summary ?? "";
+    summaries.push(
+      summary.length > 0
+        ? summary
+        : lines.map((line) => `${line.label}: ${line.value}`).join(" · "),
+    );
+  }
+  if (count === 0) return null;
+  return {
+    count,
+    // "; " between lines — a summary already uses " · " between groups.
+    summary: truncateCodePoints(
+      summaries.join("; "),
+      ORDER_OPTIONS_HINT_MAX_LENGTH,
+    ),
+  };
 }
 
 /**

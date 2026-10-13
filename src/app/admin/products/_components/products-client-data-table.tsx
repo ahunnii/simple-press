@@ -83,6 +83,7 @@ import {
 } from "../../_lib/admin-mutation-toast";
 import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 import { DeleteProductAlertDialog } from "./delete-product-alert-dialog";
+import { BulkOptionUsageWarning } from "./option-usage-warning";
 
 type Product = RouterOutputs["product"]["secureList"]["products"][number];
 
@@ -815,6 +816,12 @@ export function ProductsClient({
               Past orders keep their own record of what was bought. This action
               cannot be undone.
             </AlertDialogDescription>
+            {/* Mounted only while open (no query for a closed dialog) and
+                within the delete cap — over it the delete can't run, and the
+                server's input would reject the list anyway. */}
+            {bulkDeleteOpen && selectedCount <= ADMIN_BULK_DELETE_LIMIT && (
+              <BulkOptionUsageWarning productIds={[...selectedIds].sort()} />
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>

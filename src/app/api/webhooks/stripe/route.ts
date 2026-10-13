@@ -23,6 +23,7 @@ import {
   loadCheckoutLineConfigs,
 } from "~/lib/checkout/create-order";
 import { SUPERSEDED_METADATA_KEY } from "~/lib/checkout/discount-holds";
+import { listAllSessionLineItems } from "~/lib/checkout/list-session-line-items";
 import { listCheckoutSessionEmailItems } from "~/lib/checkout/session-email-items";
 import { sessionShopperEmail } from "~/lib/checkout/session-shopper-email";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
@@ -322,20 +323,33 @@ export async function POST(req: NextRequest) {
         }
 
         // 🔑 Retrieve full session using business's Stripe account
-        const fullSession = await stripeClient.checkout.sessions.retrieve(
+        const retrievedSession = await stripeClient.checkout.sessions.retrieve(
           session.id,
           {
-            expand: [
-              "line_items",
-              "line_items.data.price.product",
-              "total_details",
-              "payment_intent",
-            ],
+            expand: ["total_details", "payment_intent"],
           },
           {
             stripeAccount: stripeAccountId,
           },
         );
+
+        // An expanded `line_items` carries only the first page (10 items), so
+        // the full list is paged in separately and set on the session that
+        // create-order reads. A listing failure throws here (500 → Stripe
+        // retries) before anything is written — never a partial order.
+        const allLineItems = await listAllSessionLineItems({
+          sessionId: session.id,
+          stripeAccount: stripeAccountId,
+        });
+        const fullSession: Stripe.Checkout.Session = {
+          ...retrievedSession,
+          line_items: {
+            object: "list",
+            data: allLineItems,
+            has_more: false,
+            url: `/v1/checkout/sessions/${session.id}/line_items`,
+          },
+        };
 
         // Calculate discount amount
         const discountAmount = fullSession.total_details?.amount_discount ?? 0;
