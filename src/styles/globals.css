@@ -16942,10 +16942,33 @@ body:has(.pollen) {
   transform: scale(1.02);
 }
 
+/* "Show whole photo" (DreamPhoto fit="contain"): the foreground is letterboxed
+   with object-fit: contain, over a blurred, enlarged copy of the same photo
+   that fills the frame. The 1.25 scale pushes the blur's soft edge outside
+   the frame (.dream-photo clips with overflow: hidden). The backdrop is
+   static, so reduced motion needs nothing extra. */
+.dream .dream-photo-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(28px) saturate(1.2);
+  transform: scale(1.25);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.dream .dream-photo-img.is-contain {
+  position: relative;
+  object-fit: contain;
+}
+
 .dream .dream-photo-caption {
   position: absolute;
   left: 16px;
   bottom: 16px;
+  z-index: 1;
   padding: 6px 14px;
   border-radius: var(--dream-radius-pill);
   background: var(--dream-veil);

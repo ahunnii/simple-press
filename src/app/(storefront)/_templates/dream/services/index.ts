@@ -289,8 +289,8 @@ const servicesCtaData: TemplateField[] = [
 
 export const dreamServicesData: TemplateField[] = [
   ...servicesHeroData,
-  ...servicesLanesData,
   ...servicesPackagesData,
+  ...servicesLanesData,
   ...servicesCtaData,
 ];
 
@@ -303,14 +303,6 @@ export const dreamServicesFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
-    id: "services.lanes",
-    title: "Services",
-    description:
-      "Alternating rows, one per published service. Designed empty-state copy shown when none are published.",
-    icon: "🎀",
-    columns: 2,
-  },
-  {
     id: "services.packages",
     title: "Package ideas",
     description:
@@ -319,10 +311,18 @@ export const dreamServicesFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "services.lanes",
+    title: "Services",
+    description:
+      "Alternating rows, one per published service. Designed empty-state copy shown when none are published.",
+    icon: "🎀",
+    columns: 2,
+  },
+  {
     id: "services.cta",
     title: "Closing banner",
     description:
-      "Quiet closing heading, intro, and button beneath the packages.",
+      "Quiet closing heading, intro, and button beneath the service lanes.",
     icon: "💌",
     columns: 2,
   },
@@ -339,29 +339,29 @@ export const dreamServicesSections: TemplateSection[] = [
     hideable: false,
   },
   {
+    id: "services.packages",
+    page: "services",
+    title: "Package ideas",
+    description: "Grid of package cards right under the page header.",
+    groupIds: ["services.packages"],
+    order: 1,
+    hideable: true,
+  },
+  {
     id: "services.lanes",
     page: "services",
     title: "Services",
     description:
       "The alternating row for every published service, or its empty state.",
     groupIds: ["services.lanes"],
-    order: 1,
-    hideable: false,
-  },
-  {
-    id: "services.packages",
-    page: "services",
-    title: "Package ideas",
-    description: "Grid of package cards beneath the service lanes.",
-    groupIds: ["services.packages"],
     order: 2,
-    hideable: true,
+    hideable: false,
   },
   {
     id: "services.cta",
     page: "services",
     title: "Closing banner",
-    description: "Quote request band beneath the packages.",
+    description: "Quote request band beneath the service lanes.",
     groupIds: ["services.cta"],
     order: 3,
     hideable: true,

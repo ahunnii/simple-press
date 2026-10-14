@@ -62,6 +62,7 @@ function PackageTierCard({
           src={item.image ?? "/placeholder.svg"}
           alt={item.name}
           aspect="4 / 3"
+          fit="contain"
         />
         {item.isSignature && <DreamMostLovedBadge />}
       </div>

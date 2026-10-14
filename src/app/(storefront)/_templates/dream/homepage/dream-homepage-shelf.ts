@@ -14,6 +14,8 @@ export type DreamHeroShelfPhoto = {
   src: string;
   alt: string;
   caption: string;
+  /** True crops the photo to fill its frame; false (default) shows it whole. */
+  crop: boolean;
 };
 
 function clean(value: unknown): string {
@@ -30,9 +32,15 @@ function toPhoto(
   image: unknown,
   alt: unknown,
   caption: unknown,
+  crop: unknown,
 ): DreamHeroShelfPhoto {
   const cap = clean(caption);
-  return { src: cleanImage(image), alt: clean(alt) || cap, caption: cap };
+  return {
+    src: cleanImage(image),
+    alt: clean(alt) || cap,
+    caption: cap,
+    crop: crop === "true",
+  };
 }
 
 /**
@@ -52,12 +60,12 @@ export function resolveDreamHeroShelf(
   const saved = getListFieldValue(customFields, DREAM_HERO_SHELF_KEY);
   if (saved) {
     const kept = parseTemplateListRows(saved)
-      .map((row) => toPhoto(row.image, row.alt, row.caption))
+      .map((row) => toPhoto(row.image, row.alt, row.caption, row.crop))
       .filter((photo) => photo.src !== "" || photo.caption !== "");
     if (kept.length > 0) return kept;
   }
 
   return listRowsFromDefaults(DREAM_HERO_SHELF_DEFAULT_ROWS, "shelf").map(
-    (row) => toPhoto(row.image, row.alt, row.caption),
+    (row) => toPhoto(row.image, row.alt, row.caption, row.crop),
   );
 }

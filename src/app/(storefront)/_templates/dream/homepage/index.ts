@@ -180,6 +180,13 @@ const heroData: TemplateField[] = [
         description:
           "Describe the photo for screen readers. Leave blank to use the label.",
       },
+      {
+        key: "crop",
+        label: "Crop to fill the frame",
+        type: "boolean",
+        optional: true,
+        description: "Off shows the whole photo on a soft blurred backdrop.",
+      },
     ],
     defaultRows: DREAM_HERO_SHELF_DEFAULT_ROWS,
   },
@@ -310,6 +317,13 @@ const whatWeDoData: TemplateField[] = [
           "Describe the main photo for screen readers. Leave blank to use the heading.",
       },
       {
+        key: "imageCrop",
+        label: "Crop to fill the frame",
+        type: "boolean",
+        optional: true,
+        description: "Off shows the whole photo on a soft blurred backdrop.",
+      },
+      {
         key: "sideImage",
         label: "Side photo",
         type: "image",
@@ -323,6 +337,13 @@ const whatWeDoData: TemplateField[] = [
         optional: true,
         description:
           "Describe the side photo for screen readers. Leave blank if it is purely decorative.",
+      },
+      {
+        key: "sideImageCrop",
+        label: "Crop to fill the frame",
+        type: "boolean",
+        optional: true,
+        description: "Off shows the whole photo on a soft blurred backdrop.",
       },
     ],
     defaultRows: DREAM_WHAT_WE_DO_DEFAULT_ROWS,

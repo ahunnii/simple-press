@@ -24,18 +24,22 @@ import { DreamServiceItems } from "./dream-service-items";
 import { resolveDreamLaneFields } from "./fields";
 
 const FIELD_KEYS = [
+  "dream-lane.image-crop",
   "dream-lane.block-1-heading",
   "dream-lane.block-1-body",
   "dream-lane.block-1-image",
   "dream-lane.block-1-alt",
+  "dream-lane.block-1-image-crop",
   "dream-lane.block-2-heading",
   "dream-lane.block-2-body",
   "dream-lane.block-2-image",
   "dream-lane.block-2-alt",
+  "dream-lane.block-2-image-crop",
   "dream-lane.block-3-heading",
   "dream-lane.block-3-body",
   "dream-lane.block-3-image",
   "dream-lane.block-3-alt",
+  "dream-lane.block-3-image-crop",
   "dream-lane.options-heading",
   "dream-lane.cta-heading",
   "dream-lane.cta-accent",
@@ -49,6 +53,8 @@ type StoryBlock = {
   body: string;
   image: string;
   alt: string;
+  /** True crops the photo to fill its frame; false shows it whole. */
+  crop: boolean;
 };
 
 export function DreamLaneServicePage({
@@ -72,6 +78,7 @@ export function DreamLaneServicePage({
       body: f[`dream-lane.block-${n}-body`] ?? "",
       image: f[`dream-lane.block-${n}-image`] ?? "/placeholder.svg",
       alt: f[`dream-lane.block-${n}-alt`] ?? "",
+      crop: f[`dream-lane.block-${n}-image-crop`] === "true",
     }))
     .filter((block) => block.heading.trim().length > 0);
 
@@ -92,6 +99,7 @@ export function DreamLaneServicePage({
             src={service.image}
             alt={service.name}
             aspect="16 / 9"
+            fit={f["dream-lane.image-crop"] === "true" ? "cover" : "contain"}
             className="mx-auto max-w-[900px]"
           />
         </DreamSection>
@@ -115,6 +123,7 @@ export function DreamLaneServicePage({
                     src={block.image}
                     alt={block.alt}
                     aspect="4 / 3"
+                    fit={block.crop ? "cover" : "contain"}
                   />
                 }
               >

@@ -99,7 +99,12 @@ export function DreamHomepageWhatWeDo({
                     variant === "image-text" && "lg:order-1",
                   )}
                 >
-                  <DreamPhoto src={row.image} alt={row.alt} aspect="4 / 3" />
+                  <DreamPhoto
+                    src={row.image}
+                    alt={row.alt}
+                    aspect="4 / 3"
+                    fit={row.imageCrop ? "cover" : "contain"}
+                  />
                   {/* Wrapper carries the positioning: `.dream-photo` sets its own
                       `position: relative` in the scoped block, which would beat a
                       Tailwind `absolute` utility placed on the component itself. */}
@@ -109,6 +114,7 @@ export function DreamHomepageWhatWeDo({
                         src={row.sideImage}
                         alt={row.sideAlt}
                         aspect="1 / 1"
+                        fit={row.sideImageCrop ? "cover" : "contain"}
                         className="shadow-[var(--dream-shadow-card)]"
                       />
                     </div>

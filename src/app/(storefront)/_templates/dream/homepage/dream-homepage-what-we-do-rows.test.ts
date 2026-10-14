@@ -14,8 +14,10 @@ const DEFAULT_ROWS = DREAM_WHAT_WE_DO_DEFAULT_ROWS.map((row) => ({
   linkUrl: "/services",
   image: "",
   alt: row.alt,
+  imageCrop: false,
   sideImage: "",
   sideAlt: row.sideAlt,
+  sideImageCrop: false,
 }));
 
 describe("resolveDreamWhatWeDoRows", () => {
@@ -47,8 +49,10 @@ describe("resolveDreamWhatWeDoRows", () => {
             linkUrl: "/services",
             image: "/main.jpg",
             alt: " Main photo ",
+            imageCrop: "true",
             sideImage: "/side.jpg",
             sideAlt: " Side photo ",
+            sideImageCrop: "false",
           },
         ],
       }),
@@ -60,8 +64,10 @@ describe("resolveDreamWhatWeDoRows", () => {
         linkUrl: "/services",
         image: "/main.jpg",
         alt: "Main photo",
+        imageCrop: true,
         sideImage: "/side.jpg",
         sideAlt: "Side photo",
+        sideImageCrop: false,
       },
     ]);
   });
