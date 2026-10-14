@@ -64,6 +64,7 @@ import { BambooEventPage } from "./bamboo/events/bamboo-event-page";
 import { BambooEventsPage } from "./bamboo/events/bamboo-events-page";
 import { BambooFaqPage } from "./bamboo/faq/bamboo-faq-page";
 import { BambooLayout } from "./bamboo/layout/bamboo-general-layout";
+import { BambooMaintenancePage } from "./bamboo/maintenance/bamboo-maintenance-page";
 import { BambooProductPage } from "./bamboo/products/bamboo-product-page";
 import { BambooServicesIndexPage } from "./bamboo/services/bamboo-services-index-page";
 import { BambooShopPage } from "./bamboo/shop/bamboo-shop-page";
@@ -688,6 +689,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     DonatePage: BambooDonatePage,
     VideosPage: BambooVideosPage,
     FaqPage: BambooFaqPage,
+    MaintenancePage: BambooMaintenancePage,
   },
 
   "animated-bamboo": {
