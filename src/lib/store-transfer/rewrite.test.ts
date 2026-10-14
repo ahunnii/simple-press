@@ -154,3 +154,37 @@ describe("rewriteJsonValue", () => {
     });
   });
 });
+
+describe("rewriteJsonValue — Service.customFields", () => {
+  it("remaps a service-template gallery field via serviceTemplateId and rewrites list-row photos", () => {
+    const out = rewriteJsonValue(
+      {
+        "dream-lane.gallery": "gal_old",
+        "dream-lane.sections": [
+          { _id: "r1", heading: "One", image: OLD_IMG, alt: "" },
+        ],
+      },
+      urlMap,
+      galleryIdMap,
+      { templateId: "dream", serviceTemplateId: "dream-lane" },
+    );
+    expect(out).toEqual({
+      "dream-lane.gallery": "gal_new",
+      "dream-lane.sections": [
+        { _id: "r1", heading: "One", image: NEW_IMG, alt: "" },
+      ],
+    });
+  });
+
+  it("also remaps service-two.gallery, and leaves the id alone without serviceTemplateId", () => {
+    const input = { "service-two.gallery": "gal_old" };
+    expect(
+      rewriteJsonValue(input, urlMap, galleryIdMap, {
+        serviceTemplateId: "service-two",
+      }),
+    ).toEqual({ "service-two.gallery": "gal_new" });
+    expect(
+      rewriteJsonValue(input, urlMap, galleryIdMap, { templateId: "dream" }),
+    ).toEqual(input);
+  });
+});

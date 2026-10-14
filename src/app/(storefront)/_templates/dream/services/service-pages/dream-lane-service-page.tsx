@@ -1,7 +1,8 @@
 /**
  * `dream-lane` — the default service detail page (design.md "Service-page
- * variants → dream-lane"): hero (service data, not template fields), three
- * alternating story blocks, an Options grid built from this service's
+ * variants → dream-lane"): hero (service data, not template fields), an
+ * optional centered main photo, the owner's adaptive sections list, an
+ * optional gallery, an Options grid built from this service's
  * `ServiceItem`s, and a closing Estimate Quote band.
  *
  * Fields live on `Service.customFields`, edited at `/admin/services/[id]` —
@@ -11,8 +12,11 @@
  * pages (see `wealth-essay-service-page.tsx`).
  */
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { db } from "~/server/db";
 
+import { DreamGalleryGrid } from "../../shared/dream-gallery-grid";
 import { DreamHeading } from "../../shared/dream-heading";
 import { DreamPageHero } from "../../shared/dream-page-hero";
 import { DreamPhoto } from "../../shared/dream-photo";
@@ -20,26 +24,17 @@ import { DreamQuoteCta } from "../../shared/dream-quote-cta";
 import { DreamReveal } from "../../shared/dream-reveal";
 import { DreamSection } from "../../shared/dream-section";
 import { DreamAlternatingRow } from "../dream-alternating-row";
+import { resolveDreamLaneSections } from "./dream-lane-sections";
 import { DreamServiceItems } from "./dream-service-items";
 import { resolveDreamLaneFields } from "./fields";
 
 const FIELD_KEYS = [
+  "dream-lane.show-cover",
   "dream-lane.image-crop",
-  "dream-lane.block-1-heading",
-  "dream-lane.block-1-body",
-  "dream-lane.block-1-image",
-  "dream-lane.block-1-alt",
-  "dream-lane.block-1-image-crop",
-  "dream-lane.block-2-heading",
-  "dream-lane.block-2-body",
-  "dream-lane.block-2-image",
-  "dream-lane.block-2-alt",
-  "dream-lane.block-2-image-crop",
-  "dream-lane.block-3-heading",
-  "dream-lane.block-3-body",
-  "dream-lane.block-3-image",
-  "dream-lane.block-3-alt",
-  "dream-lane.block-3-image-crop",
+  "dream-lane.sections-visible",
+  "dream-lane.gallery",
+  "dream-lane.gallery-heading",
+  "dream-lane.gallery-lede",
   "dream-lane.options-heading",
   "dream-lane.cta-heading",
   "dream-lane.cta-accent",
@@ -48,16 +43,13 @@ const FIELD_KEYS = [
   "dream-lane.cta-url",
 ];
 
-type StoryBlock = {
-  heading: string;
-  body: string;
-  image: string;
-  alt: string;
-  /** True crops the photo to fill its frame; false shows it whole. */
-  crop: boolean;
-};
+// Same wrapper contract as the services index lanes: the row's
+// `[&:first-child]:pt-0` / `last:border-b-0` always match inside a reveal, so
+// the wrapper carries the first-row padding and the divider hairline.
+const ROW_WRAPPER =
+  "border-b border-[var(--dream-line)] pt-12 first:pt-0 last:border-b-0";
 
-export function DreamLaneServicePage({
+export async function DreamLaneServicePage({
   business,
   service,
   items,
@@ -72,15 +64,31 @@ export function DreamLaneServicePage({
     business.name ?? "",
   );
 
-  const blocks: StoryBlock[] = [1, 2, 3]
-    .map((n) => ({
-      heading: f[`dream-lane.block-${n}-heading`] ?? "",
-      body: f[`dream-lane.block-${n}-body`] ?? "",
-      image: f[`dream-lane.block-${n}-image`] ?? "/placeholder.svg",
-      alt: f[`dream-lane.block-${n}-alt`] ?? "",
-      crop: f[`dream-lane.block-${n}-image-crop`] === "true",
-    }))
-    .filter((block) => block.heading.trim().length > 0);
+  const showCover = f["dream-lane.show-cover"] !== "false";
+  const coverFit = f["dream-lane.image-crop"] === "true" ? "cover" : "contain";
+
+  const sections =
+    f["dream-lane.sections-visible"] !== "false"
+      ? resolveDreamLaneSections(service.customFields)
+      : [];
+
+  // Gallery: tenant-scoped lookup, gated on the `galleries` feature flag
+  // (service templates don't receive it as a prop), only when an owner has
+  // picked one. No empty state on service pages — nothing renders without
+  // photos.
+  const galleryId = f["dream-lane.gallery"]?.trim() ?? "";
+  let gallery = null;
+  if (galleryId) {
+    const { isEnabled } = await getBusinessFlags();
+    if (isEnabled("galleries")) {
+      gallery = await db.gallery.findUnique({
+        where: { id: galleryId, businessId: business.id },
+        include: { images: { orderBy: { sortOrder: "asc" } } },
+      });
+    }
+  }
+  const galleryHeading = f["dream-lane.gallery-heading"]?.trim() ?? "";
+  const galleryLede = f["dream-lane.gallery-lede"]?.trim() ?? "";
 
   const publishedItems = items.filter((item) => item.published !== false);
 
@@ -93,49 +101,95 @@ export function DreamLaneServicePage({
         lede={service.description ?? ""}
       />
 
-      {service.image && (
+      {showCover && service.image && (
         <DreamSection contained>
-          <DreamPhoto
-            src={service.image}
-            alt={service.name}
-            aspect="16 / 9"
-            fit={f["dream-lane.image-crop"] === "true" ? "cover" : "contain"}
-            className="mx-auto max-w-[900px]"
-          />
+          {/* Own centering wrapper: `.dream .dream-photo { margin: 0 }` is
+              unlayered and beats `mx-auto` on the figure itself. */}
+          <div className="mx-auto w-full max-w-[900px]">
+            <DreamPhoto
+              src={service.image}
+              alt={service.name}
+              aspect="16 / 9"
+              fit={coverFit}
+            />
+          </div>
         </DreamSection>
       )}
 
-      {blocks.length > 0 && (
+      {sections.length > 0 && (
         <DreamSection reveal={false}>
-          {blocks.map((block, i) => (
-            // Same wrapper contract as the services index lanes: the row's
-            // `[&:first-child]:pt-0` / `last:border-b-0` always match inside
-            // a reveal, so the wrapper carries the first-row padding and the
-            // divider hairline (`divider` is therefore off on the row).
-            <DreamReveal
-              key={i}
-              className="border-b border-[var(--dream-line)] pt-12 first:pt-0 last:border-b-0"
-            >
-              <DreamAlternatingRow
-                reversed={i % 2 === 1}
-                media={
-                  <DreamPhoto
-                    src={block.image}
-                    alt={block.alt}
-                    aspect="4 / 3"
-                    fit={block.crop ? "cover" : "contain"}
-                  />
+          {
+            // Split rows alternate by their position among split rows only,
+            // so a photo-only or text-only row in between keeps the rhythm.
+            sections.reduce<{ nodes: React.ReactNode[]; splitCount: number }>(
+              (acc, section) => {
+                if (section.kind === "split") {
+                  const reversed = acc.splitCount % 2 === 1;
+                  acc.splitCount += 1;
+                  acc.nodes.push(
+                    <DreamReveal key={section.id} className={ROW_WRAPPER}>
+                      <DreamAlternatingRow
+                        reversed={reversed}
+                        media={
+                          <DreamPhoto
+                            src={section.image}
+                            alt={section.alt}
+                            aspect="4 / 3"
+                            fit={section.crop ? "cover" : "contain"}
+                          />
+                        }
+                      >
+                        <SectionText section={section} />
+                      </DreamAlternatingRow>
+                    </DreamReveal>,
+                  );
+                } else if (section.kind === "photo") {
+                  acc.nodes.push(
+                    <DreamReveal key={section.id} className={ROW_WRAPPER}>
+                      <div className="mx-auto w-full max-w-[900px] pb-12">
+                        <DreamPhoto
+                          src={section.image}
+                          alt={section.alt}
+                          aspect="3 / 2"
+                          fit={section.crop ? "cover" : "contain"}
+                        />
+                      </div>
+                    </DreamReveal>,
+                  );
+                } else {
+                  acc.nodes.push(
+                    <DreamReveal key={section.id} className={ROW_WRAPPER}>
+                      <div className="mx-auto w-full max-w-[60ch] pb-12 text-center">
+                        <SectionText section={section} centered />
+                      </div>
+                    </DreamReveal>,
+                  );
                 }
-              >
-                <DreamHeading as="h2">{block.heading}</DreamHeading>
-                {block.body && (
-                  <p className="!mt-4 max-w-[60ch] text-[17px] leading-relaxed text-[var(--dream-soft)]">
-                    {block.body}
+                return acc;
+              },
+              { nodes: [], splitCount: 0 },
+            ).nodes
+          }
+        </DreamSection>
+      )}
+
+      {gallery && gallery.images.length > 0 && (
+        <DreamSection tone="sky" aria-label="Gallery" reveal={false}>
+          {(galleryHeading || galleryLede) && (
+            <DreamReveal>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                {galleryHeading && (
+                  <DreamHeading as="h2">{galleryHeading}</DreamHeading>
+                )}
+                {galleryLede && (
+                  <p className="max-w-[46ch] text-[var(--dream-soft)]">
+                    {galleryLede}
                   </p>
                 )}
-              </DreamAlternatingRow>
+              </div>
             </DreamReveal>
-          ))}
+          )}
+          <DreamGalleryGrid gallery={gallery} />
         </DreamSection>
       )}
 
@@ -157,5 +211,33 @@ export function DreamLaneServicePage({
         ctaUrl={f["dream-lane.cta-url"] ?? ""}
       />
     </article>
+  );
+}
+
+/** Heading + body of one section row (either may be absent, never both). */
+function SectionText({
+  section,
+  centered,
+}: {
+  section: { heading: string; body: string };
+  centered?: boolean;
+}) {
+  return (
+    <>
+      {section.heading && (
+        <DreamHeading as="h2">{section.heading}</DreamHeading>
+      )}
+      {section.body && (
+        <p
+          className={
+            (section.heading ? "!mt-4 " : "") +
+            "max-w-[60ch] text-[17px] leading-relaxed text-[var(--dream-soft)]" +
+            (centered ? " mx-auto" : "")
+          }
+        >
+          {section.body}
+        </p>
+      )}
+    </>
   );
 }

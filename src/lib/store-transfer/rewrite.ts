@@ -22,6 +22,7 @@
 
 import { normalizeUrl } from "~/lib/media/usage";
 import { isStorageUrl } from "~/lib/s3/url";
+import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 
 // Re-export normalizeUrl so callers can normalize keys before inserting
@@ -164,6 +165,11 @@ export function rewriteTiptapDoc(
  * @param urlMap       Old-URL → new-URL map (keys are normalized source URLs)
  * @param galleryIdMap Old-galleryId → new-galleryId map
  * @param opts.templateId  The manifest's templateId; activates gallery-field remapping
+ * @param opts.serviceTemplateId  A service's `serviceTemplateId`; activates the same
+ *                     gallery-field remapping against `SERVICE_TEMPLATE_FIELDS`
+ *                     (for `Service.customFields`, whose gallery-type fields —
+ *                     `service-two.gallery`, `dream-lane.gallery`, … — are NOT in
+ *                     the site-template registry)
  * @param opts._fieldKey   (internal) current field key being walked; used for gallery detection
  * @param embedIdMaps  Optional form / quote-calculator id remaps, applied to
  *                     any TipTap doc found inside `value` (see rewriteTiptapDoc)
@@ -172,18 +178,31 @@ export function rewriteJsonValue(
   value: unknown,
   urlMap: Map<string, string>,
   galleryIdMap: Map<string, string>,
-  opts?: { templateId?: string; _fieldKey?: string },
+  opts?: {
+    templateId?: string;
+    serviceTemplateId?: string;
+    _fieldKey?: string;
+  },
   embedIdMaps?: EmbedIdMaps,
 ): unknown {
   if (value === null || value === undefined) return value;
 
   const templateId = opts?.templateId;
+  const serviceTemplateId = opts?.serviceTemplateId;
   const fieldKey = opts?._fieldKey;
 
   // ── String value ───────────────────────────────────────────────────────────
   if (typeof value === "string") {
     // If this is a gallery-type field value (and we know the templateId),
     // remap via galleryIdMap instead of treating it as a URL.
+    if (fieldKey && serviceTemplateId) {
+      const svcField = SERVICE_TEMPLATE_FIELDS[serviceTemplateId]?.find(
+        (f) => f.key === fieldKey,
+      );
+      if (svcField?.type === "gallery") {
+        return galleryIdMap.get(value) ?? value;
+      }
+    }
     if (templateId && fieldKey) {
       const fields = TEMPLATE_FIELDS[templateId];
       if (fields) {
@@ -221,7 +240,7 @@ export function rewriteJsonValue(
         v,
         urlMap,
         galleryIdMap,
-        { templateId, _fieldKey: k },
+        { templateId, serviceTemplateId, _fieldKey: k },
         embedIdMaps,
       );
     }

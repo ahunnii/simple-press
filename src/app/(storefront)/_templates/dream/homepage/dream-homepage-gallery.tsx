@@ -1,37 +1,20 @@
 import type { CSSProperties } from "react";
 
+import type { DreamGalleryData } from "../shared/dream-gallery-grid";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
-import { GalleryRenderer } from "~/components/gallery-renderer";
 
+import { DreamGalleryGrid } from "../shared/dream-gallery-grid";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamImageFallback } from "../shared/dream-image-fallback";
 import { DreamLink } from "../shared/dream-link";
 import { DreamReveal, DreamRevealGroup } from "../shared/dream-reveal";
 import { DreamSection } from "../shared/dream-section";
 
-type GalleryData = {
-  name?: string;
-  description?: string | null;
-  layout: string;
-  columns: number;
-  gap: number;
-  showCaptions: boolean;
-  enableLightbox: boolean;
-  aspectRatio?: string | null;
-  captionStyle?: string | null;
-  images: Array<{
-    id: string;
-    url: string;
-    altText?: string | null;
-    caption?: string | null;
-  }>;
-};
-
 type DreamHomepageGalleryProps = {
   heading: string;
   lede: string;
-  gallery: GalleryData | null;
+  gallery: DreamGalleryData | null;
   emptyMessage: string;
   emptyLinkLabel: string;
   /** Fixed destination for the empty-state link (the Estimate Quote page). */
@@ -91,15 +74,10 @@ export function DreamHomepageGallery({
         </div>
       </DreamReveal>
 
-      <div className="dream-gallery mt-12">
-        {hasImages && gallery ? (
-          // The real tiles are rendered by the shared GalleryRenderer (not
-          // dream's to restructure), so the populated gallery reveals as one
-          // block; only the designed empty-state tiles stagger.
-          <DreamReveal>
-            <GalleryRenderer gallery={{ ...gallery, layout: "masonry" }} />
-          </DreamReveal>
-        ) : (
+      {hasImages && gallery ? (
+        <DreamGalleryGrid gallery={gallery} />
+      ) : (
+        <div className="dream-gallery mt-12">
           <div className="flex flex-col items-center gap-8 text-center">
             <DreamRevealGroup className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
               {EMPTY_TILE_ASPECTS.map((aspect, i) => (
@@ -139,8 +117,8 @@ export function DreamHomepageGallery({
               )}
             </DreamReveal>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </DreamSection>
   );
 }
