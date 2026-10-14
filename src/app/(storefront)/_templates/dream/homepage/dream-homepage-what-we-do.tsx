@@ -36,6 +36,12 @@ type DreamHomepageWhatWeDoProps = {
  * The smaller side photo shows when the owner picked one, and also when the
  * row has no main photo either — so a fresh store keeps the designed
  * two-placeholder composition. An empty `sideAlt` renders it as decorative.
+ *
+ * A row with a visible link is clickable as a whole, same stretched-link
+ * pattern as the services lanes (`dream-service-lane-row.tsx`): the row's one
+ * `<a>` carries an `::after` that fills the grid (plus the side photo's 32px
+ * overhang at ≥sm). One tab stop, one announcement — the owner's link label
+ * stays the accessible name. Rows whose link is hidden get no hover cues.
  */
 export function DreamHomepageWhatWeDo({
   heading,
@@ -77,10 +83,23 @@ export function DreamHomepageWhatWeDo({
                   `first:pt-0` (so those selectors still see a direct child of
                   the list) plus the preview attr; the reveal sits inside it
                   and carries the grid. */}
-              <DreamReveal className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+              <DreamReveal
+                className={cn(
+                  "grid items-center gap-10 lg:grid-cols-2 lg:gap-16",
+                  row.linkVisible && "group relative",
+                )}
+              >
                 <div className={cn(variant === "image-text" && "lg:order-2")}>
                   {row.heading && (
-                    <DreamHeading as="h3">{row.heading}</DreamHeading>
+                    <DreamHeading
+                      as="h3"
+                      className={cn(
+                        row.linkVisible &&
+                          "underline decoration-transparent decoration-1 underline-offset-[10px] transition-[text-decoration-color] duration-300 group-hover:decoration-[var(--dream-rose)] group-has-[:focus-visible]:decoration-[var(--dream-rose)] motion-reduce:transition-none",
+                      )}
+                    >
+                      {row.heading}
+                    </DreamHeading>
                   )}
                   {row.body && (
                     <p className="mt-4 max-w-[60ch] text-[var(--dream-soft)]">
@@ -88,7 +107,10 @@ export function DreamHomepageWhatWeDo({
                     </p>
                   )}
                   {row.linkVisible && (
-                    <DreamLink href={row.linkUrl} className="mt-6 inline-block">
+                    <DreamLink
+                      href={row.linkUrl}
+                      className="mt-6 inline-block group-hover:text-[var(--dream-ink)]! group-hover:decoration-[var(--dream-rose)]! after:absolute after:inset-0 after:z-[1] after:rounded-[var(--dream-radius-photo)] after:content-[''] focus-visible:outline-none! focus-visible:after:outline-2 focus-visible:after:outline-offset-8 focus-visible:after:outline-[color:var(--dream-rose)] sm:after:-bottom-8"
+                    >
                       {row.linkLabel}
                     </DreamLink>
                   )}
@@ -104,6 +126,10 @@ export function DreamHomepageWhatWeDo({
                     alt={row.alt}
                     aspect="4 / 3"
                     fit={row.imageCrop ? "cover" : "contain"}
+                    className={cn(
+                      row.linkVisible &&
+                        "motion-safe:group-hover:[&_.dream-photo-img]:scale-[1.02]",
+                    )}
                   />
                   {/* Wrapper carries the positioning: `.dream-photo` sets its own
                       `position: relative` in the scoped block, which would beat a
