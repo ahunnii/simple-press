@@ -154,3 +154,64 @@ describe("rewriteJsonValue", () => {
     });
   });
 });
+
+describe("rewriteJsonValue — Service.customFields", () => {
+  it("remaps a service-template gallery field via serviceTemplateId and rewrites list-row photos", () => {
+    const out = rewriteJsonValue(
+      {
+        "dream-lane.gallery": "gal_old",
+        "dream-lane.sections": [
+          { _id: "r1", heading: "One", image: OLD_IMG, alt: "" },
+        ],
+      },
+      urlMap,
+      galleryIdMap,
+      { templateId: "dream", serviceTemplateId: "dream-lane" },
+    );
+    expect(out).toEqual({
+      "dream-lane.gallery": "gal_new",
+      "dream-lane.sections": [
+        { _id: "r1", heading: "One", image: NEW_IMG, alt: "" },
+      ],
+    });
+  });
+
+  it("also remaps service-two.gallery, and leaves the id alone without serviceTemplateId", () => {
+    const input = { "service-two.gallery": "gal_old" };
+    expect(
+      rewriteJsonValue(input, urlMap, galleryIdMap, {
+        serviceTemplateId: "service-two",
+      }),
+    ).toEqual({ "service-two.gallery": "gal_new" });
+    expect(
+      rewriteJsonValue(input, urlMap, galleryIdMap, { templateId: "dream" }),
+    ).toEqual(input);
+  });
+
+  it("remaps the form id half of a dream-balloons formpicture field", () => {
+    const out = rewriteJsonValue(
+      {
+        "dream-balloons.color-source": "form_old:balloon-colors",
+        "dream-lane.gallery": "gal_old",
+      },
+      urlMap,
+      galleryIdMap,
+      { templateId: "dream", serviceTemplateId: "dream-balloons" },
+      embedIdMaps,
+    );
+    expect(out).toEqual({
+      "dream-balloons.color-source": "form_new:balloon-colors",
+      "dream-lane.gallery": "gal_new",
+    });
+  });
+
+  it("leaves unmapped, empty or malformed formpicture values alone", () => {
+    const opts = { templateId: "dream", serviceTemplateId: "dream-balloons" };
+    for (const value of ["form_unknown:balloon-colors", "", "no-colon"]) {
+      const input = { "dream-balloons.color-source": value };
+      expect(
+        rewriteJsonValue(input, urlMap, galleryIdMap, opts, embedIdMaps),
+      ).toEqual(input);
+    }
+  });
+});

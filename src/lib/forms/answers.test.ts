@@ -18,6 +18,7 @@ import {
   serializeAnswers,
   snapshotMatchesFieldFilter,
   snapshotMatchesSearch,
+  stripAnswerCode,
   toAnswerSnapshot,
   validateFormAnswers,
 } from "./answers";
@@ -701,6 +702,140 @@ describe("picturechoice answers", () => {
         ),
       ).toEqual([]);
     });
+  });
+});
+
+describe("picturechoice answers with catalog codes and hidden tiles", () => {
+  const tiles = [
+    { id: "t_gold", label: "Pearl Gold", code: "610" },
+    { id: "t_red", label: "Red", code: "010" },
+    { id: "t_old", label: "Retired Teal", code: "092", hidden: true },
+    { id: "t_plain", label: "Plain" },
+  ];
+  const fields = formDefinitionSchema.parse({
+    version: 1,
+    fields: [
+      { id: "one", type: "picturechoice", label: "One", options: tiles },
+      {
+        id: "many",
+        type: "picturechoice",
+        label: "Many",
+        selection: "many",
+        options: tiles,
+      },
+      {
+        id: "qty",
+        type: "picturechoice",
+        label: "Qty",
+        selection: "quantity",
+        options: tiles,
+      },
+    ],
+  }).fields;
+
+  function pic(
+    id: string,
+    value: unknown,
+    opts?: Parameters<typeof validateFormAnswers>[2],
+  ) {
+    const target = fields.find((f) => f.id === id)!;
+    const result = validateFormAnswers([target], { [id]: value }, opts);
+    return result.ok
+      ? { value: result.values[id] }
+      : { error: result.errors[id] };
+  }
+  const byLabel = { optionMatch: "label" } as const;
+
+  it("stores a coded tile as 'Label (#code)' in every mode", () => {
+    expect(pic("one", "t_gold")).toEqual({ value: "Pearl Gold (#610)" });
+    expect(pic("one", "t_plain")).toEqual({ value: "Plain" });
+    expect(pic("many", ["t_plain", "t_red", "t_gold"])).toEqual({
+      value: ["Pearl Gold (#610)", "Red (#010)", "Plain"],
+    });
+    expect(pic("qty", { t_gold: 2, t_plain: "1" })).toEqual({
+      value: [
+        { option: "Pearl Gold (#610)", quantity: 2 },
+        { option: "Plain", quantity: 1 },
+      ],
+    });
+  });
+
+  it("rejects a hidden tile in id mode, even when its id is posted", () => {
+    expect(pic("one", "t_old")).toEqual({ error: "Pick one of the options." });
+    expect(pic("many", ["t_red", "t_old"])).toEqual({
+      error: "Pick from the listed options.",
+    });
+    expect(pic("qty", { t_old: 1 })).toEqual({
+      error: "Choose quantities from the listed options.",
+    });
+  });
+
+  it("label mode accepts the plain label, the answer label, and hidden tiles", () => {
+    expect(pic("one", "pearl gold", byLabel)).toEqual({
+      value: "Pearl Gold (#610)",
+    });
+    expect(pic("one", " Pearl Gold (#610) ", byLabel)).toEqual({
+      value: "Pearl Gold (#610)",
+    });
+    expect(pic("one", "pearl gold (#610)", byLabel)).toEqual({
+      value: "Pearl Gold (#610)",
+    });
+    expect(pic("one", "Retired Teal (#092)", byLabel)).toEqual({
+      value: "Retired Teal (#092)",
+    });
+    expect(pic("many", "Pearl Gold; Red (#010)", byLabel)).toEqual({
+      value: ["Pearl Gold (#610)", "Red (#010)"],
+    });
+    expect(pic("one", "Pearl Gold (#999)", byLabel)).toEqual({
+      error: '"Pearl Gold (#999)" isn\'t one of the options.',
+    });
+  });
+
+  it("round-trips the quantity cell 'Pearl Gold (#610) × 2'", () => {
+    const items = [
+      { option: "Pearl Gold (#610)", quantity: 2 },
+      { option: "Plain", quantity: 1 },
+    ];
+    const text = formatAnswerForDisplay(items);
+    expect(text).toBe("Pearl Gold (#610) × 2; Plain × 1");
+    expect(pic("qty", text, byLabel)).toEqual({ value: items });
+    // The plain-label form (an entry from before the tile had a code) too.
+    expect(pic("qty", "Pearl Gold x 2; Plain x 1", byLabel)).toEqual({
+      value: items,
+    });
+  });
+
+  it("filters resolve old (plain) and new (coded) entries either way", () => {
+    const newEntry: FormAnswerSnapshot[] = [
+      {
+        fieldId: "many",
+        label: "Many",
+        type: "picturechoice",
+        value: ["Pearl Gold (#610)"],
+      },
+    ];
+    const oldEntry: FormAnswerSnapshot[] = [
+      {
+        fieldId: "many",
+        label: "Many",
+        type: "picturechoice",
+        value: ["Pearl Gold"],
+      },
+    ];
+    for (const entry of [newEntry, oldEntry]) {
+      expect(
+        snapshotMatchesFieldFilter(entry, "many", "Pearl Gold (#610)"),
+      ).toBe(true);
+      expect(snapshotMatchesFieldFilter(entry, "many", "pearl gold")).toBe(
+        true,
+      );
+      expect(snapshotMatchesFieldFilter(entry, "many", "Red (#010)")).toBe(
+        false,
+      );
+    }
+    expect(stripAnswerCode("Pearl Gold (#610)")).toBe("Pearl Gold");
+    expect(stripAnswerCode("Pearl Gold")).toBe("Pearl Gold");
+    expect(stripAnswerCode("Pearl (#1) Gold")).toBe("Pearl (#1) Gold");
   });
 });
 

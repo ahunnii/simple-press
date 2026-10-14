@@ -7,8 +7,10 @@ import { checkBusiness } from "~/lib/check-business";
 import {
   formCreateSchema,
   formUpdateSchema,
+  isPictureChoiceField,
   parseStoredFormDefinition,
   toPublicFormDefinition,
+  visiblePictureOptions,
 } from "~/lib/validators/form";
 import {
   createTRPCRouter,
@@ -65,6 +67,42 @@ export const formRouter = createTRPCRouter({
         totalEntries: _count.submissions,
         unreadCount: unreadByFormId.get(form.id) ?? 0,
       }));
+    }),
+
+  // Picker feed for the `formpicture` template-field type (e.g. the dream
+  // Balloons page's "Colors from"): every picture-choice field on every form,
+  // with how many tiles a visitor can see. Stored values are
+  // `"<formId>:<fieldId>"`. Forms whose stored definition no longer parses
+  // are skipped (the storefront couldn't render them either).
+  listPictureFields: ownerAdminProcedure
+    .use(featureGate("forms"))
+    .query(async ({ ctx }) => {
+      const forms = await ctx.db.form.findMany({
+        where: { businessId: ctx.businessId },
+        select: { id: true, name: true, published: true, definition: true },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      return forms.flatMap((form) => {
+        const parsed = parseStoredFormDefinition(form.definition);
+        if (!parsed.success) return [];
+        const fields = parsed.data.fields.filter(isPictureChoiceField).map(
+          (field) => ({
+            id: field.id,
+            label: field.label,
+            visibleCount: visiblePictureOptions(field).length,
+          }),
+        );
+        if (fields.length === 0) return [];
+        return [
+          {
+            formId: form.id,
+            name: form.name,
+            published: form.published,
+            fields,
+          },
+        ];
+      });
     }),
 
   getById: ownerAdminProcedure

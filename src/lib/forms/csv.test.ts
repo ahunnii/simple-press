@@ -272,6 +272,78 @@ describe("picture choice fields in CSV", () => {
   });
 });
 
+describe("coded picture choice fields in CSV", () => {
+  const tiles = [
+    { id: "t_gold", label: "Pearl Gold", code: "610" },
+    { id: "t_red", label: "Red", code: "010" },
+    { id: "t_old", label: "Retired Teal", code: "092", hidden: true },
+  ];
+  const codedDefinition: FormDefinition = formDefinitionSchema.parse({
+    version: 1,
+    fields: [
+      {
+        id: "many",
+        type: "picturechoice",
+        label: "Colors",
+        selection: "many",
+        options: tiles,
+      },
+      {
+        id: "qty",
+        type: "picturechoice",
+        label: "Balloons",
+        selection: "quantity",
+        options: tiles,
+      },
+    ],
+  });
+  const values = {
+    many: ["Pearl Gold (#610)", "Red (#010)"],
+    qty: [
+      { option: "Pearl Gold (#610)", quantity: 2 },
+      { option: "Red (#010)", quantity: 1 },
+    ],
+  };
+  const exported = buildFormCsv(codedDefinition, [
+    {
+      submittedAt: new Date("2026-09-01T12:34:56.000Z"),
+      status: "NEW",
+      tags: [],
+      answers: toAnswerSnapshot(codedDefinition.fields, values),
+    },
+  ]);
+
+  it("exports the code in the cell", () => {
+    const first = Papa.parse<Record<string, string>>(exported, {
+      header: true,
+    }).data[0]!;
+    expect(first.Colors).toBe("Pearl Gold (#610); Red (#010)");
+    expect(first.Balloons).toBe("Pearl Gold (#610) × 2; Red (#010) × 1");
+  });
+
+  it("round-trips 'Pearl Gold (#610) × 2' export → import", () => {
+    const result = parseFormCsv(codedDefinition, exported);
+    expect(result.errors).toEqual([]);
+    expect(result.validRows[0]!.values).toEqual(values);
+  });
+
+  it("imports plain labels, and hidden tiles, onto the coded answer", () => {
+    const csv = [
+      "Colors,Balloons",
+      '"Pearl Gold; red","pearl gold x 3; Retired Teal (#092) x 1"',
+    ].join("\n");
+    const result = parseFormCsv(codedDefinition, csv);
+    expect(result.errors).toEqual([]);
+    expect(result.validRows[0]!.values).toEqual({
+      many: ["Pearl Gold (#610)", "Red (#010)"],
+      qty: [
+        { option: "Pearl Gold (#610)", quantity: 3 },
+        { option: "Retired Teal (#092)", quantity: 1 },
+      ],
+    });
+  });
+});
+
 describe("parseFormCsv", () => {
   it("round-trips build → parse", () => {
     const csv = buildFormCsv(definition, [

@@ -326,6 +326,17 @@ function refName(
     : esc(ref.name);
 }
 
+/** "Estimate Quote request → Balloon colors" for a `"<formId>:<fieldId>"` value. */
+function formPictureName(ctx: RenderCtx, value: string): string {
+  const colon = value.indexOf(":");
+  const formId = colon > 0 ? value.slice(0, colon) : value;
+  const fieldId = colon > 0 ? value.slice(colon + 1) : "";
+  const form = ctx.refs?.forms?.get(formId);
+  if (!form) return esc("A question on one of your forms");
+  const field = form.fields.get(fieldId);
+  return esc(field ? `${form.name} → ${field}` : form.name);
+}
+
 function renderList(
   def: FieldDef,
   rows: unknown[],
@@ -411,6 +422,8 @@ export function renderFieldValue(
         html: refName(ctx.refs?.collections, String(value), docPath, "A product collection"),
         block: false,
       };
+    case "formpicture":
+      return { label, html: formPictureName(ctx, String(value)), block: false };
     case "iframe": {
       const parsed = parseJsonish(value);
       if (!isRecord(parsed) || typeof parsed.src !== "string") return null;

@@ -153,6 +153,7 @@ export function assembleReadableDocuments(
       data.collections.map((c) => [c.id, { name: c.name, path: COLLECTIONS_PATH }]),
     ),
     faqs: new Map(data.faqs.map((f) => [f.id, { question: f.question }])),
+    forms: data.formRefs,
   };
 
   const ctx: RenderCtx = {

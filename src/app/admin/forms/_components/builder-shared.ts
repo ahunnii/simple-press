@@ -1,7 +1,11 @@
+import type { FieldPath, UseFormReturn } from "react-hook-form";
 import type { z } from "zod";
 
 import type { formCreateSchema, FormFieldType } from "~/lib/validators/form";
-import { FORM_CHOICE_FIELD_TYPES } from "~/lib/validators/form";
+import {
+  FORM_CHOICE_FIELD_TYPES,
+  FORM_MAX_OPTIONS,
+} from "~/lib/validators/form";
 
 /**
  * Shared vocabulary for the Forms builder.
@@ -42,6 +46,10 @@ export type PictureChoiceFieldInput = Extract<
 >;
 
 export type PictureOptionInput = PictureChoiceFieldInput["options"][number];
+
+export type PictureGroupInput = NonNullable<
+  PictureChoiceFieldInput["groups"]
+>[number];
 
 export function isChoiceFieldType(
   type: FormFieldType,
@@ -154,8 +162,26 @@ export function makeOption(): OptionInput {
   return { id: newId(), label: "" };
 }
 
-export function makePictureOption(label = ""): PictureOptionInput {
-  return { id: newId(), label, color: null, imageUrl: null };
+/**
+ * A fresh tile. `groupId` is only written when there is one, so a tile added
+ * to an ungrouped field has exactly the pre-groups shape.
+ */
+export function makePictureOption(
+  label = "",
+  groupId: string | null = null,
+): PictureOptionInput {
+  return {
+    id: newId(),
+    label,
+    color: null,
+    imageUrl: null,
+    ...(groupId ? { groupId } : {}),
+  };
+}
+
+/** A fresh picture-choice group (a finish tab, e.g. "Pearl"). */
+export function makePictureGroup(label: string): PictureGroupInput {
+  return { id: newId(), label };
 }
 
 /**
@@ -255,7 +281,12 @@ export function convertFieldType(
   };
 
   // Plain options carry across select/radio/checkboxes AND to/from picture
-  // choice, ids + labels intact; color/imageUrl exist only on picture choice.
+  // choice, ids + labels intact. Everything tile-only (color, imageUrl, code,
+  // family, groupId, hidden) and the field-level groups/imageFit exist only
+  // on picture choice, so leaving it drops them — hidden tiles become plain,
+  // visible options. A long palette can exceed `FORM_MAX_OPTIONS`; that is
+  // left to the validator (and named by the change-type dialog) rather than
+  // silently truncated.
   const options: OptionInput[] =
     isOptionFieldInput(field) || isPictureChoiceFieldInput(field)
       ? field.options.map((option) => ({ id: option.id, label: option.label }))
@@ -317,8 +348,18 @@ export function convertFieldType(
  */
 export type FieldTypeChangeImpact = {
   optionsDiscarded: boolean;
-  /** Leaving picture choice for a choice type drops tile colors and photos. */
+  /**
+   * Leaving picture choice for a choice type drops tile colors, photos,
+   * codes, families and groups.
+   */
   picturesDiscarded: boolean;
+  /** Hidden tiles would come back as ordinary, visible options. */
+  hiddenRevealed: boolean;
+  /**
+   * The tiles outnumber what the destination choice type allows
+   * (`FORM_MAX_OPTIONS`); the owner must remove some before saving.
+   */
+  tooManyOptions: boolean;
   /** This field is the form's confirmation-email target and the new type isn't email. */
   wasConfirmationTarget: boolean;
 };
@@ -332,10 +373,16 @@ export function describeFieldTypeChangeImpact(
     isOptionFieldInput(field) || isPictureChoiceFieldInput(field);
   const keepsOptions =
     isChoiceFieldType(nextType) || nextType === "picturechoice";
+  const leavingPicturesForChoice =
+    isPictureChoiceFieldInput(field) && isChoiceFieldType(nextType);
   return {
     optionsDiscarded: hasOptions && !keepsOptions,
-    picturesDiscarded:
-      isPictureChoiceFieldInput(field) && isChoiceFieldType(nextType),
+    picturesDiscarded: leavingPicturesForChoice,
+    hiddenRevealed:
+      leavingPicturesForChoice &&
+      field.options.some((option) => option.hidden === true),
+    tooManyOptions:
+      leavingPicturesForChoice && field.options.length > FORM_MAX_OPTIONS,
     wasConfirmationTarget:
       confirmationFieldId === field.id && nextType !== "email",
   };
@@ -409,4 +456,129 @@ export function normalizeBuilderDefinition(
       notifyEmail: definition.settings?.notifyEmail ?? "",
     },
   };
+}
+
+// ─── Picture-choice groups (pure helpers for the tile editor) ───────────────
+
+/** The section key for tiles outside every (existing) group. */
+export const UNGROUPED_KEY = "";
+
+/**
+ * Which editor section a tile is listed under: its group, or ungrouped when
+ * it has none or points at a group that no longer exists (the validator
+ * flags the dangling id; the tile must still be reachable to fix it).
+ */
+export function pictureSectionKey(
+  option: Pick<PictureOptionInput, "groupId">,
+  groupIds: ReadonlySet<string>,
+): string {
+  return option.groupId && groupIds.has(option.groupId)
+    ? option.groupId
+    : UNGROUPED_KEY;
+}
+
+/** TRUE indexes (into the full options array) of one section, in order. */
+export function pictureSectionIndexes(
+  options: readonly Pick<PictureOptionInput, "groupId">[],
+  sectionKey: string,
+  groupIds: ReadonlySet<string>,
+): number[] {
+  return options.flatMap((option, index) =>
+    pictureSectionKey(option, groupIds) === sectionKey ? [index] : [],
+  );
+}
+
+/**
+ * The `move(from, to)` that swaps a tile with its previous (`-1`) or next
+ * (`+1`) neighbour of the SAME section — tiles of other groups in between
+ * keep their relative order. `null` at either end of the section.
+ */
+export function pictureMoveWithinSection(
+  options: readonly Pick<PictureOptionInput, "groupId">[],
+  index: number,
+  direction: -1 | 1,
+  groupIds: ReadonlySet<string>,
+): { from: number; to: number } | null {
+  const option = options[index];
+  if (!option) return null;
+  const section = pictureSectionIndexes(
+    options,
+    pictureSectionKey(option, groupIds),
+    groupIds,
+  );
+  const position = section.indexOf(index);
+  const neighbour = section[position + direction];
+  return neighbour === undefined ? null : { from: index, to: neighbour };
+}
+
+/**
+ * Where a tile moving into `targetKey` should land so it ends up LAST in
+ * that section's run: right after the section's current last tile, or at the
+ * very end when the section is empty. Returns the `to` for `move(index, to)`
+ * (equal to `index` when no move is needed). Computed on the array as it is
+ * before the move; the tile itself is never counted as a member.
+ */
+export function pictureGroupChangeDestination(
+  options: readonly Pick<PictureOptionInput, "groupId">[],
+  index: number,
+  targetKey: string,
+  groupIds: ReadonlySet<string>,
+): number {
+  const members = pictureSectionIndexes(options, targetKey, groupIds).filter(
+    (member) => member !== index,
+  );
+  const last = members.at(-1);
+  if (last === undefined) return options.length - 1;
+  return last > index ? last : last + 1;
+}
+
+/** Case-insensitive match of the editor's filter box on label or code. */
+export function pictureOptionMatches(
+  option: Pick<PictureOptionInput, "label" | "code">,
+  query: string,
+): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  if (option.label.toLowerCase().includes(needle)) return true;
+  const code = option.code?.toLowerCase();
+  if (!code) return false;
+  const bare = needle.replace(/^#/, "");
+  return bare.length > 0 && code.includes(bare);
+}
+
+/**
+ * Write an OPTIONAL key of the builder form (tile `code`/`family`/`groupId`/
+ * `hidden`, group `description`, field `imageFit`) without arming the
+ * "Unsaved Changes" guard for nothing.
+ *
+ * These keys are deliberately NOT `FormField`-registered and NOT filled by
+ * `normalizeBuilderDefinition`: registering an absent key makes RHF create it
+ * as `undefined`, and its form-level `isDirty` deep-compare counts keys, so
+ * an untouched legacy form would read as dirty. Instead a real value is
+ * `setValue`d, and an EMPTY value (`undefined`/`null`/`""`/`false`) deletes
+ * the key outright, so turning a tile's "hide" on and back off returns the
+ * form to clean. Re-validates the whole field after submit so cross-tile
+ * rules (duplicate answer labels, dangling groups) clear as soon as fixed;
+ * bulk callers pass `revalidate: false` and trigger once themselves.
+ */
+export function writeOptionalBuilderValue(
+  form: UseFormReturn<FormBuilderValues>,
+  fieldBase: `definition.fields.${number}`,
+  path: string,
+  value: string | boolean | null | undefined,
+  { revalidate = true }: { revalidate?: boolean } = {},
+): void {
+  const name = path as FieldPath<FormBuilderValues>;
+  const empty =
+    value === undefined || value === null || value === "" || value === false;
+  if (empty) {
+    form.unregister(name, {
+      keepDefaultValue: true,
+      keepDirty: true,
+      keepTouched: true,
+    });
+  } else {
+    form.setValue(name, value as never, { shouldDirty: true });
+  }
+  if (revalidate && form.formState.isSubmitted) void form.trigger(fieldBase);
 }

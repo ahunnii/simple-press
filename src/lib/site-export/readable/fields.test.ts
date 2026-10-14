@@ -4,6 +4,7 @@ import { ctx } from "./fixtures";
 import {
   isEmptyFieldValue,
   renderFieldPage,
+  renderFieldValue,
   selectFieldPages,
 } from "./fields";
 import type { FieldRegistry } from "./types";
@@ -155,5 +156,46 @@ describe("url fields", () => {
   it("leaves absolute and protocol-relative links alone", () => {
     expect(html).toContain('href="https://partner.example.com/x"');
     expect(html).not.toContain(`${ctx.business.siteUrl}//cdn.example.com`);
+  });
+});
+
+describe("formpicture fields", () => {
+  const def = {
+    key: "dream-balloons.color-source",
+    label: "Colors from",
+    type: "formpicture",
+  };
+  const refCtx = {
+    ...ctx,
+    refs: {
+      galleries: new Map(),
+      collections: new Map(),
+      faqs: new Map(),
+      forms: new Map([
+        [
+          "form1",
+          {
+            name: "Estimate Quote request",
+            fields: new Map([["balloon-colors", "Balloon colors"]]),
+          },
+        ],
+      ]),
+    },
+  };
+
+  it("prints the form and question names", () => {
+    expect(
+      renderFieldValue(def, "form1:balloon-colors", refCtx, "x.html")?.html,
+    ).toBe("Estimate Quote request → Balloon colors");
+  });
+
+  it("falls back to the form name, then a generic note", () => {
+    expect(renderFieldValue(def, "form1:gone", refCtx, "x.html")?.html).toBe(
+      "Estimate Quote request",
+    );
+    expect(renderFieldValue(def, "nope:gone", refCtx, "x.html")?.html).toBe(
+      "A question on one of your forms",
+    );
+    expect(renderFieldValue(def, "", refCtx, "x.html")).toBeNull();
   });
 });

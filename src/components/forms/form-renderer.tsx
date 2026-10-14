@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import type { FormField, PublicFormDefinition } from "~/lib/validators/form";
 import { validateFormAnswers } from "~/lib/forms/answers";
+import { parsePicturePrefill } from "~/lib/forms/prefill";
 import { localCalendarDate } from "~/lib/calendar-date";
 import { useRecaptchaV3 } from "~/lib/captcha/use-recaptcha-v3";
 import { cn } from "~/lib/utils";
@@ -97,6 +98,7 @@ export function FormRenderer({
   const successRef = useRef<HTMLDivElement | null>(null);
   const submitLock = useRef(false);
   const prefillApplied = useRef(false);
+  const pickPrefillApplied = useRef(false);
 
   // Reset local state whenever the definition genuinely changes (e.g. the
   // admin builder swaps in a new draft, or a different form embeds here).
@@ -107,6 +109,7 @@ export function FormRenderer({
     if (stateFormId.current === formId) return;
     stateFormId.current = formId;
     prefillApplied.current = false;
+    pickPrefillApplied.current = false;
     setValues(makeDefaultValues(fields));
     setFieldErrors({});
     setSubmitError(null);
@@ -136,6 +139,34 @@ export function FormRenderer({
       return { ...prev, [fieldId]: email };
     });
   }, [isLive, session.data?.user?.email, settings.confirmationFieldId, fields]);
+
+  // Preselect picture-choice tiles named by `?pick=<fieldId>:<id>,<id>` (see
+  // `~/lib/forms/prefill`), once per form, in live mode only. Declared after
+  // the formId reset above so a form swap re-applies it. A field the visitor
+  // already touched (value no longer the default) is left alone.
+  useEffect(() => {
+    if (!isLive || pickPrefillApplied.current) return;
+    pickPrefillApplied.current = true;
+    const picks = parsePicturePrefill(window.location.search, fields);
+    const fieldIds = Object.keys(picks);
+    if (fieldIds.length === 0) return;
+    setValues((prev) => {
+      let next = prev;
+      for (const fieldId of fieldIds) {
+        const field = fields.find((f) => f.id === fieldId);
+        if (!field) continue;
+        if (
+          JSON.stringify(prev[fieldId]) !==
+          JSON.stringify(defaultValueFor(field))
+        ) {
+          continue;
+        }
+        if (next === prev) next = { ...prev };
+        next[fieldId] = picks[fieldId];
+      }
+      return next;
+    });
+  }, [isLive, formId, fields]);
 
   const setValue = useCallback((fieldId: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));

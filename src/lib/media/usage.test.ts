@@ -233,6 +233,90 @@ describe("buildUsedMediaIndex — Service.customFields", () => {
   });
 });
 
+describe("buildUsedMediaIndex — Service.customFields list rows + dream-lane", () => {
+  it("finds photos inside the image sub-field of a service-template LIST field", async () => {
+    // Guard: the fixture must be a real list field with an image sub-field.
+    const listField = (SERVICE_TEMPLATE_FIELDS["dream-lane"] ?? []).find(
+      (f) => f.key === "dream-lane.sections",
+    );
+    expect(listField?.type).toBe("list");
+    const itemSchema =
+      listField?.type === "list" ? (listField.itemSchema ?? []) : [];
+    expect(itemSchema.some((i) => i.type === "image")).toBe(true);
+
+    const a = keyToPublicUrl(`${BUSINESS_ID}/image-lane-a.jpg`);
+    const b = keyToPublicUrl(`${BUSINESS_ID}/image-lane-b.jpg`);
+    asMock(db.service.findMany).mockResolvedValue([
+      serviceRow(
+        {
+          "dream-lane.sections": [
+            {
+              _id: "r1",
+              heading: "One",
+              body: "x",
+              image: a,
+              alt: "",
+              crop: "",
+            },
+            {
+              _id: "r2",
+              heading: "Two",
+              body: "",
+              image: b,
+              alt: "",
+              crop: "",
+            },
+            { _id: "r3", heading: "Text only", body: "y", image: "" },
+          ],
+        },
+        "dream-lane",
+      ),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    for (const url of [a, b]) {
+      const usages = index.get(url);
+      expect(usages).toHaveLength(1);
+      expect(usages?.[0]).toMatchObject({
+        entityType: "service",
+        entityId: "svc_1",
+        entityLabel: "Deep Clean",
+        adminHref: "/admin/services/svc_1",
+      });
+      expect(usages?.[0]?.location).toContain("Sections");
+      // Must block deletion: nothing scrubs Service.customFields.
+      expect(usages?.[0]?.inactiveTemplate).toBeUndefined();
+    }
+  });
+
+  it("treats EVERY gallery-type service-template field as an embed (generic, incl. dream-lane.gallery)", async () => {
+    const galleryFields = Object.entries(SERVICE_TEMPLATE_FIELDS).flatMap(
+      ([templateId, fields]) =>
+        fields
+          .filter((f) => f.type === "gallery")
+          .map((f) => ({ templateId, key: f.key })),
+    );
+    expect(galleryFields.map((f) => f.key)).toEqual(
+      expect.arrayContaining(["service-two.gallery", "dream-lane.gallery"]),
+    );
+
+    for (const { templateId, key } of galleryFields) {
+      asMock(db.service.findMany).mockResolvedValue([
+        serviceRow({ [key]: "gal_1" }, templateId),
+      ]);
+      asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+      const embeds = (await buildGalleryExternalUsage(BUSINESS_ID)).get(
+        "gal_1",
+      );
+      expect(embeds, key).toHaveLength(1);
+      expect(embeds?.[0]?.adminHref, key).toBe("/admin/services/svc_1");
+      // Active (blocking) — never the scrub-and-delete path.
+      expect(embeds?.[0]?.inactiveTemplate, key).toBeUndefined();
+    }
+  });
+});
+
 // ─── Product.additionalFields ─────────────────────────────────────────────────
 
 describe("buildUsedMediaIndex — Product.additionalFields", () => {

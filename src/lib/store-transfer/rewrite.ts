@@ -22,7 +22,11 @@
 
 import { normalizeUrl } from "~/lib/media/usage";
 import { isStorageUrl } from "~/lib/s3/url";
-import { TEMPLATE_FIELDS } from "~/lib/template-fields";
+import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
+import {
+  parseFormPictureFieldValue,
+  TEMPLATE_FIELDS,
+} from "~/lib/template-fields";
 
 // Re-export normalizeUrl so callers can normalize keys before inserting
 // into urlMap without importing from usage.ts directly.
@@ -53,6 +57,21 @@ export function rewriteUrl(url: string, urlMap: Map<string, string>): string {
 export interface EmbedIdMaps {
   form?: Map<string, string>;
   quoteCalculator?: Map<string, string>;
+}
+
+/**
+ * Remap the form id half of a `formpicture` value (`"<formId>:<fieldId>"`).
+ * Field ids travel inside the copied form definition unchanged, so only the
+ * form id needs the map. Unparseable values and unmapped ids pass through.
+ */
+function remapFormPictureValue(
+  value: string,
+  formMap: Map<string, string> | undefined,
+): string {
+  const picked = parseFormPictureFieldValue(value);
+  if (!picked) return value;
+  const formId = formMap?.get(picked.formId);
+  return formId ? `${formId}:${picked.fieldId}` : value;
 }
 
 /** Return a copy of `attrs` with `attrs[key]` remapped via `map`, or null if nothing to remap. */
@@ -164,6 +183,11 @@ export function rewriteTiptapDoc(
  * @param urlMap       Old-URL → new-URL map (keys are normalized source URLs)
  * @param galleryIdMap Old-galleryId → new-galleryId map
  * @param opts.templateId  The manifest's templateId; activates gallery-field remapping
+ * @param opts.serviceTemplateId  A service's `serviceTemplateId`; activates the same
+ *                     gallery-field remapping against `SERVICE_TEMPLATE_FIELDS`
+ *                     (for `Service.customFields`, whose gallery-type fields —
+ *                     `service-two.gallery`, `dream-lane.gallery`, … — are NOT in
+ *                     the site-template registry)
  * @param opts._fieldKey   (internal) current field key being walked; used for gallery detection
  * @param embedIdMaps  Optional form / quote-calculator id remaps, applied to
  *                     any TipTap doc found inside `value` (see rewriteTiptapDoc)
@@ -172,18 +196,34 @@ export function rewriteJsonValue(
   value: unknown,
   urlMap: Map<string, string>,
   galleryIdMap: Map<string, string>,
-  opts?: { templateId?: string; _fieldKey?: string },
+  opts?: {
+    templateId?: string;
+    serviceTemplateId?: string;
+    _fieldKey?: string;
+  },
   embedIdMaps?: EmbedIdMaps,
 ): unknown {
   if (value === null || value === undefined) return value;
 
   const templateId = opts?.templateId;
+  const serviceTemplateId = opts?.serviceTemplateId;
   const fieldKey = opts?._fieldKey;
 
   // ── String value ───────────────────────────────────────────────────────────
   if (typeof value === "string") {
     // If this is a gallery-type field value (and we know the templateId),
     // remap via galleryIdMap instead of treating it as a URL.
+    if (fieldKey && serviceTemplateId) {
+      const svcField = SERVICE_TEMPLATE_FIELDS[serviceTemplateId]?.find(
+        (f) => f.key === fieldKey,
+      );
+      if (svcField?.type === "gallery") {
+        return galleryIdMap.get(value) ?? value;
+      }
+      if (svcField?.type === "formpicture") {
+        return remapFormPictureValue(value, embedIdMaps?.form);
+      }
+    }
     if (templateId && fieldKey) {
       const fields = TEMPLATE_FIELDS[templateId];
       if (fields) {
@@ -191,6 +231,9 @@ export function rewriteJsonValue(
         const field = fields.find((f) => f.key === fieldKey);
         if (field?.type === "gallery") {
           return galleryIdMap.get(value) ?? value;
+        }
+        if (field?.type === "formpicture") {
+          return remapFormPictureValue(value, embedIdMaps?.form);
         }
       }
     }
@@ -221,7 +264,7 @@ export function rewriteJsonValue(
         v,
         urlMap,
         galleryIdMap,
-        { templateId, _fieldKey: k },
+        { templateId, serviceTemplateId, _fieldKey: k },
         embedIdMaps,
       );
     }

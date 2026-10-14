@@ -23,10 +23,15 @@ import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
  *    import matches a cell to an option by label. So option labels are unique
  *    per field (case-insensitive) and may not contain `;`, the separator used
  *    for multi-choice cells. Picture-choice quantity answers name their
- *    option by label too (`{ option: label, quantity }`).
+ *    option by label too (`{ option: label, quantity }`). A picture tile with
+ *    a vendor `code` is stored as its ANSWER label, `"Pearl Gold (#610)"`
+ *    (`pictureOptionAnswerLabel`); those must be unique per field as well.
  * 3. **The client never sees owner-only settings.** `toPublicFormDefinition`
  *    builds its output field-by-field (not by omission) so a setting added
- *    later cannot leak to the storefront by default.
+ *    later cannot leak to the storefront by default. The one thing it does
+ *    strip from an otherwise-public field is `hidden` picture tiles: they
+ *    stay in the stored definition so old entries still resolve, but a
+ *    visitor can neither see nor pick them.
  */
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -82,8 +87,14 @@ export type FormSource = (typeof FORM_SOURCE_VALUES)[number];
 export const FORM_ID_MAX_LENGTH = 64;
 export const FORM_MAX_FIELDS = 50;
 export const FORM_MAX_OPTIONS = 30;
-/** Picture-choice palettes (e.g. balloon colors) run longer than a dropdown. */
-export const FORM_PICTURE_MAX_OPTIONS = 60;
+/**
+ * Picture-choice palettes (e.g. a 106-color balloon catalog) run far longer
+ * than a dropdown. Old code capped this at 60, so a form past that fails the
+ * parse there: ship the new cap before storing a longer palette.
+ */
+export const FORM_PICTURE_MAX_OPTIONS = 200;
+/** Cap on the named groups (finish tabs) of one picture-choice field. */
+export const FORM_PICTURE_MAX_GROUPS = 30;
 /** Cap on one tile's quantity, and on a picture-choice min/max total. */
 export const FORM_PICTURE_MAX_QUANTITY = 999;
 export const FORM_MAX_TAGS = 20;
@@ -211,6 +222,38 @@ export const formPictureOptionSchema = formFieldOptionSchema.extend({
     .max(2048, "Image URL is too long")
     .nullable()
     .optional(),
+  /**
+   * A short catalog code (e.g. a vendor color number), stored WITHOUT the
+   * `#`. It is shown under the label and appended to the stored answer as
+   * `"Label (#code)"`; no `;` is possible, so it can't split a multi-cell.
+   */
+  code: z
+    .string()
+    .trim()
+    .regex(
+      /^[A-Za-z0-9][A-Za-z0-9.-]{0,15}$/,
+      "Use up to 16 letters, numbers, dots or dashes (no # sign)",
+    )
+    .nullable()
+    .optional(),
+  /** Free-text bucket the storefront can filter by (e.g. "Pinks"). */
+  family: z
+    .string()
+    .trim()
+    .min(1, "Family can't be blank")
+    .max(40, "Family must be 40 characters or fewer")
+    .refine((value) => !value.includes(";"), {
+      message: "Families can't contain semicolons",
+    })
+    .nullable()
+    .optional(),
+  /** A `FormPictureGroup.id` of the same field (checked by the definition). */
+  groupId: formIdField.nullable().optional(),
+  /**
+   * Hidden tiles stay in the stored definition (old entries and CSV import
+   * still resolve them) but are dropped from the public form.
+   */
+  hidden: z.boolean().optional(),
 });
 
 export type FormPictureOption = z.infer<typeof formPictureOptionSchema>;
@@ -223,6 +266,27 @@ const formPictureOptionsField = z
     `A field can have at most ${FORM_PICTURE_MAX_OPTIONS} options`,
   )
   .superRefine(refineUniqueOptions);
+
+/**
+ * A named section of a picture-choice field (e.g. a finish). The storefront
+ * renders groups as tabs; tiles point at one via `groupId`, and tiles with
+ * none fall under "Other".
+ */
+export const formPictureGroupSchema = z.object({
+  id: formIdField,
+  label: z
+    .string()
+    .trim()
+    .min(1, "Group name is required")
+    .max(60, "Group name must be 60 characters or fewer"),
+  description: z
+    .string()
+    .trim()
+    .max(200, "Description must be 200 characters or fewer")
+    .optional(),
+});
+
+export type FormPictureGroup = z.infer<typeof formPictureGroupSchema>;
 
 export const formTextFieldSchema = z.object({
   type: z.literal("text"),
@@ -290,6 +354,11 @@ export const FORM_PICTURE_TILE_SIZE_VALUES = ["small", "large"] as const;
 export type FormPictureTileSize =
   (typeof FORM_PICTURE_TILE_SIZE_VALUES)[number];
 
+/** How a tile's photo fills its swatch: crop to fill, or show the whole photo. */
+export const FORM_PICTURE_IMAGE_FIT_VALUES = ["cover", "contain"] as const;
+export type FormPictureImageFit =
+  (typeof FORM_PICTURE_IMAGE_FIT_VALUES)[number];
+
 const formPictureTotalField = z
   .number()
   .int("Enter a whole number")
@@ -324,6 +393,15 @@ export const formPictureChoiceFieldSchema = z.object({
     .optional(),
   minTotal: formPictureTotalField,
   maxTotal: formPictureTotalField,
+  /** Named sections of `options` (rendered as tabs); see `groupId`. */
+  groups: z
+    .array(formPictureGroupSchema)
+    .max(
+      FORM_PICTURE_MAX_GROUPS,
+      `A field can have at most ${FORM_PICTURE_MAX_GROUPS} groups`,
+    )
+    .optional(),
+  imageFit: z.enum(FORM_PICTURE_IMAGE_FIT_VALUES).optional(),
 });
 
 /** A single yes/no box. The label is the statement ("I agree to…"). */
@@ -383,6 +461,25 @@ export function isPictureChoiceField(
   return field.type === "picturechoice";
 }
 
+/**
+ * What a picture tile is stored as in an answer: `"Label (#code)"` when it
+ * has a catalog code, the plain label otherwise. Old entries hold the plain
+ * label, so readers match both (see `findOption` in `~/lib/forms/answers`).
+ */
+export function pictureOptionAnswerLabel(option: {
+  label: string;
+  code?: string | null;
+}): string {
+  return option.code ? `${option.label} (#${option.code})` : option.label;
+}
+
+/** The tiles a visitor can see and pick (everything not `hidden`). */
+export function visiblePictureOptions(
+  field: Pick<FormPictureChoiceField, "options">,
+): FormPictureOption[] {
+  return field.options.filter((option) => !option.hidden);
+}
+
 // ─── Settings ───────────────────────────────────────────────────────────────
 
 const plainEmail = z.string().email();
@@ -433,6 +530,68 @@ export type FormSettings = z.infer<typeof formSettingsSchema>;
 
 // ─── Definition ─────────────────────────────────────────────────────────────
 
+/**
+ * Picture-choice rules that need more than one option or the group list:
+ * `groupId`s point at real groups, group ids/labels are unique, a visitor can
+ * see at least one tile, and no two tiles share an ANSWER label (so the tile
+ * "Red" with code 010 can't collide with a tile literally named "Red (#010)").
+ */
+function refinePictureField(
+  field: FormPictureChoiceField,
+  index: number,
+  ctx: z.RefinementCtx,
+) {
+  const groupIds = new Set<string>();
+  const groupLabels = new Set<string>();
+  (field.groups ?? []).forEach((group, groupIndex) => {
+    if (groupIds.has(group.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Duplicate group id",
+        path: ["fields", index, "groups", groupIndex, "id"],
+      });
+    }
+    groupIds.add(group.id);
+    const key = labelKey(group.label);
+    if (groupLabels.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Each group needs a different name",
+        path: ["fields", index, "groups", groupIndex, "label"],
+      });
+    }
+    groupLabels.add(key);
+  });
+
+  const answerLabels = new Set<string>();
+  field.options.forEach((option, optionIndex) => {
+    if (option.groupId != null && !groupIds.has(option.groupId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This option belongs to a group that no longer exists",
+        path: ["fields", index, "options", optionIndex, "groupId"],
+      });
+    }
+    const key = labelKey(pictureOptionAnswerLabel(option));
+    if (answerLabels.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Each option needs a different label and code",
+        path: ["fields", index, "options", optionIndex, "label"],
+      });
+    }
+    answerLabels.add(key);
+  });
+
+  if (field.options.length > 0 && visiblePictureOptions(field).length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Leave at least one option visible",
+      path: ["fields", index, "options"],
+    });
+  }
+}
+
 function refineDefinition(
   definition: { fields: FormField[]; settings: FormSettings },
   ctx: z.RefinementCtx,
@@ -467,6 +626,10 @@ function refineDefinition(
     }
     seenLabels.add(key);
 
+    if (field.type === "picturechoice") {
+      refinePictureField(field, index, ctx);
+    }
+
     if (
       field.type === "number" &&
       field.min != null &&
@@ -492,7 +655,7 @@ function refineDefinition(
         });
       }
       if (field.selection === "many") {
-        const count = field.options.length;
+        const count = visiblePictureOptions(field).length;
         const tooMany = `Can't be more than the number of options (${count})`;
         if (minTotal != null && minTotal > count) {
           ctx.addIssue({
@@ -596,14 +759,20 @@ export type PublicFormDefinition = {
 /**
  * The storefront's view of a form. Built field-by-field: the owner's
  * notification address and confirmation email copy never leave the server.
- * Fields carry nothing owner-private, so they pass through as-is.
+ * Fields carry nothing owner-private, so they pass through as-is, except
+ * that `hidden` picture tiles are dropped (the owner retired them; they only
+ * stay in the stored definition so old entries still resolve).
  */
 export function toPublicFormDefinition(
   definition: FormDefinition,
 ): PublicFormDefinition {
   return {
     version: 1,
-    fields: definition.fields,
+    fields: definition.fields.map((field) =>
+      field.type === "picturechoice"
+        ? { ...field, options: visiblePictureOptions(field) }
+        : field,
+    ),
     settings: {
       submitLabel: definition.settings.submitLabel,
       successMessage: definition.settings.successMessage,

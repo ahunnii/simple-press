@@ -17888,6 +17888,1019 @@ body:has(.pollen) {
   font-size: 13px;
 }
 
+/* ── Balloon color studio (`dream-balloons` service page, 2026-10-14) —
+   ported from the approved prototype's Section A
+   (docs/templates/dream/checkpoint/balloon-studio/index.html; component:
+   services/service-pages/dream-balloon-studio.tsx). Desktop: stage + palette
+   in a sticky left column under the header, browser right. Below 1024px: the
+   stage sticks under the header as a compact strip, the browser scrolls under
+   it, the palette card follows, and a fixed palette bar shows while the
+   studio is on screen. All motion is CSS (zeroed in the reduced-motion block
+   below); colors are content, so swatches/garland opt out of forced colors. ── */
+.dream .dream-balloon-studio .dbs-head {
+  display: grid;
+  gap: 16px 64px;
+  align-items: end;
+  margin-bottom: clamp(32px, 4vw, 56px);
+}
+
+.dream .dream-balloon-studio .dbs-lede {
+  max-width: 52ch;
+  color: var(--dream-soft);
+  font-size: 18px;
+}
+
+@media (min-width: 900px) {
+  .dream .dream-balloon-studio .dbs-head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.dream .dream-balloon-studio .dbs-studio {
+  display: grid;
+  gap: 32px;
+}
+
+.dream .dream-balloon-studio .dbs-studio > *,
+.dream .dream-balloon-studio .dbs-left > * {
+  min-width: 0;
+}
+
+/* Stage */
+.dream .dream-balloon-studio .dbs-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 20px;
+  padding: 20px 24px 20px 8px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-photo);
+  background:
+    radial-gradient(
+      circle at 28% 40%,
+      rgba(255, 255, 255, 0.85) 0 12%,
+      var(--dream-halo) 30%,
+      transparent 56%
+    ),
+    linear-gradient(
+      180deg,
+      var(--dream-sky-hero-mid) 0%,
+      var(--dream-sky) 38%,
+      var(--dream-peach) 100%
+    );
+  overflow: hidden;
+}
+
+.dream .dream-balloon-studio .dbs-stage-art {
+  position: relative;
+  height: 220px;
+}
+
+.dream .dream-balloon-studio .dbs-stage-float {
+  position: absolute;
+  inset: 0 0 46px;
+  animation: dream-balloon-stage-float 6.5s ease-in-out infinite alternate;
+}
+
+.dream .dream-balloon-studio .dbs-stage-img {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  filter: drop-shadow(0 18px 16px rgba(43, 33, 29, 0.18));
+  transition:
+    opacity 0.45s var(--dream-ease-out),
+    transform 0.7s var(--dream-ease);
+}
+
+.dream .dream-balloon-studio .dbs-stage-img.is-current {
+  opacity: 1;
+  transform: none;
+}
+
+.dream .dream-balloon-studio .dbs-stage-string {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - 2px);
+  width: 24px;
+  height: 52px;
+  margin-left: -12px;
+  overflow: visible;
+}
+
+.dream .dream-balloon-studio .dbs-stage-string path {
+  fill: none;
+  stroke: var(--dream-gold);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+
+@keyframes dream-balloon-stage-float {
+  from {
+    transform: translateY(0) rotate(-1.2deg);
+  }
+  to {
+    transform: translateY(-8px) rotate(1.2deg);
+  }
+}
+
+.dream .dream-balloon-studio .dbs-stage-info {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.dream .dream-balloon-studio .dbs-stage-name {
+  font-size: clamp(30px, 3vw, 40px);
+  line-height: 1.05;
+}
+
+.dream .dream-balloon-studio .dbs-stage-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 14px;
+  color: var(--dream-soft-sky);
+}
+
+.dream .dream-balloon-studio .dbs-code {
+  color: var(--dream-gold-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream .dream-balloon-studio .dbs-sep {
+  color: var(--dream-gold);
+}
+
+.dream .dream-balloon-studio .dbs-stage-desc {
+  max-width: 30ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--dream-soft-sky);
+}
+
+.dream .dream-balloon-studio .dbs-stage-toggle {
+  max-width: 100%;
+  margin-top: 6px;
+  padding: 12px 20px;
+}
+
+.dream .dream-balloon-studio .dream-btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.dream .dream-balloon-studio .dbs-stage-limit {
+  max-width: 32ch;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--dream-soft-sky);
+}
+
+/* Swatches (stage, chips, bar, finish line, photo-less tiles): a tiny
+   finish-aware sphere. A tile with no color shows the neutral peach. */
+.dream .dream-balloon-studio .dbs-orb {
+  --dbs-hex: var(--hex, var(--dream-peach));
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50% 50% 48% 48%;
+  background:
+    radial-gradient(
+      circle at 32% 28%,
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0) 40%
+    ),
+    radial-gradient(
+      circle at 50% 45%,
+      var(--dbs-hex) 52%,
+      color-mix(in srgb, var(--dbs-hex) 76%, #000) 100%
+    );
+  box-shadow:
+    0 0 0 1px var(--dream-hairline),
+    0 3px 5px -2px rgba(43, 33, 29, 0.35);
+}
+
+.dream .dream-balloon-studio .dbs-orb:is([data-finish="pearl"], [data-finish="luster"]) {
+  background:
+    radial-gradient(
+      circle at 36% 30%,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0) 55%
+    ),
+    linear-gradient(135deg, rgba(255, 180, 210, 0.16), rgba(166, 204, 255, 0.16)),
+    var(--dbs-hex);
+}
+
+.dream .dream-balloon-studio .dbs-orb:is([data-finish="pastel"], [data-finish="retro"]) {
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0) 50%
+    ),
+    var(--dbs-hex);
+}
+
+.dream .dream-balloon-studio .dbs-orb[data-finish="platinum"] {
+  background:
+    radial-gradient(ellipse at 30% 24%, #fff 0 12%, rgba(255, 255, 255, 0) 24%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--dbs-hex) 50%, #fff) 0%,
+      color-mix(in srgb, var(--dbs-hex) 66%, #000) 30%,
+      color-mix(in srgb, var(--dbs-hex) 58%, #fff) 48%,
+      var(--dbs-hex) 60%,
+      color-mix(in srgb, var(--dbs-hex) 56%, #000) 100%
+    );
+}
+
+.dream .dream-balloon-studio .dbs-orb[data-finish="crystal"] {
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      rgba(255, 255, 255, 0.9) 0 10%,
+      rgba(255, 255, 255, 0) 26%
+    ),
+    color-mix(in srgb, var(--dbs-hex) 72%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--dbs-hex) 72%, #000),
+    0 3px 5px -2px rgba(43, 33, 29, 0.25);
+}
+
+.dream .dream-balloon-studio .dbs-orb--lg {
+  width: 18px;
+  height: 18px;
+}
+
+/* A photo-less tile/stage: a big CSS balloon in the tile's color. */
+.dream .dream-balloon-studio :is(.dbs-orb--tile, .dbs-orb--stage) {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: 86%;
+  aspect-ratio: 11 / 12;
+  margin: auto;
+  filter: drop-shadow(0 10px 8px rgba(43, 33, 29, 0.16));
+}
+
+/* Palette */
+.dream .dream-balloon-studio .dbs-palette {
+  display: grid;
+  gap: 16px;
+}
+
+.dream .dream-balloon-studio .dbs-palette-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dream .dream-balloon-studio .dbs-palette-head h3 {
+  font-size: clamp(26px, 2.6vw, 32px);
+  line-height: 1.1;
+}
+
+/* Focus lands here programmatically after the last chip is removed. */
+.dream .dream-balloon-studio .dbs-palette-head h3:focus {
+  outline: none;
+}
+
+.dream .dream-balloon-studio .dbs-palette-head h3:focus-visible {
+  outline: none;
+  text-decoration: underline 2px var(--dream-rose);
+  text-underline-offset: 6px;
+}
+
+.dream .dream-balloon-studio .dbs-count {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dream-gold-ink);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s var(--dream-ease-out);
+}
+
+.dream .dream-balloon-studio .dbs-count.is-bumped {
+  animation: dream-balloon-count-bump 0.42s var(--dream-ease);
+}
+
+@keyframes dream-balloon-count-bump {
+  40% {
+    transform: translateY(-3px);
+    color: var(--dream-rose);
+  }
+}
+
+.dream .dream-balloon-studio .dbs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream .dream-balloon-studio .dbs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-white);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--dream-ink);
+  animation: dream-balloon-chip-in 0.38s var(--dream-ease) both;
+}
+
+@keyframes dream-balloon-chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+.dream .dream-balloon-studio .dbs-chip-x {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dream-soft);
+  cursor: pointer;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-balloon-studio .dbs-chip-x:hover {
+  background: var(--dream-paper);
+  color: var(--dream-rose);
+}
+
+.dream .dream-balloon-studio .dbs-chip-x svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dream .dream-balloon-studio .dbs-palette-empty {
+  font-size: 15px;
+  color: var(--dream-soft);
+}
+
+/* Garland — the one bold moment */
+.dream .dream-balloon-studio .dbs-garland-frame {
+  position: relative;
+  margin: 0;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-photo);
+  background:
+    radial-gradient(
+      ellipse at 50% 38%,
+      rgba(255, 255, 255, 0.9) 0 18%,
+      rgba(255, 249, 237, 0.6) 40%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--dream-sky) 0%,
+      #fbf3ea 70%,
+      var(--dream-peach) 100%
+    );
+  overflow: hidden;
+}
+
+/* A soft floor line, as if the garland hangs over a styled table. */
+.dream .dream-balloon-studio .dbs-garland-frame::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dream-line), transparent);
+  pointer-events: none;
+}
+
+.dream .dream-balloon-studio .dbs-garland svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 640 / 360;
+}
+
+.dream .dream-balloon-studio .dream-balloon-garland-ghost {
+  fill: rgba(255, 255, 255, 0.35);
+  stroke: var(--dream-gold);
+  stroke-opacity: 0.6;
+  stroke-width: 1.2;
+  stroke-dasharray: 4 6;
+}
+
+.dream
+  .dream-balloon-studio
+  .dream-balloon-garland-svg.is-animated
+  .dream-balloon-garland-balloon {
+  transform-origin: 0 0;
+  animation: dream-balloon-pop 0.62s cubic-bezier(0.34, 1.5, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 26ms);
+}
+
+@keyframes dream-balloon-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+  }
+}
+
+.dream .dream-balloon-studio .dbs-garland-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--dream-soft-sky);
+  pointer-events: none;
+}
+
+.dream .dream-balloon-studio .dbs-garland-empty span {
+  padding: 8px 16px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-veil);
+}
+
+.dream .dream-balloon-studio .dbs-garland-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: -4px;
+}
+
+.dream .dream-balloon-studio .dbs-garland-note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dream-soft-sky);
+}
+
+.dream .dream-balloon-studio .dbs-shuffle {
+  flex: none;
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+.dream .dream-balloon-studio .dbs-palette-cta {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* Browser: finish tabs, family chips, grid */
+.dream .dream-balloon-studio .dbs-browser {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.dream .dream-balloon-studio .dbs-tabs {
+  display: flex;
+  gap: 2px 13px;
+  margin: 0 -4px;
+  padding: 4px 4px 0;
+  border-bottom: 1px solid var(--dream-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dream .dream-balloon-studio .dbs-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dream .dream-balloon-studio .dbs-tabs.is-overflowing {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent);
+}
+
+.dream .dream-balloon-studio .dbs-tab {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 0 14px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dream-soft);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-balloon-studio .dbs-tab:hover,
+.dream .dream-balloon-studio .dbs-tab[aria-selected="true"] {
+  color: var(--dream-ink);
+}
+
+.dream .dream-balloon-studio .dbs-tab[aria-selected="true"] {
+  font-weight: 600;
+}
+
+.dream .dream-balloon-studio .dbs-tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--dream-rose);
+  transform: scaleX(0);
+  transition: transform 0.32s var(--dream-ease);
+}
+
+.dream .dream-balloon-studio .dbs-tab[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.dream .dream-balloon-studio .dbs-tab-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dream-gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.dream .dream-balloon-studio .dbs-tab:focus-visible {
+  outline-offset: -1px;
+  border-radius: 6px;
+}
+
+.dream .dream-balloon-studio .dbs-finish-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 24px;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--dream-soft-sky);
+}
+
+.dream .dream-balloon-studio .dbs-finish-line .dbs-orb {
+  width: 16px;
+  height: 16px;
+}
+
+.dream .dream-balloon-studio .dbs-families {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream .dream-balloon-studio .dbs-fam {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-paper);
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--dream-soft-sky);
+  cursor: pointer;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-balloon-studio .dbs-fam:hover {
+  border-color: var(--dream-gold);
+  background: var(--dream-white);
+}
+
+.dream .dream-balloon-studio .dbs-fam[aria-checked="true"] {
+  border-color: var(--dream-ink);
+  background: var(--dream-ink);
+  color: var(--dream-paper);
+}
+
+.dream .dream-balloon-studio .dbs-fam-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(43, 33, 29, 0.12);
+}
+
+.dream .dream-balloon-studio .dbs-fam[aria-checked="true"] .dbs-fam-dot {
+  box-shadow: 0 0 0 1px rgba(255, 250, 244, 0.5);
+}
+
+.dream .dream-balloon-studio .dbs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 6px;
+}
+
+.dream .dream-balloon-studio .dbs-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--dream-radius-photo-sm);
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .dream-balloon-studio .dbs-tile:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dream .dream-balloon-studio .dbs-tile-art {
+  position: relative;
+  width: 100%;
+  height: 112px;
+  margin-bottom: 8px;
+}
+
+.dream .dream-balloon-studio .dbs-tile-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 8px rgba(43, 33, 29, 0.16));
+  transition: transform 0.4s var(--dream-ease);
+}
+
+.dream .dream-balloon-studio .dbs-tile:hover .dbs-tile-art img {
+  transform: translateY(-4px) rotate(-2deg);
+}
+
+.dream .dream-balloon-studio .dbs-tile-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--dream-ink);
+}
+
+.dream .dream-balloon-studio .dbs-tile-code {
+  font-size: 12px;
+  color: var(--dream-gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.dream .dream-balloon-studio .dbs-tile[aria-checked="true"] {
+  border-color: var(--dream-rose);
+  background: var(--dream-white);
+  box-shadow:
+    0 0 0 1px var(--dream-rose),
+    var(--dream-shadow-card);
+}
+
+.dream .dream-balloon-studio .dbs-tile-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--dream-white);
+  border-radius: 50%;
+  background: var(--dream-rose);
+  color: var(--dream-paper);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 6px 12px -6px rgba(43, 33, 29, 0.55);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.2s var(--dream-ease-out),
+    transform 0.36s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.dream .dream-balloon-studio .dbs-tile.is-picked .dbs-tile-badge {
+  opacity: 1;
+  transform: none;
+}
+
+/* Mobile palette bar (hidden on desktop) */
+.dream .dream-balloon-studio .dbs-bar {
+  display: none;
+}
+
+.dream .dream-balloon-studio .dbs-bar-dots {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.dream .dream-balloon-studio .dbs-bar-dots .dbs-orb {
+  width: 22px;
+  height: 22px;
+  margin-right: -6px;
+  box-shadow:
+    0 0 0 2px var(--dream-paper),
+    0 3px 6px -2px rgba(43, 33, 29, 0.35);
+}
+
+.dream .dream-balloon-studio .dbs-bar-empty {
+  font-size: 13px;
+  color: var(--dream-soft-sky);
+}
+
+.dream .dream-balloon-studio .dbs-bar .dream-btn {
+  padding: 12px 18px;
+  font-size: 14px;
+}
+
+.dream .dream-balloon-studio .dbs-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Desktop: stage + palette left (sticky under the header), browser right. */
+@media (min-width: 1024px) {
+  .dream .dream-balloon-studio .dbs-studio {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: clamp(36px, 4vw, 64px);
+    align-items: start;
+  }
+
+  .dream .dream-balloon-studio .dbs-left {
+    position: sticky;
+    top: calc(var(--dream-header-h) + 16px);
+    display: grid;
+    gap: 28px;
+    max-height: calc(100vh - var(--dream-header-h) - 32px);
+    /* room for focus rings inside the scroller */
+    margin: -6px;
+    padding: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dream-gold) transparent;
+  }
+}
+
+/* Shorter laptop screens: a tighter stage so the garland and the quote
+   button stay inside the sticky column. */
+@media (min-width: 1024px) and (max-height: 880px) {
+  .dream .dream-balloon-studio .dbs-left {
+    gap: 20px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage {
+    padding-block: 12px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-art {
+    height: 176px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-float {
+    inset: 0 0 34px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-string {
+    height: 36px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-desc {
+    display: none;
+  }
+
+  .dream .dream-balloon-studio .dbs-palette {
+    gap: 12px;
+  }
+}
+
+/* Below desktop: the stage sticks under the header as a compact strip, the
+   browser scrolls under it, and the palette card slides up over it. */
+@media (max-width: 1023px) {
+  .dream .dream-balloon-studio {
+    padding-bottom: 24px;
+  }
+
+  .dream .dream-balloon-studio .dbs-studio {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dream .dream-balloon-studio .dbs-left {
+    display: contents;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage {
+    order: 1;
+    position: sticky;
+    top: var(--dream-header-h-mobile);
+    z-index: 5;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 4px 16px;
+    margin-inline: calc(-1 * var(--dream-gutter));
+    padding: 12px var(--dream-gutter) 12px calc(var(--dream-gutter) - 4px);
+    border-width: 1px 0;
+    border-radius: 0;
+    box-shadow: 0 10px 24px -20px rgba(43, 33, 29, 0.6);
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-art {
+    height: 112px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-float {
+    inset: 0 0 18px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-string {
+    height: 22px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-info {
+    gap: 4px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-name {
+    font-size: 26px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-desc {
+    display: none;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-toggle {
+    margin-top: 4px;
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-limit {
+    font-size: 12.5px;
+  }
+
+  .dream .dream-balloon-studio .dbs-browser {
+    order: 2;
+  }
+
+  .dream .dream-balloon-studio .dbs-palette {
+    order: 3;
+    position: relative;
+    z-index: 6;
+    margin-inline: calc(-1 * var(--dream-gutter));
+    padding: 28px var(--dream-gutter) 8px;
+    border-top: 1px solid var(--dream-line);
+    border-radius: var(--dream-radius-photo) var(--dream-radius-photo) 0 0;
+    background: var(--dream-paper);
+    box-shadow: 0 -18px 30px -26px rgba(43, 33, 29, 0.5);
+  }
+
+  .dream .dream-balloon-studio .dbs-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 2px;
+  }
+
+  .dream .dream-balloon-studio .dbs-tile-art {
+    height: 96px;
+  }
+
+  .dream .dream-balloon-studio .dbs-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px var(--dream-gutter)
+      calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--dream-line);
+    background: rgba(255, 250, 244, 0.97);
+    box-shadow: 0 -12px 28px -22px rgba(43, 33, 29, 0.55);
+    transform: translateY(110%);
+    transition: transform 0.36s var(--dream-ease);
+  }
+
+  .dream .dream-balloon-studio .dbs-bar[data-visible="true"] {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream .dream-balloon-studio .dbs-lede {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dream .dream-balloon-studio .dbs-stage-name {
+    font-size: 23px;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-meta {
+    font-size: 13px;
+  }
+}
+
+/* Reduced motion: everything settles, nothing floats or pops. */
+@media (prefers-reduced-motion: reduce) {
+  .dream .dream-balloon-studio .dbs-stage-float,
+  .dream .dream-balloon-studio .dbs-count.is-bumped,
+  .dream .dream-balloon-studio .dbs-chip,
+  .dream
+    .dream-balloon-studio
+    .dream-balloon-garland-svg.is-animated
+    .dream-balloon-garland-balloon {
+    animation: none;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-img,
+  .dream .dream-balloon-studio .dbs-tile,
+  .dream .dream-balloon-studio .dbs-tile-art img,
+  .dream .dream-balloon-studio .dbs-tile-badge,
+  .dream .dream-balloon-studio .dbs-tab,
+  .dream .dream-balloon-studio .dbs-tab::after,
+  .dream .dream-balloon-studio .dbs-fam,
+  .dream .dream-balloon-studio .dbs-chip-x,
+  .dream .dream-balloon-studio .dbs-count,
+  .dream .dream-balloon-studio .dbs-bar {
+    transition: none;
+  }
+
+  .dream .dream-balloon-studio .dbs-stage-img,
+  .dream .dream-balloon-studio .dbs-tile:hover .dbs-tile-art img {
+    transform: none;
+  }
+}
+
+/* Windows high contrast: fills vanish, so mark state with system colors;
+   the swatches, photos-less balloons and the garland ARE the content, so
+   they keep their real colors. */
+@media (forced-colors: active) {
+  .dream .dream-balloon-studio .dbs-orb,
+  .dream .dream-balloon-studio .dbs-fam-dot,
+  .dream .dream-balloon-studio .dbs-garland-frame {
+    forced-color-adjust: none;
+  }
+
+  .dream .dream-balloon-studio .dbs-tile[aria-checked="true"],
+  .dream .dream-balloon-studio .dbs-fam[aria-checked="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  .dream .dream-balloon-studio .dbs-tab[aria-selected="true"]::after {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+
+  .dream .dream-balloon-studio .dbs-tile-badge {
+    border-color: CanvasText;
+  }
+}
+
 /* ── Topbar (announcement bar) ── */
 .dream .dream-topbar {
   background: var(--dream-ink);
@@ -19666,6 +20679,468 @@ body:has(.pollen) {
   color: var(--dream-ink);
 }
 
+/* ── Picture choice, browse layout (2026-10-14) — fields with groups, colour
+   families or > 24 tiles (`data-layout="browse"`): "Your picks" strip, group
+   tabs, family chips, search, grouped results and a no-match state. Mirrors
+   the approved balloon-studio prototype's quote field (`.qf-*`, `.qtile*` in
+   docs/templates/dream/checkpoint/balloon-studio/index.html). ── */
+
+/* "Your picks": dashed paper box, ink heading, gold-ink count (rose when
+   full), white pill chips with a swatch and a round remove button. */
+.dream .sp-form-block [data-slot="picture-choice-picks"] {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  border: 1px dashed var(--dream-line);
+  border-radius: 16px;
+  background: var(--dream-paper);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-picks"] > * {
+  margin-block: 0;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-picks-label"] {
+  color: var(--dream-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-picks-label"]:focus {
+  outline: none;
+  text-decoration: underline 2px var(--dream-rose);
+  text-underline-offset: 6px;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-picks"]
+  [data-slot="picture-choice-total"] {
+  color: var(--dream-gold-ink);
+  font-weight: 600;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-picks"][data-full="true"]
+  [data-slot="picture-choice-total"],
+.dream .sp-form-block [data-slot="picture-choice-limit"] {
+  color: var(--dream-rose);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-picks-empty"] {
+  color: var(--dream-soft-sky);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-pick"] {
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 4px 4px 8px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-white);
+  color: var(--dream-ink);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  animation: dream-pc-chip-in 0.38s var(--dream-ease) both;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-pick"][data-kind="label"] {
+  padding-left: 6px;
+}
+
+@keyframes dream-pc-chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-pick-swatch"][data-kind="color"]
+  > span {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(43, 33, 29, 0.12);
+  background-image: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0) 40%
+  );
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]:not([data-image-fit="contain"])
+  [data-slot="picture-choice-pick-swatch"][data-kind="image"]
+  > img {
+  border: 2px solid var(--dream-white);
+  box-shadow: 0 0 0 1px var(--dream-line);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-pick-qty"] {
+  color: var(--dream-gold-ink);
+  font-weight: 600;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-pick-remove"] {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--dream-soft);
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-pick-remove"]:hover {
+  background: var(--dream-paper);
+  color: var(--dream-rose);
+}
+
+/* Group tabs: soft text on a gold hairline, a rose underline slides in under
+   the chosen tab; picked counts in gold-ink. */
+.dream .sp-form-block [data-slot="picture-choice-tabs"] {
+  gap: 2px 18px;
+  margin: 0 -4px;
+  padding: 4px 4px 0;
+  border-bottom: 1px solid var(--dream-line);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab"] {
+  position: relative;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 0 14px;
+  border: 0;
+  background: none;
+  color: var(--dream-soft-sky);
+  font-family: var(--font-dream-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab"]:hover {
+  color: var(--dream-ink);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab"]::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--dream-rose);
+  transform: scaleX(0);
+  transition: transform 0.32s var(--dream-ease);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab"][aria-selected="true"] {
+  color: var(--dream-ink);
+  font-weight: 600;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-tab"][aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab"]:focus-visible {
+  outline-offset: -1px;
+  border-radius: 6px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tab-count"] {
+  color: var(--dream-gold-ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Search: a `.dream-input` paper field with a leading magnifier. */
+.dream .sp-form-block [data-slot="picture-choice-tools"] {
+  display: grid;
+  gap: 12px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-tools"] > * {
+  margin-block: 0;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-search"] > svg {
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--dream-soft);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-search-input"] {
+  height: auto;
+  min-height: 48px;
+  padding: 13px 16px 13px 42px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-input);
+  background: var(--dream-paper);
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 16px;
+  line-height: 1.4;
+  box-shadow: none;
+  color-scheme: light;
+  transition:
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    box-shadow var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-search-input"]::placeholder {
+  color: var(--dream-soft);
+  opacity: 0.8;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-search-input"]:focus-visible {
+  outline: none;
+  border-color: var(--dream-rose);
+  box-shadow: 0 0 0 3px var(--dream-rose-soft);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-search-input"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+/* Family chips: paper pills on a gold hairline; ink when chosen. */
+.dream .sp-form-block [data-slot="picture-choice-families"] {
+  gap: 8px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-family"] {
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-paper);
+  color: var(--dream-soft-sky);
+  font-family: var(--font-dream-body);
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background var(--dream-dur-hover) var(--dream-ease-out),
+    color var(--dream-dur-hover) var(--dream-ease-out),
+    border-color var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-family"]:hover {
+  border-color: var(--dream-gold);
+  background: var(--dream-white);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-family"][aria-checked="true"] {
+  border-color: var(--dream-ink);
+  background: var(--dream-ink);
+  color: var(--dream-paper);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-family-dot"] {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  box-shadow: 0 0 0 1px rgba(43, 33, 29, 0.12);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice-family"][aria-checked="true"]
+  [data-slot="picture-choice-family-dot"] {
+  box-shadow: 0 0 0 1px rgba(255, 250, 244, 0.5);
+}
+
+/* Results: a gold-thumbed scroll box; "All" groups under small gold-ink
+   eyebrows with an italic note. */
+.dream .sp-form-block [data-slot="picture-choice-results"] {
+  max-height: 452px;
+  scrollbar-color: var(--dream-gold) transparent;
+  scrollbar-width: thin;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-results"] > * {
+  margin-block: 0;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-results"] > * + * {
+  margin-block-start: 22px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-group-heading"] {
+  color: var(--dream-gold-ink);
+  font-family: var(--font-dream-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-group-description"] {
+  margin-top: -4px;
+  color: var(--dream-soft-sky);
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Tile code ("#610") under the name: small gold-ink numerals. */
+.dream .sp-form-block [data-slot="picture-choice-code"] {
+  margin-top: -4px;
+  color: var(--dream-gold-ink);
+  font-family: var(--font-dream-body);
+  font-size: 12px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* `imageFit: contain` — trimmed silhouettes (e.g. balloons): the whole photo,
+   no circle crop / white keyline / ring, a soft drop shadow instead; the
+   chosen tile gets the paper + rose outline instead of a ring on the photo. */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"]
+  [data-slot="picture-choice-swatch"][data-kind="image"]
+  > img {
+  width: 100%;
+  height: 72px;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  object-fit: contain;
+  box-shadow: none;
+  filter: drop-shadow(0 8px 6px rgba(43, 33, 29, 0.16));
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"][data-tile-size="large"]
+  [data-slot="picture-choice-swatch"][data-kind="image"]
+  > img {
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"]
+  [data-slot="picture-choice-option"][data-selected="true"]
+  [data-slot="picture-choice-swatch"][data-kind="image"]
+  > img {
+  box-shadow: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"][data-tile-size="small"]
+  [data-slot="picture-choice-option"][data-kind="image"] {
+  gap: 4px;
+  padding: 10px 4px;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"][data-tile-size="small"]
+  [data-slot="picture-choice-option"][data-kind="image"][data-selected="true"] {
+  border-color: var(--dream-rose);
+  background: var(--dream-paper);
+  box-shadow: 0 0 0 1px var(--dream-rose);
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"][data-image-fit="contain"]
+  [data-slot="picture-choice-pick-swatch"][data-kind="image"]
+  > img {
+  filter: drop-shadow(0 3px 2px rgba(43, 33, 29, 0.18));
+}
+
+/* Browse layout at the max: unpicked tiles are aria-disabled (still
+   focusable; a click explains). Faded, no hover lift. */
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  label[data-slot="picture-choice-option"]:has(input[aria-disabled="true"]) {
+  cursor: not-allowed;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  label[data-slot="picture-choice-option"]:has(
+    input[aria-disabled="true"]
+  ):hover {
+  border-color: var(--dream-line);
+  box-shadow: none;
+  transform: none;
+}
+
+.dream
+  .sp-form-block
+  [data-slot="picture-choice"]
+  label[data-slot="picture-choice-option"]:has(input[aria-disabled="true"])
+  [data-slot="picture-choice-swatch"]
+  > :is(img, span) {
+  filter: saturate(0.6);
+  transform: none;
+}
+
+/* No-match state: a sky-to-paper wash with a secondary pill button. */
+.dream .sp-form-block [data-slot="picture-choice-empty"] {
+  gap: 12px;
+  padding: 36px 16px;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    var(--dream-sky) 0%,
+    var(--dream-paper) 100%
+  );
+  color: var(--dream-soft-sky);
+  font-size: 15px;
+}
+
+.dream .sp-form-block [data-slot="picture-choice-empty"] p {
+  color: var(--dream-soft-sky);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-empty-clear"] {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--dream-line);
+  border-radius: var(--dream-radius-pill);
+  background: var(--dream-white);
+  color: var(--dream-ink);
+  font-family: var(--font-dream-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--dream-dur-hover) var(--dream-ease-out),
+    background var(--dream-dur-hover) var(--dream-ease-out);
+}
+
+.dream .sp-form-block [data-slot="picture-choice-empty-clear"]:hover {
+  border-color: var(--dream-gold);
+  background: var(--dream-paper);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dream
     .sp-form-block
@@ -19690,10 +21165,27 @@ body:has(.pollen) {
     > :is(img, span) {
     transform: none !important;
   }
+
+  .dream
+    .sp-form-block
+    :is(
+      [data-slot="picture-choice-tab"],
+      [data-slot="picture-choice-tab"]::after,
+      [data-slot="picture-choice-family"],
+      [data-slot="picture-choice-pick-remove"],
+      [data-slot="picture-choice-search-input"],
+      [data-slot="picture-choice-empty-clear"]
+    ) {
+    transition: none;
+  }
+
+  .dream .sp-form-block [data-slot="picture-choice-pick"] {
+    animation: none;
+  }
 }
 
-/* Windows high-contrast: fills vanish, so mark the chosen tile, and keep the
-   colour swatches' own colours. */
+/* Windows high-contrast: fills vanish, so mark the chosen tile / tab / family
+   chip with Highlight, and keep the swatches' own colours. */
 @media (forced-colors: active) {
   .dream
     .sp-form-block
@@ -19703,8 +21195,27 @@ body:has(.pollen) {
 
   .dream
     .sp-form-block
-    [data-slot="picture-choice-swatch"][data-kind="color"]
-    > span {
+    :is(
+      [data-slot="picture-choice-swatch"][data-kind="color"] > span,
+      [data-slot="picture-choice-pick-swatch"],
+      [data-slot="picture-choice-family-dot"]
+    ) {
+    forced-color-adjust: none;
+  }
+
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice-tab"][aria-selected="true"]::after {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .dream
+    .sp-form-block
+    [data-slot="picture-choice-family"][aria-checked="true"] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
     forced-color-adjust: none;
   }
 }

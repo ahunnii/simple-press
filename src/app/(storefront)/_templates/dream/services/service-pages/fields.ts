@@ -2,12 +2,16 @@
  * Dream-specific service-page template field definitions.
  *
  * Two templates:
- *   dream-lane    — the default: hero, three alternating story blocks, an
- *                   Options grid built from the service's `ServiceItem`s,
+ *   dream-lane    — the default: hero, optional centered main photo, an
+ *                   owner list of adaptive sections, an optional gallery,
+ *                   an Options grid built from the service's `ServiceItem`s,
  *                   and a closing Estimate Quote band.
  *   dream-package — hero, intro, a tier grid of `ServiceItem` package
  *                   cards, a "How to choose" band, and a closing Estimate
  *                   Quote band.
+ *   dream-balloons — dream-lane plus a balloon color studio (built from a
+ *                   quote-form picture-choice field) between the sections and
+ *                   the gallery. Reuses every `dream-lane.*` key.
  *
  * Field key convention: "<def-id>.<field-slug>" (matches
  * `src/lib/service-templates.ts`'s `ServiceTemplateDef` contract).
@@ -24,19 +28,42 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { DREAM_QUOTE_HREF } from "../../shared/dream-quote-href";
+import {
+  DREAM_LANE_SECTIONS_DEFAULT_ROWS,
+  DREAM_LANE_SECTIONS_KEY,
+} from "./dream-lane-sections-defaults";
 
 // ─── dream-lane ─────────────────────────────────────────────────────────────
 // The hero renders straight from `service.name`, `service.description`, and
 // `service.image` (design.md "Service-page variants → dream-lane"); the only
-// hero-side template field is the "Main photo" crop switch below.
+// hero-side template fields are the "Main photo" switches below.
+//
+// Retired 2026-10-14: the numbered `dream-lane.block-{1,2,3}-{heading,body,
+// image,alt,image-crop}` fields became the `dream-lane.sections` list. The old
+// keys are NOT read as a fallback (the list editor can't show rows built from
+// them); `scripts/dream/backfill-dream-lane-sections.ts` copies saved blocks
+// into the list. They need no `RETIRED_TEMPLATE_KEYS` entry — that set only
+// serves the visual editor's SiteContent "custom pairs" UI; the service
+// editor saves `Service.customFields` whole, so old values stay in place.
 
 export const dreamLaneFields: TemplateField[] = [
   // Main photo (the service's own image — set on the service itself)
   {
+    key: "dream-lane.show-cover",
+    label: "Show main photo at the top",
+    description:
+      "On shows this service's main photo, centered, under the title. Off hides it on this page only.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-lane.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "true",
+  },
+  {
     key: "dream-lane.image-crop",
     label: "Crop to fill the frame",
     description:
-      "Applies to this service's main photo on the Services page and at the top of its page. Off shows the whole photo on a soft blurred backdrop.",
+      "Applies to this service's main photo at the top of its page and on the Services page. Off shows the whole photo on a soft blurred backdrop.",
     type: "boolean",
     page: "homepage",
     group: "dream-lane.hero",
@@ -44,163 +71,102 @@ export const dreamLaneFields: TemplateField[] = [
     defaultValue: "false",
   },
 
-  // Story block 1
+  // Sections
   {
-    key: "dream-lane.block-1-heading",
-    label: "Block 1 heading",
-    description: "Leave blank to hide this block entirely.",
-    type: "text",
-    page: "homepage",
-    group: "dream-lane.block-1",
-    gridColumn: "col-span-full",
-    defaultValue: "How it starts",
-  },
-  {
-    key: "dream-lane.block-1-body",
-    label: "Block 1 body",
-    type: "textarea",
-    page: "homepage",
-    group: "dream-lane.block-1",
-    gridColumn: "col-span-full",
-    description: "Short paragraph for this block.",
-    defaultValue:
-      "Share your event date, venue, and the look you're imagining. Selest sketches a plan built around your colors and space.",
-  },
-  {
-    key: "dream-lane.block-1-image",
-    label: "Block 1 image",
-    description: "Photo shown alongside this block.",
-    type: "image",
-    page: "homepage",
-    group: "dream-lane.block-1",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream-lane.block-1-alt",
-    label: "Block 1 image alt text",
-    description: "Describes this block's photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "dream-lane.block-1",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-  },
-  {
-    key: "dream-lane.block-1-image-crop",
-    label: "Crop to fill the frame",
-    description: "Off shows the whole photo on a soft blurred backdrop.",
+    key: "dream-lane.sections-visible",
+    label: "Show sections",
+    description: "Off hides every section, including the built-in examples.",
     type: "boolean",
     page: "homepage",
-    group: "dream-lane.block-1",
+    group: "dream-lane.sections",
     gridColumn: "col-span-full",
-    defaultValue: "false",
+    defaultValue: "true",
+  },
+  {
+    key: DREAM_LANE_SECTIONS_KEY,
+    label: "Sections",
+    description:
+      "Short text, a photo, or both. Add, remove, or drag to reorder. Each section adapts to what you fill in: text with a photo sits side by side, a photo alone is shown wide, and text alone is centered. Deleting every section brings the built-in examples back — use Show sections to hide them instead.",
+    type: "list",
+    page: "homepage",
+    group: "dream-lane.sections",
+    gridColumn: "col-span-full",
+    minItems: 0,
+    maxItems: 8,
+    itemLabel: "section",
+    summaryKey: "heading",
+    defaultsWhenEmpty: true,
+    defaultRows: DREAM_LANE_SECTIONS_DEFAULT_ROWS,
+    itemSchema: [
+      {
+        key: "heading",
+        label: "Heading",
+        type: "text",
+        optional: true,
+        placeholder: "e.g. How it starts",
+      },
+      {
+        key: "body",
+        label: "Text",
+        type: "textarea",
+        optional: true,
+        description: "Keep it short — a sentence or two.",
+      },
+      {
+        key: "image",
+        label: "Photo",
+        type: "image",
+        description:
+          "Leave empty for a text-only section. A photo with no text is shown wide.",
+      },
+      {
+        key: "alt",
+        label: "Photo description",
+        type: "text",
+        optional: true,
+        description: "Describes the photo for screen readers.",
+      },
+      {
+        key: "crop",
+        label: "Crop to fill the frame",
+        type: "boolean",
+        optional: true,
+        description: "Off shows the whole photo on a soft blurred backdrop.",
+      },
+    ],
   },
 
-  // Story block 2
+  // Gallery
   {
-    key: "dream-lane.block-2-heading",
-    label: "Block 2 heading",
-    description: "Leave blank to hide this block entirely.",
-    type: "text",
+    key: "dream-lane.gallery",
+    label: "Gallery",
+    description:
+      "Pick a photo gallery to show under the sections. Leave unset to show none.",
+    type: "gallery",
     page: "homepage",
-    group: "dream-lane.block-2",
+    group: "dream-lane.gallery",
     gridColumn: "col-span-full",
-    defaultValue: "What's included",
-  },
-  {
-    key: "dream-lane.block-2-body",
-    label: "Block 2 body",
-    type: "textarea",
-    page: "homepage",
-    group: "dream-lane.block-2",
-    gridColumn: "col-span-full",
-    description: "Short paragraph for this block.",
-    defaultValue:
-      "Every layer — panels, colors, chairs, and accents — is chosen to fit your theme, then delivered and styled on site.",
-  },
-  {
-    key: "dream-lane.block-2-image",
-    label: "Block 2 image",
-    description: "Photo shown alongside this block.",
-    type: "image",
-    page: "homepage",
-    group: "dream-lane.block-2",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream-lane.block-2-alt",
-    label: "Block 2 image alt text",
-    description: "Describes this block's photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "dream-lane.block-2",
-    gridColumn: "col-span-1",
     defaultValue: "",
   },
   {
-    key: "dream-lane.block-2-image-crop",
-    label: "Crop to fill the frame",
-    description: "Off shows the whole photo on a soft blurred backdrop.",
-    type: "boolean",
-    page: "homepage",
-    group: "dream-lane.block-2",
-    gridColumn: "col-span-full",
-    defaultValue: "false",
-  },
-
-  // Story block 3
-  {
-    key: "dream-lane.block-3-heading",
-    label: "Block 3 heading",
-    description: "Leave blank to hide this block entirely.",
+    key: "dream-lane.gallery-heading",
+    label: "Gallery heading",
+    description: "Heading above the gallery.",
     type: "text",
     page: "homepage",
-    group: "dream-lane.block-3",
+    group: "dream-lane.gallery",
     gridColumn: "col-span-full",
-    defaultValue: "On the day",
+    defaultValue: "See it styled",
   },
   {
-    key: "dream-lane.block-3-body",
-    label: "Block 3 body",
+    key: "dream-lane.gallery-lede",
+    label: "Gallery intro",
+    description: "Optional short line beside the heading. Leave blank to hide.",
     type: "textarea",
     page: "homepage",
-    group: "dream-lane.block-3",
+    group: "dream-lane.gallery",
     gridColumn: "col-span-full",
-    description: "Short paragraph for this block.",
-    defaultValue:
-      "Selest arrives ahead of your event to install the full look, then returns after to break it down.",
-  },
-  {
-    key: "dream-lane.block-3-image",
-    label: "Block 3 image",
-    description: "Photo shown alongside this block.",
-    type: "image",
-    page: "homepage",
-    group: "dream-lane.block-3",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "dream-lane.block-3-alt",
-    label: "Block 3 image alt text",
-    description: "Describes this block's photo for screen readers.",
-    type: "text",
-    page: "homepage",
-    group: "dream-lane.block-3",
-    gridColumn: "col-span-1",
     defaultValue: "",
-  },
-  {
-    key: "dream-lane.block-3-image-crop",
-    label: "Crop to fill the frame",
-    description: "Off shows the whole photo on a soft blurred backdrop.",
-    type: "boolean",
-    page: "homepage",
-    group: "dream-lane.block-3",
-    gridColumn: "col-span-full",
-    defaultValue: "false",
   },
 
   // Options grid heading
@@ -282,25 +248,20 @@ export const dreamLaneFieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
-    id: "dream-lane.block-1",
-    title: "Story block 1",
-    description: "First alternating text/image block. Blank heading hides it.",
+    id: "dream-lane.sections",
+    title: "Sections",
+    description:
+      "Short text and photos beneath the main photo. Each section adapts to what you fill in.",
     icon: "🎀",
-    columns: 2,
+    columns: 1,
   },
   {
-    id: "dream-lane.block-2",
-    title: "Story block 2",
-    description: "Second alternating text/image block. Blank heading hides it.",
-    icon: "🎁",
-    columns: 2,
-  },
-  {
-    id: "dream-lane.block-3",
-    title: "Story block 3",
-    description: "Third alternating text/image block. Blank heading hides it.",
-    icon: "✨",
-    columns: 2,
+    id: "dream-lane.gallery",
+    title: "Gallery",
+    description:
+      "An optional photo gallery shown after the sections. Create galleries in the Gallery section of your admin.",
+    icon: "📸",
+    columns: 1,
   },
   {
     id: "dream-lane.options",
@@ -470,6 +431,123 @@ export const dreamPackageFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
+// ─── dream-balloons ─────────────────────────────────────────────────────────
+// dream-lane's page plus a color studio built from a picture-choice field on
+// one of the business's forms (the Estimate Quote form's "Balloon colors").
+// The studio's tiles, groups (finishes) and families all live on that FORM
+// field — the owner edits colors in the form builder, not here.
+
+export const DREAM_BALLOONS_COLOR_SOURCE_KEY = "dream-balloons.color-source";
+
+/** Default and bounds of the studio's palette size (`dream-balloons.palette-max`). */
+export const DREAM_BALLOONS_PALETTE_DEFAULT = 6;
+export const DREAM_BALLOONS_PALETTE_MIN = 1;
+export const DREAM_BALLOONS_PALETTE_MAX = 12;
+
+export const dreamBalloonsStudioFields: TemplateField[] = [
+  {
+    key: "dream-balloons.studio-visible",
+    label: "Show the color studio",
+    description:
+      "On shows the balloon color studio under the sections. Off hides it, and the page looks like a Lane page.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "true",
+  },
+  {
+    key: DREAM_BALLOONS_COLOR_SOURCE_KEY,
+    label: "Colors from",
+    description:
+      "The picture-choice question on one of your forms that lists your balloon colors. Edit the colors, finishes and families in that form. The studio only shows when the form is published.",
+    type: "formpicture",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "dream-balloons.studio-heading",
+    label: "Heading",
+    description: "Heading above the studio. The last word is shown in script.",
+    type: "text",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "Build your balloon palette",
+  },
+  {
+    key: "dream-balloons.studio-lede",
+    label: "Intro",
+    description: "Short line beside the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Tap a balloon to see it up close. Add up to six and I'll sketch them into a garland, so you can see how they sit together before we talk.",
+  },
+  {
+    key: "dream-balloons.palette-max",
+    label: "Colors per palette",
+    description:
+      "How many colors a visitor can add. Never more than the form question allows.",
+    type: "number",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    min: DREAM_BALLOONS_PALETTE_MIN,
+    max: DREAM_BALLOONS_PALETTE_MAX,
+    step: 1,
+    defaultValue: String(DREAM_BALLOONS_PALETTE_DEFAULT),
+  },
+  {
+    key: "dream-balloons.cta-label",
+    label: "Button label",
+    description:
+      "The palette's button. It opens your quote form with the picked colors already chosen.",
+    type: "text",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-1",
+    defaultValue: "Use these colors in my quote",
+  },
+  {
+    key: "dream-balloons.cta-url",
+    label: "Button link",
+    description:
+      "The page with your quote form. The picked colors are added to this link.",
+    type: "url",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-1",
+    defaultValue: DREAM_QUOTE_HREF,
+  },
+];
+
+export const dreamBalloonsFields: TemplateField[] = [
+  ...dreamLaneFields,
+  ...dreamBalloonsStudioFields,
+];
+
+const dreamBalloonsStudioGroup: TemplateFieldGroup = {
+  id: "dream-balloons.studio",
+  title: "Balloon color studio",
+  description:
+    "Visitors browse your balloon colors, build a palette and send it with their Estimate Quote.",
+  icon: "🎈",
+  columns: 2,
+};
+
+// The studio group sits right after the sections group (the page order).
+export const dreamBalloonsFieldGroups: TemplateFieldGroup[] =
+  dreamLaneFieldGroups.flatMap((group) =>
+    group.id === "dream-lane.sections"
+      ? [group, dreamBalloonsStudioGroup]
+      : [group],
+  );
+
 // ─── Bound field resolvers (one per template) ──────────────────────────────
 
 const _laneFieldMap = new Map<string, TemplateField>(
@@ -486,6 +564,17 @@ export function resolveDreamLaneFields(
 const _packageFieldMap = new Map<string, TemplateField>(
   dreamPackageFields.map((f) => [f.key, f]),
 );
+
+const _balloonsFieldMap = new Map<string, TemplateField>(
+  dreamBalloonsFields.map((f) => [f.key, f]),
+);
+
+export function resolveDreamBalloonsFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _balloonsFieldMap);
+}
 
 export function resolveDreamPackageFields(
   customFields: unknown,
@@ -525,7 +614,7 @@ export const dreamServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "dream-lane",
     label: "Lane",
     description:
-      "Hero, three alternating story blocks, an Options grid built from this service's items (pricing, tiers, add-ons, booking), and a closing Estimate Quote band.",
+      "Hero, a centered main photo, short text-and-photo sections you add and reorder, an optional gallery, an Options grid built from this service's items (pricing, tiers, add-ons, booking), and a closing Estimate Quote band.",
     fields: dreamLaneFields,
     fieldGroups: dreamLaneFieldGroups,
   },
@@ -536,5 +625,16 @@ export const dreamServiceTemplateDefs: ServiceTemplateDef[] = [
       'Hero, intro paragraph, a tier grid of package cards built from this service\'s items, a "How to choose" band, and a closing Estimate Quote band.',
     fields: dreamPackageFields,
     fieldGroups: dreamPackageFieldGroups,
+  },
+  // Deliberately reuses EVERY `dream-lane.*` key (plus `dream-balloons.*`
+  // studio keys): switching a service between Lane and Balloons keeps its
+  // sections, gallery, options heading and closing banner as they are.
+  {
+    id: "dream-balloons",
+    label: "Balloons",
+    description:
+      "Everything on a Lane page, plus a balloon color studio between the sections and the gallery: visitors browse your colors by finish and family, build a palette shown as a garland sketch, and send it with their Estimate Quote.",
+    fields: dreamBalloonsFields,
+    fieldGroups: dreamBalloonsFieldGroups,
   },
 ];

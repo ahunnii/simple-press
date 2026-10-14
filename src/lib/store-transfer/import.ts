@@ -1481,7 +1481,7 @@ export async function importStoreBundle(args: {
           svc.customFields,
           urlMap,
           galleryIdMap,
-          { templateId },
+          { templateId, serviceTemplateId: svc.serviceTemplateId },
           embedIdMaps,
         ),
       );

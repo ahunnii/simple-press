@@ -20,7 +20,11 @@ import type {
 } from "./builder-shared";
 import type { FormFieldType } from "~/lib/validators/form";
 import { cn } from "~/lib/utils";
-import { FORM_PICTURE_MAX_QUANTITY } from "~/lib/validators/form";
+import {
+  FORM_MAX_OPTIONS,
+  FORM_PICTURE_MAX_QUANTITY,
+  visiblePictureOptions,
+} from "~/lib/validators/form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -64,6 +68,7 @@ import {
   isOptionFieldInput,
   isPictureChoiceFieldInput,
   makeOption,
+  writeOptionalBuilderValue,
 } from "./builder-shared";
 import { ChangeTypeDialog } from "./change-type-dialog";
 import { PictureOptionsEditor } from "./picture-options-editor";
@@ -74,10 +79,10 @@ export type FieldPath = `definition.fields.${number}`;
 const EMPTY_IMPACT: FieldTypeChangeImpact = {
   optionsDiscarded: false,
   picturesDiscarded: false,
+  hiddenRevealed: false,
+  tooManyOptions: false,
   wasConfirmationTarget: false,
 };
-
-const MAX_OPTIONS = 30;
 
 /** Field types whose `placeholder` renders on the storefront. */
 function supportsPlaceholder(type: FormFieldType): boolean {
@@ -482,6 +487,9 @@ function PictureChoiceSettings({
 }) {
   const selection = field.selection ?? "one";
   const isQuantity = selection === "quantity";
+  // Hidden tiles can't be picked, so they don't count toward the bounds.
+  const visibleCount = visiblePictureOptions(field).length;
+  const imageFitId = useId();
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
@@ -542,6 +550,36 @@ function PictureChoiceSettings({
         />
       </div>
 
+      {/* NOT `FormField`-registered: `imageFit` is optional and absent on
+          every older form, and registering an absent key makes RHF count it
+          as a change. "Crop to fill" (the default) is stored as no key. */}
+      <div className="space-y-1.5">
+        <Label htmlFor={imageFitId}>Image fit</Label>
+        <Select
+          value={field.imageFit ?? "cover"}
+          onValueChange={(value) =>
+            writeOptionalBuilderValue(
+              form,
+              base,
+              `${base}.imageFit`,
+              value === "contain" ? "contain" : undefined,
+            )
+          }
+        >
+          <SelectTrigger id={imageFitId} className="w-full sm:w-1/2">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cover">Crop to fill</SelectItem>
+            <SelectItem value="contain">Show whole image</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-muted-foreground text-xs">
+          &ldquo;Show whole image&rdquo; suits cut-out photos, like a balloon on
+          a clear background.
+        </p>
+      </div>
+
       <FormField
         control={form.control}
         name={`${base}.showLabels`}
@@ -592,7 +630,7 @@ function PictureChoiceSettings({
             placeholder="No minimum"
             emptyAs="null"
             min={1}
-            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : field.options.length}
+            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : visibleCount}
           />
           <BuilderNumberField
             form={form}
@@ -604,7 +642,7 @@ function PictureChoiceSettings({
             placeholder="No maximum"
             emptyAs="null"
             min={1}
-            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : field.options.length}
+            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : visibleCount}
           />
         </div>
       )}
@@ -636,7 +674,7 @@ function FieldOptionsEditor({
           type="button"
           variant="outline"
           size="sm"
-          disabled={fields.length >= MAX_OPTIONS}
+          disabled={fields.length >= FORM_MAX_OPTIONS}
           onClick={() => append(makeOption())}
         >
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />

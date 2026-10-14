@@ -7,6 +7,7 @@ import {
   FORM_SOURCE_VALUES,
   FORM_STATUS_VALUES,
   isPictureChoiceField,
+  pictureOptionAnswerLabel,
 } from "~/lib/validators/form";
 import { api } from "~/trpc/server";
 
@@ -57,15 +58,20 @@ export default async function FormEntryDetailPage({ params }: PageProps) {
   );
 
   // Picture-choice answers store option LABELS, so swatches/photos are looked
-  // up by label (case-insensitive) in the form's current definition.
+  // up by label (case-insensitive) in the form's current definition. A coded
+  // tile is keyed by both its plain label (entries from before it had a code)
+  // and its answer label, "Label (#code)" (entries since).
   const pictureVisuals: PictureOptionVisuals = {};
   for (const field of submission.definition?.fields ?? []) {
     if (!isPictureChoiceField(field)) continue;
     pictureVisuals[field.id] = Object.fromEntries(
-      field.options.map((option) => [
-        option.label.trim().toLowerCase(),
-        { color: option.color, imageUrl: option.imageUrl },
-      ]),
+      field.options.flatMap((option) => {
+        const visual = { color: option.color, imageUrl: option.imageUrl };
+        return [
+          option.label,
+          ...(option.code ? [pictureOptionAnswerLabel(option)] : []),
+        ].map((label) => [label.trim().toLowerCase(), visual] as const);
+      }),
     );
   }
 

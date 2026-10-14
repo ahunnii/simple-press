@@ -5,6 +5,7 @@
  */
 import type { ServiceTemplateComponent } from "~/app/(storefront)/_templates/_service-pages/registry";
 
+import { DreamBalloonsServicePage } from "./dream-balloons-service-page";
 import { DreamLaneServicePage } from "./dream-lane-service-page";
 import { DreamPackageServicePage } from "./dream-package-service-page";
 
@@ -14,4 +15,5 @@ export const DREAM_SERVICE_COMPONENTS: Record<
 > = {
   "dream-lane": DreamLaneServicePage,
   "dream-package": DreamPackageServicePage,
+  "dream-balloons": DreamBalloonsServicePage,
 };
