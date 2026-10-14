@@ -20,6 +20,8 @@ type HeroShelfPhoto = {
   src: string;
   alt: string;
   caption: string;
+  /** True crops the photo to fill the frame; false shows the whole photo. */
+  crop: boolean;
 };
 
 type HeroField = {
@@ -112,6 +114,7 @@ export function DreamHomepageHero({
       alt={decorative ? "" : photo.alt}
       caption={photo.caption}
       aspect={SHELF_ASPECTS[i % SHELF_ASPECTS.length] ?? "3 / 2"}
+      fit={photo.crop ? "cover" : "contain"}
       className={
         decorative ? "dream-hero-shelf-photo is-dup" : "dream-hero-shelf-photo"
       }

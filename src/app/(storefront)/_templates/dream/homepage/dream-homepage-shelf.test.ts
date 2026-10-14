@@ -11,6 +11,7 @@ const DEFAULT_PHOTOS = DREAM_HERO_SHELF_DEFAULT_ROWS.map((row) => ({
   src: "",
   alt: row.alt,
   caption: row.caption,
+  crop: false,
 }));
 
 describe("resolveDreamHeroShelf", () => {
@@ -38,7 +39,14 @@ describe("resolveDreamHeroShelf", () => {
           { image: "/saved.jpg", caption: "Saved", alt: "A saved photo" },
         ],
       }),
-    ).toEqual([{ src: "/saved.jpg", alt: "A saved photo", caption: "Saved" }]);
+    ).toEqual([
+      {
+        src: "/saved.jpg",
+        alt: "A saved photo",
+        caption: "Saved",
+        crop: false,
+      },
+    ]);
   });
 
   it("falls back to the label when the description is blank", () => {
@@ -50,8 +58,13 @@ describe("resolveDreamHeroShelf", () => {
         ],
       }),
     ).toEqual([
-      { src: "/a.jpg", alt: "Balloon wall", caption: "Balloon wall" },
-      { src: "/b.jpg", alt: "Arbor", caption: "Arbor" },
+      {
+        src: "/a.jpg",
+        alt: "Balloon wall",
+        caption: "Balloon wall",
+        crop: false,
+      },
+      { src: "/b.jpg", alt: "Arbor", caption: "Arbor", crop: false },
     ]);
   });
 
@@ -66,8 +79,8 @@ describe("resolveDreamHeroShelf", () => {
         ],
       }),
     ).toEqual([
-      { src: "", alt: "Coming soon", caption: "Coming soon" },
-      { src: "/b.jpg", alt: "", caption: "" },
+      { src: "", alt: "Coming soon", caption: "Coming soon", crop: false },
+      { src: "/b.jpg", alt: "", caption: "", crop: false },
     ]);
   });
 
@@ -95,5 +108,17 @@ describe("resolveDreamHeroShelf", () => {
       "Floral backdrop",
       "Balloon table",
     ]);
+  });
+
+  it('defaults to the whole photo and only crops on the string "true"', () => {
+    expect(
+      resolveDreamHeroShelf({
+        [DREAM_HERO_SHELF_KEY]: [
+          { image: "/a.jpg", caption: "A" },
+          { image: "/b.jpg", caption: "B", crop: "false" },
+          { image: "/c.jpg", caption: "C", crop: "true" },
+        ],
+      }).map((p) => p.crop),
+    ).toEqual([false, false, true]);
   });
 });

@@ -26,11 +26,24 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 import { DREAM_QUOTE_HREF } from "../../shared/dream-quote-href";
 
 // ─── dream-lane ─────────────────────────────────────────────────────────────
-// Hero is NOT a field group — it renders straight from `service.name`,
-// `service.description`, and `service.image` (design.md "Service-page
-// variants → dream-lane").
+// The hero renders straight from `service.name`, `service.description`, and
+// `service.image` (design.md "Service-page variants → dream-lane"); the only
+// hero-side template field is the "Main photo" crop switch below.
 
 export const dreamLaneFields: TemplateField[] = [
+  // Main photo (the service's own image — set on the service itself)
+  {
+    key: "dream-lane.image-crop",
+    label: "Crop to fill the frame",
+    description:
+      "Applies to this service's main photo on the Services page and at the top of its page. Off shows the whole photo on a soft blurred backdrop.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-lane.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
+  },
+
   // Story block 1
   {
     key: "dream-lane.block-1-heading",
@@ -72,6 +85,16 @@ export const dreamLaneFields: TemplateField[] = [
     group: "dream-lane.block-1",
     gridColumn: "col-span-1",
     defaultValue: "",
+  },
+  {
+    key: "dream-lane.block-1-image-crop",
+    label: "Crop to fill the frame",
+    description: "Off shows the whole photo on a soft blurred backdrop.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-lane.block-1",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
   },
 
   // Story block 2
@@ -116,6 +139,16 @@ export const dreamLaneFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "",
   },
+  {
+    key: "dream-lane.block-2-image-crop",
+    label: "Crop to fill the frame",
+    description: "Off shows the whole photo on a soft blurred backdrop.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-lane.block-2",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
+  },
 
   // Story block 3
   {
@@ -158,6 +191,16 @@ export const dreamLaneFields: TemplateField[] = [
     group: "dream-lane.block-3",
     gridColumn: "col-span-1",
     defaultValue: "",
+  },
+  {
+    key: "dream-lane.block-3-image-crop",
+    label: "Crop to fill the frame",
+    description: "Off shows the whole photo on a soft blurred backdrop.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-lane.block-3",
+    gridColumn: "col-span-full",
+    defaultValue: "false",
   },
 
   // Options grid heading
@@ -230,6 +273,14 @@ export const dreamLaneFields: TemplateField[] = [
 ];
 
 export const dreamLaneFieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "dream-lane.hero",
+    title: "Main photo",
+    description:
+      "How this service's main photo fits its frame. Pick the photo itself on the service.",
+    icon: "🖼️",
+    columns: 1,
+  },
   {
     id: "dream-lane.block-1",
     title: "Story block 1",
@@ -441,6 +492,28 @@ export function resolveDreamPackageFields(
   keys: string[],
 ): Record<string, string> {
   return resolveTemplateFields(customFields, keys, _packageFieldMap);
+}
+
+/**
+ * How a Dream lane photo meets its frame, read from a raw
+ * `Service.customFields` value. Stored as the switch's "Crop to fill the
+ * frame" boolean: only `"true"` crops (`"cover"`); unset, `"false"` or
+ * anything else shows the whole photo (`"contain"`, the default).
+ */
+export function dreamLaneImageFit(
+  customFields: unknown,
+  key: string,
+): "cover" | "contain" {
+  if (
+    customFields === null ||
+    typeof customFields !== "object" ||
+    Array.isArray(customFields)
+  ) {
+    return "contain";
+  }
+  return (customFields as Record<string, unknown>)[key] === "true"
+    ? "cover"
+    : "contain";
 }
 
 // ─── Exported defs ──────────────────────────────────────────────────────────

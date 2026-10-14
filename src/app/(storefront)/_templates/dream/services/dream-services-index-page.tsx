@@ -39,9 +39,10 @@ const FIELD_KEYS = [
 
 /**
  * `/services` — the "Decor, rentals, and draping" index (design.md
- * "Per-page section concepts → Services index"). Each published service is
- * one alternating lane row; package ideas and the closing Estimate Quote
- * band are hideable.
+ * "Per-page section concepts → Services index"). Order: page header →
+ * package ideas (hideable; sky band right under the header so visitors see
+ * the starting points first) → one alternating, fully clickable lane row per
+ * published service → closing Estimate Quote band (hideable).
  */
 export function DreamServicesIndexPage({ business, services }: Props) {
   const customFields = business.siteContent?.customFields;
@@ -77,6 +78,24 @@ export function DreamServicesIndexPage({ business, services }: Props) {
         ledeFieldKey="dream.services.hero-lede"
         sectionAttrs={sectionGroupAttr("services", "hero")}
       />
+
+      {isSectionVisible(customFields, "dream", "services.packages") && (
+        <DreamSection
+          id="packages"
+          tone="sky"
+          className="scroll-mt-[calc(var(--dream-header-h,72px)+24px)]"
+          sectionAttrs={sectionGroupAttr("services", "packages")}
+        >
+          <DreamPackages
+            heading={f["dream.services.packages-heading"] ?? ""}
+            lede={f["dream.services.packages-lede"] ?? ""}
+            packages={packages}
+            packagesFieldKey="dream.services.packages"
+            headingFieldKey="dream.services.packages-heading"
+            ledeFieldKey="dream.services.packages-lede"
+          />
+        </DreamSection>
+      )}
 
       <DreamSection
         sectionAttrs={sectionGroupAttr("services", "lanes")}
@@ -119,24 +138,6 @@ export function DreamServicesIndexPage({ business, services }: Props) {
           </DreamReveal>
         )}
       </DreamSection>
-
-      {isSectionVisible(customFields, "dream", "services.packages") && (
-        <DreamSection
-          id="packages"
-          tone="sky"
-          className="scroll-mt-[calc(var(--dream-header-h,72px)+24px)]"
-          sectionAttrs={sectionGroupAttr("services", "packages")}
-        >
-          <DreamPackages
-            heading={f["dream.services.packages-heading"] ?? ""}
-            lede={f["dream.services.packages-lede"] ?? ""}
-            packages={packages}
-            packagesFieldKey="dream.services.packages"
-            headingFieldKey="dream.services.packages-heading"
-            ledeFieldKey="dream.services.packages-lede"
-          />
-        </DreamSection>
-      )}
 
       {isSectionVisible(customFields, "dream", "services.cta") && (
         <DreamQuoteCta

@@ -134,6 +134,7 @@ describe("dream list-field defaults (moved into TemplateField.defaultRows)", () 
         "image",
         "caption",
         "alt",
+        "crop",
       ]);
       expect(field.defaultRows).toEqual([
         {
@@ -225,8 +226,10 @@ describe("dream list-field defaults (moved into TemplateField.defaultRows)", () 
         "linkUrl",
         "image",
         "alt",
+        "imageCrop",
         "sideImage",
         "sideAlt",
+        "sideImageCrop",
       ]);
       expect(field.defaultRows).toEqual(wwdRows);
       expect(

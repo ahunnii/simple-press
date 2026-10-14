@@ -18,10 +18,14 @@ export type DreamWhatWeDoRow = {
   image: string;
   /** Falls back to the heading when the owner left the description blank. */
   alt: string;
+  /** True crops the main photo to fill its frame; false (default) shows it whole. */
+  imageCrop: boolean;
   /** Empty string means the owner picked no side photo. */
   sideImage: string;
   /** Blank means the side photo is decorative (`alt=""`). */
   sideAlt: string;
+  /** True crops the side photo to fill its frame; false (default) shows it whole. */
+  sideImageCrop: boolean;
 };
 
 function clean(value: unknown): string {
@@ -43,8 +47,10 @@ function toRow(row: Record<string, unknown>): DreamWhatWeDoRow {
     linkUrl: clean(row.linkUrl),
     image: cleanImage(row.image),
     alt: clean(row.alt) || heading,
+    imageCrop: row.imageCrop === "true",
     sideImage: cleanImage(row.sideImage),
     sideAlt: clean(row.sideAlt),
+    sideImageCrop: row.sideImageCrop === "true",
   };
 }
 
