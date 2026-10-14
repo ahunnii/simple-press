@@ -16,6 +16,8 @@ export interface ReadableRefs {
   collections: Map<string, { name: string; path?: string }>;
   /** FAQ item id → question */
   faqs: Map<string, { question: string }>;
+  /** form id → name + its picture-choice field labels (field id → label), for `formpicture` fields */
+  forms?: Map<string, { name: string; fields: Map<string, string> }>;
 }
 
 export interface RenderCtx {

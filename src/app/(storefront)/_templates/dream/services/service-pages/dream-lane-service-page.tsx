@@ -54,7 +54,14 @@ export async function DreamLaneServicePage({
   service,
   items,
   embedsEnabled,
-}: ServiceTemplateProps) {
+  afterSections,
+}: ServiceTemplateProps & {
+  /**
+   * Rendered between the sections and the gallery (`dream-balloons` puts its
+   * color studio here). Omitted → the Lane page is unchanged.
+   */
+  afterSections?: React.ReactNode;
+}) {
   const f = resolveDreamLaneFields(service.customFields, FIELD_KEYS);
 
   const logoUrl =
@@ -172,6 +179,8 @@ export async function DreamLaneServicePage({
           }
         </DreamSection>
       )}
+
+      {afterSections}
 
       {gallery && gallery.images.length > 0 && (
         <DreamSection tone="sky" aria-label="Gallery" reveal={false}>

@@ -187,4 +187,31 @@ describe("rewriteJsonValue — Service.customFields", () => {
       rewriteJsonValue(input, urlMap, galleryIdMap, { templateId: "dream" }),
     ).toEqual(input);
   });
+
+  it("remaps the form id half of a dream-balloons formpicture field", () => {
+    const out = rewriteJsonValue(
+      {
+        "dream-balloons.color-source": "form_old:balloon-colors",
+        "dream-lane.gallery": "gal_old",
+      },
+      urlMap,
+      galleryIdMap,
+      { templateId: "dream", serviceTemplateId: "dream-balloons" },
+      embedIdMaps,
+    );
+    expect(out).toEqual({
+      "dream-balloons.color-source": "form_new:balloon-colors",
+      "dream-lane.gallery": "gal_new",
+    });
+  });
+
+  it("leaves unmapped, empty or malformed formpicture values alone", () => {
+    const opts = { templateId: "dream", serviceTemplateId: "dream-balloons" };
+    for (const value of ["form_unknown:balloon-colors", "", "no-colon"]) {
+      const input = { "dream-balloons.color-source": value };
+      expect(
+        rewriteJsonValue(input, urlMap, galleryIdMap, opts, embedIdMaps),
+      ).toEqual(input);
+    }
+  });
 });

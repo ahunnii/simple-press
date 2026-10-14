@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORM_DEFAULT_SUBMIT_LABEL,
   FORM_DEFAULT_SUCCESS_MESSAGE,
+  FORM_PICTURE_MAX_GROUPS,
   FORM_PICTURE_MAX_OPTIONS,
   formBulkAddTagsSchema,
   formBulkDeleteSchema,
@@ -16,7 +17,9 @@ import {
   makeEmptyFormDefinition,
   normalizeTags,
   parseStoredFormDefinition,
+  pictureOptionAnswerLabel,
   toPublicFormDefinition,
+  visiblePictureOptions,
 } from "./form";
 
 /**
@@ -309,7 +312,9 @@ describe("picturechoice fields", () => {
         withPicture({ options: many(FORM_PICTURE_MAX_OPTIONS) }),
       ).success,
     ).toBe(true);
-    expect(issuePaths(withPicture({ options: many(61) }))).toEqual([
+    expect(
+      issuePaths(withPicture({ options: many(FORM_PICTURE_MAX_OPTIONS + 1) })),
+    ).toEqual([
       {
         path: "fields.3.options",
         message: `A field can have at most ${FORM_PICTURE_MAX_OPTIONS} options`,
@@ -380,6 +385,342 @@ describe("picturechoice fields", () => {
       type: "picturechoice",
       referenceImageUrl: "https://cdn.example.com/c.jpg",
     });
+  });
+});
+
+describe("picturechoice catalog props (codes, groups, hidden)", () => {
+  const groups = [
+    { id: "g_pearl", label: "Pearl", description: "Shimmery finish" },
+    { id: "g_std", label: "Standard" },
+  ];
+  const tiles = [
+    { id: "p_gold", label: "Pearl Gold", code: "610", groupId: "g_pearl" },
+    {
+      id: "p_red",
+      label: "Red",
+      code: "010",
+      family: "Reds",
+      groupId: "g_std",
+    },
+    { id: "p_blue", label: "Blue", family: "Blues" },
+  ];
+
+  function withPicture(overrides: RawField = {}) {
+    const def = baseDefinition();
+    def.fields.push({
+      id: "f_pic",
+      type: "picturechoice",
+      label: "Balloon colors",
+      options: tiles,
+      groups,
+      ...overrides,
+    });
+    return def;
+  }
+
+  function parsePicture(overrides: RawField = {}) {
+    const result = formDefinitionSchema.safeParse(withPicture(overrides));
+    expect(result.success).toBe(true);
+    if (!result.success) throw result.error;
+    const field = result.data.fields.at(-1)!;
+    if (!isPictureChoiceField(field)) throw new Error("not a picture field");
+    return field;
+  }
+
+  it("keeps a definition without the new props exactly as before", () => {
+    const legacy = {
+      id: "f_pic",
+      type: "picturechoice",
+      label: "Pick",
+      options: [
+        { id: "a", label: "A", color: "#FF0000" },
+        { id: "b", label: "B" },
+      ],
+    };
+    const def = baseDefinition();
+    def.fields.push(legacy);
+    const result = formDefinitionSchema.parse(def);
+    expect(result.fields.at(-1)).toEqual({
+      ...legacy,
+      options: [
+        { id: "a", label: "A", color: "#ff0000" },
+        { id: "b", label: "B" },
+      ],
+      required: false,
+      selection: "one",
+      tileSize: "small",
+      showLabels: true,
+    });
+  });
+
+  it("parses codes, families, groups and imageFit", () => {
+    const field = parsePicture({ imageFit: "contain" });
+    expect(field.imageFit).toBe("contain");
+    expect(field.groups).toEqual(groups);
+    expect(field.options[0]).toMatchObject({ code: "610", groupId: "g_pearl" });
+    expect(field.options[1]).toMatchObject({ family: "Reds" });
+    expect(parsePicture({ imageFit: undefined }).imageFit).toBeUndefined();
+    expect(
+      formDefinitionSchema.safeParse(withPicture({ imageFit: "stretch" }))
+        .success,
+    ).toBe(false);
+  });
+
+  it("accepts null catalog props", () => {
+    const field = parsePicture({
+      options: tiles.map((tile) => ({
+        ...tile,
+        code: null,
+        family: null,
+        groupId: null,
+        hidden: false,
+      })),
+    });
+    expect(field.options[0]).toMatchObject({ code: null, groupId: null });
+  });
+
+  it("allows 200 options and 30 groups, and no more", () => {
+    expect(FORM_PICTURE_MAX_OPTIONS).toBe(200);
+    expect(FORM_PICTURE_MAX_GROUPS).toBe(30);
+    const manyGroups = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `g${i}`,
+        label: `Group ${i}`,
+      }));
+    expect(
+      formDefinitionSchema.safeParse(
+        withPicture({
+          groups: manyGroups(FORM_PICTURE_MAX_GROUPS),
+          options: [
+            { id: "a", label: "A" },
+            { id: "b", label: "B" },
+          ],
+        }),
+      ).success,
+    ).toBe(true);
+    expect(
+      issuePaths(
+        withPicture({
+          groups: manyGroups(FORM_PICTURE_MAX_GROUPS + 1),
+          options: [
+            { id: "a", label: "A" },
+            { id: "b", label: "B" },
+          ],
+        }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.groups",
+        message: `A field can have at most ${FORM_PICTURE_MAX_GROUPS} groups`,
+      },
+    ]);
+  });
+
+  it("rejects bad codes (# sign, semicolon, spaces, too long)", () => {
+    for (const code of ["#610", "6;10", "61 0", "", "-1", "a".repeat(17)]) {
+      const paths = issuePaths(
+        withPicture({
+          options: [
+            { id: "a", label: "A", code },
+            { id: "b", label: "B" },
+          ],
+        }),
+      ).map((issue) => issue.path);
+      expect(paths, code).toEqual(["fields.3.options.0.code"]);
+    }
+    expect(
+      parsePicture({
+        options: [
+          { id: "a", label: "A", code: " 7.5-b " },
+          { id: "b", label: "B" },
+        ],
+      }).options[0]!.code,
+    ).toBe("7.5-b");
+  });
+
+  it("rejects a bad family and group label/description", () => {
+    expect(
+      issuePaths(
+        withPicture({
+          options: [
+            { id: "a", label: "A", family: "Pinks; Reds" },
+            { id: "b", label: "B", family: "x".repeat(41) },
+          ],
+          groups: [
+            { id: "g", label: "x".repeat(61), description: "y".repeat(201) },
+          ],
+        }),
+      ).map((issue) => issue.path),
+    ).toEqual([
+      "fields.3.options.0.family",
+      "fields.3.options.1.family",
+      "fields.3.groups.0.label",
+      "fields.3.groups.0.description",
+    ]);
+  });
+
+  it("requires every groupId to name a group of the same field", () => {
+    expect(
+      issuePaths(
+        withPicture({
+          options: [
+            { id: "a", label: "A", groupId: "g_pearl" },
+            { id: "b", label: "B", groupId: "g_gone" },
+          ],
+        }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.options.1.groupId",
+        message: "This option belongs to a group that no longer exists",
+      },
+    ]);
+    // A groupId with no groups at all is dangling too.
+    expect(
+      issuePaths(
+        withPicture({
+          groups: undefined,
+          options: [
+            { id: "a", label: "A", groupId: "g_pearl" },
+            { id: "b", label: "B" },
+          ],
+        }),
+      ).map((issue) => issue.path),
+    ).toEqual(["fields.3.options.0.groupId"]);
+  });
+
+  it("requires unique group ids and unique (case-insensitive) group labels", () => {
+    expect(
+      issuePaths(
+        withPicture({
+          groups: [
+            { id: "g1", label: "Pearl" },
+            { id: "g1", label: " pearl " },
+          ],
+          options: [
+            { id: "a", label: "A" },
+            { id: "b", label: "B" },
+          ],
+        }),
+      ).map((issue) => issue.path),
+    ).toEqual(["fields.3.groups.1.id", "fields.3.groups.1.label"]);
+  });
+
+  it("requires at least one visible tile", () => {
+    expect(
+      issuePaths(
+        withPicture({
+          options: tiles.map((tile) => ({ ...tile, hidden: true })),
+        }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.options",
+        message: "Leave at least one option visible",
+      },
+    ]);
+    expect(
+      parsePicture({
+        options: tiles.map((tile, i) => ({ ...tile, hidden: i > 0 })),
+      }).options,
+    ).toHaveLength(3);
+  });
+
+  it("keeps answer labels unique, so a coded tile can't collide with a literal one", () => {
+    expect(
+      issuePaths(
+        withPicture({
+          groups: undefined,
+          options: [
+            { id: "a", label: "Red", code: "010" },
+            { id: "b", label: "red (#010)" },
+          ],
+        }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.options.1.label",
+        message: "Each option needs a different label and code",
+      },
+    ]);
+    // Same code on tiles with different labels is fine (vendor duplicates).
+    expect(
+      formDefinitionSchema.safeParse(
+        withPicture({
+          groups: undefined,
+          options: [
+            { id: "a", label: "Red", code: "092" },
+            { id: "b", label: "Teal", code: "092" },
+          ],
+        }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it("checks minTotal/maxTotal against the VISIBLE count in many mode", () => {
+    const options = [
+      { id: "a", label: "A" },
+      { id: "b", label: "B" },
+      { id: "c", label: "C", hidden: true },
+      { id: "d", label: "D", hidden: true },
+    ];
+    expect(
+      issuePaths(
+        withPicture({
+          groups: undefined,
+          options,
+          selection: "many",
+          maxTotal: 3,
+        }),
+      ),
+    ).toEqual([
+      {
+        path: "fields.3.maxTotal",
+        message: "Can't be more than the number of options (2)",
+      },
+    ]);
+    expect(
+      formDefinitionSchema.safeParse(
+        withPicture({
+          groups: undefined,
+          options,
+          selection: "many",
+          maxTotal: 2,
+        }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it("builds answer labels and lists visible tiles", () => {
+    expect(pictureOptionAnswerLabel({ label: "Pearl Gold", code: "610" })).toBe(
+      "Pearl Gold (#610)",
+    );
+    expect(pictureOptionAnswerLabel({ label: "Red", code: null })).toBe("Red");
+    expect(pictureOptionAnswerLabel({ label: "Red" })).toBe("Red");
+    const field = parsePicture({
+      options: tiles.map((tile, i) => ({ ...tile, hidden: i === 1 })),
+    });
+    expect(visiblePictureOptions(field).map((o) => o.id)).toEqual([
+      "p_gold",
+      "p_blue",
+    ]);
+  });
+
+  it("drops hidden tiles from the public projection but keeps the rest", () => {
+    const def = formDefinitionSchema.parse(
+      withPicture({
+        options: tiles.map((tile, i) => ({ ...tile, hidden: i === 1 })),
+      }),
+    );
+    const pub = toPublicFormDefinition(def);
+    const field = pub.fields.at(-1)!;
+    if (!isPictureChoiceField(field)) throw new Error("not a picture field");
+    expect(field.options.map((o) => o.id)).toEqual(["p_gold", "p_blue"]);
+    expect(field.groups).toEqual(groups);
+    // The stored definition is untouched.
+    const stored = def.fields.at(-1)!;
+    if (!isPictureChoiceField(stored)) throw new Error("not a picture field");
+    expect(stored.options.find((o) => o.id === "p_red")?.hidden).toBe(true);
   });
 });
 

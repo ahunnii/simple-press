@@ -2,6 +2,7 @@
 
 import type { FieldTypeChangeImpact } from "./builder-shared";
 import type { FormFieldType } from "~/lib/validators/form";
+import { FORM_MAX_OPTIONS } from "~/lib/validators/form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,8 @@ export function ChangeTypeDialog({
               </p>
               {!impact.optionsDiscarded &&
               !impact.picturesDiscarded &&
+              !impact.hiddenRevealed &&
+              !impact.tooManyOptions &&
               !impact.wasConfirmationTarget ? (
                 <p>Label, help text, required and placeholder carry over.</p>
               ) : (
@@ -61,7 +64,17 @@ export function ChangeTypeDialog({
                   )}
                   {impact.picturesDiscarded && (
                     <li>
-                      Colors and photos will be removed (the labels stay).
+                      Colors, photos, codes, families and groups will be removed
+                      (the labels stay).
+                    </li>
+                  )}
+                  {impact.hiddenRevealed && (
+                    <li>Hidden choices will show again.</li>
+                  )}
+                  {impact.tooManyOptions && (
+                    <li>
+                      {toLabel} allows at most {FORM_MAX_OPTIONS} options —
+                      you&apos;ll need to remove some before you can save.
                     </li>
                   )}
                   {impact.wasConfirmationTarget && (

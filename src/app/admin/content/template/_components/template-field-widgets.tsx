@@ -334,6 +334,13 @@ export function FieldInput({
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
         />
+      ) : field.type === "formpicture" ? (
+        <FormPictureFieldSelect
+          id={field.key}
+          descId={descId}
+          value={stringValue}
+          onChange={(nextValue) => onChange(nextValue)}
+        />
       ) : field.type === "collection" ? (
         <CollectionFieldSelect
           id={field.key}
@@ -937,6 +944,93 @@ export function GalleryFieldSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+// ─── FormPictureFieldSelect ───────────────────────────────────────────────────
+
+const FORM_PICTURE_NONE = "none";
+
+/**
+ * Picks one picture-choice field on one of the business's forms, stored as
+ * `"<formId>:<fieldId>"` (`""` = none). Options read
+ * "Estimate Quote request → Balloon colors (106)" — the count is the tiles a
+ * visitor can see. A saved value that no longer resolves (form deleted, field
+ * removed, Forms switched off) stays selected as "Unavailable" so opening the
+ * editor never silently clears it.
+ */
+export function FormPictureFieldSelect({
+  id,
+  descId,
+  value,
+  onChange,
+}: {
+  id?: string;
+  descId?: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const {
+    data: forms,
+    isLoading,
+    error,
+  } = api.form.listPictureFields.useQuery(undefined, { retry: false });
+
+  const current = value.trim();
+  const options = (forms ?? []).flatMap((form) =>
+    form.fields.map((field) => ({
+      value: `${form.formId}:${field.id}`,
+      label: `${form.name} → ${field.label} (${field.visibleCount})${
+        form.published ? "" : " — draft"
+      }`,
+    })),
+  );
+  const known = options.some((o) => o.value === current);
+
+  return (
+    <div className="space-y-1.5">
+      <Select
+        value={current || FORM_PICTURE_NONE}
+        onValueChange={(v) => onChange(v === FORM_PICTURE_NONE ? "" : v)}
+      >
+        <SelectTrigger id={id} aria-describedby={descId}>
+          <SelectValue
+            placeholder={
+              isLoading ? "Loading forms..." : "Select a question..."
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={FORM_PICTURE_NONE}>None</SelectItem>
+          {current && !known && !isLoading ? (
+            <SelectItem value={current}>
+              Unavailable (form or question removed)
+            </SelectItem>
+          ) : null}
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {error ? (
+        <p className="text-muted-foreground text-xs">
+          {error.data?.code === "FORBIDDEN" ? (
+            <>
+              Turn on Forms in <strong>Settings → Features</strong> to pick a
+              question.
+            </>
+          ) : (
+            "Couldn't load your forms. Refresh to try again."
+          )}
+        </p>
+      ) : !isLoading && options.length === 0 ? (
+        <p className="text-muted-foreground text-xs">
+          None of your forms has a picture-choice question yet.
+        </p>
+      ) : null}
+    </div>
   );
 }
 

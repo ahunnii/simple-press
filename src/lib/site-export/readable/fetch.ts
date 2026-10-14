@@ -3,6 +3,10 @@
  * onto the plain input types in `./types` — nothing here renders HTML.
  */
 import type { GalleryMap } from "~/lib/wordpress/tiptap-to-html";
+import {
+  isPictureChoiceField,
+  parseStoredFormDefinition,
+} from "~/lib/validators/form";
 import { db } from "~/server/db";
 import {
   getFieldRegistry,
@@ -44,6 +48,8 @@ export interface ReadableData {
     fields: FieldDef[];
     groupTitles: Record<string, string>;
   };
+  /** Names for `formpicture` field values (see `ReadableRefs.forms`). */
+  formRefs?: Map<string, { name: string; fields: Map<string, string> }>;
 }
 
 export async function fetchReadableData(
@@ -60,6 +66,7 @@ export async function fetchReadableData(
     galleryRows,
     faqRows,
     testimonialRows,
+    formRows,
   ] = await Promise.all([
     db.business.findUniqueOrThrow({
       where: { id: businessId },
@@ -125,7 +132,27 @@ export async function fetchReadableData(
       where: { businessId },
       orderBy: { testimonialDate: "desc" },
     }),
+    db.form.findMany({
+      where: { businessId },
+      select: { id: true, name: true, definition: true },
+    }),
   ]);
+
+  // `formpicture` fields store "<formId>:<fieldId>"; the documents print the
+  // form and question names instead.
+  const formRefs = new Map(
+    formRows.map((form) => {
+      const parsed = parseStoredFormDefinition(form.definition);
+      const fields = new Map<string, string>(
+        parsed.success
+          ? parsed.data.fields
+              .filter(isPictureChoiceField)
+              .map((field) => [field.id, field.label])
+          : [],
+      );
+      return [form.id, { name: form.name, fields }] as const;
+    }),
+  );
 
   const toPage = (p: (typeof pageRows)[number]): PageInput => ({
     id: p.id,
@@ -347,5 +374,6 @@ export async function fetchReadableData(
     timeZone: business.timeZone,
     galleryMap,
     serviceFieldInfo: getServiceFieldInfo,
+    formRefs,
   };
 }

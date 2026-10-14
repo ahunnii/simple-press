@@ -36,6 +36,7 @@ import {
   FORM_STATUS_FILTER_VALUES,
   FORM_STATUS_LABELS,
   FORM_STATUS_VALUES,
+  pictureOptionAnswerLabel,
 } from "~/lib/validators/form";
 import { api } from "~/trpc/react";
 import {
@@ -168,6 +169,14 @@ function filterValueOptions(
       { value: "Yes", label: "Yes" },
       { value: "No", label: "No" },
     ];
+  }
+  if (field.type === "picturechoice") {
+    // New entries store "Label (#code)"; the filter treats it and the plain
+    // label as the same tile, so old entries match too.
+    return field.options.map((option) => {
+      const label = pictureOptionAnswerLabel(option);
+      return { value: label, label };
+    });
   }
   if ("options" in field) {
     return field.options.map((option) => ({

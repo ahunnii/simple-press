@@ -158,7 +158,30 @@ export type TemplateFieldScalarType =
   | "image"
   | "video"
   | "boolean"
-  | "collection";
+  | "collection"
+  /**
+   * A picture-choice field on one of the business's forms, stored as
+   * `"<formId>:<fieldId>"` (`""` = none). See `parseFormPictureFieldValue`.
+   */
+  | "formpicture";
+
+/**
+ * Splits a stored `formpicture` value (`"<formId>:<fieldId>"`). Returns null
+ * for `""`, `"none"` or anything without both halves. Form and field ids
+ * never contain `:` (cuid / slug-ish ids), so the first colon splits them.
+ */
+export function parseFormPictureFieldValue(
+  value: unknown,
+): { formId: string; fieldId: string } | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  const colon = trimmed.indexOf(":");
+  if (colon <= 0 || colon === trimmed.length - 1) return null;
+  return {
+    formId: trimmed.slice(0, colon),
+    fieldId: trimmed.slice(colon + 1),
+  };
+}
 
 export type TemplateField =
   | (TemplateFieldCommon & {

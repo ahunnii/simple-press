@@ -9,6 +9,9 @@
  *   dream-package — hero, intro, a tier grid of `ServiceItem` package
  *                   cards, a "How to choose" band, and a closing Estimate
  *                   Quote band.
+ *   dream-balloons — dream-lane plus a balloon color studio (built from a
+ *                   quote-form picture-choice field) between the sections and
+ *                   the gallery. Reuses every `dream-lane.*` key.
  *
  * Field key convention: "<def-id>.<field-slug>" (matches
  * `src/lib/service-templates.ts`'s `ServiceTemplateDef` contract).
@@ -428,6 +431,123 @@ export const dreamPackageFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
+// ─── dream-balloons ─────────────────────────────────────────────────────────
+// dream-lane's page plus a color studio built from a picture-choice field on
+// one of the business's forms (the Estimate Quote form's "Balloon colors").
+// The studio's tiles, groups (finishes) and families all live on that FORM
+// field — the owner edits colors in the form builder, not here.
+
+export const DREAM_BALLOONS_COLOR_SOURCE_KEY = "dream-balloons.color-source";
+
+/** Default and bounds of the studio's palette size (`dream-balloons.palette-max`). */
+export const DREAM_BALLOONS_PALETTE_DEFAULT = 6;
+export const DREAM_BALLOONS_PALETTE_MIN = 1;
+export const DREAM_BALLOONS_PALETTE_MAX = 12;
+
+export const dreamBalloonsStudioFields: TemplateField[] = [
+  {
+    key: "dream-balloons.studio-visible",
+    label: "Show the color studio",
+    description:
+      "On shows the balloon color studio under the sections. Off hides it, and the page looks like a Lane page.",
+    type: "boolean",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "true",
+  },
+  {
+    key: DREAM_BALLOONS_COLOR_SOURCE_KEY,
+    label: "Colors from",
+    description:
+      "The picture-choice question on one of your forms that lists your balloon colors. Edit the colors, finishes and families in that form. The studio only shows when the form is published.",
+    type: "formpicture",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "dream-balloons.studio-heading",
+    label: "Heading",
+    description: "Heading above the studio. The last word is shown in script.",
+    type: "text",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "Build your balloon palette",
+  },
+  {
+    key: "dream-balloons.studio-lede",
+    label: "Intro",
+    description: "Short line beside the heading. Leave blank to hide.",
+    type: "textarea",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Tap a balloon to see it up close. Add up to six and I'll sketch them into a garland, so you can see how they sit together before we talk.",
+  },
+  {
+    key: "dream-balloons.palette-max",
+    label: "Colors per palette",
+    description:
+      "How many colors a visitor can add. Never more than the form question allows.",
+    type: "number",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-full",
+    min: DREAM_BALLOONS_PALETTE_MIN,
+    max: DREAM_BALLOONS_PALETTE_MAX,
+    step: 1,
+    defaultValue: String(DREAM_BALLOONS_PALETTE_DEFAULT),
+  },
+  {
+    key: "dream-balloons.cta-label",
+    label: "Button label",
+    description:
+      "The palette's button. It opens your quote form with the picked colors already chosen.",
+    type: "text",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-1",
+    defaultValue: "Use these colors in my quote",
+  },
+  {
+    key: "dream-balloons.cta-url",
+    label: "Button link",
+    description:
+      "The page with your quote form. The picked colors are added to this link.",
+    type: "url",
+    page: "homepage",
+    group: "dream-balloons.studio",
+    gridColumn: "col-span-1",
+    defaultValue: DREAM_QUOTE_HREF,
+  },
+];
+
+export const dreamBalloonsFields: TemplateField[] = [
+  ...dreamLaneFields,
+  ...dreamBalloonsStudioFields,
+];
+
+const dreamBalloonsStudioGroup: TemplateFieldGroup = {
+  id: "dream-balloons.studio",
+  title: "Balloon color studio",
+  description:
+    "Visitors browse your balloon colors, build a palette and send it with their Estimate Quote.",
+  icon: "🎈",
+  columns: 2,
+};
+
+// The studio group sits right after the sections group (the page order).
+export const dreamBalloonsFieldGroups: TemplateFieldGroup[] =
+  dreamLaneFieldGroups.flatMap((group) =>
+    group.id === "dream-lane.sections"
+      ? [group, dreamBalloonsStudioGroup]
+      : [group],
+  );
+
 // ─── Bound field resolvers (one per template) ──────────────────────────────
 
 const _laneFieldMap = new Map<string, TemplateField>(
@@ -444,6 +564,17 @@ export function resolveDreamLaneFields(
 const _packageFieldMap = new Map<string, TemplateField>(
   dreamPackageFields.map((f) => [f.key, f]),
 );
+
+const _balloonsFieldMap = new Map<string, TemplateField>(
+  dreamBalloonsFields.map((f) => [f.key, f]),
+);
+
+export function resolveDreamBalloonsFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _balloonsFieldMap);
+}
 
 export function resolveDreamPackageFields(
   customFields: unknown,
@@ -494,5 +625,16 @@ export const dreamServiceTemplateDefs: ServiceTemplateDef[] = [
       'Hero, intro paragraph, a tier grid of package cards built from this service\'s items, a "How to choose" band, and a closing Estimate Quote band.',
     fields: dreamPackageFields,
     fieldGroups: dreamPackageFieldGroups,
+  },
+  // Deliberately reuses EVERY `dream-lane.*` key (plus `dream-balloons.*`
+  // studio keys): switching a service between Lane and Balloons keeps its
+  // sections, gallery, options heading and closing banner as they are.
+  {
+    id: "dream-balloons",
+    label: "Balloons",
+    description:
+      "Everything on a Lane page, plus a balloon color studio between the sections and the gallery: visitors browse your colors by finish and family, build a palette shown as a garland sketch, and send it with their Estimate Quote.",
+    fields: dreamBalloonsFields,
+    fieldGroups: dreamBalloonsFieldGroups,
   },
 ];

@@ -16,7 +16,11 @@
  */
 
 import { isStorageUrl } from "~/lib/s3/url";
-import { parseFaqPickerIds, TEMPLATE_FIELDS } from "~/lib/template-fields";
+import {
+  parseFaqPickerIds,
+  parseFormPictureFieldValue,
+  TEMPLATE_FIELDS,
+} from "~/lib/template-fields";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -144,6 +148,7 @@ function collectJsonRefs(value: unknown, storageUrls: Set<string>, ids: RefSets)
  *   `gallery` / `collection` → the field's string value IS the id
  *     (`""` and `"none"` mean unset — no id)
  *   `faq`                    → ids parsed via `parseFaqPickerIds`
+ *   `formpicture`            → the form id half of `"<formId>:<fieldId>"`
  *   everything else          → generic deep walk (`collectJsonRefs`), which
  *     also covers `list`-type rows and any TipTap `richtext` doc
  *
@@ -173,6 +178,9 @@ export function collectTemplateFieldRefs(
     } else if (field?.type === "faq") {
       const faqIds = parseFaqPickerIds(value);
       if (faqIds) for (const id of faqIds) ids.faq.add(id);
+    } else if (field?.type === "formpicture") {
+      const picked = parseFormPictureFieldValue(value);
+      if (picked) ids.form.add(picked.formId);
     } else {
       collectJsonRefs(value, storageUrls, ids);
     }

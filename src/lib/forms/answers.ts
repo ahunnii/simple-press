@@ -12,6 +12,7 @@ import {
   FORM_FIELD_TYPE_VALUES,
   FORM_PICTURE_MAX_QUANTITY,
   labelKey,
+  pictureOptionAnswerLabel,
 } from "~/lib/validators/form";
 
 /**
@@ -158,6 +159,16 @@ export function isQuantityItems(
   );
 }
 
+/**
+ * A stored picture-choice label without its `" (#code)"` suffix, so an old
+ * entry ("Pearl Gold") and a new one ("Pearl Gold (#610)") compare equal.
+ * Option labels are unique per field, so dropping the code can't merge two
+ * different tiles.
+ */
+export function stripAnswerCode(label: string): string {
+  return label.replace(/\s+\(#[A-Za-z0-9][A-Za-z0-9.-]*\)$/, "");
+}
+
 /** `[{Red,3},{Gold,2}]` → `"Red × 3; Gold × 2"` (the CSV import reads it back). */
 export function formatQuantityItems(items: FormQuantityItem[]): string {
   return items.map((item) => `${item.option} × ${item.quantity}`).join("; ");
@@ -176,16 +187,37 @@ type ResolvedOptions = Required<
   today: string | undefined;
 };
 
-type FieldOption = { id: string; label: string };
+/** `code`/`hidden` only exist on picture-choice tiles. */
+type FieldOption = {
+  id: string;
+  label: string;
+  code?: string | null;
+  hidden?: boolean;
+};
 
+/** What an option is stored as in an answer (a coded tile → `"Label (#code)"`). */
+function answerLabelOf(option: FieldOption): string {
+  return pictureOptionAnswerLabel(option);
+}
+
+/**
+ * Id mode (web submit) never resolves a hidden tile, even if the visitor
+ * posts its id. Label mode (CSV import) still does, so entries from before
+ * the owner hid a tile import cleanly, and it matches either the plain label
+ * or the answer label (`"Label (#code)"`).
+ */
 function findOption(
   options: FieldOption[],
   value: string,
   optionMatch: "id" | "label",
 ) {
-  if (optionMatch === "id") return options.find((o) => o.id === value);
+  if (optionMatch === "id") {
+    return options.find((o) => o.id === value && !o.hidden);
+  }
   const key = labelKey(value);
-  return options.find((o) => labelKey(o.label) === key);
+  return options.find(
+    (o) => labelKey(o.label) === key || labelKey(answerLabelOf(o)) === key,
+  );
 }
 
 /** Single-answer choice (select, radio, picture choice "one") → the label. */
@@ -204,7 +236,7 @@ function validateOneOption(
       ? { error: `"${value}" isn't one of the options.` }
       : { error: "Pick one of the options." };
   }
-  return { value: option.label };
+  return { value: answerLabelOf(option) };
 }
 
 /**
@@ -244,9 +276,7 @@ function validateManyOptions(
   }
   // Definition order, deduped — independent of click/cell order.
   return {
-    value: options
-      .filter((option) => chosen.has(option.id))
-      .map((option) => option.label),
+    value: options.filter((option) => chosen.has(option.id)).map(answerLabelOf),
   };
 }
 
@@ -321,13 +351,13 @@ function validateQuantities(
       quantity > FORM_PICTURE_MAX_QUANTITY
     ) {
       return {
-        error: `Enter a whole number from 1 to ${FORM_PICTURE_MAX_QUANTITY} for ${option.label}.`,
+        error: `Enter a whole number from 1 to ${FORM_PICTURE_MAX_QUANTITY} for ${answerLabelOf(option)}.`,
       };
     }
     const sum = (totals.get(option.id) ?? 0) + quantity;
     if (sum > FORM_PICTURE_MAX_QUANTITY) {
       return {
-        error: `Enter ${FORM_PICTURE_MAX_QUANTITY} or fewer for ${option.label}.`,
+        error: `Enter ${FORM_PICTURE_MAX_QUANTITY} or fewer for ${answerLabelOf(option)}.`,
       };
     }
     totals.set(option.id, sum);
@@ -336,7 +366,7 @@ function validateQuantities(
   const items: FormQuantityItem[] = field.options
     .filter((option) => (totals.get(option.id) ?? 0) > 0)
     .map((option) => ({
-      option: option.label,
+      option: answerLabelOf(option),
       quantity: totals.get(option.id)!,
     }));
   if (items.length === 0) return missing();
@@ -641,7 +671,8 @@ export function snapshotMatchesSearch(
 /**
  * Whether the answer to `fieldId` matches a filter value (case-insensitive):
  * select/radio → exact label; checkboxes → contains that label; picture
- * choice → that label was picked (in any mode); checkbox → same yes/no;
+ * choice → that label was picked (in any mode, with or without its
+ * `(#code)` suffix); checkbox → same yes/no;
  * everything else → substring. A blank filter matches all.
  */
 export function snapshotMatchesFieldFilter(
@@ -665,10 +696,15 @@ export function snapshotMatchesFieldFilter(
           (label) => label.toLowerCase() === needle,
         )
       );
-    case "picturechoice":
-      return answerLabels(snapshot.value).some(
-        (label) => label.toLowerCase() === needle,
-      );
+    case "picturechoice": {
+      // Entries hold the plain label (old) or "Label (#code)" (new); a filter
+      // value may be either form, so compare with the code stripped too.
+      const plainNeedle = stripAnswerCode(needle);
+      return answerLabels(snapshot.value).some((label) => {
+        const key = label.toLowerCase();
+        return key === needle || stripAnswerCode(key) === plainNeedle;
+      });
+    }
     case "checkbox": {
       const wanted = TRUE_STRINGS.has(needle)
         ? true
