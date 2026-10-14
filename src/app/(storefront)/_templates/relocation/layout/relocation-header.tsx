@@ -14,6 +14,12 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { relocationTelHref } from "../shared/relocation-phone";
@@ -98,12 +104,21 @@ export function RelocationHeader({
     businessName,
   );
 
-  // `??`, never `||`: an owner who saves an empty item list in the Navigation
-  // builder means "no nav links", which `||` would silently overwrite with the
-  // shipped default.
-  const links =
-    (business?.siteContent?.navigationItems as NavLink[] | undefined) ??
-    DEFAULT_NAV;
+  // Owner nav (children + external preserved) or the clone's default, then the
+  // shared route→flag filter (P-NAV-FLAGS) drops links to switched-off
+  // features. `??` semantics live in `resolveNav`: a saved `[]` means "no
+  // links", never "use the default".
+  const filteredLinks = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV),
+    isEnabled,
+  );
+
+  // Donations "show in header" only ADDS a plain last menu item (no
+  // duplicate, never removes an owner link). Desktop nav and drawer share it.
+  const links: NavLink[] = withDonateLink(
+    filteredLinks,
+    donateLinkOptions(business, isEnabled, "header"),
+  );
 
   // The drawer is one flat level (design.md deviation #2), so parents are
   // replaced by their children — for DEFAULT_NAV that is exactly today's list:

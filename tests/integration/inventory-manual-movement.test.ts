@@ -247,7 +247,7 @@ describe("manual inventory movements (ledger core + adjustInventory)", () => {
     gate.release();
     const [, reserve] = await Promise.all([txA, txB]);
 
-    expect(reserve).toEqual({ ok: false });
+    expect(reserve).toEqual({ ok: false, reason: "stock" });
     const after = await db.baseInventoryUnit.findUniqueOrThrow({
       where: { id: pool.id },
     });

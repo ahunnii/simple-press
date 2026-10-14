@@ -93,6 +93,7 @@ const PAYMENT_FILTER: FilterDefFor<typeof PAYMENT_VALUES> = {
     { value: "paid", label: "Paid" },
     { value: "failed", label: "Failed" },
     { value: "refunded", label: "Refunded" },
+    { value: "disputed", label: "Disputed" },
   ],
 };
 

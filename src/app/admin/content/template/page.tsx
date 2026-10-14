@@ -50,6 +50,9 @@ export default async function TemplateFieldsPage() {
         business={business}
         siteContent={business.siteContent}
         embedsEnabled={flags.isEnabled("embeds")}
+        galleriesEnabled={flags.isEnabled("galleries")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
+        formsEnabled={flags.isEnabled("forms")}
         mediaEnabled={flags.isEnabled("media")}
       />
     </>

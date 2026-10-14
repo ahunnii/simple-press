@@ -118,26 +118,39 @@ export function tierMinPurchaseNote(tier: RewardsTier): string | null {
     : null;
 }
 
-export type RewardCodeStatus = "active" | "used" | "expired" | "inactive";
+export type RewardCodeStatus =
+  | "active"
+  | "pending"
+  | "used"
+  | "expired"
+  | "inactive";
 
 /**
  * A reward code's display status. Priority mirrors the admin customer detail
  * page's `CodeStatusBadge` (`customer-loyalty-card.tsx`): a deactivated code
  * is "Inactive" even if it was also used or has since expired, a used code is
  * "Used" even past its expiry date, and only then does expiry matter.
+ *
+ * "Pending": the code's use is counted from checkout start, so a code whose
+ * only use belongs to a checkout still in progress (e.g. a bank payment that
+ * hasn't cleared) is held, not spent — it reads "Pending" and goes back to
+ * "Active" if that checkout expires or the payment fails.
  */
 export function rewardCodeStatus(
   code: RewardsCode,
   now: number = Date.now(),
 ): RewardCodeStatus {
   if (!code.active) return "inactive";
-  if (code.usageCount >= 1) return "used";
+  if (code.usageCount >= 1) {
+    return code.usageCount - code.heldUses >= 1 ? "used" : "pending";
+  }
   if (code.expiresAt && code.expiresAt.getTime() < now) return "expired";
   return "active";
 }
 
 export const REWARD_CODE_STATUS_LABEL: Record<RewardCodeStatus, string> = {
   active: "Active",
+  pending: "Pending",
   used: "Used",
   expired: "Expired",
   inactive: "Inactive",
@@ -149,6 +162,7 @@ export const REWARD_CODE_STATUS_BADGE_VARIANT: Record<
   "success" | "outline" | "destructive" | "secondary"
 > = {
   active: "success",
+  pending: "outline",
   used: "outline",
   expired: "destructive",
   inactive: "secondary",

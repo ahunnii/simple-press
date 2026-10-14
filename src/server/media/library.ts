@@ -14,7 +14,7 @@
  * EVERY tenant guard lives here, not in the routers, so a new caller can't
  * forget one: the `${businessId}/` key-prefix guard (cross-tenant), the
  * storage-key shape check (path traversal — defense in depth behind the
- * routers' zod input), the logo/favicon always-in-use guard, and the
+ * routers' zod input), the logo/favicon brand-asset guard, and the
  * server-side usage re-check (TOCTOU — never trust the client's `usedBy`).
  *
  * The callers are responsible only for deciding WHICH business the caller may
@@ -27,9 +27,11 @@ import "server-only";
 import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 
+import type { BrandAssetUrls } from "~/lib/media/brand-asset-keys";
 import type { DbClient } from "~/server/db";
+import { isProtectedBrandAssetKey } from "~/lib/media/brand-asset-keys";
 import { scrubUrlsFromCustomFields } from "~/lib/media/scrub-custom-fields";
-import { buildUsedMediaIndex, isAlwaysInUseKey } from "~/lib/media/usage";
+import { buildUsedMediaIndex } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { listBusinessObjects } from "~/lib/s3/list";
 import { getPresignedDownloadUrl } from "~/lib/s3/presign";
@@ -58,6 +60,28 @@ function isKeyInBusiness(businessId: string, key: string): boolean {
   return (
     key.startsWith(`${businessId}/`) && storageKeySchema.safeParse(key).success
   );
+}
+
+// ─── Brand assets ─────────────────────────────────────────────────────────────
+
+/**
+ * The business's saved logo / favicon URLs — what decides which fixed-key
+ * `logo.*` / `favicon.*` objects are protected (see
+ * `~/lib/media/brand-asset-keys`). A missing SiteContent row yields nulls,
+ * i.e. the strict "protect every logo.* / favicon.*" behavior.
+ */
+async function loadBrandAssetUrls(
+  db: DbClient,
+  businessId: string,
+): Promise<BrandAssetUrls> {
+  const siteContent = await db.siteContent.findUnique({
+    where: { businessId },
+    select: { logoUrl: true, faviconUrl: true },
+  });
+  return {
+    logoUrl: siteContent?.logoUrl ?? null,
+    faviconUrl: siteContent?.faviconUrl ?? null,
+  };
 }
 
 // ─── SiteContent scrub ────────────────────────────────────────────────────────
@@ -121,21 +145,24 @@ export async function scrubMediaUrlsFromSiteContent(
  * Filtering / search is intentionally deferred to the caller — the list is
  * small enough (<<10 k objects per business) that in-memory filtering is fine.
  */
-export async function listMedia(businessId: string) {
+export async function listMedia(db: DbClient, businessId: string) {
   assertBusinessId(businessId);
 
-  // Fetch S3 object list and usage index in parallel
-  const [objects, usageIndex] = await Promise.all([
+  // Fetch S3 object list, usage index and saved brand URLs in parallel
+  const [objects, usageIndex, brand] = await Promise.all([
     listBusinessObjects(businessId),
     buildUsedMediaIndex(businessId),
+    loadBrandAssetUrls(db, businessId),
   ]);
 
   const items = objects.map((obj) => {
     const usedBy = usageIndex.get(obj.url) ?? [];
 
-    // Logo/favicon fixed-key objects are always in use even if the DB
-    // column hasn't been updated yet (e.g., immediately after upload)
-    if (isAlwaysInUseKey(obj.key) && usedBy.length === 0) {
+    // The logo/favicon fixed-key object in use is always in use even if the
+    // DB column hasn't been updated yet (e.g., immediately after upload). A
+    // stale one from a previous format (logo.png after switching to
+    // logo.svg) is not — it's judged by its usage like any other file.
+    if (isProtectedBrandAssetKey(obj.key, brand) && usedBy.length === 0) {
       usedBy.push({
         url: obj.url,
         location: "Brand asset (logo/favicon)",
@@ -154,7 +181,8 @@ export async function listMedia(businessId: string) {
 /**
  * Delete an S3 object — blocked when the object has any ACTIVE usage
  * anywhere in the DB (i.e. a usage without the `inactiveTemplate` flag —
- * see `~/lib/media/usage`) or is a logo/favicon fixed-key asset. A file
+ * see `~/lib/media/usage`) or is the logo/favicon fixed-key asset currently
+ * in use (a stale `logo.png` after switching to `logo.svg` is not). A file
  * whose every usage is `inactiveTemplate` (leftover content from a
  * template the owner switched away from) is deletable; deleting it also
  * scrubs its URL out of `SiteContent.customFields`/`previewCustomFields`
@@ -178,17 +206,22 @@ export async function deleteMedia(
     });
   }
 
-  // Always-in-use guard for logo/favicon fixed-key objects
-  if (isAlwaysInUseKey(key)) {
+  // Re-run the usage scan server-side (never trust client `usedBy`), and read
+  // the saved brand URLs for the logo/favicon guard in the same breath.
+  const [usageIndex, brand] = await Promise.all([
+    buildUsedMediaIndex(businessId),
+    loadBrandAssetUrls(db, businessId),
+  ]);
+
+  // Brand-asset guard: the logo/favicon currently in use can't be deleted.
+  if (isProtectedBrandAssetKey(key, brand)) {
     throw new TRPCError({
       code: "CONFLICT",
       message:
-        "Logo and favicon assets are always in use and cannot be deleted from the Media Library. Upload a replacement to overwrite them.",
+        "Your current logo and favicon can't be deleted from the Media Library. Upload a replacement to overwrite them.",
     });
   }
 
-  // Re-run the usage scan server-side (never trust client `usedBy`)
-  const usageIndex = await buildUsedMediaIndex(businessId);
   const url = keyToPublicUrl(key);
   const usages = usageIndex.get(url) ?? [];
 
@@ -231,7 +264,7 @@ export async function deleteMedia(
  *
  * The usage check is re-run server-side against a single freshly-built
  * usage index (TOCTOU guard — never trust the client's `usedBy` list).
- * Partial success is by design: logo/favicon keys and anything with an
+ * Partial success is by design: the logo/favicon in use and anything with an
  * ACTIVE usage (i.e. in use by the business's current, live setup) are
  * silently skipped rather than failing the whole batch — there's no undo
  * for S3 deletes, so the client reports the shortfall from `skipped`
@@ -265,7 +298,10 @@ export async function bulkDeleteMedia(
   // Re-run the usage scan server-side once for the whole batch (never
   // trust client `usedBy`), then partition keys into deletable vs.
   // skipped.
-  const usageIndex = await buildUsedMediaIndex(businessId);
+  const [usageIndex, brand] = await Promise.all([
+    buildUsedMediaIndex(businessId),
+    loadBrandAssetUrls(db, businessId),
+  ]);
 
   const deletableKeys: string[] = [];
   const skipped: Array<{ key: string; reason: "in-use" | "protected" }> = [];
@@ -274,7 +310,7 @@ export async function bulkDeleteMedia(
   const inactiveOnlyUrls = new Set<string>();
 
   for (const key of keys) {
-    if (isAlwaysInUseKey(key)) {
+    if (isProtectedBrandAssetKey(key, brand)) {
       skipped.push({ key, reason: "protected" });
       continue;
     }

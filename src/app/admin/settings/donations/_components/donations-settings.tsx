@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createQrCodeSvgData } from "@better-auth-ui/core";
-import { ArrowLeft, Info, Save } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Info, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -232,11 +232,24 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
   const normalizedVenmo = normalizeVenmoHandle(rawVenmo);
   const normalizedCashApp = normalizeCashAppHandle(rawCashApp);
 
+  // The note follows the CURRENTLY SELECTED label (watched, not saved) so the
+  // preview link updates as the owner switches Donate / Tip / Support.
+  const watchedLabel = form.watch("donationLabel");
+  const labelNoun = resolveDonationLabel(watchedLabel).noun;
+
   // `paymentsHealth === "unknown"` (Stripe couldn't be reached just now) stays
   // quiet here too, matching every other consumer of `getPaymentsHealth` — a
   // transient lookup failure isn't proof charges are actually broken.
   const cardDonationsDisabled =
     paymentsHealth === "not-connected" || paymentsHealth === "charges-disabled";
+
+  // Describes what shoppers see RIGHT NOW, so it's based on the saved handles
+  // (not unsaved form input) and the saved label's noun.
+  const noLaneConfigured =
+    cardDonationsDisabled &&
+    !normalizeVenmoHandle(business.venmoHandle) &&
+    !normalizeCashAppHandle(business.cashAppHandle);
+  const savedNoun = resolveDonationLabel(business.donationLabel).noun;
 
   return (
     <Form {...form}>
@@ -297,7 +310,28 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
 
         <div className="admin-container">
           <div className="space-y-6">
-            {cardDonationsDisabled && (
+            {noLaneConfigured && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>
+                  Your {savedNoun.toLowerCase()} page has no way to pay yet
+                </AlertTitle>
+                <AlertDescription>
+                  Visitors who open it currently see an empty page. Connect
+                  Stripe to accept cards, or add a Venmo username or Cash App
+                  cashtag below.
+                </AlertDescription>
+                <AlertAction>
+                  <Button variant="outline" asChild size="xs">
+                    <Link href="/admin/settings/integrations">
+                      Settings → Integrations
+                    </Link>
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
+
+            {cardDonationsDisabled && !noLaneConfigured && (
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertTitle>
@@ -416,7 +450,7 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
                   />
                   {normalizedVenmo && (
                     <HandlePreview
-                      url={venmoUrl(normalizedVenmo, donationNote(business.name))}
+                      url={venmoUrl(normalizedVenmo, donationNote(business.name, labelNoun))}
                     />
                   )}
                 </div>
@@ -460,17 +494,18 @@ export function DonationsSettings({ business, paymentsHealth }: Props) {
                   label="Show link in footer"
                 />
                 <p className="text-muted-foreground text-sm">
-                  Automatic placement is supported on the Default and Pink
-                  templates. On other templates, or if you&apos;d like the link
-                  in a custom spot in your menu, add it yourself with the Donate
-                  shortcut in{" "}
+                  Turning a switch on adds a link to that spot even if
+                  you&apos;ve customized your menu or footer links (unless they
+                  already link to the page). Turning a switch off never removes
+                  a link you added yourself in{" "}
                   <Link
                     href="/admin/content/navigation"
                     className="underline underline-offset-2"
                   >
                     Content → Navigation
-                  </Link>
-                  &apos;s Quick Add panel.
+                  </Link>{" "}
+                  — use that page&apos;s Quick Add panel if you want the link in
+                  a specific spot.
                 </p>
                 <p className="text-muted-foreground text-sm">
                   This feature has its own master on/off switch in{" "}

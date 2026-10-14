@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { UmscAccountLayout } from "./umsc-account-layout";
 import { UmscOrderStatusBadge } from "./umsc-order-status-badge";
@@ -83,6 +84,10 @@ export function UmscOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="umsc-sans mt-0.5 text-[13px] text-[var(--umsc-muted)]"
+                      />
                       <p className="umsc-tabular umsc-sans mt-0.5 text-[13px] text-[var(--umsc-muted)]">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>

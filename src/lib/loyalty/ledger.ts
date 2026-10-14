@@ -25,6 +25,7 @@ import type { LoyaltyLedger, Prisma } from "generated/prisma";
 
 import type { LoyaltyLedgerType } from "~/lib/loyalty/constants";
 import type { DbClient, TxClient } from "~/server/db";
+import { countHeldDiscountUses } from "~/lib/inventory/reservation";
 import { LOYALTY_LEDGER_PAGE } from "~/lib/loyalty/constants";
 import { isUniqueConstraintError } from "~/lib/prisma-errors";
 
@@ -60,6 +61,11 @@ export type LoyaltyLedgerEntry = LoyaltyLedger & {
     expiresAt: Date | null;
     usageCount: number;
     active: boolean;
+    /** Uses inside `usageCount` held by a still-open checkout (counted at
+     *  checkout start, given back if it expires or its payment fails) —
+     *  lets the UI say "Pending" rather than "Used" while a bank payment
+     *  clears. See `countHeldDiscountUses`. */
+    heldUses: number;
   } | null;
 };
 
@@ -192,13 +198,14 @@ export async function listLedger(
   db: DbClient | TxClient,
   opts: { businessId: string; customerId: string; take?: number },
 ): Promise<LoyaltyLedgerEntry[]> {
-  return db.loyaltyLedger.findMany({
+  const rows = await db.loyaltyLedger.findMany({
     where: { businessId: opts.businessId, customerId: opts.customerId },
     orderBy: { createdAt: "desc" },
     take: opts.take ?? LOYALTY_LEDGER_PAGE,
     include: {
       discountCode: {
         select: {
+          id: true,
           code: true,
           expiresAt: true,
           usageCount: true,
@@ -206,6 +213,22 @@ export async function listLedger(
         },
       },
     },
+  });
+  const held = await countHeldDiscountUses(db, {
+    businessId: opts.businessId,
+    discountCodeIds: rows.flatMap((r) =>
+      r.discountCode && r.discountCode.usageCount > 0
+        ? [r.discountCode.id]
+        : [],
+    ),
+  });
+  return rows.map((row) => {
+    if (!row.discountCode) return { ...row, discountCode: null };
+    const { id, ...code } = row.discountCode;
+    return {
+      ...row,
+      discountCode: { ...code, heldUses: held.get(id) ?? 0 },
+    };
   });
 }
 

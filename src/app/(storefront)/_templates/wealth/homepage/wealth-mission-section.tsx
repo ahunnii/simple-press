@@ -1,78 +1,81 @@
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
-import { WealthOverlapHero } from "../shared/wealth-overlap-hero";
-import { WealthSection } from "../shared/wealth-section";
+import { WealthArrowLink } from "../shared/wealth-arrow-link";
+import { WealthLedgeButton } from "../shared/wealth-ledge-button";
+import { WealthSplitHero } from "../shared/wealth-split-hero";
 
 type Props = {
   image: string;
   imageAlt: string;
   eyebrow: string;
   statement: string;
-  /**
-   * The homepage orchestrator renders Mission beside Support DCWF in a 2-col
-   * desktop region (design.md: "Support DCWF sidebar — narrow right
-   * column"), so it supplies the shared container/gutter and per-row
-   * padding itself and asks this section to render unpadded/uncontained.
-   */
-  contained?: boolean;
-  className?: string;
+  /** Button label + href. Either blank hides the button. */
+  ctaLabel: string;
+  ctaHref: string;
+  /** Text link beside the button. Either blank hides the link. */
+  linkLabel: string;
+  linkHref: string;
 };
 
 /**
- * Mission overlap hero — not hideable (design.md: always shown). The eyebrow
- * ("Our Mission") and the italic mission statement are the site's must-keep
- * verbatim copy.
+ * Split hero — forest-tinted mission photo (≈2/3) + forest panel: mono label,
+ * italic mission statement, LEARN MORE button and a secondary arrow link.
+ * Always shown. The page's single h1 is the sr-only business name in the
+ * orchestrator, so the statement is a paragraph.
  */
 export function WealthMissionSection({
   image,
   imageAlt,
   eyebrow,
   statement,
-  contained,
-  className,
+  ctaLabel,
+  ctaHref,
+  linkLabel,
+  linkHref,
 }: Props) {
+  const showCta = ctaLabel.trim() !== "" && ctaHref !== "";
+  const showLink = linkLabel.trim() !== "" && linkHref !== "";
   return (
-    <WealthSection
-      sectionAttrs={sectionGroupAttr("homepage", "mission")}
-      contained={contained}
-      className={className}
+    <WealthSplitHero
+      {...sectionGroupAttr("homepage", "mission")}
+      aria-label={eyebrow.trim() || "Mission"}
+      image={image}
+      imageAlt={imageAlt}
+      imagePosition="38% 50%"
     >
-      <WealthOverlapHero image={image} imageAlt={imageAlt}>
-        {/* The live site renders this as an italic display heading (sofia-pro
-            23px), not a mono eyebrow — keep the display voice. */}
-        <h2
-          className="mb-3"
-          style={{
-            fontFamily: "var(--font-wealth-display)",
-            fontStyle: "italic",
-            fontWeight: 400,
-            fontSize: "23px",
-            lineHeight: "35px",
-            letterSpacing: "0.23px",
-            color: "var(--wealth-ink)",
-            margin: "0 0 12px",
-          }}
-        >
-          <span {...fieldAttr("wealth.homepage.mission-eyebrow")}>
-            {eyebrow}
-          </span>
-        </h2>
+      {eyebrow.trim() ? (
         <p
-          style={{
-            fontFamily: "var(--font-wealth-sub)",
-            fontStyle: "italic",
-            fontSize: "21px",
-            lineHeight: 1.4,
-            letterSpacing: "0.21px",
-            color: "var(--wealth-ink)",
-            margin: 0,
-          }}
+          className="wealth-eyebrow"
+          {...fieldAttr("wealth.homepage.mission-eyebrow")}
         >
-          <span {...fieldAttr("wealth.homepage.mission-statement")}>
-            {statement}
-          </span>
+          {eyebrow}
         </p>
-      </WealthOverlapHero>
-    </WealthSection>
+      ) : null}
+      <hr aria-hidden="true" className="wealth-hero__rule" />
+      <p
+        className="wealth-hero__statement"
+        {...fieldAttr("wealth.homepage.mission-statement")}
+      >
+        {statement}
+      </p>
+      {showCta || showLink ? (
+        <div className="wealth-btn-row">
+          {showCta ? (
+            <WealthLedgeButton href={ctaHref} onDark>
+              <span {...fieldAttr("wealth.homepage.mission-cta-label")}>
+                {ctaLabel}
+              </span>
+            </WealthLedgeButton>
+          ) : null}
+          {showLink ? (
+            <WealthArrowLink href={linkHref}>
+              <span {...fieldAttr("wealth.homepage.mission-link-label")}>
+                {linkLabel}
+              </span>
+            </WealthArrowLink>
+          ) : null}
+        </div>
+      ) : null}
+    </WealthSplitHero>
   );
 }

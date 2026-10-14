@@ -5,12 +5,16 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { navHrefFlag, navHrefOffFlag } from "~/app/(storefront)/_components/nav";
 import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  navHrefFlag,
+  navHrefOffFlag,
+} from "~/app/(storefront)/_components/nav";
 
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
@@ -47,7 +51,7 @@ export function UmscCartContents({
   doorRows,
   collectionDoors,
 }: Props) {
-  const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
+  const { items, updateLineQuantity, removeLine, total, isHydrated } =
     useCart();
   // B2.1/B2.5 (PF15, PF16): the empty-bag doors, the "Shop all" way out, the
   // populated bag's "Continue shopping" link, and the checkout CTA all point
@@ -97,11 +101,10 @@ export function UmscCartContents({
     // any store without that collection) — hide it, never swap the
     // destination. `rowIndex` keeps `listItemAttr` pointed at the door's
     // real position in the saved list after filtering.
-    const doors = rawDoors
-      .filter((door) => {
-        const flag = navHrefOffFlag(door.link, isEnabled);
-        return flag === null || isEnabled(flag);
-      });
+    const doors = rawDoors.filter((door) => {
+      const flag = navHrefOffFlag(door.link, isEnabled);
+      return flag === null || isEnabled(flag);
+    });
 
     return (
       <div className="flex flex-col items-center py-16 text-center">
@@ -167,9 +170,10 @@ export function UmscCartContents({
         {items.map((item, index) => {
           const lineTotal = item.price * item.quantity;
           const productPath = `/shop/${item.productSlug ?? item.productId}`;
+          const lineId = cartItemId(item);
           return (
             <div
-              key={`${item.productId}-${item.variantId ?? "no-variant"}`}
+              key={lineId}
               role="listitem"
               className={cn(
                 "flex gap-5 py-6",
@@ -208,10 +212,14 @@ export function UmscCartContents({
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      className="umsc-sans mt-1 text-[13px] text-[var(--umsc-muted)]"
+                    />
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.productId, item.variantId)}
+                    onClick={() => removeLine(lineId)}
                     aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from bag`}
                     className="-mt-2 -mr-2 flex size-11 shrink-0 items-center justify-center text-[var(--umsc-muted)] hover:text-[var(--umsc-ink)]"
                   >
@@ -228,7 +236,7 @@ export function UmscCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        decrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity - 1)
                       }
                       disabled={item.quantity <= 1}
                       aria-label={`Decrease quantity of ${item.productName}`}
@@ -246,7 +254,7 @@ export function UmscCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        incrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity + 1)
                       }
                       disabled={
                         item.maxInventory !== undefined &&

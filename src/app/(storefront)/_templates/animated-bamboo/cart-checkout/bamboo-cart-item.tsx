@@ -6,7 +6,8 @@ import { Minus, Plus, X } from "lucide-react";
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type Props = {
   item: CartItemType;
@@ -32,16 +33,10 @@ const STEPPER_BUTTON_SIZE: React.CSSProperties = {
  * calls, same aria-labels, same `aria-live` quantity readout.
  */
 export function BambooCartItem({ item }: Props) {
-  const { updateQuantity, removeItem } = useCart();
-  const {
-    productId,
-    variantId,
-    productName,
-    variantName,
-    price,
-    quantity,
-    imageUrl,
-  } = item;
+  const { updateLineQuantity, removeLine } = useCart();
+  // Line-id APIs: each configured build is its own line.
+  const lineId = cartItemId(item);
+  const { productName, variantName, price, quantity, imageUrl } = item;
 
   return (
     <div
@@ -68,6 +63,10 @@ export function BambooCartItem({ item }: Props) {
                 {variantName}
               </p>
             )}
+            <CartLineOptions
+              item={item}
+              className="mt-0.5 text-[0.86rem] text-[var(--bamboo-ink-soft)]"
+            />
             <p className="text-sm text-[var(--bamboo-muted)]">
               {formatPrice(price)} each
             </p>
@@ -79,7 +78,7 @@ export function BambooCartItem({ item }: Props) {
               "text-[var(--bamboo-muted)] transition-colors",
               "hover:bg-[var(--bamboo-paper)] hover:text-[var(--bamboo-terracotta-deep)]",
             )}
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             aria-label={`Remove ${productName} from cart`}
           >
             <X className="size-4" aria-hidden="true" />
@@ -90,7 +89,7 @@ export function BambooCartItem({ item }: Props) {
             <button
               type="button"
               style={STEPPER_BUTTON_SIZE}
-              onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+              onClick={() => updateLineQuantity(lineId, quantity - 1)}
               disabled={quantity <= 1}
               aria-label={`Decrease quantity of ${productName}`}
             >
@@ -102,7 +101,7 @@ export function BambooCartItem({ item }: Props) {
             <button
               type="button"
               style={STEPPER_BUTTON_SIZE}
-              onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+              onClick={() => updateLineQuantity(lineId, quantity + 1)}
               aria-label={`Increase quantity of ${productName}`}
             >
               <Plus className="size-3.5" aria-hidden="true" />

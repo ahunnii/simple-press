@@ -10,8 +10,10 @@ import { cn } from "~/lib/utils";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import {
+  donateLinkOptions,
   filterNavByFlags,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { OliveAnnouncementBar } from "./olive-announcement-bar";
@@ -70,9 +72,14 @@ export async function OliveLayout({
 
   const banner = resolveBanner(business.siteContent, isEnabled);
 
-  const navItems = filterNavByFlags(
-    resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),
-    isEnabled,
+  // Donations "show in header" switch: Donate appended last, so the header
+  // bar and the nav overlay (both fed this list) stay in step.
+  const navItems = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, OLIVE_DEFAULT_NAV),
+      isEnabled,
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
   );
 
   const navCollections: OliveNavCollection[] = collections.map(

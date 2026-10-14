@@ -68,12 +68,49 @@ describe("parseManifest back-compat", () => {
     expect(parsed.content.quoteCalculators).toEqual([]);
     expect(parsed.content.loyaltyProgram).toBeNull();
     expect(parsed.content.invoiceSettings).toBeNull();
+    // Product customizer (2026-10-12).
+    expect(parsed.content.optionGroups).toEqual([]);
     // Older back-compat defaults still hold.
     expect(parsed.content.events).toEqual([]);
     expect(parsed.content.videos).toEqual([]);
     // Map pin coordinates — absent from a pre-2026-09-25 manifest.
     expect(parsed.content.business.latitude).toBeUndefined();
     expect(parsed.content.business.longitude).toBeUndefined();
+  });
+
+  it("keeps product optionGroupAttachments undefined when absent and parses present ones", () => {
+    const product = (extra: Record<string, unknown>) => ({
+      exportId: "p1",
+      name: "Glove",
+      slug: "glove",
+      price: 5000,
+      trackInventory: false,
+      allowBackorders: false,
+      published: true,
+      featured: false,
+      sortOrder: 0,
+      additionalFields: null,
+      images: [],
+      variants: [],
+      ownerReviews: [],
+      ...extra,
+    });
+    const content = {
+      ...minimalContent(),
+      products: [
+        product({}),
+        product({
+          exportId: "p2",
+          slug: "glove-2",
+          optionGroupAttachments: [{ exportGroupId: "g1", sortOrder: 0 }],
+        }),
+      ],
+    };
+    const parsed = parseManifest(manifest(content));
+    expect(parsed.content.products[0]?.optionGroupAttachments).toBeUndefined();
+    expect(parsed.content.products[1]?.optionGroupAttachments).toEqual([
+      { exportGroupId: "g1", sortOrder: 0 },
+    ]);
   });
 
   it("parses a manifest carrying map pin coordinates", () => {

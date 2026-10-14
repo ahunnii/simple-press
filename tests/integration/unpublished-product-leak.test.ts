@@ -231,3 +231,259 @@ describe("draft events never leak to the storefront", () => {
     expect(ids).toContain(live.id);
   });
 });
+
+/**
+ * Product customizer: an option value may link to an UNPUBLISHED product (the
+ * "hidden add-on" case — stock tracked without listing it in the shop). That
+ * must work for the customizer WITHOUT leaking the hidden product: not its
+ * page, and none of its id / name / sku / raw stock through the public
+ * customizer payload.
+ */
+describe("customizer links to unpublished products without leaking them", () => {
+  beforeEach(resetDb);
+
+  async function seedCustomizer(featureFlags: Record<string, boolean>) {
+    const business = await createBusiness({
+      subdomain: "leaktest-options",
+      featureFlags,
+    });
+    reqHost.value = "leaktest-options.simplepress.test";
+
+    const parent = await createProduct(business.id, {
+      name: "Glove",
+      price: 10000,
+      published: true,
+      trackInventory: false,
+      additionalFields: { comingSoon: false },
+    });
+    const hidden = await createProduct(business.id, {
+      name: "Secret Hidden Charm",
+      price: 3500,
+      published: false,
+      trackInventory: true,
+      inventoryQty: 4,
+      additionalFields: { comingSoon: false },
+    });
+    await db.product.update({
+      where: { id: hidden.id },
+      data: { sku: "SECRET-SKU-123" },
+    });
+
+    const group = await db.productOptionGroup.create({
+      data: {
+        businessId: business.id,
+        name: "Charms",
+        maxSelections: 2,
+        values: {
+          create: [
+            {
+              label: "Hidden heart",
+              linkedProductId: hidden.id,
+              sortOrder: 0,
+            },
+            { label: "Plain star", priceDelta: 500, sortOrder: 1 },
+          ],
+        },
+      },
+      include: { values: { orderBy: { sortOrder: "asc" } } },
+    });
+    await db.productOptionGroupOnProduct.create({
+      data: { productId: parent.id, groupId: group.id, sortOrder: 0 },
+    });
+
+    return {
+      business,
+      parent,
+      hidden,
+      group,
+      linkedValue: group.values[0]!,
+      standaloneValue: group.values[1]!,
+      caller: createTestCaller({}),
+    };
+  }
+
+  it("serves the hidden linked value but exposes nothing about its product", async () => {
+    const { parent, hidden, caller, linkedValue } = await seedCustomizer({
+      productOptions: true,
+    });
+
+    const page = await caller.product.get(parent.slug);
+    expect(page?.customizer).toBeTruthy();
+    const values = page!.customizer!.groups[0]!.values;
+    const hiddenValue = values.find((v) => v.id === linkedValue.id)!;
+    expect(hiddenValue).toMatchObject({
+      label: "Hidden heart",
+      price: 3500,
+      available: true,
+      maxQty: 4,
+    });
+
+    const wire = JSON.stringify(page!.customizer);
+    for (const secret of [
+      hidden.id,
+      hidden.slug,
+      "Secret Hidden Charm",
+      "SECRET-SKU-123",
+      "linkedProductId",
+      "linkedVariantId",
+      "inventoryQty",
+    ]) {
+      expect(wire, `customizer leaked "${secret}"`).not.toContain(secret);
+    }
+
+    // The hidden product itself is still not a storefront page.
+    expect(await caller.product.get(hidden.slug)).toBeNull();
+  });
+
+  it("omits the customizer when the productOptions flag is off", async () => {
+    const { parent, caller } = await seedCustomizer({ productOptions: false });
+    const page = await caller.product.get(parent.slug);
+    expect(page).not.toBeNull();
+    expect(page!.customizer).toBeNull();
+  });
+
+  it("re-prices configured cart lines on the server and caps by component stock", async () => {
+    const { parent, group, linkedValue, standaloneValue, caller } =
+      await seedCustomizer({ productOptions: true });
+
+    const configuration = {
+      choices: [
+        { groupId: group.id, valueIds: [linkedValue.id, standaloneValue.id] },
+      ],
+      texts: [],
+    };
+    const [configured, plain] = await caller.product.getCartItemsStatus({
+      items: [
+        { productId: parent.id, variantId: null, configuration },
+        { productId: parent.id, variantId: null },
+      ],
+    });
+
+    expect(configured).toMatchObject({
+      available: true,
+      price: 10000 + 3500 + 500,
+      maxQuantity: 4, // the hidden charm's stock
+    });
+    expect(configured!.configKey).toMatch(/^[0-9a-f]{16}$/);
+    // Unconfigured line: identical to before options existed.
+    expect(plain).toMatchObject({
+      available: true,
+      price: 10000,
+      configKey: "",
+    });
+  });
+
+  it("flags a plain line of a product whose option group became required", async () => {
+    const { parent, group, standaloneValue, caller } = await seedCustomizer({
+      productOptions: true,
+    });
+    const items = [{ productId: parent.id, variantId: null }];
+
+    // All-optional product: the plain line is untouched.
+    const [optional] = await caller.product.getCartItemsStatus({ items });
+    expect(optional).toMatchObject({
+      available: true,
+      price: 10000,
+      configKey: "",
+    });
+    expect(optional!.reason).toBeUndefined();
+
+    // The owner makes the group required: a plain line can no longer be
+    // bought, and the cart says so before checkout does.
+    await db.productOptionGroup.update({
+      where: { id: group.id },
+      data: { required: true },
+    });
+    const [required] = await caller.product.getCartItemsStatus({ items });
+    expect(required).toMatchObject({
+      available: false,
+      reason: "configuration-invalid",
+      configKey: "",
+    });
+
+    // The same product with a build that satisfies the group stays fine, and
+    // carries the server's own rendering of the build for the cart.
+    const [configured] = await caller.product.getCartItemsStatus({
+      items: [
+        {
+          productId: parent.id,
+          variantId: null,
+          configuration: {
+            choices: [{ groupId: group.id, valueIds: [standaloneValue.id] }],
+            texts: [],
+          },
+        },
+      ],
+    });
+    expect(configured).toMatchObject({
+      available: true,
+      price: 10500,
+      customization: {
+        summary: expect.stringContaining("Plain star") as string,
+        lines: [{ label: "Charms", value: "Plain star", price: 500 }],
+      },
+    });
+  });
+
+  it("does not flag a plain line of a required-option product when the flag is off", async () => {
+    const { parent, group, caller } = await seedCustomizer({
+      productOptions: false,
+    });
+    await db.productOptionGroup.update({
+      where: { id: group.id },
+      data: { required: true },
+    });
+    const [result] = await caller.product.getCartItemsStatus({
+      items: [{ productId: parent.id, variantId: null }],
+    });
+    expect(result).toMatchObject({ available: true, configKey: "" });
+  });
+
+  it("rejects a posted configuration when the flag is off", async () => {
+    const { parent, group, standaloneValue, caller } = await seedCustomizer({
+      productOptions: false,
+    });
+    const [result] = await caller.product.getCartItemsStatus({
+      items: [
+        {
+          productId: parent.id,
+          variantId: null,
+          configuration: {
+            choices: [{ groupId: group.id, valueIds: [standaloneValue.id] }],
+            texts: [],
+          },
+        },
+      ],
+    });
+    expect(result).toMatchObject({
+      available: false,
+      reason: "configuration-invalid",
+    });
+  });
+
+  it("flags a configuration whose component is sold out", async () => {
+    const { hidden, parent, group, linkedValue, caller } = await seedCustomizer(
+      { productOptions: true },
+    );
+    await db.product.update({
+      where: { id: hidden.id },
+      data: { inventoryQty: 0 },
+    });
+    const [result] = await caller.product.getCartItemsStatus({
+      items: [
+        {
+          productId: parent.id,
+          variantId: null,
+          configuration: {
+            choices: [{ groupId: group.id, valueIds: [linkedValue.id] }],
+            texts: [],
+          },
+        },
+      ],
+    });
+    expect(result).toMatchObject({
+      available: false,
+      reason: "option-out-of-stock",
+    });
+  });
+});

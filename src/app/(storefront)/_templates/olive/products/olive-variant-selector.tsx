@@ -1,10 +1,13 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -31,6 +34,14 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the page, which also shows the
+   * price). When enabled, Add to bag first requires a complete build, then
+   * adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant choice and the qty / Add to bag row. */
+  customizerSlot?: ReactNode;
 };
 
 /** `{ size: "M", colour: "Sage" }`, with the junk dropped. */
@@ -69,8 +80,11 @@ export function OliveVariantSelector({
   selectedVariantId,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
   const [quantity, setQuantity] = useState(1);
 
@@ -152,8 +166,14 @@ export function OliveVariantSelector({
       !product.allowBackorders);
 
   const onAdd = () => {
-    if (!selected || soldOut) return;
-    addItem(buildVariantCartItem(product, selected, effectiveMax), quantity);
+    if (!cartEnabled || !selected || soldOut) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
+    const line = buildVariantCartItem(product, selected, effectiveMax);
+    addItem(
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
+      quantity,
+    );
     setQuantity(1);
     announceOliveCartAdded(`${product.name} — ${selected.name}`);
   };
@@ -231,6 +251,8 @@ export function OliveVariantSelector({
         })
       )}
 
+      {!soldOut && cartEnabled ? customizerSlot : null}
+
       {soldOut ? (
         <div className="flex flex-col gap-3">
           <OliveStatusBadge status="sold-out" />
@@ -243,22 +265,25 @@ export function OliveVariantSelector({
             buttonClassName="olive-btn olive-btn-secondary olive-btn-sm"
           />
         </div>
-      ) : (
+      ) : cartEnabled || product.trackInventory ? (
         <div className="flex flex-col gap-3">
-          <OliveBuyRow
-            quantity={quantity}
-            onQuantityChange={setQuantity}
-            max={effectiveMax}
-            itemLabel={`${product.name}${selected ? ` — ${selected.name}` : ""}`}
-            onAdd={onAdd}
-          />
+          {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+          {cartEnabled ? (
+            <OliveBuyRow
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              max={effectiveMax}
+              itemLabel={`${product.name}${selected ? ` — ${selected.name}` : ""}`}
+              onAdd={onAdd}
+            />
+          ) : null}
           <OliveVariantStock
             trackInventory={product.trackInventory}
             allowBackorders={product.allowBackorders}
             inventoryQty={selected?.inventoryQty ?? 0}
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

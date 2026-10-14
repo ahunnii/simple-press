@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -17,17 +20,38 @@ type Props = {
   comingSoonHeading: string;
   /** Resolved `modern.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
+};
+
+// Modern is square-cornered with small-caps labels: re-skin the shared
+// customizer's slots to match the variant pills and quantity stepper.
+const MODERN_CUSTOMIZER_CLASSNAMES = {
+  legend: "text-foreground text-xs font-semibold tracking-widest uppercase",
+  value: "rounded-sm",
+  valueImage: "rounded-sm",
+  textInput: "rounded-none",
 };
 
 export function ModernProductActions({
   product,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: Props) {
   const {
     inStock,
     variantOptions,
     handleAddToCart,
+    handleAddToCartWith,
+    displayPrice,
+    displayCompareAtPrice,
     remainingStock,
     canAddMore,
     handleDecrement,
@@ -37,6 +61,7 @@ export function ModernProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -47,6 +72,49 @@ export function ModernProductActions({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer): null when the feature is off or the
+  // product has no groups, and then nothing below changes. `displayPrice`
+  // follows the selected variant. Catalog mode (`cart` off) has no way to
+  // add, so it shows no builder either.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer
+      controller={customizer}
+      classNames={MODERN_CUSTOMIZER_CLASSNAMES}
+    />
+  ) : null;
+
+  const handleSimpleAdd = () => {
+    if (!customizerOn) {
+      handleAddToCart();
+      return;
+    }
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
 
   return (
     <div className="mt-8">
@@ -72,6 +140,8 @@ export function ModernProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizerOn ? customizer : undefined}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -95,71 +165,83 @@ export function ModernProductActions({
         <>
           {canAddMore && (
             <>
-              {/* Quantity Selector */}
-              <div
-                role="group"
-                aria-label="Quantity"
-                className="flex w-fit items-center gap-4"
-              >
-                <span
-                  aria-hidden="true"
-                  className="text-foreground text-xs font-semibold tracking-widest uppercase"
-                >
-                  Quantity
-                </span>
-                <div className="border-border flex items-center border">
-                  <button
-                    type="button"
-                    onClick={handleDecrement}
-                    disabled={quantity <= 1}
-                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                    aria-label="Decrease quantity"
+              {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+              {cartEnabled && (
+                <>
+                  {customizerElement && (
+                    <div className="mb-6">{customizerElement}</div>
+                  )}
+                  {/* Quantity Selector */}
+                  <div
+                    role="group"
+                    aria-label="Quantity"
+                    className="flex w-fit items-center gap-4"
                   >
-                    <Minus className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                    <span
+                      aria-hidden="true"
+                      className="text-foreground text-xs font-semibold tracking-widest uppercase"
+                    >
+                      Quantity
+                    </span>
+                    <div className="border-border flex items-center border">
+                      <button
+                        type="button"
+                        onClick={handleDecrement}
+                        disabled={quantity <= 1}
+                        className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                      <span
+                        aria-live="polite"
+                        aria-atomic="true"
+                        className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium"
+                      >
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleIncrement}
+                        disabled={quantity >= remainingStock}
+                        className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={handleSimpleAdd}
+                      disabled={!canAddMore}
+                      className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
+                    >
+                      {justAdded ? (
+                        <>
+                          <Check className="h-4 w-4" aria-hidden="true" />
+                          Added to Cart
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                          Add to Cart
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <span
+                    className="sr-only"
                     aria-live="polite"
                     aria-atomic="true"
-                    className="border-border text-foreground flex h-10 w-12 items-center justify-center border-x text-sm font-medium"
                   >
-                    {quantity}
+                    {justAdded ? `${product.name} added to cart` : ""}
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleIncrement}
-                    disabled={quantity >= remainingStock}
-                    className="text-foreground hover:bg-muted flex h-10 w-10 items-center justify-center transition-colors disabled:opacity-50"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={!canAddMore}
-                  className="bg-primary text-primary-foreground flex flex-1 items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  {justAdded ? (
-                    <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                      Added to Cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                      Add to Cart
-                    </>
-                  )}
-                </button>
-              </div>
-              <span className="sr-only" aria-live="polite" aria-atomic="true">
-                {justAdded ? `${product.name} added to cart` : ""}
-              </span>
+                </>
+              )}
               {product.trackInventory &&
                 product.allowBackorders &&
                 (product.inventoryQty ?? 0) === 0 && (
@@ -170,7 +252,7 @@ export function ModernProductActions({
             </>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">
               You have the maximum available quantity in your cart
             </p>

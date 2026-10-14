@@ -1,11 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -20,14 +24,25 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the parent, which also renders the
+   * price). When enabled, Add to cart first requires a complete build and
+   * then adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the qty / Add to cart row. */
+  customizerSlot?: ReactNode;
 };
 
 export function DefaultVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -64,11 +79,14 @@ export function DefaultVariantSelector({
       !product.allowBackorders);
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
     if (addToCartDisabled) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity,
     );
 
@@ -148,62 +166,67 @@ export function DefaultVariantSelector({
         </div>
       </div>
 
+      {customizerSlot}
+
       {/* Qty + Add to cart (only shown when a variant is selected) */}
       {selectedVariant && (
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center gap-3">
-            {/* Qty stepper */}
-            <div
-              role="group"
-              aria-label="Quantity"
-              className="inline-flex h-12 w-[120px] shrink-0 items-center rounded-[var(--radius)] border border-[#e8e8e8]"
-            >
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled && (
+            <div className="flex items-center gap-3">
+              {/* Qty stepper */}
+              <div
+                role="group"
+                aria-label="Quantity"
+                className="inline-flex h-12 w-[120px] shrink-0 items-center rounded-[var(--radius)] border border-[#e8e8e8]"
+              >
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
+                  className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
+                >
+                  <span aria-hidden="true">−</span>
+                </button>
+                <span
+                  className="w-10 text-center text-sm font-medium"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity(Math.min(effectiveMax, quantity + 1))
+                  }
+                  disabled={quantity >= effectiveMax}
+                  aria-label="Increase quantity"
+                  className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
+                >
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+
+              {/* Add to cart */}
               <button
                 type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-                className="flex h-full flex-1 items-center justify-center rounded-l-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6] disabled:opacity-30"
+                onClick={handleAddToCart}
+                aria-disabled={addToCartDisabled || undefined}
+                className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
               >
-                <span aria-hidden="true">−</span>
-              </button>
-              <span
-                className="w-10 text-center text-sm font-medium"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-                className="flex h-full flex-1 items-center justify-center rounded-r-[var(--radius)] text-lg font-light transition-colors hover:bg-[#f6f6f6]"
-              >
-                <span aria-hidden="true">+</span>
+                {isAdded ? (
+                  <>
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    Added to bag
+                  </>
+                ) : (
+                  "Add to cart"
+                )}
               </button>
             </div>
-
-            {/* Add to cart */}
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              aria-disabled={addToCartDisabled || undefined}
-              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-[var(--radius)] bg-[#0a0a0a] text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a] active:translate-y-px ${addToCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              {isAdded ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Added to bag
-                </>
-              ) : (
-                "Add to cart"
-              )}
-            </button>
-          </div>
+          )}
 
           {/* Stock hint */}
           {product.trackInventory && (

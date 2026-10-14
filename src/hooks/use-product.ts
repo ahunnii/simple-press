@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import type { CartItem } from "~/providers/cart-context";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { parseCardAdditionalFields } from "~/lib/products";
@@ -8,6 +9,7 @@ import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,
 } from "~/lib/variant-price";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useCart } from "~/providers/cart-context";
 
 const MAX_UNTRACKED_QTY = 100;
@@ -16,6 +18,10 @@ export function useProduct(
   product: NonNullable<RouterOutputs["product"]["get"]>,
 ) {
   const { addItem, getItemQuantity, isHydrated } = useCart();
+  // Catalog mode (B6.11): callers hide their buy UI on `!cartEnabled`;
+  // `handleAddToCart` also no-ops so a missed button can't fill a cart that
+  // has no /cart or /checkout to go to.
+  const cartEnabled = useCartEnabled();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     pickInitialVariant(product.variants, product)?.id ?? null,
@@ -152,11 +158,18 @@ export function useProduct(
     }
   };
 
-  const handleAddToCart = () => {
-    if (!canAddMore) return;
+  /**
+   * Add the current selection, letting the caller adjust the line first —
+   * e.g. `applyCustomizerToCartItem` for a configured product. Same
+   * feedback and quantity reset as `handleAddToCart`.
+   */
+  const handleAddToCartWith = (
+    transform: (item: Omit<CartItem, "quantity">) => Omit<CartItem, "quantity">,
+  ) => {
+    if (!cartEnabled || !canAddMore) return;
 
     addItem(
-      {
+      transform({
         productId: product.id,
         productSlug: product.slug,
         variantId: selectedVariantId,
@@ -170,7 +183,7 @@ export function useProduct(
         imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
         sku: selectedVariant?.sku ?? null,
         maxInventory, // Pass max for validation
-      },
+      }),
       quantity, // Add the selected quantity
     );
 
@@ -181,6 +194,9 @@ export function useProduct(
     // Reset quantity to 1
     setQuantity(1);
   };
+
+  // Takes no arguments on purpose: templates pass it straight to onClick.
+  const handleAddToCart = () => handleAddToCartWith((item) => item);
 
   const inStock = hasVariants
     ? selectedVariant
@@ -217,12 +233,14 @@ export function useProduct(
     handleIncrement,
     handleDecrement,
     handleAddToCart,
+    handleAddToCartWith,
     inStock,
     showLowStockWarning,
     formatPrice,
     variantOptions,
     selectedOptions,
     isHydrated,
+    cartEnabled,
     cartQuantity,
     remainingStock,
     canAddMore,

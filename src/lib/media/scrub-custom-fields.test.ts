@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { scrubUrlsFromCustomFields } from "./scrub-custom-fields";
+import {
+  scrubGalleryIdsFromCustomFields,
+  scrubUrlsFromCustomFields,
+} from "./scrub-custom-fields";
 
 const A = "https://cdn.example.com/biz/a.jpg";
 const B = "https://cdn.example.com/biz/b.jpg";
@@ -218,5 +221,142 @@ describe("scrubUrlsFromCustomFields", () => {
 
     expect(changed).toBe(true);
     expect(fields).toEqual(snapshot);
+  });
+});
+
+describe("scrubGalleryIdsFromCustomFields", () => {
+  const GAL = "cmgal00000000000000000001";
+  const GAL_KEEP = "cmgal00000000000000000002";
+
+  it("deletes a top-level gallery field whose value is exactly a scrubbed ID", () => {
+    const fields = deepFreeze({
+      "noise.homepage.intro-gallery": GAL,
+      "dark-trend.homepage.gallery": GAL_KEEP,
+      "noise.homepage.title": "Hello",
+    });
+
+    const { value, changed } = scrubGalleryIdsFromCustomFields(
+      fields,
+      set(GAL),
+    );
+
+    expect(changed).toBe(true);
+    expect(value).toEqual({
+      "dark-trend.homepage.gallery": GAL_KEEP,
+      "noise.homepage.title": "Hello",
+    });
+  });
+
+  it("blanks a nested string equal to a scrubbed ID", () => {
+    const fields = deepFreeze({
+      "x.list": [
+        { _id: "r1", gallery: GAL },
+        { _id: "r2", gallery: GAL_KEEP },
+      ],
+    });
+
+    const { value, changed } = scrubGalleryIdsFromCustomFields(
+      fields,
+      set(GAL),
+    );
+
+    expect(changed).toBe(true);
+    expect(value).toEqual({
+      "x.list": [
+        { _id: "r1", gallery: "" },
+        { _id: "r2", gallery: GAL_KEEP },
+      ],
+    });
+  });
+
+  it("removes a TipTap gallery node (even nested) while siblings survive", () => {
+    const fields = deepFreeze({
+      "x.body": {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "Before" }] },
+          { type: "gallery", attrs: { galleryId: GAL } },
+          { type: "gallery", attrs: { galleryId: GAL_KEEP } },
+          {
+            type: "blockquote",
+            content: [{ type: "gallery", attrs: { galleryId: GAL } }],
+          },
+        ],
+      },
+    });
+
+    const { value, changed } = scrubGalleryIdsFromCustomFields(
+      fields,
+      set(GAL),
+    );
+
+    expect(changed).toBe(true);
+    expect(value).toEqual({
+      "x.body": {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "Before" }] },
+          { type: "gallery", attrs: { galleryId: GAL_KEEP } },
+          { type: "blockquote", content: [] },
+        ],
+      },
+    });
+  });
+
+  it("only removes nodes of type gallery (an image node with a matching attr stays)", () => {
+    const fields = deepFreeze({
+      "x.body": {
+        type: "doc",
+        content: [{ type: "image", attrs: { src: A, galleryId: GAL } }],
+      },
+    });
+
+    const { value, changed } = scrubGalleryIdsFromCustomFields(
+      fields,
+      set(GAL),
+    );
+
+    // The node is kept; only the incidental matching attr string is blanked.
+    expect(changed).toBe(true);
+    expect(value).toEqual({
+      "x.body": {
+        type: "doc",
+        content: [{ type: "image", attrs: { src: A, galleryId: "" } }],
+      },
+    });
+  });
+
+  it("never touches _sp metadata", () => {
+    const fields = deepFreeze({
+      _sp: { lastGallery: GAL },
+      "noise.homepage.intro-gallery": GAL,
+    });
+
+    const { value } = scrubGalleryIdsFromCustomFields(fields, set(GAL));
+
+    expect(value).toEqual({ _sp: { lastGallery: GAL } });
+    expect((value as Record<string, unknown>)._sp).toBe(fields._sp);
+  });
+
+  it("returns the input by reference when nothing matches or ids is empty", () => {
+    const fields = deepFreeze({ "x.gallery": GAL_KEEP, "x.title": GAL + "x" });
+
+    expect(scrubGalleryIdsFromCustomFields(fields, set(GAL))).toEqual({
+      value: fields,
+      changed: false,
+    });
+    expect(scrubGalleryIdsFromCustomFields(fields, set()).value).toBe(fields);
+    expect(scrubGalleryIdsFromCustomFields(null, set(GAL))).toEqual({
+      value: null,
+      changed: false,
+    });
+  });
+
+  it("does not treat URLs with a query string as gallery-ID matches", () => {
+    const fields = deepFreeze({ "x.gallery": `${GAL}?v=2` });
+
+    expect(scrubGalleryIdsFromCustomFields(fields, set(GAL)).changed).toBe(
+      false,
+    );
   });
 });

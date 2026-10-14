@@ -348,7 +348,7 @@ export const pinkTableFields: TemplateField[] = [
     description:
       "Leave the FAQ list below empty to hide this section entirely.",
   },
-  // A Content → FAQ picker since 2026-09-26 (was a typed question/answer
+  // A Site Setup → FAQ picker since 2026-09-26 (was a typed question/answer
   // `list`). Same key: a service saved before the switch still holds
   // `{question, answer}` rows here, and the page keeps rendering them until
   // the owner picks questions — see `resolvePinkTableFaq` in
@@ -357,7 +357,7 @@ export const pinkTableFields: TemplateField[] = [
     key: "pink-table.faq",
     label: "Questions",
     description:
-      "Pick up to eight questions from Content → FAQ to show on this page. Leave empty to hide this section. Questions typed here before keep showing until you pick some.",
+      "Pick up to eight questions from Site Setup → FAQ to show on this page. Leave empty to hide this section. Questions typed here before keep showing until you pick some.",
     type: "faq",
     page: "homepage",
     group: "pink-table.faq",
@@ -542,7 +542,7 @@ const pinkTableFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pink-table.faq",
     title: "FAQ",
-    description: "Optional accordion of questions picked from Content → FAQ.",
+    description: "Optional accordion of questions picked from Site Setup → FAQ.",
     icon: "❓",
     columns: 1,
   },

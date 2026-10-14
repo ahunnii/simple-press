@@ -248,6 +248,35 @@ export const INVOICE_EVENT_TYPE_LABELS: Record<InvoiceEventType, string> = {
   OVERDUE_ALERTED: "Overdue alert sent to you",
 };
 
+/**
+ * Grouped options for the Activity log's event filter. Every
+ * `INVOICE_EVENT_TYPE_VALUES` entry appears in exactly one group.
+ */
+export const INVOICE_EVENT_TYPE_GROUPS: {
+  label: "Sending" | "Payments" | "Problems";
+  types: readonly InvoiceEventType[];
+}[] = [
+  {
+    label: "Sending",
+    types: [
+      "CREATED",
+      "UPDATED",
+      "MARKED_SENT",
+      "SENT",
+      "VIEWED",
+      "REMINDER_SENT",
+    ],
+  },
+  {
+    label: "Payments",
+    types: ["PAYMENT_RECORDED", "PAYMENT_DELETED", "RECEIPT_SENT"],
+  },
+  {
+    label: "Problems",
+    types: ["EMAIL_FAILED", "CANCELLED", "OVERDUE_ALERTED"],
+  },
+];
+
 // ─── Send ───────────────────────────────────────────────────────────────────
 
 /** `Invoice.sentVia`. `manual` = "Mark as sent without emailing". */

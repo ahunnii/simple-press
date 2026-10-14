@@ -10,11 +10,13 @@ import {
   MAX_DONOR_NAME_LENGTH,
   MIN_DONATION_CENTS,
 } from "~/lib/donations/constants";
-import { centsToDollarsString, dollarsToCents, formatPrice } from "~/lib/prices";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import {
+  centsToDollarsString,
+  dollarsToCents,
+  formatPrice,
+} from "~/lib/prices";
 import { cn } from "~/lib/utils";
 
-import { WealthEyebrow } from "../shared/wealth-eyebrow";
 import { WealthInput } from "../shared/wealth-input";
 import { WealthLedgeButton } from "../shared/wealth-ledge-button";
 
@@ -51,24 +53,24 @@ type Props = {
   label: DonationLabel;
   /** Preset amounts in cents — already resolved to the owner's config or a wealth-specific fallback. */
   presetAmountsCents: number[];
-  formHeading?: string;
-  formHeadingFieldKey?: string;
+  /** `id` of the page's form heading (rendered beside the form, not in it). */
+  headingId?: string;
 };
 
 /**
  * Wealth's styled donation checkout form. Identical logic to
  * `PinkDonateForm`/`DefaultDonateForm` (preset/custom amount validation,
  * cents conversion, fetch shape, redirect-on-success / banner-on-failure) —
- * only the presentation is wealth's own: square `--wealth-surface` amount
- * tiles with a primary-green selected border, `.wealth-input` fields, and
- * the sage `WealthLedgeButton` "donate" variant (with its characteristic
- * odd-blue ledge shadow) as the submit CTA.
+ * only the presentation is wealth's own (2026-10-12 redesign): a paper card
+ * (it sits on the Give block's surface), square amount tiles (selected =
+ * forest fill, white text), `.wealth-input` fields, and the `WealthLedgeButton`
+ * "donate" variant as the submit CTA. The page renders the italic form
+ * heading beside the card and passes its id as `headingId`.
  */
 export function WealthDonateForm({
   label,
   presetAmountsCents,
-  formHeading,
-  formHeadingFieldKey,
+  headingId,
 }: Props) {
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
     presetAmountsCents[0] ?? null,
@@ -79,6 +81,7 @@ export function WealthDonateForm({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const amountGroupId = useId();
   const amountInputId = useId();
   const nameInputId = useId();
   const messageInputId = useId();
@@ -150,37 +153,25 @@ export function WealthDonateForm({
   return (
     <form
       onSubmit={(e) => void handleSubmit(e)}
-      className="flex flex-col gap-6 bg-[var(--wealth-paper)] p-6 sm:p-8"
-      style={{ border: "1px solid var(--wealth-surface-2)" }}
+      className="wealth-donate-card wealth-on-paper"
+      aria-labelledby={headingId}
+      aria-label={headingId ? undefined : label.pageTitle}
     >
-      {formHeading && (
-        <h2
-          className="wealth-section-heading"
-          {...(formHeadingFieldKey ? fieldAttr(formHeadingFieldKey) : {})}
-        >
-          {formHeading}
-        </h2>
-      )}
-
       {error && (
-        <p
-          role="alert"
-          className="p-4 text-[14px]"
-          style={{
-            background: "var(--wealth-error-bg)",
-            border: "1px solid var(--wealth-error-border)",
-            color: "var(--wealth-error)",
-          }}
-        >
+        <p role="alert" className="wealth-donate-error">
           {error}
         </p>
       )}
 
       <div>
-        <WealthEyebrow as="span" className="block">
+        <p id={amountGroupId} className="wealth-eyebrow wealth-donate-label">
           Amount
-        </WealthEyebrow>
-        <div className="mt-3 flex flex-wrap gap-2">
+        </p>
+        <div
+          role="group"
+          aria-labelledby={amountGroupId}
+          className="wealth-donate-amounts"
+        >
           {presetAmountsCents.map((cents) => {
             const selected = selectedPreset === cents && !customAmount.trim();
             return (
@@ -189,27 +180,22 @@ export function WealthDonateForm({
                 type="button"
                 onClick={() => choosePreset(cents)}
                 aria-pressed={selected}
-                className={cn(
-                  "wealth-btn-mono aspect-square min-w-[76px] flex-col gap-0 border-2 bg-[var(--wealth-surface)] px-4 py-3 text-[var(--wealth-ink)] transition-colors",
-                  selected
-                    ? "border-[var(--wealth-primary)] text-[var(--wealth-primary)]"
-                    : "border-transparent",
-                )}
+                className="wealth-donate-tile"
               >
                 {formatPrice(cents)}
               </button>
             );
           })}
         </div>
-        <div className="mt-4">
-          <label htmlFor={amountInputId} className="wealth-eyebrow mb-1.5 block">
+        <div className="wealth-donate-custom">
+          <label
+            htmlFor={amountInputId}
+            className="wealth-eyebrow wealth-donate-label"
+          >
             Or enter a custom amount
           </label>
-          <div className="relative max-w-[180px]">
-            <span
-              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[15px]"
-              style={{ color: "var(--wealth-muted)" }}
-            >
+          <div className="wealth-donate-custom__field">
+            <span className="wealth-donate-custom__prefix" aria-hidden="true">
               $
             </span>
             <WealthInput
@@ -222,14 +208,16 @@ export function WealthDonateForm({
               value={customAmount}
               onChange={(e) => onCustomAmountChange(e.target.value)}
               placeholder={centsToDollarsString(presetAmountsCents[0] ?? null)}
-              style={{ paddingLeft: "28px" }}
             />
           </div>
         </div>
       </div>
 
       <div>
-        <label htmlFor={nameInputId} className="wealth-eyebrow mb-1.5 block">
+        <label
+          htmlFor={nameInputId}
+          className="wealth-eyebrow wealth-donate-label"
+        >
           Your name (optional)
         </label>
         <WealthInput
@@ -243,11 +231,11 @@ export function WealthDonateForm({
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between">
+        <div className="wealth-donate-label-row">
           <label htmlFor={messageInputId} className="wealth-eyebrow">
             Message (optional)
           </label>
-          <span className="text-[12px]" style={{ color: "var(--wealth-muted)" }}>
+          <span className="wealth-donate-count">
             {message.length}/{MAX_DONATION_MESSAGE_LENGTH}
           </span>
         </div>
@@ -258,16 +246,16 @@ export function WealthDonateForm({
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
           placeholder="Say a few words…"
-          className="wealth-input mt-1.5 resize-none py-3"
+          className="wealth-input"
         />
       </div>
 
       <WealthLedgeButton
         type="submit"
         variant="donate"
+        block
         disabled={isProcessing || !amountIsValid}
         className={cn(
-          "justify-center",
           (isProcessing || !amountIsValid) && "cursor-not-allowed opacity-60",
         )}
       >

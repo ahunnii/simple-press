@@ -1,12 +1,16 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -21,14 +25,24 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Customizer state (owned by the parent, which renders the price). When
+   * set, Add to Cart needs a complete build and adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the quantity stepper. */
+  customizerSlot?: ReactNode;
 };
 
 export function DarkTrendVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -60,10 +74,13 @@ export function DarkTrendVariantSelector({
         : 0;
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity, // ← Add specified quantity
     );
 
@@ -142,8 +159,22 @@ export function DarkTrendVariantSelector({
         </div>
       </div>
 
+      {customizerSlot && <div className="mb-6">{customizerSlot}</div>}
+
+      {/* Catalog mode (B6.11): no qty stepper when `cart` is off — stock stays */}
+      {selectedVariant &&
+        !cartEnabled &&
+        product.trackInventory &&
+        (isBackordered || selectedVariant.inventoryQty > 0) && (
+          <p className="mb-8 text-sm text-white/60">
+            {isBackordered
+              ? "Backordered — ships when available"
+              : `${selectedVariant.inventoryQty} available`}
+          </p>
+        )}
+
       {/* Quantity Selection */}
-      {selectedVariant && (
+      {cartEnabled && selectedVariant && (
         <div className="mb-8">
           <div
             role="group"
@@ -194,32 +225,34 @@ export function DarkTrendVariantSelector({
         </div>
       )}
 
-      {/* Add to Cart */}
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-        <button
-          type="button"
-          aria-disabled={isCartDisabled ? "true" : undefined}
-          onClick={(e) => {
-            if (isCartDisabled) {
-              e.preventDefault();
-              return;
-            }
-            handleAddToCart();
-          }}
-          className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-            isAdded ? "bg-violet-600" : "bg-violet-600 hover:bg-violet-700"
-          } ${isCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity} to Cart`
-          )}
-        </button>
-      </div>
+      {/* Add to Cart (hidden in catalog mode, B6.11) */}
+      {cartEnabled && (
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+          <button
+            type="button"
+            aria-disabled={isCartDisabled ? "true" : undefined}
+            onClick={(e) => {
+              if (isCartDisabled) {
+                e.preventDefault();
+                return;
+              }
+              handleAddToCart();
+            }}
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
+              isAdded ? "bg-violet-600" : "bg-violet-600 hover:bg-violet-700"
+            } ${isCartDisabled ? "cursor-not-allowed opacity-50" : ""}`}
+          >
+            {isAdded ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" />
+                Added to Cart
+              </>
+            ) : (
+              `Add ${quantity} to Cart`
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && isCartDisabled && (

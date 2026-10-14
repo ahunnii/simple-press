@@ -15,7 +15,8 @@
  *    (including Page.previewDraft and Business.maintenanceMessage)
  *  - Gallery images that are referenced by gallery-type template fields or by
  *    `gallery` nodes inside TipTap documents
- *  - Logo / favicon objects are marked "always in use" via `isAlwaysInUseKey`
+ *  - Logo / favicon fixed-key objects are never auto-cleaned (`isAlwaysInUseKey`);
+ *    the Media Library protects only the one in use (`isProtectedBrandAssetKey`)
  */
 
 import type { TemplateField } from "~/lib/template-fields";
@@ -23,6 +24,10 @@ import { isStorageUrl } from "~/lib/s3/url";
 import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
+import {
+  isPictureChoiceField,
+  parseStoredFormDefinition,
+} from "~/lib/validators/form";
 import { STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
 import { db } from "~/server/db";
 
@@ -68,9 +73,13 @@ function buildTemplateFieldOwnerIndex(): Map<string, TemplateFieldOwner> {
 // ─── Always-in-use predicate ──────────────────────────────────────────────────
 
 /**
- * Logo and favicon objects are written to a fixed key and should never be
- * one-click-deletable — the upload always overwrites the same S3 key, so the
- * SiteContent column may transiently lag after a re-upload.
+ * Logo and favicon objects live at fixed keys ({businessId}/logo.{ext},
+ * favicon.{ext}). This strict predicate is for automatic "delete if
+ * unreferenced" cleanup (gallery / product routers), which must never remove
+ * a brand file: the SiteContent column can lag an upload. A format switch
+ * (logo.png → logo.svg) leaves the old key behind, so the Media Library
+ * narrows this to the key actually in use via `isProtectedBrandAssetKey`
+ * (`~/lib/media/brand-asset-keys`), letting the stale one be deleted.
  */
 export function isAlwaysInUseKey(key: string): boolean {
   // Key shape: {businessId}/logo.{ext} or {businessId}/favicon.{ext}
@@ -527,6 +536,32 @@ async function scanMediaReferences(
       }
     });
 
+  // ── 3b. Product option values (customizer tile images) ─────────────────────
+  const optionValuesPromise = db.productOptionValue
+    .findMany({
+      where: { group: { businessId }, imageUrl: { not: null } },
+      select: {
+        id: true,
+        label: true,
+        imageUrl: true,
+        group: { select: { name: true } },
+      },
+    })
+    .then((values) => {
+      for (const v of values) {
+        if (v.imageUrl) {
+          addUsage(map, v.imageUrl, {
+            url: v.imageUrl,
+            location: `Product option "${v.group.name}"`,
+            entityType: "productOptionValue",
+            entityId: v.id,
+            entityLabel: v.label,
+            adminHref: "/admin/products",
+          });
+        }
+      }
+    });
+
   // ── 4. Collections ─────────────────────────────────────────────────────────
   const collectionsPromise = db.collection
     .findMany({
@@ -627,7 +662,8 @@ async function scanMediaReferences(
         // (`scrubMediaUrlsFromSiteContent` in the media router) only ever
         // touches SiteContent. Flagging a stale service-template field would
         // therefore delete the object and leave `Service.customFields`
-        // pointing at a 404.
+        // pointing at a 404. The same holds for gallery embeds: the scrub in
+        // `gallery.delete` is SiteContent-only too.
         const cf = s.customFields;
         if (cf && typeof cf === "object" && !Array.isArray(cf)) {
           const serviceFieldsByKey = new Map(
@@ -986,11 +1022,67 @@ async function scanMediaReferences(
       }
     });
 
+  // ── 10b. Forms (picture-choice option photos + reference image) ─────────────
+  // `Form.definition` is a JSON blob. Only `picturechoice` fields carry media:
+  // each option's `imageUrl` and the field's `referenceImageUrl`.
+  const formsPromise = db.form
+    .findMany({
+      where: { businessId },
+      select: { id: true, name: true, definition: true },
+    })
+    .then((forms) => {
+      for (const form of forms) {
+        const formUsage = (location: string): MediaUsage => ({
+          url: "",
+          location,
+          entityType: "form",
+          entityId: form.id,
+          entityLabel: form.name,
+          adminHref: `/admin/forms/${form.id}`,
+        });
+        const parsed = parseStoredFormDefinition(form.definition);
+        if (!parsed.success) {
+          // A definition that no longer validates still holds live photos —
+          // fall back to a generic walk so they never read as unused.
+          deepWalkJson(
+            form.definition,
+            (url) =>
+              addUsage(map, url, {
+                ...formUsage(`Form: ${form.name}`),
+                url,
+              }),
+            () => undefined,
+          );
+          continue;
+        }
+        for (const field of parsed.data.fields) {
+          if (!isPictureChoiceField(field)) continue;
+          const fieldLabel = field.label || "Picture choice";
+          if (field.referenceImageUrl) {
+            addUsage(map, field.referenceImageUrl, {
+              ...formUsage(
+                `Form: ${form.name} — ${fieldLabel} (reference image)`,
+              ),
+              url: field.referenceImageUrl,
+            });
+          }
+          for (const option of field.options) {
+            if (!option.imageUrl) continue;
+            addUsage(map, option.imageUrl, {
+              ...formUsage(`Form: ${form.name} — ${fieldLabel}`),
+              url: option.imageUrl,
+            });
+          }
+        }
+      }
+    });
+
   // Run all independent queries in parallel
   await Promise.all([
     siteContentPromise,
     productsPromise,
     variantsPromise,
+    optionValuesPromise,
     collectionsPromise,
     servicesPromise,
     eventsPromise,
@@ -1001,6 +1093,7 @@ async function scanMediaReferences(
     galleryImagesPromise,
     testimonialsPromise,
     reviewsPromise,
+    formsPromise,
   ]);
 
   return { map, galleryRefs };
@@ -1073,6 +1166,12 @@ export type GalleryExternalUsage = {
   location: string;
   entityLabel?: string;
   adminHref?: string;
+  /**
+   * Set when the embed is a field value of a template the owner switched away
+   * from (carried from the scan — only SiteContent refs ever set it). Such an
+   * embed is reported but does NOT block `gallery.delete`; the delete scrubs it.
+   */
+  inactiveTemplate?: boolean;
 };
 
 /**
@@ -1098,9 +1197,15 @@ export type GalleryExternalUsage = {
  * This is the single source of truth for both `gallery.delete`'s CONFLICT
  * guard and the admin "Embedded" badge — they must never drift apart.
  *
- * `inactiveTemplate` is deliberately ignored: an embed from an inactive
- * template still counts as embedded and still blocks gallery deletion, because
- * switching the template back would restore it.
+ * `inactiveTemplate` is carried through, matching the Media Library rule
+ * (`deleteMedia` in `~/server/media/library`): an embed that is a leftover field
+ * value of a template the owner switched away from is REPORTED (with the flag)
+ * but does not block deletion — owners have no UI to clear an inactive
+ * template's fields. `gallery.delete` blocks only on usages without the flag and
+ * scrubs the inactive ones out of `SiteContent.customFields` /
+ * `previewCustomFields` before deleting, so a reactivated template falls back to
+ * its field defaults. When an active and an inactive reference dedupe to the
+ * same entry, the active one wins.
  */
 export async function buildGalleryExternalUsage(
   businessId: string,
@@ -1124,11 +1229,18 @@ export async function buildGalleryExternalUsage(
     if (!known.has(ref.id)) continue;
     const usages =
       deduped.get(ref.id) ?? new Map<string, GalleryExternalUsage>();
-    usages.set(`${ref.entityType}:${ref.entityId ?? ref.location}`, {
-      location: ref.location,
-      entityLabel: ref.entityLabel,
-      adminHref: ref.adminHref,
-    });
+    const key = `${ref.entityType}:${ref.entityId ?? ref.location}`;
+    const existing = usages.get(key);
+    // Active wins: never let an inactive duplicate downgrade an active entry
+    // (that would let `gallery.delete` through and scrub a live embed).
+    if (!existing || (existing.inactiveTemplate && !ref.inactiveTemplate)) {
+      usages.set(key, {
+        location: ref.location,
+        entityLabel: ref.entityLabel,
+        adminHref: ref.adminHref,
+        inactiveTemplate: ref.inactiveTemplate ? true : undefined,
+      });
+    }
     deduped.set(ref.id, usages);
   }
 

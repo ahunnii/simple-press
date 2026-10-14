@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 
+import { StripeConnectReturnToast } from "./stripe-connect-return-toast";
 import {
   buildStripeConnectAuthorizeUrl,
   requestSignedStripeOAuthState,
@@ -77,6 +78,7 @@ export function ConnectStripeButton({
   if (stripeAccountId) {
     return (
       <div className="space-y-4">
+        <StripeConnectReturnToast />
         <div className="flex items-center gap-2">
           <Badge variant="default" className="gap-1">
             <CheckCircle className="h-3 w-3" />
@@ -131,6 +133,7 @@ export function ConnectStripeButton({
 
   return (
     <div className="space-y-4">
+      <StripeConnectReturnToast />
       <div className="flex items-center gap-2">
         <Badge variant="secondary" className="gap-1">
           <XCircle className="h-3 w-3" />

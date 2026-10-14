@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { isFilenameAltText } from "~/lib/images/alt-text";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,7 +30,11 @@ type ImageEditModalProps = {
   };
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (updated: {
+    id: string;
+    altText: string | null;
+    caption: string | null;
+  }) => void;
 };
 
 // Mirrors galleryUpdateImageSchema limits in src/lib/validators/gallery.ts
@@ -42,13 +47,20 @@ export function ImageEditModal({
   onClose,
   onSuccess,
 }: ImageEditModalProps) {
-  const [altText, setAltText] = useState(image.altText ?? "");
+  // Old uploads stored the file name as alt text; start the field empty and
+  // show what was there so saving it blank clears the file name.
+  const staleFilename = isFilenameAltText(image.altText)
+    ? (image.altText?.trim() ?? "")
+    : null;
+  const [altText, setAltText] = useState(
+    staleFilename === null ? (image.altText ?? "") : "",
+  );
   const [caption, setCaption] = useState(image.caption ?? "");
 
   const updateMutation = api.gallery.updateImage.useMutation({
-    onSuccess: () => {
+    onSuccess: ({ data }) => {
       toast.success("Image updated");
-      onSuccess();
+      onSuccess(data);
       onClose();
     },
     onError: (error) => {
@@ -60,8 +72,10 @@ export function ImageEditModal({
     e.preventDefault();
     updateMutation.mutate({
       id: image.id,
-      altText: altText.trim() || undefined,
-      caption: caption.trim() || undefined,
+      // "" (not undefined): the server treats an omitted field as "no change",
+      // so clearing the field has to be sent explicitly.
+      altText: altText.trim(),
+      caption: caption.trim(),
     });
   };
 
@@ -98,6 +112,12 @@ export function ImageEditModal({
                 className="mt-2"
                 maxLength={ALT_MAX}
               />
+              {staleFilename !== null && (
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Was &quot;{staleFilename}&quot; — describe what&apos;s in the
+                  photo instead.
+                </p>
+              )}
               <div className="mt-1 flex items-start justify-between gap-2">
                 <p className="text-muted-foreground text-xs">
                   Used by screen readers and when image can&apos;t load

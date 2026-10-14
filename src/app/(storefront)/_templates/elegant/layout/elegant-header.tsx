@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  ChevronDown,
   Heart,
   LayoutDashboardIcon,
   Menu,
@@ -16,18 +17,41 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  donateLinkOptions,
+  externalLinkProps,
+  filterNavByFlags,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
+import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
 
 import { resolveFields } from "..";
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+const externalHint = <span className="sr-only"> (opens in new tab)</span>;
+
+/** Index of the group (item with children) holding the current route, or null. */
+function activeGroupIndex(links: NavItem[], pathname: string) {
+  const idx = links.findIndex(
+    (item) => !!item.children?.length && isNavItemActive(pathname, item),
+  );
+  return idx === -1 ? null : idx;
+}
 
 export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [scrolled, setScrolled] = useState(false);
@@ -37,11 +61,16 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
   const pathname = usePathname();
   const router = useRouter();
+  const dd = useNavDropdown(pathname, "el-nav");
+  // Mobile accordion: one group open at a time; reset to the group holding the
+  // current route each time the menu opens.
+  const [mobileExpanded, setMobileExpanded] = useState<number | null>(null);
 
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
@@ -110,10 +139,18 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
       : []),
   ];
 
-  const links =
-    (business?.siteContent?.navigationItems as
-      | { label: string; href: string }[]
-      | undefined) ?? DEFAULT_NAV_LINKS;
+  // Owner nav (or the starter menu above) through the shared resolver + route→
+  // flag filter; the Donations "show in header" switch appends a last /donate.
+  // Groups render as desktop dropdowns / mobile accordions, so withDonateLink
+  // sees a /donate nested in a group and doesn't duplicate it. Desktop and
+  // mobile read the same list.
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+      isStorefrontEnabled,
+    ),
+    donateLinkOptions(business, isStorefrontEnabled, "header"),
+  );
 
   const cartFields = resolveFields(business?.siteContent?.customFields, [
     "elegant.global.cart-title",
@@ -123,8 +160,187 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     "elegant.global.cart-drawer-note",
   ]);
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  const navLinkStyle = (active: boolean): React.CSSProperties => ({
+    position: "relative",
+    fontSize: 13.5,
+    letterSpacing: "0.04em",
+    color: active ? "var(--el-ink, #1c1a17)" : "var(--el-ink-soft, #6b6659)",
+    padding: "6px 2px",
+    textDecoration: "none",
+    fontFamily: "var(--font-sans, Manrope, sans-serif)",
+    whiteSpace: "nowrap",
+  });
+
+  const navUnderline = (active: boolean) => (
+    <span
+      aria-hidden={true}
+      className="el-nav-underline"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 1,
+        background: "var(--el-ink, #1c1a17)",
+        display: "block",
+        transform: active ? "scaleX(1)" : "scaleX(0)",
+        transformOrigin: "left",
+        transition: `transform 0.4s ${ease}`,
+      }}
+    />
+  );
+
+  const renderDesktopItem = (item: NavItem, i: number) => {
+    if (item.children?.length) {
+      const isOpen = dd.openIndex === i;
+      const entries = navGroupEntries(item);
+      const activeEntry = activeEntryIndex(pathname, entries);
+      const groupActive = isNavItemActive(pathname, item);
+      const lit = groupActive || isOpen;
+      return (
+        <div
+          key={i}
+          {...dd.groupProps(i)}
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {/* Trigger never navigates — a non-empty parent href is the panel's
+              first entry. Active styling, but no aria-current. */}
+          <button
+            {...dd.triggerProps(i)}
+            className="el-nav-link"
+            data-active={lit ? "true" : undefined}
+            style={{
+              ...navLinkStyle(lit),
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              lineHeight: "inherit",
+            }}
+          >
+            {item.label}
+            <ChevronDown
+              aria-hidden={true}
+              style={{
+                width: 13,
+                height: 13,
+                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: `transform 0.4s ${ease}`,
+              }}
+            />
+            {navUnderline(lit)}
+          </button>
+
+          {/* Panel wrapper: top padding is the hover bridge from the trigger
+              down past the pill's bottom edge to the card. */}
+          <div
+            id={dd.panelId(i)}
+            className="el-nav-panel"
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: -22,
+              paddingTop: 22,
+              zIndex: 10,
+              pointerEvents: isOpen ? "auto" : "none",
+              visibility: isOpen ? "visible" : "hidden",
+              opacity: isOpen ? 1 : 0,
+              transform: isOpen ? "translateY(0)" : "translateY(-6px)",
+              transition: isOpen
+                ? `opacity 0.3s ${ease}, transform 0.4s ${ease}, visibility 0s`
+                : `opacity 0.2s ${ease}, transform 0.3s ${ease}, visibility 0s linear 0.3s`,
+            }}
+          >
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 8,
+                minWidth: 210,
+                background: "rgba(251, 248, 242, 0.97)",
+                border: "1px solid rgba(28, 26, 23, 0.08)",
+                borderRadius: 18,
+                boxShadow:
+                  "0 1px 0 rgba(255,255,255,0.5) inset, 0 24px 48px -24px rgba(28,26,23,0.28)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              {entries.map((child, j) => {
+                const childActive = j === activeEntry;
+                return (
+                  <li key={j}>
+                    <Link
+                      href={child.href}
+                      {...externalLinkProps(child.external)}
+                      aria-current={childActive ? "page" : undefined}
+                      onClick={() => dd.close()}
+                      className="el-nav-panel-link"
+                      data-active={childActive ? "true" : undefined}
+                      style={{
+                        display: "block",
+                        padding: "9px 14px",
+                        borderRadius: 12,
+                        fontSize: 13.5,
+                        letterSpacing: "0.04em",
+                        fontFamily: "var(--font-sans, Manrope, sans-serif)",
+                        fontWeight: childActive ? 500 : 400,
+                        color: childActive
+                          ? "var(--el-ink, #1c1a17)"
+                          : "var(--el-ink-soft, #6b6659)",
+                        background: childActive
+                          ? "rgba(28, 26, 23, 0.05)"
+                          : "transparent",
+                        textDecoration: "none",
+                        whiteSpace: "nowrap",
+                        transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                      }}
+                    >
+                      {child.label}
+                      {child.external && externalHint}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    const active = isNavItemActive(pathname, item);
+    return (
+      <Link
+        key={i}
+        href={item.href}
+        {...externalLinkProps(item.external)}
+        className="el-nav-link"
+        aria-current={active ? "page" : undefined}
+        style={navLinkStyle(active)}
+        data-active={active ? "true" : undefined}
+      >
+        {item.label}
+        {item.external && externalHint}
+        {navUnderline(active)}
+      </Link>
+    );
+  };
+
+  const mobileLinkStyle = (active: boolean): React.CSSProperties => ({
+    fontSize: 16,
+    letterSpacing: "0.04em",
+    color: active ? "var(--el-ink, #1c1a17)" : "var(--el-ink-soft, #6b6659)",
+    textDecoration: "none",
+    fontFamily: "var(--font-sans, sans-serif)",
+    fontWeight: active ? 500 : 400,
+  });
 
   const iconBtnStyle: React.CSSProperties = {
     width: 34,
@@ -169,6 +385,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             hamburger — only one is visible at a time via CSS, but they
             share the same grid cell so the logo always stays centred. */}
           <nav
+            ref={dd.containerRef}
             aria-label="Main navigation"
             className="el-pill"
             style={{
@@ -196,46 +413,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 className="el-desktop-nav"
                 style={{ display: "flex", alignItems: "center", gap: 24 }}
               >
-                {links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="el-nav-link"
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    style={{
-                      position: "relative",
-                      fontSize: 13.5,
-                      letterSpacing: "0.04em",
-                      color: isActive(link.href)
-                        ? "var(--el-ink, #1c1a17)"
-                        : "var(--el-ink-soft, #6b6659)",
-                      padding: "6px 2px",
-                      textDecoration: "none",
-                      fontFamily: "var(--font-sans, Manrope, sans-serif)",
-                      whiteSpace: "nowrap",
-                    }}
-                    data-active={isActive(link.href) ? "true" : undefined}
-                  >
-                    {link.label}
-                    <span
-                      className="el-nav-underline"
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        height: 1,
-                        background: "var(--el-ink, #1c1a17)",
-                        display: "block",
-                        transform: isActive(link.href)
-                          ? "scaleX(1)"
-                          : "scaleX(0)",
-                        transformOrigin: "left",
-                        transition: `transform 0.4s ${ease}`,
-                      }}
-                    />
-                  </Link>
-                ))}
+                {links.map(renderDesktopItem)}
               </div>
 
               {/* Mobile hamburger (hidden on desktop) */}
@@ -244,7 +422,12 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 type="button"
                 className="el-hamburger"
                 style={{ ...iconBtnStyle, display: "none" }}
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => {
+                  if (!menuOpen) {
+                    setMobileExpanded(activeGroupIndex(links, pathname));
+                  }
+                  setMenuOpen(!menuOpen);
+                }}
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menuOpen}
                 aria-controls="el-mobile-nav"
@@ -450,46 +633,49 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 </Link>
               )}
 
-              <button
-                type="button"
-                onClick={() => setIsOpen(true)}
-                aria-label={
-                  itemCount > 0
-                    ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
-                    : "Cart"
-                }
-                style={{ ...iconBtnStyle, position: "relative" }}
-                className="el-icon-btn"
-              >
-                <ShoppingBag
-                  aria-hidden={true}
-                  style={{ width: 17, height: 17 }}
-                />
-                <span
-                  aria-hidden={true}
-                  style={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    minWidth: 16,
-                    height: 16,
-                    padding: "0 4px",
-                    background: "var(--el-sage, #4a5240)",
-                    color: "var(--el-paper, #fbf8f2)",
-                    borderRadius: 999,
-                    fontSize: 10,
-                    fontWeight: 600,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-sans, sans-serif)",
-                    transform: itemCount > 0 ? "scale(1)" : "scale(0)",
-                    transition: `transform 0.35s ${ease}`,
-                  }}
+              {/* Catalog mode (B6.11): no bag button when `cart` is off */}
+              {cartEnabled && (
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(true)}
+                  aria-label={
+                    itemCount > 0
+                      ? `Cart (${itemCount} item${itemCount === 1 ? "" : "s"})`
+                      : "Cart"
+                  }
+                  style={{ ...iconBtnStyle, position: "relative" }}
+                  className="el-icon-btn"
                 >
-                  {itemCount}
-                </span>
-              </button>
+                  <ShoppingBag
+                    aria-hidden={true}
+                    style={{ width: 17, height: 17 }}
+                  />
+                  <span
+                    aria-hidden={true}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      minWidth: 16,
+                      height: 16,
+                      padding: "0 4px",
+                      background: "var(--el-sage, #4a5240)",
+                      color: "var(--el-paper, #fbf8f2)",
+                      borderRadius: 999,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-sans, sans-serif)",
+                      transform: itemCount > 0 ? "scale(1)" : "scale(0)",
+                      transition: `transform 0.35s ${ease}`,
+                    }}
+                  >
+                    {itemCount}
+                  </span>
+                </button>
+              )}
             </div>
           </nav>
 
@@ -499,8 +685,13 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             aria-hidden={!menuOpen}
             style={{
               pointerEvents: menuOpen ? "auto" : "none",
-              maxHeight: menuOpen ? 500 : 0,
-              overflow: "hidden",
+              // Viewport cap (not a fixed 500px) so an expanded accordion
+              // scrolls inside the panel instead of clipping.
+              maxHeight: menuOpen ? "calc(100dvh - 120px)" : 0,
+              overflowX: "hidden",
+              overflowY: menuOpen ? "auto" : "hidden",
+              overscrollBehavior: "contain",
+              borderRadius: 20,
               transition: `max-height 0.4s ${ease}`,
               marginTop: 8,
             }}
@@ -517,42 +708,131 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 gap: 18,
               }}
             >
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  tabIndex={menuOpen ? undefined : -1}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    fontSize: 16,
-                    letterSpacing: "0.04em",
-                    color: isActive(link.href)
-                      ? "var(--el-ink, #1c1a17)"
-                      : "var(--el-ink-soft, #6b6659)",
-                    textDecoration: "none",
-                    fontFamily: "var(--font-sans, sans-serif)",
-                    fontWeight: isActive(link.href) ? 500 : 400,
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {links.map((item, i) => {
+                if (item.children?.length) {
+                  const isOpen = mobileExpanded === i;
+                  const sublistId = `el-mobile-nav-group-${i}`;
+                  const entries = navGroupEntries(item);
+                  const activeEntry = activeEntryIndex(pathname, entries);
+                  return (
+                    <div key={i}>
+                      {/* Group trigger — never navigates; a non-empty parent
+                          href is the sub-list's first entry. No aria-current. */}
+                      <button
+                        type="button"
+                        className="el-mobile-group-btn"
+                        tabIndex={menuOpen ? undefined : -1}
+                        aria-expanded={isOpen}
+                        aria-controls={sublistId}
+                        onClick={() => setMobileExpanded(isOpen ? null : i)}
+                        style={{
+                          ...mobileLinkStyle(isNavItemActive(pathname, item)),
+                          display: "flex",
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 12,
+                          padding: 0,
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          lineHeight: "inherit",
+                        }}
+                      >
+                        {item.label}
+                        <ChevronDown
+                          aria-hidden={true}
+                          style={{
+                            width: 16,
+                            height: 16,
+                            flexShrink: 0,
+                            transform: isOpen
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                            transition: `transform 0.4s ${ease}`,
+                          }}
+                        />
+                      </button>
+                      {isOpen && (
+                        <ul
+                          id={sublistId}
+                          style={{
+                            listStyle: "none",
+                            margin: "12px 0 0 2px",
+                            padding: "2px 0 2px 16px",
+                            borderLeft: "1px solid rgba(28, 26, 23, 0.12)",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 12,
+                          }}
+                        >
+                          {entries.map((child, j) => {
+                            const childActive = j === activeEntry;
+                            return (
+                              <li key={j}>
+                                <Link
+                                  href={child.href}
+                                  {...externalLinkProps(child.external)}
+                                  className="el-mobile-sublink"
+                                  tabIndex={menuOpen ? undefined : -1}
+                                  aria-current={
+                                    childActive ? "page" : undefined
+                                  }
+                                  onClick={() => setMenuOpen(false)}
+                                  style={{
+                                    ...mobileLinkStyle(childActive),
+                                    fontSize: 14.5,
+                                    display: "block",
+                                  }}
+                                >
+                                  {child.label}
+                                  {child.external && externalHint}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                }
+
+                const active = isNavItemActive(pathname, item);
+                return (
+                  <Link
+                    key={i}
+                    href={item.href}
+                    {...externalLinkProps(item.external)}
+                    tabIndex={menuOpen ? undefined : -1}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setMenuOpen(false)}
+                    style={mobileLinkStyle(active)}
+                  >
+                    {item.label}
+                    {item.external && externalHint}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Cart drawer */}
-      <ElegantCartDrawer
-        cartTitle={cartFields["elegant.global.cart-title"] ?? ""}
-        emptyHeading={
-          cartFields["elegant.global.cart-drawer-empty-heading"] ?? ""
-        }
-        emptyBody={cartFields["elegant.global.cart-empty-body"] ?? ""}
-        browseButtonText={cartFields["elegant.global.cart-browse-button"] ?? ""}
-        checkoutNote={cartFields["elegant.global.cart-drawer-note"] ?? ""}
-      />
+      {/* Cart drawer — not mounted in catalog mode (B6.11) */}
+      {cartEnabled && (
+        <ElegantCartDrawer
+          cartTitle={cartFields["elegant.global.cart-title"] ?? ""}
+          emptyHeading={
+            cartFields["elegant.global.cart-drawer-empty-heading"] ?? ""
+          }
+          emptyBody={cartFields["elegant.global.cart-empty-body"] ?? ""}
+          browseButtonText={
+            cartFields["elegant.global.cart-browse-button"] ?? ""
+          }
+          checkoutNote={cartFields["elegant.global.cart-drawer-note"] ?? ""}
+        />
+      )}
     </>
   );
 }

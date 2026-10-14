@@ -145,6 +145,15 @@ function formatDate(date: Date | null): string {
  * cannot drift the way the pre-migration table's badge and (nonexistent)
  * mobile line could have.
  */
+/**
+ * Uses counted in `usageCount` that belong to checkouts still in progress
+ * (e.g. a bank payment that hasn't cleared). They become final when the order
+ * is placed, or are given back if the checkout expires or the payment fails.
+ */
+function heldUsesNote(heldUses: number): string {
+  return heldUses > 0 ? ` (${heldUses} pending)` : "";
+}
+
 function statusText(row: Pick<DiscountRow, "status" | "startsAt">): string {
   switch (row.status) {
     case "active":
@@ -596,6 +605,7 @@ export function DiscountsClient({
                                 {discount.usageLimit != null
                                   ? ` / ${discount.usageLimit}`
                                   : ""}
+                                {heldUsesNote(discount.heldUses)}
                               </span>
                               <span aria-hidden="true">·</span>
                               <span>{expiresLabel}</span>
@@ -615,6 +625,7 @@ export function DiscountsClient({
                             {discount.usageLimit != null
                               ? ` / ${discount.usageLimit}`
                               : ""}
+                            {heldUsesNote(discount.heldUses)}
                           </TableCell>
 
                           <TableCell className={`hidden md:table-cell ${TD}`}>

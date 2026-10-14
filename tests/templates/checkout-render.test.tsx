@@ -1,8 +1,15 @@
+// Must stay the first import: registers the shared vi.mock calls before any
+// template module loads (see _checkout-test-setup.tsx).
+import "./_checkout-test-setup";
+
 import type { ComponentType } from "react";
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
+import type {
+  BusinessProp,
+  MerchantPoliciesProp,
+} from "./_checkout-test-setup";
 import { CartProvider } from "~/providers/cart-context";
 import { CheckoutForm as BambooCheckoutForm } from "~/app/(storefront)/_templates/bamboo/cart-checkout/bamboo-checkout-form";
 import { DarkTrendCheckoutForm } from "~/app/(storefront)/_templates/dark-trend/cart-checkout/dark-trend-checkout-form";
@@ -19,118 +26,14 @@ import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-ch
 import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
 import { UmscCheckoutForm } from "~/app/(storefront)/_templates/umsc/cart-checkout/umsc-checkout-form";
 
-// --- Shared mocks: every template form imports the same externals, so mocking
-// them here covers all ten. ---
+import {
+  business,
+  CART_KEY,
+  merchantPolicies,
+  seededItem,
+} from "./_checkout-test-setup";
 
-// tRPC react client: a recursive proxy whose hooks return inert results. Lets the
-// discount-input children (api.discount.*.useMutation/useQuery) mount.
-vi.mock("~/trpc/react", () => {
-  const hookResult = {
-    data: undefined,
-    isLoading: false,
-    isPending: false,
-    isError: false,
-    error: null,
-    mutate: () => undefined,
-    mutateAsync: async () => undefined,
-    reset: () => undefined,
-  };
-  const proxy: unknown = new Proxy(() => undefined, {
-    get(_t, prop) {
-      if (
-        prop === "useQuery" ||
-        prop === "useMutation" ||
-        prop === "useSuspenseQuery"
-      ) {
-        return () => hookResult;
-      }
-      return proxy;
-    },
-    apply: () => hookResult,
-  });
-  return { api: proxy };
-});
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: () => undefined,
-    replace: () => undefined,
-    refresh: () => undefined,
-    prefetch: () => undefined,
-    back: () => undefined,
-  }),
-  usePathname: () => "/checkout",
-  useSearchParams: () => new URLSearchParams(),
-}));
-
-vi.mock("next/image", () => ({
-  default: (props: Record<string, unknown>) => {
-    const { src, alt } = props as { src?: string; alt?: string };
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={typeof src === "string" ? src : ""} alt={alt ?? ""} />;
-  },
-}));
-
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
-}));
-
-vi.mock("sonner", () => ({
-  toast: Object.assign(() => undefined, {
-    success: () => undefined,
-    error: () => undefined,
-  }),
-}));
-
-type BusinessProp = DefaultCheckoutPageTemplateProps["business"];
-type MerchantPoliciesProp =
-  DefaultCheckoutPageTemplateProps["merchantPolicies"];
-
-// Minimal business the checkout forms read (shipping config, identity, Stripe).
-const business = {
-  id: "biz_test",
-  name: "Test Store",
-  subdomain: "teststore",
-  customDomain: null,
-  domainStatus: "NONE",
-  templateId: "default",
-  stripeAccountId: "acct_test",
-  stripeAutoTaxEnabled: false,
-  shippingType: "free",
-  shippingFlatRate: null,
-  freeShippingThreshold: null,
-  offersInStorePickup: false,
-  pickupLocation: null,
-  pickupInstructions: null,
-  businessAddress: null,
-  salesCountries: [],
-  siteContent: { logoUrl: null },
-} as unknown as BusinessProp;
-
-// No published terms-of-service/refund-policy pages in this fixture — the
-// most common real-world case (see checkout-terms-notice.tsx).
-const merchantPolicies: MerchantPoliciesProp = {
-  hasTermsOfService: false,
-  hasRefundPolicy: false,
-};
-
-const CART_KEY = "shopping-cart";
-const seededItem = {
-  productId: "p1",
-  variantId: null,
-  productName: "Widget",
-  variantName: null,
-  price: 1500,
-  quantity: 1,
-  imageUrl: null,
-  sku: null,
-};
+// Must come before the template imports: registers the shared vi.mock calls.
 
 type FormComponent = ComponentType<{
   business: BusinessProp;

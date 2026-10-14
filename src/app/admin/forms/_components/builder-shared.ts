@@ -1,7 +1,7 @@
 import type { z } from "zod";
 
-import type { FormFieldType, formCreateSchema } from "~/lib/validators/form";
-import { FORM_CHOICE_FIELD_TYPES, FORM_FIELD_TYPE_VALUES } from "~/lib/validators/form";
+import type { formCreateSchema, FormFieldType } from "~/lib/validators/form";
+import { FORM_CHOICE_FIELD_TYPES } from "~/lib/validators/form";
 
 /**
  * Shared vocabulary for the Forms builder.
@@ -22,10 +22,26 @@ export type FormDefinitionInput = FormBuilderValues["definition"];
 
 export type FieldInput = FormDefinitionInput["fields"][number];
 
-/** A field carrying an option list (select / radio / checkboxes). */
-export type OptionFieldInput = Extract<FieldInput, { options: unknown[] }>;
+/**
+ * A field carrying a plain option list (select / radio / checkboxes).
+ * `picturechoice` also has `options`, but with color/photo keys and its own
+ * editor — it is deliberately NOT part of this union (and `isOptionFieldInput`
+ * is false for it) so the generic options editor never renders for it.
+ */
+export type OptionFieldInput = Extract<
+  FieldInput,
+  { type: (typeof FORM_CHOICE_FIELD_TYPES)[number] }
+>;
 
 export type OptionInput = OptionFieldInput["options"][number];
+
+/** A picture-choice field (tiles of swatches / photos / label chips). */
+export type PictureChoiceFieldInput = Extract<
+  FieldInput,
+  { type: "picturechoice" }
+>;
+
+export type PictureOptionInput = PictureChoiceFieldInput["options"][number];
 
 export function isChoiceFieldType(
   type: FormFieldType,
@@ -39,6 +55,12 @@ export function isOptionFieldInput(
   return isChoiceFieldType(field.type);
 }
 
+export function isPictureChoiceFieldInput(
+  field: FieldInput,
+): field is PictureChoiceFieldInput {
+  return field.type === "picturechoice";
+}
+
 /** Fields whose answer feeds `settings.confirmationFieldId`. */
 export function isEmailFieldInput(
   field: FieldInput,
@@ -48,8 +70,25 @@ export function isEmailFieldInput(
 
 // ─── Field type metadata ────────────────────────────────────────────────────
 
-/** Menu order for "Add field" — matches the validator's canonical order. */
-export const FIELD_TYPE_ORDER = FORM_FIELD_TYPE_VALUES;
+/**
+ * Menu order for "Add field". Same members as the validator's
+ * `FORM_FIELD_TYPE_VALUES`, with picture choice grouped beside the other
+ * choice types.
+ */
+export const FIELD_TYPE_ORDER: readonly FormFieldType[] = [
+  "text",
+  "longtext",
+  "email",
+  "phone",
+  "number",
+  "select",
+  "radio",
+  "checkboxes",
+  "picturechoice",
+  "checkbox",
+  "date",
+  "time",
+];
 
 export const FIELD_TYPE_META: Record<
   FormFieldType,
@@ -87,6 +126,10 @@ export const FIELD_TYPE_META: Record<
     label: "Checkboxes",
     hint: "Any number of answers.",
   },
+  picturechoice: {
+    label: "Picture choice",
+    hint: "Color swatches or photos — optionally with quantities",
+  },
   checkbox: {
     label: "Single checkbox",
     hint: "A single yes/no box — the label is the statement, e.g. “I agree to…”.",
@@ -109,6 +152,10 @@ function newId(): string {
 
 export function makeOption(): OptionInput {
   return { id: newId(), label: "" };
+}
+
+export function makePictureOption(label = ""): PictureOptionInput {
+  return { id: newId(), label, color: null, imageUrl: null };
 }
 
 /**
@@ -155,6 +202,18 @@ export function makeField(type: FormFieldType): FieldInput {
         type: "checkboxes",
         options: [makeOption(), makeOption()],
       };
+    case "picturechoice":
+      return {
+        ...base,
+        type: "picturechoice",
+        options: [makePictureOption("Option 1"), makePictureOption("Option 2")],
+        selection: "one",
+        tileSize: "small",
+        showLabels: true,
+        referenceImageUrl: null,
+        minTotal: null,
+        maxTotal: null,
+      };
     case "checkbox":
       return { ...base, type: "checkbox" };
     case "date":
@@ -195,9 +254,22 @@ export function convertFieldType(
     placeholder: field.placeholder,
   };
 
-  const options = isOptionFieldInput(field)
-    ? [...field.options]
-    : [makeOption(), makeOption()];
+  // Plain options carry across select/radio/checkboxes AND to/from picture
+  // choice, ids + labels intact; color/imageUrl exist only on picture choice.
+  const options: OptionInput[] =
+    isOptionFieldInput(field) || isPictureChoiceFieldInput(field)
+      ? field.options.map((option) => ({ id: option.id, label: option.label }))
+      : [makeOption(), makeOption()];
+  const pictureOptions: PictureOptionInput[] = isPictureChoiceFieldInput(field)
+    ? field.options
+    : isOptionFieldInput(field)
+      ? field.options.map((option) => ({
+          id: option.id,
+          label: option.label,
+          color: null,
+          imageUrl: null,
+        }))
+      : [makePictureOption("Option 1"), makePictureOption("Option 2")];
 
   switch (nextType) {
     case "text":
@@ -216,6 +288,18 @@ export function convertFieldType(
       return { ...base, type: "radio", options };
     case "checkboxes":
       return { ...base, type: "checkboxes", options };
+    case "picturechoice":
+      return {
+        ...base,
+        type: "picturechoice",
+        options: pictureOptions,
+        selection: "one",
+        tileSize: "small",
+        showLabels: true,
+        referenceImageUrl: null,
+        minTotal: null,
+        maxTotal: null,
+      };
     case "checkbox":
       return { ...base, type: "checkbox" };
     case "date":
@@ -233,6 +317,8 @@ export function convertFieldType(
  */
 export type FieldTypeChangeImpact = {
   optionsDiscarded: boolean;
+  /** Leaving picture choice for a choice type drops tile colors and photos. */
+  picturesDiscarded: boolean;
   /** This field is the form's confirmation-email target and the new type isn't email. */
   wasConfirmationTarget: boolean;
 };
@@ -242,8 +328,14 @@ export function describeFieldTypeChangeImpact(
   nextType: FormFieldType,
   confirmationFieldId: string | null | undefined,
 ): FieldTypeChangeImpact {
+  const hasOptions =
+    isOptionFieldInput(field) || isPictureChoiceFieldInput(field);
+  const keepsOptions =
+    isChoiceFieldType(nextType) || nextType === "picturechoice";
   return {
-    optionsDiscarded: isOptionFieldInput(field) && !isChoiceFieldType(nextType),
+    optionsDiscarded: hasOptions && !keepsOptions,
+    picturesDiscarded:
+      isPictureChoiceFieldInput(field) && isChoiceFieldType(nextType),
     wasConfirmationTarget:
       confirmationFieldId === field.id && nextType !== "email",
   };
@@ -285,6 +377,22 @@ export function normalizeBuilderDefinition(
         description: field.description ?? "",
         placeholder: field.placeholder ?? "",
       };
+      if (withBase.type === "picturechoice") {
+        return {
+          ...withBase,
+          options: withBase.options.map((option) => ({
+            ...option,
+            color: option.color ?? null,
+            imageUrl: option.imageUrl ?? null,
+          })),
+          selection: withBase.selection ?? "one",
+          tileSize: withBase.tileSize ?? "small",
+          showLabels: withBase.showLabels ?? true,
+          referenceImageUrl: withBase.referenceImageUrl ?? null,
+          minTotal: withBase.minTotal ?? null,
+          maxTotal: withBase.maxTotal ?? null,
+        };
+      }
       if (withBase.type === "number") {
         return {
           ...withBase,

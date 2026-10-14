@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Package, ReceiptText } from "lucide-react";
 
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatDate } from "~/lib/format-date";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
@@ -18,6 +19,7 @@ import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
 import { MarkReadyForPickup } from "../_components/mark-ready-for-pickup";
+import { OrderItemOptions } from "../_components/order-item-options";
 import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
 import { RefundHandler } from "../_components/refund-handler";
@@ -46,6 +48,7 @@ export default async function OrderDetailPage({ params }: Props) {
   }
 
   const isStaffViewer = membershipRole === "STAFF";
+  const pickupLocation = resolvePickupLocation(business);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -62,14 +65,34 @@ export default async function OrderDetailPage({ params }: Props) {
     }
   };
 
+  const capitalize = (value: string) =>
+    value.charAt(0).toUpperCase() + value.slice(1);
+
+  const paymentStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Pending";
+      case "paid":
+        return "Paid";
+      case "failed":
+        return "Failed";
+      case "refunded":
+        return "Refunded";
+      default:
+        return capitalize(status);
+    }
+  };
+
   const fulfillmentLabel = (status: string) => {
     switch (status) {
-      case "fulfilled":
-        return "fulfilled";
+      case "unfulfilled":
+        return "Unfulfilled";
       case "partially_fulfilled":
-        return "partially fulfilled";
+        return "Partially fulfilled";
+      case "fulfilled":
+        return "Fulfilled";
       default:
-        return "unfulfilled";
+        return capitalize(status);
     }
   };
 
@@ -94,7 +117,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <TrailHeader
         breadcrumbs={[
           { label: "Orders", href: "/admin/orders" },
-          { label: `Order #${order.id.slice(0, 8)}` },
+          { label: `Order #${order.orderNumber}` },
         ]}
       />
 
@@ -109,7 +132,7 @@ export default async function OrderDetailPage({ params }: Props) {
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <h1 className="text-base font-medium">
-              Order #{order.id.slice(0, 8)}
+              Order #{order.orderNumber}
             </h1>
 
             <Badge variant="outline">{formatDate(order.createdAt)}</Badge>
@@ -121,7 +144,7 @@ export default async function OrderDetailPage({ params }: Props) {
             <Badge
               variant={order.paymentStatus === "paid" ? "default" : "secondary"}
             >
-              Payment: {order.paymentStatus}
+              Payment: {paymentStatusLabel(order.paymentStatus)}
             </Badge>
 
             <Badge
@@ -165,7 +188,7 @@ export default async function OrderDetailPage({ params }: Props) {
               <span className="ml-2 hidden sm:inline">Invoice</span>
             </Link>
           </Button>
-          <OrderMoreOptions order={order} />
+          <OrderMoreOptions order={order} canManage={!isStaffViewer} />
         </div>
       </div>
 
@@ -195,6 +218,9 @@ export default async function OrderDetailPage({ params }: Props) {
                               {item.variantName}
                             </p>
                           )}
+                          <OrderItemOptions
+                            customization={item.customization}
+                          />
                           {item.sku && (
                             <p className="text-muted-foreground mt-1 text-xs">
                               SKU: {item.sku}
@@ -345,7 +371,9 @@ export default async function OrderDetailPage({ params }: Props) {
                     variantName: item.variantName,
                     quantity: item.quantity,
                     fulfilledQuantity: item.fulfilledQuantity,
+                    customization: item.customization,
                   }))}
+                  shippingAddress={order.shippingAddress ?? null}
                 />
               )
             )}
@@ -391,6 +419,7 @@ export default async function OrderDetailPage({ params }: Props) {
                         id: item.id,
                         productName: item.productName,
                         variantName: item.variantName,
+                        customization: item.customization,
                       }))}
                       canAddTracking={order.fulfillmentStatus === "fulfilled"}
                     />
@@ -430,9 +459,9 @@ export default async function OrderDetailPage({ params }: Props) {
                   <CardTitle>Pickup Location</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {(business?.pickupLocation ?? business?.businessAddress) ? (
+                  {pickupLocation ? (
                     <p className="text-foreground text-sm font-medium">
-                      {business?.pickupLocation ?? business?.businessAddress}
+                      {pickupLocation}
                     </p>
                   ) : (
                     <p className="text-muted-foreground text-sm">
@@ -454,14 +483,17 @@ export default async function OrderDetailPage({ params }: Props) {
                     {order.shippingAddress && (
                       <CopyAddressButton address={order.shippingAddress} />
                     )}
-                    <EditShippingAddressDialog
-                      orderId={order.id}
-                      address={order.shippingAddress ?? null}
-                      canAdd={!!order.customerId}
-                      allowedCountries={getAllowedCountries(
-                        business?.salesCountries ?? [],
-                      )}
-                    />
+                    {/* `order.updateShippingAddress` is ownerAdmin-tier. */}
+                    {!isStaffViewer && (
+                      <EditShippingAddressDialog
+                        orderId={order.id}
+                        address={order.shippingAddress ?? null}
+                        canAdd={!!order.customerId}
+                        allowedCountries={getAllowedCountries(
+                          business?.salesCountries ?? [],
+                        )}
+                      />
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -561,7 +593,8 @@ export default async function OrderDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const order = await api.order.getById(id);
+  if (!order) return { title: "Order" };
   return {
-    title: `Order #${order?.id.slice(0, 8)}`,
+    title: `Order #${order.orderNumber}`,
   };
 }

@@ -37,6 +37,7 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import { StripeConnectReturnToast } from "~/app/admin/_components/payment/stripe-connect-return-toast";
 import {
   buildStripeConnectAuthorizeUrl,
   requestSignedStripeOAuthState,
@@ -171,6 +172,7 @@ export function StripeSettings({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <StripeConnectReturnToast />
         {stripeAccountId ? (
           <>
             <div>
@@ -278,9 +280,9 @@ export function StripeSettings({
                   <p className="text-muted-foreground text-sm">
                     Automatically calculate and collect sales tax at checkout
                     via Stripe Tax, based on the customer&apos;s address.
-                    Requires an active Stripe Tax registration on your connected
-                    account — enable it in your Stripe dashboard first, or this
-                    toggle will reject the change and tell you why.{" "}
+                    Requires Stripe Tax to be set up on your connected account
+                    with your head office address. Tax is only collected in
+                    places where you&apos;ve added a registration in Stripe.{" "}
                     <Link
                       href="/admin/finances/tax-guide"
                       className="underline underline-offset-2"
@@ -316,9 +318,9 @@ export function StripeSettings({
               {autoTaxEnabled && !taxError && (
                 <Alert className="mt-3">
                   <AlertDescription className="text-sm">
-                    Stripe will collect sales tax only in states where you have
-                    active tax registrations. Customers in other states will not
-                    be charged tax.{" "}
+                    Stripe will collect sales tax only in states where
+                    you&apos;ve added a registration. Customers in other states
+                    won&apos;t be charged tax.{" "}
                     <a
                       href="https://dashboard.stripe.com/tax/registrations"
                       target="_blank"

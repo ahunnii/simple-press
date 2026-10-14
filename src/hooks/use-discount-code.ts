@@ -11,6 +11,8 @@ type UseDiscountCodeReturn = {
   setDiscountCodeInput: (val: string) => void;
   discountCodeId: string | null;
   discountAmount: number;
+  /** True when the applied code is a free-shipping code (amount is 0 until shipping is known). */
+  discountFreeShipping: boolean;
   discountCodeLabel: string | null;
   discountFieldError: string | null;
   setDiscountFieldError: (val: string | null) => void;
@@ -25,6 +27,7 @@ export function useDiscountCode(): UseDiscountCodeReturn {
   const [discountCodeInput, setDiscountCodeInput] = useState("");
   const [discountCodeId, setDiscountCodeId] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountFreeShipping, setDiscountFreeShipping] = useState(false);
   const [discountCodeLabel, setDiscountCodeLabel] = useState<string | null>(
     null,
   );
@@ -36,12 +39,14 @@ export function useDiscountCode(): UseDiscountCodeReturn {
     onSuccess: (data) => {
       setDiscountCodeId(data.discount.id);
       setDiscountAmount(data.discount.discountAmount);
+      setDiscountFreeShipping(data.discount.freeShipping);
       setDiscountCodeLabel(data.discount.code);
       setDiscountFieldError(null);
     },
     onError: (err) => {
       setDiscountCodeId(null);
       setDiscountAmount(0);
+      setDiscountFreeShipping(false);
       setDiscountCodeLabel(null);
       setDiscountFieldError(err.message ?? "Invalid code");
     },
@@ -66,6 +71,7 @@ export function useDiscountCode(): UseDiscountCodeReturn {
     setDiscountCodeInput("");
     setDiscountCodeId(null);
     setDiscountAmount(0);
+    setDiscountFreeShipping(false);
     setDiscountCodeLabel(null);
     setDiscountFieldError(null);
     // Deliberately keyed only on `subtotal` — `discountCodeId` is read from
@@ -92,6 +98,7 @@ export function useDiscountCode(): UseDiscountCodeReturn {
     setDiscountCodeInput("");
     setDiscountCodeId(null);
     setDiscountAmount(0);
+    setDiscountFreeShipping(false);
     setDiscountCodeLabel(null);
     setDiscountFieldError(null);
   }
@@ -101,6 +108,7 @@ export function useDiscountCode(): UseDiscountCodeReturn {
     setDiscountCodeInput,
     discountCodeId,
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     setDiscountFieldError,

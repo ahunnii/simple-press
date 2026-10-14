@@ -166,7 +166,10 @@ export function ImportEntriesDialog({ formId, trigger }: Props) {
                 value={preview.errorCount}
                 tone={preview.errorCount > 0 ? "destructive" : undefined}
               />
-              <SummaryStat label="Empty skipped" value={preview.skippedEmptyRows} />
+              <SummaryStat
+                label="Empty skipped"
+                value={preview.skippedEmptyRows}
+              />
             </div>
 
             <div className="space-y-1 text-sm">
@@ -178,7 +181,7 @@ export function ImportEntriesDialog({ formId, trigger }: Props) {
               </p>
               {preview.missingFields.length > 0 && (
                 <p className="text-muted-foreground">
-                  <span className="font-medium text-foreground">
+                  <span className="text-foreground font-medium">
                     Fields with no matching column:
                   </span>{" "}
                   {preview.missingFields.join(", ")}
@@ -186,7 +189,7 @@ export function ImportEntriesDialog({ formId, trigger }: Props) {
               )}
               {preview.ignoredColumns.length > 0 && (
                 <p className="text-muted-foreground">
-                  <span className="font-medium text-foreground">
+                  <span className="text-foreground font-medium">
                     Ignored columns:
                   </span>{" "}
                   {preview.ignoredColumns.join(", ")}
@@ -212,9 +215,7 @@ export function ImportEntriesDialog({ formId, trigger }: Props) {
                       </div>
                     ))}
                     {preview.errorCount > 5 && (
-                      <p className="mt-1">
-                        …and {preview.errorCount - 5} more
-                      </p>
+                      <p className="mt-1">…and {preview.errorCount - 5} more</p>
                     )}
                   </div>
                 </AlertDescription>

@@ -15,12 +15,15 @@ export default function FinancesLoading() {
         <span className="sr-only">Loading finances…</span>
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1.5">
             <Skeleton className="h-7 w-32" />
             <Skeleton className="h-4 w-72" />
           </div>
-          <Skeleton className="h-9 w-40" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-28" />
+            <Skeleton className="h-9 w-40" />
+          </div>
         </div>
 
         {/* Money in card */}

@@ -4,6 +4,10 @@ import type {
   SubscriptionIntervalKey,
   SubscriptionStripeInterval,
 } from "./intervals";
+import {
+  PENDING_COOKIE_MARKER_KEY,
+  PENDING_COOKIE_MARKER_VALUE,
+} from "~/lib/checkout/pending-session-cookie";
 import { stripeClient } from "~/lib/stripe/client";
 import { formatCurrency } from "~/lib/utils";
 
@@ -215,6 +219,9 @@ export function buildSubscriptionCheckoutParams(
       businessId: business.id,
       subscriptionId: sub.id,
       kind: "subscription",
+      // Tells /subscribe/success this session's owner holds a SIGNED
+      // pending_subscription_session cookie (no legacy bare-cookie fallback).
+      [PENDING_COOKIE_MARKER_KEY]: PENDING_COOKIE_MARKER_VALUE,
     },
     success_url: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
     // Back to the same form, pre-filled with the same choices.

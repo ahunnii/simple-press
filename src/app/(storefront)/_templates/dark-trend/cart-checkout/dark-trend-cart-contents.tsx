@@ -9,7 +9,8 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { resolveFields } from "..";
 
@@ -25,14 +26,7 @@ type Props = {
 
 export function DarkTrendCartContents({ business }: Props) {
   const router = useRouter();
-  const {
-    items,
-    incrementItem,
-    decrementItem,
-    removeItem,
-    updateQuantity,
-    total,
-  } = useCart();
+  const { items, removeLine, updateLineQuantity, total } = useCart();
 
   // S-6: live region for cart mutation announcements
   const [announcement, setAnnouncement] = useState("");
@@ -68,10 +62,7 @@ export function DarkTrendCartContents({ business }: Props) {
     const emptyButton = (f["dark-trend.cart.empty-button"] ?? "").trim();
 
     return (
-      <div
-        {...sectionGroupAttr("cart", "empty")}
-        className="py-16 text-center"
-      >
+      <div {...sectionGroupAttr("cart", "empty")} className="py-16 text-center">
         {/* N-1: decorative icon */}
         <ShoppingBag
           aria-hidden="true"
@@ -130,145 +121,158 @@ export function DarkTrendCartContents({ business }: Props) {
         </div>
 
         {/* Cart Items */}
-        {items.map((item) => (
-          <div
-            key={`${item.productId}-${item.variantId}`}
-            className="grid grid-cols-1 gap-4 border-b border-white/10 pb-6 lg:grid-cols-[2fr_1fr_1fr] lg:items-center"
-          >
-            {/* Product Info */}
-            <div className="flex gap-4">
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-zinc-900">
-                {item.imageUrl ? (
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.productName}
-                    width={96}
-                    height={96}
-                    className="h-full w-full object-cover"
+        {items.map((item) => {
+          // Line-id APIs: each configured build is its own line.
+          const lineId = cartItemId(item);
+          return (
+            <div
+              key={lineId}
+              className="grid grid-cols-1 gap-4 border-b border-white/10 pb-6 lg:grid-cols-[2fr_1fr_1fr] lg:items-center"
+            >
+              {/* Product Info */}
+              <div className="flex gap-4">
+                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-sm bg-zinc-900">
+                  {item.imageUrl ? (
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      width={96}
+                      height={96}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-white/40">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-white">
+                    {item.productName}
+                  </h3>
+                  {item.variantName && (
+                    <p className="text-sm text-white/70">
+                      <span className="text-white/50">Size:</span>{" "}
+                      {item.variantName}
+                    </p>
+                  )}
+                  <CartLineOptions
+                    item={item}
+                    className="mt-1 text-sm text-white/70"
+                    classNames={{ label: "text-white/50" }}
                   />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-white/40">
-                    No image
-                  </div>
-                )}
+                  {item.sku && (
+                    <p className="text-sm text-white/70">
+                      <span className="text-white/50">SKU:</span> {item.sku}
+                    </p>
+                  )}
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {formatPrice(item.price)}
+                  </p>
+
+                  {/* Remove button - mobile (M-9 touch target: h-10 w-10 via size) */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      removeLine(lineId);
+                      announce(`Removed ${item.productName} from cart`);
+                    }}
+                    aria-label={`Remove ${item.productName} from cart`}
+                    className="mt-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:hidden"
+                  >
+                    {/* N-1: decorative icon */}
+                    <Trash2 aria-hidden="true" className="mr-1 h-4 w-4" />
+                    Remove
+                  </Button>
+                </div>
               </div>
 
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-white">{item.productName}</h3>
-                {item.variantName && (
-                  <p className="text-sm text-white/70">
-                    <span className="text-white/50">Size:</span>{" "}
-                    {item.variantName}
-                  </p>
-                )}
-                {item.sku && (
-                  <p className="text-sm text-white/70">
-                    <span className="text-white/50">SKU:</span> {item.sku}
-                  </p>
-                )}
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {formatPrice(item.price)}
-                </p>
+              {/* Quantity Controls */}
+              <div className="flex items-center gap-2">
+                <span className="mr-2 text-sm text-white/70 lg:hidden">
+                  Quantity:
+                </span>
+                <div className="inline-flex items-center gap-2 rounded-md bg-zinc-900/50 px-2 py-1">
+                  {/* C-3 + M-9: labelled, 40px touch target */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      updateLineQuantity(lineId, item.quantity - 1);
+                      const newQty = Math.max(1, item.quantity - 1);
+                      announce(`Quantity updated to ${newQty}`);
+                    }}
+                    aria-label={`Decrease quantity of ${item.productName}`}
+                    className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                  >
+                    {/* N-1: decorative icon */}
+                    <Minus aria-hidden="true" className="h-4 w-4" />
+                  </Button>
 
-                {/* Remove button - mobile (M-9 touch target: h-10 w-10 via size) */}
+                  {/* C-3: labelled quantity input */}
+                  <Input
+                    type="number"
+                    min="1"
+                    max={item.maxInventory ?? 999}
+                    value={item.quantity}
+                    aria-label={`Quantity for ${item.productName}`}
+                    onChange={(e) => {
+                      const qty = parseInt(e.target.value);
+                      if (!isNaN(qty)) {
+                        updateLineQuantity(lineId, qty);
+                        announce(`Quantity updated to ${qty}`);
+                      }
+                    }}
+                    className="h-8 w-14 border-none bg-transparent text-center text-white"
+                  />
+
+                  {/* C-3 + M-9: labelled, 40px touch target */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      updateLineQuantity(lineId, item.quantity + 1);
+                      const newQty = item.quantity + 1;
+                      announce(`Quantity updated to ${newQty}`);
+                    }}
+                    aria-label={`Increase quantity of ${item.productName}`}
+                    className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
+                  >
+                    {/* N-1: decorative icon */}
+                    <Plus aria-hidden="true" className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Remove button - desktop (C-3) */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    removeItem(item.productId, item.variantId);
+                    removeLine(lineId);
                     announce(`Removed ${item.productName} from cart`);
                   }}
                   aria-label={`Remove ${item.productName} from cart`}
-                  className="mt-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:hidden"
+                  className="ml-2 hidden text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:inline-flex"
                 >
                   {/* N-1: decorative icon */}
-                  <Trash2 aria-hidden="true" className="mr-1 h-4 w-4" />
-                  Remove
-                </Button>
-              </div>
-            </div>
-
-            {/* Quantity Controls */}
-            <div className="flex items-center gap-2">
-              <span className="mr-2 text-sm text-white/70 lg:hidden">
-                Quantity:
-              </span>
-              <div className="inline-flex items-center gap-2 rounded-md bg-zinc-900/50 px-2 py-1">
-                {/* C-3 + M-9: labelled, 40px touch target */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    decrementItem(item.productId, item.variantId);
-                    const newQty = Math.max(1, item.quantity - 1);
-                    announce(`Quantity updated to ${newQty}`);
-                  }}
-                  aria-label={`Decrease quantity of ${item.productName}`}
-                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
-                >
-                  {/* N-1: decorative icon */}
-                  <Minus aria-hidden="true" className="h-4 w-4" />
-                </Button>
-
-                {/* C-3: labelled quantity input */}
-                <Input
-                  type="number"
-                  min="1"
-                  max={item.maxInventory ?? 999}
-                  value={item.quantity}
-                  aria-label={`Quantity for ${item.productName}`}
-                  onChange={(e) => {
-                    const qty = parseInt(e.target.value);
-                    if (!isNaN(qty)) {
-                      updateQuantity(item.productId, item.variantId, qty);
-                      announce(`Quantity updated to ${qty}`);
-                    }
-                  }}
-                  className="h-8 w-14 border-none bg-transparent text-center text-white"
-                />
-
-                {/* C-3 + M-9: labelled, 40px touch target */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    incrementItem(item.productId, item.variantId);
-                    const newQty = item.quantity + 1;
-                    announce(`Quantity updated to ${newQty}`);
-                  }}
-                  aria-label={`Increase quantity of ${item.productName}`}
-                  className="h-10 w-10 rounded-sm bg-zinc-800 p-0 text-white/60 hover:bg-zinc-700 hover:text-white"
-                >
-                  {/* N-1: decorative icon */}
-                  <Plus aria-hidden="true" className="h-4 w-4" />
+                  <Trash2 aria-hidden="true" className="h-4 w-4" />
                 </Button>
               </div>
 
-              {/* Remove button - desktop (C-3) */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  removeItem(item.productId, item.variantId);
-                  announce(`Removed ${item.productName} from cart`);
-                }}
-                aria-label={`Remove ${item.productName} from cart`}
-                className="ml-2 hidden text-red-400 hover:bg-red-500/10 hover:text-red-300 lg:inline-flex"
-              >
-                {/* N-1: decorative icon */}
-                <Trash2 aria-hidden="true" className="h-4 w-4" />
-              </Button>
+              {/* Subtotal */}
+              <div className="flex items-center justify-between lg:justify-start">
+                <span className="text-sm text-white/70 lg:hidden">
+                  Subtotal:
+                </span>
+                <p className="text-lg font-semibold text-white">
+                  {formatPrice(item.price * item.quantity)}
+                </p>
+              </div>
             </div>
-
-            {/* Subtotal */}
-            <div className="flex items-center justify-between lg:justify-start">
-              <span className="text-sm text-white/70 lg:hidden">Subtotal:</span>
-              <p className="text-lg font-semibold text-white">
-                {formatPrice(item.price * item.quantity)}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Cart Totals */}

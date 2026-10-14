@@ -64,6 +64,21 @@ export type Product = $Result.DefaultSelection<Prisma.$ProductPayload>
  */
 export type ProductVariant = $Result.DefaultSelection<Prisma.$ProductVariantPayload>
 /**
+ * Model ProductOptionGroup
+ * 
+ */
+export type ProductOptionGroup = $Result.DefaultSelection<Prisma.$ProductOptionGroupPayload>
+/**
+ * Model ProductOptionGroupOnProduct
+ * 
+ */
+export type ProductOptionGroupOnProduct = $Result.DefaultSelection<Prisma.$ProductOptionGroupOnProductPayload>
+/**
+ * Model ProductOptionValue
+ * 
+ */
+export type ProductOptionValue = $Result.DefaultSelection<Prisma.$ProductOptionValuePayload>
+/**
  * Model Collection
  * 
  */
@@ -676,6 +691,36 @@ export class PrismaClient<
     * ```
     */
   get productVariant(): Prisma.ProductVariantDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.productOptionGroup`: Exposes CRUD operations for the **ProductOptionGroup** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProductOptionGroups
+    * const productOptionGroups = await prisma.productOptionGroup.findMany()
+    * ```
+    */
+  get productOptionGroup(): Prisma.ProductOptionGroupDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.productOptionGroupOnProduct`: Exposes CRUD operations for the **ProductOptionGroupOnProduct** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProductOptionGroupOnProducts
+    * const productOptionGroupOnProducts = await prisma.productOptionGroupOnProduct.findMany()
+    * ```
+    */
+  get productOptionGroupOnProduct(): Prisma.ProductOptionGroupOnProductDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.productOptionValue`: Exposes CRUD operations for the **ProductOptionValue** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProductOptionValues
+    * const productOptionValues = await prisma.productOptionValue.findMany()
+    * ```
+    */
+  get productOptionValue(): Prisma.ProductOptionValueDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.collection`: Exposes CRUD operations for the **Collection** model.
@@ -1627,6 +1672,9 @@ export namespace Prisma {
     FaqItem: 'FaqItem',
     Product: 'Product',
     ProductVariant: 'ProductVariant',
+    ProductOptionGroup: 'ProductOptionGroup',
+    ProductOptionGroupOnProduct: 'ProductOptionGroupOnProduct',
+    ProductOptionValue: 'ProductOptionValue',
     Collection: 'Collection',
     CollectionProduct: 'CollectionProduct',
     Service: 'Service',
@@ -1695,7 +1743,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2436,6 +2484,228 @@ export namespace Prisma {
           count: {
             args: Prisma.ProductVariantCountArgs<ExtArgs>
             result: $Utils.Optional<ProductVariantCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProductOptionGroup: {
+        payload: Prisma.$ProductOptionGroupPayload<ExtArgs>
+        fields: Prisma.ProductOptionGroupFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProductOptionGroupFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProductOptionGroupFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          findFirst: {
+            args: Prisma.ProductOptionGroupFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProductOptionGroupFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          findMany: {
+            args: Prisma.ProductOptionGroupFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>[]
+          }
+          create: {
+            args: Prisma.ProductOptionGroupCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          createMany: {
+            args: Prisma.ProductOptionGroupCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProductOptionGroupCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>[]
+          }
+          delete: {
+            args: Prisma.ProductOptionGroupDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          update: {
+            args: Prisma.ProductOptionGroupUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProductOptionGroupDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProductOptionGroupUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProductOptionGroupUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProductOptionGroupUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupPayload>
+          }
+          aggregate: {
+            args: Prisma.ProductOptionGroupAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProductOptionGroup>
+          }
+          groupBy: {
+            args: Prisma.ProductOptionGroupGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionGroupGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProductOptionGroupCountArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionGroupCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProductOptionGroupOnProduct: {
+        payload: Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>
+        fields: Prisma.ProductOptionGroupOnProductFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProductOptionGroupOnProductFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProductOptionGroupOnProductFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          findFirst: {
+            args: Prisma.ProductOptionGroupOnProductFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProductOptionGroupOnProductFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          findMany: {
+            args: Prisma.ProductOptionGroupOnProductFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>[]
+          }
+          create: {
+            args: Prisma.ProductOptionGroupOnProductCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          createMany: {
+            args: Prisma.ProductOptionGroupOnProductCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProductOptionGroupOnProductCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>[]
+          }
+          delete: {
+            args: Prisma.ProductOptionGroupOnProductDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          update: {
+            args: Prisma.ProductOptionGroupOnProductUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProductOptionGroupOnProductDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProductOptionGroupOnProductUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProductOptionGroupOnProductUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProductOptionGroupOnProductUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionGroupOnProductPayload>
+          }
+          aggregate: {
+            args: Prisma.ProductOptionGroupOnProductAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProductOptionGroupOnProduct>
+          }
+          groupBy: {
+            args: Prisma.ProductOptionGroupOnProductGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionGroupOnProductGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProductOptionGroupOnProductCountArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionGroupOnProductCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProductOptionValue: {
+        payload: Prisma.$ProductOptionValuePayload<ExtArgs>
+        fields: Prisma.ProductOptionValueFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProductOptionValueFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProductOptionValueFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          findFirst: {
+            args: Prisma.ProductOptionValueFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProductOptionValueFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          findMany: {
+            args: Prisma.ProductOptionValueFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>[]
+          }
+          create: {
+            args: Prisma.ProductOptionValueCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          createMany: {
+            args: Prisma.ProductOptionValueCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProductOptionValueCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>[]
+          }
+          delete: {
+            args: Prisma.ProductOptionValueDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          update: {
+            args: Prisma.ProductOptionValueUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          deleteMany: {
+            args: Prisma.ProductOptionValueDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProductOptionValueUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProductOptionValueUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>[]
+          }
+          upsert: {
+            args: Prisma.ProductOptionValueUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProductOptionValuePayload>
+          }
+          aggregate: {
+            args: Prisma.ProductOptionValueAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProductOptionValue>
+          }
+          groupBy: {
+            args: Prisma.ProductOptionValueGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionValueGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProductOptionValueCountArgs<ExtArgs>
+            result: $Utils.Optional<ProductOptionValueCountAggregateOutputType> | number
           }
         }
       }
@@ -6245,6 +6515,9 @@ export namespace Prisma {
     faqItem?: FaqItemOmit
     product?: ProductOmit
     productVariant?: ProductVariantOmit
+    productOptionGroup?: ProductOptionGroupOmit
+    productOptionGroupOnProduct?: ProductOptionGroupOnProductOmit
+    productOptionValue?: ProductOptionValueOmit
     collection?: CollectionOmit
     collectionProduct?: CollectionProductOmit
     service?: ServiceOmit
@@ -6506,6 +6779,7 @@ export namespace Prisma {
     subscriptions: number
     donations: number
     loyaltyLedger: number
+    productOptionGroups: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6546,6 +6820,7 @@ export namespace Prisma {
     subscriptions?: boolean | BusinessCountOutputTypeCountSubscriptionsArgs
     donations?: boolean | BusinessCountOutputTypeCountDonationsArgs
     loyaltyLedger?: boolean | BusinessCountOutputTypeCountLoyaltyLedgerArgs
+    productOptionGroups?: boolean | BusinessCountOutputTypeCountProductOptionGroupsArgs
   }
 
   // Custom InputTypes
@@ -6818,6 +7093,13 @@ export namespace Prisma {
     where?: LoyaltyLedgerWhereInput
   }
 
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountProductOptionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionGroupWhereInput
+  }
+
 
   /**
    * Count Type ProductCountOutputType
@@ -6831,6 +7113,8 @@ export namespace Prisma {
     inventoryHistory: number
     backInStockRequests: number
     subscriptions: number
+    optionGroups: number
+    linkedOptionValues: number
     reviews: number
   }
 
@@ -6842,6 +7126,8 @@ export namespace Prisma {
     inventoryHistory?: boolean | ProductCountOutputTypeCountInventoryHistoryArgs
     backInStockRequests?: boolean | ProductCountOutputTypeCountBackInStockRequestsArgs
     subscriptions?: boolean | ProductCountOutputTypeCountSubscriptionsArgs
+    optionGroups?: boolean | ProductCountOutputTypeCountOptionGroupsArgs
+    linkedOptionValues?: boolean | ProductCountOutputTypeCountLinkedOptionValuesArgs
     reviews?: boolean | ProductCountOutputTypeCountReviewsArgs
   }
 
@@ -6908,6 +7194,20 @@ export namespace Prisma {
   /**
    * ProductCountOutputType without action
    */
+  export type ProductCountOutputTypeCountOptionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionGroupOnProductWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
+  export type ProductCountOutputTypeCountLinkedOptionValuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionValueWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
   export type ProductCountOutputTypeCountReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProductReviewWhereInput
   }
@@ -6921,12 +7221,14 @@ export namespace Prisma {
     inventoryHistory: number
     orderItems: number
     subscriptions: number
+    linkedOptionValues: number
   }
 
   export type ProductVariantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventoryHistory?: boolean | ProductVariantCountOutputTypeCountInventoryHistoryArgs
     orderItems?: boolean | ProductVariantCountOutputTypeCountOrderItemsArgs
     subscriptions?: boolean | ProductVariantCountOutputTypeCountSubscriptionsArgs
+    linkedOptionValues?: boolean | ProductVariantCountOutputTypeCountLinkedOptionValuesArgs
   }
 
   // Custom InputTypes
@@ -6959,6 +7261,53 @@ export namespace Prisma {
    */
   export type ProductVariantCountOutputTypeCountSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SubscriptionWhereInput
+  }
+
+  /**
+   * ProductVariantCountOutputType without action
+   */
+  export type ProductVariantCountOutputTypeCountLinkedOptionValuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionValueWhereInput
+  }
+
+
+  /**
+   * Count Type ProductOptionGroupCountOutputType
+   */
+
+  export type ProductOptionGroupCountOutputType = {
+    values: number
+    products: number
+  }
+
+  export type ProductOptionGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    values?: boolean | ProductOptionGroupCountOutputTypeCountValuesArgs
+    products?: boolean | ProductOptionGroupCountOutputTypeCountProductsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ProductOptionGroupCountOutputType without action
+   */
+  export type ProductOptionGroupCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupCountOutputType
+     */
+    select?: ProductOptionGroupCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionGroupCountOutputType without action
+   */
+  export type ProductOptionGroupCountOutputTypeCountValuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionValueWhereInput
+  }
+
+  /**
+   * ProductOptionGroupCountOutputType without action
+   */
+  export type ProductOptionGroupCountOutputTypeCountProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionGroupOnProductWhereInput
   }
 
 
@@ -9037,6 +9386,7 @@ export namespace Prisma {
     role: number
     merchantTermsAcceptedAt: number
     merchantTermsVersion: number
+    dashboardLayout: number
     _all: number
   }
 
@@ -9069,6 +9419,7 @@ export namespace Prisma {
     role?: true
     merchantTermsAcceptedAt?: true
     merchantTermsVersion?: true
+    dashboardLayout?: true
     _all?: true
   }
 
@@ -9152,6 +9503,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt: Date | null
     merchantTermsVersion: string | null
+    dashboardLayout: JsonValue | null
     _count: BusinessMembershipCountAggregateOutputType | null
     _min: BusinessMembershipMinAggregateOutputType | null
     _max: BusinessMembershipMaxAggregateOutputType | null
@@ -9179,6 +9531,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9191,6 +9544,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9203,6 +9557,7 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -9215,9 +9570,10 @@ export namespace Prisma {
     role?: boolean
     merchantTermsAcceptedAt?: boolean
     merchantTermsVersion?: boolean
+    dashboardLayout?: boolean
   }
 
-  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion", ExtArgs["result"]["businessMembership"]>
+  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion" | "dashboardLayout", ExtArgs["result"]["businessMembership"]>
   export type BusinessMembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -9245,6 +9601,7 @@ export namespace Prisma {
       role: $Enums.BusinessRole
       merchantTermsAcceptedAt: Date | null
       merchantTermsVersion: string | null
+      dashboardLayout: Prisma.JsonValue | null
     }, ExtArgs["result"]["businessMembership"]>
     composites: {}
   }
@@ -9677,6 +10034,7 @@ export namespace Prisma {
     readonly role: FieldRef<"BusinessMembership", 'BusinessRole'>
     readonly merchantTermsAcceptedAt: FieldRef<"BusinessMembership", 'DateTime'>
     readonly merchantTermsVersion: FieldRef<"BusinessMembership", 'String'>
+    readonly dashboardLayout: FieldRef<"BusinessMembership", 'Json'>
   }
     
 
@@ -13492,6 +13850,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    businessType: string | null
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean | null
     localPresence: string | null
     allowAiCrawlers: boolean | null
@@ -13562,6 +13922,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    businessType: string | null
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean | null
     localPresence: string | null
     allowAiCrawlers: boolean | null
@@ -13634,6 +13996,10 @@ export namespace Prisma {
     umamiEnabled: number
     status: number
     onboardingComplete: number
+    businessType: number
+    setupSteps: number
+    setupConfirmations: number
+    setupCompletedAt: number
     localBusinessEnabled: number
     localPresence: number
     areaServed: number
@@ -13742,6 +14108,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     allowAiCrawlers?: true
@@ -13812,6 +14180,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     allowAiCrawlers?: true
@@ -13884,6 +14254,10 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    businessType?: true
+    setupSteps?: true
+    setupConfirmations?: true
+    setupCompletedAt?: true
     localBusinessEnabled?: true
     localPresence?: true
     areaServed?: true
@@ -14049,6 +14423,10 @@ export namespace Prisma {
     umamiEnabled: boolean
     status: string
     onboardingComplete: boolean
+    businessType: string | null
+    setupSteps: JsonValue | null
+    setupConfirmations: JsonValue
+    setupCompletedAt: Date | null
     localBusinessEnabled: boolean
     localPresence: string
     areaServed: string[]
@@ -14146,6 +14524,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14221,6 +14603,7 @@ export namespace Prisma {
     donations?: boolean | Business$donationsArgs<ExtArgs>
     loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
     loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
+    productOptionGroups?: boolean | Business$productOptionGroupsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -14266,6 +14649,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14344,6 +14731,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14422,6 +14813,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    businessType?: boolean
+    setupSteps?: boolean
+    setupConfirmations?: boolean
+    setupCompletedAt?: boolean
     localBusinessEnabled?: boolean
     localPresence?: boolean
     areaServed?: boolean
@@ -14458,7 +14853,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "businessType" | "setupSteps" | "setupConfirmations" | "setupCompletedAt" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -14501,6 +14896,7 @@ export namespace Prisma {
     donations?: boolean | Business$donationsArgs<ExtArgs>
     loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
     loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
+    productOptionGroups?: boolean | Business$productOptionGroupsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -14550,6 +14946,7 @@ export namespace Prisma {
       donations: Prisma.$DonationPayload<ExtArgs>[]
       loyaltyProgram: Prisma.$LoyaltyProgramPayload<ExtArgs> | null
       loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
+      productOptionGroups: Prisma.$ProductOptionGroupPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -14593,6 +14990,10 @@ export namespace Prisma {
       umamiEnabled: boolean
       status: string
       onboardingComplete: boolean
+      businessType: string | null
+      setupSteps: Prisma.JsonValue | null
+      setupConfirmations: Prisma.JsonValue
+      setupCompletedAt: Date | null
       localBusinessEnabled: boolean
       localPresence: string
       areaServed: string[]
@@ -15062,6 +15463,7 @@ export namespace Prisma {
     donations<T extends Business$donationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$donationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     loyaltyProgram<T extends Business$loyaltyProgramArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyProgramArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     loyaltyLedger<T extends Business$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    productOptionGroups<T extends Business$productOptionGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productOptionGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15132,6 +15534,10 @@ export namespace Prisma {
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
+    readonly businessType: FieldRef<"Business", 'String'>
+    readonly setupSteps: FieldRef<"Business", 'Json'>
+    readonly setupConfirmations: FieldRef<"Business", 'Json'>
+    readonly setupCompletedAt: FieldRef<"Business", 'DateTime'>
     readonly localBusinessEnabled: FieldRef<"Business", 'Boolean'>
     readonly localPresence: FieldRef<"Business", 'String'>
     readonly areaServed: FieldRef<"Business", 'String[]'>
@@ -16515,6 +16921,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LoyaltyLedgerScalarFieldEnum | LoyaltyLedgerScalarFieldEnum[]
+  }
+
+  /**
+   * Business.productOptionGroups
+   */
+  export type Business$productOptionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    where?: ProductOptionGroupWhereInput
+    orderBy?: ProductOptionGroupOrderByWithRelationInput | ProductOptionGroupOrderByWithRelationInput[]
+    cursor?: ProductOptionGroupWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionGroupScalarFieldEnum | ProductOptionGroupScalarFieldEnum[]
   }
 
   /**
@@ -19578,6 +20008,8 @@ export namespace Prisma {
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
     backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
     subscriptions?: boolean | Product$subscriptionsArgs<ExtArgs>
+    optionGroups?: boolean | Product$optionGroupsArgs<ExtArgs>
+    linkedOptionValues?: boolean | Product$linkedOptionValuesArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
@@ -19720,6 +20152,8 @@ export namespace Prisma {
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
     backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
     subscriptions?: boolean | Product$subscriptionsArgs<ExtArgs>
+    optionGroups?: boolean | Product$optionGroupsArgs<ExtArgs>
+    linkedOptionValues?: boolean | Product$linkedOptionValuesArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -19744,6 +20178,8 @@ export namespace Prisma {
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
+      optionGroups: Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>[]
+      linkedOptionValues: Prisma.$ProductOptionValuePayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -20188,6 +20624,8 @@ export namespace Prisma {
     inventoryHistory<T extends Product$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Product$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backInStockRequests<T extends Product$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Product$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends Product$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Product$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    optionGroups<T extends Product$optionGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Product$optionGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    linkedOptionValues<T extends Product$linkedOptionValuesArgs<ExtArgs> = {}>(args?: Subset<T, Product$linkedOptionValuesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Product$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -20839,6 +21277,54 @@ export namespace Prisma {
   }
 
   /**
+   * Product.optionGroups
+   */
+  export type Product$optionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    where?: ProductOptionGroupOnProductWhereInput
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionGroupOnProductScalarFieldEnum | ProductOptionGroupOnProductScalarFieldEnum[]
+  }
+
+  /**
+   * Product.linkedOptionValues
+   */
+  export type Product$linkedOptionValuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    where?: ProductOptionValueWhereInput
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    cursor?: ProductOptionValueWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
    * Product.reviews
    */
   export type Product$reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -21155,6 +21641,7 @@ export namespace Prisma {
     inventoryHistory?: boolean | ProductVariant$inventoryHistoryArgs<ExtArgs>
     orderItems?: boolean | ProductVariant$orderItemsArgs<ExtArgs>
     subscriptions?: boolean | ProductVariant$subscriptionsArgs<ExtArgs>
+    linkedOptionValues?: boolean | ProductVariant$linkedOptionValuesArgs<ExtArgs>
     _count?: boolean | ProductVariantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productVariant"]>
 
@@ -21214,6 +21701,7 @@ export namespace Prisma {
     inventoryHistory?: boolean | ProductVariant$inventoryHistoryArgs<ExtArgs>
     orderItems?: boolean | ProductVariant$orderItemsArgs<ExtArgs>
     subscriptions?: boolean | ProductVariant$subscriptionsArgs<ExtArgs>
+    linkedOptionValues?: boolean | ProductVariant$linkedOptionValuesArgs<ExtArgs>
     _count?: boolean | ProductVariantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductVariantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -21230,6 +21718,7 @@ export namespace Prisma {
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
+      linkedOptionValues: Prisma.$ProductOptionValuePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -21643,6 +22132,7 @@ export namespace Prisma {
     inventoryHistory<T extends ProductVariant$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     orderItems<T extends ProductVariant$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscriptions<T extends ProductVariant$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    linkedOptionValues<T extends ProductVariant$linkedOptionValuesArgs<ExtArgs> = {}>(args?: Subset<T, ProductVariant$linkedOptionValuesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22153,6 +22643,30 @@ export namespace Prisma {
   }
 
   /**
+   * ProductVariant.linkedOptionValues
+   */
+  export type ProductVariant$linkedOptionValuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    where?: ProductOptionValueWhereInput
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    cursor?: ProductOptionValueWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
    * ProductVariant without action
    */
   export type ProductVariantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -22168,6 +22682,3660 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ProductVariantInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProductOptionGroup
+   */
+
+  export type AggregateProductOptionGroup = {
+    _count: ProductOptionGroupCountAggregateOutputType | null
+    _avg: ProductOptionGroupAvgAggregateOutputType | null
+    _sum: ProductOptionGroupSumAggregateOutputType | null
+    _min: ProductOptionGroupMinAggregateOutputType | null
+    _max: ProductOptionGroupMaxAggregateOutputType | null
+  }
+
+  export type ProductOptionGroupAvgAggregateOutputType = {
+    minSelections: number | null
+    maxSelections: number | null
+    includedCount: number | null
+    maxLength: number | null
+    textPriceCents: number | null
+  }
+
+  export type ProductOptionGroupSumAggregateOutputType = {
+    minSelections: number | null
+    maxSelections: number | null
+    includedCount: number | null
+    maxLength: number | null
+    textPriceCents: number | null
+  }
+
+  export type ProductOptionGroupMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    name: string | null
+    adminLabel: string | null
+    helpText: string | null
+    kind: string | null
+    required: boolean | null
+    minSelections: number | null
+    maxSelections: number | null
+    includedCount: number | null
+    display: string | null
+    maxLength: number | null
+    placeholder: string | null
+    textPriceCents: number | null
+  }
+
+  export type ProductOptionGroupMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    name: string | null
+    adminLabel: string | null
+    helpText: string | null
+    kind: string | null
+    required: boolean | null
+    minSelections: number | null
+    maxSelections: number | null
+    includedCount: number | null
+    display: string | null
+    maxLength: number | null
+    placeholder: string | null
+    textPriceCents: number | null
+  }
+
+  export type ProductOptionGroupCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    name: number
+    adminLabel: number
+    helpText: number
+    kind: number
+    required: number
+    minSelections: number
+    maxSelections: number
+    includedCount: number
+    display: number
+    maxLength: number
+    placeholder: number
+    textPriceCents: number
+    _all: number
+  }
+
+
+  export type ProductOptionGroupAvgAggregateInputType = {
+    minSelections?: true
+    maxSelections?: true
+    includedCount?: true
+    maxLength?: true
+    textPriceCents?: true
+  }
+
+  export type ProductOptionGroupSumAggregateInputType = {
+    minSelections?: true
+    maxSelections?: true
+    includedCount?: true
+    maxLength?: true
+    textPriceCents?: true
+  }
+
+  export type ProductOptionGroupMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    name?: true
+    adminLabel?: true
+    helpText?: true
+    kind?: true
+    required?: true
+    minSelections?: true
+    maxSelections?: true
+    includedCount?: true
+    display?: true
+    maxLength?: true
+    placeholder?: true
+    textPriceCents?: true
+  }
+
+  export type ProductOptionGroupMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    name?: true
+    adminLabel?: true
+    helpText?: true
+    kind?: true
+    required?: true
+    minSelections?: true
+    maxSelections?: true
+    includedCount?: true
+    display?: true
+    maxLength?: true
+    placeholder?: true
+    textPriceCents?: true
+  }
+
+  export type ProductOptionGroupCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    name?: true
+    adminLabel?: true
+    helpText?: true
+    kind?: true
+    required?: true
+    minSelections?: true
+    maxSelections?: true
+    includedCount?: true
+    display?: true
+    maxLength?: true
+    placeholder?: true
+    textPriceCents?: true
+    _all?: true
+  }
+
+  export type ProductOptionGroupAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionGroup to aggregate.
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroups to fetch.
+     */
+    orderBy?: ProductOptionGroupOrderByWithRelationInput | ProductOptionGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProductOptionGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProductOptionGroups
+    **/
+    _count?: true | ProductOptionGroupCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ProductOptionGroupAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProductOptionGroupSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProductOptionGroupMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProductOptionGroupMaxAggregateInputType
+  }
+
+  export type GetProductOptionGroupAggregateType<T extends ProductOptionGroupAggregateArgs> = {
+        [P in keyof T & keyof AggregateProductOptionGroup]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProductOptionGroup[P]>
+      : GetScalarType<T[P], AggregateProductOptionGroup[P]>
+  }
+
+
+
+
+  export type ProductOptionGroupGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionGroupWhereInput
+    orderBy?: ProductOptionGroupOrderByWithAggregationInput | ProductOptionGroupOrderByWithAggregationInput[]
+    by: ProductOptionGroupScalarFieldEnum[] | ProductOptionGroupScalarFieldEnum
+    having?: ProductOptionGroupScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProductOptionGroupCountAggregateInputType | true
+    _avg?: ProductOptionGroupAvgAggregateInputType
+    _sum?: ProductOptionGroupSumAggregateInputType
+    _min?: ProductOptionGroupMinAggregateInputType
+    _max?: ProductOptionGroupMaxAggregateInputType
+  }
+
+  export type ProductOptionGroupGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    name: string
+    adminLabel: string | null
+    helpText: string | null
+    kind: string
+    required: boolean
+    minSelections: number
+    maxSelections: number
+    includedCount: number
+    display: string
+    maxLength: number | null
+    placeholder: string | null
+    textPriceCents: number
+    _count: ProductOptionGroupCountAggregateOutputType | null
+    _avg: ProductOptionGroupAvgAggregateOutputType | null
+    _sum: ProductOptionGroupSumAggregateOutputType | null
+    _min: ProductOptionGroupMinAggregateOutputType | null
+    _max: ProductOptionGroupMaxAggregateOutputType | null
+  }
+
+  type GetProductOptionGroupGroupByPayload<T extends ProductOptionGroupGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProductOptionGroupGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProductOptionGroupGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProductOptionGroupGroupByOutputType[P]>
+            : GetScalarType<T[P], ProductOptionGroupGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProductOptionGroupSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    adminLabel?: boolean
+    helpText?: boolean
+    kind?: boolean
+    required?: boolean
+    minSelections?: boolean
+    maxSelections?: boolean
+    includedCount?: boolean
+    display?: boolean
+    maxLength?: boolean
+    placeholder?: boolean
+    textPriceCents?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    values?: boolean | ProductOptionGroup$valuesArgs<ExtArgs>
+    products?: boolean | ProductOptionGroup$productsArgs<ExtArgs>
+    _count?: boolean | ProductOptionGroupCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroup"]>
+
+  export type ProductOptionGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    adminLabel?: boolean
+    helpText?: boolean
+    kind?: boolean
+    required?: boolean
+    minSelections?: boolean
+    maxSelections?: boolean
+    includedCount?: boolean
+    display?: boolean
+    maxLength?: boolean
+    placeholder?: boolean
+    textPriceCents?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroup"]>
+
+  export type ProductOptionGroupSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    adminLabel?: boolean
+    helpText?: boolean
+    kind?: boolean
+    required?: boolean
+    minSelections?: boolean
+    maxSelections?: boolean
+    includedCount?: boolean
+    display?: boolean
+    maxLength?: boolean
+    placeholder?: boolean
+    textPriceCents?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroup"]>
+
+  export type ProductOptionGroupSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    adminLabel?: boolean
+    helpText?: boolean
+    kind?: boolean
+    required?: boolean
+    minSelections?: boolean
+    maxSelections?: boolean
+    includedCount?: boolean
+    display?: boolean
+    maxLength?: boolean
+    placeholder?: boolean
+    textPriceCents?: boolean
+  }
+
+  export type ProductOptionGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "name" | "adminLabel" | "helpText" | "kind" | "required" | "minSelections" | "maxSelections" | "includedCount" | "display" | "maxLength" | "placeholder" | "textPriceCents", ExtArgs["result"]["productOptionGroup"]>
+  export type ProductOptionGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    values?: boolean | ProductOptionGroup$valuesArgs<ExtArgs>
+    products?: boolean | ProductOptionGroup$productsArgs<ExtArgs>
+    _count?: boolean | ProductOptionGroupCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ProductOptionGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type ProductOptionGroupIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $ProductOptionGroupPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProductOptionGroup"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      values: Prisma.$ProductOptionValuePayload<ExtArgs>[]
+      products: Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      name: string
+      adminLabel: string | null
+      helpText: string | null
+      kind: string
+      required: boolean
+      minSelections: number
+      maxSelections: number
+      includedCount: number
+      display: string
+      maxLength: number | null
+      placeholder: string | null
+      textPriceCents: number
+    }, ExtArgs["result"]["productOptionGroup"]>
+    composites: {}
+  }
+
+  type ProductOptionGroupGetPayload<S extends boolean | null | undefined | ProductOptionGroupDefaultArgs> = $Result.GetResult<Prisma.$ProductOptionGroupPayload, S>
+
+  type ProductOptionGroupCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProductOptionGroupFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProductOptionGroupCountAggregateInputType | true
+    }
+
+  export interface ProductOptionGroupDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProductOptionGroup'], meta: { name: 'ProductOptionGroup' } }
+    /**
+     * Find zero or one ProductOptionGroup that matches the filter.
+     * @param {ProductOptionGroupFindUniqueArgs} args - Arguments to find a ProductOptionGroup
+     * @example
+     * // Get one ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProductOptionGroupFindUniqueArgs>(args: SelectSubset<T, ProductOptionGroupFindUniqueArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProductOptionGroup that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProductOptionGroupFindUniqueOrThrowArgs} args - Arguments to find a ProductOptionGroup
+     * @example
+     * // Get one ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProductOptionGroupFindUniqueOrThrowArgs>(args: SelectSubset<T, ProductOptionGroupFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionGroup that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupFindFirstArgs} args - Arguments to find a ProductOptionGroup
+     * @example
+     * // Get one ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProductOptionGroupFindFirstArgs>(args?: SelectSubset<T, ProductOptionGroupFindFirstArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionGroup that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupFindFirstOrThrowArgs} args - Arguments to find a ProductOptionGroup
+     * @example
+     * // Get one ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProductOptionGroupFindFirstOrThrowArgs>(args?: SelectSubset<T, ProductOptionGroupFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProductOptionGroups that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProductOptionGroups
+     * const productOptionGroups = await prisma.productOptionGroup.findMany()
+     * 
+     * // Get first 10 ProductOptionGroups
+     * const productOptionGroups = await prisma.productOptionGroup.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const productOptionGroupWithIdOnly = await prisma.productOptionGroup.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProductOptionGroupFindManyArgs>(args?: SelectSubset<T, ProductOptionGroupFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProductOptionGroup.
+     * @param {ProductOptionGroupCreateArgs} args - Arguments to create a ProductOptionGroup.
+     * @example
+     * // Create one ProductOptionGroup
+     * const ProductOptionGroup = await prisma.productOptionGroup.create({
+     *   data: {
+     *     // ... data to create a ProductOptionGroup
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProductOptionGroupCreateArgs>(args: SelectSubset<T, ProductOptionGroupCreateArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProductOptionGroups.
+     * @param {ProductOptionGroupCreateManyArgs} args - Arguments to create many ProductOptionGroups.
+     * @example
+     * // Create many ProductOptionGroups
+     * const productOptionGroup = await prisma.productOptionGroup.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProductOptionGroupCreateManyArgs>(args?: SelectSubset<T, ProductOptionGroupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProductOptionGroups and returns the data saved in the database.
+     * @param {ProductOptionGroupCreateManyAndReturnArgs} args - Arguments to create many ProductOptionGroups.
+     * @example
+     * // Create many ProductOptionGroups
+     * const productOptionGroup = await prisma.productOptionGroup.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ProductOptionGroups and only return the `id`
+     * const productOptionGroupWithIdOnly = await prisma.productOptionGroup.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProductOptionGroupCreateManyAndReturnArgs>(args?: SelectSubset<T, ProductOptionGroupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProductOptionGroup.
+     * @param {ProductOptionGroupDeleteArgs} args - Arguments to delete one ProductOptionGroup.
+     * @example
+     * // Delete one ProductOptionGroup
+     * const ProductOptionGroup = await prisma.productOptionGroup.delete({
+     *   where: {
+     *     // ... filter to delete one ProductOptionGroup
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProductOptionGroupDeleteArgs>(args: SelectSubset<T, ProductOptionGroupDeleteArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProductOptionGroup.
+     * @param {ProductOptionGroupUpdateArgs} args - Arguments to update one ProductOptionGroup.
+     * @example
+     * // Update one ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProductOptionGroupUpdateArgs>(args: SelectSubset<T, ProductOptionGroupUpdateArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProductOptionGroups.
+     * @param {ProductOptionGroupDeleteManyArgs} args - Arguments to filter ProductOptionGroups to delete.
+     * @example
+     * // Delete a few ProductOptionGroups
+     * const { count } = await prisma.productOptionGroup.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProductOptionGroupDeleteManyArgs>(args?: SelectSubset<T, ProductOptionGroupDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProductOptionGroups
+     * const productOptionGroup = await prisma.productOptionGroup.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProductOptionGroupUpdateManyArgs>(args: SelectSubset<T, ProductOptionGroupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionGroups and returns the data updated in the database.
+     * @param {ProductOptionGroupUpdateManyAndReturnArgs} args - Arguments to update many ProductOptionGroups.
+     * @example
+     * // Update many ProductOptionGroups
+     * const productOptionGroup = await prisma.productOptionGroup.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ProductOptionGroups and only return the `id`
+     * const productOptionGroupWithIdOnly = await prisma.productOptionGroup.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProductOptionGroupUpdateManyAndReturnArgs>(args: SelectSubset<T, ProductOptionGroupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProductOptionGroup.
+     * @param {ProductOptionGroupUpsertArgs} args - Arguments to update or create a ProductOptionGroup.
+     * @example
+     * // Update or create a ProductOptionGroup
+     * const productOptionGroup = await prisma.productOptionGroup.upsert({
+     *   create: {
+     *     // ... data to create a ProductOptionGroup
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProductOptionGroup we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProductOptionGroupUpsertArgs>(args: SelectSubset<T, ProductOptionGroupUpsertArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProductOptionGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupCountArgs} args - Arguments to filter ProductOptionGroups to count.
+     * @example
+     * // Count the number of ProductOptionGroups
+     * const count = await prisma.productOptionGroup.count({
+     *   where: {
+     *     // ... the filter for the ProductOptionGroups we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProductOptionGroupCountArgs>(
+      args?: Subset<T, ProductOptionGroupCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProductOptionGroupCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProductOptionGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProductOptionGroupAggregateArgs>(args: Subset<T, ProductOptionGroupAggregateArgs>): Prisma.PrismaPromise<GetProductOptionGroupAggregateType<T>>
+
+    /**
+     * Group by ProductOptionGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProductOptionGroupGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProductOptionGroupGroupByArgs['orderBy'] }
+        : { orderBy?: ProductOptionGroupGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProductOptionGroupGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProductOptionGroupGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProductOptionGroup model
+   */
+  readonly fields: ProductOptionGroupFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProductOptionGroup.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProductOptionGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    values<T extends ProductOptionGroup$valuesArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionGroup$valuesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    products<T extends ProductOptionGroup$productsArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionGroup$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProductOptionGroup model
+   */
+  interface ProductOptionGroupFieldRefs {
+    readonly id: FieldRef<"ProductOptionGroup", 'String'>
+    readonly createdAt: FieldRef<"ProductOptionGroup", 'DateTime'>
+    readonly updatedAt: FieldRef<"ProductOptionGroup", 'DateTime'>
+    readonly businessId: FieldRef<"ProductOptionGroup", 'String'>
+    readonly name: FieldRef<"ProductOptionGroup", 'String'>
+    readonly adminLabel: FieldRef<"ProductOptionGroup", 'String'>
+    readonly helpText: FieldRef<"ProductOptionGroup", 'String'>
+    readonly kind: FieldRef<"ProductOptionGroup", 'String'>
+    readonly required: FieldRef<"ProductOptionGroup", 'Boolean'>
+    readonly minSelections: FieldRef<"ProductOptionGroup", 'Int'>
+    readonly maxSelections: FieldRef<"ProductOptionGroup", 'Int'>
+    readonly includedCount: FieldRef<"ProductOptionGroup", 'Int'>
+    readonly display: FieldRef<"ProductOptionGroup", 'String'>
+    readonly maxLength: FieldRef<"ProductOptionGroup", 'Int'>
+    readonly placeholder: FieldRef<"ProductOptionGroup", 'String'>
+    readonly textPriceCents: FieldRef<"ProductOptionGroup", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProductOptionGroup findUnique
+   */
+  export type ProductOptionGroupFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroup to fetch.
+     */
+    where: ProductOptionGroupWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroup findUniqueOrThrow
+   */
+  export type ProductOptionGroupFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroup to fetch.
+     */
+    where: ProductOptionGroupWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroup findFirst
+   */
+  export type ProductOptionGroupFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroup to fetch.
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroups to fetch.
+     */
+    orderBy?: ProductOptionGroupOrderByWithRelationInput | ProductOptionGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionGroups.
+     */
+    cursor?: ProductOptionGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionGroups.
+     */
+    distinct?: ProductOptionGroupScalarFieldEnum | ProductOptionGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroup findFirstOrThrow
+   */
+  export type ProductOptionGroupFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroup to fetch.
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroups to fetch.
+     */
+    orderBy?: ProductOptionGroupOrderByWithRelationInput | ProductOptionGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionGroups.
+     */
+    cursor?: ProductOptionGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionGroups.
+     */
+    distinct?: ProductOptionGroupScalarFieldEnum | ProductOptionGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroup findMany
+   */
+  export type ProductOptionGroupFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroups to fetch.
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroups to fetch.
+     */
+    orderBy?: ProductOptionGroupOrderByWithRelationInput | ProductOptionGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProductOptionGroups.
+     */
+    cursor?: ProductOptionGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroups.
+     */
+    skip?: number
+    distinct?: ProductOptionGroupScalarFieldEnum | ProductOptionGroupScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroup create
+   */
+  export type ProductOptionGroupCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProductOptionGroup.
+     */
+    data: XOR<ProductOptionGroupCreateInput, ProductOptionGroupUncheckedCreateInput>
+  }
+
+  /**
+   * ProductOptionGroup createMany
+   */
+  export type ProductOptionGroupCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProductOptionGroups.
+     */
+    data: ProductOptionGroupCreateManyInput | ProductOptionGroupCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProductOptionGroup createManyAndReturn
+   */
+  export type ProductOptionGroupCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProductOptionGroups.
+     */
+    data: ProductOptionGroupCreateManyInput | ProductOptionGroupCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionGroup update
+   */
+  export type ProductOptionGroupUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProductOptionGroup.
+     */
+    data: XOR<ProductOptionGroupUpdateInput, ProductOptionGroupUncheckedUpdateInput>
+    /**
+     * Choose, which ProductOptionGroup to update.
+     */
+    where: ProductOptionGroupWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroup updateMany
+   */
+  export type ProductOptionGroupUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProductOptionGroups.
+     */
+    data: XOR<ProductOptionGroupUpdateManyMutationInput, ProductOptionGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionGroups to update
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * Limit how many ProductOptionGroups to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionGroup updateManyAndReturn
+   */
+  export type ProductOptionGroupUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * The data used to update ProductOptionGroups.
+     */
+    data: XOR<ProductOptionGroupUpdateManyMutationInput, ProductOptionGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionGroups to update
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * Limit how many ProductOptionGroups to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionGroup upsert
+   */
+  export type ProductOptionGroupUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProductOptionGroup to update in case it exists.
+     */
+    where: ProductOptionGroupWhereUniqueInput
+    /**
+     * In case the ProductOptionGroup found by the `where` argument doesn't exist, create a new ProductOptionGroup with this data.
+     */
+    create: XOR<ProductOptionGroupCreateInput, ProductOptionGroupUncheckedCreateInput>
+    /**
+     * In case the ProductOptionGroup was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProductOptionGroupUpdateInput, ProductOptionGroupUncheckedUpdateInput>
+  }
+
+  /**
+   * ProductOptionGroup delete
+   */
+  export type ProductOptionGroupDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+    /**
+     * Filter which ProductOptionGroup to delete.
+     */
+    where: ProductOptionGroupWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroup deleteMany
+   */
+  export type ProductOptionGroupDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionGroups to delete
+     */
+    where?: ProductOptionGroupWhereInput
+    /**
+     * Limit how many ProductOptionGroups to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionGroup.values
+   */
+  export type ProductOptionGroup$valuesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    where?: ProductOptionValueWhereInput
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    cursor?: ProductOptionValueWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroup.products
+   */
+  export type ProductOptionGroup$productsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    where?: ProductOptionGroupOnProductWhereInput
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductOptionGroupOnProductScalarFieldEnum | ProductOptionGroupOnProductScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroup without action
+   */
+  export type ProductOptionGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroup
+     */
+    select?: ProductOptionGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroup
+     */
+    omit?: ProductOptionGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProductOptionGroupOnProduct
+   */
+
+  export type AggregateProductOptionGroupOnProduct = {
+    _count: ProductOptionGroupOnProductCountAggregateOutputType | null
+    _avg: ProductOptionGroupOnProductAvgAggregateOutputType | null
+    _sum: ProductOptionGroupOnProductSumAggregateOutputType | null
+    _min: ProductOptionGroupOnProductMinAggregateOutputType | null
+    _max: ProductOptionGroupOnProductMaxAggregateOutputType | null
+  }
+
+  export type ProductOptionGroupOnProductAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type ProductOptionGroupOnProductSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type ProductOptionGroupOnProductMinAggregateOutputType = {
+    productId: string | null
+    groupId: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+  }
+
+  export type ProductOptionGroupOnProductMaxAggregateOutputType = {
+    productId: string | null
+    groupId: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+  }
+
+  export type ProductOptionGroupOnProductCountAggregateOutputType = {
+    productId: number
+    groupId: number
+    sortOrder: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ProductOptionGroupOnProductAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type ProductOptionGroupOnProductSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type ProductOptionGroupOnProductMinAggregateInputType = {
+    productId?: true
+    groupId?: true
+    sortOrder?: true
+    createdAt?: true
+  }
+
+  export type ProductOptionGroupOnProductMaxAggregateInputType = {
+    productId?: true
+    groupId?: true
+    sortOrder?: true
+    createdAt?: true
+  }
+
+  export type ProductOptionGroupOnProductCountAggregateInputType = {
+    productId?: true
+    groupId?: true
+    sortOrder?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ProductOptionGroupOnProductAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionGroupOnProduct to aggregate.
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroupOnProducts to fetch.
+     */
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroupOnProducts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroupOnProducts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProductOptionGroupOnProducts
+    **/
+    _count?: true | ProductOptionGroupOnProductCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ProductOptionGroupOnProductAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProductOptionGroupOnProductSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProductOptionGroupOnProductMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProductOptionGroupOnProductMaxAggregateInputType
+  }
+
+  export type GetProductOptionGroupOnProductAggregateType<T extends ProductOptionGroupOnProductAggregateArgs> = {
+        [P in keyof T & keyof AggregateProductOptionGroupOnProduct]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProductOptionGroupOnProduct[P]>
+      : GetScalarType<T[P], AggregateProductOptionGroupOnProduct[P]>
+  }
+
+
+
+
+  export type ProductOptionGroupOnProductGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionGroupOnProductWhereInput
+    orderBy?: ProductOptionGroupOnProductOrderByWithAggregationInput | ProductOptionGroupOnProductOrderByWithAggregationInput[]
+    by: ProductOptionGroupOnProductScalarFieldEnum[] | ProductOptionGroupOnProductScalarFieldEnum
+    having?: ProductOptionGroupOnProductScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProductOptionGroupOnProductCountAggregateInputType | true
+    _avg?: ProductOptionGroupOnProductAvgAggregateInputType
+    _sum?: ProductOptionGroupOnProductSumAggregateInputType
+    _min?: ProductOptionGroupOnProductMinAggregateInputType
+    _max?: ProductOptionGroupOnProductMaxAggregateInputType
+  }
+
+  export type ProductOptionGroupOnProductGroupByOutputType = {
+    productId: string
+    groupId: string
+    sortOrder: number
+    createdAt: Date
+    _count: ProductOptionGroupOnProductCountAggregateOutputType | null
+    _avg: ProductOptionGroupOnProductAvgAggregateOutputType | null
+    _sum: ProductOptionGroupOnProductSumAggregateOutputType | null
+    _min: ProductOptionGroupOnProductMinAggregateOutputType | null
+    _max: ProductOptionGroupOnProductMaxAggregateOutputType | null
+  }
+
+  type GetProductOptionGroupOnProductGroupByPayload<T extends ProductOptionGroupOnProductGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProductOptionGroupOnProductGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProductOptionGroupOnProductGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProductOptionGroupOnProductGroupByOutputType[P]>
+            : GetScalarType<T[P], ProductOptionGroupOnProductGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProductOptionGroupOnProductSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    productId?: boolean
+    groupId?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroupOnProduct"]>
+
+  export type ProductOptionGroupOnProductSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    productId?: boolean
+    groupId?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroupOnProduct"]>
+
+  export type ProductOptionGroupOnProductSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    productId?: boolean
+    groupId?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionGroupOnProduct"]>
+
+  export type ProductOptionGroupOnProductSelectScalar = {
+    productId?: boolean
+    groupId?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+  }
+
+  export type ProductOptionGroupOnProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"productId" | "groupId" | "sortOrder" | "createdAt", ExtArgs["result"]["productOptionGroupOnProduct"]>
+  export type ProductOptionGroupOnProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }
+  export type ProductOptionGroupOnProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }
+  export type ProductOptionGroupOnProductIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+  }
+
+  export type $ProductOptionGroupOnProductPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProductOptionGroupOnProduct"
+    objects: {
+      product: Prisma.$ProductPayload<ExtArgs>
+      group: Prisma.$ProductOptionGroupPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      productId: string
+      groupId: string
+      sortOrder: number
+      createdAt: Date
+    }, ExtArgs["result"]["productOptionGroupOnProduct"]>
+    composites: {}
+  }
+
+  type ProductOptionGroupOnProductGetPayload<S extends boolean | null | undefined | ProductOptionGroupOnProductDefaultArgs> = $Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload, S>
+
+  type ProductOptionGroupOnProductCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProductOptionGroupOnProductFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProductOptionGroupOnProductCountAggregateInputType | true
+    }
+
+  export interface ProductOptionGroupOnProductDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProductOptionGroupOnProduct'], meta: { name: 'ProductOptionGroupOnProduct' } }
+    /**
+     * Find zero or one ProductOptionGroupOnProduct that matches the filter.
+     * @param {ProductOptionGroupOnProductFindUniqueArgs} args - Arguments to find a ProductOptionGroupOnProduct
+     * @example
+     * // Get one ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProductOptionGroupOnProductFindUniqueArgs>(args: SelectSubset<T, ProductOptionGroupOnProductFindUniqueArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProductOptionGroupOnProduct that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProductOptionGroupOnProductFindUniqueOrThrowArgs} args - Arguments to find a ProductOptionGroupOnProduct
+     * @example
+     * // Get one ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProductOptionGroupOnProductFindUniqueOrThrowArgs>(args: SelectSubset<T, ProductOptionGroupOnProductFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionGroupOnProduct that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductFindFirstArgs} args - Arguments to find a ProductOptionGroupOnProduct
+     * @example
+     * // Get one ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProductOptionGroupOnProductFindFirstArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductFindFirstArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionGroupOnProduct that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductFindFirstOrThrowArgs} args - Arguments to find a ProductOptionGroupOnProduct
+     * @example
+     * // Get one ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProductOptionGroupOnProductFindFirstOrThrowArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProductOptionGroupOnProducts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProductOptionGroupOnProducts
+     * const productOptionGroupOnProducts = await prisma.productOptionGroupOnProduct.findMany()
+     * 
+     * // Get first 10 ProductOptionGroupOnProducts
+     * const productOptionGroupOnProducts = await prisma.productOptionGroupOnProduct.findMany({ take: 10 })
+     * 
+     * // Only select the `productId`
+     * const productOptionGroupOnProductWithProductIdOnly = await prisma.productOptionGroupOnProduct.findMany({ select: { productId: true } })
+     * 
+     */
+    findMany<T extends ProductOptionGroupOnProductFindManyArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProductOptionGroupOnProduct.
+     * @param {ProductOptionGroupOnProductCreateArgs} args - Arguments to create a ProductOptionGroupOnProduct.
+     * @example
+     * // Create one ProductOptionGroupOnProduct
+     * const ProductOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.create({
+     *   data: {
+     *     // ... data to create a ProductOptionGroupOnProduct
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProductOptionGroupOnProductCreateArgs>(args: SelectSubset<T, ProductOptionGroupOnProductCreateArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProductOptionGroupOnProducts.
+     * @param {ProductOptionGroupOnProductCreateManyArgs} args - Arguments to create many ProductOptionGroupOnProducts.
+     * @example
+     * // Create many ProductOptionGroupOnProducts
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProductOptionGroupOnProductCreateManyArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProductOptionGroupOnProducts and returns the data saved in the database.
+     * @param {ProductOptionGroupOnProductCreateManyAndReturnArgs} args - Arguments to create many ProductOptionGroupOnProducts.
+     * @example
+     * // Create many ProductOptionGroupOnProducts
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ProductOptionGroupOnProducts and only return the `productId`
+     * const productOptionGroupOnProductWithProductIdOnly = await prisma.productOptionGroupOnProduct.createManyAndReturn({
+     *   select: { productId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProductOptionGroupOnProductCreateManyAndReturnArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProductOptionGroupOnProduct.
+     * @param {ProductOptionGroupOnProductDeleteArgs} args - Arguments to delete one ProductOptionGroupOnProduct.
+     * @example
+     * // Delete one ProductOptionGroupOnProduct
+     * const ProductOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.delete({
+     *   where: {
+     *     // ... filter to delete one ProductOptionGroupOnProduct
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProductOptionGroupOnProductDeleteArgs>(args: SelectSubset<T, ProductOptionGroupOnProductDeleteArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProductOptionGroupOnProduct.
+     * @param {ProductOptionGroupOnProductUpdateArgs} args - Arguments to update one ProductOptionGroupOnProduct.
+     * @example
+     * // Update one ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProductOptionGroupOnProductUpdateArgs>(args: SelectSubset<T, ProductOptionGroupOnProductUpdateArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProductOptionGroupOnProducts.
+     * @param {ProductOptionGroupOnProductDeleteManyArgs} args - Arguments to filter ProductOptionGroupOnProducts to delete.
+     * @example
+     * // Delete a few ProductOptionGroupOnProducts
+     * const { count } = await prisma.productOptionGroupOnProduct.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProductOptionGroupOnProductDeleteManyArgs>(args?: SelectSubset<T, ProductOptionGroupOnProductDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionGroupOnProducts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProductOptionGroupOnProducts
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProductOptionGroupOnProductUpdateManyArgs>(args: SelectSubset<T, ProductOptionGroupOnProductUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionGroupOnProducts and returns the data updated in the database.
+     * @param {ProductOptionGroupOnProductUpdateManyAndReturnArgs} args - Arguments to update many ProductOptionGroupOnProducts.
+     * @example
+     * // Update many ProductOptionGroupOnProducts
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ProductOptionGroupOnProducts and only return the `productId`
+     * const productOptionGroupOnProductWithProductIdOnly = await prisma.productOptionGroupOnProduct.updateManyAndReturn({
+     *   select: { productId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProductOptionGroupOnProductUpdateManyAndReturnArgs>(args: SelectSubset<T, ProductOptionGroupOnProductUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProductOptionGroupOnProduct.
+     * @param {ProductOptionGroupOnProductUpsertArgs} args - Arguments to update or create a ProductOptionGroupOnProduct.
+     * @example
+     * // Update or create a ProductOptionGroupOnProduct
+     * const productOptionGroupOnProduct = await prisma.productOptionGroupOnProduct.upsert({
+     *   create: {
+     *     // ... data to create a ProductOptionGroupOnProduct
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProductOptionGroupOnProduct we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProductOptionGroupOnProductUpsertArgs>(args: SelectSubset<T, ProductOptionGroupOnProductUpsertArgs<ExtArgs>>): Prisma__ProductOptionGroupOnProductClient<$Result.GetResult<Prisma.$ProductOptionGroupOnProductPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProductOptionGroupOnProducts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductCountArgs} args - Arguments to filter ProductOptionGroupOnProducts to count.
+     * @example
+     * // Count the number of ProductOptionGroupOnProducts
+     * const count = await prisma.productOptionGroupOnProduct.count({
+     *   where: {
+     *     // ... the filter for the ProductOptionGroupOnProducts we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProductOptionGroupOnProductCountArgs>(
+      args?: Subset<T, ProductOptionGroupOnProductCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProductOptionGroupOnProductCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProductOptionGroupOnProduct.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProductOptionGroupOnProductAggregateArgs>(args: Subset<T, ProductOptionGroupOnProductAggregateArgs>): Prisma.PrismaPromise<GetProductOptionGroupOnProductAggregateType<T>>
+
+    /**
+     * Group by ProductOptionGroupOnProduct.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionGroupOnProductGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProductOptionGroupOnProductGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProductOptionGroupOnProductGroupByArgs['orderBy'] }
+        : { orderBy?: ProductOptionGroupOnProductGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProductOptionGroupOnProductGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProductOptionGroupOnProductGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProductOptionGroupOnProduct model
+   */
+  readonly fields: ProductOptionGroupOnProductFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProductOptionGroupOnProduct.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProductOptionGroupOnProductClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    group<T extends ProductOptionGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionGroupDefaultArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProductOptionGroupOnProduct model
+   */
+  interface ProductOptionGroupOnProductFieldRefs {
+    readonly productId: FieldRef<"ProductOptionGroupOnProduct", 'String'>
+    readonly groupId: FieldRef<"ProductOptionGroupOnProduct", 'String'>
+    readonly sortOrder: FieldRef<"ProductOptionGroupOnProduct", 'Int'>
+    readonly createdAt: FieldRef<"ProductOptionGroupOnProduct", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProductOptionGroupOnProduct findUnique
+   */
+  export type ProductOptionGroupOnProductFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroupOnProduct to fetch.
+     */
+    where: ProductOptionGroupOnProductWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroupOnProduct findUniqueOrThrow
+   */
+  export type ProductOptionGroupOnProductFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroupOnProduct to fetch.
+     */
+    where: ProductOptionGroupOnProductWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroupOnProduct findFirst
+   */
+  export type ProductOptionGroupOnProductFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroupOnProduct to fetch.
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroupOnProducts to fetch.
+     */
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionGroupOnProducts.
+     */
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroupOnProducts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroupOnProducts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionGroupOnProducts.
+     */
+    distinct?: ProductOptionGroupOnProductScalarFieldEnum | ProductOptionGroupOnProductScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroupOnProduct findFirstOrThrow
+   */
+  export type ProductOptionGroupOnProductFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroupOnProduct to fetch.
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroupOnProducts to fetch.
+     */
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionGroupOnProducts.
+     */
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroupOnProducts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroupOnProducts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionGroupOnProducts.
+     */
+    distinct?: ProductOptionGroupOnProductScalarFieldEnum | ProductOptionGroupOnProductScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroupOnProduct findMany
+   */
+  export type ProductOptionGroupOnProductFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionGroupOnProducts to fetch.
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionGroupOnProducts to fetch.
+     */
+    orderBy?: ProductOptionGroupOnProductOrderByWithRelationInput | ProductOptionGroupOnProductOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProductOptionGroupOnProducts.
+     */
+    cursor?: ProductOptionGroupOnProductWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionGroupOnProducts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionGroupOnProducts.
+     */
+    skip?: number
+    distinct?: ProductOptionGroupOnProductScalarFieldEnum | ProductOptionGroupOnProductScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionGroupOnProduct create
+   */
+  export type ProductOptionGroupOnProductCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProductOptionGroupOnProduct.
+     */
+    data: XOR<ProductOptionGroupOnProductCreateInput, ProductOptionGroupOnProductUncheckedCreateInput>
+  }
+
+  /**
+   * ProductOptionGroupOnProduct createMany
+   */
+  export type ProductOptionGroupOnProductCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProductOptionGroupOnProducts.
+     */
+    data: ProductOptionGroupOnProductCreateManyInput | ProductOptionGroupOnProductCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProductOptionGroupOnProduct createManyAndReturn
+   */
+  export type ProductOptionGroupOnProductCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProductOptionGroupOnProducts.
+     */
+    data: ProductOptionGroupOnProductCreateManyInput | ProductOptionGroupOnProductCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionGroupOnProduct update
+   */
+  export type ProductOptionGroupOnProductUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProductOptionGroupOnProduct.
+     */
+    data: XOR<ProductOptionGroupOnProductUpdateInput, ProductOptionGroupOnProductUncheckedUpdateInput>
+    /**
+     * Choose, which ProductOptionGroupOnProduct to update.
+     */
+    where: ProductOptionGroupOnProductWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroupOnProduct updateMany
+   */
+  export type ProductOptionGroupOnProductUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProductOptionGroupOnProducts.
+     */
+    data: XOR<ProductOptionGroupOnProductUpdateManyMutationInput, ProductOptionGroupOnProductUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionGroupOnProducts to update
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * Limit how many ProductOptionGroupOnProducts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionGroupOnProduct updateManyAndReturn
+   */
+  export type ProductOptionGroupOnProductUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * The data used to update ProductOptionGroupOnProducts.
+     */
+    data: XOR<ProductOptionGroupOnProductUpdateManyMutationInput, ProductOptionGroupOnProductUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionGroupOnProducts to update
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * Limit how many ProductOptionGroupOnProducts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionGroupOnProduct upsert
+   */
+  export type ProductOptionGroupOnProductUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProductOptionGroupOnProduct to update in case it exists.
+     */
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    /**
+     * In case the ProductOptionGroupOnProduct found by the `where` argument doesn't exist, create a new ProductOptionGroupOnProduct with this data.
+     */
+    create: XOR<ProductOptionGroupOnProductCreateInput, ProductOptionGroupOnProductUncheckedCreateInput>
+    /**
+     * In case the ProductOptionGroupOnProduct was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProductOptionGroupOnProductUpdateInput, ProductOptionGroupOnProductUncheckedUpdateInput>
+  }
+
+  /**
+   * ProductOptionGroupOnProduct delete
+   */
+  export type ProductOptionGroupOnProductDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+    /**
+     * Filter which ProductOptionGroupOnProduct to delete.
+     */
+    where: ProductOptionGroupOnProductWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionGroupOnProduct deleteMany
+   */
+  export type ProductOptionGroupOnProductDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionGroupOnProducts to delete
+     */
+    where?: ProductOptionGroupOnProductWhereInput
+    /**
+     * Limit how many ProductOptionGroupOnProducts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionGroupOnProduct without action
+   */
+  export type ProductOptionGroupOnProductDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionGroupOnProduct
+     */
+    select?: ProductOptionGroupOnProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionGroupOnProduct
+     */
+    omit?: ProductOptionGroupOnProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionGroupOnProductInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProductOptionValue
+   */
+
+  export type AggregateProductOptionValue = {
+    _count: ProductOptionValueCountAggregateOutputType | null
+    _avg: ProductOptionValueAvgAggregateOutputType | null
+    _sum: ProductOptionValueSumAggregateOutputType | null
+    _min: ProductOptionValueMinAggregateOutputType | null
+    _max: ProductOptionValueMaxAggregateOutputType | null
+  }
+
+  export type ProductOptionValueAvgAggregateOutputType = {
+    priceDelta: number | null
+    priceOverride: number | null
+    sortOrder: number | null
+  }
+
+  export type ProductOptionValueSumAggregateOutputType = {
+    priceDelta: number | null
+    priceOverride: number | null
+    sortOrder: number | null
+  }
+
+  export type ProductOptionValueMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    groupId: string | null
+    label: string | null
+    imageUrl: string | null
+    swatchColor: string | null
+    priceDelta: number | null
+    priceOverride: number | null
+    linkedProductId: string | null
+    linkedVariantId: string | null
+    available: boolean | null
+    sortOrder: number | null
+  }
+
+  export type ProductOptionValueMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    groupId: string | null
+    label: string | null
+    imageUrl: string | null
+    swatchColor: string | null
+    priceDelta: number | null
+    priceOverride: number | null
+    linkedProductId: string | null
+    linkedVariantId: string | null
+    available: boolean | null
+    sortOrder: number | null
+  }
+
+  export type ProductOptionValueCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    groupId: number
+    label: number
+    imageUrl: number
+    swatchColor: number
+    priceDelta: number
+    priceOverride: number
+    linkedProductId: number
+    linkedVariantId: number
+    available: number
+    sortOrder: number
+    _all: number
+  }
+
+
+  export type ProductOptionValueAvgAggregateInputType = {
+    priceDelta?: true
+    priceOverride?: true
+    sortOrder?: true
+  }
+
+  export type ProductOptionValueSumAggregateInputType = {
+    priceDelta?: true
+    priceOverride?: true
+    sortOrder?: true
+  }
+
+  export type ProductOptionValueMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    groupId?: true
+    label?: true
+    imageUrl?: true
+    swatchColor?: true
+    priceDelta?: true
+    priceOverride?: true
+    linkedProductId?: true
+    linkedVariantId?: true
+    available?: true
+    sortOrder?: true
+  }
+
+  export type ProductOptionValueMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    groupId?: true
+    label?: true
+    imageUrl?: true
+    swatchColor?: true
+    priceDelta?: true
+    priceOverride?: true
+    linkedProductId?: true
+    linkedVariantId?: true
+    available?: true
+    sortOrder?: true
+  }
+
+  export type ProductOptionValueCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    groupId?: true
+    label?: true
+    imageUrl?: true
+    swatchColor?: true
+    priceDelta?: true
+    priceOverride?: true
+    linkedProductId?: true
+    linkedVariantId?: true
+    available?: true
+    sortOrder?: true
+    _all?: true
+  }
+
+  export type ProductOptionValueAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionValue to aggregate.
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionValues to fetch.
+     */
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProductOptionValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProductOptionValues
+    **/
+    _count?: true | ProductOptionValueCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ProductOptionValueAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProductOptionValueSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProductOptionValueMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProductOptionValueMaxAggregateInputType
+  }
+
+  export type GetProductOptionValueAggregateType<T extends ProductOptionValueAggregateArgs> = {
+        [P in keyof T & keyof AggregateProductOptionValue]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProductOptionValue[P]>
+      : GetScalarType<T[P], AggregateProductOptionValue[P]>
+  }
+
+
+
+
+  export type ProductOptionValueGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductOptionValueWhereInput
+    orderBy?: ProductOptionValueOrderByWithAggregationInput | ProductOptionValueOrderByWithAggregationInput[]
+    by: ProductOptionValueScalarFieldEnum[] | ProductOptionValueScalarFieldEnum
+    having?: ProductOptionValueScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProductOptionValueCountAggregateInputType | true
+    _avg?: ProductOptionValueAvgAggregateInputType
+    _sum?: ProductOptionValueSumAggregateInputType
+    _min?: ProductOptionValueMinAggregateInputType
+    _max?: ProductOptionValueMaxAggregateInputType
+  }
+
+  export type ProductOptionValueGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    groupId: string
+    label: string
+    imageUrl: string | null
+    swatchColor: string | null
+    priceDelta: number
+    priceOverride: number | null
+    linkedProductId: string | null
+    linkedVariantId: string | null
+    available: boolean
+    sortOrder: number
+    _count: ProductOptionValueCountAggregateOutputType | null
+    _avg: ProductOptionValueAvgAggregateOutputType | null
+    _sum: ProductOptionValueSumAggregateOutputType | null
+    _min: ProductOptionValueMinAggregateOutputType | null
+    _max: ProductOptionValueMaxAggregateOutputType | null
+  }
+
+  type GetProductOptionValueGroupByPayload<T extends ProductOptionValueGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProductOptionValueGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProductOptionValueGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProductOptionValueGroupByOutputType[P]>
+            : GetScalarType<T[P], ProductOptionValueGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProductOptionValueSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    groupId?: boolean
+    label?: boolean
+    imageUrl?: boolean
+    swatchColor?: boolean
+    priceDelta?: boolean
+    priceOverride?: boolean
+    linkedProductId?: boolean
+    linkedVariantId?: boolean
+    available?: boolean
+    sortOrder?: boolean
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionValue"]>
+
+  export type ProductOptionValueSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    groupId?: boolean
+    label?: boolean
+    imageUrl?: boolean
+    swatchColor?: boolean
+    priceDelta?: boolean
+    priceOverride?: boolean
+    linkedProductId?: boolean
+    linkedVariantId?: boolean
+    available?: boolean
+    sortOrder?: boolean
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionValue"]>
+
+  export type ProductOptionValueSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    groupId?: boolean
+    label?: boolean
+    imageUrl?: boolean
+    swatchColor?: boolean
+    priceDelta?: boolean
+    priceOverride?: boolean
+    linkedProductId?: boolean
+    linkedVariantId?: boolean
+    available?: boolean
+    sortOrder?: boolean
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }, ExtArgs["result"]["productOptionValue"]>
+
+  export type ProductOptionValueSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    groupId?: boolean
+    label?: boolean
+    imageUrl?: boolean
+    swatchColor?: boolean
+    priceDelta?: boolean
+    priceOverride?: boolean
+    linkedProductId?: boolean
+    linkedVariantId?: boolean
+    available?: boolean
+    sortOrder?: boolean
+  }
+
+  export type ProductOptionValueOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "groupId" | "label" | "imageUrl" | "swatchColor" | "priceDelta" | "priceOverride" | "linkedProductId" | "linkedVariantId" | "available" | "sortOrder", ExtArgs["result"]["productOptionValue"]>
+  export type ProductOptionValueInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }
+  export type ProductOptionValueIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }
+  export type ProductOptionValueIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | ProductOptionGroupDefaultArgs<ExtArgs>
+    linkedProduct?: boolean | ProductOptionValue$linkedProductArgs<ExtArgs>
+    linkedVariant?: boolean | ProductOptionValue$linkedVariantArgs<ExtArgs>
+  }
+
+  export type $ProductOptionValuePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProductOptionValue"
+    objects: {
+      group: Prisma.$ProductOptionGroupPayload<ExtArgs>
+      linkedProduct: Prisma.$ProductPayload<ExtArgs> | null
+      linkedVariant: Prisma.$ProductVariantPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      groupId: string
+      label: string
+      imageUrl: string | null
+      swatchColor: string | null
+      priceDelta: number
+      priceOverride: number | null
+      linkedProductId: string | null
+      linkedVariantId: string | null
+      available: boolean
+      sortOrder: number
+    }, ExtArgs["result"]["productOptionValue"]>
+    composites: {}
+  }
+
+  type ProductOptionValueGetPayload<S extends boolean | null | undefined | ProductOptionValueDefaultArgs> = $Result.GetResult<Prisma.$ProductOptionValuePayload, S>
+
+  type ProductOptionValueCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProductOptionValueFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProductOptionValueCountAggregateInputType | true
+    }
+
+  export interface ProductOptionValueDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProductOptionValue'], meta: { name: 'ProductOptionValue' } }
+    /**
+     * Find zero or one ProductOptionValue that matches the filter.
+     * @param {ProductOptionValueFindUniqueArgs} args - Arguments to find a ProductOptionValue
+     * @example
+     * // Get one ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProductOptionValueFindUniqueArgs>(args: SelectSubset<T, ProductOptionValueFindUniqueArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProductOptionValue that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProductOptionValueFindUniqueOrThrowArgs} args - Arguments to find a ProductOptionValue
+     * @example
+     * // Get one ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProductOptionValueFindUniqueOrThrowArgs>(args: SelectSubset<T, ProductOptionValueFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionValue that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueFindFirstArgs} args - Arguments to find a ProductOptionValue
+     * @example
+     * // Get one ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProductOptionValueFindFirstArgs>(args?: SelectSubset<T, ProductOptionValueFindFirstArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProductOptionValue that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueFindFirstOrThrowArgs} args - Arguments to find a ProductOptionValue
+     * @example
+     * // Get one ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProductOptionValueFindFirstOrThrowArgs>(args?: SelectSubset<T, ProductOptionValueFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProductOptionValues that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProductOptionValues
+     * const productOptionValues = await prisma.productOptionValue.findMany()
+     * 
+     * // Get first 10 ProductOptionValues
+     * const productOptionValues = await prisma.productOptionValue.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const productOptionValueWithIdOnly = await prisma.productOptionValue.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProductOptionValueFindManyArgs>(args?: SelectSubset<T, ProductOptionValueFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProductOptionValue.
+     * @param {ProductOptionValueCreateArgs} args - Arguments to create a ProductOptionValue.
+     * @example
+     * // Create one ProductOptionValue
+     * const ProductOptionValue = await prisma.productOptionValue.create({
+     *   data: {
+     *     // ... data to create a ProductOptionValue
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProductOptionValueCreateArgs>(args: SelectSubset<T, ProductOptionValueCreateArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProductOptionValues.
+     * @param {ProductOptionValueCreateManyArgs} args - Arguments to create many ProductOptionValues.
+     * @example
+     * // Create many ProductOptionValues
+     * const productOptionValue = await prisma.productOptionValue.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProductOptionValueCreateManyArgs>(args?: SelectSubset<T, ProductOptionValueCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProductOptionValues and returns the data saved in the database.
+     * @param {ProductOptionValueCreateManyAndReturnArgs} args - Arguments to create many ProductOptionValues.
+     * @example
+     * // Create many ProductOptionValues
+     * const productOptionValue = await prisma.productOptionValue.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ProductOptionValues and only return the `id`
+     * const productOptionValueWithIdOnly = await prisma.productOptionValue.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProductOptionValueCreateManyAndReturnArgs>(args?: SelectSubset<T, ProductOptionValueCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProductOptionValue.
+     * @param {ProductOptionValueDeleteArgs} args - Arguments to delete one ProductOptionValue.
+     * @example
+     * // Delete one ProductOptionValue
+     * const ProductOptionValue = await prisma.productOptionValue.delete({
+     *   where: {
+     *     // ... filter to delete one ProductOptionValue
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProductOptionValueDeleteArgs>(args: SelectSubset<T, ProductOptionValueDeleteArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProductOptionValue.
+     * @param {ProductOptionValueUpdateArgs} args - Arguments to update one ProductOptionValue.
+     * @example
+     * // Update one ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProductOptionValueUpdateArgs>(args: SelectSubset<T, ProductOptionValueUpdateArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProductOptionValues.
+     * @param {ProductOptionValueDeleteManyArgs} args - Arguments to filter ProductOptionValues to delete.
+     * @example
+     * // Delete a few ProductOptionValues
+     * const { count } = await prisma.productOptionValue.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProductOptionValueDeleteManyArgs>(args?: SelectSubset<T, ProductOptionValueDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionValues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProductOptionValues
+     * const productOptionValue = await prisma.productOptionValue.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProductOptionValueUpdateManyArgs>(args: SelectSubset<T, ProductOptionValueUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProductOptionValues and returns the data updated in the database.
+     * @param {ProductOptionValueUpdateManyAndReturnArgs} args - Arguments to update many ProductOptionValues.
+     * @example
+     * // Update many ProductOptionValues
+     * const productOptionValue = await prisma.productOptionValue.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ProductOptionValues and only return the `id`
+     * const productOptionValueWithIdOnly = await prisma.productOptionValue.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProductOptionValueUpdateManyAndReturnArgs>(args: SelectSubset<T, ProductOptionValueUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProductOptionValue.
+     * @param {ProductOptionValueUpsertArgs} args - Arguments to update or create a ProductOptionValue.
+     * @example
+     * // Update or create a ProductOptionValue
+     * const productOptionValue = await prisma.productOptionValue.upsert({
+     *   create: {
+     *     // ... data to create a ProductOptionValue
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProductOptionValue we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProductOptionValueUpsertArgs>(args: SelectSubset<T, ProductOptionValueUpsertArgs<ExtArgs>>): Prisma__ProductOptionValueClient<$Result.GetResult<Prisma.$ProductOptionValuePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProductOptionValues.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueCountArgs} args - Arguments to filter ProductOptionValues to count.
+     * @example
+     * // Count the number of ProductOptionValues
+     * const count = await prisma.productOptionValue.count({
+     *   where: {
+     *     // ... the filter for the ProductOptionValues we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProductOptionValueCountArgs>(
+      args?: Subset<T, ProductOptionValueCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProductOptionValueCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProductOptionValue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProductOptionValueAggregateArgs>(args: Subset<T, ProductOptionValueAggregateArgs>): Prisma.PrismaPromise<GetProductOptionValueAggregateType<T>>
+
+    /**
+     * Group by ProductOptionValue.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProductOptionValueGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProductOptionValueGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProductOptionValueGroupByArgs['orderBy'] }
+        : { orderBy?: ProductOptionValueGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProductOptionValueGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProductOptionValueGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProductOptionValue model
+   */
+  readonly fields: ProductOptionValueFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProductOptionValue.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProductOptionValueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    group<T extends ProductOptionGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionGroupDefaultArgs<ExtArgs>>): Prisma__ProductOptionGroupClient<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    linkedProduct<T extends ProductOptionValue$linkedProductArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionValue$linkedProductArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    linkedVariant<T extends ProductOptionValue$linkedVariantArgs<ExtArgs> = {}>(args?: Subset<T, ProductOptionValue$linkedVariantArgs<ExtArgs>>): Prisma__ProductVariantClient<$Result.GetResult<Prisma.$ProductVariantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProductOptionValue model
+   */
+  interface ProductOptionValueFieldRefs {
+    readonly id: FieldRef<"ProductOptionValue", 'String'>
+    readonly createdAt: FieldRef<"ProductOptionValue", 'DateTime'>
+    readonly updatedAt: FieldRef<"ProductOptionValue", 'DateTime'>
+    readonly groupId: FieldRef<"ProductOptionValue", 'String'>
+    readonly label: FieldRef<"ProductOptionValue", 'String'>
+    readonly imageUrl: FieldRef<"ProductOptionValue", 'String'>
+    readonly swatchColor: FieldRef<"ProductOptionValue", 'String'>
+    readonly priceDelta: FieldRef<"ProductOptionValue", 'Int'>
+    readonly priceOverride: FieldRef<"ProductOptionValue", 'Int'>
+    readonly linkedProductId: FieldRef<"ProductOptionValue", 'String'>
+    readonly linkedVariantId: FieldRef<"ProductOptionValue", 'String'>
+    readonly available: FieldRef<"ProductOptionValue", 'Boolean'>
+    readonly sortOrder: FieldRef<"ProductOptionValue", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProductOptionValue findUnique
+   */
+  export type ProductOptionValueFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionValue to fetch.
+     */
+    where: ProductOptionValueWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionValue findUniqueOrThrow
+   */
+  export type ProductOptionValueFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionValue to fetch.
+     */
+    where: ProductOptionValueWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionValue findFirst
+   */
+  export type ProductOptionValueFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionValue to fetch.
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionValues to fetch.
+     */
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionValues.
+     */
+    cursor?: ProductOptionValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionValues.
+     */
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionValue findFirstOrThrow
+   */
+  export type ProductOptionValueFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionValue to fetch.
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionValues to fetch.
+     */
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProductOptionValues.
+     */
+    cursor?: ProductOptionValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionValues.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProductOptionValues.
+     */
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionValue findMany
+   */
+  export type ProductOptionValueFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter, which ProductOptionValues to fetch.
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProductOptionValues to fetch.
+     */
+    orderBy?: ProductOptionValueOrderByWithRelationInput | ProductOptionValueOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProductOptionValues.
+     */
+    cursor?: ProductOptionValueWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProductOptionValues from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProductOptionValues.
+     */
+    skip?: number
+    distinct?: ProductOptionValueScalarFieldEnum | ProductOptionValueScalarFieldEnum[]
+  }
+
+  /**
+   * ProductOptionValue create
+   */
+  export type ProductOptionValueCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProductOptionValue.
+     */
+    data: XOR<ProductOptionValueCreateInput, ProductOptionValueUncheckedCreateInput>
+  }
+
+  /**
+   * ProductOptionValue createMany
+   */
+  export type ProductOptionValueCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProductOptionValues.
+     */
+    data: ProductOptionValueCreateManyInput | ProductOptionValueCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProductOptionValue createManyAndReturn
+   */
+  export type ProductOptionValueCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProductOptionValues.
+     */
+    data: ProductOptionValueCreateManyInput | ProductOptionValueCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionValue update
+   */
+  export type ProductOptionValueUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProductOptionValue.
+     */
+    data: XOR<ProductOptionValueUpdateInput, ProductOptionValueUncheckedUpdateInput>
+    /**
+     * Choose, which ProductOptionValue to update.
+     */
+    where: ProductOptionValueWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionValue updateMany
+   */
+  export type ProductOptionValueUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProductOptionValues.
+     */
+    data: XOR<ProductOptionValueUpdateManyMutationInput, ProductOptionValueUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionValues to update
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * Limit how many ProductOptionValues to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionValue updateManyAndReturn
+   */
+  export type ProductOptionValueUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * The data used to update ProductOptionValues.
+     */
+    data: XOR<ProductOptionValueUpdateManyMutationInput, ProductOptionValueUncheckedUpdateManyInput>
+    /**
+     * Filter which ProductOptionValues to update
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * Limit how many ProductOptionValues to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProductOptionValue upsert
+   */
+  export type ProductOptionValueUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProductOptionValue to update in case it exists.
+     */
+    where: ProductOptionValueWhereUniqueInput
+    /**
+     * In case the ProductOptionValue found by the `where` argument doesn't exist, create a new ProductOptionValue with this data.
+     */
+    create: XOR<ProductOptionValueCreateInput, ProductOptionValueUncheckedCreateInput>
+    /**
+     * In case the ProductOptionValue was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProductOptionValueUpdateInput, ProductOptionValueUncheckedUpdateInput>
+  }
+
+  /**
+   * ProductOptionValue delete
+   */
+  export type ProductOptionValueDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
+    /**
+     * Filter which ProductOptionValue to delete.
+     */
+    where: ProductOptionValueWhereUniqueInput
+  }
+
+  /**
+   * ProductOptionValue deleteMany
+   */
+  export type ProductOptionValueDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProductOptionValues to delete
+     */
+    where?: ProductOptionValueWhereInput
+    /**
+     * Limit how many ProductOptionValues to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProductOptionValue.linkedProduct
+   */
+  export type ProductOptionValue$linkedProductArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+  }
+
+  /**
+   * ProductOptionValue.linkedVariant
+   */
+  export type ProductOptionValue$linkedVariantArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductVariant
+     */
+    select?: ProductVariantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductVariant
+     */
+    omit?: ProductVariantOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductVariantInclude<ExtArgs> | null
+    where?: ProductVariantWhereInput
+  }
+
+  /**
+   * ProductOptionValue without action
+   */
+  export type ProductOptionValueDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductOptionValue
+     */
+    select?: ProductOptionValueSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductOptionValue
+     */
+    omit?: ProductOptionValueOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductOptionValueInclude<ExtArgs> | null
   }
 
 
@@ -37708,6 +41876,7 @@ export namespace Prisma {
     fulfilledQuantity: number
     productId: number
     productVariantId: number
+    customization: number
     orderId: number
     _all: number
   }
@@ -37766,6 +41935,7 @@ export namespace Prisma {
     fulfilledQuantity?: true
     productId?: true
     productVariantId?: true
+    customization?: true
     orderId?: true
     _all?: true
   }
@@ -37867,6 +42037,7 @@ export namespace Prisma {
     fulfilledQuantity: number
     productId: string | null
     productVariantId: string | null
+    customization: JsonValue | null
     orderId: string
     _count: OrderItemCountAggregateOutputType | null
     _avg: OrderItemAvgAggregateOutputType | null
@@ -37900,6 +42071,7 @@ export namespace Prisma {
     fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
+    customization?: boolean
     orderId?: boolean
     product?: boolean | OrderItem$productArgs<ExtArgs>
     productVariant?: boolean | OrderItem$productVariantArgs<ExtArgs>
@@ -37917,6 +42089,7 @@ export namespace Prisma {
     fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
+    customization?: boolean
     orderId?: boolean
     product?: boolean | OrderItem$productArgs<ExtArgs>
     productVariant?: boolean | OrderItem$productVariantArgs<ExtArgs>
@@ -37934,6 +42107,7 @@ export namespace Prisma {
     fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
+    customization?: boolean
     orderId?: boolean
     product?: boolean | OrderItem$productArgs<ExtArgs>
     productVariant?: boolean | OrderItem$productVariantArgs<ExtArgs>
@@ -37951,10 +42125,11 @@ export namespace Prisma {
     fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
+    customization?: boolean
     orderId?: boolean
   }
 
-  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productName" | "variantName" | "sku" | "price" | "quantity" | "total" | "fulfilledQuantity" | "productId" | "productVariantId" | "orderId", ExtArgs["result"]["orderItem"]>
+  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productName" | "variantName" | "sku" | "price" | "quantity" | "total" | "fulfilledQuantity" | "productId" | "productVariantId" | "customization" | "orderId", ExtArgs["result"]["orderItem"]>
   export type OrderItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | OrderItem$productArgs<ExtArgs>
     productVariant?: boolean | OrderItem$productVariantArgs<ExtArgs>
@@ -37989,6 +42164,7 @@ export namespace Prisma {
       fulfilledQuantity: number
       productId: string | null
       productVariantId: string | null
+      customization: Prisma.JsonValue | null
       orderId: string
     }, ExtArgs["result"]["orderItem"]>
     composites: {}
@@ -38426,6 +42602,7 @@ export namespace Prisma {
     readonly fulfilledQuantity: FieldRef<"OrderItem", 'Int'>
     readonly productId: FieldRef<"OrderItem", 'String'>
     readonly productVariantId: FieldRef<"OrderItem", 'String'>
+    readonly customization: FieldRef<"OrderItem", 'Json'>
     readonly orderId: FieldRef<"OrderItem", 'String'>
   }
     
@@ -46460,6 +50637,7 @@ export namespace Prisma {
     status: number
     expiresAt: number
     items: number
+    lineConfigs: number
     _all: number
   }
 
@@ -46493,6 +50671,7 @@ export namespace Prisma {
     status?: true
     expiresAt?: true
     items?: true
+    lineConfigs?: true
     _all?: true
   }
 
@@ -46577,6 +50756,7 @@ export namespace Prisma {
     status: string
     expiresAt: Date
     items: JsonValue
+    lineConfigs: JsonValue | null
     _count: InventoryReservationCountAggregateOutputType | null
     _min: InventoryReservationMinAggregateOutputType | null
     _max: InventoryReservationMaxAggregateOutputType | null
@@ -46605,6 +50785,7 @@ export namespace Prisma {
     status?: boolean
     expiresAt?: boolean
     items?: boolean
+    lineConfigs?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryReservation"]>
 
@@ -46617,6 +50798,7 @@ export namespace Prisma {
     status?: boolean
     expiresAt?: boolean
     items?: boolean
+    lineConfigs?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryReservation"]>
 
@@ -46629,6 +50811,7 @@ export namespace Prisma {
     status?: boolean
     expiresAt?: boolean
     items?: boolean
+    lineConfigs?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryReservation"]>
 
@@ -46641,9 +50824,10 @@ export namespace Prisma {
     status?: boolean
     expiresAt?: boolean
     items?: boolean
+    lineConfigs?: boolean
   }
 
-  export type InventoryReservationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "stripeSessionId" | "status" | "expiresAt" | "items", ExtArgs["result"]["inventoryReservation"]>
+  export type InventoryReservationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "stripeSessionId" | "status" | "expiresAt" | "items" | "lineConfigs", ExtArgs["result"]["inventoryReservation"]>
   export type InventoryReservationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -46668,6 +50852,7 @@ export namespace Prisma {
       status: string
       expiresAt: Date
       items: Prisma.JsonValue
+      lineConfigs: Prisma.JsonValue | null
     }, ExtArgs["result"]["inventoryReservation"]>
     composites: {}
   }
@@ -47100,6 +51285,7 @@ export namespace Prisma {
     readonly status: FieldRef<"InventoryReservation", 'String'>
     readonly expiresAt: FieldRef<"InventoryReservation", 'DateTime'>
     readonly items: FieldRef<"InventoryReservation", 'Json'>
+    readonly lineConfigs: FieldRef<"InventoryReservation", 'Json'>
   }
     
 
@@ -84510,7 +88696,8 @@ export namespace Prisma {
     businessId: 'businessId',
     role: 'role',
     merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
-    merchantTermsVersion: 'merchantTermsVersion'
+    merchantTermsVersion: 'merchantTermsVersion',
+    dashboardLayout: 'dashboardLayout'
   };
 
   export type BusinessMembershipScalarFieldEnum = (typeof BusinessMembershipScalarFieldEnum)[keyof typeof BusinessMembershipScalarFieldEnum]
@@ -84607,6 +88794,10 @@ export namespace Prisma {
     umamiEnabled: 'umamiEnabled',
     status: 'status',
     onboardingComplete: 'onboardingComplete',
+    businessType: 'businessType',
+    setupSteps: 'setupSteps',
+    setupConfirmations: 'setupConfirmations',
+    setupCompletedAt: 'setupCompletedAt',
     localBusinessEnabled: 'localBusinessEnabled',
     localPresence: 'localPresence',
     areaServed: 'areaServed',
@@ -84762,6 +88953,57 @@ export namespace Prisma {
   };
 
   export type ProductVariantScalarFieldEnum = (typeof ProductVariantScalarFieldEnum)[keyof typeof ProductVariantScalarFieldEnum]
+
+
+  export const ProductOptionGroupScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    name: 'name',
+    adminLabel: 'adminLabel',
+    helpText: 'helpText',
+    kind: 'kind',
+    required: 'required',
+    minSelections: 'minSelections',
+    maxSelections: 'maxSelections',
+    includedCount: 'includedCount',
+    display: 'display',
+    maxLength: 'maxLength',
+    placeholder: 'placeholder',
+    textPriceCents: 'textPriceCents'
+  };
+
+  export type ProductOptionGroupScalarFieldEnum = (typeof ProductOptionGroupScalarFieldEnum)[keyof typeof ProductOptionGroupScalarFieldEnum]
+
+
+  export const ProductOptionGroupOnProductScalarFieldEnum: {
+    productId: 'productId',
+    groupId: 'groupId',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt'
+  };
+
+  export type ProductOptionGroupOnProductScalarFieldEnum = (typeof ProductOptionGroupOnProductScalarFieldEnum)[keyof typeof ProductOptionGroupOnProductScalarFieldEnum]
+
+
+  export const ProductOptionValueScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    groupId: 'groupId',
+    label: 'label',
+    imageUrl: 'imageUrl',
+    swatchColor: 'swatchColor',
+    priceDelta: 'priceDelta',
+    priceOverride: 'priceOverride',
+    linkedProductId: 'linkedProductId',
+    linkedVariantId: 'linkedVariantId',
+    available: 'available',
+    sortOrder: 'sortOrder'
+  };
+
+  export type ProductOptionValueScalarFieldEnum = (typeof ProductOptionValueScalarFieldEnum)[keyof typeof ProductOptionValueScalarFieldEnum]
 
 
   export const CollectionScalarFieldEnum: {
@@ -85035,6 +89277,7 @@ export namespace Prisma {
     fulfilledQuantity: 'fulfilledQuantity',
     productId: 'productId',
     productVariantId: 'productVariantId',
+    customization: 'customization',
     orderId: 'orderId'
   };
 
@@ -85162,7 +89405,8 @@ export namespace Prisma {
     stripeSessionId: 'stripeSessionId',
     status: 'status',
     expiresAt: 'expiresAt',
-    items: 'items'
+    items: 'items',
+    lineConfigs: 'lineConfigs'
   };
 
   export type InventoryReservationScalarFieldEnum = (typeof InventoryReservationScalarFieldEnum)[keyof typeof InventoryReservationScalarFieldEnum]
@@ -85898,6 +90142,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'BusinessDomainStatus'
    */
   export type EnumBusinessDomainStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BusinessDomainStatus'>
@@ -85922,20 +90180,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -86068,6 +90312,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -86080,6 +90325,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrderInput | SortOrder
     merchantTermsVersion?: SortOrderInput | SortOrder
+    dashboardLayout?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
   }
@@ -86096,6 +90342,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "userId_businessId">
@@ -86108,6 +90355,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrderInput | SortOrder
     merchantTermsVersion?: SortOrderInput | SortOrder
+    dashboardLayout?: SortOrderInput | SortOrder
     _count?: BusinessMembershipCountOrderByAggregateInput
     _max?: BusinessMembershipMaxOrderByAggregateInput
     _min?: BusinessMembershipMinOrderByAggregateInput
@@ -86124,6 +90372,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleWithAggregatesFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableWithAggregatesFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableWithAggregatesFilter<"BusinessMembership">
   }
 
   export type SessionWhereInput = {
@@ -86413,6 +90662,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    businessType?: StringNullableFilter<"Business"> | string | null
+    setupSteps?: JsonNullableFilter<"Business">
+    setupConfirmations?: JsonFilter<"Business">
+    setupCompletedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     localPresence?: StringFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -86488,6 +90741,7 @@ export namespace Prisma {
     donations?: DonationListRelationFilter
     loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
+    productOptionGroups?: ProductOptionGroupListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -86532,6 +90786,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrderInput | SortOrder
+    setupSteps?: SortOrderInput | SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrderInput | SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -86607,6 +90865,7 @@ export namespace Prisma {
     donations?: DonationOrderByRelationAggregateInput
     loyaltyProgram?: LoyaltyProgramOrderByWithRelationInput
     loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
+    productOptionGroups?: ProductOptionGroupOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -86654,6 +90913,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    businessType?: StringNullableFilter<"Business"> | string | null
+    setupSteps?: JsonNullableFilter<"Business">
+    setupConfirmations?: JsonFilter<"Business">
+    setupCompletedAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     localPresence?: StringFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -86729,6 +90992,7 @@ export namespace Prisma {
     donations?: DonationListRelationFilter
     loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
+    productOptionGroups?: ProductOptionGroupListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -86773,6 +91037,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrderInput | SortOrder
+    setupSteps?: SortOrderInput | SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrderInput | SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -86859,6 +91127,10 @@ export namespace Prisma {
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
+    businessType?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    setupSteps?: JsonNullableWithAggregatesFilter<"Business">
+    setupConfirmations?: JsonWithAggregatesFilter<"Business">
+    setupCompletedAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
     localBusinessEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     localPresence?: StringWithAggregatesFilter<"Business"> | string
     areaServed?: StringNullableListFilter<"Business">
@@ -87223,6 +91495,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    optionGroups?: ProductOptionGroupOnProductListRelationFilter
+    linkedOptionValues?: ProductOptionValueListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }
 
@@ -87274,6 +91548,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
+    optionGroups?: ProductOptionGroupOnProductOrderByRelationAggregateInput
+    linkedOptionValues?: ProductOptionValueOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
   }
 
@@ -87329,6 +91605,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    optionGroups?: ProductOptionGroupOnProductListRelationFilter
+    linkedOptionValues?: ProductOptionValueListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }, "id" | "businessId_slug">
 
@@ -87443,6 +91721,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     orderItems?: OrderItemListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    linkedOptionValues?: ProductOptionValueListRelationFilter
   }
 
   export type ProductVariantOrderByWithRelationInput = {
@@ -87463,6 +91742,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     orderItems?: OrderItemOrderByRelationAggregateInput
     subscriptions?: SubscriptionOrderByRelationAggregateInput
+    linkedOptionValues?: ProductOptionValueOrderByRelationAggregateInput
   }
 
   export type ProductVariantWhereUniqueInput = Prisma.AtLeast<{
@@ -87486,6 +91766,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryListRelationFilter
     orderItems?: OrderItemListRelationFilter
     subscriptions?: SubscriptionListRelationFilter
+    linkedOptionValues?: ProductOptionValueListRelationFilter
   }, "id">
 
   export type ProductVariantOrderByWithAggregationInput = {
@@ -87526,6 +91807,283 @@ export namespace Prisma {
     options?: JsonWithAggregatesFilter<"ProductVariant">
     imageUrl?: StringNullableWithAggregatesFilter<"ProductVariant"> | string | null
     productId?: StringWithAggregatesFilter<"ProductVariant"> | string
+  }
+
+  export type ProductOptionGroupWhereInput = {
+    AND?: ProductOptionGroupWhereInput | ProductOptionGroupWhereInput[]
+    OR?: ProductOptionGroupWhereInput[]
+    NOT?: ProductOptionGroupWhereInput | ProductOptionGroupWhereInput[]
+    id?: StringFilter<"ProductOptionGroup"> | string
+    createdAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    businessId?: StringFilter<"ProductOptionGroup"> | string
+    name?: StringFilter<"ProductOptionGroup"> | string
+    adminLabel?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    helpText?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    kind?: StringFilter<"ProductOptionGroup"> | string
+    required?: BoolFilter<"ProductOptionGroup"> | boolean
+    minSelections?: IntFilter<"ProductOptionGroup"> | number
+    maxSelections?: IntFilter<"ProductOptionGroup"> | number
+    includedCount?: IntFilter<"ProductOptionGroup"> | number
+    display?: StringFilter<"ProductOptionGroup"> | string
+    maxLength?: IntNullableFilter<"ProductOptionGroup"> | number | null
+    placeholder?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    textPriceCents?: IntFilter<"ProductOptionGroup"> | number
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    values?: ProductOptionValueListRelationFilter
+    products?: ProductOptionGroupOnProductListRelationFilter
+  }
+
+  export type ProductOptionGroupOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    adminLabel?: SortOrderInput | SortOrder
+    helpText?: SortOrderInput | SortOrder
+    kind?: SortOrder
+    required?: SortOrder
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    display?: SortOrder
+    maxLength?: SortOrderInput | SortOrder
+    placeholder?: SortOrderInput | SortOrder
+    textPriceCents?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    values?: ProductOptionValueOrderByRelationAggregateInput
+    products?: ProductOptionGroupOnProductOrderByRelationAggregateInput
+  }
+
+  export type ProductOptionGroupWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ProductOptionGroupWhereInput | ProductOptionGroupWhereInput[]
+    OR?: ProductOptionGroupWhereInput[]
+    NOT?: ProductOptionGroupWhereInput | ProductOptionGroupWhereInput[]
+    createdAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    businessId?: StringFilter<"ProductOptionGroup"> | string
+    name?: StringFilter<"ProductOptionGroup"> | string
+    adminLabel?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    helpText?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    kind?: StringFilter<"ProductOptionGroup"> | string
+    required?: BoolFilter<"ProductOptionGroup"> | boolean
+    minSelections?: IntFilter<"ProductOptionGroup"> | number
+    maxSelections?: IntFilter<"ProductOptionGroup"> | number
+    includedCount?: IntFilter<"ProductOptionGroup"> | number
+    display?: StringFilter<"ProductOptionGroup"> | string
+    maxLength?: IntNullableFilter<"ProductOptionGroup"> | number | null
+    placeholder?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    textPriceCents?: IntFilter<"ProductOptionGroup"> | number
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    values?: ProductOptionValueListRelationFilter
+    products?: ProductOptionGroupOnProductListRelationFilter
+  }, "id">
+
+  export type ProductOptionGroupOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    adminLabel?: SortOrderInput | SortOrder
+    helpText?: SortOrderInput | SortOrder
+    kind?: SortOrder
+    required?: SortOrder
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    display?: SortOrder
+    maxLength?: SortOrderInput | SortOrder
+    placeholder?: SortOrderInput | SortOrder
+    textPriceCents?: SortOrder
+    _count?: ProductOptionGroupCountOrderByAggregateInput
+    _avg?: ProductOptionGroupAvgOrderByAggregateInput
+    _max?: ProductOptionGroupMaxOrderByAggregateInput
+    _min?: ProductOptionGroupMinOrderByAggregateInput
+    _sum?: ProductOptionGroupSumOrderByAggregateInput
+  }
+
+  export type ProductOptionGroupScalarWhereWithAggregatesInput = {
+    AND?: ProductOptionGroupScalarWhereWithAggregatesInput | ProductOptionGroupScalarWhereWithAggregatesInput[]
+    OR?: ProductOptionGroupScalarWhereWithAggregatesInput[]
+    NOT?: ProductOptionGroupScalarWhereWithAggregatesInput | ProductOptionGroupScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ProductOptionGroup"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ProductOptionGroup"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ProductOptionGroup"> | Date | string
+    businessId?: StringWithAggregatesFilter<"ProductOptionGroup"> | string
+    name?: StringWithAggregatesFilter<"ProductOptionGroup"> | string
+    adminLabel?: StringNullableWithAggregatesFilter<"ProductOptionGroup"> | string | null
+    helpText?: StringNullableWithAggregatesFilter<"ProductOptionGroup"> | string | null
+    kind?: StringWithAggregatesFilter<"ProductOptionGroup"> | string
+    required?: BoolWithAggregatesFilter<"ProductOptionGroup"> | boolean
+    minSelections?: IntWithAggregatesFilter<"ProductOptionGroup"> | number
+    maxSelections?: IntWithAggregatesFilter<"ProductOptionGroup"> | number
+    includedCount?: IntWithAggregatesFilter<"ProductOptionGroup"> | number
+    display?: StringWithAggregatesFilter<"ProductOptionGroup"> | string
+    maxLength?: IntNullableWithAggregatesFilter<"ProductOptionGroup"> | number | null
+    placeholder?: StringNullableWithAggregatesFilter<"ProductOptionGroup"> | string | null
+    textPriceCents?: IntWithAggregatesFilter<"ProductOptionGroup"> | number
+  }
+
+  export type ProductOptionGroupOnProductWhereInput = {
+    AND?: ProductOptionGroupOnProductWhereInput | ProductOptionGroupOnProductWhereInput[]
+    OR?: ProductOptionGroupOnProductWhereInput[]
+    NOT?: ProductOptionGroupOnProductWhereInput | ProductOptionGroupOnProductWhereInput[]
+    productId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    groupId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    sortOrder?: IntFilter<"ProductOptionGroupOnProduct"> | number
+    createdAt?: DateTimeFilter<"ProductOptionGroupOnProduct"> | Date | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    group?: XOR<ProductOptionGroupScalarRelationFilter, ProductOptionGroupWhereInput>
+  }
+
+  export type ProductOptionGroupOnProductOrderByWithRelationInput = {
+    productId?: SortOrder
+    groupId?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    product?: ProductOrderByWithRelationInput
+    group?: ProductOptionGroupOrderByWithRelationInput
+  }
+
+  export type ProductOptionGroupOnProductWhereUniqueInput = Prisma.AtLeast<{
+    productId_groupId?: ProductOptionGroupOnProductProductIdGroupIdCompoundUniqueInput
+    AND?: ProductOptionGroupOnProductWhereInput | ProductOptionGroupOnProductWhereInput[]
+    OR?: ProductOptionGroupOnProductWhereInput[]
+    NOT?: ProductOptionGroupOnProductWhereInput | ProductOptionGroupOnProductWhereInput[]
+    productId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    groupId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    sortOrder?: IntFilter<"ProductOptionGroupOnProduct"> | number
+    createdAt?: DateTimeFilter<"ProductOptionGroupOnProduct"> | Date | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    group?: XOR<ProductOptionGroupScalarRelationFilter, ProductOptionGroupWhereInput>
+  }, "productId_groupId">
+
+  export type ProductOptionGroupOnProductOrderByWithAggregationInput = {
+    productId?: SortOrder
+    groupId?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    _count?: ProductOptionGroupOnProductCountOrderByAggregateInput
+    _avg?: ProductOptionGroupOnProductAvgOrderByAggregateInput
+    _max?: ProductOptionGroupOnProductMaxOrderByAggregateInput
+    _min?: ProductOptionGroupOnProductMinOrderByAggregateInput
+    _sum?: ProductOptionGroupOnProductSumOrderByAggregateInput
+  }
+
+  export type ProductOptionGroupOnProductScalarWhereWithAggregatesInput = {
+    AND?: ProductOptionGroupOnProductScalarWhereWithAggregatesInput | ProductOptionGroupOnProductScalarWhereWithAggregatesInput[]
+    OR?: ProductOptionGroupOnProductScalarWhereWithAggregatesInput[]
+    NOT?: ProductOptionGroupOnProductScalarWhereWithAggregatesInput | ProductOptionGroupOnProductScalarWhereWithAggregatesInput[]
+    productId?: StringWithAggregatesFilter<"ProductOptionGroupOnProduct"> | string
+    groupId?: StringWithAggregatesFilter<"ProductOptionGroupOnProduct"> | string
+    sortOrder?: IntWithAggregatesFilter<"ProductOptionGroupOnProduct"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"ProductOptionGroupOnProduct"> | Date | string
+  }
+
+  export type ProductOptionValueWhereInput = {
+    AND?: ProductOptionValueWhereInput | ProductOptionValueWhereInput[]
+    OR?: ProductOptionValueWhereInput[]
+    NOT?: ProductOptionValueWhereInput | ProductOptionValueWhereInput[]
+    id?: StringFilter<"ProductOptionValue"> | string
+    createdAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    groupId?: StringFilter<"ProductOptionValue"> | string
+    label?: StringFilter<"ProductOptionValue"> | string
+    imageUrl?: StringNullableFilter<"ProductOptionValue"> | string | null
+    swatchColor?: StringNullableFilter<"ProductOptionValue"> | string | null
+    priceDelta?: IntFilter<"ProductOptionValue"> | number
+    priceOverride?: IntNullableFilter<"ProductOptionValue"> | number | null
+    linkedProductId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    linkedVariantId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    available?: BoolFilter<"ProductOptionValue"> | boolean
+    sortOrder?: IntFilter<"ProductOptionValue"> | number
+    group?: XOR<ProductOptionGroupScalarRelationFilter, ProductOptionGroupWhereInput>
+    linkedProduct?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
+    linkedVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
+  }
+
+  export type ProductOptionValueOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    groupId?: SortOrder
+    label?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    swatchColor?: SortOrderInput | SortOrder
+    priceDelta?: SortOrder
+    priceOverride?: SortOrderInput | SortOrder
+    linkedProductId?: SortOrderInput | SortOrder
+    linkedVariantId?: SortOrderInput | SortOrder
+    available?: SortOrder
+    sortOrder?: SortOrder
+    group?: ProductOptionGroupOrderByWithRelationInput
+    linkedProduct?: ProductOrderByWithRelationInput
+    linkedVariant?: ProductVariantOrderByWithRelationInput
+  }
+
+  export type ProductOptionValueWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ProductOptionValueWhereInput | ProductOptionValueWhereInput[]
+    OR?: ProductOptionValueWhereInput[]
+    NOT?: ProductOptionValueWhereInput | ProductOptionValueWhereInput[]
+    createdAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    groupId?: StringFilter<"ProductOptionValue"> | string
+    label?: StringFilter<"ProductOptionValue"> | string
+    imageUrl?: StringNullableFilter<"ProductOptionValue"> | string | null
+    swatchColor?: StringNullableFilter<"ProductOptionValue"> | string | null
+    priceDelta?: IntFilter<"ProductOptionValue"> | number
+    priceOverride?: IntNullableFilter<"ProductOptionValue"> | number | null
+    linkedProductId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    linkedVariantId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    available?: BoolFilter<"ProductOptionValue"> | boolean
+    sortOrder?: IntFilter<"ProductOptionValue"> | number
+    group?: XOR<ProductOptionGroupScalarRelationFilter, ProductOptionGroupWhereInput>
+    linkedProduct?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
+    linkedVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
+  }, "id">
+
+  export type ProductOptionValueOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    groupId?: SortOrder
+    label?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    swatchColor?: SortOrderInput | SortOrder
+    priceDelta?: SortOrder
+    priceOverride?: SortOrderInput | SortOrder
+    linkedProductId?: SortOrderInput | SortOrder
+    linkedVariantId?: SortOrderInput | SortOrder
+    available?: SortOrder
+    sortOrder?: SortOrder
+    _count?: ProductOptionValueCountOrderByAggregateInput
+    _avg?: ProductOptionValueAvgOrderByAggregateInput
+    _max?: ProductOptionValueMaxOrderByAggregateInput
+    _min?: ProductOptionValueMinOrderByAggregateInput
+    _sum?: ProductOptionValueSumOrderByAggregateInput
+  }
+
+  export type ProductOptionValueScalarWhereWithAggregatesInput = {
+    AND?: ProductOptionValueScalarWhereWithAggregatesInput | ProductOptionValueScalarWhereWithAggregatesInput[]
+    OR?: ProductOptionValueScalarWhereWithAggregatesInput[]
+    NOT?: ProductOptionValueScalarWhereWithAggregatesInput | ProductOptionValueScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ProductOptionValue"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ProductOptionValue"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ProductOptionValue"> | Date | string
+    groupId?: StringWithAggregatesFilter<"ProductOptionValue"> | string
+    label?: StringWithAggregatesFilter<"ProductOptionValue"> | string
+    imageUrl?: StringNullableWithAggregatesFilter<"ProductOptionValue"> | string | null
+    swatchColor?: StringNullableWithAggregatesFilter<"ProductOptionValue"> | string | null
+    priceDelta?: IntWithAggregatesFilter<"ProductOptionValue"> | number
+    priceOverride?: IntNullableWithAggregatesFilter<"ProductOptionValue"> | number | null
+    linkedProductId?: StringNullableWithAggregatesFilter<"ProductOptionValue"> | string | null
+    linkedVariantId?: StringNullableWithAggregatesFilter<"ProductOptionValue"> | string | null
+    available?: BoolWithAggregatesFilter<"ProductOptionValue"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"ProductOptionValue"> | number
   }
 
   export type CollectionWhereInput = {
@@ -88946,6 +93504,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
+    customization?: JsonNullableFilter<"OrderItem">
     orderId?: StringFilter<"OrderItem"> | string
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
     productVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
@@ -88963,6 +93522,7 @@ export namespace Prisma {
     fulfilledQuantity?: SortOrder
     productId?: SortOrderInput | SortOrder
     productVariantId?: SortOrderInput | SortOrder
+    customization?: SortOrderInput | SortOrder
     orderId?: SortOrder
     product?: ProductOrderByWithRelationInput
     productVariant?: ProductVariantOrderByWithRelationInput
@@ -88983,6 +93543,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
+    customization?: JsonNullableFilter<"OrderItem">
     orderId?: StringFilter<"OrderItem"> | string
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
     productVariant?: XOR<ProductVariantNullableScalarRelationFilter, ProductVariantWhereInput> | null
@@ -89000,6 +93561,7 @@ export namespace Prisma {
     fulfilledQuantity?: SortOrder
     productId?: SortOrderInput | SortOrder
     productVariantId?: SortOrderInput | SortOrder
+    customization?: SortOrderInput | SortOrder
     orderId?: SortOrder
     _count?: OrderItemCountOrderByAggregateInput
     _avg?: OrderItemAvgOrderByAggregateInput
@@ -89022,6 +93584,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntWithAggregatesFilter<"OrderItem"> | number
     productId?: StringNullableWithAggregatesFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableWithAggregatesFilter<"OrderItem"> | string | null
+    customization?: JsonNullableWithAggregatesFilter<"OrderItem">
     orderId?: StringWithAggregatesFilter<"OrderItem"> | string
   }
 
@@ -89660,6 +94223,7 @@ export namespace Prisma {
     status?: StringFilter<"InventoryReservation"> | string
     expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
     items?: JsonFilter<"InventoryReservation">
+    lineConfigs?: JsonNullableFilter<"InventoryReservation">
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
 
@@ -89672,6 +94236,7 @@ export namespace Prisma {
     status?: SortOrder
     expiresAt?: SortOrder
     items?: SortOrder
+    lineConfigs?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
   }
 
@@ -89687,6 +94252,7 @@ export namespace Prisma {
     status?: StringFilter<"InventoryReservation"> | string
     expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
     items?: JsonFilter<"InventoryReservation">
+    lineConfigs?: JsonNullableFilter<"InventoryReservation">
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "stripeSessionId">
 
@@ -89699,6 +94265,7 @@ export namespace Prisma {
     status?: SortOrder
     expiresAt?: SortOrder
     items?: SortOrder
+    lineConfigs?: SortOrderInput | SortOrder
     _count?: InventoryReservationCountOrderByAggregateInput
     _max?: InventoryReservationMaxOrderByAggregateInput
     _min?: InventoryReservationMinOrderByAggregateInput
@@ -89716,6 +94283,7 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"InventoryReservation"> | string
     expiresAt?: DateTimeWithAggregatesFilter<"InventoryReservation"> | Date | string
     items?: JsonWithAggregatesFilter<"InventoryReservation">
+    lineConfigs?: JsonNullableWithAggregatesFilter<"InventoryReservation">
   }
 
   export type PageWhereInput = {
@@ -93041,6 +97609,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutMembershipsInput
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
@@ -93053,6 +97622,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUpdateInput = {
@@ -93061,6 +97631,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
@@ -93073,6 +97644,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateManyInput = {
@@ -93083,6 +97655,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUpdateManyMutationInput = {
@@ -93091,6 +97664,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyInput = {
@@ -93101,6 +97675,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SessionCreateInput = {
@@ -93423,6 +97998,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93498,6 +98077,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -93542,6 +98122,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93617,6 +98201,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -93661,6 +98246,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -93736,6 +98325,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -93780,6 +98370,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -93855,6 +98449,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -93899,6 +98494,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -93977,6 +98576,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -94055,6 +98658,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -94478,6 +99085,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -94527,6 +99136,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -94576,6 +99187,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -94625,6 +99238,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -94766,6 +99381,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUncheckedCreateInput = {
@@ -94785,6 +99401,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUpdateInput = {
@@ -94804,6 +99421,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateInput = {
@@ -94823,6 +99441,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantCreateManyInput = {
@@ -94870,6 +99489,302 @@ export namespace Prisma {
     options?: JsonNullValueInput | InputJsonValue
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ProductOptionGroupCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    business: BusinessCreateNestedOneWithoutProductOptionGroupsInput
+    values?: ProductOptionValueCreateNestedManyWithoutGroupInput
+    products?: ProductOptionGroupOnProductCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    values?: ProductOptionValueUncheckedCreateNestedManyWithoutGroupInput
+    products?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutProductOptionGroupsNestedInput
+    values?: ProductOptionValueUpdateManyWithoutGroupNestedInput
+    products?: ProductOptionGroupOnProductUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    values?: ProductOptionValueUncheckedUpdateManyWithoutGroupNestedInput
+    products?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+  }
+
+  export type ProductOptionGroupUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionGroupUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionGroupOnProductCreateInput = {
+    sortOrder?: number
+    createdAt?: Date | string
+    product: ProductCreateNestedOneWithoutOptionGroupsInput
+    group: ProductOptionGroupCreateNestedOneWithoutProductsInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedCreateInput = {
+    productId: string
+    groupId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionGroupOnProductUpdateInput = {
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: ProductUpdateOneRequiredWithoutOptionGroupsNestedInput
+    group?: ProductOptionGroupUpdateOneRequiredWithoutProductsNestedInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateInput = {
+    productId?: StringFieldUpdateOperationsInput | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionGroupOnProductCreateManyInput = {
+    productId: string
+    groupId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionGroupOnProductUpdateManyMutationInput = {
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateManyInput = {
+    productId?: StringFieldUpdateOperationsInput | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionValueCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    available?: boolean
+    sortOrder?: number
+    group: ProductOptionGroupCreateNestedOneWithoutValuesInput
+    linkedProduct?: ProductCreateNestedOneWithoutLinkedOptionValuesInput
+    linkedVariant?: ProductVariantCreateNestedOneWithoutLinkedOptionValuesInput
+  }
+
+  export type ProductOptionValueUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionValueUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    group?: ProductOptionGroupUpdateOneRequiredWithoutValuesNestedInput
+    linkedProduct?: ProductUpdateOneWithoutLinkedOptionValuesNestedInput
+    linkedVariant?: ProductVariantUpdateOneWithoutLinkedOptionValuesNestedInput
+  }
+
+  export type ProductOptionValueUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionValueUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
   }
 
   export type CollectionCreateInput = {
@@ -96501,6 +101416,7 @@ export namespace Prisma {
     quantity: number
     total: number
     fulfilledQuantity?: number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
@@ -96517,6 +101433,7 @@ export namespace Prisma {
     fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -96529,6 +101446,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
@@ -96545,6 +101463,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -96559,6 +101478,7 @@ export namespace Prisma {
     fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -96571,6 +101491,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
+    customization?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderItemUncheckedUpdateManyInput = {
@@ -96584,6 +101505,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -97274,6 +102196,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutInventoryReservationsInput
   }
 
@@ -97286,6 +102209,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUpdateInput = {
@@ -97296,6 +102220,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutInventoryReservationsNestedInput
   }
 
@@ -97308,6 +102233,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationCreateManyInput = {
@@ -97319,6 +102245,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUpdateManyMutationInput = {
@@ -97329,6 +102256,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUncheckedUpdateManyInput = {
@@ -97340,6 +102268,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type PageCreateInput = {
@@ -101271,6 +106200,29 @@ export namespace Prisma {
     notIn?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
     not?: NestedEnumBusinessRoleFilter<$PrismaModel> | $Enums.BusinessRole
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
@@ -101295,6 +106247,7 @@ export namespace Prisma {
     role?: SortOrder
     merchantTermsAcceptedAt?: SortOrder
     merchantTermsVersion?: SortOrder
+    dashboardLayout?: SortOrder
   }
 
   export type BusinessMembershipMaxOrderByAggregateInput = {
@@ -101325,6 +106278,32 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type SessionCountOrderByAggregateInput = {
@@ -101464,37 +106443,6 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -101517,6 +106465,14 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -101736,6 +106692,12 @@ export namespace Prisma {
     none?: LoyaltyLedgerWhereInput
   }
 
+  export type ProductOptionGroupListRelationFilter = {
+    every?: ProductOptionGroupWhereInput
+    some?: ProductOptionGroupWhereInput
+    none?: ProductOptionGroupWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -101860,6 +106822,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ProductOptionGroupOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -101902,6 +106868,10 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupSteps?: SortOrder
+    setupConfirmations?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     areaServed?: SortOrder
@@ -101993,6 +106963,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
@@ -102063,6 +107035,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    businessType?: SortOrder
+    setupCompletedAt?: SortOrder
     localBusinessEnabled?: SortOrder
     localPresence?: SortOrder
     allowAiCrawlers?: SortOrder
@@ -102132,32 +107106,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -102396,6 +107344,18 @@ export namespace Prisma {
     none?: OrderItemWhereInput
   }
 
+  export type ProductOptionGroupOnProductListRelationFilter = {
+    every?: ProductOptionGroupOnProductWhereInput
+    some?: ProductOptionGroupOnProductWhereInput
+    none?: ProductOptionGroupOnProductWhereInput
+  }
+
+  export type ProductOptionValueListRelationFilter = {
+    every?: ProductOptionValueWhereInput
+    some?: ProductOptionValueWhereInput
+    none?: ProductOptionValueWhereInput
+  }
+
   export type ProductReviewListRelationFilter = {
     every?: ProductReviewWhereInput
     some?: ProductReviewWhereInput
@@ -102411,6 +107371,14 @@ export namespace Prisma {
   }
 
   export type OrderItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProductOptionGroupOnProductOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProductOptionValueOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -102651,6 +107619,188 @@ export namespace Prisma {
     compareAtPrice?: SortOrder
     inventoryQty?: SortOrder
     reservedQty?: SortOrder
+  }
+
+  export type ProductOptionGroupCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    adminLabel?: SortOrder
+    helpText?: SortOrder
+    kind?: SortOrder
+    required?: SortOrder
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    display?: SortOrder
+    maxLength?: SortOrder
+    placeholder?: SortOrder
+    textPriceCents?: SortOrder
+  }
+
+  export type ProductOptionGroupAvgOrderByAggregateInput = {
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    maxLength?: SortOrder
+    textPriceCents?: SortOrder
+  }
+
+  export type ProductOptionGroupMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    adminLabel?: SortOrder
+    helpText?: SortOrder
+    kind?: SortOrder
+    required?: SortOrder
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    display?: SortOrder
+    maxLength?: SortOrder
+    placeholder?: SortOrder
+    textPriceCents?: SortOrder
+  }
+
+  export type ProductOptionGroupMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    adminLabel?: SortOrder
+    helpText?: SortOrder
+    kind?: SortOrder
+    required?: SortOrder
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    display?: SortOrder
+    maxLength?: SortOrder
+    placeholder?: SortOrder
+    textPriceCents?: SortOrder
+  }
+
+  export type ProductOptionGroupSumOrderByAggregateInput = {
+    minSelections?: SortOrder
+    maxSelections?: SortOrder
+    includedCount?: SortOrder
+    maxLength?: SortOrder
+    textPriceCents?: SortOrder
+  }
+
+  export type ProductOptionGroupScalarRelationFilter = {
+    is?: ProductOptionGroupWhereInput
+    isNot?: ProductOptionGroupWhereInput
+  }
+
+  export type ProductOptionGroupOnProductProductIdGroupIdCompoundUniqueInput = {
+    productId: string
+    groupId: string
+  }
+
+  export type ProductOptionGroupOnProductCountOrderByAggregateInput = {
+    productId?: SortOrder
+    groupId?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ProductOptionGroupOnProductAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type ProductOptionGroupOnProductMaxOrderByAggregateInput = {
+    productId?: SortOrder
+    groupId?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ProductOptionGroupOnProductMinOrderByAggregateInput = {
+    productId?: SortOrder
+    groupId?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ProductOptionGroupOnProductSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type ProductNullableScalarRelationFilter = {
+    is?: ProductWhereInput | null
+    isNot?: ProductWhereInput | null
+  }
+
+  export type ProductVariantNullableScalarRelationFilter = {
+    is?: ProductVariantWhereInput | null
+    isNot?: ProductVariantWhereInput | null
+  }
+
+  export type ProductOptionValueCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    groupId?: SortOrder
+    label?: SortOrder
+    imageUrl?: SortOrder
+    swatchColor?: SortOrder
+    priceDelta?: SortOrder
+    priceOverride?: SortOrder
+    linkedProductId?: SortOrder
+    linkedVariantId?: SortOrder
+    available?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type ProductOptionValueAvgOrderByAggregateInput = {
+    priceDelta?: SortOrder
+    priceOverride?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type ProductOptionValueMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    groupId?: SortOrder
+    label?: SortOrder
+    imageUrl?: SortOrder
+    swatchColor?: SortOrder
+    priceDelta?: SortOrder
+    priceOverride?: SortOrder
+    linkedProductId?: SortOrder
+    linkedVariantId?: SortOrder
+    available?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type ProductOptionValueMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    groupId?: SortOrder
+    label?: SortOrder
+    imageUrl?: SortOrder
+    swatchColor?: SortOrder
+    priceDelta?: SortOrder
+    priceOverride?: SortOrder
+    linkedProductId?: SortOrder
+    linkedVariantId?: SortOrder
+    available?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type ProductOptionValueSumOrderByAggregateInput = {
+    priceDelta?: SortOrder
+    priceOverride?: SortOrder
+    sortOrder?: SortOrder
   }
 
   export type CollectionBusinessIdSlugCompoundUniqueInput = {
@@ -103120,11 +108270,6 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
-  export type ProductNullableScalarRelationFilter = {
-    is?: ProductWhereInput | null
-    isNot?: ProductWhereInput | null
-  }
-
   export type BusinessNullableScalarRelationFilter = {
     is?: BusinessWhereInput | null
     isNot?: BusinessWhereInput | null
@@ -103544,11 +108689,6 @@ export namespace Prisma {
     orderId?: SortOrder
   }
 
-  export type ProductVariantNullableScalarRelationFilter = {
-    is?: ProductVariantWhereInput | null
-    isNot?: ProductVariantWhereInput | null
-  }
-
   export type OrderItemCountOrderByAggregateInput = {
     id?: SortOrder
     productName?: SortOrder
@@ -103560,6 +108700,7 @@ export namespace Prisma {
     fulfilledQuantity?: SortOrder
     productId?: SortOrder
     productVariantId?: SortOrder
+    customization?: SortOrder
     orderId?: SortOrder
   }
 
@@ -104000,6 +109141,7 @@ export namespace Prisma {
     status?: SortOrder
     expiresAt?: SortOrder
     items?: SortOrder
+    lineConfigs?: SortOrder
   }
 
   export type InventoryReservationMaxOrderByAggregateInput = {
@@ -106619,6 +111761,13 @@ export namespace Prisma {
     connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
   }
 
+  export type ProductOptionGroupCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput> | ProductOptionGroupCreateWithoutBusinessInput[] | ProductOptionGroupUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutBusinessInput | ProductOptionGroupCreateOrConnectWithoutBusinessInput[]
+    createMany?: ProductOptionGroupCreateManyBusinessInputEnvelope
+    connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -106900,6 +112049,13 @@ export namespace Prisma {
     connectOrCreate?: LoyaltyLedgerCreateOrConnectWithoutBusinessInput | LoyaltyLedgerCreateOrConnectWithoutBusinessInput[]
     createMany?: LoyaltyLedgerCreateManyBusinessInputEnvelope
     connect?: LoyaltyLedgerWhereUniqueInput | LoyaltyLedgerWhereUniqueInput[]
+  }
+
+  export type ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput> | ProductOptionGroupCreateWithoutBusinessInput[] | ProductOptionGroupUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutBusinessInput | ProductOptionGroupCreateOrConnectWithoutBusinessInput[]
+    createMany?: ProductOptionGroupCreateManyBusinessInputEnvelope
+    connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -107490,6 +112646,20 @@ export namespace Prisma {
     deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
   }
 
+  export type ProductOptionGroupUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput> | ProductOptionGroupCreateWithoutBusinessInput[] | ProductOptionGroupUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutBusinessInput | ProductOptionGroupCreateOrConnectWithoutBusinessInput[]
+    upsert?: ProductOptionGroupUpsertWithWhereUniqueWithoutBusinessInput | ProductOptionGroupUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: ProductOptionGroupCreateManyBusinessInputEnvelope
+    set?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    disconnect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    delete?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    update?: ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput | ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput | ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -108048,6 +113218,20 @@ export namespace Prisma {
     deleteMany?: LoyaltyLedgerScalarWhereInput | LoyaltyLedgerScalarWhereInput[]
   }
 
+  export type ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput> | ProductOptionGroupCreateWithoutBusinessInput[] | ProductOptionGroupUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutBusinessInput | ProductOptionGroupCreateOrConnectWithoutBusinessInput[]
+    upsert?: ProductOptionGroupUpsertWithWhereUniqueWithoutBusinessInput | ProductOptionGroupUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: ProductOptionGroupCreateManyBusinessInputEnvelope
+    set?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    disconnect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    delete?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+    update?: ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput | ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput | ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
     create?: XOR<BusinessCreateWithoutSiteContentInput, BusinessUncheckedCreateWithoutSiteContentInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSiteContentInput
@@ -108145,6 +113329,20 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
+  export type ProductOptionGroupOnProductCreateNestedManyWithoutProductInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput> | ProductOptionGroupOnProductCreateWithoutProductInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutProductInput | ProductOptionGroupOnProductCreateOrConnectWithoutProductInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyProductInputEnvelope
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+  }
+
+  export type ProductOptionValueCreateNestedManyWithoutLinkedProductInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput> | ProductOptionValueCreateWithoutLinkedProductInput[] | ProductOptionValueUncheckedCreateWithoutLinkedProductInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedProductInput | ProductOptionValueCreateOrConnectWithoutLinkedProductInput[]
+    createMany?: ProductOptionValueCreateManyLinkedProductInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+  }
+
   export type ProductReviewCreateNestedManyWithoutProductInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -108199,6 +113397,20 @@ export namespace Prisma {
     connectOrCreate?: SubscriptionCreateOrConnectWithoutProductInput | SubscriptionCreateOrConnectWithoutProductInput[]
     createMany?: SubscriptionCreateManyProductInputEnvelope
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
+  export type ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput> | ProductOptionGroupOnProductCreateWithoutProductInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutProductInput | ProductOptionGroupOnProductCreateOrConnectWithoutProductInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyProductInputEnvelope
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+  }
+
+  export type ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput> | ProductOptionValueCreateWithoutLinkedProductInput[] | ProductOptionValueUncheckedCreateWithoutLinkedProductInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedProductInput | ProductOptionValueCreateOrConnectWithoutLinkedProductInput[]
+    createMany?: ProductOptionValueCreateManyLinkedProductInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
   }
 
   export type ProductReviewUncheckedCreateNestedManyWithoutProductInput = {
@@ -108332,6 +113544,34 @@ export namespace Prisma {
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
+  export type ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput> | ProductOptionGroupOnProductCreateWithoutProductInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutProductInput | ProductOptionGroupOnProductCreateOrConnectWithoutProductInput[]
+    upsert?: ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutProductInput | ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyProductInputEnvelope
+    set?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    disconnect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    delete?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    update?: ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutProductInput | ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: ProductOptionGroupOnProductUpdateManyWithWhereWithoutProductInput | ProductOptionGroupOnProductUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+  }
+
+  export type ProductOptionValueUpdateManyWithoutLinkedProductNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput> | ProductOptionValueCreateWithoutLinkedProductInput[] | ProductOptionValueUncheckedCreateWithoutLinkedProductInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedProductInput | ProductOptionValueCreateOrConnectWithoutLinkedProductInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutLinkedProductInput | ProductOptionValueUpsertWithWhereUniqueWithoutLinkedProductInput[]
+    createMany?: ProductOptionValueCreateManyLinkedProductInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutLinkedProductInput | ProductOptionValueUpdateWithWhereUniqueWithoutLinkedProductInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutLinkedProductInput | ProductOptionValueUpdateManyWithWhereWithoutLinkedProductInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
   export type ProductReviewUpdateManyWithoutProductNestedInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -108444,6 +113684,34 @@ export namespace Prisma {
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
+  export type ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput> | ProductOptionGroupOnProductCreateWithoutProductInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutProductInput | ProductOptionGroupOnProductCreateOrConnectWithoutProductInput[]
+    upsert?: ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutProductInput | ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyProductInputEnvelope
+    set?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    disconnect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    delete?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    update?: ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutProductInput | ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: ProductOptionGroupOnProductUpdateManyWithWhereWithoutProductInput | ProductOptionGroupOnProductUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput> | ProductOptionValueCreateWithoutLinkedProductInput[] | ProductOptionValueUncheckedCreateWithoutLinkedProductInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedProductInput | ProductOptionValueCreateOrConnectWithoutLinkedProductInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutLinkedProductInput | ProductOptionValueUpsertWithWhereUniqueWithoutLinkedProductInput[]
+    createMany?: ProductOptionValueCreateManyLinkedProductInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutLinkedProductInput | ProductOptionValueUpdateWithWhereUniqueWithoutLinkedProductInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutLinkedProductInput | ProductOptionValueUpdateManyWithWhereWithoutLinkedProductInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
   export type ProductReviewUncheckedUpdateManyWithoutProductNestedInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -108485,6 +113753,13 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
   }
 
+  export type ProductOptionValueCreateNestedManyWithoutLinkedVariantInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput> | ProductOptionValueCreateWithoutLinkedVariantInput[] | ProductOptionValueUncheckedCreateWithoutLinkedVariantInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedVariantInput | ProductOptionValueCreateOrConnectWithoutLinkedVariantInput[]
+    createMany?: ProductOptionValueCreateManyLinkedVariantInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+  }
+
   export type InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput = {
     create?: XOR<InventoryHistoryCreateWithoutVariantInput, InventoryHistoryUncheckedCreateWithoutVariantInput> | InventoryHistoryCreateWithoutVariantInput[] | InventoryHistoryUncheckedCreateWithoutVariantInput[]
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutVariantInput | InventoryHistoryCreateOrConnectWithoutVariantInput[]
@@ -108504,6 +113779,13 @@ export namespace Prisma {
     connectOrCreate?: SubscriptionCreateOrConnectWithoutProductVariantInput | SubscriptionCreateOrConnectWithoutProductVariantInput[]
     createMany?: SubscriptionCreateManyProductVariantInputEnvelope
     connect?: SubscriptionWhereUniqueInput | SubscriptionWhereUniqueInput[]
+  }
+
+  export type ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput> | ProductOptionValueCreateWithoutLinkedVariantInput[] | ProductOptionValueUncheckedCreateWithoutLinkedVariantInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedVariantInput | ProductOptionValueCreateOrConnectWithoutLinkedVariantInput[]
+    createMany?: ProductOptionValueCreateManyLinkedVariantInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
   }
 
   export type ProductUpdateOneRequiredWithoutVariantsNestedInput = {
@@ -108556,6 +113838,20 @@ export namespace Prisma {
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
   }
 
+  export type ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput> | ProductOptionValueCreateWithoutLinkedVariantInput[] | ProductOptionValueUncheckedCreateWithoutLinkedVariantInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedVariantInput | ProductOptionValueCreateOrConnectWithoutLinkedVariantInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutLinkedVariantInput | ProductOptionValueUpsertWithWhereUniqueWithoutLinkedVariantInput[]
+    createMany?: ProductOptionValueCreateManyLinkedVariantInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutLinkedVariantInput | ProductOptionValueUpdateWithWhereUniqueWithoutLinkedVariantInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutLinkedVariantInput | ProductOptionValueUpdateManyWithWhereWithoutLinkedVariantInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
   export type InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput = {
     create?: XOR<InventoryHistoryCreateWithoutVariantInput, InventoryHistoryUncheckedCreateWithoutVariantInput> | InventoryHistoryCreateWithoutVariantInput[] | InventoryHistoryUncheckedCreateWithoutVariantInput[]
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutVariantInput | InventoryHistoryCreateOrConnectWithoutVariantInput[]
@@ -108596,6 +113892,192 @@ export namespace Prisma {
     update?: SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput | SubscriptionUpdateWithWhereUniqueWithoutProductVariantInput[]
     updateMany?: SubscriptionUpdateManyWithWhereWithoutProductVariantInput | SubscriptionUpdateManyWithWhereWithoutProductVariantInput[]
     deleteMany?: SubscriptionScalarWhereInput | SubscriptionScalarWhereInput[]
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput> | ProductOptionValueCreateWithoutLinkedVariantInput[] | ProductOptionValueUncheckedCreateWithoutLinkedVariantInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutLinkedVariantInput | ProductOptionValueCreateOrConnectWithoutLinkedVariantInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutLinkedVariantInput | ProductOptionValueUpsertWithWhereUniqueWithoutLinkedVariantInput[]
+    createMany?: ProductOptionValueCreateManyLinkedVariantInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutLinkedVariantInput | ProductOptionValueUpdateWithWhereUniqueWithoutLinkedVariantInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutLinkedVariantInput | ProductOptionValueUpdateManyWithWhereWithoutLinkedVariantInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
+  export type BusinessCreateNestedOneWithoutProductOptionGroupsInput = {
+    create?: XOR<BusinessCreateWithoutProductOptionGroupsInput, BusinessUncheckedCreateWithoutProductOptionGroupsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutProductOptionGroupsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type ProductOptionValueCreateNestedManyWithoutGroupInput = {
+    create?: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput> | ProductOptionValueCreateWithoutGroupInput[] | ProductOptionValueUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutGroupInput | ProductOptionValueCreateOrConnectWithoutGroupInput[]
+    createMany?: ProductOptionValueCreateManyGroupInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+  }
+
+  export type ProductOptionGroupOnProductCreateNestedManyWithoutGroupInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput> | ProductOptionGroupOnProductCreateWithoutGroupInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput | ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyGroupInputEnvelope
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+  }
+
+  export type ProductOptionValueUncheckedCreateNestedManyWithoutGroupInput = {
+    create?: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput> | ProductOptionValueCreateWithoutGroupInput[] | ProductOptionValueUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutGroupInput | ProductOptionValueCreateOrConnectWithoutGroupInput[]
+    createMany?: ProductOptionValueCreateManyGroupInputEnvelope
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+  }
+
+  export type ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutGroupInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput> | ProductOptionGroupOnProductCreateWithoutGroupInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput | ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyGroupInputEnvelope
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutProductOptionGroupsNestedInput = {
+    create?: XOR<BusinessCreateWithoutProductOptionGroupsInput, BusinessUncheckedCreateWithoutProductOptionGroupsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutProductOptionGroupsInput
+    upsert?: BusinessUpsertWithoutProductOptionGroupsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutProductOptionGroupsInput, BusinessUpdateWithoutProductOptionGroupsInput>, BusinessUncheckedUpdateWithoutProductOptionGroupsInput>
+  }
+
+  export type ProductOptionValueUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput> | ProductOptionValueCreateWithoutGroupInput[] | ProductOptionValueUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutGroupInput | ProductOptionValueCreateOrConnectWithoutGroupInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput | ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: ProductOptionValueCreateManyGroupInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutGroupInput | ProductOptionValueUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutGroupInput | ProductOptionValueUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
+  export type ProductOptionGroupOnProductUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput> | ProductOptionGroupOnProductCreateWithoutGroupInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput | ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput[]
+    upsert?: ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutGroupInput | ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyGroupInputEnvelope
+    set?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    disconnect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    delete?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    update?: ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutGroupInput | ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: ProductOptionGroupOnProductUpdateManyWithWhereWithoutGroupInput | ProductOptionGroupOnProductUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput> | ProductOptionValueCreateWithoutGroupInput[] | ProductOptionValueUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionValueCreateOrConnectWithoutGroupInput | ProductOptionValueCreateOrConnectWithoutGroupInput[]
+    upsert?: ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput | ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: ProductOptionValueCreateManyGroupInputEnvelope
+    set?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    disconnect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    delete?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    connect?: ProductOptionValueWhereUniqueInput | ProductOptionValueWhereUniqueInput[]
+    update?: ProductOptionValueUpdateWithWhereUniqueWithoutGroupInput | ProductOptionValueUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: ProductOptionValueUpdateManyWithWhereWithoutGroupInput | ProductOptionValueUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput> | ProductOptionGroupOnProductCreateWithoutGroupInput[] | ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput | ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput[]
+    upsert?: ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutGroupInput | ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: ProductOptionGroupOnProductCreateManyGroupInputEnvelope
+    set?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    disconnect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    delete?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    connect?: ProductOptionGroupOnProductWhereUniqueInput | ProductOptionGroupOnProductWhereUniqueInput[]
+    update?: ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutGroupInput | ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: ProductOptionGroupOnProductUpdateManyWithWhereWithoutGroupInput | ProductOptionGroupOnProductUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+  }
+
+  export type ProductCreateNestedOneWithoutOptionGroupsInput = {
+    create?: XOR<ProductCreateWithoutOptionGroupsInput, ProductUncheckedCreateWithoutOptionGroupsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutOptionGroupsInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type ProductOptionGroupCreateNestedOneWithoutProductsInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutProductsInput, ProductOptionGroupUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutProductsInput
+    connect?: ProductOptionGroupWhereUniqueInput
+  }
+
+  export type ProductUpdateOneRequiredWithoutOptionGroupsNestedInput = {
+    create?: XOR<ProductCreateWithoutOptionGroupsInput, ProductUncheckedCreateWithoutOptionGroupsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutOptionGroupsInput
+    upsert?: ProductUpsertWithoutOptionGroupsInput
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutOptionGroupsInput, ProductUpdateWithoutOptionGroupsInput>, ProductUncheckedUpdateWithoutOptionGroupsInput>
+  }
+
+  export type ProductOptionGroupUpdateOneRequiredWithoutProductsNestedInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutProductsInput, ProductOptionGroupUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutProductsInput
+    upsert?: ProductOptionGroupUpsertWithoutProductsInput
+    connect?: ProductOptionGroupWhereUniqueInput
+    update?: XOR<XOR<ProductOptionGroupUpdateToOneWithWhereWithoutProductsInput, ProductOptionGroupUpdateWithoutProductsInput>, ProductOptionGroupUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type ProductOptionGroupCreateNestedOneWithoutValuesInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutValuesInput, ProductOptionGroupUncheckedCreateWithoutValuesInput>
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutValuesInput
+    connect?: ProductOptionGroupWhereUniqueInput
+  }
+
+  export type ProductCreateNestedOneWithoutLinkedOptionValuesInput = {
+    create?: XOR<ProductCreateWithoutLinkedOptionValuesInput, ProductUncheckedCreateWithoutLinkedOptionValuesInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutLinkedOptionValuesInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type ProductVariantCreateNestedOneWithoutLinkedOptionValuesInput = {
+    create?: XOR<ProductVariantCreateWithoutLinkedOptionValuesInput, ProductVariantUncheckedCreateWithoutLinkedOptionValuesInput>
+    connectOrCreate?: ProductVariantCreateOrConnectWithoutLinkedOptionValuesInput
+    connect?: ProductVariantWhereUniqueInput
+  }
+
+  export type ProductOptionGroupUpdateOneRequiredWithoutValuesNestedInput = {
+    create?: XOR<ProductOptionGroupCreateWithoutValuesInput, ProductOptionGroupUncheckedCreateWithoutValuesInput>
+    connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutValuesInput
+    upsert?: ProductOptionGroupUpsertWithoutValuesInput
+    connect?: ProductOptionGroupWhereUniqueInput
+    update?: XOR<XOR<ProductOptionGroupUpdateToOneWithWhereWithoutValuesInput, ProductOptionGroupUpdateWithoutValuesInput>, ProductOptionGroupUncheckedUpdateWithoutValuesInput>
+  }
+
+  export type ProductUpdateOneWithoutLinkedOptionValuesNestedInput = {
+    create?: XOR<ProductCreateWithoutLinkedOptionValuesInput, ProductUncheckedCreateWithoutLinkedOptionValuesInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutLinkedOptionValuesInput
+    upsert?: ProductUpsertWithoutLinkedOptionValuesInput
+    disconnect?: ProductWhereInput | boolean
+    delete?: ProductWhereInput | boolean
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutLinkedOptionValuesInput, ProductUpdateWithoutLinkedOptionValuesInput>, ProductUncheckedUpdateWithoutLinkedOptionValuesInput>
+  }
+
+  export type ProductVariantUpdateOneWithoutLinkedOptionValuesNestedInput = {
+    create?: XOR<ProductVariantCreateWithoutLinkedOptionValuesInput, ProductVariantUncheckedCreateWithoutLinkedOptionValuesInput>
+    connectOrCreate?: ProductVariantCreateOrConnectWithoutLinkedOptionValuesInput
+    upsert?: ProductVariantUpsertWithoutLinkedOptionValuesInput
+    disconnect?: ProductVariantWhereInput | boolean
+    delete?: ProductVariantWhereInput | boolean
+    connect?: ProductVariantWhereUniqueInput
+    update?: XOR<XOR<ProductVariantUpdateToOneWithWhereWithoutLinkedOptionValuesInput, ProductVariantUpdateWithoutLinkedOptionValuesInput>, ProductVariantUncheckedUpdateWithoutLinkedOptionValuesInput>
   }
 
   export type BusinessCreateNestedOneWithoutCollectionsInput = {
@@ -111564,6 +117046,29 @@ export namespace Prisma {
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedEnumBusinessDomainStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessDomainStatus | EnumBusinessDomainStatusFieldRefInput<$PrismaModel>
@@ -111607,29 +117112,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -111798,6 +117280,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
 
@@ -111808,6 +117291,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateOrConnectWithoutUserInput = {
@@ -112148,6 +117632,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
     merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
     merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
+    dashboardLayout?: JsonNullableFilter<"BusinessMembership">
   }
 
   export type CustomerUpsertWithWhereUniqueWithoutUserInput = {
@@ -112418,6 +117903,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -112492,6 +117981,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -112536,6 +118026,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -112610,6 +118104,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -112721,6 +118216,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -112795,6 +118294,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -112839,6 +118339,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -112913,6 +118417,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -113152,6 +118657,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -113200,6 +118707,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -113810,6 +119319,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUncheckedCreateWithoutBusinessInput = {
@@ -113820,6 +119330,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationCreateOrConnectWithoutBusinessInput = {
@@ -114172,6 +119683,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutMembershipsInput
   }
 
@@ -114182,6 +119694,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipCreateOrConnectWithoutBusinessInput = {
@@ -115097,6 +120610,56 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProductOptionGroupCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    values?: ProductOptionValueCreateNestedManyWithoutGroupInput
+    products?: ProductOptionGroupOnProductCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    values?: ProductOptionValueUncheckedCreateNestedManyWithoutGroupInput
+    products?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupCreateOrConnectWithoutBusinessInput = {
+    where: ProductOptionGroupWhereUniqueInput
+    create: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type ProductOptionGroupCreateManyBusinessInputEnvelope = {
+    data: ProductOptionGroupCreateManyBusinessInput | ProductOptionGroupCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -115589,6 +121152,7 @@ export namespace Prisma {
     status?: StringFilter<"InventoryReservation"> | string
     expiresAt?: DateTimeFilter<"InventoryReservation"> | Date | string
     items?: JsonFilter<"InventoryReservation">
+    lineConfigs?: JsonNullableFilter<"InventoryReservation">
   }
 
   export type PageUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -116629,6 +122193,44 @@ export namespace Prisma {
     actorUserId?: StringNullableFilter<"LoyaltyLedger"> | string | null
   }
 
+  export type ProductOptionGroupUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: ProductOptionGroupWhereUniqueInput
+    update: XOR<ProductOptionGroupUpdateWithoutBusinessInput, ProductOptionGroupUncheckedUpdateWithoutBusinessInput>
+    create: XOR<ProductOptionGroupCreateWithoutBusinessInput, ProductOptionGroupUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: ProductOptionGroupWhereUniqueInput
+    data: XOR<ProductOptionGroupUpdateWithoutBusinessInput, ProductOptionGroupUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput = {
+    where: ProductOptionGroupScalarWhereInput
+    data: XOR<ProductOptionGroupUpdateManyMutationInput, ProductOptionGroupUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type ProductOptionGroupScalarWhereInput = {
+    AND?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
+    OR?: ProductOptionGroupScalarWhereInput[]
+    NOT?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
+    id?: StringFilter<"ProductOptionGroup"> | string
+    createdAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionGroup"> | Date | string
+    businessId?: StringFilter<"ProductOptionGroup"> | string
+    name?: StringFilter<"ProductOptionGroup"> | string
+    adminLabel?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    helpText?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    kind?: StringFilter<"ProductOptionGroup"> | string
+    required?: BoolFilter<"ProductOptionGroup"> | boolean
+    minSelections?: IntFilter<"ProductOptionGroup"> | number
+    maxSelections?: IntFilter<"ProductOptionGroup"> | number
+    includedCount?: IntFilter<"ProductOptionGroup"> | number
+    display?: StringFilter<"ProductOptionGroup"> | string
+    maxLength?: IntNullableFilter<"ProductOptionGroup"> | number | null
+    placeholder?: StringNullableFilter<"ProductOptionGroup"> | string | null
+    textPriceCents?: IntFilter<"ProductOptionGroup"> | number
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -116671,6 +122273,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -116745,6 +122351,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -116789,6 +122396,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -116863,6 +122474,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -116923,6 +122535,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -116997,6 +122613,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -117041,6 +122658,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117115,6 +122736,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -117159,6 +122781,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117233,6 +122859,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -117277,6 +122904,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117351,6 +122982,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -117411,6 +123043,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117485,6 +123121,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -117529,6 +123166,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -117603,6 +123244,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -117696,6 +123338,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117770,6 +123416,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -117814,6 +123461,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -117888,6 +123539,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -117943,6 +123595,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutProductInput = {
@@ -117961,6 +123614,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutProductInput = {
@@ -118004,6 +123658,7 @@ export namespace Prisma {
     quantity: number
     total: number
     fulfilledQuantity?: number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
   }
@@ -118018,6 +123673,7 @@ export namespace Prisma {
     total: number
     fulfilledQuantity?: number
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -118211,6 +123867,68 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProductOptionGroupOnProductCreateWithoutProductInput = {
+    sortOrder?: number
+    createdAt?: Date | string
+    group: ProductOptionGroupCreateNestedOneWithoutProductsInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedCreateWithoutProductInput = {
+    groupId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionGroupOnProductCreateOrConnectWithoutProductInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    create: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput>
+  }
+
+  export type ProductOptionGroupOnProductCreateManyProductInputEnvelope = {
+    data: ProductOptionGroupOnProductCreateManyProductInput | ProductOptionGroupOnProductCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProductOptionValueCreateWithoutLinkedProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    available?: boolean
+    sortOrder?: number
+    group: ProductOptionGroupCreateNestedOneWithoutValuesInput
+    linkedVariant?: ProductVariantCreateNestedOneWithoutLinkedOptionValuesInput
+  }
+
+  export type ProductOptionValueUncheckedCreateWithoutLinkedProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionValueCreateOrConnectWithoutLinkedProductInput = {
+    where: ProductOptionValueWhereUniqueInput
+    create: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput>
+  }
+
+  export type ProductOptionValueCreateManyLinkedProductInputEnvelope = {
+    data: ProductOptionValueCreateManyLinkedProductInput | ProductOptionValueCreateManyLinkedProductInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductReviewCreateWithoutProductInput = {
     id?: string
     createdAt?: Date | string
@@ -118377,6 +124095,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -118451,6 +124173,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -118495,6 +124218,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -118569,6 +124296,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -118678,6 +124406,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
+    customization?: JsonNullableFilter<"OrderItem">
     orderId?: StringFilter<"OrderItem"> | string
   }
 
@@ -118727,6 +124456,67 @@ export namespace Prisma {
   export type SubscriptionUpdateManyWithWhereWithoutProductInput = {
     where: SubscriptionScalarWhereInput
     data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutProductInput>
+  }
+
+  export type ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutProductInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    update: XOR<ProductOptionGroupOnProductUpdateWithoutProductInput, ProductOptionGroupOnProductUncheckedUpdateWithoutProductInput>
+    create: XOR<ProductOptionGroupOnProductCreateWithoutProductInput, ProductOptionGroupOnProductUncheckedCreateWithoutProductInput>
+  }
+
+  export type ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutProductInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    data: XOR<ProductOptionGroupOnProductUpdateWithoutProductInput, ProductOptionGroupOnProductUncheckedUpdateWithoutProductInput>
+  }
+
+  export type ProductOptionGroupOnProductUpdateManyWithWhereWithoutProductInput = {
+    where: ProductOptionGroupOnProductScalarWhereInput
+    data: XOR<ProductOptionGroupOnProductUpdateManyMutationInput, ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductInput>
+  }
+
+  export type ProductOptionGroupOnProductScalarWhereInput = {
+    AND?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+    OR?: ProductOptionGroupOnProductScalarWhereInput[]
+    NOT?: ProductOptionGroupOnProductScalarWhereInput | ProductOptionGroupOnProductScalarWhereInput[]
+    productId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    groupId?: StringFilter<"ProductOptionGroupOnProduct"> | string
+    sortOrder?: IntFilter<"ProductOptionGroupOnProduct"> | number
+    createdAt?: DateTimeFilter<"ProductOptionGroupOnProduct"> | Date | string
+  }
+
+  export type ProductOptionValueUpsertWithWhereUniqueWithoutLinkedProductInput = {
+    where: ProductOptionValueWhereUniqueInput
+    update: XOR<ProductOptionValueUpdateWithoutLinkedProductInput, ProductOptionValueUncheckedUpdateWithoutLinkedProductInput>
+    create: XOR<ProductOptionValueCreateWithoutLinkedProductInput, ProductOptionValueUncheckedCreateWithoutLinkedProductInput>
+  }
+
+  export type ProductOptionValueUpdateWithWhereUniqueWithoutLinkedProductInput = {
+    where: ProductOptionValueWhereUniqueInput
+    data: XOR<ProductOptionValueUpdateWithoutLinkedProductInput, ProductOptionValueUncheckedUpdateWithoutLinkedProductInput>
+  }
+
+  export type ProductOptionValueUpdateManyWithWhereWithoutLinkedProductInput = {
+    where: ProductOptionValueScalarWhereInput
+    data: XOR<ProductOptionValueUpdateManyMutationInput, ProductOptionValueUncheckedUpdateManyWithoutLinkedProductInput>
+  }
+
+  export type ProductOptionValueScalarWhereInput = {
+    AND?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+    OR?: ProductOptionValueScalarWhereInput[]
+    NOT?: ProductOptionValueScalarWhereInput | ProductOptionValueScalarWhereInput[]
+    id?: StringFilter<"ProductOptionValue"> | string
+    createdAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductOptionValue"> | Date | string
+    groupId?: StringFilter<"ProductOptionValue"> | string
+    label?: StringFilter<"ProductOptionValue"> | string
+    imageUrl?: StringNullableFilter<"ProductOptionValue"> | string | null
+    swatchColor?: StringNullableFilter<"ProductOptionValue"> | string | null
+    priceDelta?: IntFilter<"ProductOptionValue"> | number
+    priceOverride?: IntNullableFilter<"ProductOptionValue"> | number | null
+    linkedProductId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    linkedVariantId?: StringNullableFilter<"ProductOptionValue"> | string | null
+    available?: BoolFilter<"ProductOptionValue"> | boolean
+    sortOrder?: IntFilter<"ProductOptionValue"> | number
   }
 
   export type ProductReviewUpsertWithWhereUniqueWithoutProductInput = {
@@ -118817,6 +124607,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -118865,6 +124657,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -118924,6 +124718,7 @@ export namespace Prisma {
     quantity: number
     total: number
     fulfilledQuantity?: number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
   }
@@ -118938,6 +124733,7 @@ export namespace Prisma {
     total: number
     fulfilledQuantity?: number
     productId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -119061,6 +124857,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProductOptionValueCreateWithoutLinkedVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    available?: boolean
+    sortOrder?: number
+    group: ProductOptionGroupCreateNestedOneWithoutValuesInput
+    linkedProduct?: ProductCreateNestedOneWithoutLinkedOptionValuesInput
+  }
+
+  export type ProductOptionValueUncheckedCreateWithoutLinkedVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionValueCreateOrConnectWithoutLinkedVariantInput = {
+    where: ProductOptionValueWhereUniqueInput
+    create: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput>
+  }
+
+  export type ProductOptionValueCreateManyLinkedVariantInputEnvelope = {
+    data: ProductOptionValueCreateManyLinkedVariantInput | ProductOptionValueCreateManyLinkedVariantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithoutVariantsInput = {
     update: XOR<ProductUpdateWithoutVariantsInput, ProductUncheckedUpdateWithoutVariantsInput>
     create: XOR<ProductCreateWithoutVariantsInput, ProductUncheckedCreateWithoutVariantsInput>
@@ -119117,6 +124953,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -119165,6 +125003,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -119216,6 +125056,1340 @@ export namespace Prisma {
     data: XOR<SubscriptionUpdateManyMutationInput, SubscriptionUncheckedUpdateManyWithoutProductVariantInput>
   }
 
+  export type ProductOptionValueUpsertWithWhereUniqueWithoutLinkedVariantInput = {
+    where: ProductOptionValueWhereUniqueInput
+    update: XOR<ProductOptionValueUpdateWithoutLinkedVariantInput, ProductOptionValueUncheckedUpdateWithoutLinkedVariantInput>
+    create: XOR<ProductOptionValueCreateWithoutLinkedVariantInput, ProductOptionValueUncheckedCreateWithoutLinkedVariantInput>
+  }
+
+  export type ProductOptionValueUpdateWithWhereUniqueWithoutLinkedVariantInput = {
+    where: ProductOptionValueWhereUniqueInput
+    data: XOR<ProductOptionValueUpdateWithoutLinkedVariantInput, ProductOptionValueUncheckedUpdateWithoutLinkedVariantInput>
+  }
+
+  export type ProductOptionValueUpdateManyWithWhereWithoutLinkedVariantInput = {
+    where: ProductOptionValueScalarWhereInput
+    data: XOR<ProductOptionValueUpdateManyMutationInput, ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantInput>
+  }
+
+  export type BusinessCreateWithoutProductOptionGroupsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutProductOptionGroupsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutProductOptionGroupsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutProductOptionGroupsInput, BusinessUncheckedCreateWithoutProductOptionGroupsInput>
+  }
+
+  export type ProductOptionValueCreateWithoutGroupInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    available?: boolean
+    sortOrder?: number
+    linkedProduct?: ProductCreateNestedOneWithoutLinkedOptionValuesInput
+    linkedVariant?: ProductVariantCreateNestedOneWithoutLinkedOptionValuesInput
+  }
+
+  export type ProductOptionValueUncheckedCreateWithoutGroupInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionValueCreateOrConnectWithoutGroupInput = {
+    where: ProductOptionValueWhereUniqueInput
+    create: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput>
+  }
+
+  export type ProductOptionValueCreateManyGroupInputEnvelope = {
+    data: ProductOptionValueCreateManyGroupInput | ProductOptionValueCreateManyGroupInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ProductOptionGroupOnProductCreateWithoutGroupInput = {
+    sortOrder?: number
+    createdAt?: Date | string
+    product: ProductCreateNestedOneWithoutOptionGroupsInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput = {
+    productId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionGroupOnProductCreateOrConnectWithoutGroupInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    create: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput>
+  }
+
+  export type ProductOptionGroupOnProductCreateManyGroupInputEnvelope = {
+    data: ProductOptionGroupOnProductCreateManyGroupInput | ProductOptionGroupOnProductCreateManyGroupInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutProductOptionGroupsInput = {
+    update: XOR<BusinessUpdateWithoutProductOptionGroupsInput, BusinessUncheckedUpdateWithoutProductOptionGroupsInput>
+    create: XOR<BusinessCreateWithoutProductOptionGroupsInput, BusinessUncheckedCreateWithoutProductOptionGroupsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutProductOptionGroupsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutProductOptionGroupsInput, BusinessUncheckedUpdateWithoutProductOptionGroupsInput>
+  }
+
+  export type BusinessUpdateWithoutProductOptionGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutProductOptionGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput = {
+    where: ProductOptionValueWhereUniqueInput
+    update: XOR<ProductOptionValueUpdateWithoutGroupInput, ProductOptionValueUncheckedUpdateWithoutGroupInput>
+    create: XOR<ProductOptionValueCreateWithoutGroupInput, ProductOptionValueUncheckedCreateWithoutGroupInput>
+  }
+
+  export type ProductOptionValueUpdateWithWhereUniqueWithoutGroupInput = {
+    where: ProductOptionValueWhereUniqueInput
+    data: XOR<ProductOptionValueUpdateWithoutGroupInput, ProductOptionValueUncheckedUpdateWithoutGroupInput>
+  }
+
+  export type ProductOptionValueUpdateManyWithWhereWithoutGroupInput = {
+    where: ProductOptionValueScalarWhereInput
+    data: XOR<ProductOptionValueUpdateManyMutationInput, ProductOptionValueUncheckedUpdateManyWithoutGroupInput>
+  }
+
+  export type ProductOptionGroupOnProductUpsertWithWhereUniqueWithoutGroupInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    update: XOR<ProductOptionGroupOnProductUpdateWithoutGroupInput, ProductOptionGroupOnProductUncheckedUpdateWithoutGroupInput>
+    create: XOR<ProductOptionGroupOnProductCreateWithoutGroupInput, ProductOptionGroupOnProductUncheckedCreateWithoutGroupInput>
+  }
+
+  export type ProductOptionGroupOnProductUpdateWithWhereUniqueWithoutGroupInput = {
+    where: ProductOptionGroupOnProductWhereUniqueInput
+    data: XOR<ProductOptionGroupOnProductUpdateWithoutGroupInput, ProductOptionGroupOnProductUncheckedUpdateWithoutGroupInput>
+  }
+
+  export type ProductOptionGroupOnProductUpdateManyWithWhereWithoutGroupInput = {
+    where: ProductOptionGroupOnProductScalarWhereInput
+    data: XOR<ProductOptionGroupOnProductUpdateManyMutationInput, ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupInput>
+  }
+
+  export type ProductCreateWithoutOptionGroupsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutProductsInput
+    business: BusinessCreateNestedOneWithoutProductsInput
+    images?: ImageCreateNestedManyWithoutProductInput
+    variants?: ProductVariantCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
+    reviews?: ProductReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutOptionGroupsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseInventoryUnitId?: string | null
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    businessId: string
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedCreateNestedManyWithoutProductInput
+    variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutOptionGroupsInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutOptionGroupsInput, ProductUncheckedCreateWithoutOptionGroupsInput>
+  }
+
+  export type ProductOptionGroupCreateWithoutProductsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    business: BusinessCreateNestedOneWithoutProductOptionGroupsInput
+    values?: ProductOptionValueCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupUncheckedCreateWithoutProductsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    values?: ProductOptionValueUncheckedCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupCreateOrConnectWithoutProductsInput = {
+    where: ProductOptionGroupWhereUniqueInput
+    create: XOR<ProductOptionGroupCreateWithoutProductsInput, ProductOptionGroupUncheckedCreateWithoutProductsInput>
+  }
+
+  export type ProductUpsertWithoutOptionGroupsInput = {
+    update: XOR<ProductUpdateWithoutOptionGroupsInput, ProductUncheckedUpdateWithoutOptionGroupsInput>
+    create: XOR<ProductCreateWithoutOptionGroupsInput, ProductUncheckedCreateWithoutOptionGroupsInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutOptionGroupsInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutOptionGroupsInput, ProductUncheckedUpdateWithoutOptionGroupsInput>
+  }
+
+  export type ProductUpdateWithoutOptionGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutProductsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
+    images?: ImageUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
+    reviews?: ProductReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutOptionGroupsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductOptionGroupUpsertWithoutProductsInput = {
+    update: XOR<ProductOptionGroupUpdateWithoutProductsInput, ProductOptionGroupUncheckedUpdateWithoutProductsInput>
+    create: XOR<ProductOptionGroupCreateWithoutProductsInput, ProductOptionGroupUncheckedCreateWithoutProductsInput>
+    where?: ProductOptionGroupWhereInput
+  }
+
+  export type ProductOptionGroupUpdateToOneWithWhereWithoutProductsInput = {
+    where?: ProductOptionGroupWhereInput
+    data: XOR<ProductOptionGroupUpdateWithoutProductsInput, ProductOptionGroupUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type ProductOptionGroupUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutProductOptionGroupsNestedInput
+    values?: ProductOptionValueUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupUncheckedUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    values?: ProductOptionValueUncheckedUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupCreateWithoutValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    business: BusinessCreateNestedOneWithoutProductOptionGroupsInput
+    products?: ProductOptionGroupOnProductCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupUncheckedCreateWithoutValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+    products?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutGroupInput
+  }
+
+  export type ProductOptionGroupCreateOrConnectWithoutValuesInput = {
+    where: ProductOptionGroupWhereUniqueInput
+    create: XOR<ProductOptionGroupCreateWithoutValuesInput, ProductOptionGroupUncheckedCreateWithoutValuesInput>
+  }
+
+  export type ProductCreateWithoutLinkedOptionValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutProductsInput
+    business: BusinessCreateNestedOneWithoutProductsInput
+    images?: ImageCreateNestedManyWithoutProductInput
+    variants?: ProductVariantCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutLinkedOptionValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    subscriptionEnabled?: boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: number
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseInventoryUnitId?: string | null
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    businessId: string
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedCreateNestedManyWithoutProductInput
+    variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutLinkedOptionValuesInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutLinkedOptionValuesInput, ProductUncheckedCreateWithoutLinkedOptionValuesInput>
+  }
+
+  export type ProductVariantCreateWithoutLinkedOptionValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    sku?: string | null
+    barcode?: string | null
+    price?: number | null
+    compareAtPrice?: number | null
+    inventoryQty?: number
+    reservedQty?: number
+    options: JsonNullValueInput | InputJsonValue
+    imageUrl?: string | null
+    product: ProductCreateNestedOneWithoutVariantsInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
+  }
+
+  export type ProductVariantUncheckedCreateWithoutLinkedOptionValuesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    sku?: string | null
+    barcode?: string | null
+    price?: number | null
+    compareAtPrice?: number | null
+    inventoryQty?: number
+    reservedQty?: number
+    options: JsonNullValueInput | InputJsonValue
+    imageUrl?: string | null
+    productId: string
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
+  }
+
+  export type ProductVariantCreateOrConnectWithoutLinkedOptionValuesInput = {
+    where: ProductVariantWhereUniqueInput
+    create: XOR<ProductVariantCreateWithoutLinkedOptionValuesInput, ProductVariantUncheckedCreateWithoutLinkedOptionValuesInput>
+  }
+
+  export type ProductOptionGroupUpsertWithoutValuesInput = {
+    update: XOR<ProductOptionGroupUpdateWithoutValuesInput, ProductOptionGroupUncheckedUpdateWithoutValuesInput>
+    create: XOR<ProductOptionGroupCreateWithoutValuesInput, ProductOptionGroupUncheckedCreateWithoutValuesInput>
+    where?: ProductOptionGroupWhereInput
+  }
+
+  export type ProductOptionGroupUpdateToOneWithWhereWithoutValuesInput = {
+    where?: ProductOptionGroupWhereInput
+    data: XOR<ProductOptionGroupUpdateWithoutValuesInput, ProductOptionGroupUncheckedUpdateWithoutValuesInput>
+  }
+
+  export type ProductOptionGroupUpdateWithoutValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutProductOptionGroupsNestedInput
+    products?: ProductOptionGroupOnProductUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupUncheckedUpdateWithoutValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    products?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductUpsertWithoutLinkedOptionValuesInput = {
+    update: XOR<ProductUpdateWithoutLinkedOptionValuesInput, ProductUncheckedUpdateWithoutLinkedOptionValuesInput>
+    create: XOR<ProductCreateWithoutLinkedOptionValuesInput, ProductUncheckedCreateWithoutLinkedOptionValuesInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutLinkedOptionValuesInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutLinkedOptionValuesInput, ProductUncheckedUpdateWithoutLinkedOptionValuesInput>
+  }
+
+  export type ProductUpdateWithoutLinkedOptionValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutProductsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
+    images?: ImageUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutLinkedOptionValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    subscriptionEnabled?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionIntervals?: NullableJsonNullValueInput | InputJsonValue
+    subscriptionDiscountPercent?: IntFieldUpdateOperationsInput | number
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductVariantUpsertWithoutLinkedOptionValuesInput = {
+    update: XOR<ProductVariantUpdateWithoutLinkedOptionValuesInput, ProductVariantUncheckedUpdateWithoutLinkedOptionValuesInput>
+    create: XOR<ProductVariantCreateWithoutLinkedOptionValuesInput, ProductVariantUncheckedCreateWithoutLinkedOptionValuesInput>
+    where?: ProductVariantWhereInput
+  }
+
+  export type ProductVariantUpdateToOneWithWhereWithoutLinkedOptionValuesInput = {
+    where?: ProductVariantWhereInput
+    data: XOR<ProductVariantUpdateWithoutLinkedOptionValuesInput, ProductVariantUncheckedUpdateWithoutLinkedOptionValuesInput>
+  }
+
+  export type ProductVariantUpdateWithoutLinkedOptionValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    options?: JsonNullValueInput | InputJsonValue
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
+  }
+
+  export type ProductVariantUncheckedUpdateWithoutLinkedOptionValuesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    options?: JsonNullValueInput | InputJsonValue
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    productId?: StringFieldUpdateOperationsInput | string
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
+  }
+
   export type BusinessCreateWithoutCollectionsInput = {
     id?: string
     createdAt?: Date | string
@@ -119258,6 +126432,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -119332,6 +126510,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -119376,6 +126555,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -119450,6 +126633,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -119532,6 +126716,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -119606,6 +126794,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -119650,6 +126839,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -119724,6 +126917,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -119826,6 +127020,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -119874,6 +127070,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -119983,6 +127181,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -120031,6 +127231,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -120076,6 +127278,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120150,6 +127356,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -120194,6 +127401,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120268,6 +127479,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -120380,6 +127592,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -120454,6 +127670,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -120498,6 +127715,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -120572,6 +127793,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -120749,6 +127971,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120823,6 +128049,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -120867,6 +128094,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -120941,6 +128172,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -121001,6 +128233,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121075,6 +128311,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -121119,6 +128356,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121193,6 +128434,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -121237,6 +128479,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121311,6 +128557,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -121355,6 +128602,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121429,6 +128680,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -121537,6 +128789,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121611,6 +128867,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -121655,6 +128912,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -121729,6 +128990,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -121824,6 +129086,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -121898,6 +129164,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -121942,6 +129209,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122016,6 +129287,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -122117,6 +129389,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122191,6 +129467,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -122235,6 +129512,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122309,6 +129590,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -122356,6 +129638,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -122404,6 +129688,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -122454,6 +129740,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122528,6 +129818,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -122572,6 +129863,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -122646,6 +129941,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -122709,6 +130005,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -122757,6 +130055,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -122813,6 +130113,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -122887,6 +130191,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -122931,6 +130236,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -123005,6 +130314,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -123094,6 +130404,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -123168,6 +130482,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -123212,6 +130527,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -123286,6 +130605,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -123925,6 +131245,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -123999,6 +131323,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -124043,6 +131368,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -124117,6 +131446,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -124785,6 +132115,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -124859,6 +132193,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -124903,6 +132238,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -124977,6 +132316,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -125146,6 +132486,7 @@ export namespace Prisma {
     quantity: number
     total: number
     fulfilledQuantity?: number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
   }
@@ -125161,6 +132502,7 @@ export namespace Prisma {
     fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderItemCreateOrConnectWithoutOrderInput = {
@@ -125507,6 +132849,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -125581,6 +132927,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -125625,6 +132972,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -125699,6 +133050,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -126191,6 +133543,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -126239,6 +133593,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -126263,6 +133619,7 @@ export namespace Prisma {
     product: ProductCreateNestedOneWithoutVariantsInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutOrderItemsInput = {
@@ -126281,6 +133638,7 @@ export namespace Prisma {
     productId: string
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutOrderItemsInput = {
@@ -126431,6 +133789,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -126479,6 +133839,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -126509,6 +133871,7 @@ export namespace Prisma {
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutOrderItemsInput = {
@@ -126527,6 +133890,7 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type OrderUpsertWithoutItemsInput = {
@@ -126664,6 +134028,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -126738,6 +134106,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -126782,6 +134151,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -126856,6 +134229,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -127043,6 +134417,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -127117,6 +134495,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -127161,6 +134540,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -127235,6 +134618,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -127310,6 +134694,7 @@ export namespace Prisma {
     product: ProductCreateNestedOneWithoutVariantsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutInventoryHistoryInput = {
@@ -127328,6 +134713,7 @@ export namespace Prisma {
     productId: string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutInventoryHistoryInput = {
@@ -127380,6 +134766,8 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -127428,6 +134816,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -127527,6 +134917,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -127601,6 +134995,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -127645,6 +135040,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -127719,6 +135118,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -127922,6 +135322,7 @@ export namespace Prisma {
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -127940,6 +135341,7 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductUpsertWithoutInventoryHistoryInput = {
@@ -127998,6 +135400,8 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -128046,6 +135450,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -128157,6 +135563,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -128231,6 +135641,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -128275,6 +135686,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -128349,6 +135764,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -128580,6 +135996,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -128654,6 +136074,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -128698,6 +136119,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -128772,6 +136197,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -128824,6 +136250,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -128872,6 +136300,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -129016,6 +136446,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129090,6 +136524,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -129134,6 +136569,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129208,6 +136647,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -129300,6 +136740,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -129374,6 +136818,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryCheckoutsInput = {
@@ -129418,6 +136863,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -129492,6 +136941,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryCheckoutsInput = {
@@ -129675,6 +137125,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129749,6 +137203,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryCheckoutsInput = {
@@ -129793,6 +137248,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -129867,6 +137326,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutInventoryCheckoutsCreatedInput = {
@@ -130031,6 +137491,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130105,6 +137569,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput = {
@@ -130149,6 +137614,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130223,6 +137692,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryCheckoutLinesInput = {
@@ -130375,6 +137845,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130449,6 +137923,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput = {
@@ -130493,6 +137968,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130567,6 +138046,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitUpsertWithoutCheckoutLinesInput = {
@@ -130666,6 +138146,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130740,6 +138224,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -130784,6 +138269,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -130858,6 +138347,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -130918,6 +138408,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -130992,6 +138486,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -131036,6 +138531,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131110,6 +138609,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -131154,6 +138654,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131228,6 +138732,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -131272,6 +138777,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131346,6 +138855,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -131406,6 +138916,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131480,6 +138994,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -131524,6 +139039,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -131598,6 +139117,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -131642,6 +139162,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131716,6 +139240,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -131760,6 +139285,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -131834,6 +139363,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -131939,6 +139469,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132013,6 +139547,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -132057,6 +139592,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132131,6 +139670,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -132226,6 +139766,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132300,6 +139844,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -132344,6 +139889,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132418,6 +139967,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -132478,6 +140028,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132552,6 +140106,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -132596,6 +140151,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -132670,6 +140229,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -132714,6 +140274,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132788,6 +140352,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -132832,6 +140397,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -132906,6 +140475,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -132998,6 +140568,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133072,6 +140646,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -133116,6 +140691,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133190,6 +140769,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -133349,6 +140929,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -133423,6 +141007,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -133467,6 +141052,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -133541,6 +141130,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -133666,6 +141256,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133740,6 +141334,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -133784,6 +141379,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -133858,6 +141457,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -133973,6 +141573,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -134047,6 +141651,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -134091,6 +141696,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -134165,6 +141774,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -134290,6 +141900,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -134364,6 +141978,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -134408,6 +142023,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -134482,6 +142101,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -134601,6 +142221,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
   }
 
   export type ProductUncheckedCreateWithoutReviewsInput = {
@@ -134649,6 +142271,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
   }
 
   export type ProductCreateOrConnectWithoutReviewsInput = {
@@ -134891,6 +142515,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutReviewsInput = {
@@ -134939,6 +142565,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
   }
 
   export type CustomerUpsertWithoutReviewsInput = {
@@ -135287,6 +142915,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -135361,6 +142993,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -135405,6 +143038,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -135479,6 +143116,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -135584,6 +143222,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -135658,6 +143300,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -135702,6 +143345,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -135776,6 +143423,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -135871,6 +143519,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -135945,6 +143597,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -135989,6 +143642,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136063,6 +143720,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -136123,6 +143781,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136197,6 +143859,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -136241,6 +143904,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136315,6 +143982,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -136359,6 +144027,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136433,6 +144105,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -136477,6 +144150,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -136551,6 +144228,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -136633,6 +144311,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136707,6 +144389,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -136751,6 +144434,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -136825,6 +144512,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -136946,6 +144634,8 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -136994,6 +144684,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -137044,6 +144736,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137118,6 +144814,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -137162,6 +144859,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137236,6 +144937,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -137299,6 +145001,8 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -137347,6 +145051,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -137403,6 +145109,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -137477,6 +145187,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -137521,6 +145232,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -137595,6 +145310,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -137639,6 +145355,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137713,6 +145433,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -137757,6 +145478,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -137831,6 +145556,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -137943,6 +145669,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138017,6 +145747,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -138061,6 +145792,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138135,6 +145870,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -138284,6 +146020,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138358,6 +146098,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -138402,6 +146143,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138476,6 +146221,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -138583,6 +146329,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138657,6 +146407,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -138701,6 +146452,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -138775,6 +146530,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFormsInput = {
@@ -138819,6 +146575,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -138893,6 +146653,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFormsInput = {
@@ -138937,6 +146698,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139011,6 +146776,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFormsInput = {
@@ -139109,6 +146875,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139183,6 +146953,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFormsInput = {
@@ -139227,6 +146998,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139301,6 +147076,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type FormSubmissionUpsertWithWhereUniqueWithoutFormInput = {
@@ -139386,6 +147162,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139460,6 +147240,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFormSubmissionsInput = {
@@ -139504,6 +147285,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139578,6 +147363,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFormSubmissionsInput = {
@@ -139669,6 +147455,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139743,6 +147533,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFormSubmissionsInput = {
@@ -139787,6 +147578,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -139861,6 +147656,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksConnectionInput = {
@@ -139905,6 +147701,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -139979,6 +147779,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
@@ -140023,6 +147824,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140097,6 +147902,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
@@ -140157,6 +147963,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140231,6 +148041,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
@@ -140275,6 +148086,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140349,6 +148164,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksInvoicesInput = {
@@ -140393,6 +148209,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140467,6 +148287,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
@@ -140511,6 +148332,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -140585,6 +148410,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
@@ -140692,6 +148518,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140766,6 +148596,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
@@ -140810,6 +148641,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -140884,6 +148719,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
@@ -140981,6 +148817,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141055,6 +148895,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoiceSettingsInput = {
@@ -141099,6 +148940,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141173,6 +149018,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoiceSettingsInput = {
@@ -141233,6 +149079,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141307,6 +149157,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoiceSettingsInput = {
@@ -141351,6 +149202,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141425,6 +149280,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutInvoicesInput = {
@@ -141469,6 +149325,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141543,6 +149403,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicesInput = {
@@ -141587,6 +149448,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -141661,6 +149526,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicesInput = {
@@ -141850,6 +149716,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -141924,6 +149794,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicesInput = {
@@ -141968,6 +149839,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -142042,6 +149917,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutInvoicesInput = {
@@ -142297,6 +150173,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -142371,6 +150251,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicePaymentsInput = {
@@ -142415,6 +150296,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -142489,6 +150374,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicePaymentsInput = {
@@ -142650,6 +150536,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -142724,6 +150614,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicePaymentsInput = {
@@ -142768,6 +150659,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -142842,6 +150737,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type InvoiceCreateWithoutEventsInput = {
@@ -143082,6 +150978,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -143156,6 +151056,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
@@ -143200,6 +151101,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -143274,6 +151179,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSubscriptionsInput = {
@@ -143391,6 +151297,8 @@ export namespace Prisma {
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -143439,6 +151347,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedCreateNestedManyWithoutProductInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -143463,6 +151373,7 @@ export namespace Prisma {
     product: ProductCreateNestedOneWithoutVariantsInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantUncheckedCreateWithoutSubscriptionsInput = {
@@ -143481,6 +151392,7 @@ export namespace Prisma {
     productId: string
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutVariantInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductVariantInput
+    linkedOptionValues?: ProductOptionValueUncheckedCreateNestedManyWithoutLinkedVariantInput
   }
 
   export type ProductVariantCreateOrConnectWithoutSubscriptionsInput = {
@@ -143676,6 +151588,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -143750,6 +151666,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
@@ -143794,6 +151711,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -143868,6 +151789,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutSubscriptionsInput = {
@@ -143997,6 +151919,8 @@ export namespace Prisma {
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -144045,6 +151969,8 @@ export namespace Prisma {
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -144075,6 +152001,7 @@ export namespace Prisma {
     product?: ProductUpdateOneRequiredWithoutVariantsNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutSubscriptionsInput = {
@@ -144093,6 +152020,7 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ShippingAddressUpsertWithoutSubscriptionsInput = {
@@ -144202,6 +152130,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144276,6 +152208,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDonationsInput = {
@@ -144320,6 +152253,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144394,6 +152331,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDonationsInput = {
@@ -144454,6 +152392,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -144528,6 +152470,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDonationsInput = {
@@ -144572,6 +152515,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -144646,6 +152593,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutLoyaltyProgramInput = {
@@ -144690,6 +152638,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144764,6 +152716,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutLoyaltyProgramInput = {
@@ -144808,6 +152761,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -144882,6 +152839,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutLoyaltyProgramInput = {
@@ -144980,6 +152938,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145054,6 +153016,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutLoyaltyProgramInput = {
@@ -145098,6 +153061,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145172,6 +153139,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput = {
@@ -145338,6 +153306,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -145412,6 +153384,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutLoyaltyLedgerInput = {
@@ -145456,6 +153429,10 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
     localBusinessEnabled?: boolean
     localPresence?: string
     areaServed?: BusinessCreateareaServedInput | string[]
@@ -145530,6 +153507,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutLoyaltyLedgerInput = {
@@ -145787,6 +153765,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145861,6 +153843,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutLoyaltyLedgerInput = {
@@ -145905,6 +153888,10 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     localPresence?: StringFieldUpdateOperationsInput | string
     areaServed?: BusinessUpdateareaServedInput | string[]
@@ -145979,6 +153966,7 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutLoyaltyLedgerInput = {
@@ -146232,6 +154220,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CustomerCreateManyUserInput = {
@@ -146408,6 +154397,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -146418,6 +154408,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -146427,6 +154418,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CustomerUpdateWithoutUserInput = {
@@ -146923,6 +154915,7 @@ export namespace Prisma {
     status?: string
     expiresAt: Date | string
     items: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type PageCreateManyBusinessInput = {
@@ -147058,6 +155051,7 @@ export namespace Prisma {
     role: $Enums.BusinessRole
     merchantTermsAcceptedAt?: Date | string | null
     merchantTermsVersion?: string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ShippingZoneCreateManyBusinessInput = {
@@ -147352,6 +155346,24 @@ export namespace Prisma {
     actorUserId?: string | null
   }
 
+  export type ProductOptionGroupCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    adminLabel?: string | null
+    helpText?: string | null
+    kind?: string
+    required?: boolean
+    minSelections?: number
+    maxSelections?: number
+    includedCount?: number
+    display?: string
+    maxLength?: number | null
+    placeholder?: string | null
+    textPriceCents?: number
+  }
+
   export type ProductUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -147397,6 +155409,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -147445,6 +155459,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -148089,6 +156105,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUncheckedUpdateWithoutBusinessInput = {
@@ -148099,6 +156116,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryReservationUncheckedUpdateManyWithoutBusinessInput = {
@@ -148109,6 +156127,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: JsonNullValueInput | InputJsonValue
+    lineConfigs?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type PageUpdateWithoutBusinessInput = {
@@ -148497,6 +156516,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -148507,6 +156527,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutBusinessInput = {
@@ -148516,6 +156537,7 @@ export namespace Prisma {
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
     merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    dashboardLayout?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ShippingZoneUpdateWithoutBusinessInput = {
@@ -149410,6 +157432,64 @@ export namespace Prisma {
     actorUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type ProductOptionGroupUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    values?: ProductOptionValueUpdateManyWithoutGroupNestedInput
+    products?: ProductOptionGroupOnProductUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+    values?: ProductOptionValueUncheckedUpdateManyWithoutGroupNestedInput
+    products?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupNestedInput
+  }
+
+  export type ProductOptionGroupUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    adminLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    helpText?: NullableStringFieldUpdateOperationsInput | string | null
+    kind?: StringFieldUpdateOperationsInput | string
+    required?: BoolFieldUpdateOperationsInput | boolean
+    minSelections?: IntFieldUpdateOperationsInput | number
+    maxSelections?: IntFieldUpdateOperationsInput | number
+    includedCount?: IntFieldUpdateOperationsInput | number
+    display?: StringFieldUpdateOperationsInput | string
+    maxLength?: NullableIntFieldUpdateOperationsInput | number | null
+    placeholder?: NullableStringFieldUpdateOperationsInput | string | null
+    textPriceCents?: IntFieldUpdateOperationsInput | number
+  }
+
   export type ImageCreateManyProductInput = {
     id?: string
     createdAt?: Date | string
@@ -149452,6 +157532,7 @@ export namespace Prisma {
     total: number
     fulfilledQuantity?: number
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -149529,6 +157610,27 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: Date | string | null
   }
 
+  export type ProductOptionGroupOnProductCreateManyProductInput = {
+    groupId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionValueCreateManyLinkedProductInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
   export type ProductReviewCreateManyProductInput = {
     id?: string
     createdAt?: Date | string
@@ -149601,6 +157703,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateWithoutProductInput = {
@@ -149619,6 +157722,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutVariantNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductVariantNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductVariantNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantNestedInput
   }
 
   export type ProductVariantUncheckedUpdateManyWithoutProductInput = {
@@ -149663,6 +157767,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
   }
@@ -149677,6 +157782,7 @@ export namespace Prisma {
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -149690,6 +157796,7 @@ export namespace Prisma {
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -149917,6 +158024,69 @@ export namespace Prisma {
     merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type ProductOptionGroupOnProductUpdateWithoutProductInput = {
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    group?: ProductOptionGroupUpdateOneRequiredWithoutProductsNestedInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateWithoutProductInput = {
+    groupId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductInput = {
+    groupId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionValueUpdateWithoutLinkedProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    group?: ProductOptionGroupUpdateOneRequiredWithoutValuesNestedInput
+    linkedVariant?: ProductVariantUpdateOneWithoutLinkedOptionValuesNestedInput
+  }
+
+  export type ProductOptionValueUncheckedUpdateWithoutLinkedProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutLinkedProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
   export type ProductReviewUpdateWithoutProductInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -150014,6 +158184,7 @@ export namespace Prisma {
     total: number
     fulfilledQuantity?: number
     productId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -150064,6 +158235,21 @@ export namespace Prisma {
     termsAcceptedAt?: Date | string | null
     termsVersion?: string | null
     merchantTermsUpdatedAt?: Date | string | null
+  }
+
+  export type ProductOptionValueCreateManyLinkedVariantInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    groupId: string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    available?: boolean
+    sortOrder?: number
   }
 
   export type InventoryHistoryUpdateWithoutVariantInput = {
@@ -150123,6 +158309,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
   }
@@ -150137,6 +158324,7 @@ export namespace Prisma {
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -150150,6 +158338,7 @@ export namespace Prisma {
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -150300,6 +158489,135 @@ export namespace Prisma {
     termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ProductOptionValueUpdateWithoutLinkedVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    group?: ProductOptionGroupUpdateOneRequiredWithoutValuesNestedInput
+    linkedProduct?: ProductUpdateOneWithoutLinkedOptionValuesNestedInput
+  }
+
+  export type ProductOptionValueUncheckedUpdateWithoutLinkedVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutLinkedVariantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueCreateManyGroupInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    label: string
+    imageUrl?: string | null
+    swatchColor?: string | null
+    priceDelta?: number
+    priceOverride?: number | null
+    linkedProductId?: string | null
+    linkedVariantId?: string | null
+    available?: boolean
+    sortOrder?: number
+  }
+
+  export type ProductOptionGroupOnProductCreateManyGroupInput = {
+    productId: string
+    sortOrder?: number
+    createdAt?: Date | string
+  }
+
+  export type ProductOptionValueUpdateWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    linkedProduct?: ProductUpdateOneWithoutLinkedOptionValuesNestedInput
+    linkedVariant?: ProductVariantUpdateOneWithoutLinkedOptionValuesNestedInput
+  }
+
+  export type ProductOptionValueUncheckedUpdateWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionValueUncheckedUpdateManyWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    label?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    swatchColor?: NullableStringFieldUpdateOperationsInput | string | null
+    priceDelta?: IntFieldUpdateOperationsInput | number
+    priceOverride?: NullableIntFieldUpdateOperationsInput | number | null
+    linkedProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    linkedVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    available?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductOptionGroupOnProductUpdateWithoutGroupInput = {
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: ProductUpdateOneRequiredWithoutOptionGroupsNestedInput
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateWithoutGroupInput = {
+    productId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductOptionGroupOnProductUncheckedUpdateManyWithoutGroupInput = {
+    productId?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CollectionProductCreateManyCollectionInput = {
@@ -151723,6 +160041,7 @@ export namespace Prisma {
     fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryHistoryCreateManyOrderInput = {
@@ -151798,6 +160117,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
+    customization?: NullableJsonNullValueInput | InputJsonValue
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
   }
@@ -151813,6 +160133,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
@@ -151826,6 +160147,7 @@ export namespace Prisma {
     fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    customization?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type InventoryHistoryUpdateWithoutOrderInput = {
@@ -152290,6 +160612,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -152338,6 +160662,8 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    optionGroups?: ProductOptionGroupOnProductUncheckedUpdateManyWithoutProductNestedInput
+    linkedOptionValues?: ProductOptionValueUncheckedUpdateManyWithoutLinkedProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 

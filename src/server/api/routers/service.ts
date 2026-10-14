@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { DEFAULT_EMBED_HEIGHT, parseEmbedInput } from "~/lib/embed";
 import { generateCollectionSlug } from "~/lib/slug";
+import { stripEmptyPlaceholdersInFields } from "~/lib/tiptap/strip-empty-placeholders";
 import {
   serviceBulkDeleteSchema,
   serviceBulkPublishSchema,
@@ -303,8 +304,14 @@ export const serviceRouter = createTRPCRouter({
             description: source.description,
             image: source.image,
             serviceTemplateId: source.serviceTemplateId,
+            // Rows saved before placeholder stripping may still carry an
+            // unfilled "Insert elements" node — don't copy it forward.
             ...(source.customFields !== null
-              ? { customFields: source.customFields as Prisma.InputJsonValue }
+              ? {
+                  customFields: stripEmptyPlaceholdersInFields(
+                    source.customFields,
+                  ) as Prisma.InputJsonValue,
+                }
               : {}),
             metaTitle: source.metaTitle,
             metaDescription: source.metaDescription,
@@ -419,7 +426,15 @@ export const serviceRouter = createTRPCRouter({
 
       const updated = await ctx.db.service.update({
         where: { id },
-        data: { customFields },
+        // Rich-text service-page fields can carry an unfilled "Insert
+        // elements" placeholder (embed/gallery/etc. with no id) if the owner
+        // saves while its inline panel is open — never persist one. See
+        // `stripEmptyPlaceholderNodes`.
+        data: {
+          customFields: stripEmptyPlaceholdersInFields(
+            customFields,
+          ) as Prisma.InputJsonValue,
+        },
       });
 
       return updated;

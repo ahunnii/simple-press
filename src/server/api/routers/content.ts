@@ -3,12 +3,19 @@ import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
 import type { TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
-import type { TemplateFieldRefIds } from "~/lib/template-field-refs";
+import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
+import { isContentEmpty } from "~/lib/template-fields";
+import {
+  stripEmptyPlaceholderNodes,
+  stripEmptyPlaceholdersInFields,
+} from "~/lib/tiptap/strip-empty-placeholders";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -208,8 +215,21 @@ export const contentRouter = createTRPCRouter({
         clearPreviewDraft,
         publishCmsPageDrafts,
         footerNavigationItems,
-        ...data
+        ...rest
       } = input;
+
+      // Rich-text template fields can carry an unfilled "Insert elements"
+      // placeholder (embed/gallery/etc. with no id) if the owner saves while
+      // its inline panel is still open — never persist one. See
+      // `stripEmptyPlaceholderNodes`. `undefined` stays `undefined` so an
+      // unrelated save (Branding, Navigation) never touches this column.
+      const data =
+        rest.customFields === undefined
+          ? rest
+          : {
+              ...rest,
+              customFields: stripEmptyPlaceholdersInFields(rest.customFields),
+            };
 
       // `footerNavigationItems` is a JSON? column — a plain JS `null` spread
       // via `...data` writes as SQL NULL only by accident (Prisma's JSON
@@ -287,7 +307,11 @@ export const contentRouter = createTRPCRouter({
                 data: {
                   title: parsed.data.title,
                   excerpt: parsed.data.excerpt,
-                  content: parsed.data.content as Prisma.InputJsonValue,
+                  // Drafts saved before placeholder stripping existed may
+                  // still carry an unfilled embed/gallery/etc. node.
+                  content: stripEmptyPlaceholderNodes(
+                    parsed.data.content,
+                  ) as Prisma.InputJsonValue,
                   previewDraft: Prisma.DbNull,
                   previewDraftUpdatedAt: null,
                 },
@@ -309,15 +333,24 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Same placeholder stripping as `updateSiteContent`: the visual editor
+      // autosaves this draft on a debounce, so an "Insert elements" panel
+      // that's still open would otherwise land in the draft (and be promoted
+      // on Publish). The editor never re-syncs from this write, so the open
+      // panel is unaffected.
+      const previewCustomFields = stripEmptyPlaceholdersInFields(
+        input.customFields,
+      ) as Prisma.InputJsonValue;
+
       await ctx.db.siteContent.upsert({
         where: { businessId },
         create: {
           businessId,
-          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewCustomFields,
           previewUpdatedAt: new Date(),
         },
         update: {
-          previewCustomFields: input.customFields as Prisma.InputJsonValue,
+          previewCustomFields,
           previewUpdatedAt: new Date(),
         },
       });
@@ -613,6 +646,8 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
+      const isPolicyList = input.type === "policy";
+
       const pages = await ctx.db.page.findMany({
         where: {
           businessId: business.id,
@@ -623,11 +658,25 @@ export const contentRouter = createTRPCRouter({
           id: true,
           title: true,
           slug: true,
+          // Only policy lists need the body (to drop blank ones, below);
+          // every other list keeps the cheap id/title/slug read.
+          ...(isPolicyList ? { content: true } : {}),
         },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });
 
-      return pages;
+      if (!isPolicyList) return pages;
+
+      // A published policy whose body was cleared (empty TipTap doc) would be
+      // linked from footers / checkout and render a blank page. Drop it from
+      // every policy link list; the admin Policies screen already treats a
+      // blank policy as "not live". Same `{ id, title, slug }` shape as above.
+      return pages
+        .filter(
+          (p) =>
+            !isContentEmpty((p as { content?: unknown }).content as TiptapJSON),
+        )
+        .map(({ id, title, slug }) => ({ id, title, slug }));
     }),
 
   getPageById: ownerAdminProcedure
@@ -662,10 +711,19 @@ export const contentRouter = createTRPCRouter({
       // Deliberately NOT feature-gated on `blog`: if the flag is toggled off
       // mid-session, in-flight autosaves must not start erroring. Drafts are
       // owner-only and publicly invisible, so accepting one costs nothing.
+      // The editor autosaves while an inserted embed/gallery/quote/form node
+      // may still be an unfilled placeholder (its inline panel open, Save not
+      // yet clicked). Drop those here so a blank block never lands in the
+      // draft. The editor keeps its in-memory node — it never re-syncs from
+      // this write — so the open panel is unaffected.
+      const draft = {
+        ...input.draft,
+        content: stripEmptyPlaceholderNodes(input.draft.content),
+      };
       const { count } = await ctx.db.page.updateMany({
         where: { id: input.pageId, businessId, type: { in: ["page", "blog"] } },
         data: {
-          previewDraft: input.draft as Prisma.InputJsonValue,
+          previewDraft: draft as Prisma.InputJsonValue,
           previewDraftUpdatedAt: new Date(),
         },
       });
@@ -842,6 +900,16 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Reject slugs that would shadow a built-in route (or squat a policy's
+      // fixed slug) — the page would save fine but never be reachable.
+      const reservedMessage = getReservedPageSlugMessage(
+        input.data.slug,
+        input.data.type,
+      );
+      if (reservedMessage) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: reservedMessage });
+      }
+
       // Check if slug already exists
       const existing = await ctx.db.page.findUnique({
         where: {
@@ -863,7 +931,11 @@ export const contentRouter = createTRPCRouter({
         data: {
           ...input.data,
           businessId,
-          content: input.data.content ?? EMPTY_TIPTAP_DOC,
+          // Unfilled placeholder nodes (embed panel still open, etc.) are
+          // never persisted — see `stripEmptyPlaceholderNodes`.
+          content: stripEmptyPlaceholderNodes(
+            input.data.content ?? EMPTY_TIPTAP_DOC,
+          ),
         },
       });
 
@@ -907,6 +979,20 @@ export const contentRouter = createTRPCRouter({
 
       // If changing slug, check it doesn't conflict
       if (input.data.slug && input.data.slug !== existingPage.slug) {
+        // Only validated when the slug actually changes, so legacy pages
+        // already sitting on a reserved slug can still be edited. `type` is
+        // immutable (checked above), so the existing type is authoritative.
+        const reservedMessage = getReservedPageSlugMessage(
+          input.data.slug,
+          existingPage.type,
+        );
+        if (reservedMessage) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: reservedMessage,
+          });
+        }
+
         const conflict = await ctx.db.page.findUnique({
           where: {
             businessId_slug: {
@@ -926,7 +1012,17 @@ export const contentRouter = createTRPCRouter({
 
       const page = await ctx.db.page.update({
         where: { id: input.id },
-        data: input.data,
+        data:
+          input.data.content === undefined
+            ? input.data
+            : {
+                ...input.data,
+                // Unfilled placeholder nodes (embed panel still open, etc.)
+                // are never persisted. The returned page carries the
+                // stripped content, so editors that reset from the response
+                // show exactly what was saved.
+                content: stripEmptyPlaceholderNodes(input.data.content),
+              },
       });
 
       return { data: page, message: "Page updated successfully" };
@@ -1062,9 +1158,7 @@ export const contentRouter = createTRPCRouter({
 
       async function missingIds(
         ids: string[],
-        findMany: (id: {
-          in: string[];
-        }) => Promise<{ id: string }[]>,
+        findMany: (id: { in: string[] }) => Promise<{ id: string }[]>,
       ): Promise<string[]> {
         if (ids.length === 0) return [];
         const found = await findMany({ in: ids });

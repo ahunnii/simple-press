@@ -6,6 +6,7 @@ import type {
   InvoicePaymentMethodInput,
   InvoiceSettingsFormInput,
 } from "~/lib/validators/invoice";
+import { QBO_INVOICE_LIST_MAX_ROWS } from "~/lib/invoices/qbo-limits";
 import { createInvoiceToken } from "~/lib/invoices/token";
 import { recordInvoiceView } from "~/lib/invoices/views";
 
@@ -1132,6 +1133,41 @@ describe("invoice router", () => {
       const summary = await caller.invoice.summary();
       expect(summary.outstandingCount).toBe(5);
       expect(summary.outstandingCents).toBe(3 * 10_000 + 50_000 + 50_001);
+    });
+
+    it("summary: QuickBooks paid-in-window invoices aren't squeezed out by the open-row cap", async () => {
+      const { business, caller } = await setup({
+        featureFlags: { invoices: true, quickbooks: true },
+      });
+      // A full cap of NEWER open QuickBooks invoices. Raw SQL for speed: the
+      // summary never reads the (encrypted) customer columns.
+      await db.$executeRaw`
+        INSERT INTO "QuickBooksInvoice"
+          (id, "createdAt", "updatedAt", "businessId", kind, "amountCents",
+           "customerName", "customerEmail", status, "balanceCents", "realmId")
+        SELECT 'qbo-open-' || g, now() - (g || ' seconds')::interval, now(),
+               ${business.id}, 'custom', 100, 'x', 'x', 'sent', 100, 'realm-test'
+        FROM generate_series(1, ${QBO_INVOICE_LIST_MAX_ROWS}) AS g
+      `;
+      // An OLDER QuickBooks invoice paid yesterday.
+      await db.quickBooksInvoice.create({
+        data: {
+          businessId: business.id,
+          kind: "custom",
+          amountCents: 77_700,
+          customerName: "Paid Customer",
+          customerEmail: "paid@customer.test",
+          status: "paid",
+          paidAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          realmId: "realm-test",
+          createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      const summary = await caller.invoice.summary();
+      expect(summary.paidLast30Cents).toBe(77_700);
+      expect(summary.outstandingCount).toBe(QBO_INVOICE_LIST_MAX_ROWS);
+      expect(summary.outstandingCents).toBe(QBO_INVOICE_LIST_MAX_ROWS * 100);
     });
   });
 });

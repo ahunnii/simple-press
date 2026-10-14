@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { DefaultAccountLayout } from "./default-account-layout";
 
@@ -76,6 +77,10 @@ export function DefaultOrderDetailPage({
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="text-[13px] text-[#6b6b6b]"
+                      />
                       <p className="text-[13px] text-[#6b6b6b]">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>

@@ -1,7 +1,6 @@
 "use client";
 
 import type { ResolvedDonationHandle } from "~/lib/donation-handles";
-import { cn } from "~/lib/utils";
 import { CashAppIcon } from "~/components/icons/cashapp-icon";
 import { VenmoIcon } from "~/components/icons/venmo-icon";
 import { BrandedQrCode } from "~/components/shared/branded-qr-code";
@@ -23,53 +22,39 @@ function HandleCard({
   const Icon = HANDLE_ICONS[handle.key];
 
   return (
-    <div
-      className="flex flex-col items-center gap-4 p-8 text-center"
-      style={{ background: "var(--wealth-surface)" }}
-    >
-      <span
-        className="grid h-12 w-12 place-items-center"
-        style={{
-          background: "var(--wealth-paper)",
-          color: "var(--wealth-primary)",
-        }}
-      >
+    <li className="wealth-donate-way wealth-on-surface">
+      <span className="wealth-donate-way__icon" aria-hidden="true">
         <Icon className="h-5 w-5" />
       </span>
       <div>
-        <p className="wealth-section-heading" style={{ fontSize: "16px" }}>
-          {handle.label}
-        </p>
-        <p
-          className="mt-0.5 text-[14px]"
-          style={{ color: "var(--wealth-muted)" }}
-        >
-          {handle.displayHandle}
-        </p>
+        <h3 className="wealth-h3">{handle.label}</h3>
+        <p className="wealth-donate-way__handle">{handle.displayHandle}</p>
       </div>
 
-      <BrandedQrCode
-        value={handle.url}
-        logoUrl={logoUrl}
-        className="size-44"
-        style={{ border: "1px solid var(--wealth-surface-2)" }}
-      />
+      <div className="wealth-donate-way__qr">
+        <BrandedQrCode
+          value={handle.url}
+          logoUrl={logoUrl}
+          className="size-40"
+        />
+      </div>
 
       <WealthLedgeButton href={handle.url} variant="outline" external>
         Open {handle.label}
       </WealthLedgeButton>
-    </div>
+    </li>
   );
 }
 
 /**
- * Wealth's styled Venmo/Cash App cards — one per handle the owner has
- * configured, each with a deep link and a scannable QR code. Rendered by
- * `WealthDonatePage` only when `resolveDonationHandles(business)` is
- * non-empty, mirroring `PinkDonateOtherWays`/`DefaultDonateOtherWays`.
- * Restyled square/wealth-toned: `--wealth-surface` tile, mono-caps outline
- * ledge button instead of pink's ghost button. With a single handle, the
- * card is centered and width-constrained instead of half of a 2-up grid.
+ * Wealth's Venmo/Cash App cards (2026-10-12 redesign) — one square surface
+ * card per handle the owner has configured, each with a deep link and a
+ * scannable QR code. Rendered by `WealthDonatePage` only when
+ * `resolveDonationHandles(business)` is non-empty and the `donate.other-ways`
+ * section is visible, mirroring `PinkDonateOtherWays`/`DefaultDonateOtherWays`.
+ * The cards share a wrapping row (`.wealth-donate-ways`): one handle is a
+ * single centered card (`--single`), two sit side by side — no half-empty
+ * 2-up grid.
  */
 export function WealthDonateOtherWays({
   handles,
@@ -78,20 +63,17 @@ export function WealthDonateOtherWays({
   handles: ResolvedDonationHandle[];
   logoUrl?: string | null;
 }) {
-  const single = handles.length === 1;
-
   return (
-    // One handle → a single centered card instead of a half-empty 2-up.
-    <div
-      className={cn(
-        single
-          ? "mx-auto w-full max-w-[24rem]"
-          : "grid grid-cols-1 gap-[var(--wealth-gutter)] sm:grid-cols-2",
-      )}
+    <ul
+      className={
+        handles.length === 1
+          ? "wealth-donate-ways wealth-donate-ways--single"
+          : "wealth-donate-ways"
+      }
     >
       {handles.map((handle) => (
         <HandleCard key={handle.key} handle={handle} logoUrl={logoUrl} />
       ))}
-    </div>
+    </ul>
   );
 }

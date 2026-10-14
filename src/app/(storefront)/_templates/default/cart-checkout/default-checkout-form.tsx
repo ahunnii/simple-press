@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -375,10 +377,7 @@ export function DefaultCheckoutForm({
               {/* Items */}
               <div className="max-h-64 space-y-3 overflow-y-auto">
                 {f.items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.variantId}`}
-                    className="flex gap-3"
-                  >
+                  <div key={cartItemId(item)} className="flex gap-3">
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[var(--radius)] bg-[#f6f6f6]">
                       {item.imageUrl ? (
                         <Image
@@ -406,6 +405,11 @@ export function DefaultCheckoutForm({
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="text-[#6b6b6b]"
+                      />
                       <p className="text-xs text-[#6b6b6b]">
                         Qty: {item.quantity}
                       </p>
@@ -493,6 +497,14 @@ export function DefaultCheckoutForm({
                     >
                       Discount Applied: {f.discountCodeLabel} — you saved{" "}
                       {formatPrice(f.discountAmount)}
+                    </p>
+                  )}
+                  {f.discountCodeLabel && f.discountFreeShipping && (
+                    <p
+                      role="status"
+                      className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-900"
+                    >
+                      Free shipping applied: {f.discountCodeLabel}
                     </p>
                   )}
                 </div>

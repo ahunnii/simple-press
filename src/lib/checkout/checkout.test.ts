@@ -110,6 +110,45 @@ describe("computeSubtotalCents", () => {
   });
 });
 
+describe("computeSubtotalCents unit price overrides", () => {
+  it("uses the configured unit price for overridden lines only", () => {
+    const items = [
+      makeItem({ productId: "p1", quantity: 2 }),
+      makeItem({ productId: "p1", quantity: 1 }),
+    ];
+    const productMap = new Map([["p1", makeProduct({ price: 1_000 })]]);
+    expect(
+      computeSubtotalCents(items, new Map(), productMap, new Map([[1, 4_500]])),
+    ).toBe(2_000 + 4_500);
+  });
+});
+
+describe("checkCartAvailability lineKey + lineIndex", () => {
+  it("echoes the line's lineKey and its index", () => {
+    const result = checkCartAvailability({
+      items: [
+        makeItem({ productId: "p1", lineKey: "a" }),
+        makeItem({ productId: "p1", lineKey: "b", quantity: 99 }),
+      ],
+      variantMap: new Map(),
+      productMap: new Map([["p1", makeProduct()]]),
+      poolDemand: new Map(),
+      poolMap: new Map(),
+    });
+    expect(result.unavailableItemIds).toEqual([
+      { productId: "p1", variantId: null, lineKey: "b" },
+    ]);
+    expect(result.unavailableDetails).toEqual([
+      {
+        productId: "p1",
+        variantId: null,
+        reason: "out-of-stock",
+        lineIndex: 1,
+      },
+    ]);
+  });
+});
+
 describe("checkCartAvailability", () => {
   const noPools = {
     poolDemand: new Map<string, number>(),

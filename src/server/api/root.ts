@@ -9,6 +9,7 @@ import { collectionsRouter } from "./routers/collections";
 import { contactRouter } from "./routers/contact";
 import { contentRouter } from "./routers/content";
 import { customerRouter } from "./routers/customer";
+import { dashboardRouter } from "./routers/dashboard";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { donationRouter } from "./routers/donation";
@@ -37,6 +38,7 @@ import { platformBusinessRouter } from "./routers/platform-business";
 import { platformInvitesRouter } from "./routers/platform-invites";
 import { platformMediaRouter } from "./routers/platform-media";
 import { productRouter } from "./routers/product";
+import { productOptionRouter } from "./routers/product-option";
 import { quickbooksRouter } from "./routers/quickbooks";
 import { quoteCalculatorRouter } from "./routers/quote-calculator";
 import { quoteSubmissionRouter } from "./routers/quote-submission";
@@ -58,6 +60,7 @@ import { videosRouter } from "./routers/videos";
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   backInStock: backInStockRouter,
+  dashboard: dashboardRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
   domain: domainRouter,
   discount: discountRouter,
@@ -70,6 +73,7 @@ export const appRouter = createTRPCRouter({
 
   business: businessRouter,
   product: productRouter,
+  productOption: productOptionRouter,
   order: orderRouter,
   orderLookup: orderLookupRouter,
   account: accountRouter,

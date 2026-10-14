@@ -18,6 +18,7 @@ import {
 } from "~/lib/prices";
 import {
   computeDepositPresets,
+  defaultLineDescription,
   dueDateString,
   presetForRule,
 } from "~/lib/quickbooks/mapping";
@@ -101,6 +102,8 @@ export type InvoiceFormDialogProps = {
   quoteSubmissionId?: string;
   defaultDueDays: number;
   timeZone: string;
+  /** Seeds the Description placeholder with the same default the server uses (`defaultLineDescription`). */
+  businessName: string;
   /** When true the Kind select is read-only (lead page passes the kind). */
   lockKind?: boolean;
   /**
@@ -213,6 +216,7 @@ export function InvoiceFormDialog({
   quoteSubmissionId,
   defaultDueDays,
   timeZone,
+  businessName,
   lockKind = false,
   depositBasisCents,
   depositRule,
@@ -942,7 +946,7 @@ export function InvoiceFormDialog({
               </Label>
               <Input
                 id="invoice-description"
-                placeholder="Deposit — Handy Relocations"
+                placeholder={defaultLineDescription(form.kind, businessName)}
                 maxLength={QBO_MAX_DESCRIPTION_LENGTH}
                 value={form.description}
                 onChange={(e) => {

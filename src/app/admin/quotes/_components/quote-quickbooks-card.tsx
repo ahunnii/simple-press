@@ -383,6 +383,7 @@ export function QuoteQuickBooksCard({
             quoteSubmissionId={submission.id}
             defaultDueDays={connection.defaultDueDays}
             timeZone={account.timeZone}
+            businessName={account.businessName}
             lockKind
             depositBasisCents={quoteCents}
             depositRule={{ depositMode, depositPercent, depositFixedCents }}

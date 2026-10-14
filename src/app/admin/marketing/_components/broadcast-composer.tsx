@@ -63,8 +63,14 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
 
   const sendMutation = api.marketing.sendBroadcast.useMutation({
     onSuccess: (data) => {
-      if (data.test) {
-        toast.success("Test email sent to your inbox.");
+      if (data.test && data.failed > 0) {
+        toast.error("The test email couldn't be sent. Please try again.");
+      } else if (data.test) {
+        toast.success(
+          data.to
+            ? `Test email sent to ${data.to}.`
+            : "Test email sent to your inbox.",
+        );
       } else {
         toast.success(
           `Broadcast sent — ${data.sent.toString()} delivered${data.failed > 0 ? `, ${data.failed.toString()} failed` : ""}.`,

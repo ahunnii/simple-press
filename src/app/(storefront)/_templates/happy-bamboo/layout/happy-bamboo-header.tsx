@@ -22,6 +22,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   getAccountNavLinks,
   isNavItemActive,
@@ -116,9 +117,11 @@ export function HappyBambooHeader({
     }
   }, [itemCount]);
 
+  // Donations "show in header" switch appends a plain last /donate item.
   const links = resolveHappyBambooNav(
     business?.siteContent?.navigationItems,
     isEnabled,
+    donateLinkOptions(business, isEnabled, "header"),
   );
 
   const f = resolveFields(business.siteContent?.customFields, [
@@ -413,11 +416,14 @@ export function HappyBambooHeader({
           toggleRef={menuToggleRef}
         />
       </header>
-      <HappyBambooCartDrawer
-        shippingConfig={shippingConfigFromBusiness(business)}
-        cartLabel={cartLabel}
-        cartEmptyText={cartEmptyText}
-      />
+      {/* Catalog mode (B6.11): don't mount the drawer when `cart` is off */}
+      {isEnabled("cart") && (
+        <HappyBambooCartDrawer
+          shippingConfig={shippingConfigFromBusiness(business)}
+          cartLabel={cartLabel}
+          cartEmptyText={cartEmptyText}
+        />
+      )}
       <span
         role="status"
         aria-live="polite"

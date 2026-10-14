@@ -6,6 +6,7 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -160,11 +161,7 @@ export function ProductGalleryVertical({
   const photo = (index: number, isCurrent: boolean) => (
     <Image
       src={images[index]?.url ?? "/placeholder.svg"}
-      alt={
-        images[index]?.altText?.trim()
-          ? (images[index]?.altText ?? "")
-          : productName
-      }
+      alt={meaningfulAltText(images[index]?.altText) ?? productName}
       fill
       className="object-cover"
       priority={isCurrent}
@@ -326,9 +323,8 @@ export function ProductGalleryVertical({
                 <Image
                   src={image.url}
                   alt={
-                    image.altText?.trim()
-                      ? image.altText
-                      : `${productName} ${index + 1}`
+                    meaningfulAltText(image.altText) ??
+                    `${productName} ${index + 1}`
                   }
                   fill
                   className="object-cover"
@@ -365,9 +361,8 @@ export function ProductGalleryVertical({
               <Image
                 src={images[selectedImage]?.url ?? "/placeholder.svg"}
                 alt={
-                  images[selectedImage]?.altText?.trim()
-                    ? (images[selectedImage]?.altText ?? "")
-                    : productName
+                  meaningfulAltText(images[selectedImage]?.altText) ??
+                  productName
                 }
                 width={1200}
                 height={1200}

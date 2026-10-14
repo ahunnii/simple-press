@@ -6,10 +6,13 @@ export function SaveFormButton({
   disabled,
   handleSave,
   isSaving,
+  isUploading = false,
 }: {
   disabled: boolean;
   handleSave?: () => void;
   isSaving: boolean;
+  /** Shows "Uploading…" while a rich-text upload is still in flight. */
+  isUploading?: boolean;
 }) {
   return (
     <Button
@@ -22,6 +25,11 @@ export function SaveFormButton({
         <>
           <span className="saving-indicator" />
           Saving...
+        </>
+      ) : isUploading ? (
+        <>
+          <span className="saving-indicator" />
+          Uploading…
         </>
       ) : (
         <>

@@ -53,3 +53,25 @@ export const COMMON_TIME_ZONES: { value: string; label: string }[] = [
   { value: "Asia/Tokyo", label: "Japan Standard Time — Tokyo" },
   { value: "Australia/Sydney", label: "Australian Eastern Time — Sydney" },
 ];
+
+/**
+ * Owner-facing name for a time zone id.
+ *
+ * Returns the curated label ("Eastern Time — Detroit") when `tz` is in
+ * COMMON_TIME_ZONES; otherwise a readable fallback built from the last
+ * segment of the id with underscores turned into spaces ("Pacific/Auckland" →
+ * "Auckland", "America/Argentina/Buenos_Aires" → "Buenos Aires"). Ids with no
+ * slash ("UTC") and unrecognised strings come back as written. Never throws.
+ */
+export function getTimeZoneLabel(tz: string): string {
+  try {
+    const curated = COMMON_TIME_ZONES.find((z) => z.value === tz);
+    if (curated) return curated.label;
+    const trimmed = (tz ?? "").trim();
+    if (!trimmed) return "";
+    const city = trimmed.split("/").pop() ?? trimmed;
+    return city.replace(/_/g, " ");
+  } catch {
+    return typeof tz === "string" ? tz : "";
+  }
+}

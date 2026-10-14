@@ -1,6 +1,8 @@
-import Image from "next/image";
-
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
+import { WealthArrowLink } from "../shared/wealth-arrow-link";
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthOverlapCard } from "../shared/wealth-overlap-card";
 
 type Props = {
   image: string;
@@ -13,8 +15,9 @@ type Props = {
 };
 
 /**
- * Narrow-column director spotlight: square headshot, bold name/title line,
- * three bio paragraphs, bold mailto email. Hideable (about.director).
+ * Director spotlight — a square headshot with the surface card overlapping
+ * it: italic name/title heading, three bio paragraphs, mailto arrow link.
+ * Hideable (about.director).
  */
 export function WealthAboutDirector({
   image,
@@ -25,62 +28,63 @@ export function WealthAboutDirector({
   bio3,
   email,
 }: Props) {
-  return (
-    <section
-      aria-label="Director spotlight"
-      {...sectionGroupAttr("about", "director")}
-      className="py-[calc(var(--wealth-rhythm)*2)]"
-    >
-      <div className="mx-auto grid w-full max-w-[900px] grid-cols-1 gap-[var(--wealth-rhythm)] px-[var(--wealth-gutter)] sm:grid-cols-[220px_1fr]">
-        <div className="relative aspect-square w-full max-w-[220px] overflow-hidden bg-[var(--wealth-surface)]">
-          {image ? (
-            <Image
-              src={image}
-              alt={imageAlt}
-              fill
-              sizes="(min-width: 640px) 220px, 60vw"
-              className="object-cover"
-            />
-          ) : null}
-        </div>
-        <div>
-          <p
-            {...fieldAttr("wealth.about.director-name-title")}
-            className="font-bold"
-            style={{ fontFamily: "var(--font-wealth-body)" }}
+  const bios = [
+    { text: bio1, key: "wealth.about.director-bio-1" },
+    { text: bio2, key: "wealth.about.director-bio-2" },
+    { text: bio3, key: "wealth.about.director-bio-3" },
+  ].filter((b) => b.text.trim() !== "");
+
+  const content = (
+    <>
+      {nameTitle.trim() ? (
+        <h2
+          id="wealth-about-director-h"
+          className="wealth-h2"
+          {...fieldAttr("wealth.about.director-name-title")}
+        >
+          {nameTitle}
+        </h2>
+      ) : null}
+      {bios.map((b) => (
+        <p key={b.key} {...fieldAttr(b.key)}>
+          {b.text}
+        </p>
+      ))}
+      {email.trim() ? (
+        <p>
+          <WealthArrowLink
+            href={`mailto:${email}`}
+            className="wealth-about-director__email"
+            {...fieldAttr("wealth.about.director-email")}
           >
-            {nameTitle}
-          </p>
-          <div className="mt-[var(--wealth-rhythm)]">
-            {[bio1, bio2, bio3].map((paragraph, i) => (
-              <p
-                key={i}
-                {...fieldAttr(
-                  i === 0
-                    ? "wealth.about.director-bio-1"
-                    : i === 1
-                      ? "wealth.about.director-bio-2"
-                      : "wealth.about.director-bio-3",
-                )}
-                className="mt-[var(--wealth-rhythm)] first:mt-0"
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          {email ? (
-            <p className="mt-[var(--wealth-rhythm)]">
-              <a
-                href={`mailto:${email}`}
-                {...fieldAttr("wealth.about.director-email")}
-                className="font-bold"
-              >
-                {email}
-              </a>
-            </p>
-          ) : null}
+            {email}
+          </WealthArrowLink>
+        </p>
+      ) : null}
+    </>
+  );
+
+  return (
+    <WealthBlock
+      tone="paper"
+      aria-labelledby={nameTitle.trim() ? "wealth-about-director-h" : undefined}
+      aria-label={nameTitle.trim() ? undefined : "Director spotlight"}
+      {...sectionGroupAttr("about", "director")}
+    >
+      {image.trim() ? (
+        <WealthOverlapCard
+          image={image}
+          imageAlt={imageAlt}
+          tone="surface"
+          className="wealth-about-director"
+        >
+          {content}
+        </WealthOverlapCard>
+      ) : (
+        <div className="wealth-about-director wealth-about-director--solo wealth-on-surface">
+          {content}
         </div>
-      </div>
-    </section>
+      )}
+    </WealthBlock>
   );
 }

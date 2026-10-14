@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
+import AbandonedCheckoutEmail, {
+  type AbandonedCheckoutItem,
+} from "~/emails/abandoned-checkout";
 import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
@@ -35,6 +37,9 @@ import PaymentsDisabledEmail from "~/emails/payments-disabled";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
+import OrderPaymentFailedEmail from "~/emails/order-payment-failed";
+import OrderPaymentFailedOwnerEmail from "~/emails/order-payment-failed-owner";
+import OrderPaymentProcessingEmail from "~/emails/order-payment-processing";
 import SubscriptionCancelledEmail from "~/emails/subscription-cancelled";
 import SubscriptionManageLinksEmail from "~/emails/subscription-manage-links";
 import SubscriptionPaymentFailedEmail from "~/emails/subscription-payment-failed";
@@ -50,6 +55,16 @@ import type { OverdueInvoiceRow } from "~/emails/invoice-overdue-owner";
 import type { DonationLabel } from "~/lib/donations/label";
 import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
+import {
+  orderConfirmationDefaultSubject,
+  orderPaymentFailedDefaultSubject,
+  orderPaymentFailedOwnerDefaultSubject,
+  orderPaymentProcessingDefaultSubject,
+  subscriptionCancelledDefaultSubject,
+  subscriptionPaymentFailedDefaultSubject,
+  subscriptionStartedDefaultSubject,
+  subscriptionUpdatedDefaultSubject,
+} from "~/lib/email/default-subjects";
 import { getEmailOverrides } from "~/lib/email/overrides.server";
 import { createOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
@@ -106,9 +121,10 @@ export async function sendOrderConfirmation(params: {
   const isPickup = params.deliveryMethod === "pickup";
   const overrides = await getEmailOverrides(params.business.subdomain);
   const override = overrides["order-confirmation"];
-  const defaultSubject = isPickup
-    ? `Order #${params.orderNumber} confirmed — pickup details inside`
-    : `Order #${params.orderNumber} Confirmed`;
+  const defaultSubject = orderConfirmationDefaultSubject({
+    orderNumber: params.orderNumber,
+    isPickup,
+  });
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
@@ -164,6 +180,8 @@ export async function sendNewOrderNotification(params: {
     variantName: string | null;
     quantity: number;
     total: number;
+    /** `OrderItem.customization` — printed as option lines under the item. */
+    customization?: unknown;
   }>;
   subtotal: number;
   shipping: number;
@@ -519,6 +537,7 @@ export async function sendAbandonedCheckoutEmail(params: {
     customDomain?: string | null;
     domainStatus?: string | null;
   };
+  items?: AbandonedCheckoutItem[];
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
@@ -541,9 +560,145 @@ export async function sendAbandonedCheckoutEmail(params: {
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
+      items: params.items,
     }),
     tags: [
       { name: "category", value: "abandoned_checkout" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Delayed (bank) payments — see the checkout.session.async_payment_* webhooks.
+type PaymentEmailBusiness = {
+  name: string;
+  ownerEmail: string;
+  siteContent?: {
+    logoUrl?: string | null;
+  } | null;
+  subdomain: string;
+  customDomain?: string | null;
+  domainStatus?: string | null;
+};
+
+// Order Payment Processing (customer) — checkout completed but the bank
+// payment is still clearing; the real order confirmation follows later.
+export async function sendOrderPaymentProcessing(params: {
+  to: string;
+  customerName?: string | null;
+  business: PaymentEmailBusiness;
+  items?: AbandonedCheckoutItem[];
+  amountTotal: number; // cents
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-payment-processing"];
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : orderPaymentProcessingDefaultSubject({
+          businessName: params.business.name,
+        }),
+    react: OrderPaymentProcessingEmail({
+      customerName: params.customerName ?? undefined,
+      introText: override?.introText,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      items: params.items,
+      amountTotal: params.amountTotal,
+    }),
+    tags: [
+      { name: "category", value: "order_payment_processing" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Order Payment Failed (customer) — the bank payment did not complete, so the
+// order was cancelled and the customer was not charged.
+export async function sendOrderPaymentFailed(params: {
+  to: string;
+  customerName?: string | null;
+  business: PaymentEmailBusiness;
+  items?: AbandonedCheckoutItem[];
+  amountTotal: number; // cents
+  idempotencyKey?: string;
+}) {
+  const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-payment-failed"];
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : orderPaymentFailedDefaultSubject({
+          businessName: params.business.name,
+        }),
+    react: OrderPaymentFailedEmail({
+      customerName: params.customerName ?? undefined,
+      introText: override?.introText,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+      items: params.items,
+      amountTotal: params.amountTotal,
+    }),
+    tags: [
+      { name: "category", value: "order_payment_failed" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Order Payment Failed (owner/staff alert) — informational; no order exists
+// and the held stock was released automatically.
+export async function sendOrderPaymentFailedOwnerAlert(params: {
+  to: string;
+  customerName?: string | null;
+  customerEmail: string;
+  stripeSessionId: string;
+  business: PaymentEmailBusiness;
+  items?: AbandonedCheckoutItem[];
+  amountTotal: number; // cents
+  idempotencyKey?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.customerEmail,
+    subject: orderPaymentFailedOwnerDefaultSubject({
+      customerName: params.customerName,
+      customerEmail: params.customerEmail,
+      businessName: params.business.name,
+    }),
+    react: OrderPaymentFailedOwnerEmail({
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      customerName: params.customerName ?? undefined,
+      customerEmail: params.customerEmail,
+      items: params.items,
+      amountTotal: params.amountTotal,
+      stripeSessionId: params.stripeSessionId,
+    }),
+    tags: [
+      { name: "category", value: "order_payment_failed_owner" },
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: params.idempotencyKey,
@@ -739,6 +894,8 @@ export async function sendPoolOutOfStockAlert(params: {
  * without this email the owner's first signal is an angry customer.
  */
 export async function sendPaymentsDisabledAlert(params: {
+  /** Defaults to `business.ownerEmail`; the webhook sends one per recipient. */
+  to?: string;
   adminSettingsUrl?: string;
   idempotencyKey?: string;
   business: {
@@ -751,7 +908,7 @@ export async function sendPaymentsDisabledAlert(params: {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
     fromName: params.business.name,
-    to: params.business.ownerEmail,
+    to: params.to ?? params.business.ownerEmail,
     subject: `Action required: ${params.business.name} can't accept payments`,
     react: PaymentsDisabledEmail({
       businessName: params.business.name,
@@ -1322,7 +1479,7 @@ export async function sendSubscriptionStarted(params: {
       ? applySubjectTemplate(override.subject, {
           businessName: params.business.name,
         })
-      : `Your ${params.productName} subscription is confirmed`,
+      : subscriptionStartedDefaultSubject({ productName: params.productName }),
     react: SubscriptionStartedEmail({
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
@@ -1379,7 +1536,9 @@ export async function sendSubscriptionPaymentFailed(params: {
       ? applySubjectTemplate(override.subject, {
           businessName: params.business.name,
         })
-      : `Action needed: payment for your ${params.productName} subscription`,
+      : subscriptionPaymentFailedDefaultSubject({
+          productName: params.productName,
+        }),
     react: SubscriptionPaymentFailedEmail({
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
@@ -1432,7 +1591,9 @@ export async function sendSubscriptionCancelled(params: {
       ? applySubjectTemplate(override.subject, {
           businessName: params.business.name,
         })
-      : `Your ${params.productName} subscription has been cancelled`,
+      : subscriptionCancelledDefaultSubject({
+          productName: params.productName,
+        }),
     react: SubscriptionCancelledEmail({
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
@@ -1480,16 +1641,10 @@ export async function sendSubscriptionUpdated(params: {
   const overrides = await getEmailOverrides(params.business.subdomain);
   const override = overrides["subscription-updated"];
 
-  let defaultSubject: string;
-  if (params.variant === "paused") {
-    defaultSubject = "Your subscription is paused";
-  } else if (params.variant === "resumed") {
-    defaultSubject = params.undoSkip
-      ? "Your next delivery is back on"
-      : "Your subscription is back on";
-  } else {
-    defaultSubject = "Your next delivery is skipped";
-  }
+  const defaultSubject = subscriptionUpdatedDefaultSubject({
+    variant: params.variant,
+    undoSkip: params.undoSkip,
+  });
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,

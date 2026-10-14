@@ -16,9 +16,12 @@ export default async function NewOrderPage() {
   const { membershipRole } = await requireAdminAccess();
   if (membershipRole === "STAFF") redirect("/admin/orders");
 
-  const [products, business] = await Promise.all([
+  const [products, business, customizers] = await Promise.all([
     api.product.secureGetAll().catch(rethrowTrpcForErrorBoundary),
     api.business.simplifiedGet(),
+    // `{}` with product options off. A failure here only costs the options
+    // dialog, so the form still loads.
+    api.productOption.forManualOrder().catch(() => ({})),
   ]);
 
   return (
@@ -33,6 +36,7 @@ export default async function NewOrderPage() {
       <ManualOrderForm
         products={products}
         allowedCountries={getAllowedCountries(business?.salesCountries ?? [])}
+        customizers={customizers}
       />
     </>
   );

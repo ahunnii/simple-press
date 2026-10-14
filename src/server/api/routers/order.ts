@@ -5,9 +5,29 @@ import { TRPCError } from "@trpc/server";
 import { carrierLabel } from "~/data/fulfillment-constants";
 import { z } from "zod";
 
+import type { CustomizationSnapshot } from "~/lib/customizer/types";
+import type {
+  LowStockCandidate,
+  OrderDeductionItem,
+} from "~/lib/inventory/order-deduction";
+import type { PoolDeductionResult } from "~/lib/inventory/pool-deduction";
 import type { OrderEarnResult } from "~/lib/loyalty/order-hooks";
+import type { FulfillmentEmailKind } from "~/lib/orders/fulfillment-email";
 import type { OrderSortValue } from "~/lib/validators/order";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
+import { resolvePickupLocation } from "~/lib/address/pickup";
+import { withoutStockLimits } from "~/lib/checkout/customizer-checkout";
+import {
+  isEmptySelection,
+  normalizeSelection,
+} from "~/lib/customizer/canonical";
+import { orderOptionsHint } from "~/lib/customizer/display";
+import { priceConfiguration } from "~/lib/customizer/evaluate";
+import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
+import {
+  isProductOptionsEnabled,
+  loadCustomizerDefinitions,
+} from "~/lib/customizer/load";
 import {
   sendOrderCancelled,
   sendOrderConfirmation,
@@ -18,9 +38,19 @@ import {
 } from "~/lib/email/templates";
 import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
 import {
+  deductInventoryForOrderItems,
+  sendLowInventoryAlerts,
+} from "~/lib/inventory/order-deduction";
+import {
   awardPointsForPaidOrder,
   clawbackPointsForOrder,
 } from "~/lib/loyalty/order-hooks";
+import {
+  orderHadInventoryDeducted,
+  planPaymentStatusOverride,
+  shouldRestockOnRefund,
+  statusAfterRefund,
+} from "~/lib/orders/order-transitions";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
@@ -58,6 +88,12 @@ const LIST_INCLUDE = {
       items: true,
       inventoryHistory: { where: { reason: "oversell" } },
     },
+  },
+  // Only customized lines, and only their snapshot — turned into the row's
+  // compact `optionsHint` and dropped before the response leaves.
+  items: {
+    where: { customization: { not: Prisma.DbNull } },
+    select: { customization: true },
   },
 } satisfies Prisma.OrderInclude;
 
@@ -260,10 +296,20 @@ export const orderRouter = createTRPCRouter({
       const becameFullyFulfilled =
         updatedOrder.fulfillmentStatus === "fulfilled";
 
+      // Reported back so the admin toast says what the customer was ACTUALLY
+      // told (see `~/lib/orders/fulfillment-email`). `sendEmail` never throws —
+      // a Resend failure resolves `{ success: false }` (already reported to
+      // Sentry inside it) — so each send's result is checked as well as the
+      // catch below, which covers template-side throws (e.g. the overrides
+      // lookup). With several tracked shipments, one failed send marks the
+      // whole batch failed: "some went out" isn't worth a third toast.
+      let customerEmailSent: FulfillmentEmailKind | null = null;
+      let customerEmailFailed = false;
+
       try {
         if (anyTracking) {
           for (const shipment of shipmentsWithTracking) {
-            await sendOrderShipped({
+            const result = await sendOrderShipped({
               to: order.customerEmail,
               orderNumber: order.orderNumber,
               customerName: order.customerName ?? "Guest",
@@ -280,14 +326,18 @@ export const orderRouter = createTRPCRouter({
               },
               orderId: order.id,
             });
+            if (!result.success) customerEmailFailed = true;
           }
-          console.log(
-            `[Orders] Shipped email(s) sent for order #${order.orderNumber}`,
-          );
+          if (!customerEmailFailed) {
+            customerEmailSent = "shipped";
+            console.log(
+              `[Orders] Shipped email(s) sent for order #${order.orderNumber}`,
+            );
+          }
         } else if (becameFullyFulfilled) {
           // The "fulfilled" (no-tracking) email is only correct when the
           // whole order is now fulfilled — skip it for partial shipments.
-          await sendOrderFulfilled({
+          const result = await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -300,11 +350,18 @@ export const orderRouter = createTRPCRouter({
               domainStatus: order.business.domainStatus,
             },
           });
-          console.log(
-            `[Orders] Fulfilled email sent for order #${order.orderNumber}`,
-          );
+          if (result.success) {
+            customerEmailSent = "fulfilled";
+            console.log(
+              `[Orders] Fulfilled email sent for order #${order.orderNumber}`,
+            );
+          } else {
+            customerEmailFailed = true;
+          }
         }
       } catch (emailError) {
+        customerEmailSent = null;
+        customerEmailFailed = true;
         console.error("[Orders] Failed to send fulfillment email:", emailError);
         Sentry.captureException(emailError, {
           tags: {
@@ -314,8 +371,14 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      // D2 redaction — see `redactOrderForStaff`.
-      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
+      // D2 redaction — see `redactOrderForStaff`. The email outcome rides
+      // alongside the order columns (not instead of them), so existing callers
+      // that read the order straight off the result are unaffected.
+      return {
+        ...redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF"),
+        customerEmailSent,
+        customerEmailFailed,
+      };
     }),
 
   markReadyForPickup: staffProcedure
@@ -360,10 +423,7 @@ export const orderRouter = createTRPCRouter({
           to: order.customerEmail,
           orderNumber: order.orderNumber,
           customerName: order.customerName ?? undefined,
-          pickupLocation:
-            order.business.pickupLocation ??
-            order.business.businessAddress ??
-            undefined,
+          pickupLocation: resolvePickupLocation(order.business) ?? undefined,
           pickupInstructions: order.business.pickupInstructions ?? undefined,
           business: {
             name: order.business.name,
@@ -856,10 +916,13 @@ export const orderRouter = createTRPCRouter({
       const isStaff = ctx.membershipRole === "STAFF";
 
       return {
-        orders: pageOrders.map(({ _count, ...order }) => ({
+        orders: pageOrders.map(({ _count, items, ...order }) => ({
           ...redactOrderForStaff(order, isStaff),
           itemCount: _count.items,
           hasOversell: _count.inventoryHistory > 0,
+          optionsHint: orderOptionsHint(
+            items.map((item) => item.customization),
+          ),
         })),
         totalCount,
         page: clampedPage,
@@ -1063,11 +1126,13 @@ export const orderRouter = createTRPCRouter({
       const updatedOrder = await ctx.db.order.update({
         where: { id: input.orderId },
         data: {
-          status: isFullRefund
-            ? "refunded"
-            : order.fulfillmentStatus === "fulfilled"
-              ? "completed"
-              : "open",
+          // A partial refund of a cancelled order keeps it cancelled — see
+          // `statusAfterRefund`.
+          status: statusAfterRefund({
+            isFullRefund,
+            status: order.status,
+            fulfillmentStatus: order.fulfillmentStatus,
+          }),
           ...(isFullRefund && { paymentStatus: "refunded" }),
           refundReason: reasonLabel,
           refundAmountCents: newTotalRefunded,
@@ -1107,11 +1172,23 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      // Restore inventory only when explicitly requested
-      if (input.restockItems) {
+      // Restore inventory only when explicitly requested — and never for a
+      // cancelled order: cancelling already offered the restock and the row
+      // can't tell us whether it was taken, so a second one could double the
+      // stock. `input.restockItems` is ignored there (the UI hides the
+      // checkbox); see `shouldRestockOnRefund`.
+      if (
+        shouldRestockOnRefund({
+          status: order.status,
+          restockRequested: input.restockItems,
+        })
+      ) {
         try {
           await ctx.db.$transaction(async (tx) => {
-            for (const item of updatedOrder.items) {
+            // Configured lines also return their linked option values.
+            for (const item of expandOrderItemsForInventory(
+              updatedOrder.items,
+            )) {
               if (item.productVariantId) {
                 const variant = await tx.productVariant.findUnique({
                   where: { id: item.productVariantId },
@@ -1372,13 +1449,20 @@ export const orderRouter = createTRPCRouter({
           }
         }
 
-        const hadInventoryDeducted =
-          order.status === "open" || order.status === "completed";
+        // Only a live order whose sale actually happened took stock. A pending
+        // (or failed) manual order is saved as "open" too but never deducted
+        // anything, so restocking it on cancel would invent inventory. The
+        // admin UI mirrors this to decide whether to offer the restock box.
+        // Not a bare `paymentStatus === "paid"` check: a $0 Stripe checkout
+        // ("no_payment_required") and a "disputed" one both deducted at
+        // creation — see `orderHadInventoryDeducted`.
+        const hadInventoryDeducted = orderHadInventoryDeducted(order);
 
         if (input.restockItems && hadInventoryDeducted) {
           try {
             await ctx.db.$transaction(async (tx) => {
-              for (const item of order.items) {
+              // Configured lines also return their linked option values.
+              for (const item of expandOrderItemsForInventory(order.items)) {
                 if (item.productVariantId) {
                   const variant = await tx.productVariant.findUnique({
                     where: { id: item.productVariantId },
@@ -1538,25 +1622,230 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const derivedStatus = (() => {
-        if (input.paymentStatus === "refunded") return "refunded";
-        if (input.paymentStatus === "failed") return order.status;
-        if (
-          input.paymentStatus === "paid" &&
-          order.fulfillmentStatus === "fulfilled"
-        )
-          return "completed";
-        if (input.paymentStatus === "paid") return "open";
-        return "open";
-      })();
+      // Paid is one-way, "refunded" belongs to the refund flows, cancelled
+      // orders are final — see `planPaymentStatusOverride` for the rules and
+      // why each exists.
+      const plan = planPaymentStatusOverride(order, input.paymentStatus);
+      if (!plan.ok) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: plan.message });
+      }
 
-      return ctx.db.order.update({
-        where: { id: input.orderId },
-        data: {
-          paymentStatus: input.paymentStatus,
-          status: derivedStatus,
+      // Compare-and-swap on the payment/order status we just read, so two
+      // overrides racing each other (a double-click, two tabs) can't BOTH see
+      // "pending" and both run the paid catch-up below — exactly one write
+      // wins the transition, and only the winner applies side effects.
+      const swapped = await ctx.db.order.updateMany({
+        where: {
+          id: order.id,
+          businessId,
+          paymentStatus: order.paymentStatus,
+          status: order.status,
         },
+        data: { paymentStatus: input.paymentStatus, status: plan.status },
       });
+      if (swapped.count === 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "This order changed while you were updating it. Refresh and try again.",
+        });
+      }
+
+      // Catch-up: a MANUAL order moving from not-yet-paid to paid is the
+      // moment its sale happens, so it gets the same three side effects
+      // `order.createManual` applies to an order created paid — customer
+      // metrics, loyalty points, stock. (Stripe orders applied all three at
+      // creation whatever their label says, so `plan.catchUp` is never set
+      // for them.) Each step is non-fatal like createManual's: the payment
+      // status is already saved, and a failure is a Sentry-visible
+      // reconciliation item rather than a reason to fail the override.
+      // No confirmation email — an override is bookkeeping, not a purchase.
+      if (plan.catchUp) {
+        // Double-count guard. Before "paid" became one-way, a manual order
+        // created paid could be flipped to pending and back; its stock and
+        // customer metrics were applied the first time. Order-driven stock
+        // deductions always leave "sale"/"oversell" rows tagged with the
+        // orderId (pool deductions included — same table, same reasons, see
+        // `deductPoolInventory`), so any such row means this order's sale was
+        // already applied: skip stock AND metrics. Loyalty is still attempted
+        // — it's idempotent on `order:<id>`. Residual blind spot: an order
+        // whose items are all untracked leaves no ledger rows, so a legacy
+        // paid→pending→paid order of that kind would be counted twice.
+        let alreadyApplied = false;
+        try {
+          alreadyApplied =
+            (await ctx.db.inventoryHistory.count({
+              where: {
+                orderId: order.id,
+                reason: { in: ["sale", "oversell"] },
+              },
+            })) > 0;
+        } catch (lookupError) {
+          // Can't tell — err on the side of NOT double-deducting/counting.
+          alreadyApplied = true;
+          Sentry.captureException(lookupError, {
+            tags: {
+              "trpc.procedure": "order.updatePaymentStatus",
+              "inventory.step": "paid-catch-up-ledger-check",
+              businessId,
+            },
+            extra: { orderId: order.id, orderNumber: order.orderNumber },
+          });
+        }
+
+        // (a) Customer spend/order-count — read the post-increment count back
+        // for the loyalty first-order check, same as createManual.
+        let customerOrderCountAfter: number | null = null;
+        if (order.customerId && !alreadyApplied) {
+          try {
+            const metricsUpdate = await ctx.db.customer.update({
+              where: { id: order.customerId },
+              data: {
+                totalSpent: { increment: order.total },
+                orderCount: { increment: 1 },
+              },
+              select: { orderCount: true },
+            });
+            customerOrderCountAfter = metricsUpdate.orderCount;
+          } catch (customerError) {
+            console.error(
+              "[Payment Override] Failed to update customer metrics:",
+              customerError,
+            );
+            Sentry.captureException(customerError, {
+              tags: {
+                "trpc.procedure": "order.updatePaymentStatus",
+                businessId,
+              },
+            });
+          }
+        }
+
+        // (b) Loyalty (flag- and program-gated inside the helper). When the
+        // metrics step didn't return a count (failed, or skipped because it
+        // was already applied), fall back to the stored count — plus one only
+        // if this order isn't in it yet.
+        if (order.customerId) {
+          const customerId = order.customerId;
+          try {
+            let orderCount = customerOrderCountAfter;
+            if (orderCount === null) {
+              const stored = await ctx.db.customer.findUnique({
+                where: { id: customerId },
+                select: { orderCount: true },
+              });
+              orderCount = (stored?.orderCount ?? 0) + (alreadyApplied ? 0 : 1);
+            }
+            await awardPointsForPaidOrder(ctx.db, {
+              businessId,
+              order: {
+                id: order.id,
+                subtotal: order.subtotal,
+                discount: order.discount,
+              },
+              customer: { id: customerId, orderCount },
+            });
+          } catch (loyaltyError) {
+            Sentry.withScope((scope) => {
+              scope.setTag("trpc.procedure", "order.updatePaymentStatus");
+              scope.setTag("loyalty.step", "award");
+              scope.setTag("businessId", businessId);
+              scope.setExtra("orderId", order.id);
+              Sentry.captureException(loyaltyError);
+            });
+          }
+        }
+
+        // (c) Stock — the shared oversell-safe helper (trackInventory,
+        // allowBackorders, pools), then the owner's low-stock alerts once the
+        // transaction has committed (they send email). Same pairing as
+        // `createOrderFromSubscriptionInvoice`.
+        if (!alreadyApplied) {
+          let candidates: LowStockCandidate[] = [];
+          let poolCandidates: PoolDeductionResult[] = [];
+          try {
+            const items: OrderDeductionItem[] = (
+              await ctx.db.orderItem.findMany({
+                where: { orderId: order.id },
+                select: {
+                  productId: true,
+                  productVariantId: true,
+                  quantity: true,
+                  productName: true,
+                  // Linked option values are deducted with the line.
+                  customization: true,
+                },
+              })
+            ).map((item) => ({
+              productId: item.productId,
+              productVariantId: item.productVariantId,
+              quantity: item.quantity,
+              productName: item.productName,
+              customization: item.customization,
+            }));
+            const result = await ctx.db.$transaction(async (tx) =>
+              deductInventoryForOrderItems(tx, {
+                businessId,
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                items,
+              }),
+            );
+            candidates = result.candidates;
+            poolCandidates = result.poolCandidates;
+          } catch (invError) {
+            console.error(
+              "[Payment Override] Failed to deduct inventory:",
+              invError,
+            );
+            // Oversell risk, same as createManual's deduction catch: the order
+            // now reads paid with stock never decremented.
+            Sentry.captureException(invError, {
+              tags: {
+                "trpc.procedure": "order.updatePaymentStatus",
+                "inventory.step": "deduct-paid-catch-up",
+                businessId,
+              },
+              extra: { orderId: order.id, orderNumber: order.orderNumber },
+            });
+          }
+
+          if (candidates.length > 0 || poolCandidates.length > 0) {
+            try {
+              const business = await ctx.db.business.findUnique({
+                where: { id: businessId },
+                select: {
+                  id: true,
+                  name: true,
+                  ownerEmail: true,
+                  subdomain: true,
+                  customDomain: true,
+                  domainStatus: true,
+                  siteContent: { select: { logoUrl: true } },
+                },
+              });
+              // `sendLowInventoryAlerts` never throws; the lookup above can.
+              if (business) {
+                await sendLowInventoryAlerts(ctx.db, {
+                  business,
+                  candidates,
+                  poolCandidates,
+                });
+              }
+            } catch (alertError) {
+              Sentry.captureException(alertError, {
+                tags: {
+                  "trpc.procedure": "order.updatePaymentStatus",
+                  "inventory.step": "alert-notification",
+                  businessId,
+                },
+              });
+            }
+          }
+        }
+      }
+
+      return ctx.db.order.findUniqueOrThrow({ where: { id: order.id } });
     }),
 
   createManual: ownerAdminProcedure
@@ -1564,12 +1853,6 @@ export const orderRouter = createTRPCRouter({
     .input(manualOrderInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-
-      // Authoritative money. The client sends items and charges, never the
-      // resulting subtotal/total — those used to come straight off the request
-      // and be written verbatim, so a crafted payload could record a $500 order
-      // as `total: 0` and silently skew the Finances page.
-      const totals = computeManualOrderTotals(input);
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
@@ -1657,6 +1940,74 @@ export const orderRouter = createTRPCRouter({
           message: `Choose a variant for "${name}".`,
         });
       }
+
+      // Product customizer builds, priced on the server from ids: the
+      // admin-typed `price` is the line's base, the stored price is base +
+      // add-ons, and the snapshot is frozen onto the order item. Stock is not
+      // checked (a manual order records a sale that already happened — the
+      // deduction's oversell guard handles shortfalls, as for plain lines).
+      const configuredIndexes = input.items.flatMap((item, index) =>
+        item.configuration && !isEmptySelection(item.configuration)
+          ? [index]
+          : [],
+      );
+      const configuredLines = new Map<
+        number,
+        { unitPrice: number; snapshot: CustomizationSnapshot }
+      >();
+      if (configuredIndexes.length > 0) {
+        if (!(await isProductOptionsEnabled(businessId))) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product options are turned off for this store.",
+          });
+        }
+        const definitions = await loadCustomizerDefinitions(
+          ctx.db,
+          businessId,
+          configuredIndexes.map((index) => input.items[index]!.productId),
+        );
+        for (const index of configuredIndexes) {
+          const item = input.items[index]!;
+          const definition = definitions.get(item.productId);
+          if (!definition) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `"${item.productName}" has no options to choose.`,
+            });
+          }
+          const priced = priceConfiguration(
+            withoutStockLimits(definition),
+            normalizeSelection(item.configuration),
+            { basePrice: Math.round(item.price), lineQty: item.quantity },
+          );
+          if (!priced.ok) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `${item.productName}: ${priced.errors
+                .map((e) => e.message)
+                .join("; ")}`,
+            });
+          }
+          configuredLines.set(index, {
+            unitPrice: priced.unitPrice,
+            snapshot: priced.snapshot,
+          });
+        }
+      }
+      const pricedItems = input.items.map((item, index) => ({
+        ...item,
+        price: configuredLines.get(index)?.unitPrice ?? item.price,
+      }));
+
+      // Authoritative money. The client sends items and charges, never the
+      // resulting subtotal/total — those used to come straight off the request
+      // and be written verbatim, so a crafted payload could record a $500 order
+      // as `total: 0` and silently skew the Finances page.
+      const totals = computeManualOrderTotals({
+        ...input,
+        items: pricedItems,
+      });
 
       const nameParts = input.customerName.trim().split(" ");
       const firstName = nameParts[0] ?? "Guest";
@@ -1768,7 +2119,7 @@ export const orderRouter = createTRPCRouter({
                 internalNote,
 
                 items: {
-                  create: input.items.map((item) => ({
+                  create: pricedItems.map((item, index) => ({
                     productId: item.productId,
                     productName: item.productName,
                     productVariantId: item.productVariantId,
@@ -1781,6 +2132,12 @@ export const orderRouter = createTRPCRouter({
                     quantity: item.quantity,
                     price: item.price,
                     total: Math.round(item.price * item.quantity),
+                    ...(configuredLines.has(index)
+                      ? {
+                          customization: configuredLines.get(index)!
+                            .snapshot as Prisma.InputJsonValue,
+                        }
+                      : {}),
                   })),
                 },
               },
@@ -1892,7 +2249,8 @@ export const orderRouter = createTRPCRouter({
               }
             >();
 
-            for (const item of order.items) {
+            // Configured lines also deduct their linked option values.
+            for (const item of expandOrderItemsForInventory(order.items)) {
               const qty = item.quantity;
 
               if (item.productVariantId) {
@@ -2299,10 +2657,19 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      if (input.restockItems) {
+      // Same cancelled-order rule as `order.refund`: cancelling already
+      // offered the restock, so `input.restockItems` is ignored for a
+      // cancelled order (the UI hides the checkbox) — see `shouldRestockOnRefund`.
+      if (
+        shouldRestockOnRefund({
+          status: order.status,
+          restockRequested: input.restockItems,
+        })
+      ) {
         try {
           await ctx.db.$transaction(async (tx) => {
-            for (const item of order.items) {
+            // Configured lines also return their linked option values.
+            for (const item of expandOrderItemsForInventory(order.items)) {
               if (item.productVariantId) {
                 const variant = await tx.productVariant.findUnique({
                   where: { id: item.productVariantId },

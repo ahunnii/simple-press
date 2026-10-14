@@ -19,6 +19,16 @@ type SiteContentLike =
   | undefined;
 
 /**
+ * A blank or whitespace-only label (saved as "" by the admin editor) becomes
+ * null, so every template's `label ?? "Learn more"` fallback applies instead
+ * of rendering a bare arrow. Applies to already-saved "" values too.
+ */
+function labelOrNull(label: string | null | undefined): string | null {
+  const trimmed = label?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+/**
  * Resolves the active BannerConfig from a business's siteContent, or null if:
  * - the `banners` feature flag is off
  * - siteContent or bannerConfig is missing
@@ -59,7 +69,7 @@ export function resolveBanner(
     return { ...config, linkUrl: null, linkLabel: null };
   }
 
-  return config;
+  return { ...config, linkLabel: labelOrNull(config.linkLabel) };
 }
 
 /**
@@ -107,5 +117,5 @@ export function resolvePopup(
     return { ...config, ctaUrl: null, ctaLabel: null };
   }
 
-  return config;
+  return { ...config, ctaLabel: labelOrNull(config.ctaLabel) };
 }

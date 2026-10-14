@@ -1,13 +1,17 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -22,14 +26,25 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the parent, which also renders the
+   * price). When enabled, Add to Cart first requires a complete build and
+   * then adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant buttons and the qty / Add to Cart row. */
+  customizerSlot?: ReactNode;
 };
 
 export function HappyBambooVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -66,11 +81,14 @@ export function HappyBambooVariantSelector({
       !product.allowBackorders);
 
   const handleAddToCart = () => {
-    if (addToCartDisabled) return;
+    if (!cartEnabled || addToCartDisabled) return;
     if (!selectedVariant) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity, // ← Add specified quantity
     );
 
@@ -126,6 +144,8 @@ export function HappyBambooVariantSelector({
         </div>
       </div>
 
+      {customizerSlot && <div className="mb-6">{customizerSlot}</div>}
+
       {selectedVariant && product.trackInventory && (
         <span role="status" aria-live="polite" className="text-sm">
           {isBackordered
@@ -133,65 +153,70 @@ export function HappyBambooVariantSelector({
             : `${selectedVariant?.inventoryQty ?? 0} available`}
         </span>
       )}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {/* Quantity Selection */}
-        {selectedVariant && (
-          <div>
-            <div className="border-border flex items-center gap-1 rounded-lg border">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-10"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-              >
-                <Minus className="size-4" />
-              </Button>
-              <span className="text-foreground w-10 text-center text-base font-semibold">
-                {quantity}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-10"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </div>{" "}
-          </div>
-        )}
-
-        {/* Add to Cart */}
-        <Button
-          type="button"
-          onClick={handleAddToCart}
-          aria-disabled={addToCartDisabled}
-          className={`flex-1 ${addToCartDisabled ? "cursor-not-allowed opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" : ""}`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="h-4 w-4" aria-hidden="true" />
-              Added to Cart
-            </>
-          ) : (
-            `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
+      {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
+      {cartEnabled && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          {/* Quantity Selection */}
+          {selectedVariant && (
+            <div>
+              <div className="border-border flex items-center gap-1 rounded-lg border">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-10"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="size-4" />
+                </Button>
+                <span className="text-foreground w-10 text-center text-base font-semibold">
+                  {quantity}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-10"
+                  onClick={() =>
+                    setQuantity(Math.min(effectiveMax, quantity + 1))
+                  }
+                  disabled={quantity >= effectiveMax}
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </div>{" "}
+            </div>
           )}
-        </Button>
-      </div>
-      <span
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-      >
-        {isAdded ? "Added to cart" : ""}
-      </span>
+
+          {/* Add to Cart */}
+          <Button
+            type="button"
+            onClick={handleAddToCart}
+            aria-disabled={addToCartDisabled}
+            className={`flex-1 ${addToCartDisabled ? "cursor-not-allowed opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" : ""}`}
+          >
+            {isAdded ? (
+              <>
+                <Check className="h-4 w-4" aria-hidden="true" />
+                Added to Cart
+              </>
+            ) : (
+              `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
+            )}
+          </Button>
+        </div>
+      )}
+      {cartEnabled && (
+        <span
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {isAdded ? "Added to cart" : ""}
+        </span>
+      )}
 
       {/* Notify me when the selected variant is back in stock */}
       {selectedVariant && addToCartDisabled && (

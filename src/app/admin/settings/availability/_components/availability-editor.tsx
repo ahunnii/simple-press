@@ -18,6 +18,7 @@ import {
   maintenanceCtaSchema,
   normalizeMaintenanceMessage,
 } from "~/lib/maintenance-config";
+import { getTimeZoneLabel } from "~/lib/time-zones";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import {
@@ -48,6 +49,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
@@ -280,6 +282,9 @@ export function AvailabilityEditor({
 
   // The flyer upload runs inside the save, so "busy" is either half of it.
   const isSaving = updateMutation.isPending || imageUploader.isPending;
+  // True while a message image is still being processed — saving then would
+  // store its temporary `blob:` src.
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -308,6 +313,10 @@ export function AvailabilityEditor({
   }
 
   async function handleSave() {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     // Light client-side checks first so the obvious mistakes don't need a
     // round trip; the server's zod schema stays authoritative.
     if (cta) {
@@ -620,10 +629,17 @@ export function AvailabilityEditor({
                   </div>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  Times are in {timeZone}. When set, the page shows the date and
-                  a live countdown. The countdown reaching zero does not turn
-                  maintenance mode off — come back here and switch it off when
-                  you open.
+                  Times are in {getTimeZoneLabel(timeZone)} (your store&apos;s
+                  time zone in{" "}
+                  <Link
+                    href="/admin/settings/general"
+                    className="underline underline-offset-2"
+                  >
+                    General settings
+                  </Link>
+                  ). When set, the page shows the date and a live countdown. The
+                  countdown reaching zero does not turn maintenance mode off —
+                  come back here and switch it off when you open.
                 </p>
               </div>
 
@@ -731,6 +747,7 @@ export function AvailabilityEditor({
                   editorContentClassName="min-h-[160px] p-4"
                   editorClassName="focus:outline-hidden"
                   editable={!isSaving}
+                  onUploadingChange={onUploadingChange}
                 />
                 <p className="text-muted-foreground text-xs">
                   Shown below the headline — and below the flyer and launch date
@@ -860,8 +877,9 @@ export function AvailabilityEditor({
             </>
           )}
 
-          {/* Active warning */}
-          {maintenanceMode && (
+          {/* Offline status — driven by the SAVED state, not the switch, so
+              flipping the switch never claims the store is already offline. */}
+          {savedState.maintenanceMode && maintenanceMode && (
             <Alert variant="destructive">
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Storefront is currently offline</AlertTitle>
@@ -884,12 +902,43 @@ export function AvailabilityEditor({
               </AlertAction>
             </Alert>
           )}
+          {!savedState.maintenanceMode && maintenanceMode && (
+            <Alert variant="warning">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>
+                Your storefront will go offline when you save
+              </AlertTitle>
+              <AlertDescription>
+                Until you save, your store is still live. Once saved, visitors
+                will see the{" "}
+                {maintenanceVariant === "coming_soon"
+                  ? "coming soon"
+                  : "maintenance"}{" "}
+                page.
+              </AlertDescription>
+            </Alert>
+          )}
+          {savedState.maintenanceMode && !maintenanceMode && (
+            <Alert variant="warning">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>
+                Your storefront will come back online when you save
+              </AlertTitle>
+              <AlertDescription>
+                Until you save, visitors still see the{" "}
+                {savedState.maintenanceVariant === "coming_soon"
+                  ? "coming soon"
+                  : "maintenance"}{" "}
+                page.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex justify-end">
             <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <AlertDialogTrigger asChild>
                 <Button
-                  disabled={isSaving}
+                  disabled={isSaving || isUploading}
                   onClick={(e) => {
                     // Only a save that takes the storefront offline opens the
                     // dialog; every other save goes straight through.
@@ -899,7 +948,11 @@ export function AvailabilityEditor({
                     }
                   }}
                 >
-                  {isSaving ? "Saving..." : "Save changes"}
+                  {isSaving
+                    ? "Saving..."
+                    : isUploading
+                      ? "Uploading…"
+                      : "Save changes"}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>

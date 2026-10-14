@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
+import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "../index";
 import { resolveSledgeLocationTag } from "../shared/sledge-location-tag";
@@ -27,6 +29,14 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const socialLinks = business?.siteContent?.socialLinks;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
+
+  // Donations "show in footer": no general link list here, so Donate joins the
+  // legal row below.
+  const donate = donateLinkOptions(
+    business,
+    resolveFlags(business?.featureFlags).isEnabled,
+    "footer",
+  );
 
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
@@ -75,6 +85,14 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
         </span>
 
         <div className="flex flex-wrap gap-4">
+          {donate.show && (
+            <Link
+              href="/donate"
+              className="sl-footer-meta font-sans transition-colors hover:text-white"
+            >
+              {donate.label}
+            </Link>
+          )}
           {privacyPolicy ? (
             <Link
               href={`/${privacyPolicy.slug}`}

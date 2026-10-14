@@ -69,6 +69,8 @@ const LIST_PATH = "/admin/forms";
 const MAX_FIELDS = 50;
 
 type Props = {
+  /** `media` flag on — lets picture-choice tiles pick from the library. */
+  mediaLibraryEnabled?: boolean;
   /** Present in edit mode, absent when creating. */
   form?: {
     id: string;
@@ -79,7 +81,10 @@ type Props = {
   };
 };
 
-export function FormBuilder({ form: existingForm }: Props) {
+export function FormBuilder({
+  form: existingForm,
+  mediaLibraryEnabled = false,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -351,7 +356,8 @@ export function FormBuilder({ form: existingForm }: Props) {
                 <CardHeader>
                   <CardTitle>Form</CardTitle>
                   <CardDescription>
-                    Only you see this name — it labels the form in the admin.
+                    Labels the form in your admin. Visitors see it in their
+                    confirmation email.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -428,6 +434,7 @@ export function FormBuilder({ form: existingForm }: Props) {
                             index={index}
                             field={field}
                             confirmationFieldId={confirmationFieldId}
+                            mediaLibraryEnabled={mediaLibraryEnabled}
                             open={openFieldIds.includes(field.id)}
                             onOpenChange={(next) =>
                               setOpenFieldIds((previous) =>
@@ -506,7 +513,8 @@ export function FormBuilder({ form: existingForm }: Props) {
               variant="destructive"
               onClick={(event) => {
                 event.preventDefault();
-                if (existingForm) deleteMutation.mutate({ id: existingForm.id });
+                if (existingForm)
+                  deleteMutation.mutate({ id: existingForm.id });
               }}
               disabled={isDeleting}
             >

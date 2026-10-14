@@ -93,6 +93,7 @@ export function SledgeCheckoutForm({
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     setDiscountFieldError,
@@ -223,7 +224,7 @@ export function SledgeCheckoutForm({
                     <Loader2 className="size-3.5 animate-spin" />
                     Checking…
                   </>
-                ) : discountAmount > 0 ? (
+                ) : discountAmount > 0 || discountFreeShipping ? (
                   "Applied ✓"
                 ) : (
                   "Apply"
@@ -247,6 +248,15 @@ export function SledgeCheckoutForm({
               >
                 Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
                 applied.
+              </p>
+            ) : null}
+            {discountCodeLabel && discountFreeShipping ? (
+              <p
+                role="status"
+                className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase"
+              >
+                Free shipping applied:{" "}
+                <span className="font-semibold">{discountCodeLabel}</span>
               </p>
             ) : null}
           </fieldset>

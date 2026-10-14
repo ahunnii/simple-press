@@ -356,20 +356,32 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
   // delete dialog from, and the same one `gallery.delete`'s guard is built from
   // — so the dialog and the server can't disagree about what is deletable. The
   // editor page doesn't prefetch it, so it's queried here; an ABSENT key means
-  // "not embedded". Deferred until the dialog opens — it is a whole-business
+  // "not embedded anywhere"; `count` covers only ACTIVE embeds (the ones that
+  // block deletion), `inactiveCount` the leftovers in fields of templates the
+  // business no longer uses (cleared by the delete). Deferred until the dialog opens — it is a whole-business
   // scan of pages, posts and template fields, and nothing else on this screen
   // needs it.
   const usageQuery = api.gallery.usage.useQuery(undefined, {
     enabled: showDeleteDialog,
   });
   const galleryUsage = usageQuery.data?.[gallery.id];
+  /** Only ACTIVE embeds block deletion — inactive-template leftovers don't. */
+  const isEmbedded = (galleryUsage?.count ?? 0) > 0;
   /** "Homepage hero, About page and 3 more" — locations is capped at 5 server-side. */
+  const formatLocations = (locations: string[], count: number) =>
+    locations.join(", ") +
+    (count > locations.length ? ` and ${count - locations.length} more` : "");
   const usageLocations = galleryUsage
-    ? galleryUsage.locations.join(", ") +
-      (galleryUsage.count > galleryUsage.locations.length
-        ? ` and ${galleryUsage.count - galleryUsage.locations.length} more`
-        : "")
+    ? formatLocations(galleryUsage.locations, galleryUsage.count)
     : "";
+  /** Fields of templates the business switched away from that still hold it. */
+  const inactiveUsageLocations =
+    galleryUsage && galleryUsage.inactiveCount > 0
+      ? formatLocations(
+          galleryUsage.inactiveLocations,
+          galleryUsage.inactiveCount,
+        )
+      : "";
 
   const duplicateMutation = api.gallery.duplicate.useMutation({
     onMutate: loadingToast("Duplicating gallery…"),
@@ -1444,7 +1456,20 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
               image={editingImage}
               isOpen={true}
               onClose={() => setEditingImage(null)}
-              onSuccess={() => router.refresh()}
+              onSuccess={(updated) => {
+                setImages((prev) =>
+                  prev.map((img) =>
+                    img.id === updated.id
+                      ? {
+                          ...img,
+                          altText: updated.altText,
+                          caption: updated.caption,
+                        }
+                      : img,
+                  ),
+                );
+                router.refresh();
+              }}
             />
           )}
         </div>
@@ -1453,10 +1478,12 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
       {/* Delete Gallery Dialog. Two branches, mirroring the list page: an
           embedded gallery cannot be deleted at all, so offering a Delete button
           that can only ever produce a CONFLICT toast is worse than not offering
-          one. The server guard stays the enforcement if this map is stale. */}
+          one. The server guard stays the enforcement if this map is stale.
+          Embeds left in fields of templates the business no longer uses don't
+          block (the delete clears them) — the confirmation just says so. */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
-          {galleryUsage ? (
+          {galleryUsage && isEmbedded ? (
             <>
               <AlertDialogHeader>
                 <AlertDialogTitle>
@@ -1484,6 +1511,8 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                     : `This permanently deletes the gallery and its ${images.length} ${
                         images.length === 1 ? "image" : "images"
                       }. Image files are deleted too, unless they’re saved in your Media Library or used elsewhere on your store. This action cannot be undone.`}
+                  {inactiveUsageLocations &&
+                    ` It’s still saved in fields of templates you’re not using: ${inactiveUsageLocations}. Deleting it clears those fields.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

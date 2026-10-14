@@ -34,11 +34,12 @@ const items: CartItem[] = [
   },
 ];
 
-vi.mock("~/providers/cart-context", () => ({
+vi.mock("~/providers/cart-context", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("~/providers/cart-context")>()),
   useCart: () => ({
     items,
-    updateQuantity: vi.fn(),
-    removeItem: vi.fn(),
+    updateLineQuantity: vi.fn(),
+    removeLine: vi.fn(),
     subtotal: 2000,
     itemCount: 2,
     setIsOpen: vi.fn(),

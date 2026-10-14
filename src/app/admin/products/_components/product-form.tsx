@@ -28,6 +28,7 @@ import type { ImageUploaderHandle } from "./image-uploader";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { isFilenameAltText } from "~/lib/images/alt-text";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseProductIntervals } from "~/lib/subscriptions/intervals";
@@ -81,6 +82,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { InputGroup, InputGroupAddon } from "~/components/ui/input-group";
 import { Label } from "~/components/ui/label";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { MoneyInput } from "~/components/ui/money-input";
 import {
   InputGroupNumberInput,
@@ -112,6 +114,7 @@ import {
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
+import { OptionUsageWarning } from "./option-usage-warning";
 import {
   effectiveVariantPricesCents,
   formatMarginRange,
@@ -119,25 +122,40 @@ import {
   PricingHelper,
 } from "./pricing-helper";
 import { ProductFeaturesField } from "./product-features-field";
+import { ProductOptionsCard } from "./product-options-card";
 import { ProductSubscriptionCard } from "./product-subscription-card";
 import { VariantManager } from "./variant-manager";
 
 type Props = {
   product?: RouterOutputs["product"]["secureGet"];
   galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   collectionsEnabled?: boolean;
   /** `subscriptions` feature flag, resolved server-side — gates whether the
    *  Subscriptions card renders at all (see `ProductSubscriptionCard`). */
   subscriptionsEnabled?: boolean;
+  /** `productOptions` feature flag — gates the Options tab (option groups
+   *  customers choose from on this product). */
+  productOptionsEnabled?: boolean;
   /** `media` feature flag — gates "Choose from library" on gallery + OG. */
   mediaEnabled?: boolean;
   allCollections?: RouterOutputs["collections"]["getAll"];
   pools?: RouterOutputs["baseInventoryUnit"]["list"];
+  /** `inventory` feature flag — with it off, the Inventory item picker only
+   *  shows on a product that is already linked, so the link can be removed. */
+  inventoryEnabled?: boolean;
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
-type ProductFormTab = "basics" | "collections" | "seo" | "additional";
+type ProductFormTab =
+  | "basics"
+  | "collections"
+  | "options"
+  | "seo"
+  | "additional";
 
 const SEO_TAB_FIELDS = new Set<string>([
   "slug",
@@ -235,11 +253,16 @@ function getNewProductDefaults(): ProductFormSchema {
 export function ProductForm({
   product,
   galleriesEnabled,
+  embedsEnabled,
+  quotesEnabled,
+  formsEnabled,
   collectionsEnabled,
   subscriptionsEnabled,
+  productOptionsEnabled,
   mediaEnabled,
   allCollections = [],
   pools = [],
+  inventoryEnabled,
 }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -247,6 +270,17 @@ export function ProductForm({
   const imageUploaderRef = useRef<ImageUploaderHandle>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
+
+  // Rental items are returnable, so they can't back a product's stock (the
+  // server refuses the link too). The saved link is always kept in the list —
+  // a product linked before rentals were excluded still shows, and can be
+  // unlinked — and is the only reason to show the picker with Inventory off.
+  const savedPoolId = product?.baseInventoryUnitId ?? null;
+  const linkablePools = pools.filter(
+    (pool) => pool.itemType !== "rental" || pool.id === savedPoolId,
+  );
+  const showItemPicker =
+    linkablePools.length > 0 && (!!inventoryEnabled || savedPoolId !== null);
 
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
   const siteHost = useSiteHost();
@@ -550,6 +584,10 @@ export function ProductForm({
   });
 
   const onSubmit = async (data: ProductFormSchema) => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
 
@@ -640,7 +678,8 @@ export function ProductForm({
     let resolvedImages = images.map((img, idx) => ({
       id: img.id,
       url: img.url,
-      altText: img.altText,
+      // A file name left over from an old upload isn't a description; clear it.
+      altText: isFilenameAltText(img.altText) ? "" : img.altText,
       sortOrder: idx,
     }));
     if (pendingImages.length > 0) {
@@ -665,7 +704,7 @@ export function ProductForm({
       resolvedImages = images.map((img, idx) => ({
         id: img.id,
         url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
-        altText: img.altText,
+        altText: isFilenameAltText(img.altText) ? "" : img.altText,
         sortOrder: idx,
       }));
       if (resolvedImages.some((i) => !i.url)) {
@@ -899,6 +938,10 @@ export function ProductForm({
       }
     }
   };
+
+  // True while an Additional information image/video is still uploading —
+  // saving then would drop it (a `blob:` image src is stripped server-side).
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   const isSubmitting =
     updateProductMutation.isPending ||
@@ -1155,7 +1198,7 @@ export function ProductForm({
                   type="submit"
                   variant="outline"
                   size="sm"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   onClick={() => {
                     createAnotherRef.current = true;
                   }}
@@ -1164,6 +1207,11 @@ export function ProductForm({
                     <>
                       <span className="saving-indicator" />
                       Saving...
+                    </>
+                  ) : isUploading ? (
+                    <>
+                      <span className="saving-indicator" />
+                      Uploading…
                     </>
                   ) : (
                     <>
@@ -1180,7 +1228,7 @@ export function ProductForm({
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 onClick={() => {
                   createAnotherRef.current = false;
                 }}
@@ -1189,6 +1237,11 @@ export function ProductForm({
                   <>
                     <span className="saving-indicator" />
                     Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Uploading…
                   </>
                 ) : (
                   <>
@@ -1207,13 +1260,18 @@ export function ProductForm({
               onValueChange={(value) => setActiveTab(value as ProductFormTab)}
               className="w-full"
             >
-              <TabsList>
+              {/* Up to five tabs: scroll sideways on a phone instead of
+                  spilling past the page edge. */}
+              <TabsList className="no-scrollbar max-w-full justify-start overflow-x-auto">
                 <TabsTrigger value="basics">
                   Basics
                   {erroredTabs.has("basics") && <TabErrorDot />}
                 </TabsTrigger>
                 {collectionsEnabled && (
                   <TabsTrigger value="collections">Collections</TabsTrigger>
+                )}
+                {productOptionsEnabled && (
+                  <TabsTrigger value="options">Options</TabsTrigger>
                 )}
                 <TabsTrigger value="seo">
                   SEO
@@ -1586,7 +1644,7 @@ export function ProductForm({
                         )}
 
                         {/* Inventory item selector (shown when items exist and no variants) */}
-                        {pools.length > 0 && variants.length === 0 && (
+                        {showItemPicker && variants.length === 0 && (
                           <div className="space-y-3 rounded-lg border p-4">
                             <div>
                               <Label className="text-sm font-medium">
@@ -1622,7 +1680,7 @@ export function ProductForm({
                                       <SelectItem value="__none__">
                                         None — use individual inventory
                                       </SelectItem>
-                                      {pools.map((pool) => (
+                                      {linkablePools.map((pool) => (
                                         <SelectItem
                                           key={pool.id}
                                           value={pool.id}
@@ -1921,6 +1979,18 @@ export function ProductForm({
                 </TabsContent>
               )}
 
+              {/* Options — own mutations, not part of this form's Save (no
+                  RHF fields, so `tabForField` never points here). Needs a
+                  saved product to attach groups to. */}
+              {productOptionsEnabled && (
+                <TabsContent value="options" className="space-y-6">
+                  <ProductOptionsCard
+                    productId={product?.id ?? null}
+                    mediaLibraryEnabled={mediaEnabled}
+                  />
+                </TabsContent>
+              )}
+
               <TabsContent value="seo" className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-6">
@@ -2114,8 +2184,9 @@ export function ProductForm({
                   <CardHeader>
                     <CardTitle>Additional information</CardTitle>
                     <CardDescription>
-                      Shown in the &quot;Additional Information&quot; tab on the
-                      product page
+                      Materials, care, sizing, and other details. Shown in their
+                      own section on the product page &mdash; its name and
+                      placement depend on your site&apos;s design.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -2125,6 +2196,10 @@ export function ProductForm({
                       output="json"
                       editorContentClassName={"p-4 min-h-[400px]"}
                       galleriesEnabled={galleriesEnabled}
+                      embedsEnabled={embedsEnabled}
+                      quotesEnabled={quotesEnabled}
+                      formsEnabled={formsEnabled}
+                      onUploadingChange={onUploadingChange}
                     />
                   </CardContent>
                 </Card>
@@ -2189,6 +2264,7 @@ export function ProductForm({
               Are you sure you want to delete &quot;{form.watch("name")}&quot;?
               This action cannot be undone.
             </AlertDialogDescription>
+            {showDeleteDialog && <OptionUsageWarning productId={product?.id} />}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>

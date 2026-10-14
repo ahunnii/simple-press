@@ -133,6 +133,13 @@ export type FieldPanelProps = {
   onFieldChange: (key: string, value: unknown) => void;
   /** Whether the Embeds feature is enabled for this business. */
   embedsEnabled: boolean;
+  /** Rich-text "Insert elements" gates (galleries / quote calculators /
+   *  forms) — each off unless its feature is enabled. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
+  /** Rich-text uploads in flight — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
   /** Whether the Media Library feature is enabled — gates the "Choose from
    *  library" picker on image/video fields. */
   mediaEnabled: boolean;
@@ -169,7 +176,11 @@ export function FieldPanel({
   publishedFields,
   onFieldChange,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaEnabled,
+  onUploadingChange,
   enabledFeatures,
   disabled = false,
   onClose,
@@ -392,7 +403,11 @@ export function FieldPanel({
                         }
                         onChange={(value) => onFieldChange(field.key, value)}
                         embedsEnabled={embedsEnabled}
+                        galleriesEnabled={galleriesEnabled}
+                        quotesEnabled={quotesEnabled}
+                        formsEnabled={formsEnabled}
                         mediaLibraryEnabled={mediaEnabled}
+                        onUploadingChange={onUploadingChange}
                         listFocusRequest={
                           listRequest?.fieldKey === field.key
                             ? listRequest.request

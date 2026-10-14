@@ -3,7 +3,8 @@ import type { CartLineItem, PoolMap, ProductMap, VariantMap } from "./types";
 /**
  * Why a cart line was rejected.
  *
- * Every value except `out-of-stock` describes an OWNER/TEMPLATE fault: the
+ * Every value except the scarcity reasons (`out-of-stock`,
+ * `option-out-of-stock`) describes an OWNER/TEMPLATE fault: the
  * shopper did nothing wrong and retrying will never help, because the store
  * cannot sell that item until the owner fixes the underlying catalog data. Those
  * cases reject 100% of shoppers for the affected product and are otherwise
@@ -28,8 +29,22 @@ export type UnavailableReason =
   | "variant-required"
   /** The product draws from a shared pool whose `BaseInventoryUnit` row is gone. */
   | "pool-missing"
-  /** Genuine stock exhaustion — the one SHOPPER-fault reason. */
-  | "out-of-stock";
+  /** Genuine stock exhaustion — a SHOPPER-side reason. */
+  | "out-of-stock"
+  /**
+   * Product customizer: the posted configuration can never be honoured — the
+   * `productOptions` flag is off, the product has no options, an id is
+   * unknown or foreign, a required group is missing, a count/text limit is
+   * broken. Owner/template-side: a template posting a malformed build, or
+   * options edited under a live cart.
+   */
+  | "configuration-invalid"
+  /**
+   * Product customizer: a linked option value (a charm that is its own
+   * stocked product) is sold out for this build, alone or summed across the
+   * cart. Ordinary scarcity, handled like `out-of-stock`.
+   */
+  | "option-out-of-stock";
 
 /**
  * The reasons that mean "the store is broken", as opposed to "this item happens
@@ -43,7 +58,17 @@ const OWNER_FAULT_REASONS: ReadonlySet<UnavailableReason> = new Set([
   "coming-soon",
   "variant-required",
   "pool-missing",
+  "configuration-invalid",
 ]);
+
+/**
+ * Shopper-side scarcity: may be caused by the shopper's OWN still-open
+ * checkout holding the stock, so the checkout route defers these until after
+ * it has superseded that checkout. Every other reason rejects up front.
+ */
+export function isScarcityReason(reason: UnavailableReason): boolean {
+  return reason === "out-of-stock" || reason === "option-out-of-stock";
+}
 
 /** True when `reason` indicates store misconfiguration rather than scarcity. */
 export function isOwnerFaultReason(reason: UnavailableReason): boolean {
@@ -55,13 +80,26 @@ export interface UnavailableItemDetail {
   productId: string;
   variantId: string | null;
   reason: UnavailableReason;
+  /** Index of the rejected line in the posted cart. */
+  lineIndex: number;
+}
+
+/** One `unavailableItemIds` row. `lineKey` only when the client sent one. */
+export interface UnavailableItemId {
+  productId: string;
+  variantId: string | null;
+  lineKey?: string;
 }
 
 export interface CartAvailabilityResult {
   /** Display names of unavailable items (may contain duplicates, as before). */
   unavailableItems: string[];
-  /** De-duplicated product/variant ids for the client to drop from the cart. */
-  unavailableItemIds: { productId: string; variantId: string | null }[];
+  /**
+   * De-duplicated product/variant ids for the client to drop from the cart.
+   * A line posted with a `lineKey` (configured lines) is its own row carrying
+   * that key, so the client can drop exactly that line.
+   */
+  unavailableItemIds: UnavailableItemId[];
   /**
    * One entry per rejection, aligned 1:1 (same length, same order) with
    * `unavailableItems` — so it carries the same duplicates, not the de-duped
@@ -127,30 +165,30 @@ export function checkCartAvailability(params: {
 }): CartAvailabilityResult {
   const { items, variantMap, productMap, poolDemand, poolMap } = params;
 
-  const unavailableItems: string[] = [];
-  const unavailableItemIds: {
-    productId: string;
-    variantId: string | null;
-  }[] = [];
-  const unavailableDetails: UnavailableItemDetail[] = [];
-  const unavailableIdKeySet = new Set<string>();
+  const result: CartAvailabilityResult = {
+    unavailableItems: [],
+    unavailableItemIds: [],
+    unavailableDetails: [],
+  };
 
+  let lineIndex = 0;
   const pushUnavailable = (
     name: string,
     productId: string,
     variantId: string | null,
     reason: UnavailableReason,
   ) => {
-    unavailableItems.push(name);
-    unavailableDetails.push({ productId, variantId, reason });
-    const key = `${productId}-${variantId ?? "base"}`;
-    if (!unavailableIdKeySet.has(key)) {
-      unavailableIdKeySet.add(key);
-      unavailableItemIds.push({ productId, variantId });
-    }
+    pushUnavailableLine(result, items, {
+      name,
+      productId,
+      variantId,
+      reason,
+      lineIndex,
+    });
   };
 
-  for (const item of items) {
+  for (const [index, item] of items.entries()) {
+    lineIndex = index;
     const name = item.variantName
       ? `${item.productName} (${item.variantName})`
       : item.productName;
@@ -241,7 +279,8 @@ export function checkCartAvailability(params: {
       // very different urgency.
       const reason: UnavailableReason = pool ? "out-of-stock" : "pool-missing";
       // Mark all items drawing from this pool as unavailable
-      for (const item of items) {
+      for (const [index, item] of items.entries()) {
+        lineIndex = index;
         if (!item.variantId) {
           const p = productMap.get(item.productId);
           if (p?.baseInventoryUnitId === poolId) {
@@ -255,5 +294,52 @@ export function checkCartAvailability(params: {
     }
   }
 
-  return { unavailableItems, unavailableItemIds, unavailableDetails };
+  return result;
+}
+
+/** Display name of a cart line, as the rejection message lists it. */
+export function cartLineName(item: CartLineItem): string {
+  return item.variantName
+    ? `${item.productName} (${item.variantName})`
+    : item.productName;
+}
+
+/**
+ * Record one rejected line on `result` (mutates it). The id row is
+ * de-duplicated by product + variant + the line's `lineKey`, so plain lines
+ * keep their exact old shape and configured lines get one row each.
+ */
+export function pushUnavailableLine(
+  result: CartAvailabilityResult,
+  items: readonly CartLineItem[],
+  detail: {
+    name?: string;
+    productId: string;
+    variantId: string | null;
+    reason: UnavailableReason;
+    lineIndex: number;
+  },
+): void {
+  const item = items[detail.lineIndex];
+  const lineKey = item?.lineKey ?? undefined;
+  result.unavailableItems.push(detail.name ?? (item ? cartLineName(item) : ""));
+  result.unavailableDetails.push({
+    productId: detail.productId,
+    variantId: detail.variantId,
+    reason: detail.reason,
+    lineIndex: detail.lineIndex,
+  });
+  const key = `${detail.productId}-${detail.variantId ?? "base"}-${lineKey ?? ""}`;
+  const seen = result.unavailableItemIds.some(
+    (row) =>
+      `${row.productId}-${row.variantId ?? "base"}-${row.lineKey ?? ""}` ===
+      key,
+  );
+  if (!seen) {
+    result.unavailableItemIds.push({
+      productId: detail.productId,
+      variantId: detail.variantId,
+      ...(lineKey ? { lineKey } : {}),
+    });
+  }
 }

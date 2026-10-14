@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { resolveDashboardRange } from "~/lib/dashboard/ranges";
+
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
 import {
@@ -444,5 +446,123 @@ describe("finance.getBreakdown — donations block", () => {
     expect(result.donations.enabled).toBe(true);
     expect(result.donations.totalCents).toBe(7500);
     expect(result.donations.count).toBe(1);
+  });
+});
+
+describe("finance.getBreakdown — feature gate (payments OR donations)", () => {
+  beforeEach(async () => {
+    await resetDb();
+    reqHost.value = "finance-biz.simplepress.test";
+  });
+
+  async function setupBusiness(
+    opts: Parameters<typeof createBusiness>[0] = {},
+  ) {
+    const business = await createBusiness(opts);
+    const owner = await createOwnerUser(business.id);
+    reqHost.value = `${business.subdomain}.simplepress.test`;
+    const caller = createTestCaller({ userId: owner.id });
+    return { caller };
+  }
+
+  it("rejects with FORBIDDEN when neither payments nor donations is enabled", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: false, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("passes for a donations-only store (payments off)", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: false, donations: true },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).resolves.toMatchObject({ donations: { enabled: true } });
+  });
+
+  it("passes for a payments-only store (donations off)", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { payments: true, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).resolves.toBeDefined();
+  });
+
+  it("treats payments switched off by a dependency (orders off) as off", async () => {
+    const { caller } = await setupBusiness({
+      featureFlags: { orders: false, donations: false },
+    });
+
+    await expect(
+      caller.finance.getBreakdown({ range: "30d" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+});
+
+describe("finance.getBreakdown — windows in the store's time zone", () => {
+  beforeEach(async () => {
+    await resetDb();
+  });
+
+  // A zone several hours away from the runner's, so server-local midnights
+  // would put the boundary orders below on the wrong side.
+  const RUNNER_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const STORE_TZ =
+    RUNNER_TZ === "Pacific/Honolulu" ? "Asia/Tokyo" : "Pacific/Honolulu";
+  const MIN = 60_000;
+
+  it("30d matches the dashboard's 30d for orders either side of a store-local midnight", async () => {
+    const business = await createBusiness({
+      timeZone: STORE_TZ,
+      featureFlags: { orders: true },
+    });
+    const owner = await createOwnerUser(business.id);
+    reqHost.value = `${business.subdomain}.simplepress.test`;
+    const caller = createTestCaller({ userId: owner.id });
+
+    const win = resolveDashboardRange("30d", new Date(), STORE_TZ);
+    const start = win.start!;
+    // 30 minutes after the store-local midnight that opens the window: in.
+    await createOrder(business.id, {
+      total: 4100,
+      refundAmountCents: 100,
+      createdAt: new Date(start.getTime() + 30 * MIN),
+    });
+    // 30 minutes before it: out.
+    await createOrder(business.id, {
+      total: 9900,
+      createdAt: new Date(start.getTime() - 30 * MIN),
+    });
+
+    const finance = await caller.finance.getBreakdown({ range: "30d" });
+    expect(finance.range.start).toEqual(start);
+    expect(finance.orders.orderCount).toBe(1);
+    expect(finance.orders.netCollectedCents).toBe(4000);
+
+    const net = await caller.dashboard.cardData({
+      widget: "net-revenue",
+      range: "30d",
+      compare: false,
+      series: false,
+    });
+    expect(net).toMatchObject({ kind: "stat", value: 4000 });
+
+    // Every "Last N days" range opens on the same instant as the dashboard's.
+    for (const key of ["7d", "90d"] as const) {
+      const result = await caller.finance.getBreakdown({ range: key });
+      expect(result.range.start, key).toEqual(
+        resolveDashboardRange(key, new Date(), STORE_TZ).start,
+      );
+      expect(result.range.label, key).toBe(
+        key === "7d" ? "Last 7 days" : "Last 90 days",
+      );
+    }
   });
 });

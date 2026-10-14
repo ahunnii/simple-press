@@ -143,7 +143,9 @@ export function BrandingEditor({ business, siteContent }: Props) {
   // Image Uploads
   const logoUploader = useUploadFile({
     api: "/api/upload",
-    route: "image",
+    // Fixed-key route that also accepts SVG (the generic `image` route is
+    // raster-only).
+    route: "logo",
     onError: (error) => {
       toast.error(error.message ?? "Logo upload failed.");
     },
@@ -209,7 +211,12 @@ export function BrandingEditor({ business, siteContent }: Props) {
           toast.error("Logo upload succeeded but returned no URL");
           return;
         }
-        logoUrl = fileLocation;
+        // Same fixed-key caching problem as the favicon below: the `logo`
+        // route writes `{businessId}/logo{ext}`, so a re-upload returns a
+        // byte-identical URL. Safe: `normalizeUrl` (media usage) and
+        // `rewriteUrl` (store transfer) strip the query first, and next/image
+        // ignores it when detecting `.svg`.
+        logoUrl = `${fileLocation}?v=${Date.now()}`;
       } catch {
         toast.error("Failed to upload logo.");
         return;

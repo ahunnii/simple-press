@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { ElegantAccountLayout } from "./elegant-account-layout";
 
@@ -162,6 +163,10 @@ export function ElegantOrderDetailPage({
                       {item.variantName && (
                         <MetaLabel>{item.variantName}</MetaLabel>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="mt-1 text-[13px] text-[color:var(--el-ink-soft)]"
+                      />
                       <div
                         style={{
                           marginTop: 4,

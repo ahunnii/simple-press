@@ -1,7 +1,10 @@
-import { TrailHeader } from "../../_components/trail-header";
-import { FormBuilder } from "../_components/form-builder";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 
-export default function NewFormPage() {
+import { FormBuilder } from "../_components/form-builder";
+import { TrailHeader } from "../../_components/trail-header";
+
+export default async function NewFormPage() {
+  const flags = await getBusinessFlags();
   return (
     <>
       <TrailHeader
@@ -10,7 +13,7 @@ export default function NewFormPage() {
           { label: "New form" },
         ]}
       />
-      <FormBuilder />
+      <FormBuilder mediaLibraryEnabled={flags.isEnabled("media")} />
     </>
   );
 }

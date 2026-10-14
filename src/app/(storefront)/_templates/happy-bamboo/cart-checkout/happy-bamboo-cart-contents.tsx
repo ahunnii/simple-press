@@ -12,7 +12,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { HappyBambooCartItem } from "./happy-bamboo-cart-item";
 import { HappyBambooCartSummary } from "./happy-bamboo-cart-summary";
@@ -78,9 +78,7 @@ export function HappyBambooCartContents({ business, cartEmptyText }: Props) {
             staggerDelay={0.08}
           >
             {items.map((item) => (
-              <StaggerItem
-                key={`${item.productId}-${item.variantId ?? "base"}`}
-              >
+              <StaggerItem key={cartItemId(item)}>
                 <HappyBambooCartItem item={item} />
               </StaggerItem>
             ))}

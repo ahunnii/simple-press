@@ -68,6 +68,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     dependsOn: ["inventory"],
   },
+  productOptions: {
+    key: "productOptions",
+    label: "Product options & personalization",
+    description:
+      "Let customers build or personalize a product: pick from groups of options (colors, charms, add-ons) that can add to the price, and type custom text such as an engraving. Set it up under Products → edit → Options. Turning this off hides the options on your storefront and blocks new configured purchases; existing orders keep their choices.",
+    category: "ecommerce",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    dependsOn: ["products", "cart"],
+  },
   coupons: {
     key: "coupons",
     label: "Coupons & Discounts",
@@ -146,7 +156,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     key: "embeds",
     label: "Embeds",
     description:
-      "Embed external content (booking widgets, videos, social posts) into pages and rich text",
+      "Embed videos (YouTube, Vimeo), maps, and booking widgets or forms from other sites into pages and rich text. Paste a link or iframe code.",
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
@@ -200,9 +210,9 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   // `resolveFlags` (unknown keys are dropped).
   wordpressExport: {
     key: "wordpressExport",
-    label: "Export to WordPress",
+    label: "Products CSV export",
     description:
-      "Download your content, products, and records in WordPress/WooCommerce import formats",
+      "Export products as a CSV from the Products page (downloading your whole site is always available to owners)",
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
@@ -349,7 +359,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     key: "loyalty",
     label: "Rewards Program",
     description:
-      "Customers earn points on orders, birthdays, and social follows and redeem them for single-use discount codes at checkout. Redeeming needs Discount Codes turned on. Turning this off pauses earning and redeeming; balances are kept.",
+      "Customers earn points on orders, birthdays, and social follows and redeem them for single-use discount codes at checkout. Redeeming needs Coupons & Discounts turned on. Turning this off pauses earning and redeeming; balances are kept.",
     category: "marketing",
     enabledByDefault: false,
     ownerCanToggle: true,
@@ -389,22 +399,58 @@ export const CATEGORY_META: Record<
   },
 };
 
-// Get all features disabled because a dependency is off
+// Get all features disabled because a dependency is off.
+//
+// Resolution is TRANSITIVE: a feature is disabled when any dependency is
+// explicitly `false` in `flags`, or is itself disabled by one of its own
+// dependencies. So with Products off, Payments (needs Orders + Cart, which both
+// need Products) and Rewards (needs Orders) go off too even though their direct
+// dependencies are still `true` in the stored flags. Computed as a fixpoint, so
+// a dependency cycle added to the registry later cannot loop forever.
 export function getDisabledDueToDependency(
   flags: Record<string, boolean>,
 ): Set<string> {
   const disabled = new Set<string>();
 
-  for (const [key, feature] of Object.entries(FEATURE_REGISTRY)) {
-    if (feature.dependsOn) {
-      const missingDep = feature.dependsOn.some((dep) => flags[dep] === false);
-      if (missingDep) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [key, feature] of Object.entries(FEATURE_REGISTRY)) {
+      if (disabled.has(key) || !feature.dependsOn) continue;
+      const blocked = feature.dependsOn.some(
+        (dep) => flags[dep] === false || disabled.has(dep),
+      );
+      if (blocked) {
         disabled.add(key);
+        changed = true;
       }
     }
   }
 
   return disabled;
+}
+
+// The DIRECT dependencies of `key` that are effectively off: explicitly `false`
+// in `flags`, or themselves disabled by dependency. Use for "Requires X" badges
+// so the label names the thing the owner can actually turn on next.
+export function getBlockingDependencies(
+  key: string,
+  flags: Record<string, boolean>,
+): string[] {
+  const deps = FEATURE_REGISTRY[key]?.dependsOn;
+  if (!deps) return [];
+  const disabled = getDisabledDueToDependency(flags);
+  return deps.filter((dep) => flags[dep] === false || disabled.has(dep));
+}
+
+// Labels of `getBlockingDependencies`, in registry order, for badge text.
+export function getBlockingDependencyLabels(
+  key: string,
+  flags: Record<string, boolean>,
+): string[] {
+  return getBlockingDependencies(key, flags).map(
+    (dep) => FEATURE_REGISTRY[dep]?.label ?? dep,
+  );
 }
 
 // Build the default flags object for a new business

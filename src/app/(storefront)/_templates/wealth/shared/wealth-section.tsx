@@ -25,7 +25,7 @@ export function WealthSection({
   contained = true,
 }: WealthSectionProps) {
   const inner = contained ? (
-    <div className="mx-auto w-full px-[var(--wealth-gutter)] [max-width:var(--wealth-container)]">
+    <div className="mx-auto w-full [max-width:var(--wealth-container)] px-[var(--wealth-gutter)]">
       {children}
     </div>
   ) : (
@@ -35,10 +35,7 @@ export function WealthSection({
   return (
     <section
       {...sectionAttrs}
-      className={cn(
-        "py-[calc(var(--wealth-rhythm)*2)]",
-        className,
-      )}
+      className={cn("py-[calc(var(--wealth-rhythm)*2)]", className)}
     >
       {reveal ? <WealthReveal>{inner}</WealthReveal> : inner}
     </section>

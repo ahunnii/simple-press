@@ -3,22 +3,40 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Heart, Menu, ShoppingBag, X } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  activeEntryIndex,
+  donateLinkOptions,
+  externalLinkProps,
+  filterNavByFlags,
+  isNavItemActive,
+  navGroupEntries,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
+import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+
+const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
 export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
+  const pathname = usePathname();
+  const dd = useNavDropdown(pathname, "modern-nav");
   const { itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useStorefrontFlags();
@@ -26,6 +44,8 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Mobile accordion: one group open at a time.
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   // Refs for focus management (C-2)
   const mobileDialogRef = useRef<HTMLDivElement>(null);
@@ -107,11 +127,27 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
     { href: "/contact", label: "Contact" },
   ];
 
-  const links =
-    (business?.siteContent?.navigationItems as {
-      label: string;
-      href: string;
-    }[]) ?? defaultNavLinks;
+  // Owner nav (or the starter menu above) through the shared resolver + route→
+  // flag filter; the Donations "show in header" switch appends a last /donate.
+  // Groups (one level of children) render as hover/keyboard dropdowns on
+  // desktop and an accordion in the drawer; withDonateLink sees a /donate
+  // nested in a group and doesn't duplicate it.
+  const links = withDonateLink(
+    filterNavByFlags(
+      resolveNav(business?.siteContent?.navigationItems, defaultNavLinks),
+      isEnabled,
+    ),
+    donateLinkOptions(business, isEnabled, "header"),
+  );
+
+  // Opening the drawer expands the group holding the current route.
+  const openMobileMenu = () => {
+    const idx = links.findIndex(
+      (item) => !!item.children?.length && isNavItemActive(pathname, item),
+    );
+    setExpanded(idx === -1 ? null : idx);
+    setMobileMenuOpen(true);
+  };
 
   const authActions = (
     <>
@@ -182,16 +218,93 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           </Link>
 
           {/* Desktop navigation */}
-          <div className="hidden items-center gap-8 md:flex">
-            {links.map(({ href, label }) => (
-              <Link
-                key={href + label}
-                href={href}
-                className="text-muted-foreground hover:text-foreground text-sm tracking-wide transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
+          <div
+            ref={dd.containerRef as React.RefObject<HTMLDivElement | null>}
+            className="hidden items-center gap-8 md:flex"
+          >
+            {links.map((item, i) => {
+              if (item.children?.length) {
+                const isOpen = dd.openIndex === i;
+                const entries = navGroupEntries(item);
+                const activeEntry = activeEntryIndex(pathname, entries);
+                const groupActive = isNavItemActive(pathname, item);
+                return (
+                  <div key={i} className="relative" {...dd.groupProps(i)}>
+                    {/* Trigger never navigates; a non-empty parent href is the
+                        panel's first entry. Active styling, no aria-current. */}
+                    <button
+                      {...dd.triggerProps(i)}
+                      className={cn(
+                        "hover:text-foreground focus-visible:ring-ring inline-flex cursor-pointer items-center gap-1 rounded-sm text-sm tracking-wide transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                        groupActive || isOpen
+                          ? "text-foreground"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {item.label}
+                      <ChevronDown
+                        aria-hidden="true"
+                        className={cn(
+                          "size-3.5 transition-transform duration-200 motion-reduce:transition-none",
+                          isOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <div
+                        id={dd.panelId(i)}
+                        className="absolute top-full left-0 z-50 pt-2"
+                      >
+                        <ul className="bg-background border-border min-w-48 rounded-md border py-1 shadow-lg">
+                          {entries.map((child, j) => {
+                            const childActive = j === activeEntry;
+                            return (
+                              <li key={j}>
+                                <Link
+                                  href={child.href}
+                                  {...externalLinkProps(child.external)}
+                                  aria-current={
+                                    childActive ? "page" : undefined
+                                  }
+                                  onClick={() => dd.close()}
+                                  className={cn(
+                                    "hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground block px-4 py-2 text-sm whitespace-nowrap transition-colors focus-visible:outline-none",
+                                    childActive
+                                      ? "text-foreground bg-muted"
+                                      : "text-muted-foreground",
+                                  )}
+                                >
+                                  {child.label}
+                                  {child.external && externalHint}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const active = isNavItemActive(pathname, item);
+              return (
+                <Link
+                  key={i}
+                  href={item.href}
+                  {...externalLinkProps(item.external)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "hover:text-foreground text-sm tracking-wide transition-colors",
+                    active ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {item.label}
+                  {item.external && externalHint}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-4">
@@ -211,19 +324,22 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               </Link>
             )}
 
-            <Link
-              href="/cart"
-              className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
-              aria-label={`Shopping cart with ${itemCount} items`}
-            >
-              {/* M-2: decorative icon inside an aria-labeled link */}
-              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-              {itemCount > 0 && (
-                <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+            {/* Catalog mode (B6.11): no cart icon when `cart` is off */}
+            {cartEnabled && (
+              <Link
+                href="/cart"
+                className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+                aria-label={`Shopping cart with ${itemCount} items`}
+              >
+                {/* M-2: decorative icon inside an aria-labeled link */}
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                {itemCount > 0 && (
+                  <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {isEnabled("customerAccounts") && (
               <>
@@ -242,7 +358,7 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               ref={hamburgerButtonRef}
               type="button"
               className="text-foreground md:hidden"
-              onClick={() => setMobileMenuOpen(true)}
+              onClick={openMobileMenu}
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
@@ -296,46 +412,123 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col px-4 py-6">
-          {links.map(({ href, label }) => (
-            <Link
-              key={href + label}
-              href={href}
-              className="text-foreground hover:bg-muted rounded-sm px-4 py-4 text-base tracking-wide transition-colors"
-              onClick={closeMenu}
-            >
-              {label}
-            </Link>
-          ))}
+        <nav
+          aria-label="Mobile navigation"
+          className="flex flex-1 flex-col overflow-y-auto px-4 py-6"
+        >
+          {links.map((item, i) => {
+            if (item.children?.length) {
+              const isOpen = expanded === i;
+              const sublistId = `mobile-menu-group-${i}`;
+              const entries = navGroupEntries(item);
+              const activeEntry = activeEntryIndex(pathname, entries);
+              return (
+                <div key={i}>
+                  {/* Never navigates; a non-empty parent href is the sublist's
+                      first entry. Active styling, no aria-current. */}
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={sublistId}
+                    onClick={() => setExpanded(isOpen ? null : i)}
+                    className={cn(
+                      "hover:bg-muted flex w-full cursor-pointer items-center justify-between rounded-sm px-4 py-4 text-left text-base tracking-wide transition-colors",
+                      isNavItemActive(pathname, item)
+                        ? "text-foreground font-medium"
+                        : "text-foreground",
+                    )}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      aria-hidden="true"
+                      className={cn(
+                        "size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+                        isOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                  {isOpen && (
+                    <ul id={sublistId} className="flex flex-col pb-2">
+                      {entries.map((child, j) => {
+                        const childActive = j === activeEntry;
+                        return (
+                          <li key={j}>
+                            <Link
+                              href={child.href}
+                              {...externalLinkProps(child.external)}
+                              aria-current={childActive ? "page" : undefined}
+                              onClick={closeMenu}
+                              className={cn(
+                                "hover:bg-muted hover:text-foreground block rounded-sm py-3 pr-4 pl-8 text-sm tracking-wide transition-colors",
+                                childActive
+                                  ? "text-foreground font-medium"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {child.label}
+                              {child.external && externalHint}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            }
+
+            const active = isNavItemActive(pathname, item);
+            return (
+              <Link
+                key={i}
+                href={item.href}
+                {...externalLinkProps(item.external)}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "text-foreground hover:bg-muted rounded-sm px-4 py-4 text-base tracking-wide transition-colors",
+                  active && "font-medium",
+                )}
+                onClick={closeMenu}
+              >
+                {item.label}
+                {item.external && externalHint}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
-          {isEnabled("wishlist") && (
-            <Link
-              href="/wishlist"
-              className="text-foreground flex items-center gap-3"
-              onClick={closeMenu}
-            >
-              {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
-              <Heart className="h-5 w-5" aria-hidden="true" />
-              <span className="text-sm font-medium">
-                Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
-              </span>
-            </Link>
-          )}
+        {/* Catalog mode (B6.11): drop the block when nothing is left in it */}
+        {(isEnabled("wishlist") || cartEnabled) && (
+          <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
+            {isEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                className="text-foreground flex items-center gap-3"
+                onClick={closeMenu}
+              >
+                {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
+                <Heart className="h-5 w-5" aria-hidden="true" />
+                <span className="text-sm font-medium">
+                  Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+                </span>
+              </Link>
+            )}
 
-          <Link
-            href="/cart"
-            className="text-foreground flex items-center gap-3"
-            onClick={closeMenu}
-          >
-            {/* M-2: decorative icon, link text "Cart (n)" provides the name */}
-            <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-            <span className="text-sm font-medium">
-              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-            </span>
-          </Link>
-        </div>
+            {cartEnabled && (
+              <Link
+                href="/cart"
+                className="text-foreground flex items-center gap-3"
+                onClick={closeMenu}
+              >
+                {/* M-2: decorative icon, link text "Cart (n)" provides the name */}
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                <span className="text-sm font-medium">
+                  Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+                </span>
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

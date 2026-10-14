@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -8,6 +8,9 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { ProductCustomizer } from "~/components/customizer/product-customizer";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 
@@ -18,20 +21,30 @@ type PollenProductActionsProps = DefaultProductPageTemplateProps & {
   comingSoonHeading: string;
   /** Resolved `pollen.product.coming-soon-body`; blank hides the line. */
   comingSoonBody: string;
+  /**
+   * Notified with the live configured price (selected variant + chosen
+   * options) while the product has a customizer, `null` otherwise, so the
+   * page can show it in place of the base price.
+   */
+  onConfiguredPriceChange?: (
+    price: { price: number; compareAtPrice: number | null } | null,
+  ) => void;
 };
 
 export function PollenProductActions({
   product,
   comingSoonHeading,
   comingSoonBody,
+  onConfiguredPriceChange,
 }: PollenProductActionsProps) {
   const {
     formatPrice,
     inStock,
     variantOptions,
     displayPrice,
+    displayCompareAtPrice,
 
-    handleAddToCart,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -40,6 +53,7 @@ export function PollenProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -50,6 +64,43 @@ export function PollenProductActions({
   // actually picked instead of always `qty=1`.
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  // Catalog mode (`cart` off) has no way to add, so it shows no builder.
+  const customizerOn = customizer.enabled && cartEnabled;
+  const configuredPrice = customizerOn
+    ? displayPrice + customizer.addOnTotal
+    : null;
+  const configuredCompareAt =
+    customizerOn &&
+    displayCompareAtPrice != null &&
+    displayCompareAtPrice > displayPrice
+      ? displayCompareAtPrice + customizer.addOnTotal
+      : null;
+  useEffect(() => {
+    onConfiguredPriceChange?.(
+      configuredPrice === null
+        ? null
+        : { price: configuredPrice, compareAtPrice: configuredCompareAt },
+    );
+  }, [configuredPrice, configuredCompareAt, onConfiguredPriceChange]);
+
+  const customizerElement = customizerOn ? (
+    <ProductCustomizer controller={customizer} className="pollen-customizer" />
+  ) : null;
+
+  const handleAddToCart = () => {
+    if (customizerOn && !customizer.revealErrors()) return;
+    handleAddToCartWith((item) =>
+      customizerOn ? applyCustomizerToCartItem(item, customizer) : item,
+    );
+  };
 
   return (
     <>
@@ -81,6 +132,8 @@ export function PollenProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizer}
+          customizerSlot={customizerElement}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -103,7 +156,9 @@ export function PollenProductActions({
         </div>
       ) : (
         <>
-          {canAddMore && (
+          {customizerElement && <div className="mb-6">{customizerElement}</div>}
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled && canAddMore && (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Label>Quantity</Label>
               {/* S-3: wrap stepper in role="group" with aria-label */}
@@ -152,7 +207,7 @@ export function PollenProductActions({
                 ) : (
                   <>
                     <ShoppingBag className="size-5" aria-hidden="true" />
-                    Add to Cart — {formatPrice(displayPrice)}
+                    Add to Cart — {formatPrice(configuredPrice ?? displayPrice)}
                   </>
                 )}
               </Button>
@@ -160,7 +215,7 @@ export function PollenProductActions({
           )}
 
           {/* M-7: amber-600 → amber-700 */}
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="mt-3 text-center text-sm text-amber-700">
               You have the maximum available quantity in your cart
             </p>

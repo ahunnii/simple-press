@@ -237,7 +237,7 @@ const contactFaqData: TemplateField[] = [
     key: "default.contact.faq",
     label: "Questions",
     description:
-      "Pick questions from Content → FAQ. Leave empty to show the first 6 published questions.",
+      "Pick questions from Site Setup → FAQ. Leave empty to show the first 6 published questions.",
     type: "faq",
     page: "contact",
     group: "contact.faq",
@@ -281,7 +281,7 @@ export const defaultContactFieldGroups: TemplateFieldGroup[] = [
     id: "contact.faq",
     title: "FAQ",
     description:
-      "Heading and questions pulled from Content → FAQ, shown below the contact form",
+      "Heading and questions pulled from Site Setup → FAQ, shown below the contact form",
     icon: "❓",
     columns: 2,
   },

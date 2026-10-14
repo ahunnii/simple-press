@@ -1,6 +1,11 @@
 import type { Prisma } from "generated/prisma";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  matchPendingSessionCookie,
+  signPendingSessionCookie,
+  SUBSCRIPTION_PENDING_COOKIE,
+} from "~/lib/checkout/pending-session-cookie";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { buildSubscriptionCheckoutParams } from "~/lib/subscriptions/checkout-session";
 // The module under test. Does not exist yet — this file is the RED half of
@@ -499,16 +504,36 @@ describe("POST /api/stripe/subscriptions/create-session", () => {
       expect(options).toEqual({ stripeAccount: ACCOUNT_ID });
     });
 
-    it("sets the pending_subscription_session cookie (httpOnly, lax, 1 hour)", async () => {
+    it("sets a SIGNED pending_subscription_session cookie (httpOnly, lax, 1 hour)", async () => {
       const business = await createSubscriptionStore();
       const { product, variant } = await createSubscribableProduct(business.id);
 
       const res = await post(shipBody(product.id, variant.id));
       const cookie = res.headers.get("set-cookie") ?? "";
 
-      expect(cookie).toContain(
-        `pending_subscription_session=${STRIPE_SESSION_ID}`,
+      // `<sessionId>.<hmac>` bound to this store and the subscription
+      // cookie's own context — never the bare (guessable) session id.
+      const signed = signPendingSessionCookie(STRIPE_SESSION_ID, business.id, {
+        kind: SUBSCRIPTION_PENDING_COOKIE,
+      });
+      expect(cookie).toContain(`pending_subscription_session=${signed};`);
+      expect(cookie).not.toContain(
+        `pending_subscription_session=${STRIPE_SESSION_ID};`,
       );
+      expect(
+        matchPendingSessionCookie(
+          new Headers({ cookie: cookie.split(";")[0]! }),
+          business.id,
+          STRIPE_SESSION_ID,
+          { kind: SUBSCRIPTION_PENDING_COOKIE },
+        ),
+      ).toEqual({ sessionId: STRIPE_SESSION_ID, signed: true });
+      // The session carries the marker that turns off the legacy bare-cookie
+      // fallback for it on /subscribe/success.
+      const [params] = stripeMocks.sessionsCreate.mock.calls[0] as [
+        { metadata: Record<string, string> },
+      ];
+      expect(params.metadata.pendingCookie).toBe("signed-v1");
       expect(cookie).toMatch(/httponly/i);
       // Must be `lax`, not `strict`: the browser lands on `/subscribe/success`
       // via a cross-site top-level GET redirect from checkout.stripe.com, and

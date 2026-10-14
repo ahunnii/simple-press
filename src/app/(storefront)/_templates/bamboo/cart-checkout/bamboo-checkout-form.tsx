@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -64,6 +66,7 @@ export function CheckoutForm({
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     handleApplyDiscount,
@@ -237,6 +240,14 @@ export function CheckoutForm({
                   {discountCodeLabel}
                 </span>{" "}
                 applied.
+              </p>
+            )}
+            {discountCodeLabel && discountFreeShipping && (
+              <p className="text-sm text-green-700" role="status">
+                Free shipping applied:{" "}
+                <span className="font-semibold tabular-nums">
+                  {discountCodeLabel}
+                </span>
               </p>
             )}
           </fieldset>
@@ -452,7 +463,7 @@ export function CheckoutForm({
               <div className="max-h-64 space-y-3 overflow-y-auto">
                 {items.map((item) => (
                   <div
-                    key={`${item.productId}-${item.variantId}`}
+                    key={cartItemId(item)}
                     className="flex items-center gap-3"
                   >
                     <div className="bg-card relative size-12 shrink-0 overflow-hidden rounded-md">
@@ -479,6 +490,11 @@ export function CheckoutForm({
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="text-[var(--bam-forest)]/70"
+                      />
                       <p className="text-xs text-[var(--bam-forest)]/70">
                         Qty: {item.quantity}
                       </p>

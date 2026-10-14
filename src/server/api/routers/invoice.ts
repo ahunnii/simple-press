@@ -1,15 +1,22 @@
 import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
+import Papa from "papaparse";
 import { z } from "zod";
 
 import type { InvoiceCapabilities } from "~/lib/invoices/status";
 import type { UnifiedInvoiceRow } from "~/lib/invoices/unified-list";
 import type { InvoiceDraft, InvoiceStatus } from "~/lib/validators/invoice";
 import type { DbClient, TxClient } from "~/server/db";
-import { zonedCalendarDate } from "~/lib/calendar-date";
+import { addCalendarDays, zonedCalendarDate } from "~/lib/calendar-date";
 import { checkBusiness } from "~/lib/check-business";
+import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { upsertInvoiceCustomer } from "~/lib/invoices/customer-link";
+import {
+  invoiceEventActorFallback,
+  invoiceEventLabel,
+  metadataSummary,
+} from "~/lib/invoices/event-format";
 import { logInvoiceEvent } from "~/lib/invoices/events";
 import { serializeLineItems } from "~/lib/invoices/line-items";
 import {
@@ -54,11 +61,11 @@ import {
   isInvoiceOverdue,
   REMINDER_COOLDOWN_MS,
   resolveDueDateYmd,
-  todayUtcMidnight,
   toInvoiceStatus,
   utcMidnightToYmd,
   ymdToUtcMidnight,
 } from "~/lib/invoices/status";
+import { computeInvoiceSummary } from "~/lib/invoices/summary";
 import { createInvoiceToken, invoiceViewPath } from "~/lib/invoices/token";
 import { balanceDueCents, computeInvoiceTotals } from "~/lib/invoices/totals";
 import {
@@ -78,6 +85,7 @@ import { normalizeEmail } from "~/lib/utils";
 import {
   cancelInvoiceSchema,
   deletePaymentSchema,
+  INVOICE_EVENT_TYPE_VALUES,
   INVOICE_OPEN_STATUSES,
   invoiceDraftSchema,
   invoiceIdSchema,
@@ -85,15 +93,14 @@ import {
   invoiceSendSchema,
   invoiceSettingsSchema,
   invoiceUpdateSchema,
+  invoiceYmdSchema,
   parseIssuerSnapshot,
   recordPaymentSchema,
   sendReminderSchema,
 } from "~/lib/validators/invoice";
-import {
-  parseBillingAddressJson,
-  QBO_OPEN_INVOICE_STATUSES,
-} from "~/lib/validators/quickbooks";
+import { parseBillingAddressJson } from "~/lib/validators/quickbooks";
 import { resolveVariantPrice } from "~/lib/variant-price";
+import { zonedDayStart } from "~/lib/zoned-day";
 import {
   createTRPCRouter,
   featureGate,
@@ -147,6 +154,10 @@ const MY_INVOICE_LIMIT = 100;
 const EVENT_LIMIT = 100;
 /** Rows per group returned by `catalogOptions`. */
 const CATALOG_LIMIT = 50;
+/** Rows per page of `activity`. */
+export const INVOICE_ACTIVITY_PAGE_SIZE = 25;
+/** Hard cap on `exportActivity` rows. */
+export const INVOICE_ACTIVITY_EXPORT_MAX_ROWS = 20_000;
 
 const OPEN_STATUSES: string[] = [...INVOICE_OPEN_STATUSES];
 
@@ -317,6 +328,77 @@ const QBO_UNIFIED_SELECT = {
   quoteSubmission: { select: { id: true, contactName: true } },
 } satisfies Prisma.QuickBooksInvoiceSelect;
 
+// ─── Activity log ───────────────────────────────────────────────────────────
+
+const activityFiltersSchema = z.object({
+  type: z.enum(INVOICE_EVENT_TYPE_VALUES).optional(),
+  from: invoiceYmdSchema.optional(),
+  to: invoiceYmdSchema.optional(),
+  search: z.string().trim().max(100).optional(),
+});
+type ActivityFilters = z.infer<typeof activityFiltersSchema>;
+
+const ACTIVITY_INVOICE_SELECT = {
+  id: true,
+  invoiceNumber: true,
+  numberPrefix: true,
+  customerName: true,
+  customerEmail: true,
+  status: true,
+} satisfies Prisma.InvoiceSelect;
+
+async function loadTimeZone(db: DbClient, businessId: string) {
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { timeZone: true },
+  });
+  return business?.timeZone ?? "UTC";
+}
+
+/**
+ * `InvoiceEvent.actorUserId` has no User relation — resolve a page's
+ * distinct actors with one lookup.
+ */
+async function loadActorsById(
+  db: DbClient,
+  events: { actorUserId: string | null }[],
+) {
+  const ids = [
+    ...new Set(events.flatMap((e) => (e.actorUserId ? [e.actorUserId] : []))),
+  ];
+  if (ids.length === 0)
+    return new Map<string, { name: string; email: string }>();
+  const users = await db.user.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, email: true },
+  });
+  return new Map(users.map((u) => [u.id, { name: u.name, email: u.email }]));
+}
+
+/**
+ * Store-wide event feed filter. `invoice: { businessId }` repeats the
+ * denormalized `businessId` through the relation as a tenant guard; the
+ * search matches the parent invoice (customer name/email, or the number
+ * printed on it — same rules as the Invoices list search).
+ */
+function activityWhere(
+  businessId: string,
+  filters: ActivityFilters,
+  timeZone: string,
+): Prisma.InvoiceEventWhereInput {
+  const createdAt: Prisma.DateTimeFilter = {};
+  if (filters.from) createdAt.gte = zonedDayStart(filters.from, timeZone);
+  if (filters.to) {
+    createdAt.lt = zonedDayStart(addCalendarDays(filters.to, 1), timeZone);
+  }
+  return {
+    businessId,
+    invoice: { businessId, ...nativeInvoiceSearchWhere(filters.search) },
+    ...(filters.type ? { type: filters.type } : {}),
+    ...(createdAt.gte || createdAt.lt ? { createdAt } : {}),
+  };
+}
+
 // ─── Router ─────────────────────────────────────────────────────────────────
 
 export const invoiceRouter = createTRPCRouter({
@@ -462,107 +544,11 @@ export const invoiceRouter = createTRPCRouter({
    * (`mapQboRow`). "Paid in the last 30 days" is money COLLECTED: native
    * payments with `paidOn` in the window (including payments on invoices
    * later cancelled), plus QuickBooks invoices marked paid in the window.
+   * The body lives in `~/lib/invoices/summary` so the dashboard shares it.
    */
-  summary: invRead.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-    const now = new Date();
-    const { business, qboEnabled } = await loadBusinessContext(
-      ctx.db,
-      businessId,
-    );
-    const today = todayUtcMidnight(now, business.timeZone);
-    const windowStart = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    const [outstanding, overdue, collected, qboCount] = await Promise.all([
-      ctx.db.invoice.aggregate({
-        where: { businessId, status: { in: OPEN_STATUSES } },
-        _sum: { totalCents: true, amountPaidCents: true },
-        _count: { _all: true },
-      }),
-      ctx.db.invoice.aggregate({
-        where: {
-          businessId,
-          status: { in: OPEN_STATUSES },
-          dueDate: { lt: today },
-        },
-        _sum: { totalCents: true, amountPaidCents: true },
-        _count: { _all: true },
-      }),
-      ctx.db.invoicePayment.aggregate({
-        where: { businessId, paidOn: { gte: windowStart } },
-        _sum: { amountCents: true },
-      }),
-      ctx.db.quickBooksInvoice.count({ where: { businessId } }),
-    ]);
-
-    let outstandingCents =
-      (outstanding._sum.totalCents ?? 0) -
-      (outstanding._sum.amountPaidCents ?? 0);
-    let outstandingCount = outstanding._count._all;
-    let overdueCents =
-      (overdue._sum.totalCents ?? 0) - (overdue._sum.amountPaidCents ?? 0);
-    let overdueCount = overdue._count._all;
-    let paidLast30Cents = collected._sum.amountCents ?? 0;
-
-    if (qboEnabled || qboCount > 0) {
-      const qboRows = await ctx.db.quickBooksInvoice.findMany({
-        where: {
-          businessId,
-          OR: [
-            { status: { in: [...QBO_OPEN_INVOICE_STATUSES] } },
-            { status: "paid", paidAt: { gte: windowStart } },
-          ],
-        },
-        take: QBO_INVOICE_LIST_MAX_ROWS,
-        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-        select: {
-          id: true,
-          createdAt: true,
-          amountCents: true,
-          balanceCents: true,
-          status: true,
-          dueDate: true,
-          qboDocNumber: true,
-        },
-      });
-      for (const raw of qboRows) {
-        if (raw.status === "paid") {
-          paidLast30Cents += raw.amountCents;
-          continue;
-        }
-        // Customer fields and the `qbo` detail don't affect money or overdue;
-        // skip decrypting/loading them here (they cost 1 row's worth of joins
-        // × up to `QBO_INVOICE_LIST_MAX_ROWS`, and nothing below reads them).
-        const row = mapQboRow(
-          {
-            ...raw,
-            customerName: "",
-            customerEmail: "",
-            kind: "custom",
-            qboInvoiceId: null,
-            lastError: null,
-            quoteSubmission: null,
-          },
-          now,
-          business.timeZone,
-        );
-        outstandingCents += row.balanceCents;
-        outstandingCount += 1;
-        if (row.isOverdue) {
-          overdueCents += row.balanceCents;
-          overdueCount += 1;
-        }
-      }
-    }
-
-    return {
-      outstandingCents,
-      outstandingCount,
-      overdueCents,
-      overdueCount,
-      paidLast30Cents,
-    };
-  }),
+  summary: invRead.query(({ ctx }) =>
+    computeInvoiceSummary(ctx.db, ctx.businessId, new Date()),
+  ),
 
   /** One invoice for the admin detail page, with payments, timeline and capabilities. */
   getById: invRead.input(invoiceIdSchema).query(async ({ ctx, input }) => {
@@ -635,6 +621,131 @@ export const invoiceRouter = createTRPCRouter({
       })),
     };
   }),
+
+  /**
+   * Store-wide event feed (newest first) for `/admin/invoices/activity`.
+   * `actorUserId` has no relation, so the page's distinct actors are resolved
+   * with one extra lookup; a null `actor` is a customer/system event (see
+   * `invoiceEventActorFallback`).
+   */
+  activity: invRead
+    .input(
+      activityFiltersSchema.extend({
+        page: z.number().int().min(1).default(1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const pageSize = INVOICE_ACTIVITY_PAGE_SIZE;
+      const [timeZone, settings] = await Promise.all([
+        loadTimeZone(ctx.db, businessId),
+        getInvoiceSettingsOrDefaults(ctx.db, businessId),
+      ]);
+      const where = activityWhere(businessId, input, timeZone);
+
+      const totalCount = await ctx.db.invoiceEvent.count({ where });
+      const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+      const page = Math.min(input.page, pageCount);
+
+      const events = await ctx.db.invoiceEvent.findMany({
+        where,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: { invoice: { select: ACTIVITY_INVOICE_SELECT } },
+      });
+
+      const actorById = await loadActorsById(ctx.db, events);
+
+      return {
+        rows: events.map((event) => {
+          const actor = event.actorUserId
+            ? actorById.get(event.actorUserId)
+            : undefined;
+          return {
+            id: event.id,
+            createdAt: event.createdAt,
+            type: event.type,
+            metadata: event.metadata,
+            invoice: {
+              ...event.invoice,
+              displayNumber: invoiceDisplayNumber(
+                event.invoice,
+                settings.numberPadding,
+              ),
+            },
+            actor: actor ?? null,
+          };
+        }),
+        totalCount,
+        page,
+        pageCount,
+        pageSize,
+        timeZone,
+      };
+    }),
+
+  /** CSV of the same feed (capped at `INVOICE_ACTIVITY_EXPORT_MAX_ROWS`). */
+  exportActivity: invRead
+    .input(activityFiltersSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const [timeZone, settings] = await Promise.all([
+        loadTimeZone(ctx.db, businessId),
+        getInvoiceSettingsOrDefaults(ctx.db, businessId),
+      ]);
+      const found = await ctx.db.invoiceEvent.findMany({
+        where: activityWhere(businessId, input, timeZone),
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: INVOICE_ACTIVITY_EXPORT_MAX_ROWS + 1,
+        include: { invoice: { select: ACTIVITY_INVOICE_SELECT } },
+      });
+      const capped = found.length > INVOICE_ACTIVITY_EXPORT_MAX_ROWS;
+      const events = found.slice(0, INVOICE_ACTIVITY_EXPORT_MAX_ROWS);
+
+      const actorById = await loadActorsById(ctx.db, events);
+
+      const records = events.map((event) => {
+        const actor = event.actorUserId
+          ? actorById.get(event.actorUserId)
+          : undefined;
+        return {
+          // ISO UTC, matching the orders export.
+          Date: event.createdAt.toISOString(),
+          "Invoice #": invoiceDisplayNumber(
+            event.invoice,
+            settings.numberPadding,
+          ),
+          Customer: event.invoice.customerName || event.invoice.customerEmail,
+          Event: invoiceEventLabel(event.type),
+          Details: metadataSummary(event.metadata).join(" · "),
+          // `User.name` can be "" — fall through to the email then.
+          By: actor
+            ? actor.name.trim() !== ""
+              ? actor.name
+              : actor.email
+            : (invoiceEventActorFallback(event.type) ?? ""),
+        };
+      });
+      const fields = [
+        "Date",
+        "Invoice #",
+        "Customer",
+        "Event",
+        "Details",
+        "By",
+      ] as const;
+      const csv = Papa.unparse({
+        fields: [...fields],
+        data: sanitizeCsvRows(records).map((r) => fields.map((f) => r[f])),
+      });
+
+      return {
+        csv,
+        filename: `invoice-activity-${zonedCalendarDate(new Date(), timeZone)}.csv`,
+        capped,
+      };
+    }),
 
   /** Invoice settings (or the defaults when never saved), payment methods parsed. */
   getSettings: invRead.query(({ ctx }) =>

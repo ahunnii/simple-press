@@ -179,9 +179,10 @@ export function OliveDonatePage({
               </div>
             ) : null}
 
-            {/* Should be unreachable while the "donations" flag is on (the
-                settings UI requires a lane before it can be enabled); kept
-                as a safety net, mirroring Default's donate page. */}
+            {/* ── Empty state — reachable: the "donations" flag has no
+               dependsOn, so a Venmo-less/Stripe-less store can still enable it
+               and land here. Settings → Donations warns the owner when no
+               payment lane is set up. ── */}
             {showEmpty ? (
               <OliveEmptyState
                 headingAs="h2"

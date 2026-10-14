@@ -118,8 +118,6 @@ export function GeneralSettings({ business }: Props) {
       ...addressDefaults(business),
       ...mapPinDefaults(business),
       slug: business.slug ?? "",
-      sendAbandonedCheckoutEmails:
-        business.sendAbandonedCheckoutEmails ?? false,
       timeZone: business.timeZone ?? "America/Detroit",
     },
   });
@@ -187,8 +185,6 @@ export function GeneralSettings({ business }: Props) {
         ...addressDefaults(data.business),
         ...mapPinDefaults(data.business),
         slug: data.business.slug,
-        sendAbandonedCheckoutEmails:
-          data.business.sendAbandonedCheckoutEmails ?? false,
         timeZone: data.business.timeZone ?? "America/Detroit",
       });
       void utils.business.invalidate();
@@ -217,7 +213,6 @@ export function GeneralSettings({ business }: Props) {
       latitude: data.latitude?.trim() ? Number(data.latitude.trim()) : null,
       longitude: data.longitude?.trim() ? Number(data.longitude.trim()) : null,
       phoneNumber: data.phoneNumber ?? undefined,
-      sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
       timeZone: data.timeZone,
     });
   };
@@ -231,8 +226,6 @@ export function GeneralSettings({ business }: Props) {
         phoneNumber: business.phoneNumber ?? undefined,
         ...addressDefaults(business),
         ...mapPinDefaults(business),
-        sendAbandonedCheckoutEmails:
-          business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
       },
     );
@@ -356,15 +349,15 @@ export function GeneralSettings({ business }: Props) {
                       </Select>
                       <FormDescription>
                         Used when showing event dates and times to you and your
-                        shoppers. Pick the zone your shop actually operates in —
-                        this also applies to the hours shown on{" "}
+                        shoppers. Pick the zone your shop actually operates in.{" "}
                         <Link
                           href="/admin/settings/hours"
                           className="underline underline-offset-2"
                         >
                           Business Hours
-                        </Link>
-                        .
+                        </Link>{" "}
+                        are shown exactly as you type them and aren&apos;t
+                        converted.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,6 +60,40 @@ type Business = NonNullable<RouterOutputs["business"]["getWith"]>;
 type Props = {
   business: Business;
 };
+
+/**
+ * tRPC input-validation failures arrive with `error.message` set to the raw
+ * zod issue array serialised as JSON (see `errorFormatter` in server/api/trpc.ts,
+ * which also exposes `data.zodError`). Show the first field message instead.
+ */
+type ZodAwareError = {
+  message: string;
+  data?: {
+    zodError?: {
+      formErrors?: string[];
+      fieldErrors?: Record<string, string[] | undefined>;
+    } | null;
+  } | null;
+};
+
+export function friendlyErrorMessage(
+  error: ZodAwareError,
+  fallback: string,
+): string {
+  const zodError = error.data?.zodError;
+  if (zodError) {
+    const fieldMessage = Object.values(zodError.fieldErrors ?? {})
+      .flat()
+      .find((m): m is string => typeof m === "string" && m.length > 0);
+    const message = fieldMessage ?? zodError.formErrors?.[0];
+    if (message) return message;
+    return fallback;
+  }
+  return error.message || fallback;
+}
+
+/** Fields on the flat `form` that apply in every shipping mode. */
+const PICKUP_FIELDS = ["pickupLocation", "pickupInstructions"] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers: hydrate ZoneWeightFormValues from saved business data
@@ -213,6 +247,17 @@ export function ShippingSettings({ business }: Props) {
     defaultValues: hydrateZoneWeightDefaults(business),
   });
 
+  // The pickup fields are edited on the flat `form` but zoneForm's schema also
+  // validates them, so keep zoneForm's copies in step (no dirty flag) — otherwise
+  // it would validate the values hydrated at page load, not what the owner typed.
+  const pickupInstructions = form.watch("pickupInstructions");
+  const pickupLocation = form.watch("pickupLocation");
+  useEffect(() => {
+    zoneForm.setValue("offersInStorePickup", pickupEnabled);
+    zoneForm.setValue("pickupInstructions", pickupInstructions);
+    zoneForm.setValue("pickupLocation", pickupLocation);
+  }, [zoneForm, pickupEnabled, pickupInstructions, pickupLocation]);
+
   // ── Delivery times + returns form ─────────────────────────────────────────
   // Independent of the shipping mode, so it has its own form + mutation and is
   // saved alongside whichever shipping form is active.
@@ -224,10 +269,20 @@ export function ShippingSettings({ business }: Props) {
   });
 
   // ── Mutations ─────────────────────────────────────────────────────────────
+  // Toast ids are scoped so the shipping and delivery/returns saves can run in
+  // parallel without either one clobbering (or stacking duplicates of) the
+  // other's loading toast. The two shipping mutations share one id because only
+  // one of them runs per save.
+  const SHIPPING_TOAST_ID = "shipping-save";
+  const DELIVERY_TOAST_ID = "delivery-returns-save";
+  // Synchronous re-entrancy guards. The Save button only disables after a
+  // re-render, so Enter / Cmd+Enter / a double click in the same tick could
+  // otherwise submit twice. Set right before `.mutate`, cleared in `onSettled`.
+  const shippingSaveInFlight = useRef(false);
+  const deliverySaveInFlight = useRef(false);
   const updateMutation = api.business.updateShipping.useMutation({
     onSuccess: (data) => {
-      toast.dismiss();
-      toast.success(data.message);
+      toast.success(data.message, { id: SHIPPING_TOAST_ID });
       form.reset({
         shippingType: data.business
           .shippingType as ShippingFormValues["shippingType"],
@@ -248,17 +303,22 @@ export function ShippingSettings({ business }: Props) {
       router.refresh();
     },
     onError: (error) => {
-      toast.dismiss();
-      toast.error(error.message ?? "Failed to update shipping settings");
+      toast.error(
+        friendlyErrorMessage(error, "Failed to update shipping settings"),
+        { id: SHIPPING_TOAST_ID },
+      );
     },
-    onMutate: () => toast.loading("Saving shipping settings..."),
+    onMutate: () =>
+      toast.loading("Saving shipping settings...", { id: SHIPPING_TOAST_ID }),
+    onSettled: () => {
+      shippingSaveInFlight.current = false;
+    },
   });
 
   const saveZoneWeightMutation =
     api.business.saveZoneWeightShipping.useMutation({
       onSuccess: (data) => {
-        toast.dismiss();
-        toast.success(data.message);
+        toast.success(data.message, { id: SHIPPING_TOAST_ID });
         zoneForm.reset(zoneForm.getValues());
         // Country toggles live on the flat `form`; clear their dirty state too so
         // the toolbar returns to "Saved" after a zone+weight save.
@@ -267,15 +327,18 @@ export function ShippingSettings({ business }: Props) {
         router.refresh();
       },
       onError: (error) => {
-        toast.dismiss();
-        toast.error(error.message ?? "Failed to save zone + weight shipping");
+        toast.error(
+          friendlyErrorMessage(error, "Failed to save zone + weight shipping"),
+          { id: SHIPPING_TOAST_ID },
+        );
       },
-      onMutate: () => toast.loading("Saving shipping settings..."),
+      onMutate: () =>
+        toast.loading("Saving shipping settings...", { id: SHIPPING_TOAST_ID }),
+      onSettled: () => {
+        shippingSaveInFlight.current = false;
+      },
     });
 
-  // Toast ids are scoped so this save can run in parallel with a shipping save
-  // without one's `toast.dismiss()` wiping the other's loading toast.
-  const DELIVERY_TOAST_ID = "delivery-returns-save";
   const saveDeliveryMutation =
     api.business.updateDeliveryAndReturns.useMutation({
       onSuccess: (data) => {
@@ -293,6 +356,9 @@ export function ShippingSettings({ business }: Props) {
         toast.loading("Saving delivery and returns...", {
           id: DELIVERY_TOAST_ID,
         }),
+      onSettled: () => {
+        deliverySaveInFlight.current = false;
+      },
     });
 
   // ── Submit handlers ───────────────────────────────────────────────────────
@@ -312,6 +378,8 @@ export function ShippingSettings({ business }: Props) {
       | "free"
       | "flat_rate"
       | "flat_rate_with_threshold";
+    if (shippingSaveInFlight.current) return;
+    shippingSaveInFlight.current = true;
     updateMutation.mutate({
       shippingType: st,
       shippingFlatRate: flatCents,
@@ -328,7 +396,20 @@ export function ShippingSettings({ business }: Props) {
   ): Promise<void> => {
     // The in-store pickup and "Countries you sell to" toggles are bound to the
     // flat `form` (they are mode-independent), so read their current values from
-    // there rather than the zoneForm copy.
+    // there rather than the zoneForm copy. They are not part of zoneForm's
+    // validation, so run the flat form's pickup rules here (the same
+    // shippingFormSchema rule the flat modes use) before sending anything. In
+    // zone mode only the pickup rule can fire: the flat-rate checks are scoped
+    // to the flat shippingType values.
+    const pickupValid = await form.trigger([...PICKUP_FIELDS], {
+      shouldFocus: true,
+    });
+    if (!pickupValid) {
+      toast.error("Fix the highlighted shipping fields");
+      return;
+    }
+    if (shippingSaveInFlight.current) return;
+    shippingSaveInFlight.current = true;
     saveZoneWeightMutation.mutate({
       ...data,
       offersInStorePickup: form.getValues("offersInStorePickup"),
@@ -341,7 +422,19 @@ export function ShippingSettings({ business }: Props) {
   const handleDeliverySubmit = async (
     data: DeliveryReturnsFormValues,
   ): Promise<void> => {
+    if (deliverySaveInFlight.current) return;
+    deliverySaveInFlight.current = true;
     saveDeliveryMutation.mutate(deliveryReturnsFormToInput(data));
+  };
+
+  const onShippingInvalid = () => {
+    toast.error("Fix the highlighted shipping fields");
+    // zoneForm validates the pickup rule too (its schema carries the pickup
+    // fields) but has no inputs for them, so surface that error inline on the
+    // flat form's pickup inputs and move focus there.
+    if (shippingType === "zone_weight") {
+      void form.trigger([...PICKUP_FIELDS], { shouldFocus: true });
+    }
   };
 
   // ── Dirty / submitting state ──────────────────────────────────────────────
@@ -367,6 +460,7 @@ export function ShippingSettings({ business }: Props) {
       : handleFlatSubmit) as (
       data: ShippingFormValues | ZoneWeightFormValues,
     ) => Promise<void>,
+    onShippingInvalid,
   );
   // Cmd/Ctrl+Enter also saves the delivery/returns form, but only if it has
   // changes (the shipping shortcut above already fires unconditionally).
@@ -383,9 +477,9 @@ export function ShippingSettings({ business }: Props) {
     // (possibly half-configured) shipping form would block that save.
     if (isShippingDirty || !isDeliveryDirty) {
       if (shippingType === "zone_weight") {
-        void zoneForm.handleSubmit(handleZoneWeightSubmit)();
+        void zoneForm.handleSubmit(handleZoneWeightSubmit, onShippingInvalid)();
       } else {
-        void form.handleSubmit(handleFlatSubmit)();
+        void form.handleSubmit(handleFlatSubmit, onShippingInvalid)();
       }
     }
     if (isDeliveryDirty) {
@@ -555,6 +649,7 @@ export function ShippingSettings({ business }: Props) {
                               />
                             </div>
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -577,6 +672,7 @@ export function ShippingSettings({ business }: Props) {
                               {...field}
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -778,7 +874,10 @@ export function ShippingSettings({ business }: Props) {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  void zoneForm.handleSubmit(handleZoneWeightSubmit)();
+                  void zoneForm.handleSubmit(
+                    handleZoneWeightSubmit,
+                    onShippingInvalid,
+                  )();
                 }}
               >
                 <ZoneWeightEditor />

@@ -1,3 +1,5 @@
+import { resolvePickupLocation } from "~/lib/address/pickup";
+
 /** Storefront + Stripe shipping configuration (mirrors Business model fields). */
 export type ShippingConfig = {
   shippingType: string;
@@ -97,13 +99,20 @@ export function shippingConfigFromBusiness(business: {
   offersInStorePickup: boolean;
   pickupLocation?: string | null;
   pickupInstructions?: string | null;
+  // Optional address fields feed the shared pickup fallback chain
+  // (`resolvePickupLocation`): pickupLocation → structured address → legacy.
+  addressStreet?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressPostalCode?: string | null;
+  businessAddress?: string | null;
 }): ShippingConfig {
   return {
     shippingType: business.shippingType,
     shippingFlatRate: business.shippingFlatRate,
     freeShippingThreshold: business.freeShippingThreshold,
     offersInStorePickup: business.offersInStorePickup,
-    pickupLocation: business.pickupLocation ?? null,
+    pickupLocation: resolvePickupLocation(business),
     pickupInstructions: business.pickupInstructions ?? null,
   };
 }

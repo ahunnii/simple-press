@@ -1,21 +1,23 @@
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { WealthCtaBand } from "../shared/wealth-cta-band";
 import { WealthLedgeButton } from "../shared/wealth-ledge-button";
-import { WealthSection } from "../shared/wealth-section";
+import { WealthReveal } from "../shared/wealth-reveal";
 
 type Props = {
   overline: string;
   heading: string;
   body: string;
   buttonText: string;
+  /** "" hides the button (the link points at a switched-off feature). */
   buttonLink: string;
 };
 
 /**
- * Closing call-to-action shown at the end of every blog post — owner
- * configurable via the shared `blog.cta` field group (field-conventions
- * "group granularity = section granularity"; this section's platform id is
- * `blog.post` per the blog-post-context convention — see blog/index.ts).
+ * Closing call-to-action at the end of every blog post: a forest CTA band
+ * fed by the `blog.post` field group (section id == group id ==
+ * `data-sp-group`). The page gates it on the `cta-enabled` toggle AND the
+ * section's visibility switch.
  */
 export function WealthBlogPostCta({
   overline,
@@ -25,43 +27,28 @@ export function WealthBlogPostCta({
   buttonLink,
 }: Props) {
   return (
-    <WealthSection sectionAttrs={sectionGroupAttr("blog", "cta")} className="text-center">
-      <div className="mx-auto" style={{ maxWidth: 560 }}>
-        {/* Plain tags with the shared classes instead of `WealthEyebrow`/
-            `WealthSectionHeading`: neither component forwards unknown props
-            to its underlying DOM node (they destructure a closed prop list),
-            so spreading `fieldAttr` onto them silently drops the
-            `data-sp-field` attribute and breaks editor live-text patching.
-            Visually identical — this is exactly what each component renders
-            — without touching the shared components (out of this agent's
-            scope; see also wealth-blog-page.tsx). */}
-        <p className="wealth-eyebrow mb-3" {...fieldAttr("wealth.blog.cta-overline")}>
-          {overline}
-        </p>
-        {/* `.wealth-section-heading` sets `margin: 0` via an unlayered rule
-            (deliberately, so it beats Tailwind utilities) — a `mb-*`
-            className here would be silently dropped, so spacing below is
-            carried by the body paragraph's `marginTop` instead. */}
-        <h2 className="wealth-section-heading" {...fieldAttr("wealth.blog.cta-heading")}>
-          {heading}
-        </h2>
-        <p
-          {...fieldAttr("wealth.blog.cta-body")}
-          style={{
-            fontFamily: "var(--font-wealth-body)",
-            fontSize: 17,
-            lineHeight: "25.5px",
-            color: "var(--wealth-ink)",
-            marginTop: 16,
-            marginBottom: "var(--wealth-rhythm)",
-          }}
-        >
-          {body}
-        </p>
-        <WealthLedgeButton href={buttonLink}>
-          <span {...fieldAttr("wealth.blog.cta-button-text")}>{buttonText}</span>
-        </WealthLedgeButton>
-      </div>
-    </WealthSection>
+    <WealthReveal>
+      <WealthCtaBand
+        className="wealth-blog-cta"
+        aria-labelledby="wealth-blog-cta-heading"
+        headingId="wealth-blog-cta-heading"
+        eyebrow={overline || undefined}
+        eyebrowProps={fieldAttr("wealth.blog.cta-overline")}
+        heading={heading}
+        headingProps={fieldAttr("wealth.blog.cta-heading")}
+        body={body || undefined}
+        bodyProps={fieldAttr("wealth.blog.cta-body")}
+        action={
+          buttonText && buttonLink ? (
+            <WealthLedgeButton onDark href={buttonLink}>
+              <span {...fieldAttr("wealth.blog.cta-button-text")}>
+                {buttonText}
+              </span>
+            </WealthLedgeButton>
+          ) : undefined
+        }
+        {...sectionGroupAttr("blog", "post")}
+      />
+    </WealthReveal>
   );
 }

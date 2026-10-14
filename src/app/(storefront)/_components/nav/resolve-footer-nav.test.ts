@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import type { NavItem } from "./resolve-nav";
+
 import {
+  FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK,
+  FOOTER_QUICK_LINKS_TEMPLATES,
   resolveFooterNav,
   resolveFooterQuickLinks,
   topLevelNav,
 } from "./resolve-footer-nav";
-import type { NavItem } from "./resolve-nav";
 
 const DEFAULT_NAV: NavItem[] = [
   { href: "/", label: "Home" },
@@ -108,7 +111,9 @@ describe("resolveFooterNav", () => {
         [{ label: "Blog", href: "https://blog.example", external: true }],
         FALLBACK,
       ),
-    ).toEqual([{ label: "Blog", href: "https://blog.example", external: true }]);
+    ).toEqual([
+      { label: "Blog", href: "https://blog.example", external: true },
+    ]);
   });
 
   it("drops malformed entries", () => {
@@ -203,5 +208,50 @@ describe("resolveFooterQuickLinks", () => {
     ).toEqual([
       { label: "Ext", href: "https://example.com/shop", external: true },
     ]);
+  });
+
+  it("appends Donate last when donate.show is set, after flag filtering", () => {
+    expect(
+      resolveFooterQuickLinks({
+        footerItems: [{ label: "Shop", href: "/shop" }],
+        navigationItems: null,
+        navDefaults: DEFAULT_NAV,
+        isEnabled: only("blog"),
+        donate: { show: true, label: "Tip" },
+      }),
+    ).toEqual([
+      { label: "Shop", href: "/shop" },
+      { href: "/donate", label: "Tip" },
+    ]);
+  });
+
+  it("does not duplicate Donate, and adds nothing when donate.show is false", () => {
+    const base = {
+      navigationItems: null,
+      navDefaults: DEFAULT_NAV,
+      isEnabled: () => true,
+    };
+    expect(
+      resolveFooterQuickLinks({
+        ...base,
+        footerItems: [{ label: "Give", href: "/donate" }],
+        donate: { show: true, label: "Donate" },
+      }),
+    ).toEqual([{ label: "Give", href: "/donate" }]);
+    expect(
+      resolveFooterQuickLinks({
+        ...base,
+        footerItems: [{ label: "Shop", href: "/shop" }],
+        donate: { show: false, label: "Donate" },
+      }),
+    ).toEqual([{ label: "Shop", href: "/shop" }]);
+  });
+});
+
+describe("FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK", () => {
+  it("only lists templates that render footer quick links", () => {
+    for (const id of Object.keys(FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK)) {
+      expect(FOOTER_QUICK_LINKS_TEMPLATES).toContain(id);
+    }
   });
 });

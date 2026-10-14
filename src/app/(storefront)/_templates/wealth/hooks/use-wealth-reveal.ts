@@ -15,13 +15,13 @@ import { useCallback, useEffect, useState } from "react";
  * the element is always fully visible without animation.
  */
 export function useWealthReveal(threshold = 0.1): {
-  ref: (node: HTMLDivElement | null) => void;
+  ref: (node: HTMLElement | null) => void;
   visible: boolean;
 } {
-  const [el, setEl] = useState<HTMLDivElement | null>(null);
+  const [el, setEl] = useState<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
 
-  const ref = useCallback((node: HTMLDivElement | null) => {
+  const ref = useCallback((node: HTMLElement | null) => {
     if (node) setEl(node);
   }, []);
 

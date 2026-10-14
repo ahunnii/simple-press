@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+import {
+  BUSINESS_TYPE_IDS,
+  SETUP_STEP_KEYS,
+  SETUP_STEP_LEVELS,
+} from "~/lib/admin/setup-plan";
+
 // Mirrors the role constraints on `platform.createBusiness` /
 // `platform.createMembership` / `platform.updateMembership` in
 // `src/server/api/routers/platform.ts` — keep in sync.
@@ -23,6 +29,11 @@ export const createBusinessFormSchema = z.object({
     .email("Enter a valid email address")
     .optional()
     .or(z.literal("")),
+  businessType: z.enum(BUSINESS_TYPE_IDS),
+  setupSteps: z.record(z.enum(SETUP_STEP_KEYS), z.enum(SETUP_STEP_LEVELS)),
+  // The dialog's TYPE_RELEVANT_FEATURES switches, full values (not overrides)
+  // — the submit handler diffs them against registry defaults.
+  featureFlags: z.record(z.string(), z.boolean()),
 });
 
 export type CreateBusinessFormData = z.infer<typeof createBusinessFormSchema>;

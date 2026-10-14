@@ -237,7 +237,11 @@ export type PublicInvoiceView = {
   dueDate: string | null;
   notes: string | null;
   terms: string | null;
-  /** Empty when the invoice is cancelled or nothing is owed. */
+  /**
+   * Empty when the invoice is cancelled, nothing is owed, or the owner
+   * attached no payment methods — check `balanceCents`, not emptiness, to
+   * tell "paid" apart.
+   */
   paymentInstructions: InvoicePaymentInstruction[];
   payments: { amountCents: number; paidOn: string; methodLabel: string }[];
   sentAt: Date | null;

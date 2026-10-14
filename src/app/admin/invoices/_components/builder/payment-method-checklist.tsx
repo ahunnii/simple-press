@@ -49,7 +49,8 @@ export function PaymentMethodChecklist({
                 >
                   Add payment methods
                 </Link>
-                .
+                . Your customer won&apos;t see any way to pay. The invoice will
+                ask them to contact you.
               </p>
             ) : (
               <div className="space-y-2">
@@ -81,6 +82,12 @@ export function PaymentMethodChecklist({
                     </label>
                   );
                 })}
+                {selected.length === 0 && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Your customer won&apos;t see any way to pay. The invoice
+                    will ask them to contact you.
+                  </p>
+                )}
               </div>
             )}
             <FormMessage />

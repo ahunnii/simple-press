@@ -235,6 +235,41 @@ const exportedProductReviewSchema = z.object({
   reviewDate: z.string(),
 });
 
+const exportedProductOptionGroupAttachmentSchema = z.object({
+  exportGroupId: z.string(),
+  sortOrder: z.number().int(),
+});
+
+const exportedProductOptionValueSchema = z.object({
+  exportId: z.string(),
+  label: z.string(),
+  imageUrl: nullableString.optional(),
+  swatchColor: nullableString.optional(),
+  priceDelta: z.number().int(),
+  priceOverride: nullableNumber.optional(),
+  exportLinkedProductId: nullableString.optional(),
+  exportLinkedVariantId: nullableString.optional(),
+  available: z.boolean(),
+  sortOrder: z.number().int(),
+});
+
+const exportedProductOptionGroupSchema = z.object({
+  exportId: z.string(),
+  name: z.string(),
+  adminLabel: nullableString.optional(),
+  helpText: nullableString.optional(),
+  kind: z.string(),
+  required: z.boolean(),
+  minSelections: z.number().int(),
+  maxSelections: z.number().int(),
+  includedCount: z.number().int(),
+  display: z.string(),
+  maxLength: nullableNumber.optional(),
+  placeholder: nullableString.optional(),
+  textPriceCents: z.number().int(),
+  values: z.array(exportedProductOptionValueSchema),
+});
+
 const exportedProductSchema = z.object({
   exportId: z.string(),
   name: z.string(),
@@ -270,6 +305,11 @@ const exportedProductSchema = z.object({
   images: z.array(exportedImageSchema),
   variants: z.array(exportedProductVariantSchema),
   ownerReviews: z.array(exportedProductReviewSchema),
+  // Product customizer attachments. Added 2026-10-12 — absent in older
+  // manifests (undefined = leave the target's attachments untouched).
+  optionGroupAttachments: z
+    .array(exportedProductOptionGroupAttachmentSchema)
+    .optional(),
 });
 
 const exportedCollectionProductSchema = z.object({
@@ -567,6 +607,12 @@ const storeTransferContentSchema = z.object({
     .nullable()
     .optional()
     .default(null),
+  // Product customizer option groups (2026-10-12). Optional with a default —
+  // older ZIPs without the key still parse. Do not make this required.
+  optionGroups: z
+    .array(exportedProductOptionGroupSchema)
+    .optional()
+    .default([]),
 });
 
 // ─── Top-level manifest schema ────────────────────────────────────────────────

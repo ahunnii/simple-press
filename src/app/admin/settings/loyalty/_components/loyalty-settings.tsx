@@ -245,7 +245,11 @@ export function LoyaltySettings({ initial }: Props) {
   const isDirty = form.formState.isDirty;
   const isSubmitting = updateSettingsMutation.isPending;
   const loyaltyDisabled = !initial.flags.loyalty;
-  const saveDisabled = loyaltyDisabled || isSubmitting || !isDirty;
+  // No LoyaltyProgram row exists until the first save, so an owner happy
+  // with the defaults must still be able to save without editing anything.
+  const notSetUp = !initial.exists;
+  const saveDisabled =
+    loyaltyDisabled || isSubmitting || (!isDirty && !notSetUp);
 
   useKeyboardEnter(form, handleSubmit);
   useDirtyForm(isDirty);
@@ -269,10 +273,14 @@ export function LoyaltySettings({ initial }: Props) {
               <h1 className="text-base font-medium">Rewards Program</h1>
               <span
                 className={`admin-status-badge ${
-                  isDirty ? "isDirty" : "isPublished"
+                  isDirty || notSetUp ? "isDirty" : "isPublished"
                 }`}
               >
-                {isDirty ? "Unsaved Changes" : "Saved"}
+                {isDirty
+                  ? "Unsaved Changes"
+                  : notSetUp
+                    ? "Not set up yet"
+                    : "Saved"}
               </span>
             </div>
           </div>
@@ -304,7 +312,9 @@ export function LoyaltySettings({ initial }: Props) {
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Save changes</span>
+                  <span className="hidden sm:inline">
+                    {notSetUp ? "Save & turn on" : "Save changes"}
+                  </span>
                   <span className="sm:hidden">Save</span>
                 </>
               )}
@@ -315,9 +325,9 @@ export function LoyaltySettings({ initial }: Props) {
         <div className="admin-container">
           <div className="space-y-6">
             <p className="text-muted-foreground text-sm">
-              Let customers earn points on orders and bonuses, then redeem
-              them for single-use discount codes. Changes apply to future
-              orders only — points already awarded are never recalculated.
+              Let customers earn points on orders and bonuses, then redeem them
+              for single-use discount codes. Changes apply to future orders only
+              — points already awarded are never recalculated.
             </p>
 
             {!initial.flags.loyalty && (
@@ -340,15 +350,28 @@ export function LoyaltySettings({ initial }: Props) {
               </Alert>
             )}
 
+            {initial.flags.loyalty && notSetUp && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>
+                  Your rewards program isn&apos;t set up yet
+                </AlertTitle>
+                <AlertDescription>
+                  Customers can&apos;t join until you save these settings once.
+                  Review the defaults below, then choose Save &amp; turn on.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {initial.flags.loyalty && !initial.flags.coupons && (
               <Alert variant="warning">
                 <Info className="h-4 w-4" />
                 <AlertTitle>
-                  Redeeming rewards needs Discount Codes turned on
+                  Redeeming rewards needs Coupons &amp; Discounts turned on
                 </AlertTitle>
                 <AlertDescription>
-                  Customers can earn points but can&apos;t redeem them until
-                  you enable it.
+                  Customers can earn points but can&apos;t redeem them until you
+                  enable it.
                 </AlertDescription>
                 <AlertAction>
                   <Button variant="outline" asChild size="xs">
@@ -485,7 +508,7 @@ export function LoyaltySettings({ initial }: Props) {
                       href="/admin/content/branding"
                       className="underline underline-offset-2"
                     >
-                      Branding
+                      Brand &amp; Appearance
                     </Link>{" "}
                     to offer this reward.
                   </p>

@@ -5,9 +5,20 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 const testimonialsHeroData: TemplateField[] = [
   {
+    key: "wealth.testimonials.hero-eyebrow",
+    label: "Small Label",
+    description:
+      "Short uppercase label above the page heading. Leave blank to hide.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Meet the co-ops",
+  },
+  {
     key: "wealth.testimonials.hero-heading",
     label: "Page Heading",
-    description: "The page's H1.",
+    description: "The page's main heading (H1), shown large at the top.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -17,7 +28,7 @@ const testimonialsHeroData: TemplateField[] = [
   {
     key: "wealth.testimonials.hero-intro",
     label: "Intro Text",
-    description: "Short paragraph below the heading.",
+    description: "Short paragraph in italics below the heading.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.hero",
@@ -28,7 +39,8 @@ const testimonialsHeroData: TemplateField[] = [
   {
     key: "wealth.testimonials.hero-link-label",
     label: "Secondary Link Label",
-    description: "Label for the external directory link below the intro.",
+    description:
+      "Label for the button linking out to a co-op directory, below the intro. Leave blank to hide the button.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
@@ -39,7 +51,7 @@ const testimonialsHeroData: TemplateField[] = [
   {
     key: "wealth.testimonials.hero-link-url",
     label: "Secondary Link URL",
-    description: "Where the directory link sends visitors.",
+    description: "Where the directory button sends visitors.",
     type: "url",
     page: "testimonials",
     group: "testimonials.hero",
@@ -50,7 +62,7 @@ const testimonialsHeroData: TemplateField[] = [
     key: "wealth.testimonials.hero-image",
     label: "Hero Image",
     description:
-      "Optional overlap-hero image above the intro. Leave blank to hide.",
+      "Photo shown beside the page heading, with a tint. Leave blank for a full-width heading panel with no photo.",
     type: "image",
     page: "testimonials",
     group: "testimonials.hero",
@@ -65,13 +77,24 @@ const testimonialsHeroData: TemplateField[] = [
     page: "testimonials",
     group: "testimonials.hero",
     gridColumn: "col-span-full",
-    defaultValue: "Members of a co-op supported by Detroit Community Wealth Fund",
+    defaultValue:
+      "Members of a co-op supported by Detroit Community Wealth Fund",
   },
 ];
 
 // ─── Co-op logo grid — hideable ─────────────────────────────────────────────
 
 const testimonialsCoopsData: TemplateField[] = [
+  {
+    key: "wealth.testimonials.coops-heading",
+    label: "Section Heading",
+    description: "Italic heading above the co-op logos. Leave blank to hide.",
+    type: "text",
+    page: "testimonials",
+    group: "testimonials.coops",
+    gridColumn: "col-span-full",
+    defaultValue: "Co-ops we've supported",
+  },
   {
     key: "wealth.testimonials.coops",
     label: "Co-op Logos",
@@ -105,13 +128,13 @@ const testimonialsCoopsData: TemplateField[] = [
   },
 ];
 
-// ─── In their words — DB testimonials, quiet pull-quotes ───────────────────
+// ─── In their words — approved testimonials as quote cards ───────────────────
 
 const testimonialsQuotesData: TemplateField[] = [
   {
     key: "wealth.testimonials.quotes-heading",
     label: "Quotes Heading",
-    description: "Italic heading above the testimonial pull-quotes.",
+    description: "Italic heading above the testimonial cards.",
     type: "text",
     page: "testimonials",
     group: "testimonials.quotes",
@@ -181,21 +204,22 @@ export const wealthTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.hero",
     title: "Co-ops We Support",
-    description: "Page heading, intro, directory link, and optional hero image",
+    description:
+      "Label, heading, intro, directory button, and the optional hero photo",
     icon: "🌾",
     columns: 2,
   },
   {
     id: "testimonials.coops",
     title: "Co-op Logo Grid",
-    description: "Logos of the co-ops DCWF has supported",
+    description: "Heading and logos of the co-ops DCWF has supported",
     icon: "🏷️",
     columns: 1,
   },
   {
     id: "testimonials.quotes",
     title: "In Their Words",
-    description: "Heading and empty-state message for the testimonial quotes",
+    description: "Heading and empty-state message for the testimonial cards",
     icon: "💬",
     columns: 2,
   },
@@ -213,7 +237,7 @@ export const wealthTestimonialsSections: TemplateSection[] = [
     id: "testimonials.hero",
     page: "testimonials",
     title: "Co-ops We Support",
-    description: "Heading, intro, and directory link",
+    description: "Label, heading, intro, directory button, and photo",
     groupIds: ["testimonials.hero"],
     order: 0,
     hideable: false,
@@ -222,7 +246,7 @@ export const wealthTestimonialsSections: TemplateSection[] = [
     id: "testimonials.coops",
     page: "testimonials",
     title: "Co-op Logo Grid",
-    description: "Co-op logos linking out",
+    description: "Heading and co-op logos linking out",
     groupIds: ["testimonials.coops"],
     order: 1,
     hideable: true,
@@ -231,7 +255,7 @@ export const wealthTestimonialsSections: TemplateSection[] = [
     id: "testimonials.quotes",
     page: "testimonials",
     title: "In Their Words",
-    description: "Approved testimonial pull-quotes, or the empty state",
+    description: "Approved testimonial cards, or the empty state",
     groupIds: ["testimonials.quotes"],
     order: 2,
     hideable: false,

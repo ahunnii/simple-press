@@ -346,7 +346,7 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
           />
         )}
 
-        {/* Hidden until at least one question is published in Content → FAQ. */}
+        {/* Hidden until at least one question is published in Site Setup → FAQ. */}
         {isSectionVisible(customFields, "umsc", "homepage.faq") &&
           faqTop3.length > 0 && (
             <UmscFaqSection

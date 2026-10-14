@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { WealthEyebrow } from "../shared/wealth-eyebrow";
 import { WealthH1 } from "../shared/wealth-h1";
@@ -193,6 +194,10 @@ export function WealthOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               {item.variantName}
                             </p>
                           )}
+                          <OrderItemOptions
+                            customization={item.customization}
+                            className="mb-1 text-[13px] text-[var(--wealth-muted)]"
+                          />
                           <p style={{ fontSize: 13, color: "var(--wealth-muted)", margin: 0 }}>
                             Qty {item.quantity} × {formatPrice(item.price)}
                           </p>

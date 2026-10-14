@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
-  "csdt@generativejustice.org";
+  "help@generativejustice.org";
 
 export default function TermsOfServicePage() {
   return (
@@ -333,24 +333,36 @@ export default function TermsOfServicePage() {
         <li>proprietary functionality</li>
       </ul>
       <p>are owned by or licensed to THE CENTER FOR GENERATIVE JUSTICE LLC.</p>
-      <p>Unless explicitly authorized in writing, you may not:</p>
-      <ul>
-        <li>copy;</li>
-        <li>reproduce;</li>
-        <li>redistribute;</li>
-        <li>sublicense;</li>
-        <li>reverse engineer;</li>
-        <li>commercially exploit;</li>
-        <li>republish;</li>
-        <li>resell;</li>
-        <li>create derivative works from</li>
-      </ul>
-      <p>the SimplePress platform or software.</p>
       <p>
-        The platform is source-available in certain contexts but is not
-        currently open source and no open-source license is granted unless
-        explicitly stated otherwise.
+        The SimplePress source code, including its website templates, is open
+        source. It is released under the GNU Affero General Public License,
+        version 3 (&ldquo;AGPL-3.0&rdquo;), and is available at{" "}
+        <a
+          href="https://github.com/ahunnii/simple-press"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/ahunnii/simple-press
+        </a>
+        . You may use, study, copy, modify, and share that source code under
+        the terms of the AGPL-3.0, and nothing in these Terms limits the rights
+        that license gives you.
       </p>
+      <p>
+        The AGPL-3.0 does not license the SimplePress and Center for Generative
+        Justice names, logos, and other trademarks, or access to the hosted
+        SimplePress service and its infrastructure. Unless explicitly
+        authorized in writing, you may not:
+      </p>
+      <ul>
+        <li>use our names, logos, or trademarks in a way that suggests a
+          modified version or a separate service is SimplePress or is endorsed
+          by us;</li>
+        <li>resell, sublicense, or provide third parties with access to the
+          hosted SimplePress service;</li>
+        <li>interfere with, probe, or attempt to bypass the security of the
+          hosted service or its infrastructure.</li>
+      </ul>
       <hr />
 
       <h2>12. DMCA and Copyright Complaints</h2>

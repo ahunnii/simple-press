@@ -17,11 +17,13 @@ import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import { GoogleColorIcon } from "~/components/icons/google-icon";
 import {
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
   navHrefOffFlag,
   resolveFooterNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "../index";
@@ -116,12 +118,16 @@ export async function UmscFooter({
 
   // Help column: owner-saved footer quick links (Admin → Navigation), else
   // UMSC_HELP_DEFAULTS, flag-filtered (B10.2/B10.4, PF21).
-  const helpLinks = filterNavByFlags(
-    resolveFooterNav(
-      business?.siteContent?.footerNavigationItems,
-      UMSC_HELP_DEFAULTS,
+  // Donations "show in footer" switch appends Donate last.
+  const helpLinks = withDonateLink(
+    filterNavByFlags(
+      resolveFooterNav(
+        business?.siteContent?.footerNavigationItems,
+        UMSC_HELP_DEFAULTS,
+      ),
+      isEnabled,
     ),
-    isEnabled,
+    donateLinkOptions(business, isEnabled, "footer"),
   );
 
   // Account rows appended to Help (B10.3, PF20): "My account" + "Orders"

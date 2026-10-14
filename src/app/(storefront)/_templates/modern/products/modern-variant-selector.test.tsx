@@ -10,6 +10,7 @@ import { ModernVariantSelector } from "./modern-variant-selector";
  * tolerant of a missing provider on its own, so it needs no mock.
  */
 const addItem = vi.fn();
+vi.mock("~/hooks/use-cart-enabled", () => ({ useCartEnabled: () => true }));
 vi.mock("~/providers/cart-context", () => ({
   useCart: () => ({ addItem }),
 }));
@@ -22,7 +23,11 @@ vi.mock("~/trpc/react", () => ({
   api: {
     backInStock: {
       subscribe: {
-        useMutation: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+          isError: false,
+        }),
       },
     },
   },

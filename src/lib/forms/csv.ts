@@ -379,7 +379,10 @@ export function parseFormCsv(
     }
 
     if (problems.length > 0 || !validation.ok) {
-      result.errors.push({ row: rowNumber, message: problems.join("; ") });
+      const message = problems
+        .map((problem) => (/[.!?]$/.test(problem) ? problem : `${problem}.`))
+        .join(" ");
+      result.errors.push({ row: rowNumber, message });
       return;
     }
 

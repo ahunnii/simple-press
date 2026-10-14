@@ -66,14 +66,25 @@ describe("cashAppUrl", () => {
 
 describe("donationNote", () => {
   it("returns the exact donation note format", () => {
-    expect(donationNote("Dreamwalker Studios")).toBe(
+    expect(donationNote("Dreamwalker Studios", "Donation")).toBe(
       "Donation to Dreamwalker Studios",
     );
   });
 
   it("interpolates the business name directly", () => {
-    expect(donationNote("Bloom Florist")).toBe("Donation to Bloom Florist");
-    expect(donationNote("Riverside Coffee")).toBe("Donation to Riverside Coffee");
+    expect(donationNote("Bloom Florist", "Donation")).toBe(
+      "Donation to Bloom Florist",
+    );
+    expect(donationNote("Riverside Coffee", "Donation")).toBe(
+      "Donation to Riverside Coffee",
+    );
+  });
+
+  it("uses the label noun the owner picked", () => {
+    expect(donationNote("Bloom Florist", "Tip")).toBe("Tip to Bloom Florist");
+    expect(donationNote("Bloom Florist", "Contribution")).toBe(
+      "Contribution to Bloom Florist",
+    );
   });
 });
 
@@ -167,6 +178,7 @@ describe("resolveDonationHandles", () => {
   describe("both handles set", () => {
     it("returns an array with Venmo first, then Cash App", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "janedoe",
         cashAppHandle: "janedoe",
@@ -179,6 +191,7 @@ describe("resolveDonationHandles", () => {
 
     it("sets displayHandle to @handle for Venmo", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "janedoe",
         cashAppHandle: "ignored",
@@ -190,6 +203,7 @@ describe("resolveDonationHandles", () => {
 
     it("sets displayHandle to $cashtag for Cash App", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "ignored",
         cashAppHandle: "janedoe",
@@ -201,6 +215,7 @@ describe("resolveDonationHandles", () => {
 
     it("sets the Venmo URL to the payment-intent link with donation note", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "janedoe",
         cashAppHandle: "ignored",
@@ -216,6 +231,7 @@ describe("resolveDonationHandles", () => {
 
     it("sets the Cash App URL to the standard cashtag link format", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "ignored",
         cashAppHandle: "janedoe",
@@ -227,6 +243,7 @@ describe("resolveDonationHandles", () => {
 
     it("sets the label to 'Venmo' and 'Cash App'", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "venmo_user",
         cashAppHandle: "cashapp_user",
@@ -238,6 +255,7 @@ describe("resolveDonationHandles", () => {
 
     it("normalizes handles with leading symbols and whitespace", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "  @janedoe  ",
         cashAppHandle: "  $cashuser  ",
@@ -251,6 +269,7 @@ describe("resolveDonationHandles", () => {
 
     it("produces the full resolved handle object with all fields", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Test Business",
         venmoHandle: "user123",
         cashAppHandle: "user123",
@@ -277,6 +296,7 @@ describe("resolveDonationHandles", () => {
   describe("only one handle set", () => {
     it("returns a single-entry array when only Venmo is set", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "janedoe",
         cashAppHandle: null,
@@ -288,6 +308,7 @@ describe("resolveDonationHandles", () => {
 
     it("returns a single-entry array when only Cash App is set", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: null,
         cashAppHandle: "janedoe",
@@ -299,6 +320,7 @@ describe("resolveDonationHandles", () => {
 
     it("omits the handle lane entirely when it's null", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "user123",
         cashAppHandle: null,
@@ -309,6 +331,7 @@ describe("resolveDonationHandles", () => {
 
     it("omits the handle lane entirely when it normalizes to null (whitespace-only)", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "user123",
         cashAppHandle: "   ",
@@ -322,6 +345,7 @@ describe("resolveDonationHandles", () => {
   describe("no handles set", () => {
     it("returns an empty array when both are null", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: null,
         cashAppHandle: null,
@@ -332,6 +356,7 @@ describe("resolveDonationHandles", () => {
 
     it("returns an empty array when both normalize to null (whitespace-only)", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "   ",
         cashAppHandle: "\t",
@@ -342,6 +367,7 @@ describe("resolveDonationHandles", () => {
 
     it("returns an empty array when both are empty strings", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "",
         cashAppHandle: "",
@@ -354,6 +380,7 @@ describe("resolveDonationHandles", () => {
   describe("normalization in resolveDonationHandles", () => {
     it("normalizes Venmo handle with leading @", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "@janedoe",
         cashAppHandle: null,
@@ -366,6 +393,7 @@ describe("resolveDonationHandles", () => {
 
     it("normalizes Cash App handle with leading $", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: null,
         cashAppHandle: "$janedoe",
@@ -378,6 +406,7 @@ describe("resolveDonationHandles", () => {
 
     it("normalizes handles with surrounding whitespace", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "  @user  ",
         cashAppHandle: "  $user  ",
@@ -389,6 +418,7 @@ describe("resolveDonationHandles", () => {
 
     it("leaves clean handles untouched", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Bloom Florist",
         venmoHandle: "janedoe",
         cashAppHandle: "janedoe",
@@ -399,9 +429,30 @@ describe("resolveDonationHandles", () => {
     });
   });
 
+  describe("donation label in the Venmo note", () => {
+    it("uses the label noun for tip and support, and Donation for unknown/null", () => {
+      const base = {
+        name: "Bloom Florist",
+        venmoHandle: "janedoe",
+        cashAppHandle: null,
+      };
+      const note = (donationLabel: string | null) =>
+        resolveDonationHandles({ ...base, donationLabel })[0]?.url;
+
+      expect(note("tip")).toContain("note=Tip%20to%20Bloom%20Florist");
+      expect(note("support")).toContain(
+        "note=Contribution%20to%20Bloom%20Florist",
+      );
+      expect(note("donate")).toContain("note=Donation%20to%20Bloom%20Florist");
+      expect(note("bogus")).toContain("note=Donation%20to%20Bloom%20Florist");
+      expect(note(null)).toContain("note=Donation%20to%20Bloom%20Florist");
+    });
+  });
+
   describe("uses business name in the Venmo URL note", () => {
     it("includes the business name in the donation note of the Venmo URL", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "Dreamwalker Studios",
         venmoHandle: "user",
         cashAppHandle: null,
@@ -413,6 +464,7 @@ describe("resolveDonationHandles", () => {
 
     it("handles business names with special characters in the Venmo note", () => {
       const resolved = resolveDonationHandles({
+        donationLabel: null,
         name: "A&B Coffee",
         venmoHandle: "user",
         cashAppHandle: null,

@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { Card, CardContent } from "~/components/ui/card";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
@@ -61,6 +62,10 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                                 {item.variantName}
                               </p>
                             )}
+                            <OrderItemOptions
+                              customization={item.customization}
+                              className="mt-1"
+                            />
                             <p className="text-muted-foreground mt-1 text-sm">
                               Qty: {item.quantity} × {formatPrice(item.price)}
                             </p>

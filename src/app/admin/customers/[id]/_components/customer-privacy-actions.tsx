@@ -26,10 +26,13 @@ type CustomerPrivacyActionsProps = {
     deletionRequestedAt: Date | null;
     anonymizedAt: Date | null;
   };
+  // `customer.anonymize` is ownerAdmin-tier; Staff get the read-only info.
+  canAnonymize: boolean;
 };
 
 export function CustomerPrivacyActions({
   customer,
+  canAnonymize,
 }: CustomerPrivacyActionsProps) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -61,6 +64,8 @@ export function CustomerPrivacyActions({
     );
   }
 
+  if (!canAnonymize && !customer.deletionRequestedAt) return null;
+
   return (
     <>
       <Card>
@@ -78,60 +83,66 @@ export function CustomerPrivacyActions({
             </Alert>
           )}
 
-          <div>
-            <p className="text-muted-foreground mb-3 text-sm">
-              Anonymizing scrubs this customer&apos;s name, email, phone, and
-              addresses. Order records are retained (anonymized) for tax and
-              legal purposes.
-            </p>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setDialogOpen(true)}
-            >
-              Anonymize customer
-            </Button>
-          </div>
+          {canAnonymize && (
+            <div>
+              <p className="text-muted-foreground mb-3 text-sm">
+                Anonymizing scrubs this customer&apos;s name, email, phone, and
+                addresses. Order records are retained (anonymized) for tax and
+                legal purposes.
+              </p>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setDialogOpen(true)}
+              >
+                Anonymize customer
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Anonymize this customer?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-sm">
-                <p>This action is irreversible and will:</p>
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>Scrub name, email, and phone from the customer record</li>
-                  <li>Redact all saved shipping addresses</li>
-                  <li>
-                    Redact the customer&apos;s name on any public reviews and
-                    testimonials
-                  </li>
-                  <li>
-                    Retain order records (anonymized) for tax and legal
-                    compliance
-                  </li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              disabled={anonymizeMutation.isPending}
-              onClick={() => {
-                setDialogOpen(false);
-                anonymizeMutation.mutate({ id: customer.id });
-              }}
-            >
-              {anonymizeMutation.isPending ? "Anonymizing…" : "Anonymize"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {canAnonymize && (
+        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Anonymize this customer?</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  <p>This action is irreversible and will:</p>
+                  <ul className="list-disc space-y-1 pl-5">
+                    <li>
+                      Scrub name, email, and phone from the customer record
+                    </li>
+                    <li>Redact all saved shipping addresses</li>
+                    <li>
+                      Redact the customer&apos;s name on any public reviews and
+                      testimonials
+                    </li>
+                    <li>
+                      Retain order records (anonymized) for tax and legal
+                      compliance
+                    </li>
+                  </ul>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                disabled={anonymizeMutation.isPending}
+                onClick={() => {
+                  setDialogOpen(false);
+                  anonymizeMutation.mutate({ id: customer.id });
+                }}
+              >
+                {anonymizeMutation.isPending ? "Anonymizing…" : "Anonymize"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 }

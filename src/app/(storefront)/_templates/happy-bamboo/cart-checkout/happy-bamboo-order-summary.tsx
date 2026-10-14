@@ -5,7 +5,8 @@ import { Loader2 } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
 import { Separator } from "~/components/ui/separator";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
   deliveryMethod: "ship" | "pickup";
@@ -39,10 +40,7 @@ export function HappyBambooOrderSummary({
       </h2>
       <div className="mt-4 flex flex-col gap-3">
         {items.map((item) => (
-          <div
-            key={`${item.productId}-${item.variantId ?? "base"}`}
-            className="flex items-center gap-3"
-          >
+          <div key={cartItemId(item)} className="flex items-center gap-3">
             <div className="bg-secondary relative size-12 shrink-0 overflow-hidden rounded-md">
               <Image
                 src={item.imageUrl ?? "/placeholder.svg"}
@@ -56,6 +54,7 @@ export function HappyBambooOrderSummary({
               <p className="text-card-foreground text-sm font-medium">
                 {item.productName}
               </p>
+              <CartLineOptions item={item} showPrices={false} />
               <p className="text-muted-foreground text-xs">
                 Qty: {item.quantity}
               </p>

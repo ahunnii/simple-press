@@ -23,6 +23,23 @@ const only =
     !off.includes(key);
 
 describe("resolveBanner", () => {
+  it("normalizes a blank or whitespace-only linkLabel to null", () => {
+    for (const linkLabel of ["", "   "]) {
+      const out = resolveBanner(
+        {
+          bannerConfig: {
+            ...banner("/about").bannerConfig,
+            linkLabel,
+          },
+        },
+        () => true,
+      );
+      expect(out).not.toBeNull();
+      expect(out?.linkUrl).toBe("/about");
+      expect(out?.linkLabel).toBeNull();
+    }
+  });
+
   it("returns null when the banners flag is off", () => {
     expect(resolveBanner(banner("/shop"), only("banners"))).toBeNull();
   });
@@ -86,6 +103,18 @@ const popup = (ctaUrl: string | null) => ({
 });
 
 describe("resolvePopup", () => {
+  it("normalizes a blank or whitespace-only ctaLabel to null", () => {
+    for (const ctaLabel of ["", "   "]) {
+      const out = resolvePopup(
+        { popupConfig: { ...popup("/about").popupConfig, ctaLabel } },
+        () => true,
+      );
+      expect(out).not.toBeNull();
+      expect(out?.ctaUrl).toBe("/about");
+      expect(out?.ctaLabel).toBeNull();
+    }
+  });
+
   it("returns null when the popups flag is off", () => {
     expect(resolvePopup(popup("/shop"), only("popups"))).toBeNull();
   });

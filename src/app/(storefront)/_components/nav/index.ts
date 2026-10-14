@@ -18,8 +18,11 @@ export {
 } from "./nav-flags";
 
 export {
+  FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK,
   FOOTER_QUICK_LINKS_TEMPLATES,
   resolveFooterNav,
   resolveFooterQuickLinks,
   topLevelNav,
 } from "./resolve-footer-nav";
+
+export { donateLinkOptions, withDonateLink } from "./donate-link";

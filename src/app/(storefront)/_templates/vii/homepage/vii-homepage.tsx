@@ -1,6 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
 import { resolveSocialLinks } from "~/lib/social-links";
@@ -189,7 +190,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
   const instagramImages =
     instagramGallery?.images.map((img) => ({
       url: img.url,
-      altText: img.altText ?? "",
+      altText: meaningfulAltText(img.altText) ?? "",
     })) ?? [];
 
   // ── Instagram profile (Content → Branding wins) ───────────────────────────

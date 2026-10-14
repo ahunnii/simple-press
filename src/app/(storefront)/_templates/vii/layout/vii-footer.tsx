@@ -10,6 +10,7 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -93,6 +94,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: DEFAULT_NAV_LINKS,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
 
   return (

@@ -80,6 +80,61 @@ describe("isInStock", () => {
         ),
       ).toBe(false);
     });
+
+    // The product router forces trackInventory off whenever a pool is linked,
+    // so that flag must not short-circuit the pool check.
+    it("is out of stock when the pool is empty even with trackInventory off", () => {
+      expect(
+        isInStock(
+          makeProduct({
+            trackInventory: false,
+            baseInventoryUnit: { inventoryQty: 0, allowBackorders: false },
+          }),
+        ),
+      ).toBe(false);
+    });
+
+    it("is in stock when trackInventory is off and the pool has stock", () => {
+      expect(
+        isInStock(
+          makeProduct({
+            trackInventory: false,
+            baseInventoryUnit: { inventoryQty: 2, allowBackorders: false },
+          }),
+        ),
+      ).toBe(true);
+    });
+
+    it("needs baseUnitsConsumed pool units for one sale", () => {
+      const pooled = (inventoryQty: number) =>
+        makeProduct({
+          trackInventory: false,
+          baseUnitsConsumed: 3,
+          baseInventoryUnit: { inventoryQty, allowBackorders: false },
+        });
+      expect(isInStock(pooled(2))).toBe(false);
+      expect(isInStock(pooled(3))).toBe(true);
+    });
+
+    it("ignores the pool for products with variants", () => {
+      expect(
+        isInStock(
+          makeProduct({
+            trackInventory: true,
+            baseInventoryUnit: { inventoryQty: 10, allowBackorders: false },
+            variants: [
+              {
+                id: "v1",
+                name: "V1",
+                price: null,
+                compareAtPrice: null,
+                inventoryQty: 0,
+              },
+            ],
+          }),
+        ),
+      ).toBe(false);
+    });
   });
 
   describe("variants", () => {

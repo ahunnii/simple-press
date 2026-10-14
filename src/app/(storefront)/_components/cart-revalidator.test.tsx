@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as CartContext from "~/providers/cart-context";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { CartRevalidator } from "./cart-revalidator";
@@ -23,8 +24,14 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 const reconcile = vi.fn();
-let cartItems: { productId: string; variantId: string | null }[] = [];
-vi.mock("~/providers/cart-context", () => ({
+let cartItems: {
+  productId: string;
+  variantId: string | null;
+  configuration?: unknown;
+  configKey?: string;
+}[] = [];
+vi.mock("~/providers/cart-context", async (importOriginal) => ({
+  ...(await importOriginal<typeof CartContext>()),
   useCart: () => ({ items: cartItems, isHydrated: true, reconcile }),
 }));
 
@@ -48,6 +55,33 @@ describe("CartRevalidator", () => {
     expect(lastEnabled()).toBe(true);
     expect(useQuery.mock.lastCall?.[0]).toEqual({
       items: [{ productId: "prod_1", variantId: null }],
+    });
+  });
+
+  it("sends a configured line's configuration; plain lines keep their shape", () => {
+    const configuration = {
+      choices: [{ groupId: "charms", valueIds: ["heart"] }],
+      texts: [],
+    };
+    cartItems = [
+      { productId: "glove", variantId: "v1" },
+      {
+        productId: "glove",
+        variantId: "v1",
+        configuration,
+        configKey: "abc",
+      },
+    ];
+    render(
+      <StorefrontFlagsProvider flags={{ products: true }}>
+        <CartRevalidator />
+      </StorefrontFlagsProvider>,
+    );
+    expect(useQuery.mock.lastCall?.[0]).toEqual({
+      items: [
+        { productId: "glove", variantId: "v1" },
+        { productId: "glove", variantId: "v1", configuration },
+      ],
     });
   });
 

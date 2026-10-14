@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db, resetDb } from "../helpers/db";
 import { createBusiness, createProduct } from "../helpers/factories";
+import { fakeListLineItems } from "../helpers/stripe-line-items";
 import {
   makeCheckoutCompletedEvent,
   makeCheckoutExpiredEvent,
@@ -46,6 +47,8 @@ vi.mock("~/lib/stripe/client", () => ({
       sessions: {
         retrieve: (...args: unknown[]): unknown =>
           stripeMocks.sessionsRetrieve(...args),
+        listLineItems: (...args: unknown[]): unknown =>
+          fakeListLineItems(...args),
       },
     },
     subscriptions: {

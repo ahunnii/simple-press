@@ -18,6 +18,8 @@
  *     codes minted by rewards redemptions — never exported)
  *   - Form/QuoteCalculator submissions, loyalty accounts + points ledger,
  *     invoices (customer/transaction data — only the config is transferred)
+ *   - OrderItem.customization snapshots: orders are not part of the transfer
+ *     (option GROUP definitions are)
  *   - InvoiceSettings.paymentMethods (may hold bank account numbers /
  *     payment handles; the export ZIP is plaintext, unlike the encrypted
  *     column), lastDigestWeekKey / lastDigestSentAt (digest bookkeeping)
@@ -303,6 +305,54 @@ export interface ExportedProduct {
   /** Only source === "owner" reviews */
   ownerReviews: ExportedProductReview[];
   // averageRating / reviewCount excluded
+  /**
+   * Product customizer: which option groups are attached to this product.
+   * Added 2026-10-12 — absent in older manifests (undefined = leave the
+   * target's attachments untouched; an explicit [] clears them).
+   */
+  optionGroupAttachments?: ExportedProductOptionGroupAttachment[];
+}
+
+/** One ProductOptionGroupOnProduct row, keyed by the group's exportId. */
+export interface ExportedProductOptionGroupAttachment {
+  exportGroupId: string;
+  sortOrder: number;
+}
+
+export interface ExportedProductOptionValue {
+  exportId: string;
+  label: string;
+  imageUrl: string | null;
+  swatchColor: string | null;
+  priceDelta: number;
+  priceOverride: number | null;
+  /** exportId of the linked source Product, or null for a standalone value */
+  exportLinkedProductId: string | null;
+  /** exportId of the linked source ProductVariant, or null */
+  exportLinkedVariantId: string | null;
+  available: boolean;
+  sortOrder: number;
+}
+
+/**
+ * Product customizer option group (business-wide, attached to products via
+ * `ExportedProduct.optionGroupAttachments`). Added 2026-10-12.
+ */
+export interface ExportedProductOptionGroup {
+  exportId: string;
+  name: string;
+  adminLabel: string | null;
+  helpText: string | null;
+  kind: string; // "choice" | "text"
+  required: boolean;
+  minSelections: number;
+  maxSelections: number;
+  includedCount: number;
+  display: string; // "tiles" | "swatches" | "list"
+  maxLength: number | null;
+  placeholder: string | null;
+  textPriceCents: number;
+  values: ExportedProductOptionValue[];
 }
 
 export interface ExportedCollectionProduct {
@@ -597,6 +647,9 @@ export interface StoreTransferContent {
   quoteCalculators: ExportedQuoteCalculator[];
   loyaltyProgram: ExportedLoyaltyProgram | null;
   invoiceSettings: ExportedInvoiceSettings | null;
+  // Added 2026-10-12 (product customizer) — absent in older manifests; the
+  // validator defaults it to [].
+  optionGroups: ExportedProductOptionGroup[];
 }
 
 // ─── Top-level manifest ───────────────────────────────────────────────────────

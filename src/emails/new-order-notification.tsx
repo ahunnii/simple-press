@@ -8,11 +8,14 @@ import {
 } from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
+import { OrderItemOptions } from "./components/order-item-options";
 
 type OrderItem = {
   productName: string;
   variantName: string | null;
   quantity: number;
+  /** `OrderItem.customization` (product customizer snapshot JSON). */
+  customization?: unknown;
   total: number;
 };
 
@@ -100,6 +103,7 @@ export default function NewOrderNotificationEmail({
                 {item.productName}
                 {item.variantName && ` - ${item.variantName}`}
               </Text>
+              <OrderItemOptions customization={item.customization} />
               <Text style={itemQty}>Qty: {item.quantity}</Text>
             </Column>
             <Column style={itemPrice}>

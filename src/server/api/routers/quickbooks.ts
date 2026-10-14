@@ -6,6 +6,7 @@ import { z } from "zod";
 import type { QboEnvironment } from "~/lib/quickbooks/constants";
 import type { InvoiceStatus } from "~/lib/quickbooks/types";
 import { env } from "~/env";
+import { QBO_INVOICE_LIST_MAX_ROWS } from "~/lib/invoices/qbo-limits";
 import {
   coerceQboEnvironment,
   isQuickBooksConfigured,
@@ -191,7 +192,7 @@ const INVOICE_LIST_SELECT = {
  * as `totalCount` so the table can say "showing N of M". Newest first, so the
  * cap trims the stalest invoices rather than the ones being worked today.
  */
-export const QBO_INVOICE_LIST_MAX_ROWS = 1000;
+export { QBO_INVOICE_LIST_MAX_ROWS };
 
 /**
  * The one unavoidable cast on the way out of the database. `status` is a plain

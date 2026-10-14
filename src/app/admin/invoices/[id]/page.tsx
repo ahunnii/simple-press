@@ -6,7 +6,13 @@ import { formatPrice } from "~/lib/prices";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { InvoiceDocument } from "~/components/invoices/invoice-document";
 
 import { TrailHeader } from "../../_components/trail-header";
@@ -147,6 +153,14 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Activity</CardTitle>
+                <CardAction>
+                  <Link
+                    href={`/admin/invoices/activity?search=${encodeURIComponent(invoice.displayNumber)}`}
+                    className="text-sm underline underline-offset-2"
+                  >
+                    View all activity →
+                  </Link>
+                </CardAction>
               </CardHeader>
               <CardContent>
                 <InvoiceActivity

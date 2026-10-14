@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 next build",
     "check": "next lint && tsc --noEmit",
     "db:gen": "prisma generate",
     "db:pull": "prisma db pull",
@@ -23,7 +23,8 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "preview": "next build && next start",
+    "preview": "pnpm build && next start",
+    "site-export": "tsx --env-file=.env --env-file=.env.local scripts/site-export.ts",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -10,22 +10,21 @@ import {
 import { Button } from "~/components/ui/button";
 
 type Props = {
-  /** Whether the business has connected Stripe. */
-  stripeConnected: boolean;
-  /** Whether the business has at least one product. */
-  hasProducts: boolean;
+  /**
+   * Whether the store passes the /admin setup gate (`status.requiredComplete`
+   * from `loadSetupStatus`: every required step in the store's plan is done).
+   */
+  setupComplete: boolean;
 };
 
 /**
- * Sidebar footer nudge toward `/admin/welcome`. Hidden once the storefront
- * is actually sellable — Stripe connected AND at least one product. A custom
- * domain is NOT required: a subdomain store is a legitimate finished setup.
+ * Sidebar footer nudge toward `/admin/welcome`. Hidden once the store passes
+ * the same setup gate that decides whether /admin opens the dashboard. A
+ * custom domain IS required, so a store on the platform subdomain still sees
+ * the nudge.
  */
-export default function WelcomeNotification({
-  stripeConnected,
-  hasProducts,
-}: Props) {
-  if (stripeConnected && hasProducts) {
+export default function WelcomeNotification({ setupComplete }: Props) {
+  if (setupComplete) {
     return null;
   }
   return (

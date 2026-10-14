@@ -6,23 +6,17 @@ import { Minus, Plus, X } from "lucide-react";
 import type { CartItem as CartItemType } from "~/providers/cart-context";
 import { formatPrice } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type Props = {
   item: CartItemType;
 };
 
 export function PollenCartItem({ item }: Props) {
-  const { updateQuantity, removeItem } = useCart();
-  const {
-    productId,
-    variantId,
-    productName,
-    variantName,
-    price,
-    quantity,
-    imageUrl,
-  } = item;
+  const { updateLineQuantity, removeLine } = useCart();
+  const lineId = cartItemId(item);
+  const { productName, variantName, price, quantity, imageUrl } = item;
 
   return (
     <div className="flex gap-4 rounded-md border border-[#2a351f]/10 bg-white p-4">
@@ -44,6 +38,10 @@ export function PollenCartItem({ item }: Props) {
             {variantName && (
               <p className="text-xs text-[#4c566a] sm:text-sm">{variantName}</p>
             )}
+            <CartLineOptions
+              item={item}
+              className="mt-0.5 text-xs text-[#4c566a] sm:text-sm"
+            />
             <p className="text-xs text-[#4c566a] sm:text-sm">
               {formatPrice(price)} each
             </p>
@@ -52,7 +50,7 @@ export function PollenCartItem({ item }: Props) {
             variant="ghost"
             size="icon"
             className="size-8 shrink-0 text-[#4c566a] hover:text-red-600"
-            onClick={() => removeItem(productId, variantId)}
+            onClick={() => removeLine(lineId)}
             aria-label={`Remove ${productName} from cart`}
           >
             <X className="size-4" aria-hidden="true" />
@@ -68,7 +66,7 @@ export function PollenCartItem({ item }: Props) {
               variant="ghost"
               size="icon"
               className="size-8 text-[#2a351f] hover:bg-[#2a351f]/5"
-              onClick={() => updateQuantity(productId, variantId, quantity - 1)}
+              onClick={() => updateLineQuantity(lineId, quantity - 1)}
               disabled={quantity <= 1}
               aria-label={`Decrease quantity of ${productName}`}
             >
@@ -84,7 +82,7 @@ export function PollenCartItem({ item }: Props) {
               variant="ghost"
               size="icon"
               className="size-8 text-[#2a351f] hover:bg-[#2a351f]/5"
-              onClick={() => updateQuantity(productId, variantId, quantity + 1)}
+              onClick={() => updateLineQuantity(lineId, quantity + 1)}
               aria-label={`Increase quantity of ${productName}`}
             >
               <Plus className="size-3" aria-hidden="true" />

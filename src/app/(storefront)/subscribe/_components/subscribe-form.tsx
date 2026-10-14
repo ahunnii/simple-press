@@ -17,6 +17,7 @@ import {
   getAllowedCountries,
   getRegionOptions,
 } from "~/lib/geo/regions";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatPrice } from "~/lib/prices";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { getInterval } from "~/lib/subscriptions/intervals";
@@ -436,8 +437,7 @@ export function SubscribeForm({
             <div className="border-border bg-muted/30 rounded-[var(--radius)] border p-4 text-sm">
               <p className="font-medium">Pickup location</p>
               <p className="text-muted-foreground mt-0.5">
-                {business.pickupLocation ??
-                  business.businessAddress ??
+                {resolvePickupLocation(business) ??
                   "Pickup details will be confirmed by the store."}
               </p>
               {business.pickupInstructions && (

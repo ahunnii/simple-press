@@ -8,15 +8,23 @@ import { resolveVariantPrice } from "~/lib/variant-price";
  *
  * Extracted verbatim from `create-session/route.ts` so it can be unit-tested in
  * isolation; the route calls this instead of inlining the reduce.
+ *
+ * `unitPriceOverrides` (line index → unit cents) replaces the catalog price
+ * for configured lines (product customizer): base + add-ons, as priced
+ * server-side by `priceConfiguration`. Lines without an entry are unchanged.
  */
 export function computeSubtotalCents(
   items: readonly CartLineItem[],
   variantMap: VariantMap,
   productMap: ProductMap,
+  unitPriceOverrides?: ReadonlyMap<number, number>,
 ): number {
-  return items.reduce((sum, item) => {
+  return items.reduce((sum, item, index) => {
     let serverPrice: number;
-    if (item.variantId) {
+    const override = unitPriceOverrides?.get(index);
+    if (override !== undefined) {
+      serverPrice = override;
+    } else if (item.variantId) {
       const variant = variantMap.get(item.variantId);
       // Fall back to 0 only when the record is missing entirely; a variant
       // priced 0/null inherits its product's base price.

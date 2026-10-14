@@ -8,11 +8,14 @@ import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { nonBlank } from "../shared/noise-non-blank";
+import { NoiseProductCustomizer } from "./noise-product-customizer";
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
 export type NoiseProductActionsCopy = {
@@ -41,6 +44,7 @@ export function NoiseProductActions({
     displayCompareAtPrice,
     isOnSale,
     handleAddToCart,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -49,6 +53,7 @@ export function NoiseProductActions({
     selectedVariantId,
     additionalFields,
     justAdded,
+    cartEnabled,
   } = useProduct(product);
 
   const hasVariants = Object.keys(variantOptions).length > 0;
@@ -60,8 +65,36 @@ export function NoiseProductActions({
   const [variantQuantity, setVariantQuantity] = useState(1);
   const subscribeQuantity = hasVariants ? variantQuantity : quantity;
 
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then nothing below shows.
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: subscribeQuantity,
+  });
+  const configured = customizer.enabled;
+  const shownPrice = configured ? customizer.unitPrice : displayPrice;
+  const shownCompareAt =
+    isOnSale && displayCompareAtPrice
+      ? configured
+        ? displayCompareAtPrice + customizer.addOnTotal
+        : displayCompareAtPrice
+      : null;
+  const customizerSlot = configured ? (
+    <NoiseProductCustomizer controller={customizer} />
+  ) : null;
+
+  const handleSimpleAdd = () => {
+    if (!configured) {
+      handleAddToCart();
+      return;
+    }
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
+
   /* Price split: major / minor for styled display */
-  const priceStr = formatPrice(displayPrice);
+  const priceStr = formatPrice(shownPrice);
   const dotIdx = priceStr.indexOf(".");
   const priceMajor = dotIdx >= 0 ? priceStr.slice(0, dotIdx) : priceStr;
   const priceMinor = dotIdx >= 0 ? priceStr.slice(dotIdx + 1) : "00";
@@ -96,6 +129,9 @@ export function NoiseProductActions({
             fontSize: "clamp(2.4rem, 4vw, 3rem)",
             letterSpacing: "-0.01em",
           }}
+          // Announce the build's price as options change it.
+          aria-live={configured ? "polite" : undefined}
+          aria-atomic={configured ? "true" : undefined}
         >
           {priceMajor}
           <span
@@ -107,12 +143,12 @@ export function NoiseProductActions({
           >
             .{priceMinor}
           </span>
-          {isOnSale && displayCompareAtPrice && (
+          {shownCompareAt != null && (
             <span
               className="ml-3 font-sans font-normal line-through"
               style={{ fontSize: "1.2rem", color: "var(--vn-steel-mist)" }}
             >
-              {formatPrice(displayCompareAtPrice)}
+              {formatPrice(shownCompareAt)}
             </span>
           )}
         </div>
@@ -155,6 +191,8 @@ export function NoiseProductActions({
           product={product}
           setSelectedVariantId={setSelectedVariantId}
           onQuantityChange={setVariantQuantity}
+          customizer={customizer}
+          customizerSlot={customizerSlot}
         />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
@@ -182,7 +220,10 @@ export function NoiseProductActions({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {canAddMore && (
+          {/* Options sit between the price and qty / Add to bag. */}
+          {cartEnabled && customizerSlot}
+          {/* Catalog mode (B6.11): no qty or Add to bag when `cart` is off */}
+          {cartEnabled && canAddMore && (
             <div className="flex items-stretch gap-3">
               {/* Qty stepper */}
               <div
@@ -218,7 +259,7 @@ export function NoiseProductActions({
 
               {/* Add to bag */}
               <button
-                onClick={handleAddToCart}
+                onClick={handleSimpleAdd}
                 className="flex flex-1 items-center justify-between px-5 py-4 font-mono text-[12px] tracking-[0.24em] uppercase transition-all"
                 style={{
                   background: justAdded ? "var(--vn-steel)" : "var(--vn-ink)",
@@ -239,12 +280,12 @@ export function NoiseProductActions({
                     </>
                   )}
                 </span>
-                <span>{formatPrice(displayPrice)} →</span>
+                <span>{formatPrice(shownPrice)} →</span>
               </button>
             </div>
           )}
 
-          {!canAddMore && inStock && (
+          {cartEnabled && !canAddMore && inStock && (
             <p className="font-mono text-[10px] tracking-[0.2em] text-amber-600 uppercase">
               Maximum available quantity in cart
             </p>

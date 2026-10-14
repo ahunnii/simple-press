@@ -3,14 +3,17 @@ import type Stripe from "stripe";
 
 import { POST } from "~/app/api/webhooks/stripe/route";
 
+import { registerSessionLineItems } from "./stripe-line-items";
+
 /**
  * Harness for driving the real Stripe webhook route handler
  * (`src/app/api/webhooks/stripe/route.ts`) from an integration test.
  *
- * The route verifies the signature through `stripeClient.webhooks.constructEvent`
- * and re-reads the session through `stripeClient.checkout.sessions.retrieve`, so
- * every test using this harness must mock `~/lib/stripe/client` itself (vi.mock
- * is hoisted per test file and cannot live here). The typical setup is:
+ * The route verifies the signature through `stripeClient.webhooks.constructEvent`,
+ * re-reads the session through `stripeClient.checkout.sessions.retrieve` and
+ * pages its line items through `checkout.sessions.listLineItems`, so every test
+ * using this harness must mock `~/lib/stripe/client` itself (vi.mock is hoisted
+ * per test file and cannot live here). The typical setup is:
  *
  * ```ts
  * const stripeMocks = vi.hoisted(() => ({
@@ -20,7 +23,13 @@ import { POST } from "~/app/api/webhooks/stripe/route";
  * vi.mock("~/lib/stripe/client", () => ({
  *   stripeClient: {
  *     webhooks: { constructEvent: (...a: unknown[]) => stripeMocks.constructEvent(...a) },
- *     checkout: { sessions: { retrieve: (...a: unknown[]) => stripeMocks.sessionsRetrieve(...a) } },
+ *     checkout: {
+ *       sessions: {
+ *         retrieve: (...a: unknown[]) => stripeMocks.sessionsRetrieve(...a),
+ *         // Serves the line items of every `makeCheckoutSession` fixture, paged.
+ *         listLineItems: (...a: unknown[]) => fakeListLineItems(...a),
+ *       },
+ *     },
  *   },
  * }));
  * ```
@@ -66,6 +75,8 @@ export type LineItemFixture = {
   productVariantId?: string;
   variantName?: string;
   sku?: string;
+  /** Any other product metadata (e.g. the customizer's `lineConfig`). */
+  extraMetadata?: Record<string, string>;
 };
 
 export type AddressFixture = {
@@ -95,6 +106,8 @@ export type CheckoutSessionFixtureOpts = {
   /** Rendered as `collected_information.shipping_details` on the full session. */
   shippingAddress?: AddressFixture | null;
   shippingName?: string | null;
+  /** `session.created` (Unix seconds) — when checkout started. Defaults to now. */
+  created?: number;
 };
 
 export type CheckoutSessionFixture = {
@@ -107,7 +120,9 @@ export type CheckoutSessionFixture = {
 /**
  * Builds the pair of session objects the webhook works with: the unexpanded one
  * carried on the event, and the expanded one returned by
- * `checkout.sessions.retrieve` (line items, total details, shipping).
+ * `checkout.sessions.retrieve` (total details, shipping). Its `line_items`
+ * (what `listLineItems` serves, registered here) are NOT read by the route
+ * from the retrieved session — it pages them in separately.
  */
 export function makeCheckoutSession(
   opts: CheckoutSessionFixtureOpts = {},
@@ -140,6 +155,7 @@ export function makeCheckoutSession(
   const base = {
     id,
     object: "checkout.session",
+    created: opts.created ?? Math.floor(Date.now() / 1000),
     mode: opts.mode ?? "payment",
     metadata: opts.metadata ?? {},
     customer_email: null,
@@ -176,6 +192,7 @@ export function makeCheckoutSession(
             : {}),
           ...(li.variantName ? { variantName: li.variantName } : {}),
           ...(li.sku ? { sku: li.sku } : {}),
+          ...(li.extraMetadata ?? {}),
         },
       },
     },
@@ -208,9 +225,11 @@ export function makeCheckoutSession(
       : {}),
   };
 
+  const fullSession = full as unknown as Stripe.Checkout.Session;
+  registerSessionLineItems(fullSession);
   return {
     session: base as unknown as Stripe.Checkout.Session,
-    fullSession: full as unknown as Stripe.Checkout.Session,
+    fullSession,
   };
 }
 
@@ -252,6 +271,30 @@ export function makeCheckoutExpiredEvent(
 ): Stripe.Event {
   return makeEvent({
     type: "checkout.session.expired",
+    object: session,
+    account,
+  });
+}
+
+/** A delayed payment method settled: the session now reports "paid". */
+export function makeCheckoutAsyncPaymentSucceededEvent(
+  session: Stripe.Checkout.Session,
+  account: string | null,
+): Stripe.Event {
+  return makeEvent({
+    type: "checkout.session.async_payment_succeeded",
+    object: session,
+    account,
+  });
+}
+
+/** A delayed payment method failed: the session stays "unpaid". */
+export function makeCheckoutAsyncPaymentFailedEvent(
+  session: Stripe.Checkout.Session,
+  account: string | null,
+): Stripe.Event {
+  return makeEvent({
+    type: "checkout.session.async_payment_failed",
     object: session,
     account,
   });

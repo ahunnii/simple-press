@@ -37,6 +37,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { Separator } from "~/components/ui/separator";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -99,7 +100,13 @@ function popupDefaults(popup: PopupConfig | null): PopupFormValues {
 
 // ─── Banner card (presentational) ─────────────────────────────────────────────
 
-function BannerForm({ form }: { form: UseFormReturn<BannerFormValues> }) {
+function BannerForm({
+  form,
+  onUploadingChange,
+}: {
+  form: UseFormReturn<BannerFormValues>;
+  onUploadingChange: (uploading: boolean) => void;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -131,6 +138,7 @@ function BannerForm({ form }: { form: UseFormReturn<BannerFormValues> }) {
               output="json"
               placeholder="Announcing our summer sale — 20% off sitewide…"
               editorContentClassName="min-h-[100px] p-4"
+              onUploadingChange={onUploadingChange}
             />
 
             {/* Link — `col-span-1` on both fields is load-bearing:
@@ -138,15 +146,16 @@ function BannerForm({ form }: { form: UseFormReturn<BannerFormValues> }) {
                 without it these two stack full-width and the 2-col grid does
                 nothing. `items-start` because only `linkUrl` can raise a
                 validation error, and a `FormMessage` under one cell would
-                otherwise stretch the other and sink its label. */}
+                otherwise stretch the other and sink its label. Plain text, not
+                type="url": `safeHrefSchema` accepts relative paths like /shop,
+                which a url input would mark :invalid. */}
             <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="linkUrl"
                 label="Link URL"
-                description="Optional. Where the link in the banner goes."
-                placeholder="https://example.com/sale"
-                type="url"
+                description="Optional. Where the link in the banner goes: a page on your site like /shop, or a full web address."
+                placeholder="/shop or https://example.com/sale"
                 className="col-span-1"
               />
               <InputFormField
@@ -229,10 +238,12 @@ function PopupForm({
   form,
   existingImageUrl,
   mediaEnabled,
+  onUploadingChange,
 }: {
   form: UseFormReturn<PopupFormValues>;
   existingImageUrl: string | undefined;
   mediaEnabled: boolean;
+  onUploadingChange: (uploading: boolean) => void;
 }) {
   const mode = useWatch({ control: form.control, name: "mode" });
 
@@ -315,6 +326,7 @@ function PopupForm({
                 output="json"
                 placeholder="Welcome to our store! Sign up for 15% off your first order…"
                 editorContentClassName="min-h-[140px] p-4"
+                onUploadingChange={onUploadingChange}
               />
             )}
 
@@ -327,9 +339,8 @@ function PopupForm({
                 form={form}
                 name="ctaUrl"
                 label="CTA link URL"
-                description="Optional. Where the call-to-action button goes."
-                placeholder="https://example.com/sale"
-                type="url"
+                description="Optional. Where the call-to-action button goes: a page on your site like /shop, or a full web address."
+                placeholder="/shop or https://example.com/sale"
                 className="col-span-1"
               />
               <InputFormField
@@ -359,6 +370,9 @@ export function AnnouncementsEditor({
 }: Props) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  // True while a banner/popup message image is still uploading — saving then
+  // would store its temporary `blob:` src.
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   // `as any` on resolver matches the codebase pattern (shipping-settings.tsx)
   // to avoid the third TFieldValues generic mismatch from zodResolver.
@@ -417,6 +431,10 @@ export function AnnouncementsEditor({
   };
 
   const handleSaveAll = async () => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     // Validate BOTH forms before writing anything, so a bad popup URL can't
     // leave the banner saved and the popup not.
     const [bannerValid, popupValid] = await Promise.all([
@@ -542,13 +560,18 @@ export function AnnouncementsEditor({
           <Button
             type="button"
             size="sm"
-            disabled={saving}
+            disabled={saving || isUploading}
             onClick={() => void handleSaveAll()}
           >
             {saving ? (
               <>
                 <span className="saving-indicator" />
                 Saving...
+              </>
+            ) : isUploading ? (
+              <>
+                <span className="saving-indicator" />
+                Uploading…
               </>
             ) : (
               <>
@@ -563,12 +586,18 @@ export function AnnouncementsEditor({
 
       <div className="admin-container">
         <div className="space-y-8">
-          {bannersEnabled && <BannerForm form={bannerForm} />}
+          {bannersEnabled && (
+            <BannerForm
+              form={bannerForm}
+              onUploadingChange={onUploadingChange}
+            />
+          )}
           {popupsEnabled && (
             <PopupForm
               form={popupForm}
               existingImageUrl={popup?.imagePath ?? undefined}
               mediaEnabled={mediaEnabled}
+              onUploadingChange={onUploadingChange}
             />
           )}
         </div>

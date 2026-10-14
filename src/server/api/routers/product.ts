@@ -3,7 +3,25 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type {
+  CustomizerDefinition,
+  PublicCustomizerDefinition,
+} from "~/lib/customizer";
 import type { ProductSortValue } from "~/lib/validators/product";
+import { customizerFailureReason } from "~/lib/checkout/customizer-checkout";
+import {
+  configKey,
+  customizationLines,
+  isEmptySelection,
+  normalizeSelection,
+  priceConfiguration,
+  toPublicCustomizerDefinition,
+} from "~/lib/customizer";
+import {
+  isProductOptionsEnabled,
+  loadCustomizerDefinition,
+  loadCustomizerDefinitions,
+} from "~/lib/customizer/load";
 import { normalizeGtin } from "~/lib/gtin";
 import {
   buildUsedMediaIndex,
@@ -13,6 +31,7 @@ import {
 } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { publicUrlToKey } from "~/lib/s3/url";
+import { stripEmptyPlaceholdersInFields } from "~/lib/tiptap/strip-empty-placeholders";
 import {
   ADMIN_BULK_SELECTION_LIMIT,
   MAX_REQUESTED_PAGE,
@@ -26,6 +45,7 @@ import {
   productListFiltersSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
+import { customizerSelectionSchema } from "~/lib/validators/product-options";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import {
   createTRPCRouter,
@@ -132,6 +152,9 @@ export const productRouter = createTRPCRouter({
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,
+          // Card data: lets a card link to the product page instead of
+          // quick-adding (see `checkProductStatus` `hasOptions`).
+          _count: { select: { optionGroups: true } },
         },
         omit: { cost: true },
         orderBy: { createdAt: "desc" },
@@ -164,6 +187,7 @@ export const productRouter = createTRPCRouter({
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,
+          _count: { select: { optionGroups: true } },
         },
         omit: { cost: true },
         orderBy: featuredOnly
@@ -200,6 +224,7 @@ export const productRouter = createTRPCRouter({
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 4 },
           variants: true,
+          _count: { select: { optionGroups: true } },
         },
         omit: { cost: true },
         orderBy: { createdAt: "desc" },
@@ -234,10 +259,29 @@ export const productRouter = createTRPCRouter({
           baseInventoryUnit: {
             select: { inventoryQty: true, allowBackorders: true },
           },
+          _count: { select: { optionGroups: true } },
         },
         omit: { cost: true },
       });
-      return product;
+      if (!product) return product;
+
+      // Product customizer: the PUBLIC projection only (no link ids, names,
+      // skus or raw stock). `null` when the flag is off or nothing is
+      // attached; the flag is read only for products that have groups.
+      const { _count, ...rest } = product;
+      let customizer: PublicCustomizerDefinition | null = null;
+      if (
+        _count.optionGroups > 0 &&
+        (await isProductOptionsEnabled(businessId))
+      ) {
+        const def = await loadCustomizerDefinition(
+          ctx.db,
+          businessId,
+          product.id,
+        );
+        customizer = def ? toPublicCustomizerDefinition(def) : null;
+      }
+      return { ...rest, customizer };
     }),
 
   secureGet: ownerAdminProcedure
@@ -495,7 +539,10 @@ export const productRouter = createTRPCRouter({
           id: true,
           name: true,
           price: true,
-          variants: { select: { price: true } },
+          variants: {
+            select: { id: true, name: true, price: true },
+            orderBy: { createdAt: "asc" },
+          },
           published: true,
           images: {
             orderBy: { sortOrder: "asc" },
@@ -560,12 +607,21 @@ export const productRouter = createTRPCRouter({
       if (baseInventoryUnitId) {
         const pool = await ctx.db.baseInventoryUnit.findFirst({
           where: { id: baseInventoryUnitId, businessId },
-          select: { id: true },
+          select: { id: true, itemType: true },
         });
         if (!pool) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid inventory pool",
+          });
+        }
+        // Rental items are returnable: a sale would permanently subtract from
+        // their on-hand count, mixing sold-off units with checked-out ones.
+        if (pool.itemType === "rental") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Rental items can't be linked to a product. Choose a stock item.",
           });
         }
       }
@@ -602,9 +658,13 @@ export const productRouter = createTRPCRouter({
           lowInventoryThreshold: lowInventoryThreshold ?? null,
           baseInventoryUnitId: baseInventoryUnitId ?? null,
           baseUnitsConsumed: baseUnitsConsumed ?? null,
+          // `additionalInformation` is TipTap JSON — drop any unfilled
+          // "Insert elements" placeholder (see `stripEmptyPlaceholderNodes`).
           additionalFields: additionalFields
             ? (JSON.parse(
-                JSON.stringify(additionalFields),
+                JSON.stringify(
+                  stripEmptyPlaceholdersInFields(additionalFields),
+                ),
               ) as Prisma.InputJsonValue)
             : undefined,
           metaTitle: metaTitle ?? null,
@@ -698,13 +758,29 @@ export const productRouter = createTRPCRouter({
       if (baseInventoryUnitId) {
         const pool = await ctx.db.baseInventoryUnit.findFirst({
           where: { id: baseInventoryUnitId, businessId },
-          select: { id: true },
+          select: { id: true, itemType: true },
         });
         if (!pool) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid inventory pool",
           });
+        }
+        // Same rule as create, but a link made before rentals were excluded
+        // is left alone — only switching TO a rental item is refused, so
+        // saving an unrelated edit on such a product never fails.
+        if (pool.itemType === "rental") {
+          const linked = await ctx.db.product.findFirst({
+            where: { id, businessId },
+            select: { baseInventoryUnitId: true },
+          });
+          if (linked?.baseInventoryUnitId !== baseInventoryUnitId) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "Rental items can't be linked to a product. Choose a stock item.",
+            });
+          }
         }
       }
 
@@ -778,9 +854,13 @@ export const productRouter = createTRPCRouter({
           lowInventoryThreshold: lowInventoryThreshold ?? null,
           baseInventoryUnitId: baseInventoryUnitId ?? null,
           baseUnitsConsumed: baseUnitsConsumed ?? null,
+          // `additionalInformation` is TipTap JSON — drop any unfilled
+          // "Insert elements" placeholder (see `stripEmptyPlaceholderNodes`).
           additionalFields: additionalFields
             ? (JSON.parse(
-                JSON.stringify(additionalFields),
+                JSON.stringify(
+                  stripEmptyPlaceholdersInFields(additionalFields),
+                ),
               ) as Prisma.InputJsonValue)
             : undefined,
           metaTitle: metaTitle ?? null,
@@ -1146,6 +1226,9 @@ export const productRouter = createTRPCRouter({
           collectionProducts: {
             select: { collectionId: true, sortOrder: true },
           },
+          optionGroups: {
+            select: { groupId: true, sortOrder: true },
+          },
         },
       });
 
@@ -1207,9 +1290,13 @@ export const productRouter = createTRPCRouter({
             metaDescription: source.metaDescription,
             metaKeywords: source.metaKeywords,
             ogImage: source.ogImage,
+            // Rows saved before placeholder stripping may still carry an
+            // unfilled "Insert elements" node — don't copy it forward.
             additionalFields: source.additionalFields
               ? (JSON.parse(
-                  JSON.stringify(source.additionalFields),
+                  JSON.stringify(
+                    stripEmptyPlaceholdersInFields(source.additionalFields),
+                  ),
                 ) as Prisma.InputJsonValue)
               : undefined,
             businessId,
@@ -1251,6 +1338,13 @@ export const productRouter = createTRPCRouter({
                 sortOrder: cp.sortOrder,
               })),
             },
+            // Option groups are shared per business — re-attach, don't copy.
+            optionGroups: {
+              create: source.optionGroups.map((og) => ({
+                groupId: og.groupId,
+                sortOrder: og.sortOrder,
+              })),
+            },
           },
         });
       });
@@ -1285,6 +1379,9 @@ export const productRouter = createTRPCRouter({
             z.object({
               productId: z.string(),
               variantId: z.string().nullable(),
+              // Product customizer choices for this line. The server re-prices
+              // them from ids; nothing here can introduce a price.
+              configuration: customizerSelectionSchema.optional(),
             }),
           )
           .max(100),
@@ -1314,12 +1411,14 @@ export const productRouter = createTRPCRouter({
           baseInventoryUnit: {
             select: { inventoryQty: true, allowBackorders: true },
           },
+          // Plain lines are checked against required options too.
+          _count: { select: { optionGroups: true } },
         },
       });
 
       const productMap = new Map(products.map((p) => [p.id, p]));
 
-      return items.map((item) => {
+      const baseStatus = (item: (typeof items)[number]) => {
         const product = productMap.get(item.productId);
 
         // Product not found or not published
@@ -1440,6 +1539,167 @@ export const productRouter = createTRPCRouter({
             slug: product.slug,
           };
         }
+      };
+
+      // ── Product customizer ───────────────────────────────────────────────
+      // Definitions load for configured lines AND for plain lines of products
+      // that have option groups (a required group makes a plain line
+      // unorderable, which checkout would otherwise be first to say). Plain
+      // carts of products without groups pay for nothing and keep their exact
+      // old results.
+      const isConfigured = (item: (typeof items)[number]) =>
+        !!item.configuration && !isEmptySelection(item.configuration);
+      const optionProductIds = [
+        ...new Set(
+          items
+            .filter(
+              (i) =>
+                isConfigured(i) ||
+                (productMap.get(i.productId)?._count.optionGroups ?? 0) > 0,
+            )
+            .map((i) => i.productId),
+        ),
+      ];
+      const optionsEnabled =
+        optionProductIds.length > 0 &&
+        (await isProductOptionsEnabled(businessId));
+      const definitions = optionsEnabled
+        ? await loadCustomizerDefinitions(ctx.db, businessId, optionProductIds)
+        : new Map<string, CustomizerDefinition>();
+
+      return items.map((item): CartItemStatus => {
+        const base = baseStatus(item);
+        if (!isConfigured(item)) {
+          // Same rule as checkout: an empty build must satisfy every
+          // required group, or the line can never be bought as it sits.
+          const definition = base.available
+            ? definitions.get(item.productId)
+            : undefined;
+          if (definition) {
+            const empty = priceConfiguration(
+              definition,
+              { choices: [], texts: [] },
+              { basePrice: base.price, lineQty: 1 },
+            );
+            if (!empty.ok) {
+              return {
+                ...base,
+                configKey: "",
+                available: false,
+                reason: "configuration-invalid",
+                errors: empty.errors.map((e) => e.message),
+              };
+            }
+          }
+          return { ...base, configKey: "" };
+        }
+
+        const selection = normalizeSelection(item.configuration);
+        const key = configKey(selection);
+        if (!base.available) return { ...base, configKey: key };
+
+        const invalid = (
+          reason: CartItemStatus["reason"],
+          errors?: string[],
+        ): CartItemStatus => ({
+          ...base,
+          configKey: key,
+          available: false,
+          reason,
+          ...(errors ? { errors } : {}),
+        });
+
+        // Flag off, or the product has no groups: a posted configuration can
+        // never be honoured.
+        const definition = definitions.get(item.productId);
+        if (!optionsEnabled || !definition) {
+          return invalid("configuration-invalid");
+        }
+
+        const priced = priceConfiguration(definition, selection, {
+          basePrice: base.price,
+          lineQty: 1,
+        });
+        if (!priced.ok) {
+          return invalid(
+            customizerFailureReason(priced.errors),
+            priced.errors.map((e) => e.message),
+          );
+        }
+
+        // How many units the linked components allow: min over components of
+        // floor(stock / qtyPerUnit), on top of the base item's own limit.
+        const stockByTarget = new Map<string, number | null>();
+        for (const group of definition.groups) {
+          for (const value of group.values) {
+            if (!value.linked) continue;
+            stockByTarget.set(
+              `${value.linked.productId}:${value.linked.variantId ?? ""}`,
+              value.linked.stock,
+            );
+          }
+        }
+        const qtyByTarget = new Map<string, number>();
+        for (const c of priced.components) {
+          const targetKey = `${c.productId}:${c.variantId ?? ""}`;
+          qtyByTarget.set(
+            targetKey,
+            (qtyByTarget.get(targetKey) ?? 0) + c.qtyPerUnit,
+          );
+        }
+        let maxQuantity = base.maxQuantity;
+        for (const [targetKey, qtyPerUnit] of qtyByTarget) {
+          const stock = stockByTarget.get(targetKey);
+          if (stock == null) continue;
+          const units = Math.floor(stock / Math.max(1, qtyPerUnit));
+          maxQuantity =
+            maxQuantity === null ? units : Math.min(maxQuantity, units);
+        }
+
+        return {
+          ...base,
+          configKey: key,
+          available: maxQuantity === null || maxQuantity > 0,
+          ...(maxQuantity !== null && maxQuantity <= 0
+            ? { reason: "option-out-of-stock" as const }
+            : {}),
+          price: priced.unitPrice,
+          // Keep a sale display consistent: add-ons raise both sides.
+          compareAtPrice:
+            base.compareAtPrice != null
+              ? base.compareAtPrice + priced.addOnTotal
+              : null,
+          maxQuantity,
+          // The server's own rendering of the build, so the cart's breakdown
+          // follows the owner's current prices.
+          customization: {
+            summary: priced.snapshot.summary,
+            lines: customizationLines(priced.snapshot),
+          },
+        };
       });
     }),
 });
+
+/**
+ * One `getCartItemsStatus` result. `configKey` identifies the cart line
+ * (`""` for an unconfigured line). `reason`/`errors` appear only on configured
+ * lines the server rejected.
+ */
+type CartItemStatus = {
+  productId: string;
+  variantId: string | null;
+  configKey: string;
+  available: boolean;
+  price: number;
+  compareAtPrice: number | null;
+  maxQuantity: number | null;
+  slug: string | null;
+  reason?: "configuration-invalid" | "option-out-of-stock";
+  errors?: string[];
+  /** Configured, available lines only: the build as currently priced. */
+  customization?: {
+    summary: string;
+    lines: { label: string; value: string; price: number }[];
+  };
+};

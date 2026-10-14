@@ -92,6 +92,7 @@ export function NoiseCheckoutForm({
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     setDiscountFieldError,
@@ -274,7 +275,7 @@ export function NoiseCheckoutForm({
                     <Loader2 className="size-3.5 animate-spin" />
                     Checking…
                   </>
-                ) : discountAmount > 0 ? (
+                ) : discountAmount > 0 || discountFreeShipping ? (
                   "Applied ✓"
                 ) : (
                   "Apply"
@@ -297,6 +298,15 @@ export function NoiseCheckoutForm({
               >
                 Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
                 applied.
+              </p>
+            )}
+            {discountCodeLabel && discountFreeShipping && (
+              <p
+                role="status"
+                className="font-mono text-[9.5px] tracking-[0.14em] text-green-600 uppercase"
+              >
+                Free shipping applied:{" "}
+                <span className="font-semibold">{discountCodeLabel}</span>
               </p>
             )}
           </fieldset>

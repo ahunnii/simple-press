@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 
@@ -101,7 +102,7 @@ export function PinkCollectionSection({
                   priority={i < 3}
                   href={`/shop/${product.slug}`}
                   imageUrl={image?.url}
-                  imageAlt={image?.altText ?? product.name}
+                  imageAlt={meaningfulAltText(image?.altText) ?? product.name}
                   title={product.name}
                   wishlist={{
                     productId: product.id,

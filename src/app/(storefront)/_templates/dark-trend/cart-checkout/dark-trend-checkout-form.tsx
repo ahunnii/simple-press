@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -386,10 +388,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               {/* Items */}
               <div className="max-h-64 space-y-3 overflow-y-auto">
                 {f.items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.variantId}`}
-                    className="flex gap-3"
-                  >
+                  <div key={cartItemId(item)} className="flex gap-3">
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-zinc-900">
                       {item.imageUrl ? (
                         <Image
@@ -414,6 +413,11 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="text-xs text-white/60"
+                      />
                       <p className="text-xs text-white/60">
                         Qty: {item.quantity}
                       </p>
@@ -428,7 +432,8 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               {/* Discount Code Input — inline, dark-trend style */}
               {f.couponsEnabled && (
                 <div className="space-y-3 pt-4">
-                  {f.discountCodeLabel && f.discountAmount > 0 ? (
+                  {f.discountCodeLabel &&
+                  (f.discountAmount > 0 || f.discountFreeShipping) ? (
                     <div
                       role="status"
                       className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
@@ -445,11 +450,16 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                           </div>
                           <div>
                             <p className="text-sm font-medium text-green-400">
-                              Discount Applied: {f.discountCodeLabel}
+                              {f.discountAmount > 0
+                                ? "Discount Applied"
+                                : "Free shipping applied"}
+                              : {f.discountCodeLabel}
                             </p>
-                            <p className="text-sm text-green-500">
-                              You saved {formatPrice(f.discountAmount)}
-                            </p>
+                            {f.discountAmount > 0 && (
+                              <p className="text-sm text-green-500">
+                                You saved {formatPrice(f.discountAmount)}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <Button

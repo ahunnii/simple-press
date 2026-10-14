@@ -1,6 +1,7 @@
 "use client";
 
-import { AccountSettings } from "~/components/auth/settings/account/account-settings";
+import { UserProfile } from "~/components/auth/settings/account/user-profile";
+import { cn } from "~/lib/utils";
 
 /**
  * Account settings cards, as consumed by every template's account page.
@@ -14,9 +15,19 @@ import { AccountSettings } from "~/components/auth/settings/account/account-sett
  * `AccountSettingsCards` from `@daveyplate/better-auth-ui`, which kept that
  * migration to a one-line import swap per file.
  *
- * Renders: user profile (avatar + name + configured additional fields) and the
- * change-email card.
+ * Renders: user profile (avatar + name + configured additional fields).
+ *
+ * Deliberately NOT the registry's `AccountSettings`: that also shows a
+ * change-email card whenever email+password auth is on, but the server never
+ * enables `user.changeEmail` (`~/server/better-auth/config.tsx`), so every
+ * submit failed with CHANGE_EMAIL_DISABLED. Turning email changes on is a
+ * product decision (one user row spans every store, and guest orders link by
+ * email) — add the card back here when `user.changeEmail` is enabled.
  */
 export function AccountSettingsCards({ className }: { className?: string }) {
-  return <AccountSettings className={className} />;
+  return (
+    <div className={cn("flex w-full flex-col gap-4 md:gap-6", className)}>
+      <UserProfile />
+    </div>
+  );
 }

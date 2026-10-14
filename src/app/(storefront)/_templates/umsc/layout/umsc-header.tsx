@@ -30,6 +30,7 @@ import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { UserButton } from "~/components/auth/user/user-button";
@@ -38,9 +39,11 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
+  donateLinkOptions,
   externalLinkProps,
   getAccountNavLinks,
   navGroupEntries,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "../index";
@@ -166,14 +169,24 @@ export function UmscHeader({
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
   const accountsEnabled = isStorefrontEnabled("customerAccounts");
   // `cart` depends on `products`, so this is off whenever products is.
-  const cartEnabled = isEnabled("cart");
+  const cartEnabled = useCartEnabled();
 
   // Owner nav (or the shipped default) minus links to flag-disabled routes.
   // Saved `[]` = no links (`resolveNav` never falls back on an empty list).
   const navigationItems = business?.siteContent?.navigationItems;
+  // Donations "show in header" switch: Donate appended last (bar + dialog).
+  const { show: showDonate, label: donateLabel } = donateLinkOptions(
+    business,
+    isEnabled,
+    "header",
+  );
   const links = useMemo(
-    () => resolveUmscNav(navigationItems, isEnabled),
-    [navigationItems, isEnabled],
+    () =>
+      withDonateLink(resolveUmscNav(navigationItems, isEnabled), {
+        show: showDonate,
+        label: donateLabel,
+      }),
+    [navigationItems, isEnabled, showDonate, donateLabel],
   );
   const activeIndex = umscActiveItemIndex(pathname, links);
 

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 /**
- * Export to WordPress moved into the combined "Data & Export" settings page.
+ * The old WordPress export moved into the combined "Data & Export" settings page.
  * Kept as a redirect so bookmarks and older links keep working.
  */
 export default function WordPressExportPage() {

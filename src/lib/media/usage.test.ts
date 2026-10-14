@@ -13,6 +13,8 @@
  *    key, so any other image URL in that free-form blob was invisible
  *  - `SiteContent.pageMeta` / `popupConfig`, `Page.previewDraft` and
  *    `Business.maintenanceImage` / `maintenanceMessage` were not scanned at all
+ *  - `Form.definition` picture-choice option photos / reference image were not
+ *    scanned at all
  *
  * `~/server/db` is mocked, so this runs in the `unit` project (`pnpm test:nodb`)
  * with no Postgres. The service-template registry is NOT mocked — resolving a
@@ -27,6 +29,7 @@ vi.mock("~/server/db", () => ({
     business: { findUnique: vi.fn() },
     product: { findMany: vi.fn() },
     productVariant: { findMany: vi.fn() },
+    productOptionValue: { findMany: vi.fn() },
     collection: { findMany: vi.fn() },
     service: { findMany: vi.fn() },
     event: { findMany: vi.fn() },
@@ -37,6 +40,7 @@ vi.mock("~/server/db", () => ({
     gallery: { findMany: vi.fn() },
     testimonial: { findMany: vi.fn() },
     productReview: { findMany: vi.fn() },
+    form: { findMany: vi.fn() },
   },
 }));
 
@@ -60,6 +64,7 @@ const asMock = (fn: unknown) =>
 const EMPTY_TABLES = [
   db.product.findMany,
   db.productVariant.findMany,
+  db.productOptionValue.findMany,
   db.collection.findMany,
   db.service.findMany,
   db.event.findMany,
@@ -70,6 +75,7 @@ const EMPTY_TABLES = [
   db.gallery.findMany,
   db.testimonial.findMany,
   db.productReview.findMany,
+  db.form.findMany,
 ];
 
 beforeEach(() => {
@@ -291,6 +297,26 @@ describe("buildUsedMediaIndex — Product.additionalFields", () => {
   });
 });
 
+// ─── ProductOptionValue.imageUrl ──────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — product option values", () => {
+  it("indexes customizer value images so product deletes don't reap them", async () => {
+    const url = keyToPublicUrl(`${BUSINESS_ID}/image-heart-charm.jpg`);
+    asMock(db.productOptionValue.findMany).mockResolvedValue([
+      { id: "val_1", label: "Heart", imageUrl: url, group: { name: "Charms" } },
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(url)?.[0]).toMatchObject({
+      entityType: "productOptionValue",
+      entityId: "val_1",
+      entityLabel: "Heart",
+      location: 'Product option "Charms"',
+    });
+  });
+});
+
 // ─── Product gallery Image rows ───────────────────────────────────────────────
 
 describe("buildUsedMediaIndex — Product gallery Image rows", () => {
@@ -473,6 +499,95 @@ describe("buildUsedMediaIndex — Business maintenance page", () => {
 
 // ─── buildGalleryExternalUsage ────────────────────────────────────────────────
 
+// ─── Form.definition (picture choice) ─────────────────────────────────────────
+
+describe("buildUsedMediaIndex — Form picture-choice media", () => {
+  const optionUrl = keyToPublicUrl(`${BUSINESS_ID}/image-form-gold.jpg`);
+  const referenceUrl = keyToPublicUrl(`${BUSINESS_ID}/image-form-ref.jpg`);
+
+  function formRow(definition: unknown) {
+    return { id: "form_1", name: "Order Form", definition };
+  }
+
+  it("reports option photos and the reference image under the field label", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [
+          {
+            id: "f1",
+            type: "picturechoice",
+            label: "Finish",
+            required: false,
+            selection: "one",
+            referenceImageUrl: referenceUrl,
+            options: [
+              { id: "o1", label: "Gold", imageUrl: optionUrl },
+              { id: "o2", label: "Red", color: "#ff0000" },
+            ],
+          },
+        ],
+        settings: {},
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(optionUrl)).toEqual([
+      {
+        url: optionUrl,
+        location: "Form: Order Form — Finish",
+        entityType: "form",
+        entityId: "form_1",
+        entityLabel: "Order Form",
+        adminHref: "/admin/forms/form_1",
+      },
+    ]);
+    expect(index.get(referenceUrl)).toHaveLength(1);
+    expect(index.get(referenceUrl)?.[0]?.location).toContain("Finish");
+  });
+
+  it("still reports media from a definition that no longer validates", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({ fields: [{ options: [{ imageUrl: optionUrl }] }] }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(optionUrl)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+    });
+  });
+
+  it("ignores external URLs and non-object definitions", async () => {
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow(null),
+      formRow({
+        version: 1,
+        fields: [
+          {
+            id: "f1",
+            type: "picturechoice",
+            label: "Finish",
+            required: false,
+            selection: "one",
+            options: [
+              { id: "o1", label: "A", imageUrl: "https://example.com/a.jpg" },
+              { id: "o2", label: "B" },
+            ],
+          },
+        ],
+        settings: {},
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(0);
+  });
+});
+
 describe("buildGalleryExternalUsage", () => {
   function pageRow(content: unknown, id = "page_1", title = "About") {
     return {
@@ -565,6 +680,94 @@ describe("buildGalleryExternalUsage", () => {
     const external = await buildGalleryExternalUsage(BUSINESS_ID);
 
     expect(external.get("gal_1")).toHaveLength(1);
+  });
+
+  function siteContentWithFields(
+    customFields: unknown,
+    templateId: string,
+    previewCustomFields: unknown = null,
+  ) {
+    return {
+      heroImageUrl: null,
+      aboutImageUrl: null,
+      ogImage: null,
+      faviconUrl: null,
+      logoUrl: null,
+      pageMeta: null,
+      popupConfig: null,
+      customFields,
+      previewCustomFields,
+      business: { templateId },
+    };
+  }
+
+  it("flags an embed from an inactive template's gallery field as inactiveTemplate", async () => {
+    // Business is on Modern; the Noise gallery field is a leftover.
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "modern",
+        { "noise.homepage.intro-gallery": "gal_1" },
+      ),
+    );
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+    const usages = external.get("gal_1") ?? [];
+
+    // Published + draft blobs → two entries, both inactive.
+    expect(usages).toHaveLength(2);
+    for (const u of usages) {
+      expect(u.inactiveTemplate).toBe(true);
+      expect(u.location).toContain("(not active)");
+    }
+  });
+
+  it("does not flag the same gallery field when its template IS active", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "noise",
+      ),
+    );
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toHaveLength(1);
+    expect(external.get("gal_1")?.[0]?.inactiveTemplate).toBeUndefined();
+  });
+
+  it("reports active page embeds unflagged alongside inactive-template ones", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentWithFields(
+        { "noise.homepage.intro-gallery": "gal_1" },
+        "modern",
+      ),
+    );
+    asMock(db.page.findMany).mockResolvedValue([pageRow(galleryDoc("gal_1"))]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+    const usages = external.get("gal_1") ?? [];
+
+    expect(usages).toHaveLength(2);
+    expect(usages.filter((u) => !u.inactiveTemplate)).toEqual([
+      expect.objectContaining({ entityLabel: "About" }),
+    ]);
+    expect(usages.filter((u) => u.inactiveTemplate)).toHaveLength(1);
+  });
+
+  it("never flags a service-page gallery field (gallery.delete's scrub is SiteContent-only)", async () => {
+    asMock(db.service.findMany).mockResolvedValue([
+      serviceRow({ "service-two.gallery": "gal_1" }, "service-two"),
+    ]);
+    asMock(db.gallery.findMany).mockResolvedValue([{ id: "gal_1" }]);
+
+    const external = await buildGalleryExternalUsage(BUSINESS_ID);
+
+    expect(external.get("gal_1")).toHaveLength(1);
+    expect(external.get("gal_1")?.[0]?.inactiveTemplate).toBeUndefined();
   });
 
   it("drops references to galleries that are not this business's", async () => {

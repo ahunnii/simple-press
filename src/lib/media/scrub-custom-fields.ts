@@ -1,19 +1,22 @@
 /**
- * Pure removal of media URLs from a `SiteContent.customFields`-shaped JSON blob.
+ * Pure removal of media URLs / gallery IDs from a
+ * `SiteContent.customFields`-shaped JSON blob.
  *
  * ## Caller contract
  *
- * This is the write-side counterpart of `buildUsedMediaIndex` (`./usage.ts`) and
- * is only ever invoked for files whose usages are ALL flagged
- * `inactiveTemplate` — i.e. the file is referenced solely by field values left
- * behind by a template the owner switched away from. Because such a file is by
- * definition not referenced by any active-template field, scrubbing the whole
- * blob cannot touch a value the live storefront renders.
+ * These are the write-side counterparts of `buildUsedMediaIndex` /
+ * `buildGalleryExternalUsage` (`./usage.ts`) and are only ever invoked for
+ * files / galleries whose usages are ALL flagged `inactiveTemplate` — i.e. the
+ * thing is referenced solely by field values left behind by a template the
+ * owner switched away from. Because such a value is by definition not
+ * referenced by any active-template field, scrubbing the whole blob cannot
+ * touch a value the live storefront renders.
  *
- * Do NOT call this for a file that has even one active usage: the scrub is
- * blob-wide, not template-scoped, and would silently blank live content.
+ * Do NOT call these for a file or gallery that has even one active usage: the
+ * scrub is blob-wide, not template-scoped, and would silently blank live
+ * content.
  *
- * The function never mutates its input — unchanged branches are shared by
+ * The functions never mutate their input — unchanged branches are shared by
  * reference, changed ones are rebuilt.
  */
 
@@ -23,6 +26,17 @@ const RESERVED_METADATA_KEY = "_sp";
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
+
+/**
+ * What a scrub removes. The walker below is shared by every scrub; a matcher
+ * only decides which plain strings and which rich-text nodes are "scrubbed".
+ */
+type ScrubMatcher = {
+  /** A string value naming a scrubbed item (blanked, or its top-level key dropped). */
+  matchesString: (value: string) => boolean;
+  /** A TipTap node pointing at a scrubbed item (removed from its parent `content`). */
+  matchesNode: (node: Record<string, unknown>) => boolean;
+};
 
 /**
  * True when `value` names one of the scrubbed URLs.
@@ -63,12 +77,28 @@ function isScrubbedMediaNode(
   return typeof src === "string" && src !== "" && isScrubbedUrl(src, urls);
 }
 
+/**
+ * True for a rich-text `gallery` node whose `attrs.galleryId` is one of the
+ * scrubbed IDs — the node `walkTiptap` reports as a gallery embed. Removed
+ * outright: a gallery node with an empty ID renders nothing useful.
+ */
+function isScrubbedGalleryNode(
+  node: Record<string, unknown>,
+  ids: ReadonlySet<string>,
+): boolean {
+  if (node.type !== "gallery") return false;
+  const attrs = node.attrs;
+  if (!isRecord(attrs)) return false;
+  const galleryId = attrs.galleryId;
+  return typeof galleryId === "string" && ids.has(galleryId);
+}
+
 type ScrubResult = { value: unknown; changed: boolean };
 
-/** Scrub the children of a rich-text node, dropping media nodes entirely. */
+/** Scrub the children of a rich-text node, dropping matched nodes entirely. */
 function scrubTiptapNode(
   node: Record<string, unknown>,
-  urls: ReadonlySet<string>,
+  m: ScrubMatcher,
 ): ScrubResult {
   let changed = false;
   const out: Record<string, unknown> = {};
@@ -79,16 +109,16 @@ function scrubTiptapNode(
       const children: unknown[] = [];
       for (const child of value) {
         if (isRecord(child)) {
-          if (isScrubbedMediaNode(child, urls)) {
+          if (m.matchesNode(child)) {
             contentChanged = true;
             continue;
           }
-          const scrubbed = scrubTiptapNode(child, urls);
+          const scrubbed = scrubTiptapNode(child, m);
           if (scrubbed.changed) contentChanged = true;
           children.push(scrubbed.value);
           continue;
         }
-        const scrubbed = scrubValue(child, urls);
+        const scrubbed = scrubValue(child, m);
         if (scrubbed.changed) contentChanged = true;
         children.push(scrubbed.value);
       }
@@ -97,10 +127,10 @@ function scrubTiptapNode(
       continue;
     }
 
-    // attrs / marks / text and anything else: plain JSON rules apply. An
-    // `attrs.src` that matched would have removed the node above, so this can
-    // only blank incidental references (e.g. a link mark's href).
-    const scrubbed = scrubValue(value, urls);
+    // attrs / marks / text and anything else: plain JSON rules apply. A
+    // matching node would have been removed above, so this can only blank
+    // incidental references (e.g. a link mark's href).
+    const scrubbed = scrubValue(value, m);
     if (scrubbed.changed) changed = true;
     out[key] = scrubbed.value;
   }
@@ -111,9 +141,9 @@ function scrubTiptapNode(
 }
 
 /** Scrub an arbitrary nested JSON value: matching strings become `""`. */
-function scrubValue(value: unknown, urls: ReadonlySet<string>): ScrubResult {
+function scrubValue(value: unknown, m: ScrubMatcher): ScrubResult {
   if (typeof value === "string") {
-    return isScrubbedUrl(value, urls)
+    return m.matchesString(value)
       ? { value: "", changed: true }
       : { value, changed: false };
   }
@@ -121,7 +151,7 @@ function scrubValue(value: unknown, urls: ReadonlySet<string>): ScrubResult {
   if (Array.isArray(value)) {
     let changed = false;
     const out = value.map((item) => {
-      const scrubbed = scrubValue(item, urls);
+      const scrubbed = scrubValue(item, m);
       if (scrubbed.changed) changed = true;
       return scrubbed.value;
     });
@@ -129,12 +159,12 @@ function scrubValue(value: unknown, urls: ReadonlySet<string>): ScrubResult {
   }
 
   if (isRecord(value)) {
-    if (isTiptapDoc(value)) return scrubTiptapNode(value, urls);
+    if (isTiptapDoc(value)) return scrubTiptapNode(value, m);
 
     let changed = false;
     const out: Record<string, unknown> = {};
     for (const [key, child] of Object.entries(value)) {
-      const scrubbed = scrubValue(child, urls);
+      const scrubbed = scrubValue(child, m);
       if (scrubbed.changed) changed = true;
       out[key] = scrubbed.value;
     }
@@ -142,6 +172,36 @@ function scrubValue(value: unknown, urls: ReadonlySet<string>): ScrubResult {
   }
 
   return { value, changed: false };
+}
+
+/** The top-level pass shared by every exported scrub (see their rules). */
+function scrubFields(fields: unknown, m: ScrubMatcher): ScrubResult {
+  if (!isRecord(fields)) return { value: fields, changed: false };
+
+  let changed = false;
+  const out: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (key === RESERVED_METADATA_KEY) {
+      out[key] = value;
+      continue;
+    }
+
+    // Top-level scalar field pointing straight at a scrubbed item → drop the
+    // key so the template default takes over.
+    if (typeof value === "string" && m.matchesString(value)) {
+      changed = true;
+      continue;
+    }
+
+    const scrubbed = scrubValue(value, m);
+    if (scrubbed.changed) changed = true;
+    out[key] = scrubbed.value;
+  }
+
+  return changed
+    ? { value: out, changed: true }
+    : { value: fields, changed: false };
 }
 
 /**
@@ -164,32 +224,37 @@ export function scrubUrlsFromCustomFields(
   fields: unknown,
   urls: ReadonlySet<string>,
 ): { value: unknown; changed: boolean } {
-  if (!isRecord(fields) || urls.size === 0) {
-    return { value: fields, changed: false };
-  }
+  if (urls.size === 0) return { value: fields, changed: false };
+  return scrubFields(fields, {
+    matchesString: (value) => isScrubbedUrl(value, urls),
+    matchesNode: (node) => isScrubbedMediaNode(node, urls),
+  });
+}
 
-  let changed = false;
-  const out: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(fields)) {
-    if (key === RESERVED_METADATA_KEY) {
-      out[key] = value;
-      continue;
-    }
-
-    // Top-level scalar field pointing straight at a scrubbed file → drop the
-    // key so the template default takes over.
-    if (typeof value === "string" && isScrubbedUrl(value, urls)) {
-      changed = true;
-      continue;
-    }
-
-    const scrubbed = scrubValue(value, urls);
-    if (scrubbed.changed) changed = true;
-    out[key] = scrubbed.value;
-  }
-
-  return changed
-    ? { value: out, changed: true }
-    : { value: fields, changed: false };
+/**
+ * Remove every reference to the gallery `ids` from a `customFields` blob.
+ *
+ * Same contract as `scrubUrlsFromCustomFields`, with gallery IDs in place of
+ * URLs (gallery-type fields and TipTap `gallery` nodes store an ID):
+ *  - A non-object, array, or nullish `fields` is returned untouched.
+ *  - The reserved `_sp` metadata key is never inspected or modified.
+ *  - A TOP-LEVEL field whose value is exactly a scrubbed ID has its KEY
+ *    DELETED, so the template's default applies.
+ *  - Any nested string equal to a scrubbed ID becomes `""`.
+ *  - Inside a TipTap document, a `gallery` node whose `attrs.galleryId` is a
+ *    scrubbed ID is removed from its parent `content` array.
+ *
+ * Matching is exact (no query-string handling — IDs are not URLs).
+ *
+ * @returns the (possibly new) blob and whether anything was removed.
+ */
+export function scrubGalleryIdsFromCustomFields(
+  fields: unknown,
+  ids: ReadonlySet<string>,
+): { value: unknown; changed: boolean } {
+  if (ids.size === 0) return { value: fields, changed: false };
+  return scrubFields(fields, {
+    matchesString: (value) => ids.has(value),
+    matchesNode: (node) => isScrubbedGalleryNode(node, ids),
+  });
 }

@@ -6,12 +6,17 @@ import { Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useProduct } from "~/hooks/use-product";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
+import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
+import { PinkProductCustomizer } from "./pink-product-customizer";
 import { PinkProductVariantPills } from "./pink-product-variant-pills";
 
 type Props = {
@@ -52,6 +57,7 @@ export function PinkProductActions({
     displayCompareAtPrice,
     isOnSale,
     handleAddToCart,
+    handleAddToCartWith,
     canAddMore,
     handleDecrement,
     handleIncrement,
@@ -64,11 +70,40 @@ export function PinkProductActions({
     displayTrustBadges,
   } = useProduct(product);
 
+  const cartEnabled = useCartEnabled();
+  const wishlistEnabled = useStorefrontFlags().isEnabled("wishlist");
   const { setVariantImageUrl } = useVariantImage();
 
   useEffect(() => {
     setVariantImageUrl(selectedVariant?.imageUrl ?? null);
   }, [selectedVariant?.imageUrl, setVariantImageUrl]);
+
+  // Product options (customizer). `product.customizer` is null when the
+  // feature is off or the product has no groups — then none of this shows.
+  // Called before the coming-soon early return (rules of hooks).
+  const customizer = useProductCustomizer({
+    customizer: product.customizer,
+    basePrice: displayPrice,
+    lineQty: quantity,
+  });
+  const configured = customizer.enabled;
+  const shownPrice = configured ? customizer.unitPrice : displayPrice;
+  const shownCompareAt =
+    isOnSale && displayCompareAtPrice
+      ? configured
+        ? displayCompareAtPrice + customizer.addOnTotal
+        : displayCompareAtPrice
+      : null;
+
+  const handleAdd = () => {
+    if (!configured) {
+      handleAddToCart();
+      return;
+    }
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (!customizer.revealErrors()) return;
+    handleAddToCartWith((item) => applyCustomizerToCartItem(item, customizer));
+  };
 
   if (additionalFields?.comingSoon) {
     return (
@@ -107,15 +142,18 @@ export function PinkProductActions({
         <span
           className="pink-display"
           style={{ fontSize: "26px", fontWeight: 600 }}
+          // Announce the build's price as options change it.
+          aria-live={configured ? "polite" : undefined}
+          aria-atomic={configured ? "true" : undefined}
         >
-          {formatPrice(displayPrice)}
+          {formatPrice(shownPrice)}
         </span>
-        {isOnSale && displayCompareAtPrice && (
+        {shownCompareAt != null && (
           <span
             className="text-[16px] line-through"
             style={{ color: "var(--pink-subtle)" }}
           >
-            {formatPrice(displayCompareAtPrice)}
+            {formatPrice(shownCompareAt)}
           </span>
         )}
       </div>
@@ -127,6 +165,11 @@ export function PinkProductActions({
           onSelect={handleOptionSelect}
         />
       )}
+
+      {/* Options sit between the variant pills and the buy row. */}
+      {cartEnabled && inStock ? (
+        <PinkProductCustomizer controller={customizer} />
+      ) : null}
 
       {!inStock ? (
         <div className="flex flex-col gap-4">
@@ -161,71 +204,80 @@ export function PinkProductActions({
               ~426px, wider than a phone column (and each half of the
               two-column tablet layout) — without wrapping the row pushed the
               whole details column past the viewport. */}
-          <div className="flex flex-wrap items-stretch gap-3">
-            <div
-              className="flex items-center"
-              style={{ border: "1px solid var(--pink-ink)" }}
-            >
-              <button
-                type="button"
-                onClick={handleDecrement}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-                className="flex items-center justify-center disabled:opacity-30"
-                style={{ width: 44, height: 52 }}
-              >
-                <Minus className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-              <span
-                className="w-10 text-center text-[15px]"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={handleIncrement}
-                disabled={!canAddMore}
-                aria-label="Increase quantity"
-                className="flex items-center justify-center disabled:opacity-30"
-                style={{ width: 44, height: 52 }}
-              >
-                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+          {cartEnabled || wishlistEnabled ? (
+            <div className="flex flex-wrap items-stretch gap-3">
+              {/* Catalog mode (B6.11): no qty or Add to basket when `cart` is off */}
+              {cartEnabled ? (
+                <>
+                  <div
+                    className="flex items-center"
+                    style={{ border: "1px solid var(--pink-ink)" }}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleDecrement}
+                      disabled={quantity <= 1}
+                      aria-label="Decrease quantity"
+                      className="flex items-center justify-center disabled:opacity-30"
+                      style={{ width: 44, height: 52 }}
+                    >
+                      <Minus className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                    <span
+                      className="w-10 text-center text-[15px]"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleIncrement}
+                      disabled={!canAddMore}
+                      aria-label="Increase quantity"
+                      className="flex items-center justify-center disabled:opacity-30"
+                      style={{ width: 44, height: 52 }}
+                    >
+                      <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={!canAddMore}
+                    className="flex flex-1 items-center justify-center px-6 text-[15px] font-semibold transition-colors"
+                    style={{
+                      minWidth: 220,
+                      height: 52,
+                      background: justAdded
+                        ? "var(--pink-ink)"
+                        : "var(--pink-rose)",
+                      border: `1px solid ${justAdded ? "var(--pink-ink)" : "var(--pink-rose)"}`,
+                      color: "var(--pink-on-accent)",
+                    }}
+                  >
+                    {justAdded ? "Added ✓" : "Add to basket"}
+                  </button>
+                </>
+              ) : null}
+
+              <WishlistButton
+                item={{
+                  productId: product.id,
+                  name: product.name,
+                  slug: product.slug,
+                  price: displayPrice,
+                  imageUrl: product.images[0]?.url ?? null,
+                }}
+                className="static flex size-[52px] shrink-0 items-center justify-center border bg-transparent text-[var(--pink-ink)] shadow-none backdrop-blur-none hover:scale-100 hover:border-[var(--pink-rose)] hover:text-[var(--pink-rose)]"
+                iconClassName="size-5"
+              />
             </div>
-
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={!canAddMore}
-              className="flex flex-1 items-center justify-center px-6 text-[15px] font-semibold transition-colors"
-              style={{
-                minWidth: 220,
-                height: 52,
-                background: justAdded ? "var(--pink-ink)" : "var(--pink-rose)",
-                border: `1px solid ${justAdded ? "var(--pink-ink)" : "var(--pink-rose)"}`,
-                color: "var(--pink-on-accent)",
-              }}
-            >
-              {justAdded ? "Added ✓" : "Add to basket"}
-            </button>
-
-            <WishlistButton
-              item={{
-                productId: product.id,
-                name: product.name,
-                slug: product.slug,
-                price: displayPrice,
-                imageUrl: product.images[0]?.url ?? null,
-              }}
-              className="static flex size-[52px] shrink-0 items-center justify-center border bg-transparent text-[var(--pink-ink)] shadow-none backdrop-blur-none hover:scale-100 hover:border-[var(--pink-rose)] hover:text-[var(--pink-rose)]"
-              iconClassName="size-5"
-            />
-          </div>
+          ) : null}
 
           <div aria-live="polite" aria-atomic="true" className="sr-only">
-            {justAdded ? `${product.name} added to basket` : ""}
+            {cartEnabled && justAdded ? `${product.name} added to basket` : ""}
           </div>
 
           {isInventoryTracked ? (

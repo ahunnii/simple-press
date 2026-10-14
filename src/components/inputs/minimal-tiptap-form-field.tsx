@@ -107,6 +107,8 @@ type Props<CurrentForm extends FieldValues> = {
    * upload behavior (e.g. a different route/scoping).
    */
   uploader?: (file: File) => Promise<string>;
+  /** See `UseMinimalTiptapEditorProps.onUploadingChange`. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
@@ -128,6 +130,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   mediaEnabled,
   required,
   uploader,
+  onUploadingChange,
 }: Props<CurrentForm>) => {
   // Stable reference so useMinimalTiptapEditor's extensions memo (keyed on
   // `uploader`) doesn't recreate the editor every render.
@@ -168,6 +171,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 uploader={resolvedUploader}
                 videoUploader={videosEnabled ? uploadRichTextVideo : undefined}
                 mediaEnabled={mediaEnabled}
+                onUploadingChange={onUploadingChange}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

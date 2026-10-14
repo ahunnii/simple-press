@@ -10,7 +10,8 @@ import type { CartItem } from "~/providers/cart-context";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import {
@@ -25,11 +26,6 @@ import {
   OliveRevealGroup,
   useOliveFigureChange,
 } from "../shared";
-
-/** A leaving line's key — the same pair the cart provider itself keys on. */
-function lineKey(productId: string, variantId: string | null | undefined) {
-  return `${productId}-${variantId ?? "base"}`;
-}
 
 /**
  * How long the leaving row spends on each half of its exit: the arrival
@@ -90,7 +86,7 @@ export function OliveCartContents({
   emptyBody,
   emptyCta,
 }: Props) {
-  const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
+  const { items, updateLineQuantity, removeLine, total, isHydrated } =
     useCart();
   // PF16 / B7.4: `/checkout` 404s with the flag off, so the CTA that leads
   // there must not render — no disabled state, just no CTA (per bamboo/vii).
@@ -98,7 +94,7 @@ export function OliveCartContents({
   const checkoutEnabled = isEnabled("checkout");
 
   // Rows mid-exit: the visual leaves immediately on click, but the actual
-  // `removeItem` call — and the count the live region announces — waits for
+  // `removeLine` call — and the count the live region announces — waits for
   // it, so a double-click can't remove the same line twice.
   const [leaving, setLeaving] = useState<Set<string>>(() => new Set());
 
@@ -107,12 +103,12 @@ export function OliveCartContents({
   // full list.
   const totalSettling = useOliveFigureChange(total);
 
-  const handleRemove = (productId: string, variantId: string | null) => {
-    const key = lineKey(productId, variantId);
+  // Keyed by `cartItemId`: each configured build is its own line.
+  const handleRemove = (key: string) => {
     if (leaving.has(key)) return;
     setLeaving((current) => new Set(current).add(key));
     setTimeout(() => {
-      removeItem(productId, variantId);
+      removeLine(key);
       setLeaving((current) => {
         const next = new Set(current);
         next.delete(key);
@@ -158,10 +154,7 @@ export function OliveCartContents({
   // live region it feeds — reflects the click immediately rather than
   // waiting for the row's 520ms exit to finish.
   const pendingRemovalQty = items.reduce(
-    (sum, item) =>
-      leaving.has(lineKey(item.productId, item.variantId))
-        ? sum + item.quantity
-        : sum,
+    (sum, item) => (leaving.has(cartItemId(item)) ? sum + item.quantity : sum),
     0,
   );
   const itemCount =
@@ -186,21 +179,24 @@ export function OliveCartContents({
 
         <OliveRevealGroup fan>
           <ul className="flex flex-col gap-4">
-            {items.map((item, i) => (
-              <OliveCartLine
-                key={lineKey(item.productId, item.variantId)}
-                item={item}
-                index={i}
-                isLeaving={leaving.has(lineKey(item.productId, item.variantId))}
-                onIncrement={() =>
-                  incrementItem(item.productId, item.variantId)
-                }
-                onDecrement={() =>
-                  decrementItem(item.productId, item.variantId)
-                }
-                onRemove={() => handleRemove(item.productId, item.variantId)}
-              />
-            ))}
+            {items.map((item, i) => {
+              const lineId = cartItemId(item);
+              return (
+                <OliveCartLine
+                  key={lineId}
+                  item={item}
+                  index={i}
+                  isLeaving={leaving.has(lineId)}
+                  onIncrement={() =>
+                    updateLineQuantity(lineId, item.quantity + 1)
+                  }
+                  onDecrement={() =>
+                    updateLineQuantity(lineId, item.quantity - 1)
+                  }
+                  onRemove={() => handleRemove(lineId)}
+                />
+              );
+            })}
           </ul>
         </OliveRevealGroup>
       </div>
@@ -287,7 +283,7 @@ type OliveCartLineProps = {
  * then a `1fr → 0fr` collapse — timed in CSS via `transition-delay` on
  * `.olive-cart-line[data-leaving="true"]` so the two phases run in series off
  * one attribute, no second JS timer needed here. The parent defers the actual
- * `removeItem` (and disables this button via `isLeaving`) for exactly as long
+ * `removeLine` (and disables this button via `isLeaving`) for exactly as long
  * as both phases take; the item-count live region above already reflects the
  * removal the instant the click happens.
  */
@@ -369,6 +365,10 @@ function OliveCartLine({
                         <span>{item.variantName}</span>
                       </p>
                     ) : null}
+                    <CartLineOptions
+                      item={item}
+                      className="olive-caption mt-1"
+                    />
                   </div>
 
                   <button

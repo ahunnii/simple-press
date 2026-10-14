@@ -1,11 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check, Minus, Plus } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -20,6 +24,14 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the parent, which also renders the
+   * price). When enabled, Add to Cart first requires a complete build and
+   * then adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the qty / Add to Cart row. */
+  customizerSlot?: ReactNode;
 };
 
 /**
@@ -40,8 +52,11 @@ export function BambooVariantSelector({
   product,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -81,10 +96,13 @@ export function BambooVariantSelector({
     .map((variant) => variant.name);
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity, // ← Add specified quantity
     );
 
@@ -150,67 +168,74 @@ export function BambooVariantSelector({
         )}
       </fieldset>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Quantity Selection */}
-        {selectedVariant && (
-          <div className="bamboo-qty-stepper">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
-            >
-              <Minus className="size-4" aria-hidden="true" />
-            </button>
-            <span aria-live="polite" aria-atomic="true">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.min(effectiveMax, quantity + 1))}
-              disabled={quantity >= effectiveMax}
-              aria-label="Increase quantity"
-            >
-              <Plus className="size-4" aria-hidden="true" />
-            </button>
-          </div>
-        )}
+      {customizerSlot}
 
-        {/* Add to Cart */}
-        {(() => {
-          const isUnavailable =
-            !selectedVariant ||
-            (product.trackInventory &&
-              selectedVariant.inventoryQty === 0 &&
-              !product.allowBackorders);
-          return (
-            <button
-              type="button"
-              onClick={() => {
-                if (isUnavailable) return;
-                handleAddToCart();
-              }}
-              disabled={isUnavailable}
-              className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-            >
-              {isAdded ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Added to Cart
-                </>
-              ) : (
-                `Add ${quantity} to Cart`
-              )}
-            </button>
-          );
-        })()}
-        {/* S-1: live region announces add-to-cart confirmation */}
-        <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {isAdded && selectedVariant
-            ? `${product.name} — ${selectedVariant.name} added to cart`
-            : ""}
+      {/* Catalog mode (B6.11): no qty or Add to Cart when `cart` is off */}
+      {cartEnabled && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Quantity Selection */}
+          {selectedVariant && (
+            <div className="bamboo-qty-stepper">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Decrease quantity"
+              >
+                <Minus className="size-4" aria-hidden="true" />
+              </button>
+              <span aria-live="polite" aria-atomic="true">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setQuantity(Math.min(effectiveMax, quantity + 1))
+                }
+                disabled={quantity >= effectiveMax}
+                aria-label="Increase quantity"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+
+          {/* Add to Cart */}
+          {(() => {
+            const isUnavailable =
+              !selectedVariant ||
+              (product.trackInventory &&
+                selectedVariant.inventoryQty === 0 &&
+                !product.allowBackorders);
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  if (isUnavailable) return;
+                  handleAddToCart();
+                }}
+                disabled={isUnavailable}
+                className="bamboo-btn bamboo-btn-primary flex-1 justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+              >
+                {isAdded ? (
+                  <>
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    Added to Cart
+                  </>
+                ) : (
+                  `Add ${quantity} to Cart`
+                )}
+              </button>
+            );
+          })()}
+          {/* S-1: live region announces add-to-cart confirmation */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
+            {isAdded && selectedVariant
+              ? `${product.name} — ${selectedVariant.name} added to cart`
+              : ""}
+          </div>
         </div>
-      </div>
+      )}
       {selectedVariant && product.trackInventory && (
         <p className="mt-2 text-[0.86rem] text-[var(--bamboo-ink-soft)]">
           {isBackordered

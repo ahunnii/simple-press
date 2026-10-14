@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -449,7 +451,7 @@ export function UmscCheckoutForm({
               <div className="flex max-h-[260px] flex-col gap-3.5 overflow-y-auto">
                 {f.items.map((item) => (
                   <div
-                    key={`${item.productId}-${item.variantId}`}
+                    key={cartItemId(item)}
                     className="flex items-start gap-3"
                   >
                     <div className="relative size-14 shrink-0 overflow-hidden border border-[var(--umsc-line)] bg-[var(--umsc-cream)]">
@@ -477,6 +479,11 @@ export function UmscCheckoutForm({
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        showPrices={false}
+                        className="umsc-sans text-[12px] text-[var(--umsc-muted)]"
+                      />
                       <p className="umsc-sans text-[12px] text-[var(--umsc-muted)]">
                         Qty: {item.quantity}
                       </p>
@@ -568,6 +575,16 @@ export function UmscCheckoutForm({
                     >
                       Discount applied: <strong>{f.discountCodeLabel}</strong> —
                       you saved {formatPrice(f.discountAmount)}
+                    </p>
+                  )}
+
+                  {f.discountCodeLabel && f.discountFreeShipping && (
+                    <p
+                      role="status"
+                      className="umsc-sans border border-[var(--umsc-success)]/30 bg-[var(--umsc-success)]/10 px-3 py-2 text-[12px] leading-[1.4] text-[var(--umsc-success)]"
+                    >
+                      Free shipping applied:{" "}
+                      <strong>{f.discountCodeLabel}</strong>
                     </p>
                   )}
                 </div>

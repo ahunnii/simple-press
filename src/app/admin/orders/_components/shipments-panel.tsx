@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { orderItemOptionLines } from "~/lib/customizer/display";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -40,6 +41,11 @@ type OrderItemInfo = {
   id: string;
   productName: string;
   variantName: string | null;
+  /**
+   * `OrderItem.customization` — tells two builds of the same product apart
+   * in a shipment's contents (product customizer).
+   */
+  customization?: unknown;
 };
 
 type Props = {
@@ -123,8 +129,13 @@ export function ShipmentsPanel({
     return rows
       .map((row) => {
         const item = orderItems.find((it) => it.id === row.orderItemId);
+        const options = item
+          ? orderItemOptionLines(item.customization)
+              .map((line) => `${line.label}: ${line.value}`)
+              .join(" · ")
+          : "";
         const name = item
-          ? `${item.productName}${item.variantName ? ` (${item.variantName})` : ""}`
+          ? `${item.productName}${item.variantName ? ` (${item.variantName})` : ""}${options ? ` [${options}]` : ""}`
           : "Unknown item";
         return `${row.quantity}× ${name}`;
       })

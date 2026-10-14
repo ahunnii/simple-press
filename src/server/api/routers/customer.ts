@@ -5,6 +5,10 @@ import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
+import {
+  customizationLines,
+  readCustomizationSnapshot,
+} from "~/lib/customizer";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { listLedger } from "~/lib/loyalty/ledger";
 import { normalizeEmail } from "~/lib/utils";
@@ -444,14 +448,28 @@ export const customerRouter = createTRPCRouter({
         discount: o.discount,
         total: o.total,
         createdAt: o.createdAt,
-        items: o.items.map((i) => ({
-          productName: i.productName,
-          variantName: i.variantName,
-          sku: i.sku,
-          price: i.price,
-          quantity: i.quantity,
-          total: i.total,
-        })),
+        items: o.items.map((i) => {
+          // Product options as the shopper saw them ("Charms: Heart,
+          // Star") — never the raw snapshot, which carries internal ids.
+          const snapshot = readCustomizationSnapshot(i.customization);
+          return {
+            productName: i.productName,
+            variantName: i.variantName,
+            sku: i.sku,
+            price: i.price,
+            quantity: i.quantity,
+            total: i.total,
+            ...(snapshot
+              ? {
+                  options: customizationLines(snapshot).map((line) => ({
+                    name: line.label,
+                    value: line.value,
+                    price: line.price,
+                  })),
+                }
+              : {}),
+          };
+        }),
         shippingAddress: o.shippingAddress
           ? {
               firstName: o.shippingAddress.firstName,

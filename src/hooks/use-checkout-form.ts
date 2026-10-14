@@ -9,6 +9,7 @@ import type {
   DefaultCheckoutPageTemplateProps,
 } from "~/app/(storefront)/_templates/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
+import type { CartItem } from "~/providers/cart-context";
 import {
   getAllowedCountries, // used at runtime inside useCheckoutForm
 } from "~/lib/geo/regions";
@@ -19,7 +20,13 @@ import {
 } from "~/lib/shipping-utils";
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
-import { useCart } from "~/providers/cart-context";
+import {
+  cartItemId,
+  checkoutLineKey,
+  findLineByCheckoutKey,
+  matchesCartLine,
+  useCart,
+} from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useDiscountCode } from "./use-discount-code";
@@ -57,6 +64,9 @@ type UseCheckoutFormReturn = {
   setDiscountCodeInput: (v: string) => void;
   discountCodeId: string | null;
   discountAmount: number;
+  // True when the applied code is a free-shipping code. `shipping` is already
+  // 0 (and not pending) in that case, so summaries just render "Free".
+  discountFreeShipping: boolean;
   discountCodeLabel: string | null;
   discountFieldError: string | null;
   setDiscountFieldError: (v: string | null) => void;
@@ -95,10 +105,59 @@ const noopApplyDiscount = () => {
 type CreateSessionResponse = {
   error?: string;
   unavailableItems?: string[];
-  unavailableItemIds?: { productId: string; variantId: string | null }[];
+  // `lineKey` echoes the `lineKey` this client sent for the rejected line.
+  // Older servers omit it — read defensively.
+  unavailableItemIds?: {
+    productId: string;
+    variantId: string | null;
+    lineKey?: unknown;
+  }[];
   sessionUrl?: string;
   sessionId?: string;
 };
+
+/**
+ * One cart line as posted to `create-session`: the cart fields plus the
+ * line's `lineKey` (echoed back on rejection). The display-only
+ * `customization` and the derived `configKey` stay in the browser — the
+ * server re-prices `configuration` from ids.
+ */
+function toCheckoutItem(item: CartItem) {
+  const line: Partial<CartItem> & { lineKey: string } = {
+    ...item,
+    lineKey: checkoutLineKey(item),
+  };
+  delete line.customization;
+  delete line.configKey;
+  return line;
+}
+
+/**
+ * The cart line ids to drop for a rejected checkout. A row that echoes our
+ * `lineKey` removes exactly that line (so one sold-out build doesn't take
+ * the shopper's other builds of the same glove with it). A row without one
+ * (an older server) falls back to the old rule: every line of that
+ * product/variant, configured lines included.
+ */
+export function linesToRemoveForRejection(
+  items: readonly CartItem[],
+  rows: NonNullable<CreateSessionResponse["unavailableItemIds"]>,
+): string[] {
+  const ids = new Set<string>();
+  for (const row of rows) {
+    if (typeof row.lineKey === "string" && row.lineKey !== "") {
+      const line = findLineByCheckoutKey(items, row.lineKey);
+      if (line) ids.add(cartItemId(line));
+      continue;
+    }
+    for (const item of items) {
+      if (matchesCartLine(item, row.productId, row.variantId ?? null)) {
+        ids.add(cartItemId(item));
+      }
+    }
+  }
+  return [...ids];
+}
 
 // Shown to the shopper when the checkout endpoint answers with something that
 // is not JSON (a 502 HTML page, a WAF challenge, a proxy interstitial). Before
@@ -301,12 +360,36 @@ export function useCheckoutForm(
 ): UseCheckoutFormReturn {
   const { isEnabled } = useStorefrontFlags();
   const couponsEnabled = isEnabled("coupons");
-  const { items, removeItem, subtotal } = useCart();
+  const { items, removeLine, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   const [isProcessing, setIsProcessing] = useState(false);
+  // Synchronous re-entrancy guard for `handleSubmit`. `isProcessing` only
+  // reaches the buttons after React re-renders, so two clicks / Enter presses
+  // in the same tick would both pass a state check and send two create-session
+  // requests (the second can then collide with the first's fresh discount
+  // hold). A ref flips immediately.
+  const submitInFlightRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+
+  // A successful submit deliberately leaves `submitInFlightRef` and
+  // `isProcessing` set while the page navigates to Stripe. If the shopper
+  // presses Back, the browser may restore this page from the back/forward
+  // cache with that state frozen in place, leaving Continue dead until a
+  // manual reload. `pageshow` with `persisted` is the bfcache-restore signal;
+  // reset so the Back-then-retry path (which create-session's supersede logic
+  // supports) works. A normal load has `persisted === false` and is left alone.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      submitInFlightRef.current = false;
+      setIsProcessing(false);
+      setError(null);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -334,6 +417,8 @@ export function useCheckoutForm(
   // When coupons are disabled, never let an applied/stale discount affect
   // totals or the checkout payload — treat it as if none was applied.
   const effectiveDiscountAmount = couponsEnabled ? discount.discountAmount : 0;
+  const effectiveDiscountFreeShipping =
+    couponsEnabled && discount.discountFreeShipping;
   const effectiveDiscountCodeId = couponsEnabled
     ? discount.discountCodeId
     : null;
@@ -442,6 +527,16 @@ export function useCheckoutForm(
       deliveryMethod === "pickup"
         ? 0
         : calculateShipping(subtotal, shippingConfig);
+    isQuotingShipping = false;
+    shippingPending = false;
+  }
+
+  // A free-shipping code's validate amount is 0 (shipping isn't known then);
+  // create-session sets the real discount to the computed shipping cost. The
+  // payload only carries the code id, so zeroing shipping here is display-only
+  // and mirrors what Stripe will charge — no double-discount.
+  if (effectiveDiscountFreeShipping && deliveryMethod === "ship") {
+    shipping = 0;
     isQuotingShipping = false;
     shippingPending = false;
   }
@@ -560,6 +655,8 @@ export function useCheckoutForm(
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
     setError(null);
     setIsProcessing(true);
 
@@ -633,7 +730,7 @@ export function useCheckoutForm(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items,
+          items: items.map(toCheckoutItem),
           deliveryMethod,
           customerInfo: {
             email,
@@ -679,8 +776,11 @@ export function useCheckoutForm(
         });
 
         if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
-          for (const row of data.unavailableItemIds) {
-            removeItem(row.productId, row.variantId);
+          for (const lineId of linesToRemoveForRejection(
+            items,
+            data.unavailableItemIds,
+          )) {
+            removeLine(lineId);
           }
         }
         if (data.unavailableItems && data.unavailableItems.length > 0) {
@@ -692,6 +792,7 @@ export function useCheckoutForm(
         } else {
           setError(data.error ?? "Failed to create checkout session");
         }
+        submitInFlightRef.current = false;
         setIsProcessing(false);
         return;
       }
@@ -716,10 +817,14 @@ export function useCheckoutForm(
           },
         });
         setError("Failed to create checkout session");
+        submitInFlightRef.current = false;
         setIsProcessing(false);
         return;
       }
 
+      // Success: the page navigates away to Stripe, so the guard stays set
+      // (a late second submit must not create another session). The
+      // assignment throwing is handled by the catch below.
       window.location.href = sessionUrl;
     } catch (err: unknown) {
       // Only report once the request was actually attempted: a network failure
@@ -746,6 +851,7 @@ export function useCheckoutForm(
         });
       }
       setError((err as Error).message ?? "Failed to create checkout session");
+      submitInFlightRef.current = false;
       setIsProcessing(false);
     }
   };
@@ -777,6 +883,7 @@ export function useCheckoutForm(
     setDiscountCodeInput: discount.setDiscountCodeInput,
     discountCodeId: effectiveDiscountCodeId,
     discountAmount: effectiveDiscountAmount,
+    discountFreeShipping: effectiveDiscountFreeShipping,
     discountCodeLabel: discount.discountCodeLabel,
     discountFieldError: discount.discountFieldError,
     setDiscountFieldError: discount.setDiscountFieldError,

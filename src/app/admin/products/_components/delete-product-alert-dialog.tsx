@@ -11,8 +11,12 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 
+import { OptionUsageWarning } from "./option-usage-warning";
+
 /** Just what the copy needs to name the row and state the consequences. */
 export type DeleteProductTarget = {
+  /** When present, the dialog warns if the product is used as an option. */
+  id?: string;
   name: string;
   slug: string;
   published: boolean;
@@ -61,6 +65,7 @@ export const DeleteProductAlertDialog = ({
             Past orders keep their own record of what was bought. This action
             cannot be undone.
           </AlertDialogDescription>
+          {open && <OptionUsageWarning productId={product?.id} />}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>

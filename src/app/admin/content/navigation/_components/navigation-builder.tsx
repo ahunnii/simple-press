@@ -6,10 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ChevronDown, Info, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  FOOTER_QUICK_LINKS_TEMPLATES,
-  topLevelNav,
-} from "~/app/(storefront)/_components/nav";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -18,6 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK,
+  FOOTER_QUICK_LINKS_TEMPLATES,
+  topLevelNav,
+} from "~/app/(storefront)/_components/nav";
 
 type NavChild = {
   label: string;
@@ -51,6 +52,10 @@ type Props = {
   productsEnabled?: boolean;
   /** Gates the Quick Add "Collections" shortcut. */
   collectionsEnabled?: boolean;
+  /** Gates the Quick Add "Events" shortcut. */
+  eventsEnabled?: boolean;
+  /** Gates the Quick Add "Videos" shortcut. */
+  videosEnabled?: boolean;
   /** Gates the Quick Add "Donate" shortcut. */
   donationsEnabled?: boolean;
   /** Label for the Donate quick-add button (e.g., "Donate", "Contribute"). */
@@ -65,6 +70,8 @@ export function NavigationBuilder({
   blogEnabled,
   productsEnabled,
   collectionsEnabled,
+  eventsEnabled,
+  videosEnabled,
   donationsEnabled,
   donationNavLabel,
 }: Props) {
@@ -218,17 +225,15 @@ export function NavigationBuilder({
 
     const newIndex = direction === "up" ? index - 1 : index + 1;
     const updated = [...footerItems];
-    [updated[index], updated[newIndex]] = [
-      updated[newIndex]!,
-      updated[index]!,
-    ];
+    [updated[index], updated[newIndex]] = [updated[newIndex]!, updated[index]!];
     setFooterItems(updated);
   };
 
   // Switching Custom → Main leaves `footerItems` alone (it just stops being
   // used) so toggling back doesn't lose work. Switching Main → Custom with an
-  // empty custom list pre-fills from the live main nav, matching what the
-  // footer would have shown a moment ago in "Use main navigation" mode.
+  // empty custom list pre-fills from the live main nav (a sensible starting
+  // point on every template, including those whose "default links" mode
+  // shows a built-in list instead).
   const handleFooterModeChange = (mode: "main" | "custom") => {
     if (mode === "custom" && footerItems.length === 0) {
       setFooterItems(topLevelNav(navItems));
@@ -258,6 +263,10 @@ export function NavigationBuilder({
   const templateHasFooterQuickLinks = FOOTER_QUICK_LINKS_TEMPLATES.includes(
     business.templateId,
   );
+  // Templates whose footer falls back to their own built-in list (not the
+  // main nav) when no footer list is saved.
+  const builtInFooterDescription =
+    FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK[business.templateId];
 
   const initialNavItems = siteContent.navigationItems ?? [];
   const isSameOrder = navItems.every((item, i) => {
@@ -567,8 +576,8 @@ export function NavigationBuilder({
                     <AlertTitle>Not shown on your current template</AlertTitle>
                     <AlertDescription>
                       Your current template doesn&apos;t show a footer links
-                      column, so these links won&apos;t appear until you
-                      switch to a template that does.
+                      column, so these links won&apos;t appear until you switch
+                      to a template that does.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -583,44 +592,51 @@ export function NavigationBuilder({
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="main" id="footer-mode-main" />
                     <Label htmlFor="footer-mode-main" className="font-normal">
-                      Use main navigation
+                      {builtInFooterDescription
+                        ? "Use template's default links"
+                        : "Use main navigation"}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="custom" id="footer-mode-custom" />
-                    <Label
-                      htmlFor="footer-mode-custom"
-                      className="font-normal"
-                    >
+                    <Label htmlFor="footer-mode-custom" className="font-normal">
                       Custom list
                     </Label>
                   </div>
                 </RadioGroup>
 
                 {footerMode === "main" ? (
-                  <div className="space-y-2">
+                  builtInFooterDescription ? (
                     <p className="text-muted-foreground text-sm">
-                      Your footer shows the top-level links from your main
-                      navigation. Dropdown links are left out to keep the
-                      footer compact.
+                      Your template&apos;s footer shows its own built-in links:{" "}
+                      {builtInFooterDescription}. Choose Custom list to pick
+                      your own.
                     </p>
-                    {mainNavPreview.length === 0 ? (
+                  ) : (
+                    <div className="space-y-2">
                       <p className="text-muted-foreground text-sm">
-                        No links
+                        Your footer shows the top-level links from your main
+                        navigation. Dropdown links are left out to keep the
+                        footer compact.
                       </p>
-                    ) : (
-                      <ul className="space-y-1">
-                        {mainNavPreview.map((item, i) => (
-                          <li key={i} className="text-sm">
-                            {item.label}{" "}
-                            <span className="text-muted-foreground">
-                              — {item.href}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                      {mainNavPreview.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">
+                          No links
+                        </p>
+                      ) : (
+                        <ul className="space-y-1">
+                          {mainNavPreview.map((item, i) => (
+                            <li key={i} className="text-sm">
+                              {item.label}{" "}
+                              <span className="text-muted-foreground">
+                                — {item.href}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )
                 ) : (
                   <div className="space-y-4">
                     <Button
@@ -650,9 +666,7 @@ export function NavigationBuilder({
                                   ▲
                                 </button>
                                 <button
-                                  onClick={() =>
-                                    moveFooterItem(index, "down")
-                                  }
+                                  onClick={() => moveFooterItem(index, "down")}
                                   disabled={index === footerItems.length - 1}
                                   aria-label="Move link down"
                                   className="text-muted-foreground hover:text-foreground disabled:opacity-30"
@@ -762,6 +776,8 @@ export function NavigationBuilder({
                       blogEnabled={blogEnabled}
                       productsEnabled={productsEnabled}
                       collectionsEnabled={collectionsEnabled}
+                      eventsEnabled={eventsEnabled}
+                      videosEnabled={videosEnabled}
                       donationsEnabled={donationsEnabled}
                       donationNavLabel={donationNavLabel}
                       pages={business.pages}
@@ -783,6 +799,8 @@ export function NavigationBuilder({
               blogEnabled={blogEnabled}
               productsEnabled={productsEnabled}
               collectionsEnabled={collectionsEnabled}
+              eventsEnabled={eventsEnabled}
+              videosEnabled={videosEnabled}
               donationsEnabled={donationsEnabled}
               donationNavLabel={donationNavLabel}
               pages={business.pages}
@@ -806,6 +824,8 @@ type QuickAddPanelProps = {
   blogEnabled?: boolean;
   productsEnabled?: boolean;
   collectionsEnabled?: boolean;
+  eventsEnabled?: boolean;
+  videosEnabled?: boolean;
   donationsEnabled?: boolean;
   donationNavLabel?: string;
   pages: Array<{ title: string; slug: string }>;
@@ -826,6 +846,8 @@ function QuickAddPanel({
   blogEnabled,
   productsEnabled,
   collectionsEnabled,
+  eventsEnabled,
+  videosEnabled,
   donationsEnabled,
   donationNavLabel,
   pages,
@@ -896,6 +918,34 @@ function QuickAddPanel({
                 Blog
               </Button>
             )}
+            {eventsEnabled && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => addPage("events", "Events")}
+              >
+                Events
+              </Button>
+            )}
+            {videosEnabled && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => addPage("videos", "Videos")}
+              >
+                Videos
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => addPage("faq", "FAQ")}
+            >
+              FAQ
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -917,9 +967,7 @@ function QuickAddPanel({
                 variant="outline"
                 size="sm"
                 className="w-full justify-start"
-                onClick={() =>
-                  addPage("donate", donationNavLabel ?? "Donate")
-                }
+                onClick={() => addPage("donate", donationNavLabel ?? "Donate")}
               >
                 {donationNavLabel ?? "Donate"}
               </Button>

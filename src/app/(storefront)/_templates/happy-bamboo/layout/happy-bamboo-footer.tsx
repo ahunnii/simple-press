@@ -8,6 +8,7 @@ import { telHref } from "~/lib/tel-href";
 import { api } from "~/trpc/server";
 import { Separator } from "~/components/ui/separator";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -36,6 +37,8 @@ export async function HappyBambooFooter({
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: HB_DEFAULT_NAV,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
 
   const policies = await api.content.getSimplifiedPages({

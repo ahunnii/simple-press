@@ -55,6 +55,9 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const [reason, setReason] = useState("");
   const [restockItems, setRestockItems] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
+  // Cancelling may already have returned items to inventory, so restocking on
+  // a refund of a cancelled order would double-count — never offer it.
+  const canRestock = order.status !== "cancelled";
   // Remaining refundable = order total minus what has already been refunded.
   // On a partially-refunded order the remainder is the true ceiling — defaulting
   // to order.total would over-request and the server (which caps at the
@@ -114,7 +117,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
       orderId: order.id,
       amount: amountCents,
       reason: reason || undefined,
-      restockItems,
+      restockItems: canRestock && restockItems,
       sendEmail,
     });
   };
@@ -213,19 +216,21 @@ function StripeRefundDialog({ order }: { order: Order }) {
 
           {/* Options */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Checkbox
-                id="restock-items"
-                checked={restockItems}
-                onCheckedChange={(v) => setRestockItems(!!v)}
-              />
-              <Label
-                htmlFor="restock-items"
-                className="cursor-pointer font-normal"
-              >
-                Return items to inventory
-              </Label>
-            </div>
+            {canRestock && (
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="restock-items"
+                  checked={restockItems}
+                  onCheckedChange={(v) => setRestockItems(!!v)}
+                />
+                <Label
+                  htmlFor="restock-items"
+                  className="cursor-pointer font-normal"
+                >
+                  Return items to inventory
+                </Label>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <Checkbox
                 id="send-refund-email"
@@ -292,6 +297,8 @@ function ManualRefundDialog({ order }: { order: Order }) {
   const [reason, setReason] = useState("");
   const [restockItems, setRestockItems] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
+  // Same as the Stripe dialog: a cancelled order may already be restocked.
+  const canRestock = order.status !== "cancelled";
 
   const markRefundedMutation = api.order.markAsRefunded.useMutation({
     onSuccess: () => {
@@ -353,19 +360,21 @@ function ManualRefundDialog({ order }: { order: Order }) {
 
           {/* Options */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Checkbox
-                id="manual-restock-items"
-                checked={restockItems}
-                onCheckedChange={(v) => setRestockItems(!!v)}
-              />
-              <Label
-                htmlFor="manual-restock-items"
-                className="cursor-pointer font-normal"
-              >
-                Return items to inventory
-              </Label>
-            </div>
+            {canRestock && (
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="manual-restock-items"
+                  checked={restockItems}
+                  onCheckedChange={(v) => setRestockItems(!!v)}
+                />
+                <Label
+                  htmlFor="manual-restock-items"
+                  className="cursor-pointer font-normal"
+                >
+                  Return items to inventory
+                </Label>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <Checkbox
                 id="manual-send-email"
@@ -404,7 +413,7 @@ function ManualRefundDialog({ order }: { order: Order }) {
               markRefundedMutation.mutate({
                 orderId: order.id,
                 reason: reason || undefined,
-                restockItems,
+                restockItems: canRestock && restockItems,
                 sendEmail,
               })
             }

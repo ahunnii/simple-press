@@ -29,10 +29,10 @@ vi.mock("~/server/db", () => ({
     faqItem: { count: vi.fn() },
     page: { count: vi.fn() },
     product: { count: vi.fn() },
-    image: { count: vi.fn() },
+    image: { count: vi.fn(), findMany: vi.fn() },
     collection: { count: vi.fn() },
     service: { count: vi.fn() },
-    galleryImage: { count: vi.fn() },
+    galleryImage: { count: vi.fn(), findMany: vi.fn() },
   },
 }));
 
@@ -55,6 +55,8 @@ const ZERO_TABLES = [
 
 beforeEach(() => {
   for (const fn of ZERO_TABLES) asMock(fn).mockResolvedValue(0);
+  (db.image.findMany as unknown as Mock).mockResolvedValue([]);
+  (db.galleryImage.findMany as unknown as Mock).mockResolvedValue([]);
 });
 
 const NEVER_ENABLED = () => false;
@@ -408,5 +410,87 @@ describe("computeSeoScorecard — catalog shareable image", () => {
     expect(item?.score).toBe(1);
     expect(item?.detail).toBe("1 of 1 products");
     expect(item?.label).toBe("Products with a shareable image");
+  });
+});
+
+function altItem(scorecard: Scorecard, key: string) {
+  return scorecard.groups
+    .find((g) => g.id === "alt-text")
+    ?.items.find((i) => i.key === key);
+}
+
+describe("computeSeoScorecard — image alt text", () => {
+  it("does not count file-name alt text on gallery images", async () => {
+    asMock(db.galleryImage.count).mockResolvedValue(5);
+    (db.galleryImage.findMany as unknown as Mock).mockResolvedValue([
+      { altText: "download-9.png" },
+      { altText: "a9fe57_faf3d13345b74dd18294d9b2a01c54edmv2.webp" },
+      { altText: "IMG_1234.JPG" },
+      { altText: "A red mug on a shelf" },
+      { altText: "  Our shop front  " },
+    ]);
+
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "galleries",
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = altItem(scorecard, "alt-gallery-images");
+    expect(item?.detail).toBe("2 of 5 gallery images");
+    expect(item?.score).toBeCloseTo(0.4);
+  });
+
+  it("does not count file-name alt text on product images", async () => {
+    asMock(db.image.count).mockResolvedValue(3);
+    (db.image.findMany as unknown as Mock).mockResolvedValue([
+      { altText: "download-9.png" },
+      { altText: "Hand-thrown blue mug" },
+      { altText: null },
+    ]);
+
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "products",
+      business: BASE_BUSINESS,
+      siteContent: BASE_SITE_CONTENT,
+    });
+    const item = altItem(scorecard, "alt-product-images");
+    expect(item?.detail).toBe("1 of 3 product images");
+  });
+});
+
+function pageTitleItem(scorecard: Scorecard) {
+  return scorecard.groups
+    .find((g) => g.id === "page-listing")
+    ?.items.find((i) => i.key === "page-meta-title");
+}
+
+describe("computeSeoScorecard — Donate page", () => {
+  const SITE_WITH_DONATE_TITLE: SiteContentForScorecard = {
+    ...BASE_SITE_CONTENT,
+    pageMeta: { donate: { title: "Support us" } },
+  };
+
+  it("counts the Donate page toward page-title coverage when donations is on", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: (key) => key === "donations",
+      business: BASE_BUSINESS,
+      siteContent: SITE_WITH_DONATE_TITLE,
+    });
+    // About, Contact, FAQ, and Donate are applicable; Donate has its title set.
+    expect(pageTitleItem(scorecard)?.detail).toBe("1 of 4 pages");
+  });
+
+  it("leaves the Donate page out of page-title coverage when donations is off", async () => {
+    const scorecard = await computeSeoScorecard({
+      businessId: "biz_1",
+      isEnabled: NEVER_ENABLED,
+      business: BASE_BUSINESS,
+      siteContent: SITE_WITH_DONATE_TITLE,
+    });
+    // Only About, Contact, and FAQ apply; the Donate title it has is ignored.
+    expect(pageTitleItem(scorecard)?.detail).toBe("0 of 3 pages");
   });
 });

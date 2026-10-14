@@ -141,16 +141,19 @@ export const marketingRouter = createTRPCRouter({
 
       // ── Test send ────────────────────────────────────────────────────────────
       if (input.testOnly) {
-        const ownerEmail = business.ownerEmail ?? ctx.session.user.email;
-        if (!ownerEmail) {
+        // Send to whoever is signed in and testing (a staff member's test
+        // shouldn't land in the owner's inbox); the owner address is only a
+        // fallback for a session that somehow carries no email.
+        const testRecipient = ctx.session.user.email ?? business.ownerEmail;
+        if (!testRecipient) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "No owner email address found to send the test to.",
+            message: "No email address found to send the test to.",
           });
         }
 
         const result = await sendMarketingBroadcast({
-          to: ownerEmail,
+          to: testRecipient,
           subject: `[TEST] ${input.subject}`,
           business,
           body: input.body,
@@ -162,6 +165,7 @@ export const marketingRouter = createTRPCRouter({
           sent: result.success ? 1 : 0,
           failed: result.success ? 0 : 1,
           test: true,
+          to: testRecipient,
         };
       }
 
@@ -223,6 +227,6 @@ export const marketingRouter = createTRPCRouter({
         }
       }
 
-      return { sent, failed, test: false };
+      return { sent, failed, test: false, to: null };
     }),
 });

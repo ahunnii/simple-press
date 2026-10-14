@@ -171,11 +171,10 @@ export function BambooDonatePage({
                     form to sit beside. ── */}
                 {!showCard && otherWaysVisible && otherWays("grid")}
 
-                {/* ── Empty state — should be unreachable while the
-                    "donations" flag is on, since the settings UI requires at
-                    least one lane before it can be enabled. Kept as a safety
-                    net for a business that had every lane removed after the
-                    fact (mirrors Default's donate page). ── */}
+                {/* ── Empty state — reachable: the "donations" flag has no
+                   dependsOn, so a Venmo-less/Stripe-less store can still enable it
+                   and land here. Settings → Donations warns the owner when no
+                   payment lane is set up. ── */}
                 {showEmpty && (
                   <FadeIn direction="up">
                     <div className="bg-card flex flex-col items-center rounded-2xl border border-[var(--bam-hairline)] px-6 py-16 text-center md:py-20">

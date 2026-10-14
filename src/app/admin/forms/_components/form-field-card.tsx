@@ -16,9 +16,11 @@ import type {
   FieldInput,
   FieldTypeChangeImpact,
   FormBuilderValues,
+  PictureChoiceFieldInput,
 } from "./builder-shared";
 import type { FormFieldType } from "~/lib/validators/form";
 import { cn } from "~/lib/utils";
+import { FORM_PICTURE_MAX_QUANTITY } from "~/lib/validators/form";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -53,21 +55,25 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
+import { TemplateImageUploadField } from "../../content/template/_components/template-media-upload-fields";
 import { BuilderNumberField } from "../../quotes/calculators/_components/builder-number-field";
 import {
   describeFieldTypeChangeImpact,
   FIELD_TYPE_META,
   FIELD_TYPE_ORDER,
   isOptionFieldInput,
+  isPictureChoiceFieldInput,
   makeOption,
 } from "./builder-shared";
 import { ChangeTypeDialog } from "./change-type-dialog";
+import { PictureOptionsEditor } from "./picture-options-editor";
 
 /** The react-hook-form path prefix for one field row. */
 export type FieldPath = `definition.fields.${number}`;
 
 const EMPTY_IMPACT: FieldTypeChangeImpact = {
   optionsDiscarded: false,
+  picturesDiscarded: false,
   wasConfirmationTarget: false,
 };
 
@@ -90,6 +96,8 @@ type Props = {
   index: number;
   field: FieldInput;
   confirmationFieldId: string | null | undefined;
+  /** `media` flag on — enables "Choose from library" and bulk "Add photos". */
+  mediaLibraryEnabled?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemove: () => void;
@@ -112,6 +120,7 @@ export function FormFieldCard({
   index,
   field,
   confirmationFieldId,
+  mediaLibraryEnabled,
   open,
   onOpenChange,
   onRemove,
@@ -242,10 +251,7 @@ export function FormFieldCard({
                   </span>
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="e.g. Full name"
-                    {...labelField}
-                  />
+                  <Input placeholder="e.g. Full name" {...labelField} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -424,6 +430,22 @@ export function FormFieldCard({
           {isOptionFieldInput(field) && (
             <FieldOptionsEditor form={form} base={base} />
           )}
+
+          {isPictureChoiceFieldInput(field) && (
+            <>
+              <PictureChoiceSettings
+                form={form}
+                base={base}
+                field={field}
+                mediaLibraryEnabled={mediaLibraryEnabled}
+              />
+              <PictureOptionsEditor
+                form={form}
+                base={base}
+                mediaLibraryEnabled={mediaLibraryEnabled}
+              />
+            </>
+          )}
         </CollapsibleContent>
       </Collapsible>
 
@@ -442,6 +464,151 @@ export function FormFieldCard({
         }}
       />
     </Card>
+  );
+}
+
+// ─── Picture choice settings ────────────────────────────────────────────────
+
+function PictureChoiceSettings({
+  form,
+  base,
+  field,
+  mediaLibraryEnabled,
+}: {
+  form: UseFormReturn<FormBuilderValues>;
+  base: FieldPath;
+  field: PictureChoiceFieldInput;
+  mediaLibraryEnabled?: boolean;
+}) {
+  const selection = field.selection ?? "one";
+  const isQuantity = selection === "quantity";
+
+  return (
+    <div className="space-y-4 rounded-lg border p-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField
+          control={form.control}
+          name={`${base}.selection`}
+          render={({ field: selectionField }) => (
+            <FormItem>
+              <FormLabel>Customers can pick</FormLabel>
+              <Select
+                value={selectionField.value ?? "one"}
+                onValueChange={selectionField.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="one">One</SelectItem>
+                  <SelectItem value="many">Several</SelectItem>
+                  <SelectItem value="quantity">
+                    Several, with quantities
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={`${base}.tileSize`}
+          render={({ field: tileSizeField }) => (
+            <FormItem>
+              <FormLabel>Tile size</FormLabel>
+              <Select
+                value={tileSizeField.value ?? "small"}
+                onValueChange={tileSizeField.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="small">
+                    Small — swatches or numbers
+                  </SelectItem>
+                  <SelectItem value="large">Large — photos</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name={`${base}.showLabels`}
+        render={({ field: showLabelsField }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <FormLabel>Show labels under tiles</FormLabel>
+              <FormDescription>
+                Turn off when the swatch or photo says it all.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch
+                checked={showLabelsField.value ?? true}
+                onCheckedChange={showLabelsField.onChange}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name={`${base}.referenceImageUrl`}
+        render={({ field: referenceField }) => (
+          <FormItem>
+            <TemplateImageUploadField
+              value={referenceField.value ?? ""}
+              onChange={(url) => referenceField.onChange(url || null)}
+              label="Image above the choices"
+              description="Optional — e.g. a numbered collage the choices refer to."
+              mediaLibraryEnabled={mediaLibraryEnabled}
+            />
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {selection !== "one" && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <BuilderNumberField
+            form={form}
+            name={`${base}.minTotal`}
+            label={isQuantity ? "Minimum total" : "Minimum picks"}
+            description={
+              isQuantity ? "Total quantity across all choices." : undefined
+            }
+            placeholder="No minimum"
+            emptyAs="null"
+            min={1}
+            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : field.options.length}
+          />
+          <BuilderNumberField
+            form={form}
+            name={`${base}.maxTotal`}
+            label={isQuantity ? "Maximum total" : "Maximum picks"}
+            description={
+              isQuantity ? "Total quantity across all choices." : undefined
+            }
+            placeholder="No maximum"
+            emptyAs="null"
+            min={1}
+            max={isQuantity ? FORM_PICTURE_MAX_QUANTITY : field.options.length}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooReveal, BambooRevealGroup } from "../shared/bamboo-reveal";
@@ -106,7 +106,7 @@ export function BambooCartContents({ business }: Props) {
         <BambooRevealGroup className="flex flex-1 flex-col gap-4">
           {items.map((item, i) => (
             <div
-              key={item.productId}
+              key={cartItemId(item)}
               className="bamboo-reveal-item"
               style={{ "--i": i } as React.CSSProperties}
             >

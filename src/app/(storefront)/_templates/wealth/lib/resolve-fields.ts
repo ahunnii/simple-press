@@ -14,6 +14,10 @@
  */
 
 export const WEALTH_FIELD_DEFAULTS: Record<string, string> = {
+  "wealth.global.footer-contact-heading": "Contact",
+  "wealth.global.footer-follow-heading": "Follow",
+  "wealth.global.footer-badge-note":
+    "Detroit Community Wealth Fund is a 501(c)(3) non-profit.",
   "wealth.global.footer-address-line1": "9545 Goodwin St",
   "wealth.global.footer-address-line2": "Detroit, MI 48211",
   "wealth.global.footer-appointment-label": "By Appointment Only",
@@ -47,9 +51,7 @@ export function resolveWealthFields(
     const value = raw[key];
     const custom = typeof value === "string" ? value.trim() : undefined;
     out[key] =
-      custom && custom.length > 0
-        ? custom
-        : (WEALTH_FIELD_DEFAULTS[key] ?? "");
+      custom && custom.length > 0 ? custom : (WEALTH_FIELD_DEFAULTS[key] ?? "");
   }
   return out;
 }

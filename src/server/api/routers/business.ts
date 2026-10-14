@@ -5,10 +5,15 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { formatBusinessAddress, hasAddressParts } from "~/lib/address/format";
+import {
+  CONFIRMABLE_SETUP_STEPS,
+  parseSetupConfirmations,
+} from "~/lib/admin/setup-plan";
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
 import { emailOverridesSchema } from "~/lib/email/customization";
 import { parseZonedDateTime } from "~/lib/events/normalize";
+import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
@@ -498,7 +503,13 @@ export const businessRouter = createTRPCRouter({
         shippingAddress: true,
       },
     });
-    return { business, sampleOrder };
+    // Lets the preview show a sample customized item only to stores that
+    // actually use product options.
+    const productOptionsEnabled = await isFeatureEnabledForBusiness(
+      businessId,
+      "productOptions",
+    );
+    return { business, sampleOrder, productOptionsEnabled };
   }),
 
   // Owner-customized transactional email copy (subject + intro text).
@@ -659,6 +670,9 @@ export const businessRouter = createTRPCRouter({
               baseInventoryUnit: {
                 select: { inventoryQty: true, allowBackorders: true },
               },
+              // Product customizer: cards link to the product page instead
+              // of quick-adding. Callers gate it on the `productOptions` flag.
+              _count: { select: { optionGroups: true } },
             },
             orderBy: { createdAt: "desc" },
             // Payload ceiling: the shop page serializes every product to the
@@ -774,7 +788,7 @@ export const businessRouter = createTRPCRouter({
             throw new TRPCError({
               code: "BAD_REQUEST",
               message:
-                "Stripe Tax is not fully configured on your account. Add your business address and at least one active tax registration in the Stripe Tax Dashboard, then try again.",
+                "Stripe Tax isn't set up on your account yet. Finish your Tax settings in the Stripe Tax Dashboard, mainly your head office address, then try again.",
             });
           }
         } catch (err) {
@@ -797,7 +811,7 @@ export const businessRouter = createTRPCRouter({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:
-              "Could not verify your Stripe Tax setup. Make sure Stripe Tax is configured in your Stripe Dashboard before enabling this.",
+              "Could not verify your Stripe Tax setup. Make sure your Tax settings, including your head office address, are complete in the Stripe Tax Dashboard, then try again.",
           });
         }
       }
@@ -1507,4 +1521,45 @@ export const businessRouter = createTRPCRouter({
     .mutation(({ ctx, input }) =>
       setBusinessTemplate(ctx.db, ctx.businessId, input.templateId),
     ),
+
+  /**
+   * Setup Guide "Mark as done" — for steps the platform can't verify (sales
+   * tax, shipping or pickup). Stores the confirmation date under
+   * `setupConfirmations[step]`; `confirmed: false` removes it ("Undo").
+   * Read-modify-write is fine here: one owner clicking one button.
+   */
+  confirmSetupStep: ownerAdminProcedure
+    .input(
+      z.object({
+        step: z.enum(CONFIRMABLE_SETUP_STEPS as [string, ...string[]]),
+        confirmed: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { setupConfirmations: true },
+      });
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const confirmations: Record<string, string> = {
+        ...parseSetupConfirmations(business.setupConfirmations),
+      };
+      if (input.confirmed) {
+        confirmations[input.step] = new Date().toISOString();
+      } else {
+        delete confirmations[input.step];
+      }
+
+      await ctx.db.business.update({
+        where: { id: ctx.businessId },
+        data: { setupConfirmations: confirmations },
+      });
+      return { success: true };
+    }),
 });

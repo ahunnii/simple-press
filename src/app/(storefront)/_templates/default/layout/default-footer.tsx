@@ -10,9 +10,11 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
 import { EmailIcon } from "~/components/icons/email-icon";
 import {
+  donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
   resolveFooterNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
@@ -67,12 +69,21 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
       : []),
   ];
 
-  const quickLinks = filterNavByFlags(
+  const filteredQuickLinks = filterNavByFlags(
     resolveFooterNav(
       business?.siteContent?.footerNavigationItems,
       quickLinksFallback,
     ),
     isEnabled,
+  );
+
+  // The Donations "show in footer" switch only ADDS a link: it never removes
+  // one the owner placed, and never duplicates one. With the fallback list
+  // Donate is already there, so this is a no-op; with custom footer quick
+  // links it appends Donate last so the switch keeps working.
+  const quickLinks = withDonateLink(
+    filteredQuickLinks,
+    donateLinkOptions(business, isEnabled, "footer"),
   );
 
   return (

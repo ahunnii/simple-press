@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
-  "csdt@generativejustice.org";
+  "help@generativejustice.org";
 
 export default function SellerMerchantPage() {
   return (
@@ -424,22 +424,33 @@ export default function SellerMerchantPage() {
         <li>trademarks.</li>
       </ul>
       <p>
-        The SimplePress platform is source-available in certain contexts but is
-        not open source unless explicitly stated otherwise.
+        The SimplePress source code, including its website templates, is open
+        source under the GNU Affero General Public License, version 3
+        (&ldquo;AGPL-3.0&rdquo;), and is available at{" "}
+        <a
+          href="https://github.com/ahunnii/simple-press"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/ahunnii/simple-press
+        </a>
+        . Merchants may use, copy, modify, and share that source code under the
+        terms of the AGPL-3.0, and nothing in this Agreement limits the rights
+        that license gives.
       </p>
-      <p>Merchants may not:</p>
-      <ul>
-        <li>copy;</li>
-        <li>redistribute;</li>
-        <li>reverse engineer;</li>
-        <li>commercially exploit;</li>
-        <li>recreate;</li>
-        <li>sublicense</li>
-      </ul>
       <p>
-        the platform or proprietary infrastructure without written
-        authorization.
+        The AGPL-3.0 does not cover our branding and trademarks or the hosted
+        SimplePress service. Without written authorization, Merchants may not:
       </p>
+      <ul>
+        <li>use the SimplePress or Center for Generative Justice names, logos,
+          or trademarks in a way that suggests a modified version or a separate
+          service is SimplePress or is endorsed by us;</li>
+        <li>resell, sublicense, or give third parties access to the hosted
+          SimplePress service;</li>
+        <li>interfere with, probe, or attempt to bypass the security of the
+          hosted service or its infrastructure.</li>
+      </ul>
       <hr />
 
       <h2>19. Disclaimer of Warranties</h2>

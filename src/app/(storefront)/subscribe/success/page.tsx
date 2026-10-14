@@ -1,5 +1,4 @@
-import type { Subscription } from "generated/prisma";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
@@ -10,6 +9,7 @@ import {
   subscriptionIntervalLabel,
   subscriptionPerDeliveryCents,
 } from "~/lib/subscriptions/emails";
+import { findOwnedSubscription } from "~/lib/subscriptions/success-owner";
 import { db } from "~/server/db";
 
 export const metadata = {
@@ -70,10 +70,11 @@ function ConfirmingCard() {
 
 /**
  * `success_url` destination from `createSubscriptionCheckoutSession`. Reads
- * only the local `Subscription` row and the `pending_subscription_session`
- * cookie set by the create-session route — it never calls Stripe, so it can
- * never race the webhook by asking Stripe a question the webhook hasn't
- * answered yet.
+ * the local `Subscription` row and the signed `pending_subscription_session`
+ * cookie set by the create-session route — it never asks Stripe about the
+ * subscription's status, so it can never race the webhook. (During the
+ * signed-cookie rollout a legacy bare cookie costs one read of the session's
+ * creation-time metadata; see `findOwnedSubscription`.)
  */
 export default async function SubscribeSuccessPage({ searchParams }: Props) {
   const { session_id: sessionId } = await searchParams;
@@ -81,19 +82,11 @@ export default async function SubscribeSuccessPage({ searchParams }: Props) {
   const business = await checkBusiness();
   if (!business) notFound();
 
-  const cookieStore = await cookies();
-  const pendingSessionId = cookieStore.get(
-    "pending_subscription_session",
-  )?.value;
-
-  const verified =
-    !!sessionId && !!pendingSessionId && sessionId === pendingSessionId;
-
-  const subscription: Subscription | null = verified
-    ? await db.subscription.findFirst({
-        where: { stripeCheckoutSessionId: sessionId, businessId: business.id },
-      })
-    : null;
+  const subscription = await findOwnedSubscription({
+    headers: await headers(),
+    businessId: business.id,
+    sessionId,
+  });
 
   if (!subscription || subscription.status === "cancelled") {
     return <GenericThanksCard />;

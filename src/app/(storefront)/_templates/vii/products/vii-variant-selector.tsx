@@ -1,10 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
+import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
+import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
+import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -20,6 +25,14 @@ type Props = {
    * chose instead of always `1`.
    */
   onQuantityChange?: (quantity: number) => void;
+  /**
+   * Product customizer state (owned by the parent, which also renders the
+   * price). When enabled, Add to cart first requires a complete build and
+   * then adds one configured line.
+   */
+  customizer?: ProductCustomizerController;
+  /** Rendered between the variant pills and the qty / Add to cart row. */
+  customizerSlot?: ReactNode;
 };
 
 export function ViiVariantSelector({
@@ -27,8 +40,11 @@ export function ViiVariantSelector({
   selectedVariantId,
   setSelectedVariantId,
   onQuantityChange,
+  customizer,
+  customizerSlot,
 }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
 
   const selectedVariant =
@@ -66,11 +82,14 @@ export function ViiVariantSelector({
       !product.allowBackorders);
 
   const handleAddToCart = () => {
-    if (!selectedVariant) return;
+    if (!cartEnabled || !selectedVariant) return;
     if (addToCartDisabled) return;
+    // Incomplete build: show the errors (and focus the first) instead.
+    if (customizer?.enabled && !customizer.revealErrors()) return;
 
+    const line = buildVariantCartItem(product, selectedVariant, effectiveMax);
     addItem(
-      buildVariantCartItem(product, selectedVariant, effectiveMax),
+      customizer?.enabled ? applyCustomizerToCartItem(line, customizer) : line,
       quantity,
     );
 
@@ -183,121 +202,133 @@ export function ViiVariantSelector({
         </div>
       </div>
 
+      {customizerSlot}
+
       {/* Qty + Add to cart */}
       {selectedVariant && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Qty stepper */}
-            <div
-              role="group"
-              aria-label="Quantity"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                height: 48,
-                width: 132,
-                flexShrink: 0,
-                borderRadius: "var(--radius)",
-                border: stepperBorder,
-              }}
-            >
+          {/* Catalog mode (B6.11): no qty or Add to cart when `cart` is off */}
+          {cartEnabled && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* Qty stepper */}
+              <div
+                role="group"
+                aria-label="Quantity"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 48,
+                  width: 132,
+                  flexShrink: 0,
+                  borderRadius: "var(--radius)",
+                  border: stepperBorder,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
+                  style={{
+                    flex: 1,
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 18,
+                    fontWeight: 300,
+                    color: "var(--vii-navy)",
+                    background: "transparent",
+                    cursor: quantity <= 1 ? "default" : "pointer",
+                    opacity: quantity <= 1 ? 0.3 : 1,
+                  }}
+                >
+                  <span aria-hidden="true">−</span>
+                </button>
+                <span
+                  aria-live="polite"
+                  aria-atomic="true"
+                  style={{
+                    width: 40,
+                    textAlign: "center",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "var(--vii-navy)",
+                  }}
+                >
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity(Math.min(effectiveMax, quantity + 1))
+                  }
+                  disabled={quantity >= effectiveMax}
+                  aria-label="Increase quantity"
+                  style={{
+                    flex: 1,
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 18,
+                    fontWeight: 300,
+                    color: "var(--vii-navy)",
+                    background: "transparent",
+                    cursor: quantity >= effectiveMax ? "default" : "pointer",
+                    opacity: quantity >= effectiveMax ? 0.3 : 1,
+                  }}
+                >
+                  <span aria-hidden="true">+</span>
+                </button>
+              </div>
+
+              {/* Add to cart */}
               <button
                 type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
+                onClick={handleAddToCart}
+                aria-disabled={addToCartDisabled || undefined}
+                data-vii-pulse=""
                 style={{
                   flex: 1,
-                  height: "100%",
+                  height: 48,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 18,
-                  fontWeight: 300,
-                  color: "var(--vii-navy)",
-                  background: "transparent",
-                  cursor: quantity <= 1 ? "default" : "pointer",
-                  opacity: quantity <= 1 ? 0.3 : 1,
-                }}
-              >
-                <span aria-hidden="true">−</span>
-              </button>
-              <span
-                aria-live="polite"
-                aria-atomic="true"
-                style={{
-                  width: 40,
-                  textAlign: "center",
+                  gap: 8,
+                  borderRadius: "var(--radius)",
+                  background: "var(--vii-copper-deep)",
+                  color: "var(--vii-paper)",
                   fontFamily: "var(--font-sans)",
-                  fontSize: 14,
+                  fontSize: 11,
                   fontWeight: 500,
-                  color: "var(--vii-navy)",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  cursor: addToCartDisabled ? "not-allowed" : "pointer",
+                  opacity: addToCartDisabled ? 0.5 : 1,
+                  transition: "opacity 0.2s var(--vii-ease)",
+                  animation: isAdded
+                    ? "vii-pulse 0.42s var(--vii-ease)"
+                    : "none",
                 }}
               >
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setQuantity(Math.min(effectiveMax, quantity + 1))
-                }
-                disabled={quantity >= effectiveMax}
-                aria-label="Increase quantity"
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 18,
-                  fontWeight: 300,
-                  color: "var(--vii-navy)",
-                  background: "transparent",
-                  cursor: quantity >= effectiveMax ? "default" : "pointer",
-                  opacity: quantity >= effectiveMax ? 0.3 : 1,
-                }}
-              >
-                <span aria-hidden="true">+</span>
+                {isAdded ? (
+                  <>
+                    <Check
+                      style={{ width: 16, height: 16 }}
+                      aria-hidden="true"
+                    />
+                    Added to bag
+                  </>
+                ) : customizer?.enabled ? (
+                  `Add to cart · ${formatPrice(customizer.unitPrice)}`
+                ) : (
+                  "Add to cart"
+                )}
               </button>
             </div>
-
-            {/* Add to cart */}
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              aria-disabled={addToCartDisabled || undefined}
-              data-vii-pulse=""
-              style={{
-                flex: 1,
-                height: 48,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                borderRadius: "var(--radius)",
-                background: "var(--vii-copper-deep)",
-                color: "var(--vii-paper)",
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                cursor: addToCartDisabled ? "not-allowed" : "pointer",
-                opacity: addToCartDisabled ? 0.5 : 1,
-                transition: "opacity 0.2s var(--vii-ease)",
-                animation: isAdded ? "vii-pulse 0.42s var(--vii-ease)" : "none",
-              }}
-            >
-              {isAdded ? (
-                <>
-                  <Check style={{ width: 16, height: 16 }} aria-hidden="true" />
-                  Added to bag
-                </>
-              ) : (
-                "Add to cart"
-              )}
-            </button>
-          </div>
+          )}
 
           {/* Stock hint */}
           {product.trackInventory && (

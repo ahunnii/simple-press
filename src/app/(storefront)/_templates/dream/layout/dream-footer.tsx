@@ -11,8 +11,10 @@ import {
   externalLinkProps,
   filterNavByFlags,
   getAccountNavLinks,
+  donateLinkOptions,
   resolveFooterNav,
   topLevelNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveDreamFields } from "../lib/resolve-fields";
@@ -87,12 +89,17 @@ export async function DreamFooter({
       customFields,
       isEnabled,
     );
-  const quickLinks = filterNavByFlags(
-    resolveFooterNav(
-      business?.siteContent?.footerNavigationItems,
-      topLevelNav(headerNav),
+  // Donations "show in footer" switch (`headerNav` is the un-appended nav, so
+  // the header's Donate never leaks into this fallback).
+  const quickLinks = withDonateLink(
+    filterNavByFlags(
+      resolveFooterNav(
+        business?.siteContent?.footerNavigationItems,
+        topLevelNav(headerNav),
+      ),
+      isEnabled,
     ),
-    isEnabled,
+    donateLinkOptions(business, isEnabled, "footer"),
   );
 
   // Signed-in account entries from the flag-gated account links: "My

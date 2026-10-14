@@ -1,10 +1,9 @@
 import { Button, Section, Text } from "@react-email/components";
 
+import type { InvoiceSummaryLineItem } from "./components/invoice-summary";
+
+import { InvoiceSummary } from "./components/invoice-summary";
 import { EmailLayout } from "./components/layout";
-import {
-  InvoiceSummary,
-  type InvoiceSummaryLineItem,
-} from "./components/invoice-summary";
 
 type InvoiceSentEmailProps = {
   customerName: string;

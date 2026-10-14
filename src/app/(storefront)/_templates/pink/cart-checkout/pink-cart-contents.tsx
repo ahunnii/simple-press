@@ -6,7 +6,8 @@ import { Minus, Plus, X } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
@@ -38,14 +39,8 @@ export function PinkCartContents({
   emptyBody,
   emptyCta,
 }: Props) {
-  const {
-    items,
-    incrementItem,
-    decrementItem,
-    removeItem,
-    subtotal,
-    isHydrated,
-  } = useCart();
+  const { items, updateLineQuantity, removeLine, subtotal, isHydrated } =
+    useCart();
   const { isEnabled } = useStorefrontFlags();
 
   // Hydration guard — neutral skeleton prevents an empty→filled flash.
@@ -155,9 +150,11 @@ export function PinkCartContents({
       >
         {items.map((item, index) => {
           const lineTotal = item.price * item.quantity;
+          // Line-id APIs: each configured build is its own line.
+          const lineId = cartItemId(item);
           return (
             <div
-              key={`${item.productId}-${item.variantId ?? "no-variant"}`}
+              key={lineId}
               role="listitem"
               className="flex gap-5 py-6"
               style={{
@@ -198,10 +195,14 @@ export function PinkCartContents({
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      className="mt-1 text-[13px] text-[var(--pink-subtle)]"
+                    />
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.productId, item.variantId)}
+                    onClick={() => removeLine(lineId)}
                     aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from basket`}
                     className="flex h-9 w-9 shrink-0 items-center justify-center transition-colors hover:opacity-70"
                     style={{ color: "var(--pink-subtle)" }}
@@ -220,7 +221,7 @@ export function PinkCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        decrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity - 1)
                       }
                       disabled={item.quantity <= 1}
                       aria-label={`Decrease quantity of ${item.productName}`}
@@ -238,7 +239,7 @@ export function PinkCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        incrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity + 1)
                       }
                       disabled={
                         item.maxInventory !== undefined &&

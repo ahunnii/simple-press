@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -184,6 +186,14 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                   {f.discountCodeLabel}
                 </span>{" "}
                 applied.
+              </p>
+            )}
+            {f.discountCodeLabel && f.discountFreeShipping && (
+              <p role="status" className="mt-2 text-sm text-green-700">
+                Free shipping applied:{" "}
+                <span className="font-mono font-semibold">
+                  {f.discountCodeLabel}
+                </span>
               </p>
             )}
           </section>
@@ -401,10 +411,7 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
           {/* Items */}
           <div className="max-h-64 space-y-4 overflow-y-auto">
             {f.items.map((item) => (
-              <div
-                key={`${item.productId}-${item.variantId}`}
-                className="flex items-center gap-3"
-              >
+              <div key={cartItemId(item)} className="flex items-center gap-3">
                 <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                   {item.imageUrl ? (
                     <Image
@@ -427,6 +434,11 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                   {item.variantName && (
                     <p className="text-xs text-gray-500">{item.variantName}</p>
                   )}
+                  <CartLineOptions
+                    item={item}
+                    showPrices={false}
+                    className="text-xs text-gray-500"
+                  />
                   <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                 </div>
                 <span className="text-sm font-medium text-gray-900">

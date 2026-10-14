@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { SETUP_PRESETS } from "~/lib/admin/setup-plan";
 import { verifyPartnerRequest } from "~/lib/partner-auth";
 import {
   buildClaimUrl,
@@ -315,6 +316,10 @@ export async function POST(req: NextRequest) {
             maintenanceMode: true,
             maintenanceVariant: "coming_soon",
             afProvisionCode,
+            // Partner-provisioned stores sell products. Feature flags stay on
+            // registry defaults, which is exactly the products preset.
+            businessType: "products",
+            setupSteps: SETUP_PRESETS.products,
           },
         });
 

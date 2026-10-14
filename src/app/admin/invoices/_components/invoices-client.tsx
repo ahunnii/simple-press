@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -98,6 +99,8 @@ type ConnectionData =
   RouterOutputs["quickbooks"]["getConnection"]["connection"];
 
 type Props = {
+  /** Invoices / Activity route tabs — rendered first in the container, above the header. */
+  routeTabs?: ReactNode;
   rows: UnifiedInvoiceRow[];
   /** Set when the QuickBooks 1000-row cap (`QBO_INVOICE_LIST_MAX_ROWS`) trimmed older QuickBooks invoices. */
   qboListCap: { shown: number; total: number } | null;
@@ -119,6 +122,8 @@ type Props = {
   summary: RouterOutputs["invoice"]["summary"];
   /** `Business.timeZone`. */
   timeZone: string;
+  /** `Business.name` — seeds the New QuickBooks invoice dialog's Description placeholder. */
+  businessName: string;
   connection: ConnectionData;
   environment: QboEnvironment;
   /** The deployment has QuickBooks app credentials (`QBO_CLIENT_ID`/`SECRET`). */
@@ -256,6 +261,7 @@ function StatusTabs({ status }: { status: InvoiceListStatusFilter }) {
 }
 
 export function InvoicesClient({
+  routeTabs,
   rows,
   qboListCap,
   totalCount,
@@ -271,6 +277,7 @@ export function InvoicesClient({
   qboEnabled,
   summary,
   timeZone,
+  businessName,
   connection,
   environment,
   platformConfigured,
@@ -360,6 +367,8 @@ export function InvoicesClient({
 
   return (
     <div className="admin-container">
+      {routeTabs}
+
       <div className="admin-header">
         <div>
           <h1>Invoices</h1>
@@ -842,6 +851,7 @@ export function InvoicesClient({
           defaults={NEW_QBO_INVOICE_DEFAULTS}
           defaultDueDays={defaultDueDays}
           timeZone={timeZone}
+          businessName={businessName}
         />
       )}
     </div>

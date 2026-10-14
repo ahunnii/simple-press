@@ -60,7 +60,7 @@ export default async function NotPermittedPage() {
         <p className="text-muted-foreground/80 mt-12 text-sm">
           Think you should have access?{" "}
           <a
-            href="mailto:support@simplepress.com"
+            href="mailto:help@generativejustice.org"
             className="text-primary underline-offset-2 hover:underline"
           >
             Contact Support

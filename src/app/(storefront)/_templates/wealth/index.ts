@@ -7,12 +7,13 @@ import { wealthContactData, wealthContactFieldGroups } from "./contact";
 import { wealthDonateData, wealthDonateFieldGroups } from "./donate";
 import { wealthGenericData, wealthGenericFieldGroups } from "./generic";
 import { wealthHomepageData, wealthHomepageFieldGroups } from "./homepage";
+import { wealthImpactData, wealthImpactFieldGroups } from "./impact";
+import { WEALTH_FIELD_DEFAULTS } from "./lib/resolve-fields";
 import { wealthServicesData, wealthServicesFieldGroups } from "./services";
 import {
   wealthTestimonialsData,
   wealthTestimonialsFieldGroups,
 } from "./testimonials";
-import { WEALTH_FIELD_DEFAULTS } from "./lib/resolve-fields";
 
 // ─── Global: Branding (header nav + footer contact block) ────────────────────
 // Chrome (wealth-header/footer/newsletter) reads these keys through
@@ -23,6 +24,28 @@ import { WEALTH_FIELD_DEFAULTS } from "./lib/resolve-fields";
 const d = (key: string): string => WEALTH_FIELD_DEFAULTS[key] ?? "";
 
 const globalBrandingData: TemplateField[] = [
+  {
+    key: "wealth.global.footer-contact-heading",
+    label: "Contact Column Heading",
+    description:
+      "Small heading over the footer's address and email column. Leave blank to hide.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: d("wealth.global.footer-contact-heading"),
+  },
+  {
+    key: "wealth.global.footer-follow-heading",
+    label: "Social Column Heading",
+    description:
+      "Small heading over the footer's social links (the links come from Content → Branding). The column hides when there are no social links.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: d("wealth.global.footer-follow-heading"),
+  },
   {
     key: "wealth.global.footer-address-line1",
     label: "Footer Address — Line 1",
@@ -117,6 +140,17 @@ const globalBrandingData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: d("wealth.global.footer-farm-alt"),
   },
+  {
+    key: "wealth.global.footer-badge-note",
+    label: "Partner Logo Note",
+    description:
+      "Short line under the partner logo in the footer. Clear it to hide.",
+    type: "textarea",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-full",
+    defaultValue: d("wealth.global.footer-badge-note"),
+  },
 ];
 
 // ─── Global: Newsletter (footer Subscribe block) ─────────────────────────────
@@ -166,6 +200,7 @@ export const wealthData = {
     ...wealthDonateData,
     ...wealthBlogData,
     ...wealthGenericData,
+    ...wealthImpactData,
     ...globalBrandingData,
     ...globalNewsletterData,
   ],
@@ -181,18 +216,20 @@ export const wealthFieldGroups = {
     ...wealthDonateFieldGroups,
     ...wealthBlogFieldGroups,
     ...wealthGenericFieldGroups,
+    ...wealthImpactFieldGroups,
     {
       id: "global.branding",
       title: "Footer & Navigation",
       description:
-        "Footer contact block (address, email, EIN), partner logo, and the menu's Resources link",
+        "Footer contact block (address, email, EIN), column headings, partner logo and note, and the menu's Resources link",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,
     {
       id: "global.newsletter",
       title: "Footer Newsletter",
-      description: "The footer Subscribe block's heading, body, and privacy note",
+      description:
+        "The footer Subscribe block's heading, body, and privacy note",
       icon: "✉️",
       columns: 2,
     } satisfies TemplateFieldGroup,

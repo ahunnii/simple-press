@@ -180,6 +180,98 @@ describe("time fields in CSV", () => {
   });
 });
 
+describe("picture choice fields in CSV", () => {
+  const tiles = [
+    { id: "t_neg", label: "-Five" }, // formula-looking → escaped on export
+    { id: "t_red", label: "Red", color: "#ff0000" },
+    { id: "t_gold", label: "Gold", imageUrl: "https://cdn.example.com/g.jpg" },
+    { id: "t_box", label: "2 x 4" },
+  ];
+  const pictureDefinition: FormDefinition = formDefinitionSchema.parse({
+    version: 1,
+    fields: [
+      { id: "name", type: "text", label: "Name" },
+      { id: "one", type: "picturechoice", label: "Favorite", options: tiles },
+      {
+        id: "many",
+        type: "picturechoice",
+        label: "Likes",
+        selection: "many",
+        options: tiles,
+      },
+      {
+        id: "qty",
+        type: "picturechoice",
+        label: "Balloons",
+        selection: "quantity",
+        maxTotal: 12,
+        options: tiles,
+      },
+    ],
+  });
+  const pictureValues = {
+    name: "Ada",
+    one: "-Five",
+    many: ["Red", "2 x 4"],
+    qty: [
+      { option: "-Five", quantity: 1 },
+      { option: "Red", quantity: 3 },
+      { option: "2 x 4", quantity: 2 },
+    ],
+  };
+
+  function exportCsv() {
+    return buildFormCsv(pictureDefinition, [
+      {
+        submittedAt: new Date("2026-09-01T12:34:56.000Z"),
+        status: "NEW",
+        tags: [],
+        answers: toAnswerSnapshot(pictureDefinition.fields, pictureValues),
+      },
+    ]);
+  }
+
+  it("exports labels, '; '-joined picks and 'Label × N' quantities", () => {
+    const parsed = Papa.parse<Record<string, string>>(exportCsv(), {
+      header: true,
+    });
+    const first = parsed.data[0]!;
+    expect(first.Favorite).toBe("'-Five");
+    expect(first.Likes).toBe("Red; 2 x 4");
+    expect(first.Balloons).toBe("'-Five × 1; Red × 3; 2 x 4 × 2");
+  });
+
+  it("round-trips export → import for every mode", () => {
+    const result = parseFormCsv(pictureDefinition, exportCsv());
+    expect(result.errors).toEqual([]);
+    expect(result.validRows).toHaveLength(1);
+    expect(result.validRows[0]!.values).toEqual(pictureValues);
+  });
+
+  it("imports hand-typed 'x' quantities and reports bad cells", () => {
+    const csv = [
+      "Name,Balloons",
+      'A,"gold x 4; RED X 1"',
+      "B,Red",
+      'C,"Red x 10; Gold x 3"',
+    ].join("\n");
+    const result = parseFormCsv(pictureDefinition, csv);
+    expect(result.validRows.map((r) => r.values.qty)).toEqual([
+      [
+        { option: "Red", quantity: 1 },
+        { option: "Gold", quantity: 4 },
+      ],
+    ]);
+    expect(result.errors).toEqual([
+      {
+        row: 3,
+        message: 'Balloons: "Red" needs a quantity, like "Red x 2".',
+      },
+      { row: 4, message: "Balloons: Choose no more than 12 in total." },
+    ]);
+  });
+});
+
 describe("parseFormCsv", () => {
   it("round-trips build → parse", () => {
     const csv = buildFormCsv(definition, [
@@ -251,12 +343,27 @@ describe("parseFormCsv", () => {
       {
         row: 3,
         message: [
-          'Submitted at: "not a date" isn\'t a date we can read',
-          'Status: "Pending" must be New, Read, or Archived',
+          'Submitted at: "not a date" isn\'t a date we can read.',
+          'Status: "Pending" must be New, Read, or Archived.',
           "Email: Enter a valid email address.",
           'Color: "Purple" isn\'t one of the options.',
           'Extras: "Zeta" isn\'t one of the options.',
-        ].join("; "),
+        ].join(" "),
+      },
+    ]);
+  });
+
+  it("joins two row problems with a single space and one period each", () => {
+    const csv = [
+      "Name,Email,Color,Status,Submitted at,Extras",
+      "Bad,nope,red,Pending,,",
+    ].join("\n");
+    const result = parseFormCsv(definition, csv);
+    expect(result.errors).toEqual([
+      {
+        row: 2,
+        message:
+          'Status: "Pending" must be New, Read, or Archived. Email: Enter a valid email address.',
       },
     ]);
   });

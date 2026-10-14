@@ -3,8 +3,10 @@ import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
-import { WealthLink } from "../shared/wealth-link";
-import { WealthSection } from "../shared/wealth-section";
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthLedgeButton } from "../shared/wealth-ledge-button";
+import { WealthReveal } from "../shared/wealth-reveal";
+import { WealthSplitHero } from "../shared/wealth-split-hero";
 import { WealthBlogClient } from "./wealth-blog-client";
 
 type Props = {
@@ -13,12 +15,20 @@ type Props = {
   customFields?: Record<string, string>;
 };
 
+/**
+ * BlogPage — redesign pass 2 (2026-10-12): forest hero panel (optional photo
+ * split) with the H1 + intro excerpt, then the searchable post list (newest
+ * post featured, the rest a 3-up grid), or a designed empty state on a
+ * surface block. The hero and the empty block are both `blog.index`.
+ */
 export function WealthBlogPage({ pages, business, customFields }: Props) {
   const fields = customFields ?? business.siteContent?.customFields;
 
   const f = resolveFields(fields, [
     "wealth.blog.heading",
     "wealth.blog.intro",
+    "wealth.blog.hero-image",
+    "wealth.blog.hero-image-alt",
     "wealth.blog.empty-heading",
     "wealth.blog.empty-body",
     "wealth.blog.empty-cta-label",
@@ -26,78 +36,80 @@ export function WealthBlogPage({ pages, business, customFields }: Props) {
 
   const heading = (f["wealth.blog.heading"] ?? "").trim() || "News + Notes";
   const intro = (f["wealth.blog.intro"] ?? "").trim();
+  const heroImage = (f["wealth.blog.hero-image"] ?? "").trim();
+  const heroAlt = (f["wealth.blog.hero-image-alt"] ?? "").trim();
   const emptyHeading =
     (f["wealth.blog.empty-heading"] ?? "").trim() || "No posts yet.";
   const emptyBody =
     (f["wealth.blog.empty-body"] ?? "").trim() ||
     "Meanwhile, find DCWF in the news on our homepage.";
+  const emptyCta =
+    (f["wealth.blog.empty-cta-label"] ?? "").trim() || "Back to the homepage";
 
   return (
-    <WealthSection sectionAttrs={sectionGroupAttr("blog", "index")}>
-      <div className="text-center" style={{ marginBottom: "calc(var(--wealth-rhythm) * 2)" }}>
-        {/* `WealthH1` doesn't forward unknown props to its underlying `<h1>`
-            (it destructures only `children`/`className`/`id`), so spreading
-            `fieldAttr` onto it silently drops the `data-sp-field` attribute
-            and breaks live-text patching in the editor. Rendered as a plain
-            `<h1 className="wealth-h1">` instead — visually identical, since
-            that's exactly what `WealthH1` renders under the hood — without
-            touching the shared component (out of this agent's scope). */}
-        <h1 className="wealth-h1" {...fieldAttr("wealth.blog.heading")}>
-          {heading}
-        </h1>
-        {intro && (
-          <p
-            {...fieldAttr("wealth.blog.intro")}
-            style={{
-              fontFamily: "var(--font-wealth-body)",
-              fontSize: 17,
-              lineHeight: "25.5px",
-              color: "var(--wealth-muted)",
-              maxWidth: 620,
-              margin: "20px auto 0",
-            }}
+    <>
+      <WealthSplitHero
+        ratio="sixty"
+        image={heroImage || null}
+        imageAlt={heroAlt}
+        aria-labelledby="wealth-blog-title"
+        {...sectionGroupAttr("blog", "index")}
+      >
+        <WealthReveal>
+          <h1
+            id="wealth-blog-title"
+            className="wealth-hero__title"
+            {...fieldAttr("wealth.blog.heading")}
           >
-            {intro}
-          </p>
-        )}
-      </div>
+            {heading}
+          </h1>
+        </WealthReveal>
+        <WealthReveal delay={1}>
+          <hr className="wealth-hero__rule" />
+        </WealthReveal>
+        {intro ? (
+          <WealthReveal delay={2}>
+            <p
+              className="wealth-hero__excerpt"
+              {...fieldAttr("wealth.blog.intro")}
+            >
+              {intro}
+            </p>
+          </WealthReveal>
+        ) : null}
+      </WealthSplitHero>
 
       {pages.length === 0 ? (
-        <div className="text-center" style={{ padding: "calc(var(--wealth-rhythm) * 2) 0" }}>
-          <p
-            {...fieldAttr("wealth.blog.empty-heading")}
-            style={{
-              fontFamily: "var(--font-wealth-sub)",
-              fontStyle: "italic",
-              fontSize: 24,
-              lineHeight: 1.4,
-              color: "var(--wealth-ink)",
-              margin: "0 0 12px",
-            }}
-          >
-            {emptyHeading}
-          </p>
-          <p
-            {...fieldAttr("wealth.blog.empty-body")}
-            style={{
-              fontFamily: "var(--font-wealth-body)",
-              fontSize: 16,
-              color: "var(--wealth-muted)",
-              margin: "0 0 24px",
-            }}
-          >
-            {emptyBody}
-          </p>
-          <WealthLink href="/">
-            <span {...fieldAttr("wealth.blog.empty-cta-label")}>
-              {(f["wealth.blog.empty-cta-label"] ?? "").trim() ||
-                "Back to the homepage"}
-            </span>
-          </WealthLink>
-        </div>
+        <WealthBlock
+          tone="surface"
+          container="narrow"
+          aria-labelledby="wealth-blog-empty-title"
+          className="wealth-blog-empty"
+          {...sectionGroupAttr("blog", "index")}
+        >
+          <WealthReveal className="wealth-center wealth-stack">
+            <h2
+              id="wealth-blog-empty-title"
+              className="wealth-h2"
+              {...fieldAttr("wealth.blog.empty-heading")}
+            >
+              {emptyHeading}
+            </h2>
+            <p className="wealth-lead" {...fieldAttr("wealth.blog.empty-body")}>
+              {emptyBody}
+            </p>
+            <div className="wealth-btn-row wealth-btn-row--center">
+              <WealthLedgeButton href="/">
+                <span {...fieldAttr("wealth.blog.empty-cta-label")}>
+                  {emptyCta}
+                </span>
+              </WealthLedgeButton>
+            </div>
+          </WealthReveal>
+        </WealthBlock>
       ) : (
         <WealthBlogClient pages={pages} />
       )}
-    </WealthSection>
+    </>
   );
 }

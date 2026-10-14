@@ -8,6 +8,7 @@ import {
   createLoyaltyProgram,
   createProduct,
 } from "../helpers/factories";
+import { fakeListLineItems } from "../helpers/stripe-line-items";
 import {
   makeCheckoutCompletedEvent,
   makeCheckoutSession,
@@ -46,6 +47,8 @@ vi.mock("~/lib/stripe/client", () => ({
       sessions: {
         retrieve: (...args: unknown[]): unknown =>
           stripeMocks.sessionsRetrieve(...args),
+        listLineItems: (...args: unknown[]): unknown =>
+          fakeListLineItems(...args),
       },
     },
   },

@@ -21,7 +21,7 @@ import {
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-  /** Published Content → FAQ items (from `services/page.tsx`). */
+  /** Published Site Setup → FAQ items (from `services/page.tsx`). */
   faqItems?: RouterOutputs["faq"]["list"];
 };
 
@@ -63,7 +63,7 @@ export async function PollenServicesPage({ business, faqItems = [] }: Props) {
     getListFieldValue(customFields, "pollen.services.resources-list"),
   ) as PollenResourceRow[];
 
-  // Content → FAQ picker. An unset value — or a legacy saved list of
+  // Site Setup → FAQ picker. An unset value — or a legacy saved list of
   // `{question, answer}` rows from before the picker — falls back to the
   // first published questions; none published hides the section.
   const faqs = resolveFaqPickerItems(

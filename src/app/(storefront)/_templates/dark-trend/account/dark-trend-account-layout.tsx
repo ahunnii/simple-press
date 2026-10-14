@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,7 +14,6 @@ import {
   Repeat,
   Settings,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -26,7 +26,8 @@ type DarkTrendAccountNavItem = {
 };
 
 const NAV_ITEMS: DarkTrendAccountNavItem[] = [
-  { href: "/account/orders", label: "Orders", icon: Package },
+  // `account/orders` 404s when `orders` is off.
+  { href: "/account/orders", label: "Orders", icon: Package, flag: "orders" },
   {
     href: "/account/subscriptions",
     label: "Subscriptions",

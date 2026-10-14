@@ -12,6 +12,10 @@ import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
 type DeliveryMethod = "ship" | "pickup" | null;
@@ -210,7 +214,12 @@ export function NoiseOrderConfirmation({
   }
 
   const deliveryMethod = orderDetails?.delivery_method ?? null;
-  const { lead, steps } = confirmationCopy(deliveryMethod);
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
+  const { lead: baseLead, steps: baseSteps } = confirmationCopy(deliveryMethod);
+  // While a bank payment clears, no email has gone out yet — swap the lead for
+  // the processing notice and drop the "you'll receive an email" step.
+  const lead = processing ? PAYMENT_PROCESSING_MESSAGE : baseLead;
+  const steps = processing ? baseSteps.slice(1) : baseSteps;
   const pickupLocation =
     deliveryMethod === "pickup" ? (business.pickupLocation?.trim() ?? "") : "";
   const pickupInstructions = pickupLocation
@@ -242,7 +251,8 @@ export function NoiseOrderConfirmation({
               className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              Transmission confirmed · {business.name}
+              {processing ? "Transmission received" : "Transmission confirmed"}{" "}
+              · {business.name}
             </p>
             <h1
               ref={confirmationH1Ref}
@@ -256,6 +266,7 @@ export function NoiseOrderConfirmation({
               Order placed.
             </h1>
             <p
+              role={processing ? "status" : undefined}
               className="max-w-[40ch] font-sans text-[15px] leading-relaxed"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
@@ -293,7 +304,9 @@ export function NoiseOrderConfirmation({
                 className="mb-3 font-mono text-[9px] tracking-[0.22em] uppercase"
                 style={{ color: "var(--vn-steel-mist)" }}
               >
-                Confirmation sent to
+                {processing
+                  ? "Confirmation will be sent to"
+                  : "Confirmation sent to"}
               </h2>
               <p
                 className="font-mono text-[12px] tracking-[0.08em]"

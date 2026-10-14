@@ -64,6 +64,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PreviewPane } from "~/components/preview/preview-pane";
@@ -86,6 +87,9 @@ type Props = {
     customFields: any;
   };
   embedsEnabled?: boolean;
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaEnabled?: boolean;
 };
 
@@ -117,6 +121,9 @@ export function TemplateFieldsEditor({
   business,
   siteContent,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaEnabled,
 }: Props) {
   const router = useRouter();
@@ -302,6 +309,9 @@ export function TemplateFieldsEditor({
   };
 
   const isSaving = updateSiteContent.isPending;
+  // True while a rich-text field image is still uploading — saving then
+  // would drop it (its temporary `blob:` src is stripped server-side).
+  const { isUploading, onUploadingChange } = useUploadingState();
 
   // Set the preview cookie on mount; clear it on unmount (the cookie is the
   // load-bearing guard for the server-side draft swap). The draft itself is
@@ -350,6 +360,10 @@ export function TemplateFieldsEditor({
   );
 
   const handleSave = () => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     const allFields = { ...customFields };
     customPairs.forEach((pair) => {
       if (pair.key && pair.value) {
@@ -833,9 +847,10 @@ export function TemplateFieldsEditor({
           />
 
           <SaveFormButton
-            disabled={isSaving}
+            disabled={isSaving || isUploading}
             handleSave={handleSave}
             isSaving={isSaving}
+            isUploading={isUploading}
           />
         </div>
       </div>
@@ -1142,7 +1157,11 @@ export function TemplateFieldsEditor({
                                 onFieldChange={handleFieldChange}
                                 isUngrouped={isUngrouped}
                                 embedsEnabled={embedsEnabled}
+                                galleriesEnabled={galleriesEnabled}
+                                quotesEnabled={quotesEnabled}
+                                formsEnabled={formsEnabled}
                                 mediaLibraryEnabled={mediaEnabled}
+                                onUploadingChange={onUploadingChange}
                               />
                             );
                           },

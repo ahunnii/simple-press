@@ -46,6 +46,7 @@ const FIELD_KEYS = [
  * Subscriptions instead of inventing a new one. */
 const CODE_STATUS_KEY: Record<RewardCodeStatus, string> = {
   active: "active",
+  pending: "pending",
   used: "completed",
   expired: "past_due",
   inactive: "cancelled",

@@ -4,8 +4,9 @@
  * Two templates:
  *   wealth-essay   — long-form editorial layout, seeded with the real DCWF
  *                    "Non-Extractive Financing" (Lending) page.
- *   wealth-program — hero + centered copy + outlined CTA, seeded with the
- *                    real "Worker-Owned Detroit" program page.
+ *   wealth-program — split hero with a CTA, copy column and an optional
+ *                    closing band, seeded with the real "Worker-Owned
+ *                    Detroit" program page.
  *
  * Field key convention: "<def-id>.<field-slug>".
  *
@@ -36,7 +37,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.title",
     label: "Page Title",
-    description: "The page's H1 (Jost display).",
+    description: "The page's main heading, shown large at the top.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.header",
@@ -46,7 +47,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.deck",
     label: "Deck / Subtitle",
-    description: "Italic PT Sans subtitle beneath the title.",
+    description: "Italic subtitle beneath the title.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.header",
@@ -58,7 +59,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.lend-to-heading",
     label: '"Who We Lend To" Heading',
-    description: "Italic H2 for this section.",
+    description: "Italic heading for this section.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.lend-to",
@@ -92,7 +93,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.priorities-heading",
     label: '"Our Priorities" Heading',
-    description: "Italic H2 for this section.",
+    description: "Italic heading for this section.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.priorities",
@@ -112,7 +113,8 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.priorities-list",
     label: "Priorities Bullets",
-    description: "Plain bullet list — no bold lead-in, just the sentence.",
+    description:
+      "Plain bullet list shown in two columns on wide screens. No bold lead-in, just the sentence.",
     type: "list",
     page: "homepage",
     group: "wealth-essay.priorities",
@@ -149,7 +151,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.process-heading",
     label: '"Our Process" Heading',
-    description: "Italic H2 for this section.",
+    description: "Italic heading for this section.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.process",
@@ -214,7 +216,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.terms-eyebrow",
     label: "Loan Terms Eyebrow",
-    description: "Mono-caps eyebrow above the terms bullets.",
+    description: "Small all-caps heading above the loan terms.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.terms",
@@ -254,7 +256,7 @@ export const wealthEssayFields: TemplateField[] = [
   {
     key: "wealth-essay.values-eyebrow",
     label: "Shared Values Eyebrow",
-    description: "Mono-caps eyebrow above the values bullets.",
+    description: "Small all-caps heading above the shared values.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.values",
@@ -298,12 +300,25 @@ export const wealthEssayFields: TemplateField[] = [
     ]),
   },
 
-  // Closing CTA — hideable by leaving label/url blank (this template isn't
-  // sp-group wired, so there's no `_sp` visibility toggle to hook into).
+  // Closing CTA — hideable by leaving the label/url blank
+  // (service detail pages aren't sp-group wired, so there's no `_sp`
+  // visibility toggle to hook into).
+  {
+    key: "wealth-essay.cta-heading",
+    label: "Closing CTA Heading",
+    description:
+      "Italic line in the closing band, beside the button. Leave blank to show the button alone. The band only shows when the button below has a label and link.",
+    type: "text",
+    page: "homepage",
+    group: "wealth-essay.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Let's talk about financing your co-op.",
+  },
   {
     key: "wealth-essay.cta-label",
     label: "Closing CTA Button Label",
-    description: "Leave blank to hide the closing CTA button.",
+    description:
+      "Button in the closing band. Leave blank to hide the whole closing band.",
     type: "text",
     page: "homepage",
     group: "wealth-essay.cta",
@@ -326,7 +341,8 @@ const wealthEssayFieldGroups: TemplateFieldGroup[] = [
   {
     id: "wealth-essay.header",
     title: "Header",
-    description: "Page title and italic deck.",
+    description:
+      "Page title and italic subtitle. Shows beside the service's photo when it has one.",
     icon: "📜",
     columns: 2,
   },
@@ -354,14 +370,14 @@ const wealthEssayFieldGroups: TemplateFieldGroup[] = [
   {
     id: "wealth-essay.terms",
     title: "Loan Terms Band",
-    description: "Mono eyebrow and bold-lead bullets between hairlines.",
+    description: "Small heading and bold-lead items in a dark green band.",
     icon: "📋",
     columns: 1,
   },
   {
     id: "wealth-essay.values",
     title: "Shared Values Band",
-    description: "Mono eyebrow and bold-lead bullets between hairlines.",
+    description: "Small heading and bold-lead items in a light green band.",
     icon: "💚",
     columns: 1,
   },
@@ -369,7 +385,7 @@ const wealthEssayFieldGroups: TemplateFieldGroup[] = [
     id: "wealth-essay.cta",
     title: "Closing Call to Action",
     description:
-      "Book-a-consult button. Leave the label blank to hide it entirely.",
+      "Closing band with a heading and a book-a-consult button. Leave the button label blank to hide the band.",
     icon: "📞",
     columns: 2,
   },
@@ -382,7 +398,8 @@ export const wealthProgramFields: TemplateField[] = [
   {
     key: "wealth-program.hero-image",
     label: "Hero Image",
-    description: "Full-width hero image at the top of the page.",
+    description:
+      "Photo beside the heading at the top of the page, with a green tint.",
     type: "image",
     page: "homepage",
     group: "wealth-program.hero",
@@ -405,7 +422,7 @@ export const wealthProgramFields: TemplateField[] = [
   {
     key: "wealth-program.heading",
     label: "Page Heading",
-    description: "Centered Jost H1.",
+    description: "The page's main heading, shown large beside the hero image.",
     type: "text",
     page: "homepage",
     group: "wealth-program.body",
@@ -450,7 +467,7 @@ export const wealthProgramFields: TemplateField[] = [
   {
     key: "wealth-program.cta-label",
     label: "CTA Button Label",
-    description: "Outlined mono-caps CTA button label.",
+    description: "Label for the button in the hero, beside the heading.",
     type: "text",
     page: "homepage",
     group: "wealth-program.cta",
@@ -461,7 +478,7 @@ export const wealthProgramFields: TemplateField[] = [
     key: "wealth-program.cta-url",
     label: "CTA Button URL",
     description:
-      "Where the CTA button links to. NOTE: the real Worker-Owned Detroit program page URL was not available at build time — defaults to /contact until an owner sets the real link.",
+      "Where the hero button links to. Defaults to /contact until you set the real program website link.",
     type: "url",
     page: "homepage",
     group: "wealth-program.cta",
@@ -471,10 +488,21 @@ export const wealthProgramFields: TemplateField[] = [
 
   // Optional secondary block
   {
+    key: "wealth-program.follow-heading",
+    label: "Closing Band Heading",
+    description:
+      "Small heading above the social icons and button in the closing band.",
+    type: "text",
+    page: "homepage",
+    group: "wealth-program.secondary",
+    gridColumn: "col-span-full",
+    defaultValue: "Follow along",
+  },
+  {
     key: "wealth-program.show-social",
     label: "Show social row",
     description:
-      "Show the business's Facebook/Instagram icons below the CTA. Turn off to hide this optional block entirely.",
+      "Show your social media icons in the closing band. Turn off to hide them.",
     type: "boolean",
     page: "homepage",
     group: "wealth-program.secondary",
@@ -484,7 +512,7 @@ export const wealthProgramFields: TemplateField[] = [
   {
     key: "wealth-program.secondary-cta-label",
     label: "Secondary CTA Label",
-    description: "Leave blank to hide the secondary CTA link.",
+    description: "Button in the closing band. Leave blank to hide the button.",
     type: "text",
     page: "homepage",
     group: "wealth-program.secondary",
@@ -495,7 +523,7 @@ export const wealthProgramFields: TemplateField[] = [
   {
     key: "wealth-program.secondary-cta-url",
     label: "Secondary CTA URL",
-    description: "Where the secondary CTA link goes.",
+    description: "Where the closing band button goes.",
     type: "url",
     page: "homepage",
     group: "wealth-program.secondary",
@@ -509,29 +537,29 @@ const wealthProgramFieldGroups: TemplateFieldGroup[] = [
   {
     id: "wealth-program.hero",
     title: "Hero",
-    description: "Full-width hero image and alt text.",
+    description: "Hero photo and its alt text.",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "wealth-program.body",
     title: "Body",
-    description: "Centered heading and three body paragraphs.",
+    description: "Page heading and three body paragraphs.",
     icon: "📝",
     columns: 1,
   },
   {
     id: "wealth-program.cta",
     title: "Call to Action",
-    description: "Outlined mono-caps CTA button.",
+    description: "Button in the hero, beside the heading.",
     icon: "🔗",
     columns: 2,
   },
   {
     id: "wealth-program.secondary",
-    title: "Social Row & Secondary CTA",
+    title: "Closing Band",
     description:
-      "Optional social icon row and a second, quieter CTA link. Leave the secondary label blank to hide it.",
+      "Optional closing band with your social icons and a button. Leave the button label blank to hide the button.",
     icon: "🔉",
     columns: 2,
   },
@@ -568,7 +596,7 @@ export const wealthServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "wealth-essay",
     label: "Essay",
     description:
-      "Long-form editorial layout: title + deck, essay sections with bold-lead bullets and a numbered process, loan-terms and shared-values bands between hairlines, and a closing consult CTA.",
+      "Long-form editorial layout: split hero, essay sections with a bullet list and a numbered process, loan-terms and shared-values color bands, and a closing consult band.",
     fields: wealthEssayFields,
     fieldGroups: wealthEssayFieldGroups,
   },
@@ -576,7 +604,7 @@ export const wealthServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "wealth-program",
     label: "Program",
     description:
-      "Full-width hero image, centered heading and copy, an outlined mono-caps CTA, and an optional social row with a secondary CTA.",
+      "Split hero with a photo and a button, a copy column, and an optional closing band with social icons and a second button.",
     fields: wealthProgramFields,
     fieldGroups: wealthProgramFieldGroups,
   },

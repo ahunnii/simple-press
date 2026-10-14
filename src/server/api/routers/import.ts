@@ -10,8 +10,26 @@ import { importProducts } from "~/lib/woocommerce/product-importer";
 
 import { createTRPCRouter, ownerAdminProcedure } from "../trpc";
 
+/**
+ * The WooCommerce import is PLATFORM_ADMIN-only, matching its page gate
+ * (`/admin/products/import`, `allowedRoles: []`). Built on ownerAdminProcedure
+ * for the tenant resolution, then narrowed: `membershipRole` is null only for a
+ * platform admin, so any membership role — OWNER and MANAGER included — is
+ * refused. Owners can still READ their store's log through
+ * `product.getProductImportHistory` (the /admin/products/import/history page).
+ */
+const importProcedure = ownerAdminProcedure.use(({ ctx, next }) => {
+  if (ctx.membershipRole !== null) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Platform admin access required",
+    });
+  }
+  return next();
+});
+
 export const importRouter = createTRPCRouter({
-  parseCSV: ownerAdminProcedure
+  parseCSV: importProcedure
     .input(
       z.object({
         csvContent: z.string(),
@@ -49,7 +67,7 @@ export const importRouter = createTRPCRouter({
       };
     }),
 
-  getImport: ownerAdminProcedure
+  getImport: importProcedure
     .input(z.object({ importId: z.string() }))
     .query(async ({ ctx, input }) => {
       const importRecord = await ctx.db.productImport.findFirst({
@@ -66,7 +84,7 @@ export const importRouter = createTRPCRouter({
       return importRecord;
     }),
 
-  executeImport: ownerAdminProcedure
+  executeImport: importProcedure
     .input(
       z.object({
         importId: z.string(),
@@ -154,7 +172,7 @@ export const importRouter = createTRPCRouter({
       }
     }),
 
-  getImportHistory: ownerAdminProcedure
+  getImportHistory: importProcedure
     .input(z.object({}))
     .query(async ({ ctx }) => {
       const imports = await ctx.db.productImport.findMany({

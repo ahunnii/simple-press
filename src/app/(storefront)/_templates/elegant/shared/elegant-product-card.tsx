@@ -7,8 +7,10 @@ import Link from "next/link";
 import type { RouterOutputs } from "~/trpc/react";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type _HomepageProduct = NonNullable<
@@ -40,6 +42,9 @@ type CardProduct = Pick<
   }[];
   // baseInventoryUnit is not included in getRelated, so make it optional
   baseInventoryUnit?: { inventoryQty: number; allowBackorders: boolean } | null;
+  // Present on card queries; a product with option groups needs a choice
+  // before it can be bought, like one with variants.
+  _count?: { optionGroups: number };
 };
 
 type Props = {
@@ -53,11 +58,15 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 export function ElegantProductCard({ product, index, isVisible }: Props) {
   const { addItem } = useCart();
+  const cartEnabled = useCartEnabled();
+  const { isEnabled } = useStorefrontFlags();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const reducedMotion = useReducedMotion();
 
   const productStatus = checkProductStatus({
+    hasOptions:
+      isEnabled("productOptions") && (product._count?.optionGroups ?? 0) > 0,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
     trackInventory: product.trackInventory,
@@ -80,7 +89,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (productStatus.disableCart) return;
+    if (!cartEnabled || productStatus.disableCart) return;
     addItem({
       productId: product.id,
       productSlug: product.slug,
@@ -195,7 +204,7 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
             zIndex: 3,
           }}
         >
-          {productStatus.hasVariants ? (
+          {productStatus.chooseOptions ? (
             <Link
               href={`/shop/${product.slug}`}
               aria-label={`View options for ${product.name}`}
@@ -222,30 +231,35 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
             </Link>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                aria-disabled={productStatus.disableCart || undefined}
-                aria-label={`Quick add ${product.name} to bag`}
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  background: "var(--el-paper, #fbf8f2)",
-                  borderRadius: 999,
-                  fontSize: 11,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  border: "none",
-                  cursor: productStatus.disableCart ? "not-allowed" : "pointer",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
-                  opacity: productStatus.disableCart ? 0.5 : 1,
-                }}
-                className="el-quick-btn"
-              >
-                {isAdded ? "Added" : "Quick add"}
-              </button>
+              {/* Catalog mode (B6.11): no Quick add when `cart` is off */}
+              {cartEnabled && (
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  aria-disabled={productStatus.disableCart || undefined}
+                  aria-label={`Quick add ${product.name} to bag`}
+                  style={{
+                    flex: 1,
+                    padding: "10px 14px",
+                    background: "var(--el-paper, #fbf8f2)",
+                    borderRadius: 999,
+                    fontSize: 11,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    border: "none",
+                    cursor: productStatus.disableCart
+                      ? "not-allowed"
+                      : "pointer",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transition: `background 0.3s ${ease}, color 0.3s ${ease}`,
+                    opacity: productStatus.disableCart ? 0.5 : 1,
+                  }}
+                  className="el-quick-btn"
+                >
+                  {isAdded ? "Added" : "Quick add"}
+                </button>
+              )}
               <Link
                 href={`/shop/${product.slug}`}
                 aria-label={`View ${product.name}`}
@@ -276,9 +290,11 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
       </div>
 
       {/* S-3: sr-only live region for quick-add confirmation */}
-      <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {isAdded ? `Added ${product.name} to bag` : ""}
-      </span>
+      {cartEnabled && (
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {isAdded ? `Added ${product.name} to bag` : ""}
+        </span>
+      )}
 
       {/* Meta */}
       <div

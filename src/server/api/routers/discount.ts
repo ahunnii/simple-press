@@ -2,8 +2,13 @@ import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  discountUsageForCheckout,
+  findSupersedableHold,
+} from "~/lib/checkout/discount-holds";
 import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
+import { countHeldDiscountUses } from "~/lib/inventory/reservation";
 import { discountLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
 import {
@@ -33,7 +38,7 @@ export const discountRouter = createTRPCRouter({
       // filters, or sorts on. It keeps the editor-only columns
       // (perCustomerLimit, minPurchase, maxDiscount) and any future field out
       // of the RSC payload; the detail page reads those through `getById`.
-      return ctx.db.discountCode.findMany({
+      const codes = await ctx.db.discountCode.findMany({
         // Exclude loyalty-minted codes (source: "loyalty") — they surface
         // per customer on the loyalty admin card, not in this owner-created list.
         where: { businessId, source: "manual" },
@@ -51,6 +56,15 @@ export const discountRouter = createTRPCRouter({
         },
         orderBy: { createdAt: "desc" },
       });
+      // `usageCount` includes uses held by still-open checkouts (counted at
+      // checkout start; given back if the checkout expires or its payment
+      // fails). `heldUses` lets the table say so instead of presenting a code
+      // that is at its limit only because of a pending bank payment as final.
+      const held = await countHeldDiscountUses(ctx.db, {
+        businessId,
+        discountCodeIds: codes.filter((c) => c.usageCount > 0).map((c) => c.id),
+      });
+      return codes.map((c) => ({ ...c, heldUses: held.get(c.id) ?? 0 }));
     }),
 
   getById: ownerAdminProcedure
@@ -366,27 +380,50 @@ export const discountRouter = createTRPCRouter({
         });
       }
 
-      // Per-customer limit: only enforceable here when the form supplied an
-      // email. create-session re-checks this server-side with the checkout
-      // email, so this is a best-effort early rejection.
-      let customerUsageCount: number | undefined;
-      if (discount.perCustomerLimit != null && input.email) {
-        customerUsageCount = await ctx.db.order.count({
-          where: {
+      // Agree with what create-session will decide, through the same helper:
+      //
+      // - Uses held by open checkouts count (they are inside `usageCount`;
+      //   per customer, the shopper's held uses are added to their orders).
+      // - EXCEPT the hold of the shopper's own previous checkout (the signed
+      //   `pending_session` cookie) when create-session would supersede it —
+      //   an active reservation of this store for that session, still open
+      //   on Stripe — because create-session gives that use back before
+      //   claiming a new one. Without this, a shopper who pressed Back
+      //   from Stripe and re-enters their single-use (e.g. loyalty reward)
+      //   code is told it has reached its usage limit by their own checkout.
+      //
+      // Per-customer is only enforceable here when the form supplied an email;
+      // create-session re-checks it with the checkout email either way.
+      // The lookup is DB-first (a Stripe retrieve only when such a hold
+      // exists), and only runs when a limit could actually reject the code.
+      const customerEmail = input.email
+        ? normalizeEmail(input.email)
+        : undefined;
+      const limited =
+        discount.usageLimit != null ||
+        (discount.perCustomerLimit != null && customerEmail !== undefined);
+      const excludeReservationId = limited
+        ? await findSupersedableHold(ctx.db, {
+            headers: ctx.headers,
             businessId,
             discountCodeId: discount.id,
-            customerEmail: normalizeEmail(input.email),
-            status: { not: "cancelled" },
-          },
-        });
-      }
+          })
+        : null;
+      const usage = await discountUsageForCheckout(ctx.db, {
+        businessId,
+        discount,
+        customerEmail,
+        excludeReservationId,
+      });
 
       // Shipping isn't known at validate time, so a free_shipping code
       // reports discountAmount 0 — the `freeShipping` flag tells the UI to
       // show a "Free shipping" label instead of a dollar amount.
-      const result = validateAndComputeDiscount(discount, cartTotal, {
-        customerUsageCount,
-      });
+      const result = validateAndComputeDiscount(
+        { ...discount, usageCount: usage.usageCount },
+        cartTotal,
+        { customerUsageCount: usage.customerUsageCount },
+      );
       if (!result.ok) {
         throw new TRPCError({
           code: "BAD_REQUEST",

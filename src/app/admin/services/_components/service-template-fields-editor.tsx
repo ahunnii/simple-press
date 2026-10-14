@@ -16,6 +16,11 @@ type Props = {
   customFields: Record<string, unknown>;
   onFieldChange: (key: string, value: unknown) => void;
   embedsEnabled?: boolean;
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 /**
@@ -29,6 +34,10 @@ export function ServiceTemplateFieldsEditor({
   customFields,
   onFieldChange,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
+  onUploadingChange,
 }: Props) {
   const mediaEnabled = useMediaLibraryEnabled();
   const fieldsByGroup = getServiceTemplateFieldsByGroup(serviceTemplateId);
@@ -79,7 +88,11 @@ export function ServiceTemplateFieldsEditor({
               onFieldChange={onFieldChange}
               isUngrouped={isUngrouped}
               embedsEnabled={embedsEnabled}
+              galleriesEnabled={galleriesEnabled}
+              quotesEnabled={quotesEnabled}
+              formsEnabled={formsEnabled}
               mediaLibraryEnabled={mediaEnabled}
+              onUploadingChange={onUploadingChange}
             />
           );
         })

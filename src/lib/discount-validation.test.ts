@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { validateAndComputeDiscount } from "./discount-validation";
+import {
+  endOfExpiryDay,
+  isPastExpiry,
+  startOfToday,
+  validateAndComputeDiscount,
+} from "./discount-validation";
 
 type DiscountArg = Parameters<typeof validateAndComputeDiscount>[0];
 
@@ -171,5 +176,52 @@ describe("validateAndComputeDiscount", () => {
       );
       expect(result).toEqual({ ok: true, discountAmountCents: 1_000 });
     });
+  });
+});
+
+describe("expiry day helpers", () => {
+  // Local-time constructors, matching how the server reads expiry dates.
+  const today = new Date(2026, 9, 10, 23, 0, 0); // Oct 10, 23:00
+  const midnightToday = new Date(2026, 9, 10);
+  const midnightYesterday = new Date(2026, 9, 9);
+
+  it("endOfExpiryDay is 23:59:59.999 of the stored date", () => {
+    expect(endOfExpiryDay(midnightToday).getTime()).toBe(
+      new Date(2026, 9, 10, 23, 59, 59, 999).getTime(),
+    );
+  });
+
+  it("a code expiring today is still valid at 23:00 today", () => {
+    expect(isPastExpiry(midnightToday, today)).toBe(false);
+  });
+
+  it("a code is expired the instant the next day starts", () => {
+    expect(isPastExpiry(midnightToday, new Date(2026, 9, 11, 0, 0, 0, 0))).toBe(
+      true,
+    );
+  });
+
+  it("a code that expired yesterday is invalid today", () => {
+    expect(
+      isPastExpiry(midnightYesterday, new Date(2026, 9, 10, 0, 0, 1)),
+    ).toBe(true);
+  });
+
+  it("a null expiry never expires", () => {
+    expect(isPastExpiry(null, today)).toBe(false);
+  });
+
+  it("startOfToday cutoff agrees with isPastExpiry", () => {
+    const cutoff = startOfToday(today);
+    expect(midnightToday < cutoff).toBe(false); // keep: expires today
+    expect(midnightYesterday < cutoff).toBe(true); // deactivate
+  });
+
+  it("validateAndComputeDiscount honours a code expiring today", () => {
+    const result = validateAndComputeDiscount(
+      makeDiscount({ expiresAt: startOfToday() }),
+      10_000,
+    );
+    expect(result.ok).toBe(true);
   });
 });

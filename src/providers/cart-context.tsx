@@ -10,7 +10,25 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import type { CustomizerSelection } from "~/lib/customizer";
+import {
+  configKey as computeConfigKey,
+  normalizeSelection,
+  stableHash16,
+} from "~/lib/customizer";
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
+import { customizerSelectionSchema } from "~/lib/validators/product-options";
+
+/**
+ * Display-only description of a configured line's choices, computed in the
+ * browser when the line is added (`useProductCustomizer().toCartFields()`).
+ * UNTRUSTED: it comes from localStorage, so it is only ever rendered as
+ * text, and the server never reads it (it re-prices `configuration`).
+ */
+export type CartItemCustomization = {
+  summary: string;
+  lines: { label: string; value: string; price: number }[];
+};
 
 export type CartItem = {
   productId: string;
@@ -31,13 +49,37 @@ export type CartItem = {
    * Server-side checkout ignores it.
    */
   addOnFor?: string;
+  /**
+   * Product customizer choices (ids + raw text). Present only on a
+   * CONFIGURED line; the provider stores it normalized and drops an empty
+   * one, so a line with `configuration` always has a non-empty `configKey`.
+   */
+  configuration?: CustomizerSelection;
+  /**
+   * `configKey(configuration)` — part of the line's identity. Always
+   * recomputed by the provider (on add and on load), never trusted from the
+   * caller or storage. Absent / "" = a plain line.
+   */
+  configKey?: string;
+  /** Display-only summary of `configuration` (see `CartItemCustomization`). */
+  customization?: CartItemCustomization;
 };
 
 /**
- * Which lines of a product/variant a cart call targets:
- * - `undefined` (omitted): every line of it, standalone or add-on
- * - `null`: only the standalone line (no `addOnFor`)
- * - a string: only the add-on line for that parent `cartLineKey`
+ * Which lines of a product/variant a product+variant cart call targets:
+ * - `undefined` (omitted): every PLAIN line of it, standalone or add-on
+ * - `null`: only the standalone plain line (no `addOnFor`)
+ * - a string: only the plain add-on line for that parent `cartLineKey`
+ *
+ * Configured lines (product customizer, `configKey` set) are never targeted
+ * by a scope: the product+variant mutators (`removeItem`, `updateQuantity`,
+ * `incrementItem`, `decrementItem`, `removeItemWithAddOns`) cannot touch
+ * them, so a template written before options existed can't wipe or resize
+ * someone's build by product id. Configured lines are changed only through
+ * the line-id APIs (`removeLine`, `updateLineQuantity`) with
+ * `cartItemId(item)`. The READ helpers (`isInCart`, `getItemQuantity`) with
+ * an omitted scope still count every line, configured included, because a
+ * configured line draws on the same base stock.
  */
 export type CartLineScope = string | null | undefined;
 
@@ -46,13 +88,72 @@ export function cartLineKey(productId: string, variantId: string | null) {
   return `${productId}:${variantId ?? "base"}`;
 }
 
-/** Unique id for one cart line (React keys etc.); includes `addOnFor`. */
-export function cartItemId(item: CartItem) {
-  const key = cartLineKey(item.productId, item.variantId);
-  return item.addOnFor ? `${key}@${item.addOnFor}` : key;
+/** The line's configuration key ("" for a plain line). */
+export function lineConfigKey(
+  item: Pick<CartItem, "configKey" | "configuration">,
+): string {
+  if (item.configKey !== undefined) return item.configKey;
+  return item.configuration ? computeConfigKey(item.configuration) : "";
 }
 
-/** Whether `item` is a line of productId/variantId within `scope`. */
+/** A product-customizer line (has a non-empty configuration). */
+export function isConfiguredLine(
+  item: Pick<CartItem, "configKey" | "configuration">,
+): boolean {
+  return lineConfigKey(item) !== "";
+}
+
+/**
+ * Unique id for one cart line (React keys, `removeLine`,
+ * `updateLineQuantity`): product + variant, then `~configKey` for a
+ * configured line, then `@addOnFor` for a legacy add-on line. A plain line's
+ * id is unchanged from before options existed.
+ */
+export function cartItemId(
+  item: Pick<
+    CartItem,
+    "productId" | "variantId" | "addOnFor" | "configKey" | "configuration"
+  >,
+) {
+  const key = cartLineKey(item.productId, item.variantId);
+  const config = lineConfigKey(item);
+  const withConfig = config ? `${key}~${config}` : key;
+  return item.addOnFor ? `${withConfig}@${item.addOnFor}` : withConfig;
+}
+
+/** Most characters the checkout accepts in a `lineKey`. */
+const CHECKOUT_LINE_KEY_MAX = 64;
+
+/**
+ * The `lineKey` sent to checkout for this line, echoed back when the server
+ * rejects it so exactly that line can be removed. The line id when it fits
+ * the server's 64-char cap (two cuids + a config key do not), otherwise a
+ * stable 16-hex hash of it. Map an echoed key back with
+ * `findLineByCheckoutKey`.
+ */
+export function checkoutLineKey(
+  item: Pick<
+    CartItem,
+    "productId" | "variantId" | "addOnFor" | "configKey" | "configuration"
+  >,
+) {
+  const id = cartItemId(item);
+  if (id.length <= CHECKOUT_LINE_KEY_MAX) return id;
+  return `h:${stableHash16(id)}`;
+}
+
+export function findLineByCheckoutKey<T extends CartItem>(
+  items: readonly T[],
+  lineKey: string,
+): T | undefined {
+  return items.find((item) => checkoutLineKey(item) === lineKey);
+}
+
+/**
+ * Whether `item` is a line of productId/variantId within `scope`. An omitted
+ * scope matches EVERY line, configured included (stock reads); a `null` or
+ * string scope only ever matches plain lines.
+ */
 export function matchesCartLine(
   item: CartItem,
   productId: string,
@@ -62,7 +163,25 @@ export function matchesCartLine(
   if (item.productId !== productId || item.variantId !== variantId) {
     return false;
   }
-  return scope === undefined || (item.addOnFor ?? null) === scope;
+  if (scope === undefined) return true;
+  if (isConfiguredLine(item)) return false;
+  return (item.addOnFor ?? null) === scope;
+}
+
+/**
+ * What a product+variant MUTATOR may touch: `matchesCartLine` minus every
+ * configured line (see `CartLineScope`).
+ */
+function isLegacyTarget(
+  item: CartItem,
+  productId: string,
+  variantId: string | null,
+  scope: CartLineScope,
+) {
+  return (
+    !isConfiguredLine(item) &&
+    matchesCartLine(item, productId, variantId, scope)
+  );
 }
 
 /** Quantity of productId/variantId held by every line except `exclude`. */
@@ -70,25 +189,56 @@ function quantityElsewhere(
   items: CartItem[],
   productId: string,
   variantId: string | null,
-  exclude: CartItem | undefined,
+  exclude: (item: CartItem) => boolean,
 ) {
   return items.reduce(
     (sum, item) =>
-      item !== exclude && matchesCartLine(item, productId, variantId)
+      !exclude(item) && matchesCartLine(item, productId, variantId)
         ? sum + item.quantity
         : sum,
     0,
   );
 }
 
+/**
+ * Normalize an incoming line: a non-empty configuration is stored
+ * normalized with its recomputed key; an empty one (and any stray
+ * `configKey`/`customization`) is dropped so the line is plain.
+ */
+function prepareLine<T extends Omit<CartItem, "quantity">>(item: T): T {
+  const { configuration: rawConfig, customization, ...rest } = item;
+  delete rest.configKey; // always recomputed below
+  const configuration = rawConfig ? normalizeSelection(rawConfig) : null;
+  const key = configuration ? computeConfigKey(configuration) : "";
+  if (!configuration || key === "") return rest as T;
+  return {
+    ...rest,
+    configuration,
+    configKey: key,
+    ...(customization ? { customization } : {}),
+  } as T;
+}
+
 export type CartItemSnapshot = {
   productId: string;
   variantId: string | null;
+  /**
+   * The line's configuration key as the server computed it ("" or absent =
+   * a plain line). Snapshots are matched to lines by product + variant +
+   * this key, so each configured build gets its own price/availability.
+   */
+  configKey?: string;
   available: boolean;
   price: number;
   compareAtPrice: number | null;
   maxQuantity: number | null;
   slug?: string | null;
+  /**
+   * The server's own rendering of a configured, available line's build
+   * (priced from the current option definitions). Replaces the line's
+   * stored `customization` so the breakdown follows owner price edits.
+   */
+  customization?: CartItemCustomization;
 };
 
 type CartContextType = {
@@ -100,6 +250,14 @@ type CartContextType = {
     variantId: string | null,
     scope?: CartLineScope,
   ) => void;
+  /**
+   * Remove one line by `cartItemId(item)` — the only way (with
+   * `updateLineQuantity`) to change a configured line. Use these for every
+   * cart row.
+   */
+  removeLine: (lineId: string) => void;
+  /** Set one line's quantity by `cartItemId(item)`; `<= 0` removes it. */
+  updateLineQuantity: (lineId: string, quantity: number) => void;
   /** Remove a standalone line and every add-on line added for it. */
   removeItemWithAddOns: (productId: string, variantId: string | null) => void;
   updateQuantity: (
@@ -139,7 +297,8 @@ type CartContextType = {
   subtotal: number;
 
   /**
-   * Reconcile the cart against a fresh snapshot from the server.
+   * Reconcile the cart against a fresh snapshot from the server. Snapshots
+   * match lines by product + variant + `configKey`.
    * - Removes items that are unavailable or absent from the snapshot.
    * - Updates price, compareAtPrice, maxInventory for available items.
    * - Clamps quantity down to maxQuantity when finite.
@@ -153,16 +312,24 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "shopping-cart";
 
-/** Parse a raw localStorage value into cart items; null when unusable. */
-function parseStoredCartItems(raw: string | null): CartItem[] | null {
+/**
+ * Parse a raw localStorage value into cart items; null when unusable.
+ *
+ * Product customizer fields are validated too. A line whose `configuration`
+ * or `customization` is malformed is DROPPED, not stripped: stripping the
+ * configuration would turn a customized build into a plain line charged at
+ * the base price, silently losing what the shopper chose. `configKey` is
+ * always recomputed from the configuration, never trusted.
+ */
+export function parseStoredCartItems(raw: string | null): CartItem[] | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return null;
-    return parsed.filter((item): item is CartItem => {
-      if (typeof item !== "object" || item === null) return false;
+    return parsed.flatMap((item): CartItem[] => {
+      if (typeof item !== "object" || item === null) return [];
       const c = item as Record<string, unknown>;
-      return (
+      const basic =
         typeof c.productId === "string" &&
         (c.variantId === null || typeof c.variantId === "string") &&
         typeof c.productName === "string" &&
@@ -171,12 +338,68 @@ function parseStoredCartItems(raw: string | null): CartItem[] | null {
         typeof c.quantity === "number" &&
         (c.imageUrl === null || typeof c.imageUrl === "string") &&
         (c.sku === null || typeof c.sku === "string") &&
-        (c.addOnFor === undefined || typeof c.addOnFor === "string")
-      );
+        (c.addOnFor === undefined || typeof c.addOnFor === "string");
+      if (!basic) return [];
+
+      const { configuration, customization, ...rest } = c;
+      delete rest.configKey; // recomputed by prepareLine, never trusted
+      if (configuration === undefined) {
+        // A plain line: any stray customization is meaningless.
+        return [rest as CartItem];
+      }
+      const selection = customizerSelectionSchema.safeParse(configuration);
+      if (!selection.success) return [];
+      if (customization !== undefined && !isCustomization(customization)) {
+        return [];
+      }
+      return [
+        prepareLine({
+          ...(rest as Omit<CartItem, "quantity">),
+          configuration: selection.data,
+          ...(customization !== undefined
+            ? { customization: customization }
+            : {}),
+        }) as CartItem,
+      ];
     });
   } catch {
     return null;
   }
+}
+
+function sameCustomization(
+  a: CartItemCustomization | undefined,
+  b: CartItemCustomization,
+): boolean {
+  if (a?.summary !== b.summary || a.lines.length !== b.lines.length) {
+    return false;
+  }
+  return a.lines.every((line, i) => {
+    const other = b.lines[i];
+    return (
+      line.label === other?.label &&
+      line.value === other?.value &&
+      line.price === other?.price
+    );
+  });
+}
+
+function isCustomization(value: unknown): value is CartItemCustomization {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.summary === "string" &&
+    Array.isArray(v.lines) &&
+    v.lines.every((line: unknown) => {
+      if (typeof line !== "object" || line === null) return false;
+      const l = line as Record<string, unknown>;
+      return (
+        typeof l.label === "string" &&
+        typeof l.value === "string" &&
+        typeof l.price === "number"
+      );
+    })
+  );
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -243,9 +466,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [items],
   );
 
-  // Add item to cart
+  // Add item to cart. Merges into an existing line only when the FULL line
+  // id matches (product, variant, configuration, add-on parent): the same
+  // build bumps its line, a different build of the same variant is a new one.
   const addItem = useCallback(
-    (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+    (rawItem: Omit<CartItem, "quantity">, quantity = 1) => {
+      const newItem = prepareLine(rawItem);
+      const newId = cartItemId(newItem);
       let toastMsg: string | null = null;
       let toastIsError = false;
       let openCart = false;
@@ -255,26 +482,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         toastIsError = false;
         openCart = false;
 
-        const existingIndex = currentItems.findIndex((item) =>
-          matchesCartLine(
-            item,
-            newItem.productId,
-            newItem.variantId,
-            newItem.addOnFor ?? null,
-          ),
+        const existingIndex = currentItems.findIndex(
+          (item) => cartItemId(item) === newId,
         );
-        // Stock is shared by every line of the product (an add-on line and a
-        // standalone line of the same charm draw on the same inventory).
+        const existing = currentItems[existingIndex];
+        // Stock is shared by every line of the product (an add-on line, a
+        // standalone line and a configured build of the same variant all
+        // draw on the same inventory).
         const elsewhere = quantityElsewhere(
           currentItems,
           newItem.productId,
           newItem.variantId,
-          currentItems[existingIndex],
+          (item) => item === existing,
         );
 
-        if (existingIndex > -1) {
+        if (existing) {
           const updated = [...currentItems];
-          const newQuantity = updated[existingIndex]!.quantity + quantity;
+          const newQuantity = existing.quantity + quantity;
 
           if (
             newItem.maxInventory != null &&
@@ -285,10 +509,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             return currentItems;
           }
 
-          updated[existingIndex] = {
-            ...updated[existingIndex]!,
-            quantity: newQuantity,
-          };
+          updated[existingIndex] = { ...existing, quantity: newQuantity };
 
           toastMsg = `Updated quantity in cart`;
           return updated;
@@ -325,7 +546,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  // Remove item from cart
+  // Remove the plain lines of a product/variant (never a configured line —
+  // see `CartLineScope`)
   const removeItem = useCallback(
     (productId: string, variantId: string | null, scope?: CartLineScope) => {
       let removed = false;
@@ -333,7 +555,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems((currentItems) => {
         removed = false;
         const filtered = currentItems.filter(
-          (item) => !matchesCartLine(item, productId, variantId, scope),
+          (item) => !isLegacyTarget(item, productId, variantId, scope),
         );
         if (filtered.length < currentItems.length) removed = true;
         return filtered;
@@ -343,6 +565,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     },
     [],
   );
+
+  // Remove exactly one line by its `cartItemId`
+  const removeLine = useCallback((lineId: string) => {
+    let removed = false;
+
+    setItems((currentItems) => {
+      removed = false;
+      const filtered = currentItems.filter(
+        (item) => cartItemId(item) !== lineId,
+      );
+      if (filtered.length < currentItems.length) removed = true;
+      return filtered;
+    });
+
+    if (removed) toast.success("Removed from cart");
+  }, []);
 
   // Remove a standalone line together with the add-ons picked for it
   const removeItemWithAddOns = useCallback(
@@ -354,8 +592,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removed = false;
         const filtered = currentItems.filter(
           (item) =>
-            !matchesCartLine(item, productId, variantId, null) &&
-            item.addOnFor !== parentKey,
+            !isLegacyTarget(item, productId, variantId, null) &&
+            !(item.addOnFor === parentKey && !isConfiguredLine(item)),
         );
         if (filtered.length < currentItems.length) removed = true;
         return filtered;
@@ -366,7 +604,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  // Update quantity
+  // Update quantity of the plain lines of a product/variant
   const updateQuantity = useCallback(
     (
       productId: string,
@@ -383,12 +621,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       setItems((currentItems) => {
         maxInventoryHit = null;
+        const targeted = (item: CartItem) =>
+          isLegacyTarget(item, productId, variantId, scope);
         return currentItems.map((item) => {
-          if (matchesCartLine(item, productId, variantId, scope)) {
-            const elsewhere =
-              scope === undefined
-                ? 0
-                : quantityElsewhere(currentItems, productId, variantId, item);
+          if (targeted(item)) {
+            // Every line this call does not set (other builds, other
+            // scopes) still holds stock.
+            const elsewhere = quantityElsewhere(
+              currentItems,
+              productId,
+              variantId,
+              targeted,
+            );
             if (
               item.maxInventory != null &&
               elsewhere + quantity > item.maxInventory
@@ -408,20 +652,63 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [removeItem],
   );
 
-  // Increment item quantity
+  // Set one line's quantity by its `cartItemId`
+  const updateLineQuantity = useCallback(
+    (lineId: string, quantity: number) => {
+      if (quantity <= 0) {
+        removeLine(lineId);
+        return;
+      }
+
+      let maxInventoryHit: number | null = null;
+
+      setItems((currentItems) => {
+        maxInventoryHit = null;
+        const line = currentItems.find((item) => cartItemId(item) === lineId);
+        if (!line || line.quantity === quantity) return currentItems;
+        const elsewhere = quantityElsewhere(
+          currentItems,
+          line.productId,
+          line.variantId,
+          (item) => item === line,
+        );
+        if (
+          line.maxInventory != null &&
+          quantity > line.quantity &&
+          elsewhere + quantity > line.maxInventory
+        ) {
+          maxInventoryHit = line.maxInventory;
+          return currentItems;
+        }
+        return currentItems.map((item) =>
+          item === line ? { ...item, quantity } : item,
+        );
+      });
+
+      if (maxInventoryHit !== null)
+        toast.error(`Only ${maxInventoryHit} available in stock`);
+    },
+    [removeLine],
+  );
+
+  // Increment the plain lines of a product/variant
   const incrementItem = useCallback(
     (productId: string, variantId: string | null, scope?: CartLineScope) => {
       let maxInventoryHit: number | null = null;
 
       setItems((currentItems) => {
         maxInventoryHit = null;
+        const targeted = (item: CartItem) =>
+          isLegacyTarget(item, productId, variantId, scope);
         return currentItems.map((item) => {
-          if (matchesCartLine(item, productId, variantId, scope)) {
+          if (targeted(item)) {
             const newQuantity = item.quantity + 1;
-            const elsewhere =
-              scope === undefined
-                ? 0
-                : quantityElsewhere(currentItems, productId, variantId, item);
+            const elsewhere = quantityElsewhere(
+              currentItems,
+              productId,
+              variantId,
+              targeted,
+            );
 
             if (
               item.maxInventory != null &&
@@ -443,7 +730,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  // Decrement item quantity
+  // Decrement the plain lines of a product/variant
   const decrementItem = useCallback(
     (productId: string, variantId: string | null, scope?: CartLineScope) => {
       let removed = false;
@@ -452,7 +739,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removed = false;
         return currentItems
           .map((item) => {
-            if (matchesCartLine(item, productId, variantId, scope)) {
+            if (isLegacyTarget(item, productId, variantId, scope)) {
               const newQuantity = item.quantity - 1;
 
               if (newQuantity <= 0) {
@@ -487,10 +774,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     toast.success("Cart cleared");
   }, []);
 
-  // Reconcile cart against a fresh server snapshot — additive (no CartItem shape change)
+  // Reconcile cart against a fresh server snapshot. Keyed per line (product,
+  // variant, configKey), so each configured build takes only its own price,
+  // stock cap and availability.
   const reconcile = useCallback((snapshots: CartItemSnapshot[]) => {
     const snapshotMap = new Map(
-      snapshots.map((s) => [`${s.productId}-${s.variantId ?? ""}`, s]),
+      snapshots.map((s) => [
+        `${s.productId}-${s.variantId ?? ""}-${s.configKey ?? ""}`,
+        s,
+      ]),
     );
 
     let itemsRemoved = false;
@@ -503,7 +795,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const next: CartItem[] = [];
 
       for (const item of currentItems) {
-        const key = `${item.productId}-${item.variantId ?? ""}`;
+        const key = `${item.productId}-${item.variantId ?? ""}-${lineConfigKey(item)}`;
         const snap = snapshotMap.get(key);
 
         // Remove items with no snapshot or explicitly unavailable
@@ -537,6 +829,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           compareAtPrice: newCompare,
           maxInventory: newMaxInv,
           quantity: clampedQty,
+          // Keep the stored object when the build reads the same, so an
+          // unchanged cart stays reference-stable.
+          ...(snap.customization &&
+          item.configuration &&
+          !sameCustomization(item.customization, snap.customization)
+            ? { customization: snap.customization }
+            : {}),
         });
       }
 
@@ -550,7 +849,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const unchanged = next.every(
           (n, i) =>
             n.quantity === currentItems[i]?.quantity &&
-            (n.productSlug ?? null) === (currentItems[i]?.productSlug ?? null),
+            (n.productSlug ?? null) ===
+              (currentItems[i]?.productSlug ?? null) &&
+            n.customization === currentItems[i]?.customization,
         );
         if (unchanged) return currentItems;
       }
@@ -593,6 +894,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isHydrated,
         addItem,
         removeItem,
+        removeLine,
+        updateLineQuantity,
         removeItemWithAddOns,
         updateQuantity,
         incrementItem,

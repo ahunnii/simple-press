@@ -91,6 +91,22 @@ export const CUSTOMIZABLE_EMAILS = [
     supportsIntro: true,
   },
   {
+    id: "order-payment-processing",
+    label: "Bank Payment Processing",
+    description:
+      "Sent when a customer pays by bank transfer and the payment is still clearing.",
+    defaultSubject: "Your order at {businessName} is processing",
+    supportsIntro: true,
+  },
+  {
+    id: "order-payment-failed",
+    label: "Bank Payment Failed",
+    description:
+      "Sent when a customer's bank payment doesn't go through and their order is cancelled.",
+    defaultSubject: "Your payment to {businessName} didn't go through",
+    supportsIntro: true,
+  },
+  {
     id: "quote-confirmation",
     label: "Quote Request Received",
     description:

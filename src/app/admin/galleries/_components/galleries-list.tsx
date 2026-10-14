@@ -66,9 +66,12 @@ type Props = {
   /** The current page's cards only — filtering/sorting/paging happen server-side. */
   galleries: Gallery[];
   /** Where each gallery is embedded outside its own listing. An ABSENT key means
-   *  "not embedded"; the same map the `gallery.delete` guard is built from, so the
-   *  badge and the server's CONFLICT can't disagree. */
-  usage: Record<string, { count: number; locations: string[] }>;
+   *  "not embedded anywhere"; the same map the `gallery.delete` guard is built
+   *  from, so the badge and the server's CONFLICT can't disagree. `count` /
+   *  `locations` are ACTIVE embeds (they block deletion); `inactiveCount` /
+   *  `inactiveLocations` are leftovers in fields of templates the business no
+   *  longer uses (they don't block — the delete clears them). */
+  usage: RouterOutputs["gallery"]["usage"];
   /** Unfiltered total — distinguishes "no galleries yet" from "no matches". */
   totalGalleries: number;
   totalCount: number;
@@ -79,6 +82,14 @@ type Props = {
 };
 
 const BASE_PATH = "/admin/galleries";
+
+/** "Homepage hero, About page and 3 more" — `locations` is capped at 5 server-side. */
+function formatUsageLocations(locations: string[], count: number): string {
+  return (
+    locations.join(", ") +
+    (count > locations.length ? ` and ${count - locations.length} more` : "")
+  );
+}
 const ITEM_NOUN = { one: "gallery", many: "galleries" } as const;
 
 /**
@@ -193,13 +204,20 @@ export function GalleriesList({
   const deletingUsage = deleteId ? usage[deleteId] : undefined;
   const deletingName = deletingGallery?.name ?? "this gallery";
   const deletingImageCount = deletingGallery?._count.images ?? 0;
+  /** Only ACTIVE embeds block deletion — inactive-template leftovers don't. */
+  const deletingIsEmbedded = (deletingUsage?.count ?? 0) > 0;
   /** "Homepage hero, About page and 3 more" — locations is capped at 5 server-side. */
   const deletingLocations = deletingUsage
-    ? deletingUsage.locations.join(", ") +
-      (deletingUsage.count > deletingUsage.locations.length
-        ? ` and ${deletingUsage.count - deletingUsage.locations.length} more`
-        : "")
+    ? formatUsageLocations(deletingUsage.locations, deletingUsage.count)
     : "";
+  /** Fields of templates the business switched away from that still hold it. */
+  const deletingInactiveLocations =
+    deletingUsage && deletingUsage.inactiveCount > 0
+      ? formatUsageLocations(
+          deletingUsage.inactiveLocations,
+          deletingUsage.inactiveCount,
+        )
+      : "";
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -358,7 +376,7 @@ export function GalleriesList({
                               {count} {count === 1 ? "image" : "images"}
                             </Badge>
 
-                            {usedIn && (
+                            {usedIn && usedIn.count > 0 && (
                               // Warns BEFORE the delete dialog that this gallery
                               // is load-bearing on the storefront. CARD_RAISED so
                               // it sits above the stretched-link overlay and can
@@ -376,11 +394,11 @@ export function GalleriesList({
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-72">
-                                  Used on: {usedIn.locations.join(", ")}
-                                  {usedIn.count > usedIn.locations.length &&
-                                    ` and ${
-                                      usedIn.count - usedIn.locations.length
-                                    } more`}
+                                  Used on:{" "}
+                                  {formatUsageLocations(
+                                    usedIn.locations,
+                                    usedIn.count,
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                             )}
@@ -460,7 +478,9 @@ export function GalleriesList({
       {/* Delete confirmation. Two branches, because an embedded gallery cannot be
           deleted at all — offering a Delete button that can only ever produce a
           CONFLICT toast is worse than not offering one. The server guard remains
-          the enforcement if this map is stale. */}
+          the enforcement if this map is stale. Embeds left in fields of templates
+          the business no longer uses don't block (the delete clears them) — the
+          normal confirmation just says so. */}
       <AlertDialog
         open={!!deleteId}
         onOpenChange={(open) => {
@@ -468,7 +488,7 @@ export function GalleriesList({
         }}
       >
         <AlertDialogContent>
-          {deletingUsage ? (
+          {deletingUsage && deletingIsEmbedded ? (
             <>
               <AlertDialogHeader>
                 <AlertDialogTitle>
@@ -498,6 +518,8 @@ export function GalleriesList({
                     : `This permanently deletes the gallery and its ${deletingImageCount} ${
                         deletingImageCount === 1 ? "image" : "images"
                       }. Image files are deleted too, unless they’re saved in your Media Library or used elsewhere on your store. This action cannot be undone.`}
+                  {deletingInactiveLocations &&
+                    ` It’s still saved in fields of templates you’re not using: ${deletingInactiveLocations}. Deleting it clears those fields.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

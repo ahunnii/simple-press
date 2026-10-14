@@ -10,9 +10,9 @@
  */
 "use client";
 
-import type { Content } from "@tiptap/react";
-import { useId, useRef, useCallback, useEffect, useState } from "react";
 import type { DragEndEvent } from "@dnd-kit/core";
+import type { Content } from "@tiptap/react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { TemplateListFocusRequest } from "./template-list-field-editor";
 import type {
   EmbedAspectRatio,
   EmbedDisplayMode,
@@ -92,7 +93,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
 import { EmbedFrame } from "~/components/embed-frame";
 
-import type { TemplateListFocusRequest } from "./template-list-field-editor";
 import { TemplateListFieldEditor } from "./template-list-field-editor";
 import {
   TemplateImageUploadField,
@@ -140,7 +140,11 @@ export function FieldGroup({
   onFieldChange,
   isUngrouped,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaLibraryEnabled,
+  onUploadingChange,
 }: {
   groupId: string;
   page: string;
@@ -158,7 +162,13 @@ export function FieldGroup({
   onFieldChange: (key: string, value: unknown) => void;
   isUngrouped: boolean;
   embedsEnabled?: boolean;
+  /** Rich-text "Insert elements" gates — off unless the feature is on. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const columns = groupMeta?.columns ?? 1;
   const fieldsByKey = buildFieldsByKey(allFields ?? fields);
@@ -206,7 +216,11 @@ export function FieldGroup({
                 isModified={modifiedFields?.has(field.key) ?? false}
                 onChange={(value) => onFieldChange(field.key, value)}
                 embedsEnabled={embedsEnabled}
+                galleriesEnabled={galleriesEnabled}
+                quotesEnabled={quotesEnabled}
+                formsEnabled={formsEnabled}
                 mediaLibraryEnabled={mediaLibraryEnabled}
+                onUploadingChange={onUploadingChange}
               />
             </div>
           ))}
@@ -236,17 +250,27 @@ export function FieldInput({
   isModified,
   onChange,
   embedsEnabled,
+  galleriesEnabled,
+  quotesEnabled,
+  formsEnabled,
   mediaLibraryEnabled,
   listFocusRequest,
+  onUploadingChange,
 }: {
   field: TemplateField;
   value: unknown;
   isModified: boolean;
   onChange: (value: unknown) => void;
   embedsEnabled?: boolean;
+  /** Rich-text "Insert elements" gates — off unless the feature is on. */
+  galleriesEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
   mediaLibraryEnabled?: boolean;
   /** `list` fields only: expand + focus a row. Ignored for other types. */
   listFocusRequest?: TemplateListFocusRequest | null;
+  /** Rich-text image uploads — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   // `value === undefined` means the key was never saved — distinct from an
   // explicitly saved "" (which owners use to hide optional text/colors).
@@ -339,8 +363,12 @@ export function FieldInput({
           editorContentClassName="min-h-[220px] p-4 text-base md:text-sm"
           editorClassName="focus:outline-hidden"
           editable
+          galleriesEnabled={galleriesEnabled}
           embedsEnabled={embedsEnabled}
+          quotesEnabled={quotesEnabled}
+          formsEnabled={formsEnabled}
           uploader={uploadRichTextImage}
+          onUploadingChange={onUploadingChange}
         />
       ) : field.type === "textarea" ? (
         <Textarea
@@ -354,7 +382,9 @@ export function FieldInput({
       ) : field.type === "boolean" ? (
         <Switch
           id={field.key}
-          checked={isUnset ? field.defaultValue === "true" : stringValue === "true"}
+          checked={
+            isUnset ? field.defaultValue === "true" : stringValue === "true"
+          }
           onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
           aria-describedby={descId}
         />
@@ -478,7 +508,9 @@ function NumberSliderWidget({
     [defaultValue, sliderMin, sliderMax],
   );
 
-  const [draft, setDraft] = useState<number>(() => resolveNumeric(displayValue));
+  const [draft, setDraft] = useState<number>(() =>
+    resolveNumeric(displayValue),
+  );
 
   useEffect(() => {
     setDraft(resolveNumeric(displayValue));
@@ -1245,13 +1277,13 @@ export function FaqFieldEditor({
       <Alert role="note">
         <Info aria-hidden="true" />
         <AlertTitle>
-          {count} {questions} typed in before this field used Content → FAQ
+          {count} {questions} typed in before this field used Site Setup → FAQ
         </AlertTitle>
         <AlertDescription className="space-y-3">
           <p>
             {field.rendersLegacyRows
               ? `Your page still shows ${count === 1 ? "it" : "them"} until you pick questions instead.`
-              : `Your page no longer shows ${count === 1 ? "it" : "them"}. It shows the first ${maxItems} published questions from Content → FAQ instead.`}{" "}
+              : `Your page no longer shows ${count === 1 ? "it" : "them"}. It shows the first ${maxItems} published questions from Site Setup → FAQ instead.`}{" "}
             To keep {count === 1 ? "it" : "them"}, add{" "}
             {count === 1 ? "it" : "them"} under{" "}
             <a
@@ -1259,7 +1291,7 @@ export function FaqFieldEditor({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Content → FAQ
+              Site Setup → FAQ
             </a>{" "}
             first.
           </p>
@@ -1300,7 +1332,7 @@ export function FaqFieldEditor({
             rel="noopener noreferrer"
             className="text-foreground underline underline-offset-2"
           >
-            Pick specific ones, or add questions under Content → FAQ
+            Pick specific ones, or add questions under Site Setup → FAQ
           </a>
           .
         </p>
@@ -1313,7 +1345,10 @@ export function FaqFieldEditor({
           modifiers={[restrictToVerticalAxis]}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={sortIds} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={sortIds}
+            strategy={verticalListSortingStrategy}
+          >
             <div className="space-y-2">
               {ids.map((id, rowIndex) => {
                 const usedElsewhere = new Set(

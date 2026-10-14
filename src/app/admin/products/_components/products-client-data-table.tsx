@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  History,
   MoreVertical,
   Package,
   Pencil,
@@ -82,6 +83,7 @@ import {
 } from "../../_lib/admin-mutation-toast";
 import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 import { DeleteProductAlertDialog } from "./delete-product-alert-dialog";
+import { BulkOptionUsageWarning } from "./option-usage-warning";
 
 type Product = RouterOutputs["product"]["secureList"]["products"][number];
 
@@ -116,6 +118,9 @@ type Props = {
    * own gate (`requireAdminAccess({ allowedRoles: [] })`).
    */
   isPlatformAdmin: boolean;
+  /** Read-only "Import history" link for owners/managers, resolved server-side:
+   *  shown only when a platform admin has imported products into this store. */
+  showImportHistory: boolean;
   /**
    * Gates the "Export products (CSV)" button. Resolved server-side as
    * `isPlatformAdmin || membershipRole === "OWNER"`, AND the `wordpressExport`
@@ -160,6 +165,7 @@ export function ProductsClient({
   page,
   pageSize,
   isPlatformAdmin,
+  showImportHistory,
   canExportProducts,
   canBulkDelete,
 }: Props) {
@@ -453,6 +459,15 @@ export function ProductsClient({
               <Link href={`${BASE_PATH}/export`}>
                 <Download className="mr-2 h-4 w-4" />
                 Export products (CSV)
+              </Link>
+            </Button>
+          )}
+
+          {showImportHistory && (
+            <Button variant="outline" asChild size="sm">
+              <Link href={`${BASE_PATH}/import/history`}>
+                <History className="mr-2 h-4 w-4" />
+                Import history
               </Link>
             </Button>
           )}
@@ -801,6 +816,12 @@ export function ProductsClient({
               Past orders keep their own record of what was bought. This action
               cannot be undone.
             </AlertDialogDescription>
+            {/* Mounted only while open (no query for a closed dialog) and
+                within the delete cap — over it the delete can't run, and the
+                server's input would reject the list anyway. */}
+            {bulkDeleteOpen && selectedCount <= ADMIN_BULK_DELETE_LIMIT && (
+              <BulkOptionUsageWarning productIds={[...selectedIds].sort()} />
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>

@@ -1,71 +1,110 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
+
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthReveal, WealthRevealGroup } from "../shared/wealth-reveal";
 
 type Props = {
+  heading: string;
   coops: TemplateListRow[];
 };
 
 /**
- * Co-op logo grid: square cells, logos object-contain, links out, quiet
- * hover (opacity transition, no transforms — matches design.md's hover
- * register). Hideable (testimonials.coops).
+ * Co-op grid — paper block: italic H2, then square hairline cells (logo
+ * contained, mono-caps name beneath). A cell with a website links out as a
+ * whole. Rows keep their saved-list index for `listItemAttr` even when a
+ * blank row is skipped. Hideable (testimonials.coops).
  */
-export function WealthTestimonialsCoops({ coops }: Props) {
-  if (coops.length === 0) return null;
+export function WealthTestimonialsCoops({ heading, coops }: Props) {
+  const cells = coops
+    .map((coop, index) => ({
+      id: coop._id ?? String(index),
+      index,
+      logo: typeof coop.logo === "string" ? coop.logo : "",
+      name: typeof coop.name === "string" ? coop.name.trim() : "",
+      url: typeof coop.url === "string" ? coop.url.trim() : "",
+    }))
+    .filter((c) => c.logo !== "" || c.name !== "");
+
+  if (cells.length === 0) return null;
+  const hasHeading = heading.trim() !== "";
 
   return (
-    <section
-      aria-label="Supported co-op logos"
+    <WealthBlock
+      tone="paper"
+      aria-labelledby={hasHeading ? "wealth-testimonials-coops-h" : undefined}
+      aria-label={hasHeading ? undefined : "Co-ops we have supported"}
       {...sectionGroupAttr("testimonials", "coops")}
-      className="py-[calc(var(--wealth-rhythm)*2)]"
     >
-      <div className="mx-auto w-full max-w-[var(--wealth-container)] px-[var(--wealth-gutter)]">
-        <ul className="grid list-none grid-cols-2 gap-[var(--wealth-gutter)] sm:grid-cols-3 md:grid-cols-4">
-          {coops.map((coop, i) => {
-            const logo = typeof coop.logo === "string" ? coop.logo : "";
-            const name = typeof coop.name === "string" ? coop.name : "";
-            const url = typeof coop.url === "string" ? coop.url : "";
-            const isExternal = /^https?:\/\//i.test(url);
-
-            const tile = (
-              <div className="relative aspect-square w-full bg-[var(--wealth-surface)]">
-                {logo ? (
-                  <Image
-                    src={logo}
-                    alt={name ? `${name} logo` : ""}
-                    fill
-                    sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    className="object-contain p-[var(--wealth-gutter)]"
-                  />
+      {hasHeading ? (
+        <WealthReveal className="wealth-section-head">
+          <h2
+            id="wealth-testimonials-coops-h"
+            className="wealth-h2"
+            {...fieldAttr("wealth.testimonials.coops-heading")}
+          >
+            {heading}
+          </h2>
+        </WealthReveal>
+      ) : null}
+      <WealthRevealGroup threshold={0}>
+        <ul className="wealth-testimonials-coops">
+          {cells.map((cell, i) => {
+            const external = /^https?:\/\//i.test(cell.url);
+            const inner = (
+              <>
+                <span className="wealth-testimonials-coops__logo">
+                  {cell.logo ? (
+                    <Image
+                      src={cell.logo}
+                      alt={cell.name ? "" : "Co-op logo"}
+                      fill
+                      sizes="(min-width: 1100px) 220px, (min-width: 640px) 25vw, 45vw"
+                    />
+                  ) : null}
+                </span>
+                {cell.name ? (
+                  <span className="wealth-testimonials-coops__name">
+                    {cell.name}
+                    {external ? <span aria-hidden="true"> &#8599;</span> : null}
+                  </span>
                 ) : null}
-              </div>
+              </>
             );
-
             return (
-              <li key={coop._id ?? i}>
-                {url ? (
+              <li
+                key={cell.id}
+                className="wealth-reveal-item"
+                style={{ "--i": Math.min(i, 7) } as React.CSSProperties}
+                {...listItemAttr("wealth.testimonials.coops", cell.index)}
+              >
+                {cell.url ? (
                   <a
-                    href={url}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
-                    className="block transition-opacity duration-100 ease-in-out hover:opacity-70 focus-visible:opacity-70"
-                    aria-label={name || undefined}
+                    href={cell.url}
+                    className="wealth-testimonials-coops__cell"
+                    {...(external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                   >
-                    {tile}
+                    {inner}
+                    {external ? (
+                      <span className="sr-only"> (opens in new tab)</span>
+                    ) : null}
                   </a>
                 ) : (
-                  tile
+                  <div className="wealth-testimonials-coops__cell">{inner}</div>
                 )}
-                {name ? (
-                  <p className="mt-2 text-center text-sm">{name}</p>
-                ) : null}
               </li>
             );
           })}
         </ul>
-      </div>
-    </section>
+      </WealthRevealGroup>
+    </WealthBlock>
   );
 }

@@ -5,7 +5,6 @@ import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
-import { WealthHr } from "../shared/wealth-hr";
 import { WealthTestimonialsCoops } from "./wealth-testimonials-coops";
 import { WealthTestimonialsCta } from "./wealth-testimonials-cta";
 import { WealthTestimonialsHero } from "./wealth-testimonials-hero";
@@ -77,12 +76,14 @@ export async function WealthTestimonialsPage({
     | undefined;
 
   const f = resolveFields(customFields, [
+    "wealth.testimonials.hero-eyebrow",
     "wealth.testimonials.hero-heading",
     "wealth.testimonials.hero-intro",
     "wealth.testimonials.hero-link-label",
     "wealth.testimonials.hero-link-url",
     "wealth.testimonials.hero-image",
     "wealth.testimonials.hero-image-alt",
+    "wealth.testimonials.coops-heading",
     "wealth.testimonials.quotes-heading",
     "wealth.testimonials.quotes-empty-message",
     "wealth.testimonials.cta-heading",
@@ -97,8 +98,9 @@ export async function WealthTestimonialsPage({
 
   return (
     <div>
-      {/* 1. Co-ops We Support — not hideable */}
+      {/* 1. Meet the Co-ops hero — not hideable */}
       <WealthTestimonialsHero
+        eyebrow={f["wealth.testimonials.hero-eyebrow"] ?? ""}
         heading={f["wealth.testimonials.hero-heading"] ?? "Co-ops We Support"}
         intro={f["wealth.testimonials.hero-intro"] ?? ""}
         linkLabel={f["wealth.testimonials.hero-link-label"] ?? ""}
@@ -107,14 +109,13 @@ export async function WealthTestimonialsPage({
         imageAlt={f["wealth.testimonials.hero-image-alt"] ?? ""}
       />
 
+      {/* 2. Co-op grid */}
       {isSectionVisible(customFields, "wealth", "testimonials.coops") && (
-        <>
-          <WealthHr />
-          <WealthTestimonialsCoops coops={coops} />
-        </>
+        <WealthTestimonialsCoops
+          heading={f["wealth.testimonials.coops-heading"] ?? ""}
+          coops={coops}
+        />
       )}
-
-      <WealthHr />
 
       {/* 3. In their words — approved testimonials, or the empty state */}
       <WealthTestimonialsQuotes
@@ -123,15 +124,13 @@ export async function WealthTestimonialsPage({
         testimonials={testimonials}
       />
 
+      {/* 4. Share your story band */}
       {isSectionVisible(customFields, "wealth", "testimonials.cta") && (
-        <>
-          <WealthHr />
-          <WealthTestimonialsCta
-            heading={f["wealth.testimonials.cta-heading"] ?? ""}
-            body={f["wealth.testimonials.cta-body"] ?? ""}
-            buttonLabel={f["wealth.testimonials.cta-button-label"] ?? ""}
-          />
-        </>
+        <WealthTestimonialsCta
+          heading={f["wealth.testimonials.cta-heading"] ?? ""}
+          body={f["wealth.testimonials.cta-body"] ?? ""}
+          buttonLabel={f["wealth.testimonials.cta-button-label"] ?? ""}
+        />
       )}
     </div>
   );

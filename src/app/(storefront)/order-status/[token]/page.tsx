@@ -7,6 +7,7 @@ import { formatDate } from "~/lib/format-date";
 import { verifyOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
 import { db } from "~/server/db";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 export const metadata = {
   title: "Order Status",
@@ -180,6 +181,10 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="text-muted-foreground text-[13px]"
+                      />
                       <p className="text-muted-foreground text-[13px]">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>

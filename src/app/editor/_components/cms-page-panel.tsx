@@ -71,6 +71,13 @@ export type CmsPagePanelProps = {
   variant?: PanelVariant;
   /** "page" for CMS pages, "blog" for blog posts. */
   kind: "page" | "blog";
+  /** Rich-text "Insert elements" gates — each off unless its feature is on. */
+  galleriesEnabled?: boolean;
+  embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
+  formsEnabled?: boolean;
+  /** Rich-text uploads in flight — see `useUploadingState`. */
+  onUploadingChange?: (uploading: boolean) => void;
 };
 
 function ModifiedBadge() {
@@ -100,6 +107,11 @@ export function CmsPagePanel({
   adminHref,
   variant = "sidebar",
   kind,
+  galleriesEnabled,
+  embedsEnabled,
+  quotesEnabled,
+  formsEnabled,
+  onUploadingChange,
 }: CmsPagePanelProps) {
   const isBlog = kind === "blog";
   const titleModified = values.title !== baseline.title;
@@ -204,10 +216,6 @@ export function CmsPagePanel({
           </Label>
           {/* Keyed on pageId so switching pages remounts the editor instead
            * of diffing controlled TipTap JSON across unrelated documents. */}
-          {/* TODO: this instance passes no galleriesEnabled/embedsEnabled/
-           * quotesEnabled prop, so those widgets default to enabled here
-           * regardless of the business's actual feature flags — a
-           * pre-existing shared gap (not new for quotesEnabled). */}
           <MinimalTiptapEditor
             key={pageId}
             value={contentValue}
@@ -218,6 +226,11 @@ export function CmsPagePanel({
             className="w-full"
             editorClassName="focus:outline-hidden"
             uploader={uploadRichTextImage}
+            galleriesEnabled={galleriesEnabled}
+            embedsEnabled={embedsEnabled}
+            quotesEnabled={quotesEnabled}
+            formsEnabled={formsEnabled}
+            onUploadingChange={onUploadingChange}
           />
         </div>
 

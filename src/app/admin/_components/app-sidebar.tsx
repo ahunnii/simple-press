@@ -66,8 +66,12 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   featureData?: { flags: Record<string, boolean> };
   /** Business membership role; null for PLATFORM_ADMIN (sees everything). */
   membershipRole?: AdminRole | null;
-  /** Drives the sidebar's "Finish setup" nudge — see WelcomeNotification. */
-  welcomeSetupStatus?: { stripeConnected: boolean; hasProducts: boolean };
+  /**
+   * Whether the store passes the /admin setup gate (`requiredComplete` from
+   * `loadSetupStatus`). When false, the sidebar shows the "Finish setup"
+   * nudge. See WelcomeNotification.
+   */
+  setupComplete?: boolean;
   /**
    * Count of unapproved `ProductReview` rows for the business, fetched once
    * in the admin layout. Rendered as a badge on the Reviews nav item only —
@@ -82,7 +86,7 @@ export function AppSidebar({
   businessName,
   featureData,
   membershipRole,
-  welcomeSetupStatus,
+  setupComplete,
   pendingReviewCount,
   ...props
 }: AppSidebarProps) {
@@ -191,10 +195,10 @@ export function AppSidebar({
         />
       </SidebarContent>
       <SidebarFooter>
-        <WelcomeNotification
-          stripeConnected={welcomeSetupStatus?.stripeConnected ?? false}
-          hasProducts={welcomeSetupStatus?.hasProducts ?? false}
-        />
+        {/* STAFF can't open /admin/welcome (they bounce to Orders), so skip the prompt. */}
+        {roleForFiltering !== "STAFF" && (
+          <WelcomeNotification setupComplete={setupComplete ?? false} />
+        )}
         <NavUser />
       </SidebarFooter>
     </Sidebar>

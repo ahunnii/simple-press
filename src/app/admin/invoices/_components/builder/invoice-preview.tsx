@@ -15,6 +15,7 @@ import {
   computeInvoiceTotals,
   computeLineAmountCents,
 } from "~/lib/invoices/totals";
+import { ContactToPay } from "~/components/invoices/contact-to-pay";
 import { InvoiceDocument } from "~/components/invoices/invoice-document";
 
 import { formatYmdLabel } from "../../[id]/_components/format";
@@ -177,7 +178,11 @@ export function InvoicePreview({
       instructions.length > 0 ? (
         <PaymentInstructionsList instructions={instructions} />
       ) : (
-        <p className="text-sm text-neutral-500">No payment methods selected.</p>
+        <ContactToPay
+          businessName={issuer.businessName}
+          email={issuer.email}
+          phone={issuer.phone}
+        />
       );
 
     return {

@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 import type { NoiseCartCopy } from "./noise-cart-copy";
 import type { ShippingConfig } from "~/lib/shipping-utils";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import {
@@ -22,8 +21,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 type NoiseCartDrawerProps = {
   shippingConfig: ShippingConfig;
@@ -35,7 +36,7 @@ export function NoiseCartDrawer({
   shippingConfig,
   copy,
 }: NoiseCartDrawerProps) {
-  const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
+  const { items, subtotal, isOpen, setIsOpen, updateLineQuantity, removeLine } =
     useCart();
   const reduce = useReducedMotion();
   // PF8 / B2.1, B7.4: `/checkout` 404s with the flag off, and `/shop` (or
@@ -155,7 +156,7 @@ export function NoiseCartDrawer({
               <AnimatePresence mode="popLayout">
                 {items.map((item) => (
                   <motion.div
-                    key={`${item.productId}-${item.variantId ?? "base"}`}
+                    key={cartItemId(item)}
                     layout
                     initial={{ opacity: reduce ? 1 : 0, x: reduce ? 0 : 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -202,6 +203,10 @@ export function NoiseCartDrawer({
                           {item.variantName}
                         </p>
                       )}
+                      <CartLineOptions
+                        item={item}
+                        className="font-mono text-[10px] tracking-[0.1em] text-[var(--vn-ink-soft)] uppercase"
+                      />
 
                       {/* Qty stepper + Remove */}
                       <div className="mt-1.5 flex items-center gap-2">
@@ -213,9 +218,8 @@ export function NoiseCartDrawer({
                             className="hover:bg-foreground hover:text-background flex items-center justify-center transition-colors disabled:opacity-30"
                             style={{ width: "36px", height: "36px" }}
                             onClick={() =>
-                              updateQuantity(
-                                item.productId,
-                                item.variantId,
+                              updateLineQuantity(
+                                cartItemId(item),
                                 item.quantity - 1,
                               )
                             }
@@ -236,9 +240,8 @@ export function NoiseCartDrawer({
                             className="hover:bg-foreground hover:text-background flex items-center justify-center transition-colors"
                             style={{ width: "36px", height: "36px" }}
                             onClick={() =>
-                              updateQuantity(
-                                item.productId,
-                                item.variantId,
+                              updateLineQuantity(
+                                cartItemId(item),
                                 item.quantity + 1,
                               )
                             }
@@ -248,9 +251,7 @@ export function NoiseCartDrawer({
                           </button>
                         </div>
                         <button
-                          onClick={() =>
-                            removeItem(item.productId, item.variantId)
-                          }
+                          onClick={() => removeLine(cartItemId(item))}
                           className="ml-1 font-mono text-[10px] tracking-[0.1em] uppercase transition-opacity hover:opacity-50"
                           style={{
                             color: "var(--vn-steel-mist)",

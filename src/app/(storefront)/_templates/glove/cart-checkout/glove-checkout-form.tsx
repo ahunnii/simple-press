@@ -79,6 +79,7 @@ export function GloveCheckoutForm({
     discountFieldError,
     discountCodeLabel,
     discountAmount,
+    discountFreeShipping,
   } = form;
 
   // Tracks whether the shopper has tried to submit, to derive aria-invalid.
@@ -493,6 +494,11 @@ export function GloveCheckoutForm({
             {discountCodeLabel && discountAmount > 0 ? (
               <p role="status" className="glove-success mt-1 text-[14px]">
                 Code <strong>{discountCodeLabel}</strong> applied.
+              </p>
+            ) : null}
+            {discountCodeLabel && discountFreeShipping ? (
+              <p role="status" className="glove-success mt-1 text-[14px]">
+                Free shipping applied: <strong>{discountCodeLabel}</strong>
               </p>
             ) : null}
           </div>

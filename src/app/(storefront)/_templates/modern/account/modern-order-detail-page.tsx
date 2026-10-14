@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { ModernAccountLayout } from "./modern-account-layout";
 
@@ -58,6 +59,10 @@ export function ModernOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="mt-1"
+                      />
                       <p className="text-muted-foreground mt-1 text-sm">
                         Qty: {item.quantity} × {formatPrice(item.price)}
                       </p>

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSession } from "~/server/better-auth/server";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 import { TestimonialForm } from "./_components/testimonial-form";
@@ -37,5 +38,17 @@ export default async function SubmitTestimonialPage({
     redirect(`/auth/sign-in?redirectTo=/testimonials/submit`);
   }
 
-  return <TestimonialForm business={business} />;
+  // simplifiedGet doesn't carry the auto-approve setting, so read it here — the
+  // form uses it to say whether a submission goes live right away or waits.
+  const settings = await db.business.findUnique({
+    where: { id: business.id },
+    select: { testimonialsAutoApprove: true },
+  });
+
+  return (
+    <TestimonialForm
+      business={business}
+      autoApprove={settings?.testimonialsAutoApprove ?? false}
+    />
+  );
 }

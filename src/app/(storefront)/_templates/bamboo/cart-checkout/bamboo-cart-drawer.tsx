@@ -26,7 +26,8 @@ import {
   SheetDescription,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type BambooCartDrawerProps = {
@@ -42,7 +43,9 @@ const quantityButtonClass =
 
 /** One line item inside the drawer. Kept local so the drawer owns its look. */
 function BambooDrawerItem({ item }: { item: CartItem }) {
-  const { updateQuantity, removeItem } = useCart();
+  const { updateLineQuantity, removeLine } = useCart();
+  // Line-id APIs: each configured build is its own line.
+  const lineId = cartItemId(item);
 
   return (
     <div className="flex gap-4 border-b border-[var(--bam-hairline)] py-4 last:border-b-0">
@@ -65,12 +68,13 @@ function BambooDrawerItem({ item }: { item: CartItem }) {
             variant="ghost"
             size="icon"
             className="size-8 shrink-0 text-[var(--bam-forest)]/60 hover:bg-transparent hover:text-[var(--bam-forest-deep)]"
-            onClick={() => removeItem(item.productId, item.variantId)}
+            onClick={() => removeLine(lineId)}
             aria-label={`Remove ${item.productName} from cart`}
           >
             <X className="size-4" aria-hidden="true" />
           </Button>
         </div>
+        <CartLineOptions item={item} className="mt-1" />
         <p className="mt-0.5 text-xs text-[var(--bam-forest)]/70">
           {formatPrice(item.price)} each
         </p>
@@ -81,11 +85,7 @@ function BambooDrawerItem({ item }: { item: CartItem }) {
               size="icon"
               className={quantityButtonClass}
               onClick={() =>
-                updateQuantity(
-                  item.productId,
-                  item.variantId,
-                  item.quantity - 1,
-                )
+                updateLineQuantity(lineId, item.quantity - 1)
               }
               disabled={item.quantity <= 1}
               aria-label={`Decrease quantity of ${item.productName}`}
@@ -104,11 +104,7 @@ function BambooDrawerItem({ item }: { item: CartItem }) {
               size="icon"
               className={quantityButtonClass}
               onClick={() =>
-                updateQuantity(
-                  item.productId,
-                  item.variantId,
-                  item.quantity + 1,
-                )
+                updateLineQuantity(lineId, item.quantity + 1)
               }
               aria-label={`Increase quantity of ${item.productName}`}
             >
@@ -225,7 +221,7 @@ export function BambooCartDrawer({
               <AnimatePresence mode="popLayout">
                 {items.map((item) => (
                   <motion.div
-                    key={`${item.productId}-${item.variantId ?? "base"}`}
+                    key={cartItemId(item)}
                     layout
                     initial={
                       reducedMotion

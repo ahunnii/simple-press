@@ -71,6 +71,9 @@ export default async function EditorPage({
       productPreview={productPreview}
       sections={sections}
       embedsEnabled={flags.isEnabled("embeds")}
+      galleriesEnabled={flags.isEnabled("galleries")}
+      quotesEnabled={flags.isEnabled("quoteCalculator")}
+      formsEnabled={flags.isEnabled("forms")}
       mediaEnabled={flags.isEnabled("media")}
       enabledFeatures={enabledFeatures}
       initialPage={initialPage}

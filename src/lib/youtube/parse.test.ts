@@ -225,6 +225,61 @@ describe("parseChannelRef", () => {
   });
 });
 
+describe("parseChannelRef — bare @handle", () => {
+  it("parses a bare @handle and strips the @", () => {
+    expect(parseChannelRef("@SimplePressDemo")).toEqual({
+      kind: "handle",
+      handle: "SimplePressDemo",
+    });
+    expect(parseChannelRef("  @SimplePressDemo  ")).toEqual({
+      kind: "handle",
+      handle: "SimplePressDemo",
+    });
+  });
+
+  it("decodes a percent-encoded bare handle", () => {
+    expect(parseChannelRef("@caf%C3%A9")).toEqual({
+      kind: "handle",
+      handle: "café",
+    });
+  });
+
+  it("rejects handles with spaces or slashes", () => {
+    expect(parseChannelRef("@some handle")).toBeNull();
+    expect(parseChannelRef("@some/handle")).toBeNull();
+    expect(parseChannelRef("@a%2Fb")).toBeNull();
+  });
+
+  it("rejects a lone @ and a doubled @", () => {
+    expect(parseChannelRef("@")).toBeNull();
+    expect(parseChannelRef("@   ")).toBeNull();
+    expect(parseChannelRef("@@handle")).toBeNull();
+  });
+
+  it("still rejects a bare word without the @", () => {
+    expect(parseChannelRef("SimplePressDemo")).toBeNull();
+  });
+
+  it("does not interfere with URLs or bare channel IDs", () => {
+    expect(parseChannelRef("https://www.youtube.com/@Foo")).toEqual({
+      kind: "handle",
+      handle: "Foo",
+    });
+    expect(parseChannelRef(VALID_CHANNEL_ID)).toEqual({
+      kind: "channel",
+      externalId: VALID_CHANNEL_ID,
+    });
+  });
+
+  it("flows through parseSourceInput as a handle source", () => {
+    expect(parseSourceInput("@SimplePressDemo")).toEqual({
+      kind: "handle",
+      handle: "SimplePressDemo",
+    });
+    expect(parseSourceInput("@")).toBeNull();
+  });
+});
+
 describe("parseSourceInput", () => {
   it("parses a playlist URL", () => {
     expect(

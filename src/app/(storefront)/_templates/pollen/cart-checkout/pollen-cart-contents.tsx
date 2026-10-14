@@ -20,7 +20,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { useCart } from "~/providers/cart-context";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { resolveFields } from "..";
 import { PollenCartEmptyState } from "./pollen-cart-empty-state";
@@ -94,7 +94,7 @@ export function PollenCartContents({ business }: Props) {
             staggerDelay={0.08}
           >
             {items.map((item) => (
-              <StaggerItem key={item.productId}>
+              <StaggerItem key={cartItemId(item)}>
                 <PollenCartItem item={item} />
               </StaggerItem>
             ))}

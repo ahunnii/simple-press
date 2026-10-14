@@ -6,6 +6,7 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { api } from "~/trpc/server";
 import {
+  donateLinkOptions,
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
@@ -29,6 +30,8 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
     navigationItems: business?.siteContent?.navigationItems,
     navDefaults: NAV_LINKS,
     isEnabled,
+    // Donations "show in footer" switch only adds a /donate link.
+    donate: donateLinkOptions(business, isEnabled, "footer"),
   });
 
   const policies = await api.content.getSimplifiedPages({

@@ -1,5 +1,9 @@
+import Link from "next/link";
+
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 
@@ -33,6 +37,11 @@ export function CoopFooter({ business }: DefaultFooterTemplateProps) {
     f["coop.global.footer.facebookUrl"] ??
     "https://www.facebook.com/Building.Cooperatively/";
 
+  // Donations "show in footer": rides along with the footer link row. Sync
+  // server component, so resolve the flags directly from the business.
+  const { isEnabled } = resolveFlags(business?.featureFlags);
+  const donate = donateLinkOptions(business, isEnabled, "footer");
+
   return (
     <footer
       {...sectionGroupAttr("global", "branding")}
@@ -65,6 +74,14 @@ export function CoopFooter({ business }: DefaultFooterTemplateProps) {
               {facebookLabel}
               <span className="sr-only"> (opens in new tab)</span>
             </a>
+            {donate.show && (
+              <Link
+                href="/donate"
+                className="coop-footer-link inline-block cursor-pointer pr-3.5 text-[var(--coop-background)]"
+              >
+                {donate.label}
+              </Link>
+            )}
           </div>
         </nav>
 

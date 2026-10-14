@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
+import { getReservedPageSlugMessage } from "~/lib/reserved-page-slugs";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
@@ -49,6 +50,7 @@ import {
 } from "~/components/ui/card";
 import { Form, FormField } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
@@ -163,10 +165,31 @@ export function PageEditor({
   const slugManuallyEditedRef = useRef(false);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  // True while a rich-text image/video is still uploading. Saving then would
+  // drop it (a temporary `blob:` image src is stripped server-side), so Save
+  // waits for the upload to finish.
+  const { isUploading, onUploadingChange } = useUploadingState();
   const [activeTab, setActiveTab] = useState<PageEditorTab>("content");
   // Initialize form with TipTap content
+  // This editor only handles URL-served pages (new ones are always created as
+  // type "page"), so a slug that shadows a built-in route like /about — or a
+  // policy's fixed slug — is rejected here before the server has to. An
+  // existing page keeps whatever slug it already has (legacy rows stay
+  // editable); only a changed slug is checked, mirroring `content.updatePage`.
+  const originalSlug = page?.slug;
+  const resolverSchema = useMemo(
+    () =>
+      pageFormSchema.superRefine((values, ctx) => {
+        if (values.slug === originalSlug) return;
+        const message = getReservedPageSlugMessage(values.slug, "page");
+        if (message) {
+          ctx.addIssue({ code: "custom", path: ["slug"], message });
+        }
+      }),
+    [originalSlug],
+  );
   const form = useForm<PageFormValues>({
-    resolver: zodResolver(pageFormSchema),
+    resolver: zodResolver(resolverSchema),
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
@@ -326,6 +349,10 @@ export function PageEditor({
   });
 
   const onSubmit = async (data: PageFormValues) => {
+    if (isUploading) {
+      toast.info("Wait for the upload to finish, then save.");
+      return;
+    }
     let imageUrl: string | null | undefined;
     let ogImageUrl: string | null | undefined;
     const imageFile = data.imageFile;
@@ -414,6 +441,10 @@ export function PageEditor({
 
   const watchedTitle = form.watch("title") ?? "";
   const watchedSlug = form.watch("slug") ?? "";
+  const reservedSlugMessage =
+    watchedSlug !== originalSlug
+      ? getReservedPageSlugMessage(watchedSlug, "page")
+      : null;
   const titleDerivedSlug = slugify(watchedTitle);
   const slugFrozen = !slugAutoSyncs(form.watch("published"));
   const showContentRenameWarning =
@@ -536,7 +567,7 @@ export function PageEditor({
                   type="submit"
                   variant="outline"
                   size="sm"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   onClick={() => {
                     createAnotherRef.current = true;
                   }}
@@ -550,7 +581,7 @@ export function PageEditor({
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 onClick={() => {
                   createAnotherRef.current = false;
                 }}
@@ -559,6 +590,11 @@ export function PageEditor({
                   <>
                     <span className="saving-indicator" />
                     Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <span className="saving-indicator" />
+                    Uploading…
                   </>
                 ) : (
                   <>
@@ -657,6 +693,14 @@ export function PageEditor({
                         >
                           Edit in SEO
                         </Button>
+                        {/* The slug auto-follows the title, so typing
+                            "About" lands on a built-in route without the
+                            owner ever opening the SEO tab — say so here. */}
+                        {reservedSlugMessage && (
+                          <span className="text-destructive basis-full">
+                            {reservedSlugMessage}
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -695,6 +739,7 @@ export function PageEditor({
                       videosEnabled={true}
                       mediaEnabled={mediaEnabled}
                       required
+                      onUploadingChange={onUploadingChange}
                     />
                   </CardContent>
                 </Card>

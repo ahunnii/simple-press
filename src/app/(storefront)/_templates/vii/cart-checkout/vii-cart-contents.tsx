@@ -6,7 +6,8 @@ import { X } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -31,7 +32,7 @@ export function ViiCartContents({
   emptyCta,
   continueShoppingLabel,
 }: Props) {
-  const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
+  const { items, updateLineQuantity, removeLine, total, isHydrated } =
     useCart();
   const { isEnabled } = useStorefrontFlags();
   const checkoutEnabled = isEnabled("checkout");
@@ -181,10 +182,11 @@ export function ViiCartContents({
         {items.map((item, index) => {
           const lineTotal = item.price * item.quantity;
           const productPath = `/shop/${item.productSlug ?? item.productId}`;
+          const lineId = cartItemId(item);
 
           return (
             <div
-              key={`${item.productId}-${item.variantId ?? "no-variant"}`}
+              key={lineId}
               role="listitem"
               className="vii-reveal-item"
               style={
@@ -306,12 +308,16 @@ export function ViiCartContents({
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      className="mt-1 text-[13px] text-[var(--vii-ink-soft)]"
+                    />
                   </div>
 
                   {/* Remove button */}
                   <button
                     type="button"
-                    onClick={() => removeItem(item.productId, item.variantId)}
+                    onClick={() => removeLine(lineId)}
                     aria-label={`Remove ${item.productName}${item.variantName ? ` — ${item.variantName}` : ""} from bag`}
                     style={{
                       flexShrink: 0,
@@ -370,7 +376,7 @@ export function ViiCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        decrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity - 1)
                       }
                       disabled={item.quantity <= 1}
                       aria-label={`Decrease quantity of ${item.productName}`}
@@ -425,7 +431,7 @@ export function ViiCartContents({
                     <button
                       type="button"
                       onClick={() =>
-                        incrementItem(item.productId, item.variantId)
+                        updateLineQuantity(lineId, item.quantity + 1)
                       }
                       disabled={
                         item.maxInventory !== undefined &&

@@ -13,6 +13,12 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooMobileNav } from "./bamboo-mobile-nav";
@@ -88,12 +94,21 @@ export function BambooHeader({
     { href: "/contact", label: "Contact" },
   ];
 
-  // `??`, never `||`: an owner who saves an empty nav list means "no custom
-  // nav", which `||` would silently overwrite with the shipped default.
-  const customNav = business?.siteContent?.navigationItems as
-    | NavLink[]
-    | undefined;
-  const links = customNav ?? DEFAULT_NAV_LINKS;
+  // Owner nav (children + external preserved) or the shipped default, then the
+  // shared route→flag filter (P-NAV-FLAGS) drops links to switched-off
+  // features. `??` semantics live in `resolveNav`: a saved `[]` means "no
+  // links", never "use the default".
+  const filteredLinks = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, DEFAULT_NAV_LINKS),
+    isEnabled,
+  );
+
+  // Donations "show in header" only ADDS a plain last menu item (no
+  // duplicate, never removes an owner link). Same list feeds the mobile nav.
+  const links: NavLink[] = withDonateLink(
+    filteredLinks,
+    donateLinkOptions(business, isEnabled, "header"),
+  );
 
   const isActive = (href: string) =>
     href === "/"
@@ -302,26 +317,29 @@ export function BambooHeader({
               </Link>
             )}
 
-            <Link
-              href="/cart"
-              aria-label={
-                itemCount > 0
-                  ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                  : "Cart"
-              }
-              className="bamboo-icon-btn"
-            >
-              <ShoppingBag
-                className="h-[18px] w-[18px]"
-                strokeWidth={1.8}
-                aria-hidden="true"
-              />
-              {itemCount > 0 && (
-                <span aria-hidden="true" className="bamboo-icon-badge">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+            {/* Catalog mode (B6.11): no cart link when `cart` is off */}
+            {isEnabled("cart") && (
+              <Link
+                href="/cart"
+                aria-label={
+                  itemCount > 0
+                    ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "Cart"
+                }
+                className="bamboo-icon-btn"
+              >
+                <ShoppingBag
+                  className="h-[18px] w-[18px]"
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
+                {itemCount > 0 && (
+                  <span aria-hidden="true" className="bamboo-icon-badge">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <button
               ref={burgerRef}

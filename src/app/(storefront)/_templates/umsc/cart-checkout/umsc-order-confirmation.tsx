@@ -9,6 +9,10 @@ import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 
 import { umscTelHref } from "../shared/umsc-contact-details";
 import { UmscButton } from "../shared/umsc-button";
@@ -188,6 +192,7 @@ export function UmscOrderConfirmation({
   const formattedTotal = orderDetails
     ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
     : null;
+  const processing = isPaymentProcessing(orderDetails?.payment_status);
 
   return (
     <div className="bg-[var(--umsc-black)]">
@@ -228,11 +233,22 @@ export function UmscOrderConfirmation({
             className="mx-auto my-8 h-px w-12 bg-[var(--umsc-line-gold)]"
           />
 
+          {processing && (
+            <p
+              role="status"
+              className="umsc-sans mx-auto mb-8 max-w-[46ch] text-[15px] leading-[1.6] text-[var(--umsc-cream-on-black)]"
+            >
+              {PAYMENT_PROCESSING_MESSAGE}
+            </p>
+          )}
+
           {(orderDetails?.customer_email ?? formattedTotal) && (
             <div className="mb-8 flex flex-col items-center gap-2">
               {orderDetails?.customer_email && (
                 <p className="umsc-sans text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)]">
-                  Confirmation sent to{" "}
+                  {processing
+                    ? "Confirmation will be sent to"
+                    : "Confirmation sent to"}{" "}
                   <strong className="font-semibold">
                     {orderDetails.customer_email}
                   </strong>

@@ -131,10 +131,10 @@ export function DefaultDonatePage({
             </div>
           )}
 
-          {/* ── Empty state — should be unreachable while the "donations"
-              flag is on, since the settings UI requires at least one lane
-              to be configured before it can be enabled. Kept as a safety
-              net for a business that had every lane removed after the fact. ── */}
+          {/* ── Empty state — reachable: the "donations" flag has no
+             dependsOn, so a Venmo-less/Stripe-less store can still enable it
+             and land here. Settings → Donations warns the owner when no
+             payment lane is set up. ── */}
           {!showCard && !showOtherWays && (
             <div className="rounded-(--radius) border border-[#e8e8e8] py-24 text-center">
               <p className="text-[15px] font-medium text-[#0a0a0a]">

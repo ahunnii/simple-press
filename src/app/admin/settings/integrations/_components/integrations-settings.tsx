@@ -16,7 +16,6 @@ type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
   /** Verified against Stripe by the server page; type-only import, the module itself is `server-only`. */
   paymentsHealth: PaymentsHealth;
-  umamiBaseUrl: string;
   /**
    * `null` when the `quickbooks` feature flag is off for this business (the
    * server page never calls the gated `getConnection` procedure in that
@@ -28,7 +27,6 @@ type Props = {
 export function IntegrationsSettings({
   business,
   paymentsHealth,
-  umamiBaseUrl,
   quickbooks,
 }: Props) {
   // This page has no single form-wide save state to report: Stripe's
@@ -67,7 +65,7 @@ export function IntegrationsSettings({
           />
 
           {/* Umami Analytics */}
-          <UmamiSettings business={business} umamiBaseUrl={umamiBaseUrl} />
+          <UmamiSettings business={business} />
 
           {/* QuickBooks Online */}
           {quickbooks ? (

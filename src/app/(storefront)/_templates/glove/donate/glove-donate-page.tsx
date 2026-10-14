@@ -117,9 +117,10 @@ export function GloveDonatePage({
               />
             ) : null}
 
-            {/* Should be unreachable while the "donations" flag is on (the
-                settings UI requires a lane before enabling), but kept as a
-                safety net for a business whose lanes were all removed. */}
+            {/* ── Empty state — reachable: the "donations" flag has no
+               dependsOn, so a Venmo-less/Stripe-less store can still enable it
+               and land here. Settings → Donations warns the owner when no
+               payment lane is set up. ── */}
             {showEmpty ? (
               <GloveEmptyState
                 heading={`${label.noun}s aren't set up yet.`}

@@ -23,7 +23,7 @@ export default async function ServicesPage() {
       notFound();
     }
     // Published FAQ items for templates whose services page embeds a
-    // Content → FAQ picker (pollen); others ignore the prop.
+    // Site Setup → FAQ picker (pollen); others ignore the prop.
     return (
       <t.ServicesPage business={business} faqItems={await api.faq.list()} />
     );

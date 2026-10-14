@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { FadeIn } from "~/components/page-animations";
 
 import { PollenAccountLayout } from "./pollen-account-layout";
@@ -60,6 +61,10 @@ export function PollenOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                             {item.variantName}
                           </p>
                         )}
+                        <OrderItemOptions
+                          customization={item.customization}
+                          className="text-sm text-[#4b5563]"
+                        />
                         <p className="mt-1 text-sm text-[#6b7280]">
                           Qty: {item.quantity} × {formatPrice(item.price)}
                         </p>

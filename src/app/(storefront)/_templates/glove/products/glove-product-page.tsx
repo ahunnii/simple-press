@@ -123,10 +123,30 @@ export async function GloveProductPage({
     .filter((m) => m.collection.published)
     .map((m) => ({ name: m.collection.name, slug: m.collection.slug }));
 
-  // ── Add-ons: one query for both collections, own product excluded ──────
+  // ── Product options (customizer) or, for a product without any, the legacy
+  // collection-based add-ons. Options win: when the product has groups
+  // attached the chains/charms collections are not even queried.
+  // TODO: drop the legacy path (and the two collection-slug fields) once
+  // every store is migrated — plan Phase 6,
+  // ~/.claude/plans/i-need-to-add-noble-volcano.md.
+  const customizer = product.customizer ?? null;
+  const addOnsSectionVisible = isSectionVisible(
+    customFields,
+    "glove",
+    "product.addons",
+  );
+  // Hiding the section hides the picker, unless a group must be answered to
+  // buy at all.
+  const customizerVisible =
+    customizer !== null &&
+    (addOnsSectionVisible ||
+      customizer.groups.some((g) => g.required || g.minSelections > 0));
+
+  // ── Legacy add-ons: one query for both collections, own product excluded
   const showAddOns =
+    customizer === null &&
     madeToOrder &&
-    isSectionVisible(customFields, "glove", "product.addons") &&
+    addOnsSectionVisible &&
     (chainsSlug !== "" || charmsSlug !== "");
   let addOns: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null = null;
   if (showAddOns) {
@@ -314,6 +334,7 @@ export async function GloveProductPage({
               intro={intro}
               addOns={addOns}
               addOnSectionAttrs={sectionGroupAttr("product", "addons")}
+              customizerVisible={customizerVisible}
               categories={categories}
               linkCategories={isEnabled("collections")}
               cartEnabled={isEnabled("cart")}

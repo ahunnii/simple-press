@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import type { FormAnswerSnapshot } from "./answers";
+import type { FormAnswerSnapshot, FormQuantityItem } from "./answers";
 import type { FormDefinition, FormField } from "~/lib/validators/form";
 import { formDefinitionSchema } from "~/lib/validators/form";
 
 import {
+  answerLabels,
+  FORM_REQUIRED_MESSAGE,
   formatAnswerForDisplay,
   formatAnswerOrDash,
+  formatQuantityItems,
   formatTimeForDisplay,
   getConfirmationEmail,
+  isQuantityItems,
   normalizeTime,
   parseAnswersJson,
   serializeAnswers,
@@ -394,6 +398,309 @@ describe("snapshots + formatting", () => {
     expect(snapshotMatchesFieldFilter(withChoice, "email", "x")).toBe(false);
     expect(snapshotMatchesFieldFilter(withChoice, "missing", "x")).toBe(false);
     expect(snapshotMatchesFieldFilter(withChoice, "missing", " ")).toBe(true);
+  });
+});
+
+describe("picturechoice answers", () => {
+  const tiles = [
+    { id: "t_red", label: "Red", color: "#ff0000" },
+    { id: "t_gold", label: "Gold", imageUrl: "https://cdn.example.com/g.jpg" },
+    { id: "t_box", label: "2 x 4" }, // a label that itself contains " x "
+    { id: "t_blue", label: "Blue" },
+  ];
+  const pictureFields = formDefinitionSchema.parse({
+    version: 1,
+    fields: [
+      { id: "pick", type: "picturechoice", label: "Pick", options: tiles },
+      {
+        id: "picks",
+        type: "picturechoice",
+        label: "Picks",
+        selection: "many",
+        minTotal: 2,
+        maxTotal: 3,
+        options: tiles,
+      },
+      {
+        id: "qty",
+        type: "picturechoice",
+        label: "Balloons",
+        selection: "quantity",
+        options: tiles,
+      },
+      {
+        id: "dozen",
+        type: "picturechoice",
+        label: "Dozen",
+        selection: "quantity",
+        required: true,
+        minTotal: 12,
+        maxTotal: 12,
+        options: tiles,
+      },
+      {
+        id: "need",
+        type: "picturechoice",
+        label: "Need",
+        selection: "many",
+        required: true,
+        options: tiles,
+      },
+    ],
+  }).fields;
+
+  function pic(
+    id: string,
+    value: unknown,
+    opts?: Parameters<typeof validateFormAnswers>[2],
+  ) {
+    const target = pictureFields.find((f) => f.id === id)!;
+    const result = validateFormAnswers([target], { [id]: value }, opts);
+    return result.ok
+      ? { value: result.values[id] }
+      : { error: result.errors[id] };
+  }
+  const byLabel = { optionMatch: "label" } as const;
+
+  describe("'one' mode (like radio)", () => {
+    it("stores the label, matched by id or label", () => {
+      expect(pic("pick", "t_gold")).toEqual({ value: "Gold" });
+      expect(pic("pick", " gold ", byLabel)).toEqual({ value: "Gold" });
+      expect(pic("pick", "")).toEqual({ value: null });
+    });
+
+    it("rejects unknown options and non-strings", () => {
+      expect(pic("pick", "Gold")).toEqual({
+        error: "Pick one of the options.",
+      });
+      expect(pic("pick", "Pink", byLabel)).toEqual({
+        error: '"Pink" isn\'t one of the options.',
+      });
+      expect(pic("pick", ["t_red"])).toEqual({
+        error: "Pick one of the options.",
+      });
+    });
+  });
+
+  describe("'many' mode (like checkboxes)", () => {
+    it("stores labels in option order, deduped", () => {
+      expect(pic("picks", ["t_blue", "t_red", "t_blue"])).toEqual({
+        value: ["Red", "Blue"],
+      });
+      expect(pic("picks", "Blue; red", byLabel)).toEqual({
+        value: ["Red", "Blue"],
+      });
+    });
+
+    it("enforces the pick count only on a given answer", () => {
+      expect(pic("picks", ["t_red"])).toEqual({
+        error: "Pick at least 2 options.",
+      });
+      expect(pic("picks", ["t_red", "t_gold", "t_box", "t_blue"])).toEqual({
+        error: "Pick no more than 3 options.",
+      });
+      expect(pic("picks", [])).toEqual({ value: null });
+    });
+
+    it("required means at least one pick (relaxed for import)", () => {
+      expect(pic("need", [])).toEqual({ error: FORM_REQUIRED_MESSAGE });
+      expect(pic("need", "", { relaxRequired: true })).toEqual({
+        value: null,
+      });
+      expect(pic("need", ["t_box"])).toEqual({ value: ["2 x 4"] });
+    });
+  });
+
+  describe("'quantity' mode", () => {
+    it("accepts {option, quantity}[] by id, in option order, zeros dropped", () => {
+      expect(
+        pic("qty", [
+          { option: "t_blue", quantity: 2 },
+          { option: "t_red", quantity: 3 },
+          { option: "t_gold", quantity: 0 },
+        ]),
+      ).toEqual({
+        value: [
+          { option: "Red", quantity: 3 },
+          { option: "Blue", quantity: 2 },
+        ],
+      });
+    });
+
+    it("accepts a record keyed by id (zeros skipped) or by label", () => {
+      expect(pic("qty", { t_red: 1, t_gold: 0, t_blue: "4" })).toEqual({
+        value: [
+          { option: "Red", quantity: 1 },
+          { option: "Blue", quantity: 4 },
+        ],
+      });
+      expect(pic("qty", { gold: 2 }, byLabel)).toEqual({
+        value: [{ option: "Gold", quantity: 2 }],
+      });
+    });
+
+    it("sums repeats of one option", () => {
+      expect(
+        pic("qty", [
+          { option: "t_red", quantity: 2 },
+          { option: "t_red", quantity: 5 },
+        ]),
+      ).toEqual({ value: [{ option: "Red", quantity: 7 }] });
+      expect(pic("qty", "Red x 1; red × 2", byLabel)).toEqual({
+        value: [{ option: "Red", quantity: 3 }],
+      });
+    });
+
+    it("parses CSV text with x or ×, and labels containing ' x '", () => {
+      expect(
+        pic("qty", "Gold × 2; 2 x 4 x 3; Red X 1; Blue ×10", byLabel),
+      ).toEqual({
+        value: [
+          { option: "Red", quantity: 1 },
+          { option: "Gold", quantity: 2 },
+          { option: "2 x 4", quantity: 3 },
+          { option: "Blue", quantity: 10 },
+        ],
+      });
+      expect(pic("qty", "Red", byLabel)).toEqual({
+        error: '"Red" needs a quantity, like "Red x 2".',
+      });
+      expect(pic("qty", "Pink x 2", byLabel)).toEqual({
+        error: '"Pink" isn\'t one of the options.',
+      });
+    });
+
+    it("rejects bad quantities and shapes", () => {
+      const bad = "Enter a whole number from 1 to 999 for Red.";
+      expect(pic("qty", [{ option: "t_red", quantity: 1.5 }])).toEqual({
+        error: bad,
+      });
+      expect(pic("qty", [{ option: "t_red", quantity: -1 }])).toEqual({
+        error: bad,
+      });
+      expect(pic("qty", [{ option: "t_red", quantity: 1000 }])).toEqual({
+        error: bad,
+      });
+      expect(pic("qty", { t_red: "two" })).toEqual({ error: bad });
+      expect(
+        pic("qty", [
+          { option: "t_red", quantity: 600 },
+          { option: "t_red", quantity: 600 },
+        ]),
+      ).toEqual({ error: "Enter 999 or fewer for Red." });
+      const shape = "Choose quantities from the listed options.";
+      expect(pic("qty", [{ option: "Red", quantity: 1 }])).toEqual({
+        error: shape,
+      }); // label sent where an id is expected
+      expect(pic("qty", ["Red x 1"])).toEqual({ error: shape });
+      expect(pic("qty", 5)).toEqual({ error: shape });
+    });
+
+    it("enforces the total and required", () => {
+      expect(pic("dozen", { t_red: 6, t_gold: 5 })).toEqual({
+        error: "Choose at least 12 in total.",
+      });
+      expect(pic("dozen", { t_red: 6, t_gold: 7 })).toEqual({
+        error: "Choose no more than 12 in total.",
+      });
+      expect(pic("dozen", { t_red: 6, t_gold: 6 })).toEqual({
+        value: [
+          { option: "Red", quantity: 6 },
+          { option: "Gold", quantity: 6 },
+        ],
+      });
+      expect(pic("dozen", {})).toEqual({ error: FORM_REQUIRED_MESSAGE });
+      expect(pic("dozen", { t_red: 0 })).toEqual({
+        error: FORM_REQUIRED_MESSAGE,
+      });
+      expect(pic("dozen", null, { relaxRequired: true })).toEqual({
+        value: null,
+      });
+      expect(pic("qty", undefined)).toEqual({ value: null });
+    });
+  });
+
+  describe("formatting, filters and storage", () => {
+    const items: FormQuantityItem[] = [
+      { option: "Red", quantity: 3 },
+      { option: "2 x 4", quantity: 2 },
+    ];
+    const snapshots: FormAnswerSnapshot[] = [
+      { fieldId: "pick", label: "Pick", type: "picturechoice", value: "Gold" },
+      {
+        fieldId: "picks",
+        label: "Picks",
+        type: "picturechoice",
+        value: ["Red", "Blue"],
+      },
+      {
+        fieldId: "qty",
+        label: "Balloons",
+        type: "picturechoice",
+        value: items,
+      },
+    ];
+
+    it("formats quantity items as 'Label × N; …'", () => {
+      expect(formatQuantityItems(items)).toBe("Red × 3; 2 x 4 × 2");
+      expect(formatAnswerForDisplay(items)).toBe("Red × 3; 2 x 4 × 2");
+      expect(formatAnswerForDisplay(snapshots[2]!)).toBe("Red × 3; 2 x 4 × 2");
+      expect(formatAnswerOrDash([])).toBe("—");
+      expect(formatAnswerForDisplay(snapshots[1]!)).toBe("Red; Blue");
+    });
+
+    it("formatted quantity text validates back to the same items", () => {
+      expect(pic("qty", formatAnswerForDisplay(items), byLabel)).toEqual({
+        value: [
+          { option: "Red", quantity: 3 },
+          { option: "2 x 4", quantity: 2 },
+        ],
+      });
+    });
+
+    it("isQuantityItems / answerLabels tell the shapes apart", () => {
+      expect(isQuantityItems(items)).toBe(true);
+      expect(isQuantityItems(["Red"])).toBe(false);
+      expect(isQuantityItems([])).toBe(false);
+      expect(isQuantityItems("Red")).toBe(false);
+      expect(answerLabels(items)).toEqual(["Red", "2 x 4"]);
+      expect(answerLabels(["Red", "Blue"])).toEqual(["Red", "Blue"]);
+      expect(answerLabels("Gold")).toEqual(["Gold"]);
+      expect(answerLabels(true)).toEqual([]);
+    });
+
+    it("filters match a picked label in every mode", () => {
+      expect(snapshotMatchesFieldFilter(snapshots, "pick", "gold")).toBe(true);
+      expect(snapshotMatchesFieldFilter(snapshots, "pick", "gol")).toBe(false);
+      expect(snapshotMatchesFieldFilter(snapshots, "picks", "BLUE")).toBe(true);
+      expect(snapshotMatchesFieldFilter(snapshots, "picks", "gold")).toBe(
+        false,
+      );
+      expect(snapshotMatchesFieldFilter(snapshots, "qty", "2 x 4")).toBe(true);
+      expect(snapshotMatchesFieldFilter(snapshots, "qty", "blue")).toBe(false);
+    });
+
+    it("search covers quantity labels and the formatted text", () => {
+      expect(snapshotMatchesSearch(snapshots, "red × 3")).toBe(true);
+      expect(snapshotMatchesSearch(snapshots, "2 x 4")).toBe(true);
+      expect(snapshotMatchesSearch(snapshots, "pink")).toBe(false);
+    });
+
+    it("parseAnswersJson keeps quantity items (and still drops junk)", () => {
+      expect(parseAnswersJson(serializeAnswers(snapshots))).toEqual(snapshots);
+      expect(
+        parseAnswersJson(
+          JSON.stringify([
+            {
+              fieldId: "q",
+              label: "Q",
+              type: "picturechoice",
+              value: [{ option: "Red", quantity: "3" }],
+            },
+          ]),
+        ),
+      ).toEqual([]);
+    });
   });
 });
 

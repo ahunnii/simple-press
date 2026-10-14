@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { orderHadInventoryDeducted } from "~/lib/orders/order-transitions";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -54,6 +55,9 @@ type Order = {
 
 type Props = {
   order: Order;
+  // Staff are fulfillment-only: resend email, payment override and cancel are
+  // ownerAdmin-tier server-side, so only Owner/Manager/Platform admin see them.
+  canManage: boolean;
 };
 
 // "Refunded" is intentionally excluded — use the Refund button in the Payment
@@ -71,7 +75,7 @@ const FULFILLMENT_STATUSES = [
   { value: "fulfilled", label: "Fulfilled" },
 ] as const;
 
-export function OrderMoreOptions({ order }: Props) {
+export function OrderMoreOptions({ order, canManage }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -157,6 +161,7 @@ export function OrderMoreOptions({ order }: Props) {
   };
 
   const isPaid = order.paymentStatus === "paid";
+  const isDisputed = order.paymentStatus === "disputed";
   const isFulfilled = order.fulfillmentStatus === "fulfilled";
   const isRefunded = order.status === "refunded";
   const shipmentsWithTracking = order.shipments.filter((s) => s.trackingNumber);
@@ -171,15 +176,15 @@ export function OrderMoreOptions({ order }: Props) {
   // `updateStatus` mutation has no transition guard, so this must be
   // enforced client-side.
   const canCancel =
+    canManage &&
     order.status !== "cancelled" &&
     order.status !== "refunded" &&
     order.fulfillmentStatus !== "fulfilled" &&
     order.fulfillmentStatus !== "partially_fulfilled";
 
-  // Inventory was only deducted for orders that reached "open" or
-  // "completed" — mirrors the server's hadInventoryDeducted check.
-  const hadInventoryDeducted =
-    order.status === "open" || order.status === "completed";
+  // A pending manual order is saved as "open" but never took stock — same
+  // predicate the server's cancel path uses.
+  const hadInventoryDeducted = orderHadInventoryDeducted(order);
 
   // If a refund already ran with restock, the inventory was restored then, so
   // cancelling must NOT restock again (would double-count). We can't tell
@@ -194,6 +199,10 @@ export function OrderMoreOptions({ order }: Props) {
     updateFulfillmentStatus.isPending ||
     cancelOrder.isPending;
 
+  // A cancelled order hides the status overrides, so for Staff (who can't
+  // cancel or resend) nothing would be left in the menu.
+  if (!canManage && order.status === "cancelled") return null;
+
   return (
     <>
       <DropdownMenu>
@@ -204,7 +213,7 @@ export function OrderMoreOptions({ order }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          {hasEmailOptions && (
+          {canManage && hasEmailOptions && (
             <>
               <DropdownMenuLabel>Resend Emails</DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -255,47 +264,70 @@ export function OrderMoreOptions({ order }: Props) {
               <DropdownMenuLabel>Override Status</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <span>Payment Status</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {PAYMENT_STATUSES.map(({ value, label }) => {
-                    // Flipping a refunded order back to "paid" would leave
-                    // refundAmountCents > 0 while the order reads as paid,
-                    // corrupting net-revenue math (revenue = total − refunds).
-                    // Block that transition; use the Refund panel for money.
-                    const blockedByRefund =
-                      value === "paid" && (isRefunded || hasPriorRefund);
-                    return (
-                      <DropdownMenuItem
-                        key={value}
-                        disabled={
-                          order.paymentStatus === value || blockedByRefund
-                        }
-                        onSelect={() =>
-                          updatePaymentStatus.mutate({
-                            orderId: order.id,
-                            paymentStatus: value,
-                          })
-                        }
-                      >
-                        {label}
-                        {order.paymentStatus === value && (
-                          <span className="text-muted-foreground ml-auto text-xs">
-                            current
-                          </span>
-                        )}
-                        {blockedByRefund && order.paymentStatus !== value && (
-                          <span className="text-muted-foreground ml-auto text-xs">
-                            refunded
-                          </span>
-                        )}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
+              {canManage && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <span>Payment Status</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {PAYMENT_STATUSES.map(({ value, label }) => {
+                      // Flipping a refunded order back to "paid" would leave
+                      // refundAmountCents > 0 while the order reads as paid,
+                      // corrupting net-revenue math (revenue = total − refunds).
+                      // Block that transition; use the Refund panel for money.
+                      const blockedByRefund =
+                        value === "paid" && (isRefunded || hasPriorRefund);
+                      // Paid is one-way: reverting to pending would orphan the
+                      // deducted stock and payment record. Cancel instead.
+                      const blockedByPaid = value === "pending" && isPaid;
+                      // An open Stripe dispute owns the payment status: the
+                      // webhook sets it back to paid/refunded when it closes.
+                      const blockedByDispute = isDisputed;
+                      return (
+                        <DropdownMenuItem
+                          key={value}
+                          disabled={
+                            order.paymentStatus === value ||
+                            blockedByRefund ||
+                            blockedByPaid ||
+                            blockedByDispute
+                          }
+                          onSelect={() =>
+                            updatePaymentStatus.mutate({
+                              orderId: order.id,
+                              paymentStatus: value,
+                            })
+                          }
+                        >
+                          {label}
+                          {order.paymentStatus === value && (
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              current
+                            </span>
+                          )}
+                          {blockedByRefund && order.paymentStatus !== value && (
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              refunded
+                            </span>
+                          )}
+                          {blockedByDispute &&
+                            !blockedByRefund &&
+                            order.paymentStatus !== value && (
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              dispute open
+                            </span>
+                          )}
+                          {blockedByPaid && order.paymentStatus !== value && (
+                            <span className="text-muted-foreground ml-auto text-xs">
+                              cancel instead
+                            </span>
+                          )}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              )}
 
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
@@ -344,7 +376,10 @@ export function OrderMoreOptions({ order }: Props) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+      <Dialog
+        open={canManage && showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Cancel Order #{order.orderNumber}</DialogTitle>

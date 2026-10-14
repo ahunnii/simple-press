@@ -1,32 +1,53 @@
 import type Stripe from "stripe";
 import { Prisma } from "generated/prisma";
+import * as Sentry from "@sentry/nextjs";
 
-import type { DbClient } from "~/server/db";
+import type { CustomizationSnapshot } from "~/lib/customizer/types";
+import type { DbClient, TxClient } from "~/server/db";
+import {
+  LINE_CONFIG_METADATA_KEY,
+  OPTIONS_SUMMARY_METADATA_KEY,
+  readLineConfigSnapshots,
+} from "~/lib/checkout/customizer-checkout";
 
 /**
- * Maps Stripe line items from a fully-expanded checkout session into the shape
- * expected by `db.order.create({ data: { items: { create: [...] } } })`.
+ * Maps Stripe line items from a checkout session (its complete `line_items`
+ * list) into the shape expected by `db.order.create({ data: { items: { create: [...] } } })`.
+ *
+ * `lineConfigs` (from `loadCheckoutLineConfigs`) attaches the product
+ * customizer build to every line create-session tagged with
+ * `metadata.lineConfig`:
+ *
+ * - Normal path: the snapshot stored at checkout is copied VERBATIM. It is
+ *   never re-priced here — the owner may have edited or deleted the options
+ *   since (a bank payment can settle days later) — and the item's `price` is
+ *   always Stripe's `unit_amount`, i.e. what was actually charged.
+ * - Degraded path (the stored build is missing — effectively unreachable:
+ *   create-session writes the builds in the same transaction as the
+ *   reservation row, and those rows are never deleted; a merchant
+ *   hand-building a session is the realistic way in): a summary-only
+ *   snapshot from Stripe's `metadata.optionsSummary`, with no groups and NO
+ *   components. The fulfiller still sees the build as text; the linked
+ *   option stock is NOT deducted (there is nothing trustworthy to deduct
+ *   from). `createOrderFromCheckout` reports it to Sentry as an error and
+ *   tells the owner on the order (`missingLineConfigNote`).
  *
  * This is a pure function — it performs no I/O and can be tested without a DB.
  */
 export function mapStripeLineItemsToOrderItems(
   fullSession: Stripe.Checkout.Session,
+  lineConfigs?: ReadonlyMap<string, CustomizationSnapshot>,
 ) {
   return (
     fullSession.line_items?.data.map((item) => {
-      const product = item.price?.product;
-      const metadata =
-        product &&
-        typeof product === "object" &&
-        !("deleted" in product && product.deleted) &&
-        "metadata" in product
-          ? (product as { metadata: Record<string, string> }).metadata
-          : {};
+      const metadata = lineMetadata(item);
 
       const productId = metadata.productId?.trim() ?? null;
       const productVariantId = metadata.productVariantId?.trim() ?? null;
       const variantName = metadata.variantName?.trim() ?? null;
       const sku = metadata.sku?.trim() ?? null;
+      const price = item.price?.unit_amount ?? 0;
+      const customization = lineCustomization(metadata, price, lineConfigs);
 
       return {
         productName: item.description ?? "Unknown Product",
@@ -35,11 +56,120 @@ export function mapStripeLineItemsToOrderItems(
         productId,
         productVariantId,
         quantity: item.quantity ?? 1,
-        price: item.price?.unit_amount ?? 0,
+        price,
         total: item.amount_total,
+        ...(customization
+          ? { customization: customization as Prisma.InputJsonValue }
+          : {}),
       };
     }) ?? []
   );
+}
+
+function lineMetadata(item: Stripe.LineItem): Record<string, string> {
+  const product = item.price?.product;
+  return product &&
+    typeof product === "object" &&
+    !("deleted" in product && product.deleted) &&
+    "metadata" in product
+    ? (product as { metadata: Record<string, string> }).metadata
+    : {};
+}
+
+function lineCustomization(
+  metadata: Record<string, string>,
+  unitAmount: number,
+  lineConfigs: ReadonlyMap<string, CustomizationSnapshot> | undefined,
+): CustomizationSnapshot | null {
+  const key = metadata[LINE_CONFIG_METADATA_KEY]?.trim();
+  if (!key) return null;
+  const stored = lineConfigs?.get(key);
+  if (stored) return stored;
+  const summary = metadata[OPTIONS_SUMMARY_METADATA_KEY]?.trim() ?? "";
+  return {
+    v: 1,
+    basePrice: unitAmount,
+    addOnTotal: 0,
+    summary,
+    groups: [],
+    components: [],
+  };
+}
+
+/**
+ * `lineConfig` keys on the session's lines that have no stored build — the
+ * lines `mapStripeLineItemsToOrderItems` degrades to a summary-only snapshot.
+ */
+export function findMissingLineConfigs(
+  fullSession: Stripe.Checkout.Session,
+  lineConfigs: ReadonlyMap<string, CustomizationSnapshot>,
+): string[] {
+  return (fullSession.line_items?.data ?? [])
+    .map((item) => lineMetadata(item)[LINE_CONFIG_METADATA_KEY]?.trim() ?? "")
+    .filter((key) => key !== "" && !lineConfigs.has(key));
+}
+
+/**
+ * The owner-facing order note for lines that took the degraded path (see
+ * `mapStripeLineItemsToOrderItems`): their linked option stock was not
+ * deducted, so the owner must check it by hand. `null` when every configured
+ * line has its stored build.
+ */
+export function missingLineConfigNote(
+  fullSession: Stripe.Checkout.Session,
+  lineConfigs: ReadonlyMap<string, CustomizationSnapshot>,
+): string | null {
+  const names = (fullSession.line_items?.data ?? [])
+    .filter((item) => {
+      const key = lineMetadata(item)[LINE_CONFIG_METADATA_KEY]?.trim() ?? "";
+      return key !== "" && !lineConfigs.has(key);
+    })
+    .map((item) => item.description ?? "Unknown Product");
+  if (names.length === 0) return null;
+  return (
+    "Some options on this order couldn't be matched to stock, so linked " +
+    "option inventory (e.g. charms) was not deducted. Check and adjust " +
+    `inventory for: ${[...new Set(names)].join(", ")}.`
+  );
+}
+
+/** Does any line of the session carry a customizer build (`lineConfig`)? */
+export function hasConfiguredLines(
+  fullSession: Stripe.Checkout.Session,
+): boolean {
+  return (fullSession.line_items?.data ?? []).some(
+    (item) => !!lineMetadata(item)[LINE_CONFIG_METADATA_KEY]?.trim(),
+  );
+}
+
+/**
+ * The builds create-session stored for this checkout
+ * (`InventoryReservation.lineConfigs`), by line key.
+ *
+ * Scoped to the verified business (metadata.reservationId is
+ * merchant-controllable) and deliberately WITHOUT a status filter: a delayed
+ * payment whose hold the sweeper already released (status "released") must
+ * still get its builds when the late success arrives. Prefers the row bound
+ * to this session id over the metadata id.
+ */
+export async function loadCheckoutLineConfigs(
+  db: DbClient | TxClient,
+  params: { businessId: string; session: Stripe.Checkout.Session },
+): Promise<Map<string, CustomizationSnapshot>> {
+  const reservationId = params.session.metadata?.reservationId;
+  const rows = await db.inventoryReservation.findMany({
+    where: {
+      businessId: params.businessId,
+      OR: [
+        { stripeSessionId: params.session.id },
+        ...(reservationId ? [{ id: reservationId }] : []),
+      ],
+    },
+    select: { id: true, stripeSessionId: true, lineConfigs: true },
+  });
+  const row =
+    rows.find((r) => r.stripeSessionId === params.session.id) ?? rows[0];
+  return readLineConfigSnapshots(row?.lineConfigs ?? null);
 }
 
 /**
@@ -68,7 +198,11 @@ export type CreateOrderParams = {
   customerEmail: string;
   /** The base session object from the webhook event (unexpanded). */
   session: Stripe.Checkout.Session;
-  /** The fully-expanded session (with line_items, total_details, etc.). */
+  /**
+   * The retrieved session with total_details expanded and the COMPLETE
+   * `line_items` list set on it (the webhook pages them in; an expanded
+   * `line_items` alone is only the first 10).
+   */
   fullSession: Stripe.Checkout.Session;
   verifiedDiscountCodeId: string | null;
   discountAmount: number;
@@ -83,6 +217,11 @@ export type CreateOrderParams = {
   termsAcceptedAt?: Date | null;
   termsVersion?: string | null;
   merchantTermsUpdatedAt?: Date | null;
+  /**
+   * Product customizer builds stored at checkout, by line key
+   * (`loadCheckoutLineConfigs`). Absent = no configured lines expected.
+   */
+  lineConfigs?: ReadonlyMap<string, CustomizationSnapshot>;
 };
 
 /**
@@ -111,7 +250,29 @@ export async function createOrderFromCheckout(
     termsAcceptedAt = null,
     termsVersion = null,
     merchantTermsUpdatedAt = null,
+    lineConfigs = new Map<string, CustomizationSnapshot>(),
   } = params;
+
+  // A configured line whose stored build is gone still becomes an order item
+  // (the money was taken) with a summary-only snapshot — see
+  // `mapStripeLineItemsToOrderItems`. Its linked option stock is NOT
+  // deducted, so this is an error (it should never happen) and the owner is
+  // told on the order itself (`internalNote`) which products to recount.
+  const missingLineConfigs = findMissingLineConfigs(fullSession, lineConfigs);
+  const missingBuildNote = missingLineConfigNote(fullSession, lineConfigs);
+  if (missingLineConfigs.length > 0) {
+    Sentry.captureMessage(
+      `[Webhook] Configured line(s) without a stored build on session ${session.id}; order items get a summary-only snapshot and linked option stock is not deducted`,
+      {
+        level: "error",
+        tags: {
+          "webhook.step": "customizer-line-config-missing",
+          businessId: business.id,
+        },
+        extra: { missingLineConfigs, stripeSessionId: session.id },
+      },
+    );
+  }
 
   // Payment gate: only materialize the order (and, downstream in the webhook,
   // decrement inventory) once the money is actually captured. On
@@ -122,10 +283,14 @@ export async function createOrderFromCheckout(
   // decrement stock before payment succeeds. Reject "unpaid" so no order is
   // created for it.
   //
-  // NOTE: Fully supporting async payments requires the webhook to also handle
-  // `checkout.session.async_payment_succeeded` (create the order then) and
-  // `checkout.session.async_payment_failed` (release any reservation). Until
-  // that's wired up, async-payment sessions will not produce an order.
+  // NOTE: the webhook never reaches this with an unpaid session in the normal
+  // flow — this gate is defense in depth. For delayed methods the route
+  // handles `checkout.session.completed` + "unpaid" itself (extends the stock
+  // hold, emails the shopper that payment is processing, creates nothing),
+  // then `checkout.session.async_payment_succeeded` — which carries "paid" —
+  // runs the ordinary order path through here, and
+  // `checkout.session.async_payment_failed` releases the hold (see
+  // `src/lib/checkout/async-payment-webhook.ts`).
   if (session.payment_status === "unpaid") {
     throw new Error(
       `[Webhook] Refusing to create order for unpaid session ${session.id} (payment_status=unpaid)`,
@@ -187,6 +352,9 @@ export async function createOrderFromCheckout(
 
             deliveryMethod,
 
+            // Owner-only; set only on the degraded customizer path above.
+            ...(missingBuildNote ? { internalNote: missingBuildNote } : {}),
+
             // Merchant-terms acceptance — see the Order model docblock.
             termsAcceptedAt,
             termsVersion,
@@ -205,7 +373,7 @@ export async function createOrderFromCheckout(
 
             // Order items
             items: {
-              create: mapStripeLineItemsToOrderItems(fullSession),
+              create: mapStripeLineItemsToOrderItems(fullSession, lineConfigs),
             },
           },
           include: { items: true },

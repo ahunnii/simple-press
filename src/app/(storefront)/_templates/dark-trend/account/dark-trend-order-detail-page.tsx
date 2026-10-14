@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 
@@ -60,6 +61,10 @@ export function DarkTrendOrderDetailPage({
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="mt-1 text-sm text-white/60"
+                      />
                       <p className="mt-1 text-sm text-white/50">
                         Qty: {item.quantity} × {formatPrice(item.price)}
                       </p>

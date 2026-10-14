@@ -21,14 +21,15 @@ import { WealthInput } from "../shared/wealth-input";
 import { WealthLedgeButton } from "../shared/wealth-ledge-button";
 
 type Props = {
-  heading: string;
-  intro: string;
   submitLabel: string;
   successHeading: string;
   successBody: string;
 };
 
 /**
+ * The form card (right column of the contact block; the heading, intro and
+ * office note live in the server page's left column).
+ *
  * The platform contact form via the shared `useContactForm` hook (never
  * reimplemented). `ContactFormValues` has no `firstName`/`lastName` split
  * and no `subject` field, so — following the pink template's precedent
@@ -38,8 +39,6 @@ type Props = {
  * flag, matching vii's exact usage.
  */
 export function WealthContactForm({
-  heading,
-  intro,
   submitLabel,
   successHeading,
   successBody,
@@ -113,207 +112,183 @@ export function WealthContactForm({
 
   if (isSuccess) {
     return (
-      <section
+      <div
+        role="status"
+        className="wealth-contact-card wealth-contact-card--success wealth-on-paper"
         {...sectionGroupAttr("contact", "form")}
-        className="py-[calc(var(--wealth-rhythm)*2)]"
       >
-        <div
-          role="status"
-          className="mx-auto flex w-full max-w-[600px] flex-col items-center gap-3 px-[var(--wealth-gutter)] py-[calc(var(--wealth-rhythm)*2)] text-center"
+        <h2
+          {...fieldAttr("wealth.contact.form-success-heading")}
+          ref={successHeadingRef}
+          tabIndex={-1}
+          className="wealth-h2"
         >
-          <h2
-            {...fieldAttr("wealth.contact.form-success-heading")}
-            ref={successHeadingRef}
-            tabIndex={-1}
-            className="wealth-section-heading"
-          >
-            {successHeading}
-          </h2>
-          <p {...fieldAttr("wealth.contact.form-success-body")}>
-            {successBody}
-          </p>
-          <button
-            type="button"
-            onClick={resetSuccess}
-            className="wealth-link mt-[var(--wealth-rhythm)] cursor-pointer bg-transparent"
-          >
-            Send another message
-          </button>
-        </div>
-      </section>
+          {successHeading}
+        </h2>
+        <p {...fieldAttr("wealth.contact.form-success-body")}>{successBody}</p>
+        <button
+          type="button"
+          onClick={resetSuccess}
+          className="wealth-link cursor-pointer bg-transparent"
+        >
+          Send another message
+        </button>
+      </div>
     );
   }
 
   return (
-    <section
+    <div
+      className="wealth-contact-card wealth-on-paper"
       {...sectionGroupAttr("contact", "form")}
-      className="py-[calc(var(--wealth-rhythm)*2)]"
     >
-      <div className="mx-auto w-full max-w-[720px] px-[var(--wealth-gutter)] text-center">
-        <h2
-          {...fieldAttr("wealth.contact.form-heading")}
-          className="wealth-section-heading"
+      <Form {...form}>
+        <form
+          ref={formRef}
+          onSubmit={composedSubmit}
+          aria-label="Contact form"
+          className="flex flex-col gap-[var(--wealth-rhythm)]"
         >
-          {heading}
-        </h2>
-        {intro ? (
-          <p
-            {...fieldAttr("wealth.contact.form-intro")}
-            className="mt-[var(--wealth-rhythm)]"
-          >
-            {intro}
-          </p>
-        ) : null}
+          {error && (
+            <p
+              role="alert"
+              className="p-3 text-left text-sm"
+              style={{
+                background: "var(--wealth-error-bg)",
+                border: "1px solid var(--wealth-error-border)",
+                color: "var(--wealth-error)",
+              }}
+            >
+              {error}
+            </p>
+          )}
 
-        <Form {...form}>
-          <form
-            ref={formRef}
-            onSubmit={composedSubmit}
-            className="mt-[calc(var(--wealth-rhythm)*1.5)] flex flex-col gap-[var(--wealth-rhythm)] text-left"
-          >
-            {error && (
-              <p
-                role="alert"
-                className="p-3 text-left text-sm"
-                style={{
-                  background: "var(--wealth-error-bg)",
-                  border: "1px solid var(--wealth-error-border)",
-                  color: "var(--wealth-error)",
-                }}
-              >
-                {error}
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 gap-[var(--wealth-gutter)] sm:grid-cols-2">
-              <label className="flex flex-col gap-2">
-                <span className="text-sm">
-                  First Name <span className="opacity-70">(required)</span>
-                </span>
-                <WealthInput
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  type="text"
-                  name="firstName"
-                  autoComplete="given-name"
-                  required
-                />
-              </label>
-              <label className="flex flex-col gap-2">
-                <span className="text-sm">
-                  Last Name <span className="opacity-70">(required)</span>
-                </span>
-                <WealthInput
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  type="text"
-                  name="lastName"
-                  autoComplete="family-name"
-                  required
-                />
-              </label>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <label className="flex flex-col gap-2">
-                    <span className="text-sm">
-                      Email <span className="opacity-70">(required)</span>
-                    </span>
-                    <FormControl>
-                      {/* Raw input (not `WealthInput`) so react-hook-form's
-                          field ref attaches directly to the DOM node —
-                          `WealthInput` doesn't forward refs. */}
-                      <input
-                        {...field}
-                        type="email"
-                        autoComplete="email"
-                        required
-                        className="wealth-input"
-                      />
-                    </FormControl>
-                  </label>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+          <div className="wealth-contact-card__names">
             <label className="flex flex-col gap-2">
               <span className="text-sm">
-                Subject <span className="opacity-70">(required)</span>
+                First Name <span className="opacity-70">(required)</span>
               </span>
               <WealthInput
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 type="text"
-                name="subject"
+                name="firstName"
+                autoComplete="given-name"
                 required
               />
             </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm">
+                Last Name <span className="opacity-70">(required)</span>
+              </span>
+              <WealthInput
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                type="text"
+                name="lastName"
+                autoComplete="family-name"
+                required
+              />
+            </label>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <label className="flex flex-col gap-2">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm">
-                        Message{" "}
-                        <span className="opacity-70">(required)</span>
-                      </span>
-                      <span
-                        className="text-xs"
-                        style={{ color: "var(--wealth-muted)" }}
-                      >
-                        {messageLength}/{messageMaxLength}
-                      </span>
-                    </div>
-                    <FormControl>
-                      <textarea
-                        {...field}
-                        required
-                        rows={6}
-                        maxLength={messageMaxLength}
-                        className="wealth-input h-auto min-h-[130px] resize-y py-3"
-                      />
-                    </FormControl>
-                  </label>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm">
+                    Email <span className="opacity-70">(required)</span>
+                  </span>
+                  <FormControl>
+                    {/* Raw input (not `WealthInput`) so react-hook-form's
+                          field ref attaches directly to the DOM node —
+                          `WealthInput` doesn't forward refs. */}
+                    <input
+                      {...field}
+                      type="email"
+                      autoComplete="email"
+                      required
+                      className="wealth-input"
+                    />
+                  </FormControl>
+                </label>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <RecaptchaField
-              ref={captchaRef}
-              action="contact"
-              onVerify={setCaptchaToken}
-              onExpire={() => setCaptchaToken("")}
-              onError={() => setCaptchaToken("")}
-              label="Verification"
+          <label className="flex flex-col gap-2">
+            <span className="text-sm">
+              Subject <span className="opacity-70">(required)</span>
+            </span>
+            <WealthInput
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              type="text"
+              name="subject"
               required
             />
+          </label>
 
-            <div className="flex justify-center pt-2">
-              <WealthLedgeButton
-                type="submit"
-                variant="send"
-                disabled={isSubmitting || !captchaToken}
-              >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                )}
-                <span {...fieldAttr("wealth.contact.form-submit-label")}>
-                  {isSubmitting ? "Sending…" : submitLabel}
-                </span>
-              </WealthLedgeButton>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </section>
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem>
+                <label className="flex flex-col gap-2">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-sm">
+                      Message <span className="opacity-70">(required)</span>
+                    </span>
+                    <span
+                      className="text-xs"
+                      style={{ color: "var(--wealth-muted)" }}
+                    >
+                      {messageLength}/{messageMaxLength}
+                    </span>
+                  </div>
+                  <FormControl>
+                    <textarea
+                      {...field}
+                      required
+                      rows={6}
+                      maxLength={messageMaxLength}
+                      className="wealth-input h-auto min-h-[130px] resize-y py-3"
+                    />
+                  </FormControl>
+                </label>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <RecaptchaField
+            ref={captchaRef}
+            action="contact"
+            onVerify={setCaptchaToken}
+            onExpire={() => setCaptchaToken("")}
+            onError={() => setCaptchaToken("")}
+            label="Verification"
+            required
+          />
+
+          <div className="flex pt-2">
+            <WealthLedgeButton
+              type="submit"
+              disabled={isSubmitting || !captchaToken}
+            >
+              {isSubmitting && (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              )}
+              <span {...fieldAttr("wealth.contact.form-submit-label")}>
+                {isSubmitting ? "Sending…" : submitLabel}
+              </span>
+            </WealthLedgeButton>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

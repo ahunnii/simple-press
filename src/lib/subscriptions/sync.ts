@@ -85,6 +85,10 @@ const SYNC_BUSINESS_SELECT = {
   pickupLocation: true,
   pickupInstructions: true,
   businessAddress: true,
+  addressStreet: true,
+  addressCity: true,
+  addressState: true,
+  addressPostalCode: true,
   stripeAccountId: true,
   siteContent: { select: { logoUrl: true } },
 } satisfies Prisma.BusinessSelect;

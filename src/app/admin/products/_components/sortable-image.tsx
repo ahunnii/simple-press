@@ -6,6 +6,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 
 import type { FormProductImage } from "../_validators/schema";
+import { isFilenameAltText } from "~/lib/images/alt-text";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -22,6 +23,9 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: image.url });
   const altInputId = useId();
+  // Old uploads stored the file name as alt text. Show the field empty and say
+  // what was there; the product form clears it on save unless it's replaced.
+  const staleFilename = isFilenameAltText(image.altText);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -53,7 +57,11 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
         <div className="bg-muted relative h-24 w-24 shrink-0 overflow-hidden rounded">
           <AdminThumb
             src={image.url}
-            alt={image.altText ?? "Product image"}
+            alt={
+              staleFilename
+                ? "Product image"
+                : (image.altText ?? "Product image")
+            }
             loading="lazy"
             className="h-24 w-24 object-cover"
           />
@@ -68,11 +76,17 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
           <Input
             id={altInputId}
             type="text"
-            value={image.altText ?? ""}
+            value={staleFilename ? "" : (image.altText ?? "")}
             onChange={(e) => onUpdateAlt(e.target.value)}
             placeholder="Describe this image..."
             className="mt-1"
           />
+          {staleFilename && (
+            <p className="text-muted-foreground mt-1 text-xs">
+              Was &quot;{image.altText?.trim()}&quot; — describe what&apos;s in
+              the photo instead.
+            </p>
+          )}
           {index === 0 && (
             <p className="text-muted-foreground mt-1 text-xs">Primary image</p>
           )}

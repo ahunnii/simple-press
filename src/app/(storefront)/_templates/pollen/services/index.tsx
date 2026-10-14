@@ -339,7 +339,7 @@ const servicesQuestionsData: TemplateField[] = [
     key: "pollen.services.faq-list",
     label: "Questions",
     description:
-      "Pick questions from Content → FAQ for the services page accordion. Leave empty to show the first 10 published questions; the section hides when there are none.",
+      "Pick questions from Site Setup → FAQ for the services page accordion. Leave empty to show the first 10 published questions; the section hides when there are none.",
     type: "faq",
     page: "services",
     group: "products.faq",

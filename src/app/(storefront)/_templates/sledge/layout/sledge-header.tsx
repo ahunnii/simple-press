@@ -29,12 +29,19 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import {
+  donateLinkOptions,
+  filterNavByFlags,
+  resolveNav,
+  withDonateLink,
+} from "~/app/(storefront)/_components/nav";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -66,6 +73,7 @@ export function SledgeHeader({
   initialSession,
 }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const cartEnabled = useCartEnabled();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
@@ -226,6 +234,19 @@ export function SledgeHeader({
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
+  // Mobile bottom tiles that survive their flag gates (cart / wishlist /
+  // account) — the grid sizes to them and the strip hides when none remain.
+  const tileCount =
+    Number(cartEnabled) +
+    Number(isStorefrontEnabled("wishlist")) +
+    Number(isStorefrontEnabled("customerAccounts"));
+  const tileCols =
+    tileCount === 1
+      ? "grid-cols-1"
+      : tileCount === 2
+        ? "grid-cols-2"
+        : "grid-cols-3";
+
   const defaultNav: NavLink[] = [
     { href: "/", label: "Home" },
     ...(isEnabled("products") ? [{ href: "/shop", label: "What's New" }] : []),
@@ -240,8 +261,21 @@ export function SledgeHeader({
     { href: "/contact", label: "Contact" },
   ];
 
-  const navItems =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? defaultNav;
+  // Owner nav (children + external preserved) or the shipped default, then the
+  // shared route→flag filter (P-NAV-FLAGS) drops links to switched-off
+  // features. `??` semantics live in `resolveNav`: a saved `[]` means "no
+  // links".
+  const filteredNav = filterNavByFlags(
+    resolveNav(business?.siteContent?.navigationItems, defaultNav),
+    isStorefrontEnabled,
+  );
+
+  // Donations "show in header" only ADDS a plain last menu item (no
+  // duplicate, never removes an owner link). Desktop and mobile share it.
+  const navItems: NavLink[] = withDonateLink(
+    filteredNav,
+    donateLinkOptions(business, isStorefrontEnabled, "header"),
+  );
 
   const toggleMobileExpanded = (index: number) => {
     setExpandedMobile((prev) => {
@@ -608,29 +642,32 @@ export function SledgeHeader({
               </Link>
             )}
 
-            {/* M-8: dynamic aria-label includes item count; badge is aria-hidden */}
-            <Link
-              href="/cart"
-              aria-label={
-                itemCount > 0
-                  ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                  : "View cart"
-              }
-              className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
-            >
-              <ShoppingBag className="h-[25px] w-[25px]" strokeWidth={1.4} />
-              {itemCount > 0 && (
-                <motion.span
-                  /* S-4: skip initial pop animation under reduced motion */
-                  initial={shouldReduceMotion ? false : { scale: 0 }}
-                  animate={{ scale: 1 }}
-                  aria-hidden="true"
-                  className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
-                >
-                  {itemCount}
-                </motion.span>
-              )}
-            </Link>
+            {/* Catalog mode (B6.11): no cart link when `cart` is off. M-8:
+                dynamic aria-label includes item count; badge is aria-hidden */}
+            {cartEnabled && (
+              <Link
+                href="/cart"
+                aria-label={
+                  itemCount > 0
+                    ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "View cart"
+                }
+                className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
+              >
+                <ShoppingBag className="h-[25px] w-[25px]" strokeWidth={1.4} />
+                {itemCount > 0 && (
+                  <motion.span
+                    /* S-4: skip initial pop animation under reduced motion */
+                    initial={shouldReduceMotion ? false : { scale: 0 }}
+                    animate={{ scale: 1 }}
+                    aria-hidden="true"
+                    className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
+                  >
+                    {itemCount}
+                  </motion.span>
+                )}
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -695,178 +732,183 @@ export function SledgeHeader({
               </motion.nav>
 
               {/* Bottom: cart + account */}
-              <div className="relative shrink-0 border-t border-white/10 px-5 py-4 sm:px-6">
-                <AnimatePresence>
-                  {accountMenuOpen && session?.user ? (
-                    /* S-5: plain nav + ul instead of role="menu" */
-                    <motion.nav
-                      ref={accountMenuRef}
-                      id={accountMenuId}
-                      aria-label="Account menu"
-                      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
-                      transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                      className="absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-sm border border-white/15 bg-[#1f1f1f] shadow-lg sm:right-6 sm:left-6"
-                    >
-                      <div className="border-b border-white/10 px-4 py-3">
-                        {/* M-12: raised from text-white/45 to text-white/60 */}
-                        <p className="font-sans text-[10px] tracking-[0.18em] text-white/60 uppercase">
-                          Signed in as
-                        </p>
-                        <p className="mt-1 truncate font-sans text-sm text-white/85">
-                          {session.user.name ?? session.user.email}
-                        </p>
-                      </div>
-                      <ul className="py-1">
-                        {MOBILE_ACCOUNT_LINKS.map(
-                          ({ href, label, icon: Icon }) => (
-                            <li key={href}>
+              {tileCount > 0 && (
+                <div className="relative shrink-0 border-t border-white/10 px-5 py-4 sm:px-6">
+                  <AnimatePresence>
+                    {accountMenuOpen && session?.user ? (
+                      /* S-5: plain nav + ul instead of role="menu" */
+                      <motion.nav
+                        ref={accountMenuRef}
+                        id={accountMenuId}
+                        aria-label="Account menu"
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                        className="absolute right-5 bottom-full left-5 mb-2 overflow-hidden rounded-sm border border-white/15 bg-[#1f1f1f] shadow-lg sm:right-6 sm:left-6"
+                      >
+                        <div className="border-b border-white/10 px-4 py-3">
+                          {/* M-12: raised from text-white/45 to text-white/60 */}
+                          <p className="font-sans text-[10px] tracking-[0.18em] text-white/60 uppercase">
+                            Signed in as
+                          </p>
+                          <p className="mt-1 truncate font-sans text-sm text-white/85">
+                            {session.user.name ?? session.user.email}
+                          </p>
+                        </div>
+                        <ul className="py-1">
+                          {MOBILE_ACCOUNT_LINKS.map(
+                            ({ href, label, icon: Icon }) => (
+                              <li key={href}>
+                                <Link
+                                  href={href}
+                                  onClick={closeMobileMenu}
+                                  className={cn(
+                                    "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
+                                    isLinkActive(href)
+                                      ? "text-[var(--sl-coral)]"
+                                      : "text-white/80",
+                                  )}
+                                >
+                                  <Icon
+                                    className="h-4 w-4 shrink-0"
+                                    aria-hidden
+                                  />
+                                  {label}
+                                </Link>
+                              </li>
+                            ),
+                          )}
+                          {showAdminLink ? (
+                            <li>
                               <Link
-                                href={href}
+                                href="/admin"
                                 onClick={closeMobileMenu}
-                                className={cn(
-                                  "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
-                                  isLinkActive(href)
-                                    ? "text-[var(--sl-coral)]"
-                                    : "text-white/80",
-                                )}
+                                className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
                               >
-                                <Icon
+                                <IconLayoutDashboard
                                   className="h-4 w-4 shrink-0"
                                   aria-hidden
                                 />
-                                {label}
+                                Admin
                               </Link>
                             </li>
-                          ),
-                        )}
-                        {showAdminLink ? (
-                          <li>
+                          ) : null}
+                          <li className="border-t border-white/10">
                             <Link
-                              href="/admin"
+                              href="/auth/sign-out"
                               onClick={closeMobileMenu}
                               className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
                             >
-                              <IconLayoutDashboard
+                              <IconLogout
                                 className="h-4 w-4 shrink-0"
                                 aria-hidden
                               />
-                              Admin
+                              Sign out
                             </Link>
                           </li>
-                        ) : null}
-                        <li className="border-t border-white/10">
-                          <Link
-                            href="/auth/sign-out"
-                            onClick={closeMobileMenu}
-                            className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
-                          >
-                            <IconLogout
-                              className="h-4 w-4 shrink-0"
-                              aria-hidden
-                            />
-                            Sign out
-                          </Link>
-                        </li>
-                      </ul>
-                    </motion.nav>
-                  ) : null}
-                </AnimatePresence>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {/* M-8: mobile cart link — badge is aria-hidden */}
-                  <Link
-                    href="/cart"
-                    onClick={closeMobileMenu}
-                    aria-label={
-                      itemCount > 0
-                        ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                        : "Cart"
-                    }
-                    className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
-                  >
-                    <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                    <span aria-hidden="true">Cart</span>
-                    {itemCount > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
-                      >
-                        {itemCount}
-                      </span>
+                        </ul>
+                      </motion.nav>
                     ) : null}
-                  </Link>
+                  </AnimatePresence>
 
-                  {/* Mobile wishlist link — mirrors mobile cart link treatment */}
-                  {isStorefrontEnabled("wishlist") && (
-                    <Link
-                      href="/wishlist"
-                      onClick={closeMobileMenu}
-                      aria-label={
-                        wishlistCount > 0
-                          ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
-                          : "Wishlist"
-                      }
-                      className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
-                    >
-                      <Heart className="h-4 w-4" aria-hidden="true" />
-                      <span aria-hidden="true">Wishlist</span>
-                      {wishlistCount > 0 ? (
-                        <span
-                          aria-hidden="true"
-                          className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
-                        >
-                          {wishlistCount}
-                        </span>
-                      ) : null}
-                    </Link>
-                  )}
+                  <div className={cn("grid gap-3", tileCols)}>
+                    {/* Catalog mode (B6.11): no cart link when `cart` is off. M-8:
+                      badge is aria-hidden */}
+                    {cartEnabled && (
+                      <Link
+                        href="/cart"
+                        onClick={closeMobileMenu}
+                        aria-label={
+                          itemCount > 0
+                            ? `Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                            : "Cart"
+                        }
+                        className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                      >
+                        <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                        <span aria-hidden="true">Cart</span>
+                        {itemCount > 0 ? (
+                          <span
+                            aria-hidden="true"
+                            className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                          >
+                            {itemCount}
+                          </span>
+                        ) : null}
+                      </Link>
+                    )}
 
-                  {/* Same `customerAccounts` gate as the desktop cluster, plus
+                    {/* Mobile wishlist link — mirrors mobile cart link treatment */}
+                    {isStorefrontEnabled("wishlist") && (
+                      <Link
+                        href="/wishlist"
+                        onClick={closeMobileMenu}
+                        aria-label={
+                          wishlistCount > 0
+                            ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                            : "Wishlist"
+                        }
+                        className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                      >
+                        <Heart className="h-4 w-4" aria-hidden="true" />
+                        <span aria-hidden="true">Wishlist</span>
+                        {wishlistCount > 0 ? (
+                          <span
+                            aria-hidden="true"
+                            className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                          >
+                            {wishlistCount}
+                          </span>
+                        ) : null}
+                      </Link>
+                    )}
+
+                    {/* Same `customerAccounts` gate as the desktop cluster, plus
                       a pending guard — this row is either the account menu or
                       a "Login" link, so rendering it before the session lands
                       shows a signed-in shopper the wrong one. */}
-                  {isStorefrontEnabled("customerAccounts") &&
-                    !isPending &&
-                    (session?.user ? (
-                      <button
-                        type="button"
-                        id={`${accountMenuId}-trigger`}
-                        /* S-5: changed aria-haspopup from "menu" to "true" */
-                        aria-haspopup="true"
-                        aria-expanded={accountMenuOpen}
-                        aria-controls={accountMenuId}
-                        onClick={() => setAccountMenuOpen((open) => !open)}
-                        className={cn(
-                          "flex items-center justify-center gap-2 rounded-sm border px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-80",
-                          accountMenuOpen
-                            ? "border-[var(--sl-coral)] text-[var(--sl-coral)]"
-                            : "border-white/20 text-white/85",
-                        )}
-                      >
-                        <User className="h-4 w-4" aria-hidden="true" />
-                        Account
-                        <ChevronUp
+                    {isStorefrontEnabled("customerAccounts") &&
+                      !isPending &&
+                      (session?.user ? (
+                        <button
+                          type="button"
+                          id={`${accountMenuId}-trigger`}
+                          /* S-5: changed aria-haspopup from "menu" to "true" */
+                          aria-haspopup="true"
+                          aria-expanded={accountMenuOpen}
+                          aria-controls={accountMenuId}
+                          onClick={() => setAccountMenuOpen((open) => !open)}
                           className={cn(
-                            "h-3.5 w-3.5 transition-transform duration-200",
-                            accountMenuOpen ? "rotate-180" : "",
+                            "flex items-center justify-center gap-2 rounded-sm border px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-80",
+                            accountMenuOpen
+                              ? "border-[var(--sl-coral)] text-[var(--sl-coral)]"
+                              : "border-white/20 text-white/85",
                           )}
-                          aria-hidden="true"
-                        />
-                      </button>
-                    ) : (
-                      <Link
-                        href="/auth/sign-in"
-                        onClick={closeMobileMenu}
-                        className="flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
-                      >
-                        <User className="h-4 w-4" aria-hidden="true" />
-                        Login
-                      </Link>
-                    ))}
+                        >
+                          <User className="h-4 w-4" aria-hidden="true" />
+                          Account
+                          <ChevronUp
+                            className={cn(
+                              "h-3.5 w-3.5 transition-transform duration-200",
+                              accountMenuOpen ? "rotate-180" : "",
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
+                      ) : (
+                        <Link
+                          href="/auth/sign-in"
+                          onClick={closeMobileMenu}
+                          className="flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                        >
+                          <User className="h-4 w-4" aria-hidden="true" />
+                          Login
+                        </Link>
+                      ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </motion.div>
         ) : null}

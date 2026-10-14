@@ -3,12 +3,14 @@ import Link from "next/link";
 import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
 
 export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
@@ -30,6 +32,11 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
   const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+
+  // Donations "show in footer": no general link list here, so Donate joins
+  // the legal row below.
+  const { isEnabled } = resolveFlags(business?.featureFlags);
+  const donate = donateLinkOptions(business, isEnabled, "footer");
 
   return (
     <footer
@@ -188,6 +195,14 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
             fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
           }}
         >
+          {donate.show && (
+            <Link
+              href="/donate"
+              className="inline-block py-2 transition-colors hover:text-gray-700"
+            >
+              {donate.label}
+            </Link>
+          )}
           {privacyPolicy ? (
             <Link
               href={`/${privacyPolicy.slug}`}

@@ -10,11 +10,17 @@ import type { SupportedCountry } from "~/lib/geo/regions";
 import { env } from "~/env";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
+  PENDING_SESSION_COOKIE_MAX_AGE,
+  signPendingSessionCookie,
+  SUBSCRIPTION_PENDING_COOKIE,
+} from "~/lib/checkout/pending-session-cookie";
+import {
   checkCartAvailability,
   computePoolDemand,
 } from "~/lib/checkout/validate-cart";
 import { splitCustomerName } from "~/lib/customer-name";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { PRODUCT_OPTIONS_FEATURE_KEY } from "~/lib/customizer/load";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
@@ -190,19 +196,31 @@ export async function POST(req: Request) {
     const domain = getCurrentDomain(req.headers);
     const business = await getBusinessByDomain(domain);
 
-    if (!business?.stripeAccountId) {
+    if (!business) {
+      // Null means an unknown host OR a suspended/closed store
+      // (`getBusinessByDomain` is active-only).
+      reportSubscriptionBlocked("business-not-found", {
+        host: domain,
+        extra: { host: domain },
+      });
+      return NextResponse.json(
+        { error: "Subscriptions are not available for this store." },
+        { status: 404 },
+      );
+    }
+
+    if (!business.stripeAccountId) {
       // Subscriptions are billed as direct charges on the store's own account.
       // Without Connect onboarding there is nowhere for the money to go, and
       // the storefront gives no hint of it.
       reportSubscriptionBlocked("stripe-not-connected", {
-        businessId: business?.id,
-        templateId: business?.templateId,
+        businessId: business.id,
+        templateId: business.templateId,
         host: domain,
         extra: {
           host: domain,
-          businessResolved: !!business,
-          hasStripeAccountId: !!business?.stripeAccountId,
-          stripeChargesEnabled: business?.stripeChargesEnabled ?? null,
+          hasStripeAccountId: false,
+          stripeChargesEnabled: business.stripeChargesEnabled,
         },
       });
       return NextResponse.json(
@@ -279,6 +297,25 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+    // Product customizer: a configured product can't be subscribed to in v1
+    // (a subscription renews one fixed SKU; there is nowhere to keep a build
+    // and nothing would re-price it each cycle). Only while the store has
+    // options on — off, the product sells plain everywhere.
+    if (isEnabled(PRODUCT_OPTIONS_FEATURE_KEY)) {
+      const optionGroupCount = await db.productOptionGroupOnProduct.count({
+        where: { productId: product.id, group: { businessId: business.id } },
+      });
+      if (optionGroupCount > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "This product has options to choose, so it can't be bought as a subscription. Add it to your cart instead.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     // Guaranteed present: `intervals` is filtered against the same catalog.
     const cadence = getInterval(body.intervalKey);
     if (!cadence) {
@@ -695,13 +732,24 @@ export async function POST(req: Request) {
       // are never sent on cross-site navigations — the one-time
       // `pending_session` cookie stays `strict` because it's read via a
       // same-site client fetch to `/api/stripe/session`, not a redirect.
-      response.cookies.set("pending_subscription_session", session.id, {
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 3600,
-      });
+      //
+      // SIGNED (`<sessionId>.<hmac>`, bound to this store and to the
+      // subscription cookie's own signature context): a Stripe session id is
+      // not a secret, so a bare id would let anyone who saw it set the cookie
+      // and read the subscriber's details. See pending-session-cookie.ts.
+      response.cookies.set(
+        SUBSCRIPTION_PENDING_COOKIE.name,
+        signPendingSessionCookie(session.id, business.id, {
+          kind: SUBSCRIPTION_PENDING_COOKIE,
+        }),
+        {
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: PENDING_SESSION_COOKIE_MAX_AGE,
+        },
+      );
       return response;
     } catch (stripeErr) {
       // Roll the placeholder back. An `incomplete` row with no Stripe

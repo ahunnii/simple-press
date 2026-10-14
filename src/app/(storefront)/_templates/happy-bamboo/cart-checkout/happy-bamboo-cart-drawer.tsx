@@ -17,7 +17,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { HappyBambooCartSummary } from "./happy-bamboo-cart-summary";
 
@@ -34,7 +35,8 @@ export function HappyBambooCartDrawer({
   cartLabel,
   cartEmptyText,
 }: HappyBambooCartDrawerProps) {
-  const { items, isOpen, setIsOpen, updateQuantity, removeItem } = useCart();
+  const { items, isOpen, setIsOpen, updateLineQuantity, removeLine } =
+    useCart();
   const reducedMotion = useReducedMotion();
 
   // The sheet portals to document.body by default, which escapes the
@@ -86,7 +88,7 @@ export function HappyBambooCartDrawer({
               <AnimatePresence mode="popLayout">
                 {items.map((item) => (
                   <motion.div
-                    key={`${item.productId}-${item.variantId ?? "base"}`}
+                    key={cartItemId(item)}
                     layout
                     initial={
                       reducedMotion
@@ -120,14 +122,13 @@ export function HappyBambooCartDrawer({
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            removeItem(item.productId, item.variantId)
-                          }
+                          onClick={() => removeLine(cartItemId(item))}
                           aria-label={`Remove ${item.productName} from cart`}
                         >
                           <X className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </div>
+                      <CartLineOptions item={item} className="mt-0.5" />
                       <p className="text-muted-foreground text-sm">
                         {formatPrice(item.price)}
                       </p>
@@ -137,9 +138,8 @@ export function HappyBambooCartDrawer({
                           size="icon"
                           className="h-8 w-8"
                           onClick={() =>
-                            updateQuantity(
-                              item.productId,
-                              item.variantId,
+                            updateLineQuantity(
+                              cartItemId(item),
                               item.quantity - 1,
                             )
                           }
@@ -159,9 +159,8 @@ export function HappyBambooCartDrawer({
                           size="icon"
                           className="h-8 w-8"
                           onClick={() =>
-                            updateQuantity(
-                              item.productId,
-                              item.variantId,
+                            updateLineQuantity(
+                              cartItemId(item),
                               item.quantity + 1,
                             )
                           }

@@ -16,7 +16,10 @@ export {
 } from "./domain-utils";
 
 /**
- * Get business by any domain type (server-only — queries the database)
+ * Get an ACTIVE business by any domain type (server-only — queries the
+ * database). Like `checkBusiness`, a suspended/closed store resolves to null
+ * exactly like an unknown host. Platform-admin flows that need any status must
+ * use `checkBusinessAnyStatus` from `~/lib/check-business`.
  */
 export async function getBusinessByDomain(domain: string) {
   const { db } = await import("~/server/db");
@@ -27,7 +30,7 @@ export async function getBusinessByDomain(domain: string) {
   if (subdomain) {
     // Search by subdomain
     return db.business.findUnique({
-      where: { subdomain },
+      where: { subdomain, status: "active" },
       include: {
         siteContent: {
           select: { logoUrl: true },
@@ -38,6 +41,7 @@ export async function getBusinessByDomain(domain: string) {
     // Search by custom domain
     return db.business.findFirst({
       where: {
+        status: "active",
         OR: [
           { customDomain: domain },
           { customDomain: domain.replace(/:\d+$/, "") }, // Remove port for dev

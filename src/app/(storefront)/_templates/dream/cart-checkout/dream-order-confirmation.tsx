@@ -17,6 +17,10 @@ import { formatCurrency } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import {
+  isPaymentProcessing,
+  PAYMENT_PROCESSING_MESSAGE,
+} from "~/app/(storefront)/_components/checkout/payment-status";
 import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
 import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
@@ -203,6 +207,9 @@ export function DreamOrderConfirmation({
     );
   }
 
+  // A delayed bank payment (`unpaid`) is still clearing: the processing notice
+  // replaces the lede, and the receipt hasn't been emailed yet.
+  const processing = isPaymentProcessing(details?.payment_status);
   const method = details?.delivery_method ?? null;
   const list = stepsFor(steps, method);
   const pickupLocation =
@@ -230,10 +237,12 @@ export function DreamOrderConfirmation({
         logoAlt={logoAlt}
         title={copy.heading}
         accent={copy.accent}
-        lede={copy.lede}
+        lede={processing ? PAYMENT_PROCESSING_MESSAGE : copy.lede}
         titleFieldKey="dream.checkout.confirmation-heading"
         accentFieldKey="dream.checkout.confirmation-accent"
-        ledeFieldKey="dream.checkout.confirmation-lede"
+        ledeFieldKey={
+          processing ? undefined : "dream.checkout.confirmation-lede"
+        }
       />
 
       <DreamSection aria-label={copy.nextHeading} reveal={false}>
@@ -346,7 +355,9 @@ export function DreamOrderConfirmation({
                   {details.customer_email ? (
                     <div className="flex flex-col gap-1">
                       <dt className="text-[var(--dream-soft)]">
-                        Receipt sent to
+                        {processing
+                          ? "Receipt will be sent to"
+                          : "Receipt sent to"}
                       </dt>
                       <dd className="m-0 font-semibold break-words text-[var(--dream-ink)]">
                         {details.customer_email}

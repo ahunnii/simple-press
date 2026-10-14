@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { FEATURE_REGISTRY } from "~/lib/features/registry";
+import { getBlockingDependencyLabels } from "~/lib/features/registry";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 
 type UseFeatureFlagsOptions = {
@@ -29,13 +29,10 @@ export function useFeatureFlags({ flags }: UseFeatureFlagsOptions) {
         return disabledSet.has(key);
       },
 
-      getDependencyLabel: (key: string): string | undefined => {
-        const feature = FEATURE_REGISTRY[key];
-        if (!feature?.dependsOn) return undefined;
-        const missingDep = feature.dependsOn.find((dep) => !merged[dep]);
-        if (!missingDep) return undefined;
-        return FEATURE_REGISTRY[missingDep]?.label;
-      },
+      // Labels of the DIRECT dependencies that are effectively off (explicitly
+      // disabled, or themselves disabled by dependency). Empty when none.
+      getBlockingLabels: (key: string): string[] =>
+        getBlockingDependencyLabels(key, merged),
     };
   }, [flags]);
 

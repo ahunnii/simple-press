@@ -19,16 +19,43 @@ import { SECTION_LINKS } from "~/lib/section-links";
  *   - `donate.form` keeps pink's `form-heading` field verbatim.
  *   - `donate.impact` is a wealth-only fifth group (design.md's addition,
  *     no pink equivalent) — italic H2 + body + optional image.
+ *
+ * 2026-10-12 redesign (pass 2): the header becomes a split hero (optional
+ * `hero-image`, else a full-width forest panel). `header-body-2` and
+ * `form-heading` now sit beside the donation form in the "Give" block.
  */
 
 // ── donate.header ────────────────────────────────────────────────────────────
 
 const donateHeaderData: TemplateField[] = [
   {
+    key: "wealth.donate.hero-image",
+    label: "Hero Photo",
+    description:
+      "Optional photo beside the page heading (forest-tinted). Leave blank for a full-width green heading panel.",
+    type: "image",
+    page: "donate",
+    group: "donate.header",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "wealth.donate.hero-image-alt",
+    label: "Hero Photo Alt Text",
+    description:
+      "Describe the hero photo for screen readers. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "donate",
+    group: "donate.header",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "Neighbors gathered at a cooperative's grand opening",
+  },
+  {
     key: "wealth.donate.header-heading",
     label: "Header Heading",
     description:
-      "Page h1, left column of the header. Leave blank to use the page title derived from the donation label (Donate / Leave a Tip / Support Us) set in Donation settings.",
+      "Page h1 in the hero. Leave blank to use the page title derived from the donation label (Donate / Leave a Tip / Support Us) set in Donation settings.",
     type: "text",
     page: "donate",
     group: "donate.header",
@@ -39,7 +66,7 @@ const donateHeaderData: TemplateField[] = [
   {
     key: "wealth.donate.header-eyebrow",
     label: "Header Eyebrow",
-    description: "Mono overline above the two body paragraphs.",
+    description: "Mono overline above the page heading.",
     type: "text",
     page: "donate",
     group: "donate.header",
@@ -50,7 +77,7 @@ const donateHeaderData: TemplateField[] = [
   {
     key: "wealth.donate.header-body-1",
     label: "Header Body — Paragraph 1",
-    description: "First body paragraph, left column of the header.",
+    description: "Intro paragraph under the heading, in the hero.",
     type: "textarea",
     page: "donate",
     group: "donate.header",
@@ -63,7 +90,8 @@ const donateHeaderData: TemplateField[] = [
   {
     key: "wealth.donate.header-body-2",
     label: "Header Body — Paragraph 2",
-    description: "Second body paragraph, left column of the header.",
+    description:
+      "Second paragraph, shown beside the donation form (above the form heading).",
     type: "textarea",
     page: "donate",
     group: "donate.header",
@@ -81,7 +109,8 @@ const donateFormData: TemplateField[] = [
   {
     key: "wealth.donate.form-heading",
     label: "Form Heading",
-    description: "Small heading above the amount picker / checkout form.",
+    description:
+      "Italic heading beside the amount picker / checkout form (it appears under the second paragraph). Only shown while the donation form is.",
     type: "text",
     page: "donate",
     group: "donate.form",
@@ -125,7 +154,8 @@ const donateOtherWaysData: TemplateField[] = [
   {
     key: "wealth.donate.other-ways-heading",
     label: "Other Ways to Give Heading",
-    description: "Heading for the Venmo/Cash App section.",
+    description:
+      "Heading above the Venmo / Cash App cards. The section only appears when a handle is set in Donation settings.",
     type: "text",
     page: "donate",
     group: "donate.other-ways",
@@ -140,7 +170,7 @@ const donateImpactData: TemplateField[] = [
   {
     key: "wealth.donate.impact-heading",
     label: "Impact Heading",
-    description: "Italic H2 introducing what donations fund.",
+    description: "Italic heading on the impact card.",
     type: "text",
     page: "donate",
     group: "donate.impact",
@@ -164,7 +194,8 @@ const donateImpactData: TemplateField[] = [
   {
     key: "wealth.donate.impact-image",
     label: "Impact Image",
-    description: "Optional photo beside the impact copy. Leave blank to hide the image only — the heading and body still render.",
+    description:
+      "Optional photo behind the impact card (forest-tinted). Leave blank to hide the photo only — the heading and body still render.",
     type: "image",
     page: "donate",
     group: "donate.impact",
@@ -179,8 +210,10 @@ const donateImpactData: TemplateField[] = [
     page: "donate",
     group: "donate.impact",
     gridColumn: "col-span-1",
-    defaultValue: "Community members gathered at a Detroit Community Wealth Fund event",
-    placeholder: "Community members gathered at a Detroit Community Wealth Fund event",
+    defaultValue:
+      "Community members gathered at a Detroit Community Wealth Fund event",
+    placeholder:
+      "Community members gathered at a Detroit Community Wealth Fund event",
   },
 ];
 
@@ -198,14 +231,15 @@ export const wealthDonateFieldGroups: TemplateFieldGroup[] = [
   {
     id: "donate.header",
     title: "Donate — Header",
-    description: "Page heading, eyebrow, and two intro paragraphs.",
+    description:
+      "Hero: optional photo, eyebrow, page heading, intro paragraph, plus the second paragraph beside the form.",
     icon: "💝",
     columns: 2,
   },
   {
     id: "donate.form",
     title: "Donate — Form",
-    description: "Heading above the amount picker / checkout form.",
+    description: "Heading beside the amount picker / checkout form.",
     icon: "📝",
     columns: 2,
   },
@@ -226,7 +260,8 @@ export const wealthDonateFieldGroups: TemplateFieldGroup[] = [
   {
     id: "donate.impact",
     title: "Donate — Impact",
-    description: "What your gift makes possible: heading, body, optional image.",
+    description:
+      "What your gift makes possible: heading, body, optional photo.",
     icon: "🌱",
     columns: 2,
   },
@@ -237,7 +272,8 @@ export const wealthDonateSections: TemplateSection[] = [
     id: "donate.header",
     page: "donate",
     title: "Header",
-    description: "Page heading, eyebrow, and two intro paragraphs (left column).",
+    description:
+      "Hero (optional photo, eyebrow, heading, intro) and the second paragraph beside the form.",
     groupIds: ["donate.header"],
     order: 0,
     hideable: false,
@@ -247,34 +283,37 @@ export const wealthDonateSections: TemplateSection[] = [
     page: "donate",
     title: "Form",
     description:
-      "Heading above the amount picker / Stripe Checkout form (right column) — shown once Stripe payments are connected and charges-enabled.",
+      "Heading beside the amount picker / Stripe Checkout form — shown once Stripe payments are connected and charges-enabled.",
     groupIds: ["donate.form"],
-    order: 1,
+    order: 2,
     hideable: false,
   },
   {
     id: "donate.impact",
     page: "donate",
     title: "Impact",
-    description: "What your gift makes possible — heading, body, optional image.",
+    description:
+      "What your gift makes possible — heading, body, optional photo.",
     groupIds: ["donate.impact"],
-    order: 2,
+    order: 3,
     hideable: true,
   },
   {
     id: "donate.thank-you",
     page: "donate",
     title: "Thank You",
-    description: "Copy shown after a successful donation.",
+    description:
+      "Green panel under the hero, shown after a successful donation.",
     groupIds: ["donate.thank-you"],
-    order: 3,
+    order: 1,
     hideable: false,
   },
   {
     id: "donate.other-ways",
     page: "donate",
     title: "Other Ways to Give",
-    description: "Heading for the Venmo/Cash App section",
+    description:
+      "Venmo / Cash App cards — shown when a handle is set in Donation settings.",
     groupIds: ["donate.other-ways"],
     order: 4,
     hideable: true,

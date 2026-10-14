@@ -7,6 +7,7 @@ import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 
 import { GloveButton } from "../shared/glove-button";
+import { GloveOrderItemOptions } from "../shared/glove-line-options";
 import { GloveAccountLayout } from "./glove-account-layout";
 import {
   GloveAccountCard,
@@ -69,6 +70,9 @@ export function GloveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {item.variantName}
                         </p>
                       ) : null}
+                      <GloveOrderItemOptions
+                        customization={item.customization}
+                      />
                       <p className="mt-0.5 text-[13px] text-[var(--glove-muted)]">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>

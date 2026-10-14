@@ -4,6 +4,7 @@ import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 import { PageTransition } from "~/components/page-animations";
 
 import { SledgeAccountLayout } from "./sledge-account-layout";
@@ -107,6 +108,10 @@ export function SledgeOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                           {item.variantName}
                         </p>
                       )}
+                      <OrderItemOptions
+                        customization={item.customization}
+                        className="sledge-line-options mt-1 font-sans text-xs tracking-[0.08em] text-[var(--sl-ink-soft)]"
+                      />
                     </div>
                     {/* M-4: sr-only labels for qty and total cells */}
                     <span className="sl-eyebrow font-sans text-xs">

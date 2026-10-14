@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId } from "~/providers/cart-context";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -235,7 +237,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
             <div className="flex max-h-[280px] flex-col gap-4 overflow-y-auto">
               {form.items.map((item) => (
                 <div
-                  key={`${item.productId}-${item.variantId ?? "no-variant"}`}
+                  key={cartItemId(item)}
                   className="grid items-start gap-3"
                   style={{ gridTemplateColumns: "56px 1fr auto" }}
                 >
@@ -267,6 +269,11 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                         {item.variantName}
                       </p>
                     )}
+                    <CartLineOptions
+                      item={item}
+                      showPrices={false}
+                      className="text-[11px] text-[var(--pink-ink-subtle)]"
+                    />
                     <p
                       className="text-[11px]"
                       style={{ color: "var(--pink-ink-subtle)" }}
@@ -371,6 +378,17 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                   >
                     Code <strong>{form.discountCodeLabel}</strong> applied — you
                     saved {formatPrice(form.discountAmount)}
+                  </p>
+                )}
+
+                {form.discountCodeLabel && form.discountFreeShipping && (
+                  <p
+                    role="status"
+                    className="text-[12px]"
+                    style={{ color: "var(--pink-success)" }}
+                  >
+                    Free shipping applied:{" "}
+                    <strong>{form.discountCodeLabel}</strong>
                   </p>
                 )}
               </div>

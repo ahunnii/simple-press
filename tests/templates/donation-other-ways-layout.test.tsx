@@ -20,42 +20,62 @@ const CASHAPP: ResolvedDonationHandle = {
   url: "https://cash.app/$teststore",
 };
 
+// `single` centers a lone card; `pair` lays two cards side by side. Wealth's
+// wrapping flex row only needs a centering modifier for the single case.
 const COMPONENTS = [
-  { name: "DefaultDonateOtherWays", Component: DefaultDonateOtherWays },
-  { name: "PinkDonateOtherWays", Component: PinkDonateOtherWays },
-  { name: "WealthDonateOtherWays", Component: WealthDonateOtherWays },
+  {
+    name: "DefaultDonateOtherWays",
+    Component: DefaultDonateOtherWays,
+    single: "mx-auto",
+    pair: "sm:grid-cols-2",
+  },
+  {
+    name: "PinkDonateOtherWays",
+    Component: PinkDonateOtherWays,
+    single: "mx-auto",
+    pair: "sm:grid-cols-2",
+  },
+  {
+    name: "WealthDonateOtherWays",
+    Component: WealthDonateOtherWays,
+    single: "wealth-donate-ways--single",
+    pair: null,
+  },
 ];
 
-describe.each(COMPONENTS)("$name layout behavior", ({ Component }) => {
-  it("with a single handle, renders mx-auto and does not render sm:grid-cols-2", () => {
-    const { container } = render(<Component handles={[VENMO]} />);
+describe.each(COMPONENTS)(
+  "$name layout behavior",
+  ({ Component, single, pair }) => {
+    it("with a single handle, renders the centered single layout", () => {
+      const { container } = render(<Component handles={[VENMO]} />);
 
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).not.toBeNull();
-    expect(wrapper.className).toContain("mx-auto");
-    expect(wrapper.className).not.toContain("sm:grid-cols-2");
-  });
+      const wrapper = container.firstChild as HTMLElement;
+      expect(wrapper).not.toBeNull();
+      expect(wrapper.className).toContain(single);
+      if (pair) expect(wrapper.className).not.toContain(pair);
+    });
 
-  it("with two handles, renders sm:grid-cols-2 and does not render mx-auto", () => {
-    const { container } = render(<Component handles={[VENMO, CASHAPP]} />);
+    it("with two handles, renders the side-by-side layout", () => {
+      const { container } = render(<Component handles={[VENMO, CASHAPP]} />);
 
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).not.toBeNull();
-    expect(wrapper.className).toContain("sm:grid-cols-2");
-    expect(wrapper.className).not.toContain("mx-auto");
-  });
+      const wrapper = container.firstChild as HTMLElement;
+      expect(wrapper).not.toBeNull();
+      if (pair) expect(wrapper.className).toContain(pair);
+      expect(wrapper.className).not.toContain(single);
+    });
 
-  it("with a single handle, renders exactly two SVGs (icon + QR code)", () => {
-    const { container } = render(<Component handles={[VENMO]} />);
+    it("with a single handle, renders exactly two SVGs (icon + QR code)", () => {
+      const { container } = render(<Component handles={[VENMO]} />);
 
-    const svgs = container.querySelectorAll("svg");
-    expect(svgs.length).toBe(2);
-  });
+      const svgs = container.querySelectorAll("svg");
+      expect(svgs.length).toBe(2);
+    });
 
-  it("with two handles, renders exactly four SVGs (icon + QR code per handle)", () => {
-    const { container } = render(<Component handles={[VENMO, CASHAPP]} />);
+    it("with two handles, renders exactly four SVGs (icon + QR code per handle)", () => {
+      const { container } = render(<Component handles={[VENMO, CASHAPP]} />);
 
-    const svgs = container.querySelectorAll("svg");
-    expect(svgs.length).toBe(4);
-  });
-});
+      const svgs = container.querySelectorAll("svg");
+      expect(svgs.length).toBe(4);
+    });
+  },
+);

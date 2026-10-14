@@ -38,11 +38,19 @@ export default async function EditProductPage({ params }: Props) {
       <ProductForm
         product={product}
         galleriesEnabled={flags.isEnabled("galleries")}
+        embedsEnabled={flags.isEnabled("embeds")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
+        formsEnabled={flags.isEnabled("forms")}
         collectionsEnabled={flags.isEnabled("collections")}
         subscriptionsEnabled={flags.isEnabled("subscriptions")}
+        productOptionsEnabled={
+          flags.isEnabled("productOptions") &&
+          !flags.disabledByDependency.has("productOptions")
+        }
         mediaEnabled={flags.isEnabled("media")}
         allCollections={allCollections}
         pools={pools}
+        inventoryEnabled={flags.isEnabled("inventory")}
       />
     </>
   );

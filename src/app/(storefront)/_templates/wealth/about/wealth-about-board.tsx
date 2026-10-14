@@ -1,5 +1,12 @@
 import type { TemplateListRow } from "~/lib/template-fields";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import {
+  fieldAttr,
+  listItemAttr,
+  sectionGroupAttr,
+} from "~/lib/preview/section-attrs";
+
+import { WealthBlock } from "../shared/wealth-block";
+import { WealthReveal, WealthRevealGroup } from "../shared/wealth-reveal";
 
 type Props = {
   heading: string;
@@ -7,51 +14,55 @@ type Props = {
 };
 
 /**
- * Centered italic H2 + uppercase Jost-semibold display lines for each board
- * member, colored via `--wealth-eyebrow` per design.md's a11y note (the
- * eyebrow COLOR, not the mono eyebrow font — board names use the display
- * typeface per design.md's Typography section). Hideable (about.board).
+ * Board of Directors — sage block: centered italic H2 over a 3 / 2 / 1-up
+ * grid of Jost-semibold caps names, each under a sage-rule hairline. Names
+ * keep their position in the saved list (`listItemAttr` index) even when a
+ * blank row is skipped. Hideable (about.board).
  */
 export function WealthAboutBoard({ heading, members }: Props) {
-  if (members.length === 0) return null;
+  const names = members
+    .map((member, index) => ({
+      id: member._id ?? String(index),
+      index,
+      name: typeof member.name === "string" ? member.name.trim() : "",
+    }))
+    .filter((m) => m.name !== "");
+
+  if (names.length === 0) return null;
+  const hasHeading = heading.trim() !== "";
 
   return (
-    <section
-      aria-label="Board of Directors"
+    <WealthBlock
+      tone="sage"
+      aria-labelledby={hasHeading ? "wealth-about-board-h" : undefined}
+      aria-label={hasHeading ? undefined : "Board of Directors"}
       {...sectionGroupAttr("about", "board")}
-      className="py-[calc(var(--wealth-rhythm)*2)]"
     >
-      <div className="mx-auto w-full max-w-[720px] px-[var(--wealth-gutter)] text-center">
-        <h2
-          {...fieldAttr("wealth.about.board-heading")}
-          className="wealth-section-heading"
-        >
-          {heading}
-        </h2>
-        <ul className="mt-[var(--wealth-rhythm)] list-none">
-          {members.map((member, i) => {
-            const name = typeof member.name === "string" ? member.name : "";
-            if (!name.trim()) return null;
-            return (
-              <li
-                key={member._id ?? i}
-                className="mt-[13px] first:mt-0"
-                style={{
-                  fontFamily: "var(--font-wealth-display)",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  lineHeight: "17px",
-                  letterSpacing: "1.69px",
-                  textTransform: "uppercase",
-                  color: "var(--wealth-eyebrow)",
-                }}
-              >
-                {name}
-              </li>
-            );
-          })}
+      {hasHeading ? (
+        <WealthReveal className="wealth-section-head wealth-section-head--center">
+          <h2
+            id="wealth-about-board-h"
+            className="wealth-h2"
+            {...fieldAttr("wealth.about.board-heading")}
+          >
+            {heading}
+          </h2>
+        </WealthReveal>
+      ) : null}
+      <WealthRevealGroup threshold={0}>
+        <ul className="wealth-about-board__list">
+          {names.map((m, i) => (
+            <li
+              key={m.id}
+              className="wealth-about-board__name wealth-reveal-item"
+              style={{ "--i": Math.min(i, 7) } as React.CSSProperties}
+              {...listItemAttr("wealth.about.board-members", m.index)}
+            >
+              {m.name}
+            </li>
+          ))}
         </ul>
-      </div>
-    </section>
+      </WealthRevealGroup>
+    </WealthBlock>
   );
 }

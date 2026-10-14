@@ -17,6 +17,7 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Textarea } from "~/components/ui/textarea";
 import { RecaptchaDisclosure } from "~/components/inputs/recaptcha-field";
+import { PictureChoiceField } from "~/components/forms/picture-choice-field";
 
 /** reCAPTCHA v3 action asserted server-side by `formSubmission.submit`. */
 const RECAPTCHA_ACTION = "form";
@@ -44,6 +45,13 @@ function defaultValueFor(field: FormField): unknown {
       return [];
     case "checkbox":
       return false;
+    case "picturechoice":
+      // one -> option id, many -> option ids, quantity -> { optionId: qty }
+      return field.selection === "many"
+        ? []
+        : field.selection === "quantity"
+          ? {}
+          : "";
     default:
       return "";
   }
@@ -466,6 +474,22 @@ function FormFieldRow({
           </p>
         )}
       </fieldset>
+    );
+  }
+
+  if (field.type === "picturechoice") {
+    return (
+      <PictureChoiceField
+        field={field}
+        value={value}
+        fieldDomId={fieldDomId}
+        describedBy={describedBy}
+        descriptionId={descriptionId}
+        errorId={errorId}
+        error={error}
+        onChange={onChange}
+        registerRef={registerRef}
+      />
     );
   }
 

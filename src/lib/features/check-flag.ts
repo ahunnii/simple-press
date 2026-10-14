@@ -11,7 +11,7 @@ import { resolveFlags } from "./resolve-flags";
  * business.featureFlags overrides are merged over the registry defaults,
  * then any feature disabled-by-dependency is forced off.
  *
- * Used by server routes (e.g. store-transfer, wordpress-export) that need to
+ * Used by server routes (e.g. the products CSV export) that need to
  * gate on a flag for a businessId resolved outside the normal per-request
  * tenant context (PLATFORM_ADMIN acting on behalf of another business).
  */

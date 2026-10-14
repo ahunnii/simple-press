@@ -337,7 +337,7 @@ export function NewCheckoutForm({ items, preselectItemId }: Props) {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="e.g. Alvarez wedding, Sat 10/3"
+                      placeholder="e.g. Rivera wedding, Sat 10/3"
                     />
                   </FormControl>
                   <FormMessage />

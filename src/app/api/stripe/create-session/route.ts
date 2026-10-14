@@ -1,22 +1,64 @@
+import type { Prisma } from "generated/prisma";
 import type { NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import type {
+  ConfiguredLine,
+  StockPoolRow,
+  StockProductRow,
+  StockRows,
+  StockVariantRow,
+  StoredLineConfigs,
+} from "~/lib/checkout/customizer-checkout";
+import type { CartAvailabilityResult } from "~/lib/checkout/validate-cart";
+import type { CustomizerDefinition } from "~/lib/customizer/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { env } from "~/env";
+import {
+  appendHold,
+  buildLineDemands,
+  evaluateCheckoutCustomizations,
+  findOverdrawnLines,
+  holdForTarget,
+  isConfiguredLine,
+  LINE_CONFIG_METADATA_KEY,
+  OPTIONS_SUMMARY_METADATA_KEY,
+  STRIPE_DESCRIPTION_MAX,
+  STRIPE_OPTIONS_SUMMARY_MAX,
+  truncateUtf16,
+} from "~/lib/checkout/customizer-checkout";
+import {
+  discountUsageForCheckout,
+  supersedePendingCheckout,
+} from "~/lib/checkout/discount-holds";
+import {
+  PENDING_COOKIE_MARKER_KEY,
+  PENDING_COOKIE_MARKER_VALUE,
+  PENDING_SESSION_COOKIE,
+  PENDING_SESSION_COOKIE_MAX_AGE,
+  signPendingSessionCookie,
+} from "~/lib/checkout/pending-session-cookie";
 import { computeSubtotalCents } from "~/lib/checkout/pricing";
 import { shouldPinPaymentIntentShipping } from "~/lib/checkout/shipping";
 import {
   checkCartAvailability,
   computePoolDemand,
   isOwnerFaultReason,
+  isScarcityReason,
+  pushUnavailableLine,
 } from "~/lib/checkout/validate-cart";
+import {
+  loadCustomizerDefinitions,
+  PRODUCT_OPTIONS_FEATURE_KEY,
+} from "~/lib/customizer/load";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
+import { rasterImageUrl } from "~/lib/image-url";
 import {
   releaseReservation,
   reserveInventory,
@@ -46,6 +88,11 @@ import { db } from "~/server/db";
 // than returning) is required so Prisma rolls back any partial reservedQty
 // increments made earlier in the reserve loop.
 class OutOfStockError extends Error {}
+
+// Same rollback mechanism as OutOfStockError, for a discount entry that could
+// not claim a use: another open checkout (or order) took the code's last use
+// between validation and the reservation transaction.
+class DiscountExhaustedError extends Error {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Owner-fault checkout blocks → Sentry
@@ -210,22 +257,32 @@ export async function POST(req: NextRequest) {
     //   },
     // });
 
-    if (!business?.stripeAccountId) {
+    if (!business) {
+      // Null means an unknown host OR a suspended/closed store
+      // (`getBusinessByDomain` is active-only) — e.g. a shopper whose cart was
+      // still open when the store was suspended.
+      reportCheckoutBlocked("business-not-found", {
+        host: domain,
+        extra: { host: domain },
+      });
+      return NextResponse.json(
+        { error: "Checkout is not available for this store." },
+        { status: 404 },
+      );
+    }
+
+    if (!business.stripeAccountId) {
       // The store cannot take a single order until Connect onboarding finishes.
       // Owners routinely believe they are live because the storefront renders
-      // and the cart works — this branch is the proof that it doesn't. A null
-      // `business` lands here too (host resolved to no store: a custom domain
-      // pointed at us before its DB row was updated, or a stray probe), so
-      // `businessResolved` is in the extras to tell the two apart instantly.
+      // and the cart works — this branch is the proof that it doesn't.
       reportCheckoutBlocked("stripe-not-connected", {
-        businessId: business?.id,
-        templateId: business?.templateId,
+        businessId: business.id,
+        templateId: business.templateId,
         host: domain,
         extra: {
           host: domain,
-          businessResolved: !!business,
-          hasStripeAccountId: !!business?.stripeAccountId,
-          stripeChargesEnabled: business?.stripeChargesEnabled ?? null,
+          hasStripeAccountId: false,
+          stripeChargesEnabled: business.stripeChargesEnabled,
         },
       });
       return NextResponse.json(
@@ -279,6 +336,9 @@ export async function POST(req: NextRequest) {
       );
     }
     const couponsEnabled = isFeatureEnabled("coupons");
+    // Product customizer. Off: any posted build is rejected
+    // (`configuration-invalid`) and products sell as plain lines.
+    const optionsEnabled = isFeatureEnabled(PRODUCT_OPTIONS_FEATURE_KEY);
 
     // Maintenance guard: reject checkout while platform or store is in maintenance.
     const platformMaintenance = await getPlatformMaintenance();
@@ -353,100 +413,296 @@ export async function POST(req: NextRequest) {
       ...new Set(itemList.map((i) => i.productId).filter(Boolean)),
     ] as string[];
 
-    const [variantsWithProduct, productsNoVariant] = await Promise.all([
-      variantIds.length > 0
-        ? db.productVariant.findMany({
-            where: {
-              id: { in: variantIds },
-              product: { businessId: business.id },
-            },
-            select: {
-              id: true,
-              price: true,
-              inventoryQty: true,
-              reservedQty: true,
-              name: true,
-              productId: true,
-              product: {
-                select: {
-                  businessId: true,
-                  published: true,
-                  trackInventory: true,
-                  allowBackorders: true,
-                  price: true,
-                  additionalFields: true,
-                  weight: true,
-                  weightUnit: true,
-                  images: {
-                    select: { url: true },
-                    orderBy: { sortOrder: "asc" },
-                    take: 1,
+    // The cart's catalog rows, current stock included. Loaded again after
+    // the supersede below when that released the shopper's own hold, so the
+    // stock check sees the freed units.
+    const loadCart = async () => {
+      const [variantsWithProduct, productsNoVariant] = await Promise.all([
+        variantIds.length > 0
+          ? db.productVariant.findMany({
+              where: {
+                id: { in: variantIds },
+                product: { businessId: business.id },
+              },
+              select: {
+                id: true,
+                price: true,
+                inventoryQty: true,
+                reservedQty: true,
+                name: true,
+                sku: true,
+                productId: true,
+                product: {
+                  select: {
+                    businessId: true,
+                    name: true,
+                    sku: true,
+                    published: true,
+                    trackInventory: true,
+                    allowBackorders: true,
+                    price: true,
+                    additionalFields: true,
+                    weight: true,
+                    weightUnit: true,
+                    images: {
+                      select: { url: true },
+                      orderBy: { sortOrder: "asc" },
+                      take: 1,
+                    },
                   },
                 },
               },
-            },
-          })
-        : [],
-      db.product.findMany({
-        where: {
-          id: { in: productIds },
-          businessId: business.id,
-        },
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          published: true,
-          trackInventory: true,
-          allowBackorders: true,
-          inventoryQty: true,
-          reservedQty: true,
-          additionalFields: true,
-          baseInventoryUnitId: true,
-          baseUnitsConsumed: true,
-          weight: true,
-          weightUnit: true,
-          _count: { select: { variants: true } },
-          images: {
-            select: { url: true },
-            orderBy: { sortOrder: "asc" },
-            take: 1,
+            })
+          : [],
+        db.product.findMany({
+          where: {
+            id: { in: productIds },
+            businessId: business.id,
           },
-        },
-      }),
-    ]);
-
-    const variantMap = new Map(variantsWithProduct.map((v) => [v.id, v]));
-    const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
-
-    // Aggregate base units demanded per pool across the whole cart
-    const poolDemand = computePoolDemand(itemList, productMap);
-
-    const poolIds = [...poolDemand.keys()];
-    const pools =
-      poolIds.length > 0
-        ? await db.baseInventoryUnit.findMany({
-            where: { id: { in: poolIds }, businessId: business.id },
-            select: {
-              id: true,
-              inventoryQty: true,
-              reservedQty: true,
-              allowBackorders: true,
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            price: true,
+            published: true,
+            trackInventory: true,
+            allowBackorders: true,
+            inventoryQty: true,
+            reservedQty: true,
+            additionalFields: true,
+            baseInventoryUnitId: true,
+            baseUnitsConsumed: true,
+            weight: true,
+            weightUnit: true,
+            _count: { select: { variants: true } },
+            images: {
+              select: { url: true },
+              orderBy: { sortOrder: "asc" },
+              take: 1,
             },
-          })
-        : [];
-    const poolMap = new Map(pools.map((p) => [p.id, p]));
+          },
+        }),
+      ]);
 
-    const { unavailableItems, unavailableItemIds, unavailableDetails } =
-      checkCartAvailability({
+      const variantMap = new Map(variantsWithProduct.map((v) => [v.id, v]));
+      const productMap = new Map(productsNoVariant.map((p) => [p.id, p]));
+
+      // Aggregate base units demanded per pool across the whole cart
+      const poolDemand = computePoolDemand(itemList, productMap);
+
+      const poolIds = [...poolDemand.keys()];
+      const pools =
+        poolIds.length > 0
+          ? await db.baseInventoryUnit.findMany({
+              where: { id: { in: poolIds }, businessId: business.id },
+              select: {
+                id: true,
+                inventoryQty: true,
+                reservedQty: true,
+                allowBackorders: true,
+              },
+            })
+          : [];
+      const poolMap = new Map(pools.map((p) => [p.id, p]));
+
+      // Option definitions (live stock of linked values included), only when
+      // the store has options on. Loaded for every cart product, not just the
+      // configured lines: a product with a REQUIRED group posted without a
+      // build must be rejected too.
+      const definitions: Map<string, CustomizerDefinition> = optionsEnabled
+        ? await loadCustomizerDefinitions(db, business.id, productIds)
+        : new Map<string, CustomizerDefinition>();
+
+      return { variantMap, productMap, poolDemand, poolMap, definitions };
+    };
+
+    type LoadedCart = Awaited<ReturnType<typeof loadCart>>;
+
+    // Server price of a line's product/variant before options, or null when
+    // the catalog row is missing.
+    const basePriceOf = (cartRows: LoadedCart, index: number) => {
+      const item = itemList[index]!;
+      if (item.variantId) {
+        const variant = cartRows.variantMap.get(item.variantId);
+        return variant
+          ? resolveVariantPrice(variant.price, variant.product.price)
+          : null;
+      }
+      return cartRows.productMap.get(item.productId)?.price ?? null;
+    };
+
+    const emptyStockRows: StockRows = {
+      variants: new Map(),
+      products: new Map(),
+      pools: new Map(),
+    };
+
+    // The catalog check plus the product customizer: every configured line is
+    // re-priced from ids (`evaluateCheckoutCustomizations`), the stock rows of
+    // its linked option values are loaded, and the whole cart's demand —
+    // plain lines and option components together — is checked against stock
+    // per variant/product/pool (`findOverdrawnLines`), so two lines can't
+    // each take the last charm. Rejections map back to the PARENT line.
+    // A cart with no options involved skips all of it and gets the exact
+    // `checkCartAvailability` result it always had.
+    const assessCart = async (cartRows: LoadedCart) => {
+      const availability: CartAvailabilityResult = checkCartAvailability({
         items: itemList,
-        variantMap,
-        productMap,
-        poolDemand,
-        poolMap,
+        ...cartRows,
       });
+      const anyConfigured = itemList.some(isConfiguredLine);
+      if (!anyConfigured && cartRows.definitions.size === 0) {
+        return {
+          availability,
+          configured: new Map<number, ConfiguredLine>(),
+          unitPrices: new Map<number, number>(),
+          stockRows: emptyStockRows,
+        };
+      }
 
-    if (unavailableItems.length > 0) {
+      const failedLines = new Set(
+        availability.unavailableDetails.map((d) => d.lineIndex),
+      );
+      const { configured, failures, unitPrices } =
+        evaluateCheckoutCustomizations({
+          items: itemList,
+          optionsEnabled,
+          definitions: cartRows.definitions,
+          basePriceOf: (index) =>
+            failedLines.has(index) ? null : basePriceOf(cartRows, index),
+        });
+      const markFailed = (
+        lineIndex: number,
+        reason: (typeof failures)[0]["reason"],
+      ) => {
+        if (failedLines.has(lineIndex)) return;
+        failedLines.add(lineIndex);
+        configured.delete(lineIndex);
+        const item = itemList[lineIndex]!;
+        pushUnavailableLine(availability, itemList, {
+          productId: item.productId,
+          variantId: item.variantId ?? null,
+          reason,
+          lineIndex,
+        });
+      };
+      for (const failure of failures) {
+        markFailed(failure.lineIndex, failure.reason);
+      }
+
+      const stockRows = await loadComponentStockRows(cartRows, configured);
+      if (configured.size > 0) {
+        const demands = buildLineDemands({
+          items: itemList,
+          configured,
+          rows: stockRows,
+        }).filter((d) => !failedLines.has(d.lineIndex));
+        for (const failure of findOverdrawnLines(demands, stockRows)) {
+          markFailed(failure.lineIndex, failure.reason);
+        }
+      }
+      return { availability, configured, unitPrices, stockRows };
+    };
+
+    // Stock rows for the cart lines AND the linked option values of the
+    // configured lines (which may be unpublished products — an owner can
+    // track stock on an option without listing it). Everything scoped to the
+    // business.
+    const loadComponentStockRows = async (
+      cartRows: LoadedCart,
+      configured: ReadonlyMap<number, ConfiguredLine>,
+    ): Promise<StockRows> => {
+      const components = [...configured.values()].flatMap(
+        (line) => line.components,
+      );
+      const componentVariantIds = [
+        ...new Set(
+          components.map((c) => c.variantId).filter((id): id is string => !!id),
+        ),
+      ];
+      const componentProductIds = [
+        ...new Set(
+          components.filter((c) => !c.variantId).map((c) => c.productId),
+        ),
+      ];
+      const [componentVariants, componentProducts] = await Promise.all([
+        componentVariantIds.length > 0
+          ? db.productVariant.findMany({
+              where: {
+                id: { in: componentVariantIds },
+                product: { businessId: business.id },
+              },
+              select: {
+                id: true,
+                inventoryQty: true,
+                reservedQty: true,
+                product: {
+                  select: { trackInventory: true, allowBackorders: true },
+                },
+              },
+            })
+          : [],
+        componentProductIds.length > 0
+          ? db.product.findMany({
+              where: {
+                id: { in: componentProductIds },
+                businessId: business.id,
+              },
+              select: {
+                id: true,
+                trackInventory: true,
+                allowBackorders: true,
+                inventoryQty: true,
+                reservedQty: true,
+                baseInventoryUnitId: true,
+                baseUnitsConsumed: true,
+              },
+            })
+          : [],
+      ]);
+      const extraPoolIds = [
+        ...new Set(
+          componentProducts
+            .map((p) => p.baseInventoryUnitId)
+            .filter((id): id is string => !!id && !cartRows.poolMap.has(id)),
+        ),
+      ];
+      const extraPools =
+        extraPoolIds.length > 0
+          ? await db.baseInventoryUnit.findMany({
+              where: { id: { in: extraPoolIds }, businessId: business.id },
+              select: {
+                id: true,
+                inventoryQty: true,
+                reservedQty: true,
+                allowBackorders: true,
+              },
+            })
+          : [];
+      // Cart rows win on overlap (same read, and they carry more fields).
+      return {
+        variants: new Map<string, StockVariantRow>([
+          ...componentVariants.map((v) => [v.id, v] as const),
+          ...cartRows.variantMap,
+        ]),
+        products: new Map<string, StockProductRow>([
+          ...componentProducts.map((p) => [p.id, p] as const),
+          ...cartRows.productMap,
+        ]),
+        pools: new Map<string, StockPoolRow>([
+          ...extraPools.map((p) => [p.id, p] as const),
+          ...cartRows.poolMap,
+        ]),
+      };
+    };
+
+    // Reject an unsellable cart. Shared by the pre-supersede check (lines that
+    // can never be sold) and the stock check after it.
+    const rejectUnavailable = ({
+      unavailableItems,
+      unavailableItemIds,
+      unavailableDetails,
+    }: ReturnType<typeof checkCartAvailability>) => {
       // Report only when at least one line failed for an owner-fault reason: a
       // deleted or unpublished product the storefront still links, a
       // `comingSoon` flag left on, a bare productId posted for a product that
@@ -497,6 +753,22 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 },
       );
+    };
+
+    let cart = await loadCart();
+    let assessed = await assessCart(cart);
+    let availability = assessed.availability;
+
+    // Lines that can never be sold (missing, unpublished, coming soon,
+    // variant required, pool gone, a build the store can't honour) are
+    // rejected now — BEFORE the supersede below, so a doomed request never
+    // kills the shopper's working Stripe session. Scarcity (`out-of-stock`,
+    // `option-out-of-stock`) waits until after it: the shopper's own hold may
+    // be what makes the cart look sold out.
+    if (
+      availability.unavailableDetails.some((d) => !isScarcityReason(d.reason))
+    ) {
+      return rejectUnavailable(availability);
     }
 
     const deliveryMethod = body.deliveryMethod === "pickup" ? "pickup" : "ship";
@@ -603,11 +875,17 @@ export async function POST(req: NextRequest) {
 
     // Always use server-fetched prices for subtotal — never trust client-supplied amounts.
     // This ensures discounts and free-shipping thresholds are computed against real prices.
-    const subtotalCents = computeSubtotalCents(
-      itemList,
-      variantMap,
-      productMap,
-    );
+    // (Prices are not affected by the supersede reload below — only stock.)
+    // Configured lines are priced base + add-ons (`priceConfiguration`),
+    // independent of stock. Recomputed after the supersede reload below.
+    const subtotalOf = (rows: LoadedCart, unitPrices: Map<number, number>) =>
+      computeSubtotalCents(
+        itemList,
+        rows.variantMap,
+        rows.productMap,
+        unitPrices,
+      );
+    let subtotalCents = subtotalOf(cart, assessed.unitPrices);
 
     // Ignore any supplied discount code when the coupons feature is disabled —
     // the store has turned discounts off, so a stale/injected code must not apply.
@@ -618,44 +896,112 @@ export async function POST(req: NextRequest) {
         ? discountCodeId.trim()
         : null;
 
-    let discountCents = 0;
-    let verifiedDiscountCodeId: string | null = null;
-    let verifiedDiscountType: string | null = null;
-
-    if (rawDiscountId) {
-      const discountRow = await db.discountCode.findFirst({
+    const findDiscountRow = (id: string) =>
+      db.discountCode.findFirst({
         where: {
-          id: rawDiscountId,
+          id,
           businessId: business.id,
         },
       });
 
-      if (!discountRow) {
-        // Deliberately NOT reported, like the `validateAndComputeDiscount`
-        // rejection below: a bad, expired, exhausted or per-customer-capped code
-        // is routine shopper behavior (mistyped codes, screenshots of old
-        // promos), it blocks nothing — the shopper can still check out by
-        // clearing the field — and it would be by far the noisiest branch here.
+    let discountRow = rawDiscountId
+      ? await findDiscountRow(rawDiscountId)
+      : null;
+
+    // Deliberately NOT reported, here and in the `validateAndComputeDiscount`
+    // rejections below: a bad, expired, exhausted or per-customer-capped code
+    // is routine shopper behavior (mistyped codes, screenshots of old promos),
+    // it blocks nothing — the shopper can still check out by clearing the
+    // field — and it would be by far the noisiest branch here.
+    if (rawDiscountId && !discountRow) {
+      return NextResponse.json(
+        { error: "Invalid or expired discount code" },
+        { status: 400 },
+      );
+    }
+
+    if (discountRow) {
+      // The code's rules that no checkout hold can affect — active, start /
+      // expiry dates, minimum purchase — checked BEFORE the supersede below,
+      // so a doomed request never kills the shopper's working Stripe session.
+      // The usage limits (total and per-customer) are what the shopper's own
+      // hold can trip; they are checked after the supersede.
+      const holdIndependent = validateAndComputeDiscount(
+        { ...discountRow, usageLimit: null, perCustomerLimit: null },
+        subtotalCents,
+      );
+      if (!holdIndependent.ok) {
         return NextResponse.json(
-          { error: "Invalid or expired discount code" },
+          { error: holdIndependent.error },
           { status: 400 },
         );
       }
+    }
 
-      // Per-customer limit: count this shopper's prior (non-cancelled) orders
-      // that used this code. Authoritative check — the storefront validate
-      // endpoint may not have known the email.
-      let customerUsageCount: number | undefined;
-      if (discountRow.perCustomerLimit != null) {
-        customerUsageCount = await db.order.count({
-          where: {
-            businessId: business.id,
-            discountCodeId: discountRow.id,
-            customerEmail: normalizeEmail(customerInfo.email),
-            status: { not: "cancelled" },
-          },
-        });
+    // ── Supersede the shopper's own previous checkout ──────────────────────
+    // A shopper who went to Stripe, pressed Back and continues to payment
+    // again still has that first session open, holding their stock and any
+    // discount use for up to 30 minutes — enough to reject a single-use (or
+    // per-customer-1) code, or the last unit, with their OWN hold. If the
+    // SIGNED `pending_session` cookie names an active reservation of this
+    // store whose session is still open, mark it (no abandoned-cart email),
+    // expire it on Stripe and release that reservation once Stripe confirms
+    // the expiry.
+    //
+    // Placement: AFTER every check above that does not depend on holds (cart
+    // lines exist + are sellable, delivery/address/country, the code exists +
+    // its active/date/min-purchase rules), so a request rejected on its own
+    // merits leaves the shopper's working session alone. BEFORE everything
+    // the shopper's own hold could fail: the stock check, the usage-limit /
+    // per-customer checks and the reservation claim. Never throws — a
+    // supersede problem never blocks this checkout.
+    const { released } = await supersedePendingCheckout(db, {
+      headers: req.headers,
+      businessId: business.id,
+    });
+    if (released) {
+      // The released hold gave back stock (reservedQty) and maybe a code use
+      // (usageCount): re-read both so the checks below see them.
+      cart = await loadCart();
+      assessed = await assessCart(cart);
+      availability = assessed.availability;
+      subtotalCents = subtotalOf(cart, assessed.unitPrices);
+      if (discountRow) {
+        discountRow = await findDiscountRow(discountRow.id);
+        if (!discountRow) {
+          return NextResponse.json(
+            { error: "Invalid or expired discount code" },
+            { status: 400 },
+          );
+        }
       }
+    }
+    const { variantMap, productMap, poolMap } = cart;
+    const { configured, stockRows } = assessed;
+
+    if (availability.unavailableItems.length > 0) {
+      return rejectUnavailable(availability);
+    }
+
+    let discountCents = 0;
+    let verifiedDiscountCodeId: string | null = null;
+    let verifiedDiscountType: string | null = null;
+
+    if (discountRow) {
+      // Per-customer limit: count this shopper's prior (non-cancelled) orders
+      // that used this code, plus their still-open checkouts holding a use of
+      // it (a delayed bank payment has no order for days — see the discount
+      // entry on the reservation below). Authoritative check — the storefront
+      // validate endpoint may not have known the email. Not atomic: two
+      // simultaneous checkouts by the same shopper can both pass; the TOTAL
+      // usageLimit claim below is the atomic one. Shared with the storefront
+      // Apply (discount.validate) so the two can't disagree. No exclusion
+      // here: the shopper's own superseded checkout was already released above.
+      const { customerUsageCount } = await discountUsageForCheckout(db, {
+        businessId: business.id,
+        discount: discountRow,
+        customerEmail: normalizeEmail(customerInfo.email),
+      });
 
       // Shipping isn't computed yet: free_shipping codes yield 0 here and are
       // applied to the shipping amount below once it's known.
@@ -663,9 +1009,9 @@ export async function POST(req: NextRequest) {
         customerUsageCount,
       });
       if (!computed.ok) {
-        // Not reported — see the sibling branch above. All six rejection
-        // messages are shopper-facing coupon rules working correctly, and the
-        // order can still be placed without the code.
+        // Not reported — see above. All six rejection messages are
+        // shopper-facing coupon rules working correctly, and the order can
+        // still be placed without the code.
         return NextResponse.json({ error: computed.error }, { status: 400 });
       }
 
@@ -771,53 +1117,104 @@ export async function POST(req: NextRequest) {
     // Initialize Stripe with platform account
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
-    const lineItems = itemList.map((item) => {
-      // Always use server-fetched prices — never trust client-supplied amounts
-      const variantRecord = item.variantId
-        ? variantMap.get(item.variantId)
-        : undefined;
-      const productRecord = productMap.get(item.productId);
-      const serverPrice = variantRecord
-        ? resolveVariantPrice(variantRecord.price, variantRecord.product.price)
-        : productRecord?.price;
+    const lineItems = itemList.map(
+      (item, index): Stripe.Checkout.SessionCreateParams.LineItem => {
+        // Always use server-fetched prices — never trust client-supplied amounts
+        const variantRecord = item.variantId
+          ? variantMap.get(item.variantId)
+          : undefined;
+        const productRecord = productMap.get(item.productId);
+        const serverPrice = variantRecord
+          ? resolveVariantPrice(
+              variantRecord.price,
+              variantRecord.product.price,
+            )
+          : productRecord?.price;
 
-      if (serverPrice == null) {
-        throw new Error(`Price not found for item ${item.productId}`);
-      }
+        if (serverPrice == null) {
+          throw new Error(`Price not found for item ${item.productId}`);
+        }
+        const configuredLine = configured.get(index);
 
-      // Use server-fetched image URL — never trust client-supplied imageUrl.
-      // Client URLs may be relative paths or malformed, which causes Stripe to
-      // reject the session with "Not a valid URL".
-      const rawImageUrl =
-        variantRecord?.product.images[0]?.url ??
-        productRecord?.images[0]?.url ??
-        business.siteContent?.logoUrl ??
-        null;
-      const imageUrl =
-        rawImageUrl?.startsWith("https://") ||
-        rawImageUrl?.startsWith("http://")
-          ? rawImageUrl
-          : null;
+        // Use server-fetched image URL — never trust client-supplied imageUrl.
+        // Client URLs may be relative paths or malformed, which causes Stripe to
+        // reject the session with "Not a valid URL".
+        const rawImageUrl =
+          variantRecord?.product.images[0]?.url ??
+          productRecord?.images[0]?.url ??
+          // Stripe product images must be raster; an SVG logo is skipped.
+          rasterImageUrl(business.siteContent?.logoUrl) ??
+          null;
+        const imageUrl =
+          rawImageUrl?.startsWith("https://") ||
+          rawImageUrl?.startsWith("http://")
+            ? rawImageUrl
+            : null;
 
-      return {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: item.productName,
-            description: item.variantName ?? undefined,
-            images: imageUrl ? [imageUrl] : undefined,
-            metadata: {
-              productId: String(item.productId ?? ""),
-              productVariantId: String(item.variantId ?? ""),
-              variantName: String(item.variantName ?? ""),
-              sku: String(item.sku ?? ""),
+        if (configuredLine) {
+          // Configured line: everything shown or stored comes from the database
+          // and the server-priced snapshot — never the client's name, variant
+          // or price. `lineConfig` points the webhook at the stored build
+          // (`InventoryReservation.lineConfigs`); `optionsSummary` lets
+          // session-only emails (processing / failed / abandoned) show it.
+          const dbProductName =
+            variantRecord?.product.name ??
+            productRecord?.name ??
+            item.productName;
+          const dbVariantName = variantRecord?.name ?? null;
+          const dbSku = variantRecord
+            ? (variantRecord.sku ?? variantRecord.product.sku)
+            : (productRecord?.sku ?? null);
+          const summary = configuredLine.snapshot.summary;
+          const description = truncateUtf16(
+            [dbVariantName, summary].filter(Boolean).join(" · "),
+            STRIPE_DESCRIPTION_MAX,
+          );
+          return {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: dbProductName,
+                description: description || undefined,
+                images: imageUrl ? [imageUrl] : undefined,
+                metadata: {
+                  productId: String(item.productId),
+                  productVariantId: String(item.variantId ?? ""),
+                  variantName: dbVariantName ?? "",
+                  sku: dbSku ?? "",
+                  [LINE_CONFIG_METADATA_KEY]: configuredLine.serverKey,
+                  [OPTIONS_SUMMARY_METADATA_KEY]: truncateUtf16(
+                    summary,
+                    STRIPE_OPTIONS_SUMMARY_MAX,
+                  ),
+                },
+              },
+              unit_amount: Math.round(configuredLine.unitPrice),
             },
+            quantity: item.quantity,
+          };
+        }
+
+        return {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: item.productName,
+              description: item.variantName ?? undefined,
+              images: imageUrl ? [imageUrl] : undefined,
+              metadata: {
+                productId: String(item.productId ?? ""),
+                productVariantId: String(item.variantId ?? ""),
+                variantName: String(item.variantName ?? ""),
+                sku: String(item.sku ?? ""),
+              },
+            },
+            unit_amount: serverPrice,
           },
-          unit_amount: serverPrice,
-        },
-        quantity: item.quantity,
-      };
-    });
+          quantity: item.quantity,
+        };
+      },
+    );
 
     // Determine success/cancel URLs
     const isDev = process.env.NODE_ENV === "development";
@@ -970,6 +1367,9 @@ export async function POST(req: NextRequest) {
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
         discountCodeId: verifiedDiscountCodeId ?? "",
+        // Tells /api/stripe/session this session's owner holds a SIGNED
+        // pending_session cookie (no legacy bare-cookie fallback for it).
+        [PENDING_COOKIE_MARKER_KEY]: PENDING_COOKIE_MARKER_VALUE,
         ...(freeShippingDiscountCents > 0
           ? { freeShippingDiscountCents: String(freeShippingDiscountCents) }
           : {}),
@@ -1050,13 +1450,62 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Linked option values of configured lines (a charm that is its own
+    // stocked product) are held exactly like cart lines — same three
+    // branches, pool holds folded into the pool's entry — so the webhook's
+    // consume step drops their reservedQty with everything else, and every
+    // release path (expiry, failure, sweep) gives them back.
+    for (const line of configured.values()) {
+      const qty = Number(itemList[line.lineIndex]!.quantity) || 1;
+      for (const component of line.components) {
+        appendHold(
+          reservationEntries,
+          holdForTarget(component, component.qtyPerUnit * qty, stockRows),
+        );
+      }
+    }
+
+    // The builds themselves, keyed by the server line key on each Stripe
+    // line's `metadata.lineConfig`. The full priced snapshot is stored (not
+    // just the ids) so the webhook copies it verbatim and never re-prices
+    // against a definition the owner may have edited since. A configured
+    // cart therefore always gets a reservation row, even with nothing
+    // tracked (same precedent as the discount-only row below).
+    const lineConfigs: StoredLineConfigs | null =
+      configured.size > 0
+        ? Object.fromEntries(
+            [...configured.values()].map((line) => [
+              line.serverKey,
+              { selection: line.selection, snapshot: line.snapshot },
+            ]),
+          )
+        : null;
+
+    // A verified discount code holds one use for this checkout, like a unit of
+    // stock: `reserveInventory` claims it atomically (usageCount + 1 under
+    // usageLimit), releasing the reservation gives it back, and consuming it
+    // when the order is created makes it final (the webhook then skips its
+    // own increment). Counting from checkout start matters for delayed (bank)
+    // payments, which stay open for days — otherwise every pending checkout
+    // could redeem a single-use code. A cart with no tracked stock still gets
+    // a reservation row for this entry alone; that row only feeds the
+    // `stripeSessionId` lookup the webhook already does, and the session's
+    // `expires_at` is aligned to the 30-minute window for every cart anyway.
+    if (verifiedDiscountCodeId) {
+      reservationEntries.push({
+        discountCodeId: verifiedDiscountCodeId,
+        customerEmail: normalizeEmail(customerInfo.email),
+        qty: 1,
+      });
+    }
+
     // Reserve inventory and create an InventoryReservation record before
     // creating the Stripe session. If the reserve fails (race), treat it as
-    // out-of-stock.
+    // out-of-stock — or, for the discount entry, as a used-up code.
     const RESERVATION_SECONDS = 30 * 60; // 30 minutes
     let reservationId: string | null = null;
 
-    if (reservationEntries.length > 0) {
+    if (reservationEntries.length > 0 || lineConfigs) {
       try {
         // Throwing OutOfStockError on a failed reserve forces Prisma to roll
         // back the whole transaction, including any reservedQty increments made
@@ -1067,7 +1516,11 @@ export async function POST(req: NextRequest) {
             entries: reservationEntries,
             businessId: business.id,
           });
-          if (!result.ok) throw new OutOfStockError();
+          if (!result.ok) {
+            throw result.reason === "discount"
+              ? new DiscountExhaustedError()
+              : new OutOfStockError();
+          }
 
           const res = await tx.inventoryReservation.create({
             data: {
@@ -1075,33 +1528,48 @@ export async function POST(req: NextRequest) {
               status: "active",
               expiresAt: new Date(Date.now() + RESERVATION_SECONDS * 1000),
               items: reservationEntries,
+              ...(lineConfigs
+                ? { lineConfigs: lineConfigs as Prisma.InputJsonValue }
+                : {}),
             },
             select: { id: true },
           });
           return res.id;
         });
       } catch (reserveErr) {
+        if (reserveErr instanceof DiscountExhaustedError) {
+          // Not reported, like the validation rejections above: the code's
+          // last use went to another checkout a moment ago. Same wording as
+          // `validateAndComputeDiscount`'s usage-limit rejection.
+          return NextResponse.json(
+            { error: "This discount code has reached its usage limit" },
+            { status: 400 },
+          );
+        }
         if (reserveErr instanceof OutOfStockError) {
           // Not reported: this is the race where another shopper's reservation
           // won between the availability check above and this transaction.
           // Correct, expected behavior on a store selling the last unit — the
           // system is protecting stock, not failing. The owner-fault causes of
           // an unsellable cart were already reported at the availability check.
+          //
+          // The failed claim doesn't say WHICH line lost, so re-read stock
+          // (the transaction rolled back, so neither this cart's holds nor its
+          // discount use are counted) and reject only the lines that are now
+          // short — the client removes exactly those (`rejectUnavailable`
+          // stays silent on pure scarcity). If the re-read finds
+          // nothing short (the competing hold already went away), no line is
+          // named: the client keeps the cart and shows the message.
+          const fresh = await assessCart(await loadCart());
+          if (fresh.availability.unavailableItems.length > 0) {
+            return rejectUnavailable(fresh.availability);
+          }
           return NextResponse.json(
             {
               error:
-                "Some items in your cart are out of stock or no longer available. Please update your cart and try again.",
-              unavailableItems: itemList.map((i) =>
-                i.variantName
-                  ? `${i.productName} (${i.variantName})`
-                  : i.productName,
-              ),
-              unavailableItemIds: itemList.map((i) => ({
-                productId: i.productId,
-                variantId: i.variantId ?? null,
-              })),
+                "Stock changed while you were checking out. Please try again.",
             },
-            { status: 400 },
+            { status: 409 },
           );
         }
         throw reserveErr;
@@ -1134,11 +1602,18 @@ export async function POST(req: NextRequest) {
         const idToRelease = reservationId;
         try {
           await db.$transaction(async (tx) => {
-            await releaseReservation(tx, { items: reservationEntries });
-            await tx.inventoryReservation.update({
-              where: { id: idToRelease },
+            // Same conditional flip as every other settlement path, so the
+            // hold (stock + discount use) is given back exactly once.
+            const flipped = await tx.inventoryReservation.updateMany({
+              where: { id: idToRelease, status: "active" },
               data: { status: "released" },
             });
+            if (flipped.count === 0) return;
+            await releaseReservation(
+              tx,
+              { items: reservationEntries },
+              { mode: "release" },
+            );
           });
         } catch (releaseErr) {
           console.error(
@@ -1181,11 +1656,23 @@ export async function POST(req: NextRequest) {
           data: { stripeSessionId: session.id },
         });
       } catch (attachErr) {
-        // Non-fatal — webhook will fall back to metadata.reservationId
+        // Non-fatal — webhook will fall back to metadata.reservationId. But
+        // the shopper's next checkout cannot supersede this one (that lookup
+        // is by stripeSessionId only), so its hold simply lapses at the
+        // 30-minute expiry — worth knowing about if it ever recurs.
         console.warn(
           "[create-session] Failed to attach stripeSessionId to reservation:",
           attachErr,
         );
+        Sentry.captureException(attachErr, {
+          level: "warning",
+          tags: {
+            route: "stripe.create-session",
+            "inventory.step": "attach-session-to-reservation",
+            businessId: business.id,
+          },
+          extra: { reservationId, stripeSessionId: session.id },
+        });
       }
     }
 
@@ -1193,13 +1680,21 @@ export async function POST(req: NextRequest) {
       sessionUrl: session.url,
       sessionId: session.id,
     });
-    response.cookies.set("pending_session", session.id, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 3600,
-    });
+    // Signed (`<sessionId>.<hmac>`, bound to this business): the session id
+    // itself is visible in Stripe URLs, and the supersede above expires and
+    // releases whatever session this cookie names — see
+    // pending-session-cookie.ts.
+    response.cookies.set(
+      PENDING_SESSION_COOKIE,
+      signPendingSessionCookie(session.id, business.id),
+      {
+        path: "/",
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: PENDING_SESSION_COOKIE_MAX_AGE,
+      },
+    );
     return response;
   } catch (error: unknown) {
     console.error("Create checkout session error:", error);

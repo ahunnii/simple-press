@@ -3,7 +3,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 // Verbatim headings from theluvgluv.com/contact-us. Keys: glove.contact.<name>.
-// The live FAQ answers are entered by the owner as Content → FAQ questions.
+// The live FAQ answers are entered by the owner as Site Setup → FAQ questions.
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────
 
@@ -12,7 +12,7 @@ const contactFaqData: TemplateField[] = [
     key: "glove.contact.faq-heading",
     label: "Heading",
     description:
-      "Heading above the link to your FAQ page. The section stays out of view until at least one question is published (Content → FAQ).",
+      "Heading above the link to your FAQ page. The section stays out of view until at least one question is published (Site Setup → FAQ).",
     type: "text",
     page: "contact",
     group: "contact.faq",

@@ -81,6 +81,8 @@ export type EditorTopBarProps = {
   hasUnpublishedChanges: boolean;
   /** True while the publish mutation is running. */
   isPublishing: boolean;
+  /** True while a rich-text image/video upload is in flight — Publish waits. */
+  isUploading?: boolean;
   /** True while a draft flush is scheduled or in-flight (gates Exit confirm). */
   flushPending: boolean;
   /**
@@ -151,6 +153,7 @@ export function EditorTopBar({
   onDeviceChange,
   hasUnpublishedChanges,
   isPublishing,
+  isUploading = false,
   flushPending,
   mutationPending,
   saveFailed,
@@ -341,11 +344,17 @@ export function EditorTopBar({
           type="button"
           size="sm"
           className="shrink-0"
-          disabled={!hasUnpublishedChanges || isPublishing}
+          disabled={!hasUnpublishedChanges || isPublishing || isUploading}
           onClick={onPublish}
         >
-          {isPublishing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {isPublishing ? "Publishing…" : "Publish"}
+          {(isPublishing || isUploading) && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          )}
+          {isPublishing
+            ? "Publishing…"
+            : isUploading
+              ? "Uploading…"
+              : "Publish"}
         </Button>
 
         <DropdownMenu>
@@ -574,11 +583,17 @@ export function EditorTopBar({
         <Button
           type="button"
           size="sm"
-          disabled={!hasUnpublishedChanges || isPublishing}
+          disabled={!hasUnpublishedChanges || isPublishing || isUploading}
           onClick={onPublish}
         >
-          {isPublishing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {isPublishing ? "Publishing…" : "Publish"}
+          {(isPublishing || isUploading) && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          )}
+          {isPublishing
+            ? "Publishing…"
+            : isUploading
+              ? "Uploading…"
+              : "Publish"}
         </Button>
       </div>
 

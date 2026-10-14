@@ -1,6 +1,17 @@
 import { z } from "zod";
 
+import type { DayCode } from "~/lib/business-hours";
 import { DAY_CODES } from "~/lib/business-hours";
+
+const DAY_SHORT_LABEL: Record<DayCode, string> = {
+  mon: "Mon",
+  tue: "Tue",
+  wed: "Wed",
+  thu: "Thu",
+  fri: "Fri",
+  sat: "Sat",
+  sun: "Sun",
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Per-row schema
@@ -70,7 +81,7 @@ export const businessHoursSchema = z
         if (existingIdx !== undefined) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Day "${day}" appears in more than one row (rows ${existingIdx + 1} and ${i + 1})`,
+            message: `${DAY_SHORT_LABEL[day]} appears in more than one row (rows ${existingIdx + 1} and ${i + 1})`,
             path: [i, "days"],
           });
         } else {

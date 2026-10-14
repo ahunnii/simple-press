@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
@@ -54,6 +54,20 @@ export function DarkTrendProductPage({
     isOnSale,
     displayCompareAtPrice,
   } = useProduct(product);
+
+  // Live configured price from the actions panel (product options); null for
+  // a product without a customizer, which keeps the base price display.
+  const [configured, setConfigured] = useState<{
+    price: number;
+    compareAtPrice: number | null;
+  } | null>(null);
+  const shownPrice = configured?.price ?? displayPrice;
+  const shownCompareAt = configured
+    ? configured.compareAtPrice
+    : isOnSale
+      ? displayCompareAtPrice
+      : null;
+  const shownOnSale = shownCompareAt != null && shownCompareAt > shownPrice;
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -145,19 +159,24 @@ export function DarkTrendProductPage({
 
             {/* Price */}
             <div className="mb-8 flex items-center gap-3">
-              {isOnSale && displayCompareAtPrice && (
+              {shownOnSale && shownCompareAt != null && (
                 <span className="bg-primary inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold">
-                  {computeSavingsLabel(displayPrice, displayCompareAtPrice)}
+                  {computeSavingsLabel(shownPrice, shownCompareAt)}
                 </span>
               )}
 
               <div className="flex items-baseline gap-2">
-                <span className="text-foreground text-3xl font-semibold">
-                  {formatPrice(displayPrice)}
+                <span
+                  className="text-foreground text-3xl font-semibold"
+                  // Announce the build's price as options change it.
+                  aria-live={configured ? "polite" : undefined}
+                  aria-atomic={configured ? "true" : undefined}
+                >
+                  {formatPrice(shownPrice)}
                 </span>
-                {isOnSale && displayCompareAtPrice && (
+                {shownOnSale && shownCompareAt != null && (
                   <span className="text-muted-foreground text-xl line-through">
-                    {formatPrice(displayCompareAtPrice)}
+                    {formatPrice(shownCompareAt)}
                   </span>
                 )}
               </div>
@@ -174,6 +193,7 @@ export function DarkTrendProductPage({
                   f["dark-trend.product.coming-soon-heading"] ?? ""
                 }
                 comingSoonBody={f["dark-trend.product.coming-soon-body"] ?? ""}
+                onConfiguredPriceChange={setConfigured}
               />
 
               {/* Trust / Feature badges */}

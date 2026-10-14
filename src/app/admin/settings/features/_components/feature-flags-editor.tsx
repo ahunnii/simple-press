@@ -30,7 +30,7 @@ type Props = {
 
 export function FeatureFlagsEditor({ initialFlags }: Props) {
   const router = useRouter();
-  const { isEnabled, isDisabledByDependency, getDependencyLabel } =
+  const { isEnabled, isDisabledByDependency, getBlockingLabels } =
     useFeatureFlags({
       flags: initialFlags,
     });
@@ -90,7 +90,7 @@ export function FeatureFlagsEditor({ initialFlags }: Props) {
                 {featuresInCategory.map((feature) => {
                   const enabled = isEnabled(feature.key);
                   const blockedByDep = isDisabledByDependency(feature.key);
-                  const depLabel = getDependencyLabel(feature.key);
+                  const blockers = getBlockingLabels(feature.key);
 
                   return (
                     <div
@@ -108,12 +108,15 @@ export function FeatureFlagsEditor({ initialFlags }: Props) {
                                   className="gap-1 text-xs"
                                 >
                                   <Info className="h-3 w-3" />
-                                  Requires {depLabel}
+                                  Requires {blockers.join(", ")}
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent>
-                                Enable &quot;{depLabel}&quot; first to use this
-                                feature
+                                Enable{" "}
+                                {blockers
+                                  .map((label) => `"${label}"`)
+                                  .join(" and ")}{" "}
+                                first to use this feature
                               </TooltipContent>
                             </Tooltip>
                           )}

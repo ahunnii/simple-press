@@ -1,7 +1,11 @@
+import type { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { GalleryExternalUsage } from "~/lib/media/usage";
+import type { TxClient } from "~/server/db";
+import { scrubGalleryIdsFromCustomFields } from "~/lib/media/scrub-custom-fields";
 import {
   buildGalleryExternalUsage,
   buildUsedMediaIndex,
@@ -106,6 +110,62 @@ async function deleteUnreferencedGalleryObjects(
   if (toDelete.length > 0) await deleteStoredObjects(toDelete);
 }
 
+/** "Modern template · Featured gallery (About)" — shared by the CONFLICT message and the `usage` query. */
+function formatGalleryUsage(u: GalleryExternalUsage): string {
+  return u.location + (u.entityLabel ? ` (${u.entityLabel})` : "");
+}
+
+/**
+ * Scrub gallery IDs out of a business's `SiteContent.customFields` /
+ * `previewCustomFields` — the gallery counterpart of
+ * `scrubMediaUrlsFromSiteContent` in `~/server/media/library`, used by
+ * `gallery.delete` to clear embeds left behind in fields of a template the
+ * owner switched away from (the `inactiveTemplate` flag in `~/lib/media/usage`).
+ *
+ * Callers MUST only pass galleries whose every external usage is
+ * `inactiveTemplate`: the scrub is blob-wide, not template-scoped (see
+ * `scrubGalleryIdsFromCustomFields`'s contract), so scrubbing a gallery with
+ * an active embed would blank live content. `gallery.delete` only reaches this
+ * after confirming zero ACTIVE usages.
+ *
+ * One read, at most one write — a no-op (no SiteContent row, or neither blob
+ * changed) issues zero writes.
+ */
+async function scrubGalleryIdsFromSiteContent(
+  db: TxClient,
+  businessId: string,
+  ids: ReadonlySet<string>,
+): Promise<void> {
+  if (ids.size === 0) return;
+
+  const siteContent = await db.siteContent.findUnique({
+    where: { businessId },
+    select: { customFields: true, previewCustomFields: true },
+  });
+  if (!siteContent) return;
+
+  const scrubbedCustom = scrubGalleryIdsFromCustomFields(
+    siteContent.customFields,
+    ids,
+  );
+  const scrubbedPreview = scrubGalleryIdsFromCustomFields(
+    siteContent.previewCustomFields,
+    ids,
+  );
+
+  if (!scrubbedCustom.changed && !scrubbedPreview.changed) return;
+
+  const data: Prisma.SiteContentUpdateInput = {};
+  if (scrubbedCustom.changed) {
+    data.customFields = scrubbedCustom.value as Prisma.InputJsonValue;
+  }
+  if (scrubbedPreview.changed) {
+    data.previewCustomFields = scrubbedPreview.value as Prisma.InputJsonValue;
+  }
+
+  await db.siteContent.update({ where: { businessId }, data });
+}
+
 export const galleryRouter = createTRPCRouter({
   list: ownerAdminProcedure
     .use(featureGate("galleries"))
@@ -123,25 +183,39 @@ export const galleryRouter = createTRPCRouter({
 
   // Which galleries are embedded outside their own image listing (gallery-type
   // template fields, TipTap `gallery` nodes) — powers the admin "Embedded"
-  // badge. Shares buildGalleryExternalUsage with the delete guard so the two
-  // can never drift: a gallery present here is exactly a gallery `delete`
-  // would refuse to remove.
+  // badge and the two-branch delete dialog. Shares buildGalleryExternalUsage
+  // with the delete guard so the two can never drift: a gallery with
+  // `count > 0` here is exactly a gallery `delete` would refuse to remove.
+  //
+  // Embeds are split the same way `delete` splits them: `count`/`locations`
+  // are ACTIVE embeds (they block deletion); `inactiveCount`/
+  // `inactiveLocations` are leftover field values of templates the owner
+  // switched away from (reported, don't block — `delete` scrubs them).
   usage: ownerAdminProcedure
     .use(featureGate("galleries"))
     .query(async ({ ctx }) => {
       const usage = await buildGalleryExternalUsage(ctx.businessId);
-      // Plain record, not a Map — lean JSON; absent key = not embedded.
-      const result: Record<string, { count: number; locations: string[] }> = {};
+      // Plain record, not a Map — lean JSON; absent key = not referenced
+      // anywhere (active or inactive).
+      const result: Record<
+        string,
+        {
+          count: number;
+          locations: string[];
+          inactiveCount: number;
+          inactiveLocations: string[];
+        }
+      > = {};
       for (const [galleryId, usages] of usage) {
+        const active = usages.filter((u) => !u.inactiveTemplate);
+        const inactive = usages.filter((u) => u.inactiveTemplate);
         result[galleryId] = {
-          count: usages.length,
+          count: active.length,
           // Same formatting as the delete guard's CONFLICT message; cap at
-          // 5, the client renders "and N more" from count.
-          locations: usages
-            .slice(0, 5)
-            .map(
-              (u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""),
-            ),
+          // 5, the client renders "and N more" from the counts.
+          locations: active.slice(0, 5).map(formatGalleryUsage),
+          inactiveCount: inactive.length,
+          inactiveLocations: inactive.slice(0, 5).map(formatGalleryUsage),
         };
       }
       return result;
@@ -275,19 +349,24 @@ export const galleryRouter = createTRPCRouter({
       // block: deleting the gallery leaves those intact, and
       // deleteUnreferencedGalleryObjects below keeps the shared file. Shares
       // its lookup with the `usage` query above — the two can never drift.
+      //
+      // Only ACTIVE embeds block (matching the Media Library's `deleteMedia`):
+      // an embed flagged `inactiveTemplate` is a leftover field value of a
+      // template the owner switched away from, which they have no UI to
+      // clear. Those are scrubbed out of SiteContent in the same transaction
+      // as the delete, so a reactivated template falls back to its defaults.
+      let hasInactiveEmbeds = false;
       if (gallery) {
         const externalUsageByGallery =
           await buildGalleryExternalUsage(businessId);
         const list = externalUsageByGallery.get(id) ?? [];
+        const active = list.filter((u) => !u.inactiveTemplate);
+        hasInactiveEmbeds = list.length > active.length;
 
-        if (list.length > 0) {
-          const summary = list
-            .slice(0, 5)
-            .map(
-              (u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""),
-            )
-            .join(", ");
-          const more = list.length > 5 ? ` and ${list.length - 5} more` : "";
+        if (active.length > 0) {
+          const summary = active.slice(0, 5).map(formatGalleryUsage).join(", ");
+          const more =
+            active.length > 5 ? ` and ${active.length - 5} more` : "";
 
           throw new TRPCError({
             code: "CONFLICT",
@@ -296,8 +375,16 @@ export const galleryRouter = createTRPCRouter({
         }
       }
 
-      await ctx.db.gallery.delete({
-        where: { id, businessId },
+      // DB before storage, scrub + delete atomically: a template field can
+      // never be left pointing at a deleted gallery, and a failed delete
+      // never leaves the fields scrubbed.
+      await ctx.db.$transaction(async (tx) => {
+        if (hasInactiveEmbeds) {
+          await scrubGalleryIdsFromSiteContent(tx, businessId, new Set([id]));
+        }
+        await tx.gallery.delete({
+          where: { id, businessId },
+        });
       });
 
       // Clean up S3 objects — best-effort, after the DB delete (the helper's
@@ -436,10 +523,17 @@ export const galleryRouter = createTRPCRouter({
     .input(galleryUpdateImageSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { id, ...data } = input;
+      const { id, altText, caption } = input;
+      // Blank clears the field (stored as null so storefront `?? fallback`
+      // works); undefined means the field was omitted and stays unchanged.
+      const blankToNull = (v: string | undefined) => {
+        if (v === undefined) return undefined;
+        const trimmed = v.trim();
+        return trimmed === "" ? null : trimmed;
+      };
       const image = await ctx.db.galleryImage.update({
         where: { id, gallery: { businessId } },
-        data,
+        data: { altText: blankToNull(altText), caption: blankToNull(caption) },
       });
       return { data: image, message: "Image updated successfully!" };
     }),

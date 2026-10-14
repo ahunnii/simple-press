@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { orderOptionsHint } from "~/lib/customizer/display";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { requireAdminAccess } from "~/lib/require-admin-access";
@@ -35,16 +37,20 @@ export default async function CustomerDetailPage({ params }: Props) {
   // `membershipRole` — which is what decides whether the Rewards card's
   // "Adjust points" control renders. Matches /admin/orders/[id]/page.tsx's
   // use of it.
-  const [customer, { membershipRole }] = await Promise.all([
+  const [customer, { membershipRole }, { isEnabled }] = await Promise.all([
     api.customer.getById(id).catch(rethrowTrpcForErrorBoundary),
     requireAdminAccess(),
+    getBusinessFlags(),
   ]);
 
   if (!customer) {
     notFound();
   }
 
-  const canAdjustLoyalty = membershipRole !== "STAFF";
+  // Staff are fulfillment-only: loyalty adjustments, notes and anonymize are
+  // all ownerAdmin-tier server-side.
+  const canManage = membershipRole !== "STAFF";
+  const canAdjustLoyalty = canManage;
 
   const name =
     [customer.firstName, customer.lastName].filter(Boolean).join(" ") || null;
@@ -107,6 +113,9 @@ export default async function CustomerDetailPage({ params }: Props) {
                     // `hasOversell`, so the Oversold badge simply never
                     // showed on a customer's order history before either.
                     hasOversell: false,
+                    optionsHint: orderOptionsHint(
+                      items.map((item) => item.customization),
+                    ),
                   }),
                 )}
               />
@@ -170,6 +179,7 @@ export default async function CustomerDetailPage({ params }: Props) {
             <CustomerLoyaltyCard
               customerId={customer.id}
               canAdjust={canAdjustLoyalty}
+              loyaltyEnabled={isEnabled("loyalty")}
             />
 
             <CustomerInvoicesCard
@@ -177,7 +187,11 @@ export default async function CustomerDetailPage({ params }: Props) {
               customerEmail={customer.email}
             />
 
-            <CustomerNotes customerId={customer.id} notes={customer.notes} />
+            {/* The server returns `notes: null` to Staff, so rendering the
+                card would falsely read "No notes". */}
+            {canManage && (
+              <CustomerNotes customerId={customer.id} notes={customer.notes} />
+            )}
 
             <CustomerPrivacyActions
               customer={{
@@ -185,6 +199,7 @@ export default async function CustomerDetailPage({ params }: Props) {
                 deletionRequestedAt: customer.deletionRequestedAt,
                 anonymizedAt: customer.anonymizedAt,
               }}
+              canAnonymize={canManage}
             />
           </div>
         </div>

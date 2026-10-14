@@ -73,7 +73,7 @@ type ConnectionStatus =
 function connectErrorMessage(err: QuickBooksConnectError): string {
   switch (err.code) {
     case "not_configured":
-      return "QuickBooks isn't configured on this platform yet. Ask your SimplePress administrator to add the Intuit app credentials.";
+      return "QuickBooks isn't set up for your store yet. Contact us at help@generativejustice.org and we'll set it up.";
     case "feature_disabled":
       return "QuickBooks isn't enabled for this store.";
     case "forbidden":
@@ -229,8 +229,14 @@ export function QuickBooksSettings({ businessId, data }: Props) {
           {status === "not_configured" && (
             <>
               <p className="text-muted-foreground text-sm">
-                QuickBooks isn&apos;t configured on this platform yet. Ask your
-                SimplePress administrator to add the Intuit app credentials.
+                QuickBooks isn&apos;t set up for your store yet. Contact us at{" "}
+                <a
+                  href="mailto:help@generativejustice.org"
+                  className="text-primary underline underline-offset-2"
+                >
+                  help@generativejustice.org
+                </a>{" "}
+                and we&apos;ll set it up.
               </p>
               <Button disabled>Connect QuickBooks</Button>
             </>

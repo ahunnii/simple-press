@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { Download } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { StoreTransferClient } from "~/components/store-transfer/store-transfer-client";
@@ -6,8 +6,6 @@ import { StoreTransferClient } from "~/components/store-transfer/store-transfer-
 interface BusinessContentTransferCardProps {
   businessId: string;
   businessName: string;
-  /** Whether the `wordpressExport` feature flag is on for this business. */
-  wordpressExportEnabled: boolean;
 }
 
 /**
@@ -18,7 +16,6 @@ interface BusinessContentTransferCardProps {
 export function BusinessContentTransferCard({
   businessId,
   businessName,
-  wordpressExportEnabled,
 }: BusinessContentTransferCardProps) {
   return (
     <section className="space-y-4" aria-labelledby="site-content-heading">
@@ -32,17 +29,21 @@ export function BusinessContentTransferCard({
             fields, media and other content.
           </p>
         </div>
-        {wordpressExportEnabled && (
+        <div className="flex flex-col items-start gap-1 sm:items-end">
           <Button variant="outline" size="sm" asChild>
             <a
-              href={`/api/admin/wordpress-export?businessId=${encodeURIComponent(businessId)}`}
+              href={`/api/admin/site-export?businessId=${encodeURIComponent(businessId)}`}
               download
             >
-              <FileText className="mr-2 h-4 w-4" aria-hidden />
-              Export to WordPress
+              <Download className="mr-2 h-4 w-4" aria-hidden />
+              Download site export
             </a>
           </Button>
-        )}
+          <p className="text-muted-foreground max-w-xs text-xs sm:text-right">
+            The same organized download the owner gets — works even if the
+            store is suspended
+          </p>
+        </div>
       </div>
       <StoreTransferClient
         isPlatformAdmin

@@ -65,6 +65,7 @@ export function HappyBambooCheckoutForm({
     setDiscountCodeInput,
 
     discountAmount,
+    discountFreeShipping,
     discountCodeLabel,
     discountFieldError,
     setDiscountFieldError,
@@ -239,6 +240,14 @@ export function HappyBambooCheckoutForm({
                   {discountCodeLabel}
                 </span>{" "}
                 applied.
+              </p>
+            )}
+            {discountCodeLabel && discountFreeShipping && (
+              <p className="text-sm text-green-600">
+                Free shipping applied:{" "}
+                <span className="font-mono font-semibold">
+                  {discountCodeLabel}
+                </span>
               </p>
             )}
           </fieldset>

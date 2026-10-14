@@ -602,4 +602,271 @@ describe("store transfer round-trip", () => {
     });
     expect(aBiz.maintenanceImage).toBe(flyerUrl);
   });
+  describe("product option groups", () => {
+    async function seedOptions() {
+      const a = await createBusiness({ name: "Source A" });
+      const glove = await db.product.create({
+        data: { businessId: a.id, name: "Glove", slug: "glove", price: 5000 },
+      });
+      const charm = await db.product.create({
+        data: {
+          businessId: a.id,
+          name: "Star charm",
+          slug: "star-charm",
+          price: 3500,
+          published: false,
+          variants: {
+            create: [{ name: "Gold", options: { color: "Gold" } }],
+          },
+        },
+        include: { variants: true },
+      });
+      const charms = await db.productOptionGroup.create({
+        data: {
+          businessId: a.id,
+          name: "Charms",
+          adminLabel: "Glove charms",
+          helpText: "Pick up to three",
+          required: true,
+          minSelections: 1,
+          maxSelections: 3,
+          includedCount: 1,
+          display: "swatches",
+          values: {
+            create: [
+              {
+                label: "Star",
+                swatchColor: "#d4af37",
+                imageUrl: "https://example.com/star.png",
+                priceOverride: 3000,
+                linkedProductId: charm.id,
+                linkedVariantId: charm.variants[0]!.id,
+                sortOrder: 0,
+              },
+              { label: "Moon", priceDelta: 1200, sortOrder: 1 },
+              { label: "Retired", available: false, sortOrder: 2 },
+            ],
+          },
+        },
+      });
+      const engraving = await db.productOptionGroup.create({
+        data: {
+          businessId: a.id,
+          name: "Engraving",
+          kind: "text",
+          maxLength: 12,
+          placeholder: "Initials",
+          textPriceCents: 500,
+        },
+      });
+      await db.productOptionGroupOnProduct.createMany({
+        data: [
+          { productId: glove.id, groupId: engraving.id, sortOrder: 0 },
+          { productId: glove.id, groupId: charms.id, sortOrder: 1 },
+        ],
+      });
+      return { a, glove, charm, charms, engraving };
+    }
+
+    it("round-trips groups, values, links and attachments, idempotently", async () => {
+      const { a, charms } = await seedOptions();
+      const { manifestContent } = await collectStoreContent(a.id);
+      expect(manifestContent.optionGroups).toHaveLength(2);
+      const exportedCharms = manifestContent.optionGroups.find(
+        (g) => g.exportId === charms.id,
+      )!;
+      expect(exportedCharms.values[0]?.exportLinkedProductId).toBeTruthy();
+      expect(exportedCharms.values[0]?.exportLinkedVariantId).toBeTruthy();
+      expect(
+        manifestContent.products.find((p) => p.slug === "glove")
+          ?.optionGroupAttachments,
+      ).toHaveLength(2);
+
+      const b = await createBusiness({ name: "Target B" });
+      const zipBuffer = await buildZip(a.id);
+      const result = await importStoreBundle({
+        targetBusinessId: b.id,
+        zipBuffer,
+      });
+      expect(
+        result.warnings.filter((w) => !w.startsWith("Template changed")),
+      ).toEqual([]);
+
+      const bGlove = await db.product.findUniqueOrThrow({
+        where: { businessId_slug: { businessId: b.id, slug: "glove" } },
+      });
+      const bCharm = await db.product.findUniqueOrThrow({
+        where: { businessId_slug: { businessId: b.id, slug: "star-charm" } },
+        include: { variants: true },
+      });
+      const bGroups = await db.productOptionGroup.findMany({
+        where: { businessId: b.id },
+        include: { values: { orderBy: { sortOrder: "asc" } } },
+        orderBy: { name: "asc" },
+      });
+      expect(bGroups.map((g) => g.name)).toEqual(["Charms", "Engraving"]);
+      const [bCharms, bEngraving] = bGroups;
+      expect(bCharms).toMatchObject({
+        adminLabel: "Glove charms",
+        helpText: "Pick up to three",
+        required: true,
+        minSelections: 1,
+        maxSelections: 3,
+        includedCount: 1,
+        display: "swatches",
+      });
+      expect(bCharms!.values.map((v) => v.label)).toEqual([
+        "Star",
+        "Moon",
+        "Retired",
+      ]);
+      // Links remapped to the TARGET's product + variant, never the source's.
+      expect(bCharms!.values[0]).toMatchObject({
+        linkedProductId: bCharm.id,
+        linkedVariantId: bCharm.variants[0]!.id,
+        priceOverride: 3000,
+        swatchColor: "#d4af37",
+        imageUrl: "https://example.com/star.png",
+        available: true,
+      });
+      expect(bCharms!.values[1]).toMatchObject({
+        priceDelta: 1200,
+        linkedProductId: null,
+      });
+      expect(bCharms!.values[2]?.available).toBe(false);
+      expect(bEngraving).toMatchObject({
+        kind: "text",
+        maxLength: 12,
+        placeholder: "Initials",
+        textPriceCents: 500,
+      });
+
+      const attachments = await db.productOptionGroupOnProduct.findMany({
+        where: { productId: bGlove.id },
+        orderBy: { sortOrder: "asc" },
+      });
+      expect(attachments.map((x) => x.groupId)).toEqual([
+        bEngraving!.id,
+        bCharms!.id,
+      ]);
+
+      // Second import reuses rows (no duplicates).
+      await importStoreBundle({ targetBusinessId: b.id, zipBuffer });
+      expect(
+        await db.productOptionGroup.count({ where: { businessId: b.id } }),
+      ).toBe(2);
+      expect(
+        await db.productOptionValue.count({
+          where: { group: { businessId: b.id } },
+        }),
+      ).toBe(3);
+      expect(
+        await db.productOptionGroupOnProduct.count({
+          where: { productId: bGlove.id },
+        }),
+      ).toBe(2);
+    });
+
+    it("drops links whose target did not import and marks the value unavailable", async () => {
+      const { a, charm } = await seedOptions();
+      const b = await createBusiness({ name: "Target B" });
+
+      // Build the bundle, then strip the linked product from the manifest.
+      const { manifestContent, templateId, businessSlug } =
+        await collectStoreContent(a.id);
+      manifestContent.products = manifestContent.products.filter(
+        (p) => p.exportId !== charm.id,
+      );
+      const manifest: StoreTransferManifest = {
+        formatVersion: STORE_TRANSFER_FORMAT_VERSION,
+        exportedAt: new Date().toISOString(),
+        source: {
+          formatVersion: STORE_TRANSFER_FORMAT_VERSION,
+          businessId: a.id,
+          businessSlug,
+          templateId,
+          storageBase: "https://storage.test/bucket/",
+        },
+        media: [],
+        content: manifestContent,
+      };
+      const zip = new JSZip();
+      zip.file("manifest.json", JSON.stringify(manifest));
+      const result = await importStoreBundle({
+        targetBusinessId: b.id,
+        zipBuffer: await zip.generateAsync({ type: "nodebuffer" }),
+      });
+
+      expect(
+        result.warnings.some((w) =>
+          w.includes('Option value "Star" in group "Charms" lost its linked'),
+        ),
+      ).toBe(true);
+      const star = await db.productOptionValue.findFirstOrThrow({
+        where: { label: "Star", group: { businessId: b.id } },
+      });
+      expect(star.linkedProductId).toBeNull();
+      expect(star.linkedVariantId).toBeNull();
+      expect(star.available).toBe(false);
+    });
+
+    it("imports a pre-customizer manifest and leaves existing attachments alone", async () => {
+      const a = await createBusiness({ name: "Source A" });
+      await db.product.create({
+        data: { businessId: a.id, name: "Glove", slug: "glove", price: 5000 },
+      });
+      const b = await createBusiness({ name: "Target B" });
+      const bGlove = await db.product.create({
+        data: { businessId: b.id, name: "Glove", slug: "glove", price: 100 },
+      });
+      const keep = await db.productOptionGroup.create({
+        data: { businessId: b.id, name: "Keep me" },
+      });
+      await db.productOptionGroupOnProduct.create({
+        data: { productId: bGlove.id, groupId: keep.id },
+      });
+
+      // Strip the new keys exactly as an older export would lack them.
+      const { manifestContent, templateId, businessSlug } =
+        await collectStoreContent(a.id);
+      const legacyContent: Record<string, unknown> = { ...manifestContent };
+      delete legacyContent.optionGroups;
+      legacyContent.products = manifestContent.products.map((p) => {
+        const legacy: Record<string, unknown> = { ...p };
+        delete legacy.optionGroupAttachments;
+        return legacy;
+      });
+      const zip = new JSZip();
+      zip.file(
+        "manifest.json",
+        JSON.stringify({
+          formatVersion: STORE_TRANSFER_FORMAT_VERSION,
+          exportedAt: new Date().toISOString(),
+          source: {
+            formatVersion: STORE_TRANSFER_FORMAT_VERSION,
+            businessId: a.id,
+            businessSlug,
+            templateId,
+            storageBase: "https://storage.test/bucket/",
+          },
+          media: [],
+          content: legacyContent,
+        }),
+      );
+      const result = await importStoreBundle({
+        targetBusinessId: b.id,
+        zipBuffer: await zip.generateAsync({ type: "nodebuffer" }),
+      });
+
+      expect(result.errors).toEqual([]);
+      expect(
+        await db.productOptionGroupOnProduct.count({
+          where: { productId: bGlove.id, groupId: keep.id },
+        }),
+      ).toBe(1);
+      expect(
+        await db.productOptionGroup.count({ where: { businessId: b.id } }),
+      ).toBe(1);
+    });
+  });
 });

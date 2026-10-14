@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
+import { OrderItemOptions } from "~/components/customizer/order-item-options";
 
 import { BambooReveal } from "../shared/bamboo-reveal";
 import { BambooAccountLayout } from "./bamboo-account-layout";
@@ -60,6 +61,10 @@ export function BambooOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                             {item.variantName}
                           </p>
                         )}
+                        <OrderItemOptions
+                          customization={item.customization}
+                          className="mt-1 text-sm text-[var(--bamboo-ink-soft)]"
+                        />
                         <p className="mt-1 text-sm text-[var(--bamboo-muted)]">
                           Qty: {item.quantity} × {formatPrice(item.price)}
                         </p>

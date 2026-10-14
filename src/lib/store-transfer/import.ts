@@ -21,6 +21,10 @@ import type { LocalPresence } from "~/lib/seo/local-presence";
 import type { EmbedIdMaps } from "~/lib/store-transfer/rewrite";
 import type { ExportedBusiness } from "~/lib/store-transfer/types";
 import {
+  CUSTOMIZER_MAX_VALUES_PER_GROUP,
+  CUSTOMIZER_TEXT_MAX_LENGTH,
+} from "~/lib/customizer/types";
+import {
   normalizeMaintenanceMessage,
   normalizeMaintenanceText,
 } from "~/lib/maintenance-config";
@@ -42,7 +46,12 @@ import {
   rewriteTiptapDoc,
   rewriteUrl,
 } from "~/lib/store-transfer/rewrite";
+import {
+  stripEmptyPlaceholderNodes,
+  stripEmptyPlaceholdersInFields,
+} from "~/lib/tiptap/strip-empty-placeholders";
 import { parseStoredFormDefinition } from "~/lib/validators/form";
+import { OPTION_PRICE_MAX_CENTS } from "~/lib/validators/product-options";
 import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 import { parseManifest } from "~/lib/validators/store-transfer";
 import { db } from "~/server/db";
@@ -76,6 +85,138 @@ function resolveImportedLocalPresence(biz: ExportedBusiness): LocalPresence {
     return parseLocalPresence(biz.localPresence);
   }
   return biz.localBusinessEnabled === true ? "storefront" : "none";
+}
+
+// ─── Product customizer number sanitizing ─────────────────────────────────────
+
+/**
+ * Bundle schemas accept any integer for option prices and counts, but the
+ * admin editor only allows 0..OPTION_PRICE_MAX_CENTS prices and sane counts.
+ * A hand-edited bundle must not store values the admin would reject: a
+ * negative `textPriceCents` would lower the item price at checkout.
+ */
+
+function clampInt(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+export function sanitizeOptionPrice(cents: number): number {
+  return clampInt(cents, 0, OPTION_PRICE_MAX_CENTS);
+}
+
+export interface OptionGroupNumbers {
+  kind: "choice" | "text";
+  minSelections: number;
+  maxSelections: number;
+  includedCount: number;
+  maxLength: number | null;
+  textPriceCents: number;
+}
+
+/**
+ * Clamp a group's counts and prices into the admin's ranges. Text groups get
+ * the same resets the admin's upsertGroup applies (no picks, one "pick",
+ * no included count). `changed` is true when any stored number differs.
+ */
+export function sanitizeOptionGroupNumbers(group: OptionGroupNumbers): {
+  value: OptionGroupNumbers;
+  changed: boolean;
+} {
+  const maxLength =
+    group.maxLength === null
+      ? null
+      : clampInt(group.maxLength, 1, CUSTOMIZER_TEXT_MAX_LENGTH);
+  const textPriceCents = sanitizeOptionPrice(group.textPriceCents);
+
+  let value: OptionGroupNumbers;
+  if (group.kind === "text") {
+    value = {
+      kind: "text",
+      minSelections: 0,
+      maxSelections: 1,
+      includedCount: 0,
+      maxLength,
+      textPriceCents,
+    };
+  } else {
+    const maxSelections = clampInt(
+      group.maxSelections,
+      1,
+      CUSTOMIZER_MAX_VALUES_PER_GROUP,
+    );
+    value = {
+      kind: "choice",
+      minSelections: clampInt(group.minSelections, 0, maxSelections),
+      maxSelections,
+      includedCount: clampInt(group.includedCount, 0, maxSelections),
+      maxLength,
+      textPriceCents,
+    };
+  }
+
+  const changed =
+    value.minSelections !== group.minSelections ||
+    value.maxSelections !== group.maxSelections ||
+    value.includedCount !== group.includedCount ||
+    value.maxLength !== group.maxLength ||
+    value.textPriceCents !== group.textPriceCents;
+  return { value, changed };
+}
+
+/**
+ * Resolve a bundle value's product/variant links against the imported ids.
+ * Any link that did not import drops the whole link. So does a variant
+ * without its product (the admin refine forbids that pairing), since the
+ * variant would otherwise be charged/decremented without its product.
+ */
+export function resolveOptionValueLinks(
+  value: {
+    exportLinkedProductId?: string | null;
+    exportLinkedVariantId?: string | null;
+  },
+  productMap: ReadonlyMap<string, string>,
+  variantMap: ReadonlyMap<string, string>,
+): {
+  linkedProductId: string | null;
+  linkedVariantId: string | null;
+  linkDropped: boolean;
+} {
+  let linkedProductId: string | null = null;
+  let linkedVariantId: string | null = null;
+  let linkDropped = false;
+
+  if (value.exportLinkedProductId) {
+    linkedProductId = productMap.get(value.exportLinkedProductId) ?? null;
+    if (!linkedProductId) linkDropped = true;
+  }
+  if (value.exportLinkedVariantId) {
+    linkedVariantId = variantMap.get(value.exportLinkedVariantId) ?? null;
+    if (!linkedVariantId || !value.exportLinkedProductId) linkDropped = true;
+  }
+  if (linkDropped) {
+    return { linkedProductId: null, linkedVariantId: null, linkDropped };
+  }
+  return { linkedProductId, linkedVariantId, linkDropped };
+}
+
+/**
+ * Clamp a value's prices. `priceOverride` only applies to a linked value
+ * (the admin refines this), so an unlinked value stores `null`.
+ */
+export function sanitizeOptionValuePrices(
+  value: { priceDelta: number; priceOverride?: number | null },
+  linked: boolean,
+): { priceDelta: number; priceOverride: number | null; changed: boolean } {
+  const priceDelta = sanitizeOptionPrice(value.priceDelta);
+  const original = value.priceOverride ?? null;
+  const priceOverride =
+    linked && original !== null ? sanitizeOptionPrice(original) : null;
+  return {
+    priceDelta,
+    priceOverride,
+    changed: priceDelta !== value.priceDelta || priceOverride !== original,
+  };
 }
 
 // ─── Bounded concurrency helper ───────────────────────────────────────────────
@@ -542,19 +683,25 @@ export async function importStoreBundle(args: {
   if (content.siteContent) {
     const sc = content.siteContent;
     try {
-      const rewrittenCustomFields = rewriteJsonValue(
-        sc.customFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      // Rich-text fields drop unfilled "Insert elements" placeholders, like
+      // every other owner write (see `stripEmptyPlaceholderNodes`).
+      const rewrittenCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          sc.customFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
-      const rewrittenPreviewCustomFields = rewriteJsonValue(
-        sc.previewCustomFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenPreviewCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          sc.previewCustomFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
       const rewrittenFeatures = rewriteJsonValue(
         sc.features,
@@ -837,6 +984,9 @@ export async function importStoreBundle(args: {
 
   // ── 3f. Products — upsert [businessId, slug] → productMap
   const productMap = new Map<string, string>(); // exportId → newId
+  // Variant exportId → new id. Used by the option-group step (3g2) to
+  // remap values linked to a specific variant.
+  const variantMap = new Map<string, string>();
 
   for (const prod of content.products) {
     try {
@@ -845,12 +995,14 @@ export async function importStoreBundle(args: {
           ? (baseUnitMap.get(prod.exportBaseInventoryUnitId) ?? null)
           : null;
 
-      const rewrittenAdditionalFields = rewriteJsonValue(
-        prod.additionalFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenAdditionalFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          prod.additionalFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
       // Absent in bundles exported before 2026-09-25.
       const subscriptionIntervals = toJsonOrUndefined(
@@ -988,6 +1140,7 @@ export async function importStoreBundle(args: {
         for (const variant of prod.variants) {
           const existingVariantId = variantByName.get(variant.name);
           if (existingVariantId) {
+            variantMap.set(variant.exportId, existingVariantId);
             await db.productVariant.update({
               where: { id: existingVariantId },
               data: {
@@ -1004,7 +1157,7 @@ export async function importStoreBundle(args: {
               },
             });
           } else {
-            await db.productVariant.create({
+            const createdVariant = await db.productVariant.create({
               data: {
                 productId: newId,
                 name: variant.name,
@@ -1019,7 +1172,9 @@ export async function importStoreBundle(args: {
                 inventoryQty: 0,
                 reservedQty: 0,
               },
+              select: { id: true },
             });
+            variantMap.set(variant.exportId, createdVariant.id);
           }
         }
       } catch (err) {
@@ -1112,15 +1267,223 @@ export async function importStoreBundle(args: {
     }
   }
 
+  // ── 3g2. Product customizer option groups, values and product attachments.
+  // Runs after products + variants so linked product/variant ids can be
+  // remapped. Groups match on (businessId, name, adminLabel); values match on
+  // label within the group (update-else-create, never deleting extras — the
+  // same non-destructive approach as variants). A value whose linked
+  // product/variant did not import loses the link AND is marked unavailable
+  // (a link-less value would otherwise be sold free, since its price came
+  // from the linked product). Absent in bundles exported before 2026-10-12
+  // (`content.optionGroups` defaults to []); a product with no
+  // `optionGroupAttachments` key keeps whatever the target already has.
+  const optionGroupMap = new Map<string, string>(); // exportId → newId
+  const matchedGroupIds = new Set<string>();
+  const CHOICE_DISPLAYS = new Set(["tiles", "swatches", "list"]);
+
+  for (const group of content.optionGroups) {
+    try {
+      const kind = group.kind === "text" ? "text" : "choice";
+      const display = CHOICE_DISPLAYS.has(group.display)
+        ? group.display
+        : "tiles";
+      const sanitizedGroup = sanitizeOptionGroupNumbers({
+        kind,
+        minSelections: group.minSelections,
+        maxSelections: group.maxSelections,
+        includedCount: group.includedCount,
+        maxLength: group.maxLength ?? null,
+        textPriceCents: group.textPriceCents,
+      });
+      let groupSanitized = sanitizedGroup.changed;
+      const groupNumbers = sanitizedGroup.value;
+      const groupData = {
+        name: group.name,
+        adminLabel: group.adminLabel ?? null,
+        helpText: group.helpText ?? null,
+        kind,
+        required: group.required,
+        minSelections: groupNumbers.minSelections,
+        maxSelections: groupNumbers.maxSelections,
+        includedCount: groupNumbers.includedCount,
+        display,
+        maxLength: groupNumbers.maxLength,
+        placeholder: group.placeholder ?? null,
+        textPriceCents: groupNumbers.textPriceCents,
+      };
+
+      const candidates = await db.productOptionGroup.findMany({
+        where: {
+          businessId: targetBusinessId,
+          name: group.name,
+          adminLabel: group.adminLabel ?? null,
+        },
+        select: { id: true },
+        orderBy: { createdAt: "asc" },
+      });
+      const existing = candidates.find((c) => !matchedGroupIds.has(c.id));
+
+      let groupId: string;
+      if (existing) {
+        await db.productOptionGroup.update({
+          where: { id: existing.id },
+          data: groupData,
+        });
+        groupId = existing.id;
+        track("ProductOptionGroup", false);
+      } else {
+        const created = await db.productOptionGroup.create({
+          data: { businessId: targetBusinessId, ...groupData },
+          select: { id: true },
+        });
+        groupId = created.id;
+        track("ProductOptionGroup", true);
+      }
+      matchedGroupIds.add(groupId);
+      optionGroupMap.set(group.exportId, groupId);
+
+      // Values: label → queue of existing ids (labels may repeat).
+      const existingValues = await db.productOptionValue.findMany({
+        where: { groupId },
+        select: { id: true, label: true },
+        orderBy: { createdAt: "asc" },
+      });
+      const valueQueue = new Map<string, string[]>();
+      for (const v of existingValues) {
+        const q = valueQueue.get(v.label) ?? [];
+        q.push(v.id);
+        valueQueue.set(v.label, q);
+      }
+
+      for (const value of group.values) {
+        try {
+          const links = resolveOptionValueLinks(value, productMap, variantMap);
+          const { linkedProductId, linkedVariantId } = links;
+          let available = value.available;
+
+          if (links.linkDropped) {
+            // The whole link is dropped (see resolveOptionValueLinks): a
+            // product without its variant would change which SKU is
+            // charged/decremented.
+            available = false;
+            result.warnings.push(
+              `Option value "${value.label}" in group "${group.name}" lost its linked product/variant (not part of this import) and was marked unavailable`,
+            );
+          }
+
+          // Prices are sanitized after link resolution: a dropped link
+          // also drops any override.
+          const sanitizedPrices = sanitizeOptionValuePrices(
+            value,
+            linkedProductId !== null,
+          );
+          if (sanitizedPrices.changed) groupSanitized = true;
+
+          const valueData = {
+            label: value.label,
+            imageUrl: value.imageUrl
+              ? rewriteUrl(value.imageUrl, urlMap)
+              : null,
+            swatchColor: value.swatchColor ?? null,
+            priceDelta: sanitizedPrices.priceDelta,
+            priceOverride: sanitizedPrices.priceOverride,
+            linkedProductId,
+            linkedVariantId,
+            available,
+            sortOrder: value.sortOrder,
+          };
+
+          const existingValueId = valueQueue.get(value.label)?.shift();
+          if (existingValueId) {
+            await db.productOptionValue.update({
+              where: { id: existingValueId },
+              data: valueData,
+            });
+            track("ProductOptionValue", false);
+          } else {
+            await db.productOptionValue.create({
+              data: { groupId, ...valueData },
+            });
+            track("ProductOptionValue", true);
+          }
+        } catch (err) {
+          result.warnings.push(
+            `Option value "${value.label}" in group "${group.name}" failed: ${String(err)}`,
+          );
+        }
+      }
+      if (groupSanitized) {
+        result.warnings.push(
+          `Option group "${group.name}" had invalid prices or limits that were corrected`,
+        );
+      }
+    } catch (err) {
+      result.warnings.push(
+        `Option group "${group.name}" failed: ${String(err)}`,
+      );
+    }
+  }
+
+  // Product ↔ group attachments. Only products that carry the key are
+  // touched; for those, the attachment set is replaced with the imported one.
+  for (const prod of content.products) {
+    if (prod.optionGroupAttachments === undefined) continue;
+    const newProductId = productMap.get(prod.exportId);
+    if (!newProductId) continue;
+    try {
+      const wanted = new Map<string, number>(); // new groupId → sortOrder
+      for (const att of prod.optionGroupAttachments) {
+        const groupId = optionGroupMap.get(att.exportGroupId);
+        if (!groupId) {
+          result.warnings.push(
+            `Option group attachment skipped for product "${prod.slug}" — group ${att.exportGroupId} did not import`,
+          );
+          continue;
+        }
+        wanted.set(groupId, att.sortOrder);
+      }
+      await db.productOptionGroupOnProduct.deleteMany({
+        where: {
+          productId: newProductId,
+          groupId: { notIn: [...wanted.keys()] },
+        },
+      });
+      for (const [groupId, sortOrder] of wanted) {
+        const existing = await db.productOptionGroupOnProduct.findUnique({
+          where: { productId_groupId: { productId: newProductId, groupId } },
+          select: { productId: true },
+        });
+        if (existing) {
+          await db.productOptionGroupOnProduct.update({
+            where: { productId_groupId: { productId: newProductId, groupId } },
+            data: { sortOrder },
+          });
+          track("ProductOptionGroupOnProduct", false);
+        } else {
+          await db.productOptionGroupOnProduct.create({
+            data: { productId: newProductId, groupId, sortOrder },
+          });
+          track("ProductOptionGroupOnProduct", true);
+        }
+      }
+    } catch (err) {
+      result.warnings.push(
+        `Option group attachments for "${prod.slug}" failed: ${String(err)}`,
+      );
+    }
+  }
+
   // ── 3h. Services + ServiceItems
   for (const svc of content.services) {
     try {
-      const rewrittenCustomFields = rewriteJsonValue(
-        svc.customFields,
-        urlMap,
-        galleryIdMap,
-        { templateId },
-        embedIdMaps,
+      const rewrittenCustomFields = stripEmptyPlaceholdersInFields(
+        rewriteJsonValue(
+          svc.customFields,
+          urlMap,
+          galleryIdMap,
+          { templateId },
+          embedIdMaps,
+        ),
       );
 
       const existing = await db.service.findUnique({
@@ -1238,11 +1601,10 @@ export async function importStoreBundle(args: {
   // ── 3i. Pages
   for (const page of content.pages) {
     try {
-      const rewrittenContent = rewriteTiptapDoc(
-        page.content,
-        urlMap,
-        galleryIdMap,
-        embedIdMaps,
+      // Unfilled "Insert elements" placeholders (embed/gallery/etc. with no
+      // id) are dropped on import too — see `stripEmptyPlaceholderNodes`.
+      const rewrittenContent = stripEmptyPlaceholderNodes(
+        rewriteTiptapDoc(page.content, urlMap, galleryIdMap, embedIdMaps),
       );
 
       // previewDraft is { title, excerpt, content } — only its `content` key
@@ -1265,11 +1627,8 @@ export async function importStoreBundle(args: {
         const draft = page.previewDraft as Record<string, unknown>;
         rewrittenPreviewDraft = {
           ...draft,
-          content: rewriteTiptapDoc(
-            draft.content,
-            urlMap,
-            galleryIdMap,
-            embedIdMaps,
+          content: stripEmptyPlaceholderNodes(
+            rewriteTiptapDoc(draft.content, urlMap, galleryIdMap, embedIdMaps),
           ),
         } as Prisma.InputJsonValue;
       } else {

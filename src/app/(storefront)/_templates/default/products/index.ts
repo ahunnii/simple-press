@@ -110,7 +110,7 @@ export const defaultProductData: TemplateField[] = [
     key: "default.product.details-label",
     label: "Details section title",
     description:
-      "Title of the first expandable section under the buy button on every product page, which shows the product's Additional Information.",
+      "Title of the first expandable section under the buy button on every product page, which shows the product's Additional information (Products → Product page tab).",
     type: "text",
     page: "product",
     group: "product.details",
@@ -122,13 +122,13 @@ export const defaultProductData: TemplateField[] = [
     key: "default.product.details-empty-text",
     label: "Details fallback text",
     description:
-      "Shown in the Details section on products with no Additional Information set in Products. Leave blank to hide the Details section on those products.",
+      "Shown in the Details section on products with no Additional information set (Products → Product page tab). Leave blank to hide the Details section on those products.",
     type: "textarea",
     page: "product",
     group: "product.details",
     gridColumn: "col-span-full",
     defaultValue:
-      "Materials, care instructions, and any other details about this product. Edit this from your product settings under 'Additional Information' in the admin panel.",
+      "Materials, care instructions, and any other details about this product. Add these in Products: open the product, then fill in Additional information on its Product page tab.",
     placeholder: "e.g. Hand wash cold. Made from recycled cotton.",
   },
   {

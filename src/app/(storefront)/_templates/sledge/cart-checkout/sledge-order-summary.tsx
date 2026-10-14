@@ -5,7 +5,8 @@ import { Loader2 } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { useCart } from "~/providers/cart-context";
+import { CartLineOptions } from "~/components/customizer/cart-line-options";
+import { cartItemId, useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
   deliveryMethod: "ship" | "pickup";
@@ -42,10 +43,7 @@ export function SledgeOrderSummary({
 
       <div className="flex flex-col gap-3 border-b border-[var(--sl-border)] px-6 py-5">
         {items.map((item) => (
-          <div
-            key={`${item.productId}-${item.variantId ?? "base"}`}
-            className="flex items-center gap-3"
-          >
+          <div key={cartItemId(item)} className="flex items-center gap-3">
             <div className="relative h-14 w-11 flex-shrink-0 overflow-hidden rounded-sm bg-[var(--sl-green)]">
               <Image
                 src={item.imageUrl ?? "/placeholder.svg"}
@@ -74,6 +72,11 @@ export function SledgeOrderSummary({
                   {item.variantName}
                 </p>
               ) : null}
+              <CartLineOptions
+                item={item}
+                showPrices={false}
+                className="sledge-line-options mt-0.5 font-sans text-[10px] tracking-[0.08em] text-[var(--sl-ink-soft)]"
+              />
               <p className="mt-0.5 font-sans text-[10px] tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
                 Qty: {item.quantity}
               </p>

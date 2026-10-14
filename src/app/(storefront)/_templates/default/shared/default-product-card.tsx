@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
@@ -34,9 +35,8 @@ export function DefaultProductCard({ product }: Props) {
   });
 
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
-  const productImageAlt = product.images[0]?.altText?.trim()
-    ? (product.images[0]?.altText ?? "")
-    : product.name;
+  const productImageAlt =
+    meaningfulAltText(product.images[0]?.altText) ?? product.name;
 
   return (
     // Relative wrapper keeps the wishlist button a sibling of the card link

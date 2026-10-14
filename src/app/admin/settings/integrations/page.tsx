@@ -1,4 +1,3 @@
-import { env } from "~/env";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getPaymentsHealth } from "~/lib/stripe/payments-health";
 import { api } from "~/trpc/server";
@@ -39,7 +38,6 @@ export default async function IntegrationsSettingsPage() {
       <IntegrationsSettings
         business={business}
         paymentsHealth={paymentsHealth}
-        umamiBaseUrl={env.UMAMI_BASE_URL}
         quickbooks={quickbooks}
       />
     </>

@@ -1,14 +1,21 @@
 import { Info } from "lucide-react";
 
-import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { GenericFeatureDisabledPage } from "~/components/shared/generic-feature-disabled-page";
 import { StoreTransferClient } from "~/components/store-transfer/store-transfer-client";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
 import { TrailHeader } from "../../_components/trail-header";
-import { WordPressExportClient } from "./_components/wordpress-export-client";
+import { SiteExportClient } from "./_components/site-export-client";
+
+const INCLUDED = [
+  "Every page, blog post and policy, as readable documents",
+  "Your products, with their photos and variants, as spreadsheets",
+  "All of your photos and files, organized into folders",
+  "Customer, order, discount and review records",
+  "Step-by-step guides for moving to WordPress, Shopify, Wix, Squarespace or Square",
+  "A complete backup of your site data, for safekeeping",
+];
 
 export default async function DataSettingsPage() {
   const { session, membershipRole } = await requireAdminAccess();
@@ -18,17 +25,7 @@ export default async function DataSettingsPage() {
   // lookup for them. Treat that null as full access rather than "not an
   // owner" — mirrors the `canManage` logic in settings/team/page.tsx.
   const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
-  const canExportToWordPress = isPlatformAdmin || membershipRole === "OWNER";
-
-  const flags = await getBusinessFlags();
-  const wordpressExportEnabled = flags.isEnabled("wordpressExport");
-
-  // Store Transfer is platform-admin-only, so with the WordPress flag off
-  // there is nothing on this page for a business user to see — fall back to
-  // the same disabled page the old /admin/settings/wordpress-export showed.
-  if (!wordpressExportEnabled && !isPlatformAdmin) {
-    return <GenericFeatureDisabledPage featureName="Export to WordPress" />;
-  }
+  const canDownloadSite = isPlatformAdmin || membershipRole === "OWNER";
 
   return (
     <>
@@ -44,41 +41,41 @@ export default async function DataSettingsPage() {
         <div className="admin-header">
           <div>
             <h1>Data &amp; Export</h1>
-            <p>Take your store content with you, in bulk</p>
+            <p>Your content is yours — download it any time</p>
           </div>
         </div>
 
-        {/* ── Export to WordPress ──────────────────────────────────────── */}
+        {/* ── Download your site ───────────────────────────────────────── */}
         <section className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">Export to WordPress</h2>
+            <h2 className="text-lg font-semibold">Download your site</h2>
             <p className="text-muted-foreground text-sm">
-              Download your store content in WordPress/WooCommerce import
-              formats
+              Everything on your site — pages, blog posts, products, photos,
+              customer and order records — in one organized folder, with
+              step-by-step guides for moving to WordPress, Shopify, Wix,
+              Squarespace or Square. Your content is yours; download it any
+              time.
             </p>
           </div>
 
-          {!wordpressExportEnabled ? (
-            // Only reachable as PLATFORM_ADMIN — business users already got
-            // the disabled page above.
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>
-                Export to WordPress is disabled for this business
-              </AlertTitle>
-              <AlertDescription>
-                Turn the feature on in Settings → Features to make this section
-                available to the store owner.
-              </AlertDescription>
-            </Alert>
-          ) : canExportToWordPress ? (
-            <WordPressExportClient isPlatformAdmin={isPlatformAdmin} />
+          {canDownloadSite ? (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium">What&apos;s included</h3>
+                <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-sm">
+                  {INCLUDED.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <SiteExportClient />
+            </div>
           ) : (
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Exporting your store is Owner-only</AlertTitle>
+              <AlertTitle>Downloading your site is Owner-only</AlertTitle>
               <AlertDescription>
-                Only the store owner can download a full export of the
+                Only the store owner can download a full copy of the
                 store&apos;s content, products, and customer records.
               </AlertDescription>
             </Alert>

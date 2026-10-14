@@ -19,7 +19,9 @@ import {
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { ShippingAddress } from "~/lib/orders/shipping-address";
 import type { FulfillmentFormValues } from "~/lib/validators/order";
+import { fulfillmentToast } from "~/lib/orders/fulfillment-email";
 import { fulfillmentFormSchema } from "~/lib/validators/order";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -35,12 +37,17 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import { CopyAddressButton } from "./copy-address-button";
+import { OrderItemOptions } from "./order-item-options";
+
 type OrderItemInfo = {
   id: string;
   productName: string;
   variantName: string | null;
   quantity: number;
   fulfilledQuantity: number;
+  /** `OrderItem.customization` — the build to pack (product customizer). */
+  customization?: unknown;
 };
 
 type Props = {
@@ -49,12 +56,19 @@ type Props = {
   customerEmail: string;
   customerName: string;
   items: OrderItemInfo[];
+  /** Enables "Copy address" beside the Pirate Ship link. */
+  shippingAddress?: ShippingAddress | null;
 };
 
 const remainingFor = (item: OrderItemInfo) =>
   Math.max(0, item.quantity - item.fulfilledQuantity);
 
-export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
+export function FulfillmentForm({
+  orderId,
+  customerEmail,
+  items,
+  shippingAddress,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -92,9 +106,16 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
   const isPartiallyFulfilled = items.some((item) => item.fulfilledQuantity > 0);
 
   const markFulfilled = api.order.markAsFulfilled.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast.dismiss();
-      toast.success("Fulfillment recorded and email sent to customer");
+      // Say what the customer was actually told — a partial shipment without
+      // tracking sends nothing, and a send can fail. See `fulfillmentToast`.
+      const { tone, title, description } = fulfillmentToast({
+        customerEmailSent: result.customerEmailSent,
+        customerEmailFailed: result.customerEmailFailed,
+        fullyFulfilled: result.fulfillmentStatus === "fulfilled",
+      });
+      toast[tone](title, description ? { description } : undefined);
       void utils.order.invalidate();
       router.refresh();
     },
@@ -265,25 +286,33 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
 
           {hasTracking && (
             <div className="space-y-4">
-              <div className="border-border flex items-center justify-between gap-3 rounded-lg border p-3">
+              <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
                 <p className="text-muted-foreground text-sm">
-                  Need a shipping label? Buy discounted postage on PirateShip.
+                  {shippingAddress
+                    ? "Need a shipping label? Copy the address, then buy discounted postage on Pirate Ship."
+                    : "Need a shipping label? Buy discounted postage on Pirate Ship."}
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  asChild
-                  className="shrink-0"
-                >
-                  <a
-                    href="https://www.pirateship.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open PirateShip
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
+                <div className="flex min-w-0 flex-wrap gap-2">
+                  {shippingAddress && (
+                    <CopyAddressButton
+                      address={shippingAddress}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-3 [&>span]:text-sm"
+                      label="Copy address"
+                    />
+                  )}
+                  <Button size="sm" variant="outline" asChild>
+                    <a
+                      href="https://ship.pirateship.com/ship/single"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open PirateShip
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </a>
+                  </Button>
+                </div>
               </div>
 
               {fields.map((field, index) => (
@@ -349,9 +378,13 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
               ) : (
                 <>
                   <Package className="mr-2 h-4 w-4" />
+                  {/* A partial shipment without tracking only emails if it
+                      completes the order — see the note above. */}
                   {shipAllRemaining || items.length === 0
                     ? "Mark as Fulfilled & Send Email"
-                    : "Fulfill Selected Items & Send Email"}
+                    : hasTracking
+                      ? "Fulfill Selected Items & Send Email"
+                      : "Fulfill Selected Items"}
                 </>
               )}
             </Button>
@@ -390,9 +423,16 @@ function PackageItemsSelector({
                   className="h-4 w-4 shrink-0 text-green-600"
                   aria-hidden="true"
                 />
-                <span className="truncate">
-                  {item.productName}
-                  {item.variantName ? ` — ${item.variantName}` : ""}
+                <span className="min-w-0">
+                  <span className="block truncate">
+                    {item.productName}
+                    {item.variantName ? ` — ${item.variantName}` : ""}
+                  </span>
+                  <OrderItemOptions
+                    customization={item.customization}
+                    showPrices={false}
+                    className="mt-0 text-xs"
+                  />
                 </span>
               </span>
               <span className="shrink-0 text-xs">
@@ -417,6 +457,11 @@ function PackageItemsSelector({
                   ? `${item.fulfilledQuantity} of ${item.quantity} already shipped`
                   : `${item.quantity} ordered`}
               </p>
+              <OrderItemOptions
+                customization={item.customization}
+                showPrices={false}
+                className="text-xs"
+              />
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <Input

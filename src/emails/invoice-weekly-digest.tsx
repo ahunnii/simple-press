@@ -1,4 +1,11 @@
-import { Button, Column, Link, Row, Section, Text } from "@react-email/components";
+import {
+  Button,
+  Column,
+  Link,
+  Row,
+  Section,
+  Text,
+} from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
 

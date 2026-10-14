@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { FilterDefFor } from "../_components/admin-filters";
 import type { InvoiceListStatusFilter } from "~/lib/validators/invoice";
 import type { QboDepositMode } from "~/lib/validators/quickbooks";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
   INVOICE_LIST_SORT_DEFAULT,
@@ -24,6 +25,7 @@ import {
   pickParam,
 } from "../_lib/table-query";
 import { InvoicesClient } from "./_components/invoices-client";
+import { InvoicesTabs } from "./_components/invoices-tabs";
 
 type Props = {
   searchParams: Promise<{
@@ -145,7 +147,7 @@ export default async function AdminInvoicesPage({ searchParams }: Props) {
   const requestedPage = parsePageParam(params.page) ?? 1;
   const openNew = params.new === "1";
 
-  const [list, summary, connectionData] = await Promise.all([
+  const [list, summary, connectionData, flags] = await Promise.all([
     api.invoice
       .listUnified({
         search: search || undefined,
@@ -157,6 +159,7 @@ export default async function AdminInvoicesPage({ searchParams }: Props) {
       .catch(rethrowTrpcForErrorBoundary),
     api.invoice.summary().catch(rethrowTrpcForErrorBoundary),
     api.quickbooks.getConnection().catch(rethrowTrpcForErrorBoundary),
+    getBusinessFlags(),
   ]);
 
   // Put the URL back in step with the page the router clamped to — see
@@ -183,6 +186,9 @@ export default async function AdminInvoicesPage({ searchParams }: Props) {
     <>
       <TrailHeader breadcrumbs={[{ label: "Invoices" }]} />
       <InvoicesClient
+        // Native invoices only: the Activity log has nothing for a
+        // QuickBooks-only store, so it gets no tab strip at all.
+        routeTabs={flags.isEnabled("invoices") ? <InvoicesTabs /> : null}
         rows={list.rows}
         qboListCap={qboListCap}
         totalCount={list.totalCount}
@@ -205,6 +211,7 @@ export default async function AdminInvoicesPage({ searchParams }: Props) {
         qboEnabled={list.qboEnabled}
         summary={summary}
         timeZone={list.timeZone}
+        businessName={connectionData.businessName}
         connection={connection}
         environment={connectionData.environment}
         platformConfigured={connectionData.platformConfigured}

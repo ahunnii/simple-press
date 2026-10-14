@@ -92,6 +92,9 @@ function OrderFlagBadges({ order }: { order: OrderRow }) {
       {order.paymentStatus === "pending" && order.status !== "cancelled" && (
         <Badge variant="warning">Awaiting payment</Badge>
       )}
+      {order.paymentStatus === "disputed" && (
+        <Badge variant="destructive">Disputed</Badge>
+      )}
       {order.fulfillmentStatus === "partially_fulfilled" && (
         <Badge variant="warning">Partially fulfilled</Badge>
       )}
@@ -177,6 +180,12 @@ export function OrdersTable({ orders }: Props) {
                       <span>
                         {order.itemCount}{" "}
                         {order.itemCount === 1 ? "item" : "items"}
+                        {order.optionsHint && (
+                          <span title={order.optionsHint.summary}>
+                            {" "}
+                            with options
+                          </span>
+                        )}
                       </span>
                       <span aria-hidden="true">·</span>
                       <span>{statusLabel(order.status)}</span>
@@ -202,6 +211,17 @@ export function OrdersTable({ orders }: Props) {
                   className={`hidden md:table-cell ${TD} text-foreground tabular-nums`}
                 >
                   {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
+                  {/* Product-customizer builds: the full options live on the
+                      order page; here just enough to spot a custom order. */}
+                  {order.optionsHint && (
+                    <p
+                      className="text-muted-foreground max-w-56 truncate text-sm"
+                      title={order.optionsHint.summary}
+                    >
+                      <span className="sr-only">Options: </span>
+                      {order.optionsHint.summary}
+                    </p>
+                  )}
                 </TableCell>
 
                 <TableCell

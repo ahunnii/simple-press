@@ -9,6 +9,7 @@ import type {
 } from "~/lib/inventory/order-deduction";
 import type { PoolDeductionResult } from "~/lib/inventory/pool-deduction";
 import type { DbClient } from "~/server/db";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { splitCustomerName } from "~/lib/customer-name";
 import {
@@ -60,6 +61,10 @@ export type SubscriptionOrderBusiness = {
   pickupLocation?: string | null;
   pickupInstructions?: string | null;
   businessAddress?: string | null;
+  addressStreet?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressPostalCode?: string | null;
   siteContent?: { logoUrl?: string | null } | null;
 };
 
@@ -408,8 +413,7 @@ export async function processPaidInvoice(
       deliveryMethod: order.deliveryMethod as "ship" | "pickup",
       ...(order.deliveryMethod === "pickup"
         ? {
-            pickupLocation:
-              business.pickupLocation ?? business.businessAddress ?? undefined,
+            pickupLocation: resolvePickupLocation(business) ?? undefined,
             pickupInstructions: business.pickupInstructions ?? undefined,
           }
         : {}),

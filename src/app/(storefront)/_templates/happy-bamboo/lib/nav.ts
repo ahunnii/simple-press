@@ -10,6 +10,7 @@ import type { NavItem } from "~/app/(storefront)/_components/nav";
 import {
   filterNavByFlags,
   resolveNav,
+  withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 /** Shipped default nav, used only when the owner has never saved a Navigation list. */
@@ -27,13 +28,19 @@ export const HB_DEFAULT_NAV: NavItem[] = [
  * is off), so the header, mobile panel and footer never link to a route that
  * 404s. Sanitizing and the empty-list rule (a saved `[]` means "no links",
  * never the default) live in `resolveNav`.
+ *
+ * Pass `donate` (`donateLinkOptions(business, isEnabled, "header")`) for the
+ * header + mobile panel so the Donations "show in header" switch appends a
+ * plain last /donate item — both consumers get the same list.
  */
 export function resolveHappyBambooNav(
   navigationItems: unknown,
   isEnabled: (flag: string) => boolean,
+  donate?: { show: boolean; label: string },
 ): NavItem[] {
-  return filterNavByFlags(
+  const links = filterNavByFlags(
     resolveNav(navigationItems, HB_DEFAULT_NAV),
     isEnabled,
   );
+  return donate ? withDonateLink(links, donate) : links;
 }

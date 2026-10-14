@@ -32,7 +32,7 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
 
   const acceptMutation = api.team.acceptInvite.useMutation({
     onSuccess: ({ adminUrl }) => {
-      toast.success("Invitation accepted! Redirecting to your dashboard...");
+      toast.success("Invitation accepted! Redirecting to your store admin...");
       setTimeout(() => {
         // adminUrl points at the business's own domain (absolute in prod), so
         // use a full navigation rather than a same-origin push — /admin on the
@@ -47,10 +47,10 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
 
   const roleLabel =
     invite?.role === "OWNER"
-      ? "Owner"
+      ? "an Owner"
       : invite?.role === "STAFF"
-        ? "Staff"
-        : "Manager";
+        ? "a Staff member"
+        : "a Manager";
 
   // Error state
   if (errorMessage != null || !invite) {
@@ -82,7 +82,7 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
           <CardTitle>Team Invitation</CardTitle>
           <CardDescription>
             You&apos;ve been invited to join{" "}
-            <strong>{invite.businessName}</strong> as a{" "}
+            <strong>{invite.businessName}</strong> as{" "}
             <strong>{roleLabel}</strong>.
           </CardDescription>
         </CardHeader>
@@ -164,7 +164,7 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
         </div>
         <CardDescription>
           You&apos;ve been invited to join{" "}
-          <strong>{invite.businessName}</strong> as a{" "}
+          <strong>{invite.businessName}</strong> as{" "}
           <strong>{roleLabel}</strong>.
         </CardDescription>
       </CardHeader>

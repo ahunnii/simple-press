@@ -2,10 +2,12 @@ import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { getListFieldValue } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { DEFAULT_RELOCATION_SERVICES } from "../homepage";
@@ -88,6 +90,13 @@ export async function RelocationFooter({
   const hasPrivacyPolicy = policyPages.some((p) => p.slug === "privacy-policy");
   const hasTermsOfService = policyPages.some(
     (p) => p.slug === "terms-of-service",
+  );
+  // Donations "show in footer": the Helpful Links list is this footer's only
+  // flat link list, so Donate is appended after the policy links.
+  const donate = donateLinkOptions(
+    business,
+    resolveFlags(business?.featureFlags).isEnabled,
+    "footer",
   );
   const policyLinks = [
     ...policyPages.map((page) => ({
@@ -220,6 +229,16 @@ export async function RelocationFooter({
                   </Link>
                 </li>
               ))}
+              {donate.show ? (
+                <li className="relocation-footer-body">
+                  <Link
+                    href="/donate"
+                    className="relocation-hover-fade underline"
+                  >
+                    {donate.label}
+                  </Link>
+                </li>
+              ) : null}
             </ul>
           </section>
         </div>
