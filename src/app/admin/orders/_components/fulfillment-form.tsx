@@ -19,6 +19,7 @@ import {
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { ShippingAddress } from "~/lib/orders/shipping-address";
 import type { FulfillmentFormValues } from "~/lib/validators/order";
 import { fulfillmentToast } from "~/lib/orders/fulfillment-email";
 import { fulfillmentFormSchema } from "~/lib/validators/order";
@@ -36,6 +37,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import { CopyAddressButton } from "./copy-address-button";
 import { OrderItemOptions } from "./order-item-options";
 
 type OrderItemInfo = {
@@ -54,12 +56,19 @@ type Props = {
   customerEmail: string;
   customerName: string;
   items: OrderItemInfo[];
+  /** Enables "Copy address" beside the Pirate Ship link. */
+  shippingAddress?: ShippingAddress | null;
 };
 
 const remainingFor = (item: OrderItemInfo) =>
   Math.max(0, item.quantity - item.fulfilledQuantity);
 
-export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
+export function FulfillmentForm({
+  orderId,
+  customerEmail,
+  items,
+  shippingAddress,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -277,25 +286,33 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
 
           {hasTracking && (
             <div className="space-y-4">
-              <div className="border-border flex items-center justify-between gap-3 rounded-lg border p-3">
+              <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
                 <p className="text-muted-foreground text-sm">
-                  Need a shipping label? Buy discounted postage on PirateShip.
+                  {shippingAddress
+                    ? "Need a shipping label? Copy the address, then buy discounted postage on Pirate Ship."
+                    : "Need a shipping label? Buy discounted postage on Pirate Ship."}
                 </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  asChild
-                  className="shrink-0"
-                >
-                  <a
-                    href="https://www.pirateship.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open PirateShip
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
+                <div className="flex min-w-0 flex-wrap gap-2">
+                  {shippingAddress && (
+                    <CopyAddressButton
+                      address={shippingAddress}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-3 [&>span]:text-sm"
+                      label="Copy address"
+                    />
+                  )}
+                  <Button size="sm" variant="outline" asChild>
+                    <a
+                      href="https://ship.pirateship.com/ship/single"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open PirateShip
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </a>
+                  </Button>
+                </div>
               </div>
 
               {fields.map((field, index) => (

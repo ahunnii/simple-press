@@ -373,6 +373,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     fulfilledQuantity: item.fulfilledQuantity,
                     customization: item.customization,
                   }))}
+                  shippingAddress={order.shippingAddress ?? null}
                 />
               )
             )}
