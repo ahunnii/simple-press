@@ -36,7 +36,7 @@ export function UmscHeading({
       className={cn(
         "umsc-serif font-normal text-balance",
         isH1
-          ? "text-[clamp(42px,6.4vw,86px)] leading-[1.05] tracking-[0.035em] uppercase"
+          ? "text-[clamp(32px,4.6vw,64px)] leading-[1.08] tracking-[0.035em] uppercase"
           : as === "h2"
             ? "text-[clamp(32px,4.2vw,56px)] leading-[1.08] tracking-[0.015em]"
             : "text-[clamp(22px,2.2vw,30px)] leading-[1.15] tracking-[0.015em]",
