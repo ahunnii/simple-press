@@ -2,8 +2,8 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscGallery, type UmscGalleryData } from "../shared/umsc-gallery";
+import { UmscGalleryPlaceholder } from "../shared/umsc-gallery-placeholder";
 import { UmscSection } from "../shared/umsc-section";
-import { UmscAboutCommunityPlaceholder } from "./umsc-about-community-placeholder";
 
 type Props = {
   heading: string;
@@ -24,12 +24,19 @@ type Props = {
  * gallery has no photos, this renders nothing on the public site. That
  * leaves an owner browsing a fresh store with no on-page hotspot for this
  * section's panel, so the same empty case instead renders
- * `UmscAboutCommunityPlaceholder`, which is itself a no-op outside the
+ * `UmscGalleryPlaceholder`, which is itself a no-op outside the
  * editor preview iframe.
  */
 export function UmscAboutCommunity({ heading, gallery }: Props) {
   if (!gallery || gallery.images.length === 0) {
-    return <UmscAboutCommunityPlaceholder heading={heading} />;
+    return (
+      <UmscGalleryPlaceholder
+        heading={heading}
+        headingFieldKey="umsc.about.community-heading"
+        sectionAttrs={sectionGroupAttr("about", "community")}
+        ariaLabel="Our customers, our community"
+      />
+    );
   }
 
   return (

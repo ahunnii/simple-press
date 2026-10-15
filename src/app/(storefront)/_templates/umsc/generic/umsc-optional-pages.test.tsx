@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { umscBlogData, umscBlogFieldGroups, umscBlogSections } from "../blog";
 import { UmscBlogPage } from "../blog/umsc-blog-page";
@@ -38,6 +38,24 @@ import {
 } from "../videos";
 import { UmscVideosPage } from "../videos/umsc-videos-page";
 import { UmscGenericPage } from "./umsc-generic-page";
+
+// The async blog page reads flags, the picked gallery and testimonials; the
+// real modules reach the Prisma client / tRPC server, so they are stubbed.
+const mocks = vi.hoisted(() => ({
+  enabled: new Set<string>(),
+  gallery: null as unknown,
+  testimonials: [] as unknown[],
+}));
+vi.mock("~/lib/features/get-business-flags", () => ({
+  getBusinessFlags: () =>
+    Promise.resolve({ isEnabled: (key: string) => mocks.enabled.has(key) }),
+}));
+vi.mock("~/server/db", () => ({
+  db: { gallery: { findUnique: () => Promise.resolve(mocks.gallery) } },
+}));
+vi.mock("~/trpc/server", () => ({
+  api: { testimonial: { list: () => Promise.resolve(mocks.testimonials) } },
+}));
 
 // TiptapRenderer's module graph reaches the Prisma client (encryption keys
 // are unavailable under happy-dom); the pages only need it to render.
@@ -167,6 +185,7 @@ const REGISTRY = [
 
 const PAGE_FILES = [
   "blog/umsc-blog-page.tsx",
+  "blog/umsc-blog-gallery.tsx",
   "blog/umsc-blog-post-page.tsx",
   "blog/umsc-blog-list.tsx",
   "events/umsc-events-page.tsx",
@@ -314,15 +333,26 @@ describe("UmscPageHero (PF25)", () => {
 // ─── Blog ──────────────────────────────────────────────────────────────────
 
 describe("UmscBlogPage", () => {
-  it("renders the band and the designed empty state with a shop link", () => {
-    const { container } = render(
-      <UmscBlogPage
-        pages={[] as BlogProps["pages"]}
-        customFields={{}}
-        business={makeBusiness<BlogProps["business"]>()}
-      />,
+  beforeEach(() => {
+    mocks.enabled = new Set(["blog", "galleries", "testimonials"]);
+    mocks.gallery = null;
+    mocks.testimonials = [];
+  });
+
+  async function renderBlog(props: Partial<BlogProps> = {}) {
+    return render(
+      await UmscBlogPage({
+        pages: [] as BlogProps["pages"],
+        customFields: {},
+        business: makeBusiness<BlogProps["business"]>(),
+        ...props,
+      }),
     );
-    expectOneBandH1(container, "Blog");
+  }
+
+  it("renders the band and the designed empty state with a shop link", async () => {
+    const { container } = await renderBlog();
+    expectOneBandH1(container, "Community");
     expect(
       container.querySelector('[data-sp-group="blog.header"]'),
     ).toHaveTextContent("News, tips, and updates");
@@ -338,13 +368,33 @@ describe("UmscBlogPage", () => {
     expectNoDefaultColours(container);
   });
 
-  it("renders the lead story, the grid heading and search", () => {
-    const { container } = render(
-      <UmscBlogPage
-        pages={POSTS as unknown as BlogProps["pages"]}
-        customFields={{}}
-      />,
-    );
+  it("titles the band with the page name unless a heading is saved", async () => {
+    const renamed = await renderBlog({
+      customFields: { "umsc.blog.page-name": "Blog" },
+    });
+    expectOneBandH1(renamed.container, "Blog");
+    renamed.unmount();
+
+    const legacy = await renderBlog({
+      customFields: { "default.blog.listing-title": "Blog" },
+    });
+    expectOneBandH1(legacy.container, "Community");
+    legacy.unmount();
+
+    const headed = await renderBlog({
+      customFields: {
+        "umsc.blog.page-name": "Blog",
+        "default.blog.listing-title": "Out and about",
+      },
+    });
+    expectOneBandH1(headed.container, "Out and about");
+  });
+
+  it("renders the lead story, the grid heading and search", async () => {
+    const { container } = await renderBlog({
+      pages: POSTS as unknown as BlogProps["pages"],
+      business: undefined,
+    });
     expect(
       container.querySelector('[data-sp-group="blog.list"]'),
     ).not.toBeNull();
@@ -358,6 +408,100 @@ describe("UmscBlogPage", () => {
       screen.getByRole("heading", { level: 3, name: "Caring for your candle" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Search blog posts")).toBeInTheDocument();
+  });
+
+  it("lays out the community sections in order: header, gallery, posts, reviews, closing", async () => {
+    mocks.gallery = {
+      name: "Markets",
+      description: null,
+      layout: "grid",
+      columns: 3,
+      gap: 16,
+      showCaptions: false,
+      enableLightbox: false,
+      aspectRatio: null,
+      captionStyle: null,
+      images: [
+        {
+          id: "i1",
+          url: "/g1.jpg",
+          altText: "A market stall",
+          caption: null,
+          sortOrder: 0,
+        },
+      ],
+    };
+    mocks.testimonials = [
+      { text: "Smells amazing.", customerName: "Dana", source: "owner" },
+      { text: "Love it.", customerName: "Lee", source: "order" },
+      { text: "Third.", customerName: "Sam", source: "order" },
+      { text: "Fourth.", customerName: "Kit", source: "order" },
+    ];
+    const { container } = await renderBlog({
+      customFields: { "umsc.blog.gallery": "g1" },
+    });
+    const groups = [...container.querySelectorAll("[data-sp-group]")].map(
+      (el) => el.getAttribute("data-sp-group"),
+    );
+    expect(groups).toEqual([
+      "blog.header",
+      "blog.gallery",
+      "blog.list",
+      "blog.reviews",
+      "blog.closing",
+    ]);
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Out in the community" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Kind words" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Smells amazing\./)).toBeInTheDocument();
+    expect(screen.queryByText(/Fourth\./)).toBeNull();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Have an event in mind?" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
+      "href",
+      "/contact",
+    );
+  });
+
+  it("skips the gallery without a pick and the reviews with testimonials off", async () => {
+    mocks.enabled = new Set(["blog", "galleries"]);
+    const { container } = await renderBlog();
+    expect(
+      container.querySelector('[data-sp-group="blog.gallery"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="blog.reviews"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-sp-group="blog.closing"]'),
+    ).not.toBeNull();
+  });
+
+  it("hides each optional section when its toggle is off", async () => {
+    const hidden = (id: string) => ({ [id]: { hidden: true } });
+    const { container } = await renderBlog({
+      customFields: {
+        _sp: {
+          sections: {
+            ...hidden("blog.gallery"),
+            ...hidden("blog.reviews"),
+            ...hidden("blog.closing"),
+          },
+        },
+      } as unknown as BlogProps["customFields"],
+    });
+    for (const id of ["gallery", "reviews", "closing"]) {
+      expect(
+        container.querySelector(`[data-sp-group="blog.${id}"]`),
+      ).toBeNull();
+    }
+    expect(
+      container.querySelector('[data-sp-group="blog.list"]'),
+    ).not.toBeNull();
   });
 });
 
@@ -377,7 +521,9 @@ describe("UmscBlogPostPage", () => {
     );
     expectOneBandH1(container, "New fall scents");
     const band = container.querySelector("section.umsc-page-hero");
-    const allPosts = screen.getAllByRole("link", { name: /All posts/ });
+    const allPosts = screen.getAllByRole("link", {
+      name: /All Community posts/,
+    });
     expect(allPosts).toHaveLength(2);
     expect(band).toContainElement(allPosts[0]!);
     const related = container.querySelector('[data-sp-group="blog.post"]');
@@ -390,6 +536,19 @@ describe("UmscBlogPostPage", () => {
       "href",
       "/shop",
     );
+  });
+
+  it("names the post links after the page name", () => {
+    render(
+      <UmscBlogPostPage
+        page={post}
+        relatedPosts={POSTS as unknown as PostProps["relatedPosts"]}
+        customFields={{ "umsc.blog.page-name": "Blog" }}
+      />,
+    );
+    expect(
+      screen.getAllByRole("link", { name: /All Blog posts/ }),
+    ).toHaveLength(2);
   });
 
   it("hides the closing band when blog.cta is hidden", () => {

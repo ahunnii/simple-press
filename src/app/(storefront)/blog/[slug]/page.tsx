@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { resolveBlogPageName } from "~/lib/blog-page-name";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   buildPageMetadata,
@@ -70,7 +71,10 @@ export default async function PageView({ params }: Props) {
   const blogPostingSchema = buildBlogPostingSchema(page, business);
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog" },
+    {
+      name: resolveBlogPageName(business.templateId, customFields),
+      path: "/blog",
+    },
     { name: page.title, path: `/blog/${page.slug}` },
   ]);
 

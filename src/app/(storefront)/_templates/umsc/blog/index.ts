@@ -14,13 +14,16 @@ import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
  * copy (if any) lives under Default's `default.blog.*` keys. The umsc pages
  * keep reading those keys through Default's resolver and declare them here
  * verbatim — that is what gives them a panel in umsc's editor (the pollen
- * round-2 trap). Two are left out because umsc has no eyebrow/kicker labels
+ * round-2 trap). The one exception is `default.blog.listing-title`, re-labelled
+ * with an empty default so the heading can follow `umsc.blog.page-name`. Two are left out because umsc has no eyebrow/kicker labels
  * by design (design.md "Typography": "No eyebrow/kicker labels"), so the
  * pages never render them and the editor must not offer a dead field:
  * `default.blog.listing-eyebrow` and `default.blog.post-eyebrow`.
  *
  * Copy Default never had (the band's optional photo, the card link, the
- * designed empty state, the closing band on posts) is new `umsc.blog.*` keys, in design.md's voice,
+ * designed empty state, the closing band on posts, and the listing page's
+ * community gallery / reviews / closing band — the page is the "Community"
+ * page at the same `/blog` URL) is new `umsc.blog.*` keys, in design.md's voice,
  * read through `resolveUmscBlogFields` (this module's own map) so defaults
  * and "blank hides" behave the same before and after the root `index.ts`
  * spreads `umscBlogData`.
@@ -34,9 +37,40 @@ export const UMSC_BLOG_OMITTED_KEYS = new Set([
   "default.blog.post-eyebrow",
 ]);
 
-const inheritedBlogData: TemplateField[] = defaultBlogData.filter(
-  (field) => !UMSC_BLOG_OMITTED_KEYS.has(field.key),
-);
+/**
+ * The page's name ("Community" by default, "Blog" if the owner prefers).
+ * Platform routes read it through `resolveBlogPageName` for the `/blog`
+ * fallback `<title>` and the post breadcrumb trail; the listing heading
+ * falls back to it, which is why Default's `listing-title` loses its "Blog"
+ * default here (a saved heading still wins).
+ */
+const blogPageNameField: TemplateField = {
+  key: "umsc.blog.page-name",
+  label: "Page name",
+  description:
+    "What this page is called in search results, browser tabs and the link trail on each post — for example Community or Blog. The heading uses it too unless you type your own.",
+  type: "text",
+  page: "blog",
+  group: "blog.header",
+  gridColumn: "col-span-full",
+  defaultValue: "Community",
+  placeholder: "Community",
+};
+
+const inheritedBlogData: TemplateField[] = defaultBlogData
+  .filter((field) => !UMSC_BLOG_OMITTED_KEYS.has(field.key))
+  .map((field) =>
+    field.key === "default.blog.listing-title"
+      ? {
+          ...field,
+          label: "Heading",
+          description:
+            "Big heading at the top of this page. Leave empty to use the page name.",
+          defaultValue: "",
+          placeholder: "Same as the page name",
+        }
+      : field,
+  );
 
 // ─── blog.list — the post list and its empty state ─────────────────────────
 
@@ -102,6 +136,125 @@ const blogListData: TemplateField[] = [
   },
 ];
 
+// ─── blog.gallery — community photo gallery (hideable, listing page) ───────
+
+const blogGalleryData: TemplateField[] = [
+  {
+    key: "umsc.blog.gallery-heading",
+    label: "Heading",
+    description: "Heading above the community photos on the blog page.",
+    type: "text",
+    page: "blog",
+    group: "blog.gallery",
+    gridColumn: "col-span-full",
+    defaultValue: "Out in the community",
+    placeholder: "e.g. Around town",
+  },
+  {
+    key: "umsc.blog.gallery",
+    label: "Gallery",
+    description:
+      "Pick a gallery of market and community photos. Galleries are created under Admin → Galleries; its layout, aspect ratio, captions, and lightbox settings are honored here. Leave unset to hide this section on your site.",
+    type: "gallery",
+    page: "blog",
+    group: "blog.gallery",
+    gridColumn: "col-span-full",
+  },
+];
+
+// ─── blog.reviews — latest testimonials (hideable, listing page) ───────────
+
+const blogReviewsData: TemplateField[] = [
+  {
+    key: "umsc.blog.reviews-heading",
+    label: "Heading",
+    description: "Heading above the customer reviews on the blog page.",
+    type: "text",
+    page: "blog",
+    group: "blog.reviews",
+    gridColumn: "col-span-1",
+    defaultValue: "Kind words",
+    placeholder: "e.g. What people say",
+  },
+  {
+    key: "umsc.blog.reviews-lede",
+    label: "Intro text",
+    description:
+      "One sentence beneath the reviews heading. Leave blank to hide.",
+    type: "textarea",
+    page: "blog",
+    group: "blog.reviews",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "What people say after markets, pop-ups and community events.",
+    placeholder: "One short sentence",
+  },
+  {
+    key: "umsc.blog.reviews-empty-text",
+    label: "Empty state text",
+    description:
+      "Shown beside the Google review link when there are no reviews yet.",
+    type: "text",
+    page: "blog",
+    group: "blog.reviews",
+    gridColumn: "col-span-1",
+    defaultValue: "Reviews are on their way.",
+    placeholder: "e.g. No reviews yet",
+  },
+];
+
+// ─── blog.closing — closing band on the listing page (hideable) ────────────
+
+const blogClosingData: TemplateField[] = [
+  {
+    key: "umsc.blog.closing-heading",
+    label: "Heading",
+    description: "Heading of the closing band at the bottom of the blog page.",
+    type: "text",
+    page: "blog",
+    group: "blog.closing",
+    gridColumn: "col-span-full",
+    defaultValue: "Have an event in mind?",
+    placeholder: "e.g. Let's work together",
+  },
+  {
+    key: "umsc.blog.closing-body",
+    label: "Text",
+    description:
+      "One line under the closing band's heading. Leave blank to hide.",
+    type: "textarea",
+    page: "blog",
+    group: "blog.closing",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Invite us to your market, pop-up or community event. We'd love to be there.",
+    placeholder: "One short sentence",
+  },
+  {
+    key: "umsc.blog.closing-button-label",
+    label: "Button text",
+    description: "Text on the blog page's closing band button.",
+    type: "text",
+    page: "blog",
+    group: "blog.closing",
+    gridColumn: "col-span-1",
+    defaultValue: "Get in touch",
+    placeholder: "e.g. Contact us",
+  },
+  {
+    key: "umsc.blog.closing-button-url",
+    label: "Button link",
+    description:
+      "Where the blog page's closing band button goes. Leave blank to hide the button; it also hides when the page it points at is switched off.",
+    type: "url",
+    page: "blog",
+    group: "blog.closing",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
+    placeholder: "/contact",
+  },
+];
+
 // ─── blog.cta — closing band on every post (hideable) ──────────────────────
 
 const blogCtaData: TemplateField[] = [
@@ -156,11 +309,15 @@ const blogCtaData: TemplateField[] = [
 // ─── Exports ────────────────────────────────────────────────────────────────
 
 export const umscBlogData: TemplateField[] = [
+  blogPageNameField,
   ...inheritedBlogData,
   // blog.header — the listing band's optional photo (index page only; a
   // post's band stays plain).
   ...umscHeroPhotoFields("blog", "blog.header"),
   ...blogListData,
+  ...blogGalleryData,
+  ...blogReviewsData,
+  ...blogClosingData,
   ...blogCtaData,
 ];
 
@@ -184,6 +341,28 @@ export const umscBlogFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
+    id: "blog.gallery",
+    title: "Gallery",
+    description: "Community photos shown above the posts on the blog page.",
+    icon: "📸",
+    columns: 2,
+  },
+  {
+    id: "blog.reviews",
+    title: "Reviews",
+    description: "Latest customer reviews below the posts on the blog page.",
+    icon: "⭐",
+    columns: 2,
+  },
+  {
+    id: "blog.closing",
+    title: "Page closing banner",
+    description:
+      "Band at the bottom of the blog page, with a button to your contact page.",
+    icon: "🎪",
+    columns: 2,
+  },
+  {
     id: "blog.cta",
     title: "Closing banner",
     description: "Band at the bottom of every post, with a button to the shop.",
@@ -192,7 +371,11 @@ export const umscBlogFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
-/** Visual render order: index page first, then the post page's sections. */
+/**
+ * Visual render order. The listing page is the "Community" page (header,
+ * community gallery, posts, reviews, closing band); the post page's sections
+ * come after it.
+ */
 export const umscBlogSections: TemplateSection[] = [
   {
     id: "blog.header",
@@ -206,14 +389,43 @@ export const umscBlogSections: TemplateSection[] = [
     links: [SECTION_LINKS.blog],
   },
   {
+    id: "blog.gallery",
+    page: "blog",
+    title: "Gallery",
+    description: "Heading and community photo gallery above the posts",
+    groupIds: ["blog.gallery"],
+    order: 1,
+    hideable: true,
+    links: [SECTION_LINKS.galleries],
+  },
+  {
     id: "blog.list",
     page: "blog",
     title: "Posts",
     description: "The latest post, the post grid, or the empty state",
     groupIds: ["blog.list"],
-    order: 1,
+    order: 2,
     hideable: false,
     links: [SECTION_LINKS.blog],
+  },
+  {
+    id: "blog.reviews",
+    page: "blog",
+    title: "Reviews",
+    description: "Latest approved customer reviews below the posts",
+    groupIds: ["blog.reviews"],
+    order: 3,
+    hideable: true,
+    links: [SECTION_LINKS.testimonials],
+  },
+  {
+    id: "blog.closing",
+    page: "blog",
+    title: "Page closing banner",
+    description: "Band at the bottom of the blog page, not on posts",
+    groupIds: ["blog.closing"],
+    order: 4,
+    hideable: true,
   },
   {
     id: "blog.post",
@@ -222,7 +434,7 @@ export const umscBlogSections: TemplateSection[] = [
     title: "Blog post",
     description: "Related-posts heading at the bottom of a post",
     groupIds: ["blog.post"],
-    order: 2,
+    order: 5,
     hideable: false,
     links: [SECTION_LINKS.blog],
   },
@@ -233,7 +445,7 @@ export const umscBlogSections: TemplateSection[] = [
     title: "Closing banner",
     description: "Band at the bottom of every post",
     groupIds: ["blog.cta"],
-    order: 3,
+    order: 6,
     hideable: true,
   },
 ];

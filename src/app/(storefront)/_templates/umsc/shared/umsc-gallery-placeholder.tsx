@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-
-import { UmscHeading } from "../shared/umsc-heading";
-import { UmscImageFallback } from "../shared/umsc-image-fallback";
-import { UmscSection } from "../shared/umsc-section";
+import { UmscHeading } from "./umsc-heading";
+import { UmscImageFallback } from "./umsc-image-fallback";
+import { UmscSection } from "./umsc-section";
 
 /**
  * True only when running inside the visual editor's preview iframe — i.e. in
@@ -29,12 +27,13 @@ function isPreviewFrame() {
 }
 
 /**
- * UmscAboutCommunityPlaceholder — editor-only stand-in for design.md
- * "About #5" ("Our customers. Our community.") when the section's `gallery`
- * field is unset. `UmscAboutCommunity` (`umsc-about-community.tsx`) follows
- * design.md's "empty = hidden" contract and renders null on the public site
- * when no gallery is picked, so an owner browsing a fresh store has no
- * on-page hotspot to find that section's panel from. This component fills
+ * UmscGalleryPlaceholder — editor-only stand-in for a gallery section (e.g.
+ * design.md "About #5", "Our customers. Our community.") when the section's
+ * `gallery` field is unset. The real section (`UmscAboutCommunity`,
+ * `about/umsc-about-community.tsx`) follows design.md's "empty = hidden"
+ * contract and renders null on the public site when no gallery is picked, so
+ * an owner browsing a fresh store has no on-page hotspot to find that
+ * section's panel from. This component fills
  * that gap in the editor only: it renders the same `UmscSection` shell with
  * four `UmscImageFallback` tiles and a hint to pick a gallery, so the
  * section rail's hover/click affordances have something to land on.
@@ -43,7 +42,7 @@ function isPreviewFrame() {
  * `?__preview=1`) checked in a `useEffect`, not during render, so the first
  * client render matches the server render (`inPreview` starts `false`) and
  * hydration is unaffected. On the public site, and on every server render,
- * this returns null exactly like `UmscAboutCommunity` does when empty.
+ * this returns null exactly like the real section does when empty.
  *
  * Known limitation: `PreviewOverlay` collects its keyboard-accessible
  * companion-button list (`allGroups`) once on mount by querying
@@ -59,10 +58,18 @@ function isPreviewFrame() {
  * this placeholder is showing still live-patch into `UmscAboutCommunity`
  * once a gallery is picked.
  */
-export function UmscAboutCommunityPlaceholder({
+export function UmscGalleryPlaceholder({
   heading,
+  headingFieldKey,
+  sectionAttrs,
+  ariaLabel,
 }: {
   heading: string;
+  /** Real field key of the section heading, so live edits keep patching. */
+  headingFieldKey: string;
+  /** `sectionGroupAttr(...)` of the real section, for the preview overlay. */
+  sectionAttrs: Record<string, string>;
+  ariaLabel: string;
 }) {
   // Hydration-safe: false on the server and on the first client render.
   const [inPreview, setInPreview] = useState(false);
@@ -76,12 +83,12 @@ export function UmscAboutCommunityPlaceholder({
   return (
     <UmscSection
       tone="cream"
-      aria-label="Our customers, our community"
-      sectionAttrs={sectionGroupAttr("about", "community")}
+      aria-label={ariaLabel}
+      sectionAttrs={sectionAttrs}
     >
       <UmscHeading
         as="h2"
-        fieldKey="umsc.about.community-heading"
+        fieldKey={headingFieldKey}
         className="mb-10"
       >
         {heading}

@@ -1,17 +1,43 @@
+import type { ComponentProps } from "react";
+
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import { UmscGoogleReviewLink } from "../shared/umsc-google-review-link";
-import { UmscHeading } from "../shared/umsc-heading";
-import { UmscLede } from "../shared/umsc-lede";
-import { UmscRevealGroup } from "../shared/umsc-reveal";
-import { UmscReviewCard } from "../shared/umsc-review-card";
-import { UmscSection } from "../shared/umsc-section";
+import { UmscGoogleReviewLink } from "./umsc-google-review-link";
+import { UmscHeading } from "./umsc-heading";
+import { UmscLede } from "./umsc-lede";
+import { UmscRevealGroup } from "./umsc-reveal";
+import { UmscReviewCard } from "./umsc-review-card";
+import { UmscSection } from "./umsc-section";
 
 export type UmscReviewCardData = {
   quote: string;
   name: string;
   source?: string;
 };
+
+/** The slice of a testimonial record the review cards read. */
+type UmscReviewTestimonial = {
+  text: string;
+  customerName: string;
+  source: string;
+};
+
+/**
+ * Maps the latest approved testimonials to review cards: the owner's own
+ * quotes get `ownerSource`, customer-submitted ones `verifiedSource`.
+ * Server-safe (no client code) so any page's data layer can call it.
+ */
+export function toUmscReviewCards(
+  testimonials: UmscReviewTestimonial[],
+  sources: { ownerSource: string; verifiedSource: string },
+  limit: number,
+): UmscReviewCardData[] {
+  return testimonials.slice(0, limit).map((t) => ({
+    quote: t.text,
+    name: t.customerName,
+    source: t.source === "owner" ? sources.ownerSource : sources.verifiedSource,
+  }));
+}
 
 type Props = {
   heading: string;
@@ -20,11 +46,19 @@ type Props = {
   emptyText: string;
   googleReviewUrl: string;
   sectionAttrs?: Record<string, string>;
+  /** Field keys for the editable heading / lede / empty-state text. */
+  headingFieldKey: string;
+  ledeFieldKey: string;
+  emptyTextFieldKey: string;
+  /** Heading `id`; also the section's `aria-labelledby` target. */
+  headingId: string;
+  tone?: ComponentProps<typeof UmscSection>["tone"];
 };
 
 /**
- * UmscReviewsSection (homepage.reviews) — "Our customers. Our community."
- * h2 + lede; three latest approved testimonials (a manual override quote/
+ * UmscReviewsSection — "Our customers. Our community." (homepage.reviews,
+ * reused by other pages; each caller passes its own field keys and heading
+ * id). h2 + lede; three latest approved testimonials (a manual override quote/
  * name pair wins the first slot when set) as `UmscReviewCard`s, with the
  * Google review link beside the heading. Empty: the Google-review link
  * alone on one cream card (design.md "Homepage → Our customers. Our
@@ -37,24 +71,29 @@ export function UmscReviewsSection({
   emptyText,
   googleReviewUrl,
   sectionAttrs,
+  headingFieldKey,
+  ledeFieldKey,
+  emptyTextFieldKey,
+  headingId,
+  tone = "paper",
 }: Props) {
   return (
     <UmscSection
-      tone="paper"
-      aria-labelledby="umsc-reviews-heading"
+      tone={tone}
+      aria-labelledby={headingId}
       sectionAttrs={sectionAttrs}
     >
       <div className="mb-10 flex flex-wrap items-end justify-between gap-6 sm:mb-14">
         <div>
           <UmscHeading
             as="h2"
-            id="umsc-reviews-heading"
-            fieldKey="umsc.homepage.reviews-heading"
+            id={headingId}
+            fieldKey={headingFieldKey}
           >
             {heading}
           </UmscHeading>
           {lede && (
-            <UmscLede fieldKey="umsc.homepage.reviews-lede" className="mt-3">
+            <UmscLede fieldKey={ledeFieldKey} className="mt-3">
               {lede}
             </UmscLede>
           )}
@@ -85,7 +124,7 @@ export function UmscReviewsSection({
             className="justify-center"
           />
           <p
-            {...fieldAttr("umsc.homepage.reviews-empty-text")}
+            {...fieldAttr(emptyTextFieldKey)}
             className="umsc-sans text-[14px] text-[var(--umsc-muted)]"
           >
             {emptyText}
