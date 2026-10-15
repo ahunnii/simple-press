@@ -6,7 +6,8 @@ import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
 
 // design.md "Per-page section concepts › Contact": hero (not hideable) →
 // form + sticky aside (not hideable — gated on the contactForm flag inside
-// the client form) → "Follow on social" (hideable). The custom-order extras
+// the client form) → "In stores" (hideable, hidden until a store is listed)
+// → "Follow on social" (hideable). The custom-order extras
 // (product type, quantity, date needed, occasion, scent-or-colour notes) are
 // visitor-filled form inputs, not owner-editable copy, so they carry no
 // template fields of their own — only the toggle-pill labels are fields, per
@@ -147,6 +148,87 @@ const contactFormData: TemplateField[] = [
   },
 ];
 
+// ─── In stores (contact.stores, hideable) ───────────────────────────────────
+// Shops that carry the owner's work (other businesses, not her own
+// locations), shown as photo cards. No default rows: an empty list hides the
+// section and the footer's link to it.
+
+const contactStoresData: TemplateField[] = [
+  {
+    key: "umsc.contact.stores-heading",
+    label: "Heading",
+    description: "Heading above the store cards.",
+    type: "text",
+    page: "contact",
+    group: "contact.stores",
+    gridColumn: "col-span-full",
+    defaultValue: "Find us in stores",
+  },
+  {
+    key: "umsc.contact.stores-body",
+    label: "Message",
+    description:
+      "Optional line beneath the heading. Leave blank to show only the cards.",
+    type: "textarea",
+    page: "contact",
+    group: "contact.stores",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "See and smell Unique Monique pieces in person at these shops.",
+  },
+  {
+    key: "umsc.contact.stores",
+    label: "Stores",
+    description:
+      "Shops that carry your work. Each becomes a card with a Directions link; add a website if they have one. Up to 12.",
+    type: "list",
+    page: "contact",
+    group: "contact.stores",
+    gridColumn: "col-span-full",
+    maxItems: 12,
+    itemLabel: "store",
+    summaryKey: "name",
+    itemSchema: [
+      {
+        key: "image",
+        label: "Photo",
+        type: "image",
+        description: "The shop's storefront, or a shelf with your pieces.",
+        placeholder: "/placeholder.svg",
+      },
+      {
+        key: "name",
+        label: "Shop name",
+        type: "text",
+        description: "A store without a name is not shown.",
+        placeholder: "e.g. Detroit Flower Market",
+      },
+      {
+        key: "address",
+        label: "Address",
+        type: "textarea",
+        description:
+          "Street and city, one line each. Directions opens Google Maps for this address.",
+        placeholder: "123 Main St\nDetroit, MI 48201",
+      },
+      {
+        key: "note",
+        label: "Note",
+        type: "text",
+        description: "Optional, e.g. which pieces they carry.",
+        placeholder: "e.g. Carries candles & earrings",
+      },
+      {
+        key: "website",
+        label: "Website",
+        type: "url",
+        description: "Optional. The shop's site or Instagram page.",
+        placeholder: "https://",
+      },
+    ],
+  },
+];
+
 // ─── Follow on social (contact.visit, hideable) ─────────────────────────────
 // The group/section id and the heading/body keys stay `contact.visit` /
 // `umsc.contact.visit-*` so a store's saved show/hide state and copy carry
@@ -182,6 +264,7 @@ const contactVisitData: TemplateField[] = [
 export const umscContactData: TemplateField[] = [
   ...contactHeroData,
   ...contactFormData,
+  ...contactStoresData,
   ...contactVisitData,
 ];
 
@@ -199,6 +282,14 @@ export const umscContactFieldGroups: TemplateFieldGroup[] = [
     description:
       "Form heading, toggle labels, submit and success copy, and the What to expect aside",
     icon: "📝",
+    columns: 2,
+  },
+  {
+    id: "contact.stores",
+    title: "In stores",
+    description:
+      "Shops that carry your work, shown as photo cards between the form and the social band",
+    icon: "🏬",
     columns: 2,
   },
   {
@@ -236,13 +327,23 @@ export const umscContactSections: TemplateSection[] = [
     ],
   },
   {
+    id: "contact.stores",
+    page: "contact",
+    title: "In stores",
+    description:
+      "Shops that carry your work, shown as photo cards. Hidden until you add a store.",
+    groupIds: ["contact.stores"],
+    order: 2,
+    hideable: true,
+  },
+  {
     id: "contact.visit",
     page: "contact",
     title: "Follow on social",
     description:
       "A band of large social icons, shown when at least one social link is set in Content → Branding",
     groupIds: ["contact.visit"],
-    order: 2,
+    order: 3,
     hideable: true,
     links: [SECTION_LINKS.branding],
   },

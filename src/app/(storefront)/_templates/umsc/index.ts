@@ -112,6 +112,17 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "Leave a Google review",
   },
   {
+    key: "umsc.global.visit-stores-label",
+    label: "Stores link text",
+    description:
+      "Footer link to the In stores section on your Contact page. Shown only when you've added a store. Blank hides it.",
+    type: "text",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "Find us in stores",
+  },
+  {
     key: "umsc.global.footer-shop-heading",
     label: "Footer shop heading",
     description:
@@ -220,7 +231,7 @@ export const umscFieldGroups: Record<string, TemplateFieldGroup[]> = {
       id: "global.branding",
       title: "Header and footer",
       description:
-        "Header tagline, mobile menu button, store visits link, Google review link, and the footer's shop links — shown on every page. Phone comes from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements.",
+        "Header tagline, mobile menu button, stores link (shown when you list stores on Contact), Google review link, and the footer's shop links — shown on every page. Phone comes from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements.",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,

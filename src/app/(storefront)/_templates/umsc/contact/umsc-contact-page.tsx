@@ -11,6 +11,8 @@ import { resolveUmscHeroPhoto } from "../shared/umsc-hero-fields";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscContactForm, UmscContactFormFallback } from "./umsc-contact-form";
 import { UmscContactFollow } from "./umsc-contact-follow";
+import { UmscContactStores } from "./umsc-contact-stores";
+import { hasVisibleUmscStores, resolveUmscStores } from "./umsc-stores";
 
 const FIELD_KEYS = [
   // Hero
@@ -30,6 +32,10 @@ const FIELD_KEYS = [
   "umsc.contact.expect-line-1",
   "umsc.contact.expect-line-2",
   "umsc.contact.expect-line-3",
+  // In stores (the cards themselves come from `umsc.contact.stores`, read
+  // through `resolveUmscStores`)
+  "umsc.contact.stores-heading",
+  "umsc.contact.stores-body",
   // Follow on social (group id + keys stay `visit`)
   "umsc.contact.visit-heading",
   "umsc.contact.visit-body",
@@ -56,6 +62,12 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
   const followBandShown =
     isSectionVisible(customFields, "umsc", "contact.visit") &&
     socials.length > 0;
+
+  // "In stores" cards: hideable, and absent until at least one named store
+  // is listed (the footer link follows the same rule).
+  const stores = hasVisibleUmscStores(customFields)
+    ? resolveUmscStores(customFields)
+    : [];
 
   return (
     <PageTransition>
@@ -101,8 +113,17 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
         />
       </Suspense>
 
+      {stores.length > 0 && (
+        <UmscContactStores
+          heading={f["umsc.contact.stores-heading"] ?? ""}
+          body={f["umsc.contact.stores-body"] ?? ""}
+          stores={stores}
+        />
+      )}
+
       {followBandShown && (
         <UmscContactFollow
+          tone={stores.length > 0 ? "paper" : "cream"}
           heading={f["umsc.contact.visit-heading"] ?? ""}
           body={f["umsc.contact.visit-body"] ?? ""}
           socials={socials}

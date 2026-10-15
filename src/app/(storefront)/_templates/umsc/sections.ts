@@ -32,7 +32,7 @@ const globalSections: TemplateSection[] = [
     page: "global",
     title: "Header and footer",
     description:
-      "Header tagline, mobile menu button, store visits link, Google review link, and the footer's shop links — shown on every page. Phone comes from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements.",
+      "Header tagline, mobile menu button, stores link (shown when you list stores on Contact), Google review link, and the footer's shop links — shown on every page. Phone comes from Settings; the footer tagline and social links from Content → Branding; the announcement bar from Content → Announcements.",
     groupIds: ["global.branding"],
     order: 0,
     hideable: false,

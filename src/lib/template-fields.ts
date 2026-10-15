@@ -646,11 +646,12 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   // from the store's first four published collections, and the contact
   // page's market-visit band became a "Follow on social" band whose icons
   // come from Content → Branding. The footer's "Visit Our Stores" link went
-  // with it.
+  // with it. `umsc.global.visit-stores-label` was brought back 2026-10-15 as
+  // the label of the footer link to the Contact "In stores" cards (always
+  // `/contact#stores`, so `visit-stores-url` stays retired).
   "umsc.homepage.categories-doors",
   "umsc.contact.visit-link-label",
   "umsc.contact.visit-link-url",
-  "umsc.global.visit-stores-label",
   "umsc.global.visit-stores-url",
   // dark-trend, retired 2026-09-27.
   // - `about.feature-N-header` / `-description`: the about page's numbered

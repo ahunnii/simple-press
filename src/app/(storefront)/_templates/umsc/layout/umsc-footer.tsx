@@ -26,6 +26,7 @@ import {
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
+import { hasVisibleUmscStores } from "../contact/umsc-stores";
 import { resolveFields } from "../index";
 import { UmscButton } from "../shared/umsc-button";
 import {
@@ -75,12 +76,14 @@ export async function UmscFooter({
     "umsc.global.footer-review-heading",
     "umsc.global.footer-review-body",
     "umsc.global.footer-review-label",
+    "umsc.global.visit-stores-label",
   ]);
   const googleReviewUrl = g["umsc.global.google-review-url"] ?? "";
   const footerShopHeading = g["umsc.global.footer-shop-heading"] ?? "";
   const reviewHeading = g["umsc.global.footer-review-heading"] ?? "";
   const reviewBody = g["umsc.global.footer-review-body"] ?? "";
   const reviewLabel = g["umsc.global.footer-review-label"] ?? "";
+  const storesLabel = g["umsc.global.visit-stores-label"] ?? "";
 
   const shopLinkRows = parseTemplateListRows(
     customFields?.["umsc.global.footer-shop-links"],
@@ -118,8 +121,9 @@ export async function UmscFooter({
 
   // Help column: owner-saved footer quick links (Admin → Navigation), else
   // UMSC_HELP_DEFAULTS, flag-filtered (B10.2/B10.4, PF21).
-  // Donations "show in footer" switch appends Donate last.
-  const helpLinks = withDonateLink(
+  // Donations "show in footer" switch appends Donate last, then the stores
+  // link (below).
+  const helpBaseLinks = withDonateLink(
     filterNavByFlags(
       resolveFooterNav(
         business?.siteContent?.footerNavigationItems,
@@ -129,6 +133,20 @@ export async function UmscFooter({
     ),
     donateLinkOptions(business, isEnabled, "footer"),
   );
+
+  // "Find us in stores" → the Contact page's `#stores` cards. Shown only
+  // while that section is visible with at least one named store, the label is
+  // non-blank, and an owner-saved quick link doesn't already point there.
+  // Appended (not part of UMSC_HELP_DEFAULTS) so it shows with or without
+  // saved quick links, like Donate.
+  const STORES_HREF = "/contact#stores";
+  const showStoresLink =
+    storesLabel.trim() !== "" &&
+    hasVisibleUmscStores(customFields) &&
+    !helpBaseLinks.some((link) => link.href === STORES_HREF);
+  const helpLinks = showStoresLink
+    ? [...helpBaseLinks, { label: storesLabel, href: STORES_HREF }]
+    : helpBaseLinks;
 
   // Account rows appended to Help (B10.3, PF20): "My account" + "Orders"
   // (only while `orders` is on) signed in, "Sign in" signed out.
