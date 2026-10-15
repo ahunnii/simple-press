@@ -9,9 +9,7 @@ import type { Session } from "~/server/better-auth/config";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { UserAvatar } from "~/components/auth/user/user-avatar";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-import { UMSC_QUICK_ACCOUNT_KEYS } from "./umsc-nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type UmscNavDialogAccountProps = {
   initialSession?: Session | null;
@@ -37,8 +35,8 @@ const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
  * it is also reachable by the dialog's own Tab focus trap (which only walks
  * the dialog subtree).
  *
- * The links are the quick-access subset (`UMSC_QUICK_ACCOUNT_KEYS`: Orders,
- * Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
+ * The links are the quick-access subset (`getQuickAccountNavLinks`, B4.3:
+ * Orders, Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
  * hand-written list — followed by the sign-out row (decision 2026-09-28).
  */
 export function UmscNavDialogAccount({
@@ -103,10 +101,10 @@ export function UmscNavDialogAccount({
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must also count as "not set"
   const showSubtitle = Boolean(user.displayUsername || user.name);
 
-  const accountLinks = getAccountNavLinks({
+  const accountLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
-  }).filter((link) => UMSC_QUICK_ACCOUNT_KEYS.has(link.key));
+  });
 
   return (
     <div className="umsc-nav-dialog-account">

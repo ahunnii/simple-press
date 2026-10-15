@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import {
   resolveUmscNav,
   UMSC_DEFAULT_NAV,
-  UMSC_QUICK_ACCOUNT_KEYS,
   umscActiveItemIndex,
   umscHrefAllowed,
 } from "./umsc-nav";
@@ -118,11 +117,11 @@ describe("umscHrefAllowed", () => {
   });
 });
 
-describe("UMSC_QUICK_ACCOUNT_KEYS", () => {
+describe("getQuickAccountNavLinks (UMSC menus)", () => {
   const quick = (isEnabled: (flag: string) => boolean, includeAdmin = false) =>
-    getAccountNavLinks({ isEnabled, includeAdmin })
-      .filter((link) => UMSC_QUICK_ACCOUNT_KEYS.has(link.key))
-      .map((link) => link.key);
+    getQuickAccountNavLinks({ isEnabled, includeAdmin }).map(
+      (link) => link.key,
+    );
 
   it("is Orders / Settings / Admin, in shared order", () => {
     expect(quick(allOn, true)).toEqual(["orders", "settings", "admin"]);

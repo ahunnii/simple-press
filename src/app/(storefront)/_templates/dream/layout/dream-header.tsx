@@ -20,19 +20,15 @@ import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import {
   activeEntryIndex,
-  externalLinkProps,
-  getAccountNavLinks,
   donateLinkOptions,
+  externalLinkProps,
+  getQuickAccountNavLinks,
   navGroupEntries,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveDreamFields } from "../lib/resolve-fields";
-import {
-  DREAM_QUICK_ACCOUNT_KEYS,
-  dreamCtaHref,
-  resolveDreamNav,
-} from "./dream-nav";
+import { dreamCtaHref, resolveDreamNav } from "./dream-nav";
 import { DreamNavOverlay } from "./dream-nav-overlay";
 
 type DreamHeaderProps = DefaultHeaderTemplateProps & {
@@ -134,17 +130,15 @@ export function DreamHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  // Desktop avatar menu: the quick-access subset of the flag-gated account
-  // links (B4.3) — Orders only while `orders` is on. Settings is dropped
-  // here because `UserButton` renders its own built-in Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Desktop avatar menu: the quick-access subset (`getQuickAccountNavLinks`,
+  // B4.3) of the flag-gated account links — Orders only while `orders` is on.
+  // Settings is dropped here because `UserButton` renders its own built-in
+  // Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
   })
-    .filter(
-      (link) =>
-        DREAM_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,

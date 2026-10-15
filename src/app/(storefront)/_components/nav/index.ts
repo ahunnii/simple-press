@@ -8,7 +8,12 @@ export {
   type NavItem,
 } from "./resolve-nav";
 
-export { getAccountNavLinks, type AccountNavLink } from "./account-links";
+export {
+  getAccountNavLinks,
+  getQuickAccountNavLinks,
+  QUICK_ACCOUNT_KEYS,
+  type AccountNavLink,
+} from "./account-links";
 
 export {
   filterNavByFlags,

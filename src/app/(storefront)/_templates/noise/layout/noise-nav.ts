@@ -65,19 +65,6 @@ export function noiseNavLeftCount(
 }
 
 /**
- * Quick-access account subset (B4.3) for the desktop avatar menu, filtered
- * from `getAccountNavLinks` by key so flag gating still applies (Orders needs
- * `orders`). The header also drops "settings" because `UserButton` renders
- * its own built-in Settings item. The mobile menu lists the FULL
- * `getAccountNavLinks` output instead (decision 2026-09-28).
- */
-export const NOISE_QUICK_ACCOUNT_KEYS = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);
-
-/**
  * Index of the ONE top-level item that reads as current (B3.4): every item's
  * group entries (`navGroupEntries`: its own href, then its children) go
  * through a single `activeEntryIndex` pass, so the longest matching href

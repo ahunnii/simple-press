@@ -6,7 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Heart, Menu, ShoppingCart, UserRound } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  Menu,
+  ShoppingCart,
+  UserRound,
+} from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -24,7 +30,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -58,18 +64,6 @@ const BAMBOO_DEFAULT_NAV: NavItem[] = [
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];
-
-/**
- * Quick-access account keys shown in the desktop avatar menu — Orders,
- * Settings, Admin (B4.3 decision, 2026-09-27). The full list (address book,
- * subscriptions, invoices, rewards, security, preferences) lives only in the
- * account sidebar, one tap away via Settings. `bamboo-nav-sheet-account.tsx`
- * keeps its own copy of this set (same keys) rather than importing it from
- * here, to avoid a header ↔ mobile-nav ↔ sheet-account import cycle
- * (`BambooHeader` already imports `BambooMobileNav`, which imports the sheet
- * account component).
- */
-const BAMBOO_QUICK_ACCOUNT_KEYS = new Set(["orders", "settings", "admin"]);
 
 /**
  * BambooHeader — the "hanging emblem" nav, bamboo's signature moment.
@@ -287,7 +281,8 @@ export function BambooHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  // Desktop avatar menu: the quick-access subset (B4.3 decision) of the same
+  // Desktop avatar menu: the quick-access subset (`getQuickAccountNavLinks`,
+  // B4.3) of the same
   // flag-gated account links the mobile sheet and Default's account sidebar
   // use — the full list lives in the account sidebar. Settings is dropped
   // because `UserButton` renders its own built-in Settings item.
@@ -295,14 +290,11 @@ export function BambooHeader({
     orders: <IconPackage className="h-4 w-4" />,
     admin: <IconLayoutDashboard className="h-4 w-4" />,
   };
-  const userButtonLinks = getAccountNavLinks({
+  const userButtonLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: isAdmin,
   })
-    .filter(
-      (link) =>
-        BAMBOO_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,
@@ -748,7 +740,7 @@ export function BambooHeader({
                 aria-label={`${businessName} — home`}
                 className="flex items-center"
               >
-                <span className="font-heading max-w-[12rem] truncate text-lg text-[var(--bam-cream)] uppercase tracking-[0.18em]">
+                <span className="font-heading max-w-[12rem] truncate text-lg tracking-[0.18em] text-[var(--bam-cream)] uppercase">
                   {businessName}
                 </span>
               </Link>

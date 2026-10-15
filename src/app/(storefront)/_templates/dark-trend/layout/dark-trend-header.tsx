@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,7 +33,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -144,35 +145,34 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
     </>
   );
 
+  const isAdminUser =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
+  // Quick-access subset (`getQuickAccountNavLinks`, B4.3) shared with the
+  // mobile panel below. Business members reach /admin too, not just platform
+  // admins; Orders drops with the `orders` flag. Settings is dropped because
+  // `UserButton` renders its own built-in Settings item.
+  const quickAccountLinks = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin: isAdminUser,
+  });
+  const accountLinkIcons: Record<string, ReactNode> = {
+    orders: <IconPackage className="h-4 w-4" />,
+    admin: <IconLayoutDashboard className="h-4 w-4" />,
+  };
+
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="border-primary border"
       avatarClassName="size-10"
-      links={[
-        // Business members reach /admin too, not just platform admins — this
-        // matches the gate the other templates already use.
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-        // /account/orders 404s when the owner disables the `orders` feature.
-        ...(isEnabled("orders")
-          ? [
-              {
-                icon: <IconPackage className="h-4 w-4" />,
-                label: "Orders",
-                href: "/account/orders",
-              },
-            ]
-          : []),
-      ]}
+      links={quickAccountLinks
+        .filter((link) => link.key !== "settings")
+        .map((link) => ({
+          label: link.label,
+          href: link.href,
+          icon: accountLinkIcons[link.key],
+        }))}
     />
   );
 
@@ -182,14 +182,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
     "text-sm text-white/70 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6A5ACD]";
   const accountUser = session?.user;
   const accountName = accountUser?.name?.trim() ?? "";
-  const accountLinks = accountUser
-    ? getAccountNavLinks({
-        isEnabled,
-        includeAdmin:
-          accountUser.platformRole === "PLATFORM_ADMIN" ||
-          !!session?.session?.membershipId,
-      }).filter((link) => ["orders", "settings", "admin"].includes(link.key))
-    : [];
+  const accountLinks = accountUser ? quickAccountLinks : [];
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/5 bg-[#1F1F1F]">

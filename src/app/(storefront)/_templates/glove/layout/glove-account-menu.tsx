@@ -9,7 +9,7 @@ import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import { sentenceCase } from "../shared/glove-sentence-case";
 import { GLOVE_FIELD_KEYS } from "./index";
@@ -28,8 +28,8 @@ type GloveAccountMenuProps = {
 
 /**
  * The quiet account control (icon + label, styled like the header icon buttons). Signed out it links to sign-in; signed in
- * it opens a small disclosure with the flag-aware account links
- * (`getAccountNavLinks`) and sign-out. A custom disclosure rather than Radix,
+ * it opens a small disclosure with the quick-access account links
+ * (`getQuickAccountNavLinks`: Orders, Settings, Admin) and sign-out. A custom disclosure rather than Radix,
  * so the panel stays inside the `.glove` scope. The caller gates this on the
  * `customerAccounts` flag.
  */
@@ -97,7 +97,7 @@ export function GloveAccountMenu({
 
   const includeAdmin =
     user.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
-  const links = getAccountNavLinks({ isEnabled, includeAdmin });
+  const links = getQuickAccountNavLinks({ isEnabled, includeAdmin });
 
   return (
     <div

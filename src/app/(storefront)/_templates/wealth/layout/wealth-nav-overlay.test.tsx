@@ -2,14 +2,14 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 import { WealthNavOverlay } from "./wealth-nav-overlay";
 
 /**
  * Wealth nav overlay account block: plain links inside the dialog (no
  * UserButton — its portaled dropdown landed under the z-60 overlay),
- * flag-gated via the shared `getAccountNavLinks`, closing the overlay.
+ * the quick-access subset (B4.3) from the shared `getQuickAccountNavLinks`, closing the overlay.
  * Mocks follow pollen/layout/pollen-header.test.tsx.
  */
 
@@ -121,7 +121,7 @@ describe("WealthNavOverlay account block", () => {
     expect(within(dialog).queryByRole("link", { name: "Sign out" })).toBeNull();
   });
 
-  it("lists flag-gated account links + Sign out as plain links, no UserButton", () => {
+  it("lists the quick account links + Sign out as plain links, no UserButton", () => {
     session = {
       user: { name: "Ada Lovelace", email: "ada@example.com" },
       session: {},
@@ -141,16 +141,22 @@ describe("WealthNavOverlay account block", () => {
         a.getAttribute("href"),
       ]),
     ).toEqual(
-      getAccountNavLinks({
+      getQuickAccountNavLinks({
         isEnabled: (flag) => flag === "orders" || flag === "invoices",
       }).map((l) => [l.label, l.href]),
     );
-    // Gating reaches the overlay: on → shown, off → absent, no Admin.
+    // Gating reaches the overlay: Orders on → shown, no Admin.
     expect(within(account).getByRole("link", { name: "Orders" })).toBeTruthy();
+    // Everything beyond the quick subset stays out, even with its flag on.
     expect(
-      within(account).getByRole("link", { name: "Invoices" }),
-    ).toBeTruthy();
-    expect(within(account).queryByRole("link", { name: "Rewards" })).toBeNull();
+      within(account).queryByRole("link", { name: "Invoices" }),
+    ).toBeNull();
+    expect(
+      within(account).queryByRole("link", { name: "Address Book" }),
+    ).toBeNull();
+    expect(
+      within(account).queryByRole("link", { name: "Security" }),
+    ).toBeNull();
     expect(within(account).queryByRole("link", { name: "Admin" })).toBeNull();
 
     const signOut = within(dialog).getByRole("link", { name: "Sign out" });

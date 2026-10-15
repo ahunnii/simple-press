@@ -5,16 +5,7 @@ import { LogOut } from "lucide-react";
 
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-/**
- * Quick-access account keys shown in this signed-in block — Orders,
- * Settings, Admin (B4.3/B4.4 decision, 2026-09-27). Kept as its own local
- * copy of `bamboo-header.tsx`'s `BAMBOO_QUICK_ACCOUNT_KEYS` (same keys)
- * rather than an import, to avoid a header ↔ mobile-nav ↔ sheet-account
- * import cycle.
- */
-const BAMBOO_QUICK_ACCOUNT_KEYS = new Set(["orders", "settings", "admin"]);
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 const SIGN_OUT_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signOut}`;
 
@@ -57,9 +48,9 @@ export function BambooNavSheetAccount({
   const includeAdmin =
     user.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
 
-  const links = getAccountNavLinks({ isEnabled, includeAdmin }).filter(
-    (link) => BAMBOO_QUICK_ACCOUNT_KEYS.has(link.key),
-  );
+  // Quick-access subset (`getQuickAccountNavLinks`, B4.3): Orders, Settings,
+  // Admin.
+  const links = getQuickAccountNavLinks({ isEnabled, includeAdmin });
 
   return (
     <div className="mb-6">

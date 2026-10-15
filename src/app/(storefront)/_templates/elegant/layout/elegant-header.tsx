@@ -18,6 +18,7 @@ import {
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
@@ -31,6 +32,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -42,6 +44,12 @@ import { resolveFields } from "..";
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+/** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <Package className="h-4 w-4" />,
+  admin: <LayoutDashboardIcon className="h-4 w-4" />,
+};
 
 const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
@@ -342,6 +350,22 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     fontWeight: active ? 500 : 400,
   });
 
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped:
+  // `UserButton` renders its own built-in Settings item. Business members
+  // reach /admin too, not just platform admins.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
+    isEnabled: isStorefrontEnabled,
+    includeAdmin:
+      user?.platformRole === "PLATFORM_ADMIN" ||
+      !!session?.session?.membershipId,
+  })
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const iconBtnStyle: React.CSSProperties = {
     width: 34,
     height: 34,
@@ -551,32 +575,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                       size="icon"
                       className="h-[34px] w-[34px] rounded-full"
                       avatarClassName="w-[34px] h-[34px]"
-                      links={[
-                        // Business members reach /admin too, not just platform
-                        // admins — matches the gate the other templates use.
-                        ...(user.platformRole === "PLATFORM_ADMIN" ||
-                        session?.session?.membershipId
-                          ? [
-                              {
-                                icon: (
-                                  <LayoutDashboardIcon className="h-4 w-4" />
-                                ),
-                                label: "Admin",
-                                href: "/admin",
-                              },
-                            ]
-                          : []),
-                        // /account/orders 404s when the owner disables `orders`.
-                        ...(isStorefrontEnabled("orders")
-                          ? [
-                              {
-                                icon: <Package className="h-4 w-4" />,
-                                label: "Orders",
-                                href: "/account/orders",
-                              },
-                            ]
-                          : []),
-                      ]}
+                      links={userButtonLinks}
                     />
                   ) : (
                     <Link

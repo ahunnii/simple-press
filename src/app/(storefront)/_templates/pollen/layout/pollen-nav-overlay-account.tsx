@@ -5,14 +5,7 @@ import { LogOut } from "lucide-react";
 
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-/** Account links shown in pollen's header menus (desktop + mobile overlay). */
-export const POLLEN_QUICK_ACCOUNT_KEYS = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
 
@@ -97,9 +90,7 @@ export function PollenNavOverlayAccount({
   // Quick-access subset only — the full list (address book, subscriptions,
   // invoices, rewards, security, preferences) lives in the account area's
   // own nav, one tap away via Settings.
-  const links = getAccountNavLinks({ isEnabled, includeAdmin }).filter((link) =>
-    POLLEN_QUICK_ACCOUNT_KEYS.has(link.key),
-  );
+  const links = getQuickAccountNavLinks({ isEnabled, includeAdmin });
 
   // `name` can be blank (email-only sign-ups) — fall back to the email as the
   // primary line and drop the duplicate subtitle.

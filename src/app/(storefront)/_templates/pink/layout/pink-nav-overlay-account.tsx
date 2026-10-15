@@ -9,9 +9,7 @@ import { LogOut, Settings, User } from "lucide-react";
 import type { Session } from "~/server/better-auth/config";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-import { PINK_QUICK_ACCOUNT_KEYS } from "./pink-nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 const SIGN_IN_HREF = `${AUTH_BASE_PATHS.auth}/${AUTH_VIEW_PATHS.signIn}`;
 /** Same better-auth-ui sign-out view the desktop avatar menu navigates to. */
@@ -41,8 +39,8 @@ type PinkNavOverlayAccountProps = {
  * trap. Everything here is a plain anchor the overlay's own Tab trap reaches.
  *
  * - Signed out: the full-width "Sign in" ghost button the menu always had.
- * - Signed in: the quick-access subset (`PINK_QUICK_ACCOUNT_KEYS`: Orders,
- *   Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
+ * - Signed in: the quick-access subset (`getQuickAccountNavLinks`, B4.3:
+ *   Orders, Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
  *   hand-written list — then Sign out, as one compact row of links so the
  *   stack doesn't crowd the nav above it.
  * - Pending (unseeded session only): a placeholder the size of the Sign in
@@ -87,10 +85,10 @@ export function PinkNavOverlayAccount({
     session.user.platformRole === "PLATFORM_ADMIN" ||
     !!session.session?.membershipId;
 
-  const accountLinks = getAccountNavLinks({
+  const accountLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
-  }).filter((link) => PINK_QUICK_ACCOUNT_KEYS.has(link.key));
+  });
 
   return (
     <nav aria-label="Account" className="flex flex-col gap-1">

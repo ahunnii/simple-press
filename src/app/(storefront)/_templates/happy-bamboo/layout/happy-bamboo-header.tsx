@@ -24,17 +24,14 @@ import {
   activeEntryIndex,
   donateLinkOptions,
   externalLinkProps,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
-import {
-  HB_ACCOUNT_LINK_ICONS,
-  HB_QUICK_ACCOUNT_KEYS,
-} from "../lib/account-link-icons";
+import { HB_ACCOUNT_LINK_ICONS } from "../lib/account-link-icons";
 import { resolveHappyBambooNav } from "../lib/nav";
 import {
   HappyBambooMenuToggle,
@@ -149,19 +146,17 @@ export function HappyBambooHeader({
     </>
   );
 
-  // Desktop avatar menu: the quick-access subset (B4.3 decision) of the same
-  // flag-gated account links the mobile panel and Default's account sidebar
-  // use — the full list lives in the account sidebar. Settings is dropped
-  // because `UserButton` renders its own built-in Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Desktop avatar menu: the quick-access subset (`getQuickAccountNavLinks`,
+  // B4.3) of the same flag-gated account links the mobile panel and Default's
+  // account sidebar use — the full list lives in the account sidebar. Settings
+  // is dropped because `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin:
       session?.user?.platformRole === "PLATFORM_ADMIN" ||
       !!session?.session?.membershipId,
   })
-    .filter(
-      (link) => HB_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,

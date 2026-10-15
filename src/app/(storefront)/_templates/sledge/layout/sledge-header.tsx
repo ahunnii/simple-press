@@ -10,12 +10,9 @@ import {
   IconPackage,
 } from "@tabler/icons-react";
 import {
-  Bell,
-  BookUser,
   ChevronDown,
   ChevronUp,
   Heart,
-  Lock,
   Menu,
   Package,
   Settings,
@@ -26,6 +23,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
@@ -39,6 +37,7 @@ import { useWishlist } from "~/providers/wishlist-context";
 import {
   donateLinkOptions,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
@@ -51,13 +50,18 @@ type NavLink = {
   children?: NavChild[];
 };
 
-const MOBILE_ACCOUNT_LINKS = [
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/account/settings", label: "Settings", icon: Settings },
-  { href: "/account/security", label: "Security", icon: Lock },
-  { href: "/account/address-book", label: "Address Book", icon: BookUser },
-  { href: "/account/preferences", label: "Preferences", icon: Bell },
-] as const;
+/** Icons for the desktop `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
+
+/** Icons for the mobile account menu, keyed by `getQuickAccountNavLinks` key. */
+const MOBILE_ACCOUNT_ICONS: Record<string, React.ReactNode> = {
+  orders: <Package className="h-4 w-4 shrink-0" aria-hidden />,
+  settings: <Settings className="h-4 w-4 shrink-0" aria-hidden />,
+  admin: <IconLayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />,
+};
 
 /** Returns all keyboard-focusable elements inside `container`. */
 function getFocusables(container: HTMLElement): HTMLElement[] {
@@ -313,27 +317,27 @@ export function SledgeHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
+  // Quick-access subset (B4.3: Orders, Settings, Admin). The desktop menu
+  // drops Settings: `UserButton` renders its own built-in Settings item. The
+  // mobile account menu keeps all three.
+  const quickAccountLinks = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  });
+  const userButtonLinks: UserButtonLink[] = quickAccountLinks
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="h-auto w-auto rounded-full border border-white/30 p-0"
       avatarClassName="size-9"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(showAdminLink
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
@@ -757,43 +761,23 @@ export function SledgeHeader({
                           </p>
                         </div>
                         <ul className="py-1">
-                          {MOBILE_ACCOUNT_LINKS.map(
-                            ({ href, label, icon: Icon }) => (
-                              <li key={href}>
-                                <Link
-                                  href={href}
-                                  onClick={closeMobileMenu}
-                                  className={cn(
-                                    "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
-                                    isLinkActive(href)
-                                      ? "text-[var(--sl-coral)]"
-                                      : "text-white/80",
-                                  )}
-                                >
-                                  <Icon
-                                    className="h-4 w-4 shrink-0"
-                                    aria-hidden
-                                  />
-                                  {label}
-                                </Link>
-                              </li>
-                            ),
-                          )}
-                          {showAdminLink ? (
-                            <li>
+                          {quickAccountLinks.map(({ key, href, label }) => (
+                            <li key={key}>
                               <Link
-                                href="/admin"
+                                href={href}
                                 onClick={closeMobileMenu}
-                                className="flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/80 uppercase transition-colors hover:bg-white/5"
+                                className={cn(
+                                  "flex items-center gap-3 px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-colors hover:bg-white/5",
+                                  isLinkActive(href)
+                                    ? "text-[var(--sl-coral)]"
+                                    : "text-white/80",
+                                )}
                               >
-                                <IconLayoutDashboard
-                                  className="h-4 w-4 shrink-0"
-                                  aria-hidden
-                                />
-                                Admin
+                                {MOBILE_ACCOUNT_ICONS[key]}
+                                {label}
                               </Link>
                             </li>
-                          ) : null}
+                          ))}
                           <li className="border-t border-white/10">
                             <Link
                               href="/auth/sign-out"

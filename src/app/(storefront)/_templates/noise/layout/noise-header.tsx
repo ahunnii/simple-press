@@ -17,17 +17,11 @@ import {
   IconPackage,
 } from "@tabler/icons-react";
 import {
-  Bell,
-  BookUser,
   ChevronDown,
   ChevronUp,
-  FileText,
-  Gift,
   Heart,
-  Lock,
   Menu,
   Package,
-  Repeat,
   Settings,
   ShoppingBag,
   User,
@@ -54,14 +48,14 @@ import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
   externalLinkProps,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveNoiseCartCopy } from "../cart-checkout/noise-cart-copy";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
 import { resolveNoiseLocationTag } from "../shared/noise-location-tag";
-import { NOISE_QUICK_ACCOUNT_KEYS, noiseActiveItemIndex } from "./noise-nav";
+import { noiseActiveItemIndex } from "./noise-nav";
 
 type NoiseHeaderProps = DefaultHeaderTemplateProps & {
   /** Owner nav (or `NOISE_DEFAULT_NAV`), resolved and flag-filtered ONCE by
@@ -81,20 +75,15 @@ const QUICK_ACCOUNT_ICONS: Record<string, ReactNode> = {
   admin: <IconLayoutDashboard className="h-4 w-4" />,
 };
 
-/** Mobile account-panel icons, keyed by `getAccountNavLinks` key (same set
- *  as the account sidebar). Unknown future keys fall back to `Settings`. */
+/** Mobile account-panel icons, keyed by `getAccountNavLinks` key — just the
+ *  quick-access keys (Orders, Settings, Admin). Unknown keys fall back to
+ *  `Settings`. */
 const MOBILE_ACCOUNT_ICONS: Record<
   string,
   LucideIcon | ComponentType<{ className?: string; "aria-hidden"?: boolean }>
 > = {
   orders: Package,
-  "address-book": BookUser,
-  subscriptions: Repeat,
-  invoices: FileText,
-  rewards: Gift,
   settings: Settings,
-  security: Lock,
-  preferences: Bell,
   admin: IconLayoutDashboard,
 };
 
@@ -360,27 +349,25 @@ export function NoiseHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  // Every account link, flag-gated (B4.3/B4.4): Orders needs `orders`,
-  // Subscriptions/Invoices/Rewards their own flags, Admin only for staff.
-  const accountLinks = getAccountNavLinks({
+  // Quick-access subset (`getQuickAccountNavLinks`, B4.3): Orders (needs
+  // `orders`), Settings, Admin (staff only). Feeds both the desktop avatar
+  // and the mobile panel; the full list lives in the account sidebar.
+  const accountLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
   });
 
-  // Desktop avatar: the quick-access subset, filtered by key. Settings is
-  // dropped because `UserButton` renders its own built-in Settings item.
+  // Desktop avatar: Settings is dropped because `UserButton` renders its own
+  // built-in Settings item.
   const userButtonLinks: UserButtonLink[] = accountLinks
-    .filter(
-      (link) =>
-        NOISE_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,
       icon: QUICK_ACCOUNT_ICONS[link.key],
     }));
 
-  // Mobile account panel: the FULL list; one `aria-current` (longest match).
+  // Mobile account panel: the same quick set; one `aria-current` (longest match).
   const activeAccountIndex = activeEntryIndex(pathname, accountLinks);
 
   const userMenu = session?.user && (
@@ -979,8 +966,8 @@ export function NoiseHeader({
                           </p>
                         </div>
                         <ul className="py-1">
-                          {/* The FULL flag-gated list (B4.4), Admin last when
-                            the shopper is staff, then Sign out. */}
+                          {/* The quick-access set (B4.3), Admin last when the
+                            shopper is staff, then Sign out. */}
                           {accountLinks.map((link, j) => {
                             const Icon =
                               MOBILE_ACCOUNT_ICONS[link.key] ?? Settings;

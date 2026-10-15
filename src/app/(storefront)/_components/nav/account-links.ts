@@ -112,3 +112,26 @@ export function getAccountNavLinks({
 
   return links;
 }
+
+/**
+ * Keys of the quick-access subset shown in header user menus and mobile menus
+ * (feature baseline B4.3). The full list belongs only to the account area's
+ * sidebar.
+ */
+export const QUICK_ACCOUNT_KEYS: ReadonlySet<string> = new Set([
+  "orders",
+  "settings",
+  "admin",
+]);
+
+/**
+ * Header and mobile-menu quick-access subset of `getAccountNavLinks` (B4.3):
+ * Orders (still gated on `orders`), Settings, and Admin. Same params, same
+ * order — just filtered to `QUICK_ACCOUNT_KEYS`.
+ */
+export function getQuickAccountNavLinks(opts: {
+  isEnabled: IsEnabled;
+  includeAdmin?: boolean;
+}): AccountNavLink[] {
+  return getAccountNavLinks(opts).filter((l) => QUICK_ACCOUNT_KEYS.has(l.key));
+}

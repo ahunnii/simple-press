@@ -22,18 +22,14 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 import {
   externalLinkProps,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
 import { PinkMobileMenu } from "./pink-mobile-menu";
-import {
-  PINK_QUICK_ACCOUNT_KEYS,
-  pinkActiveNav,
-  resolvePinkNav,
-} from "./pink-nav";
+import { pinkActiveNav, resolvePinkNav } from "./pink-nav";
 import { PinkNavDropdown } from "./pink-nav-dropdown";
 
 /** Re-exported for existing imports — the nav model lives in `./pink-nav`. */
@@ -156,17 +152,15 @@ export function PinkHeader({
   // desktop nav too.
   const active = pinkActiveNav(pathname ?? "/", mobileItems);
 
-  // Desktop avatar menu: the quick-access subset (Orders, Admin) of the
-  // flag-gated account links — Orders drops with `orders` off. Settings is
-  // dropped because `UserButton` renders its own built-in Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Desktop avatar menu: the quick-access subset (`getQuickAccountNavLinks`,
+  // B4.3) of the flag-gated account links — Orders drops with `orders` off.
+  // Settings is dropped because `UserButton` renders its own built-in
+  // Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
   })
-    .filter(
-      (link) =>
-        PINK_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,

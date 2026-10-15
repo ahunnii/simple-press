@@ -41,7 +41,7 @@ import {
   activeEntryIndex,
   donateLinkOptions,
   externalLinkProps,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   navGroupEntries,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
@@ -50,7 +50,6 @@ import { resolveFields } from "../index";
 import { resolveUmscContactDetails } from "../shared/umsc-contact-details";
 import {
   resolveUmscNav,
-  UMSC_QUICK_ACCOUNT_KEYS,
   umscActiveItemIndex,
   umscHrefAllowed,
 } from "./umsc-nav";
@@ -228,16 +227,14 @@ export function UmscHeader({
   // flag-gated account links (B4.3, decision 2026-09-28), then UserButton's
   // own Sign out. Its built-in Settings item is hidden so Settings comes from
   // the same shared list as everything else.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
-  })
-    .filter((link) => UMSC_QUICK_ACCOUNT_KEYS.has(link.key))
-    .map((link) => ({
-      label: link.label,
-      href: link.href,
-      icon: ACCOUNT_LINK_ICONS[link.key],
-    }));
+  }).map((link) => ({
+    label: link.label,
+    href: link.href,
+    icon: ACCOUNT_LINK_ICONS[link.key],
+  }));
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
