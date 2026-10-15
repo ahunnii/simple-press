@@ -9,6 +9,7 @@ import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
@@ -18,12 +19,19 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import {
   donateLinkOptions,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
+
+/** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <LayoutDashboardIcon className="h-4 w-4" />,
+};
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -177,28 +185,28 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
         : "text-[#6b6b6b] hover:text-[#0a0a0a] after:scale-x-0 hover:after:scale-x-100",
     );
 
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped
+  // from the desktop menu: `UserButton` renders its own built-in Settings item.
+  const quickAccountLinks = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin:
+      user?.platformRole === "PLATFORM_ADMIN" ||
+      !!session?.session?.membershipId,
+  });
+  const userButtonLinks: UserButtonLink[] = quickAccountLinks
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const userMenu = user && (
     <UserButton
       size="icon"
       className="border border-[#e8e8e8]"
       avatarClassName="size-8"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <LayoutDashboardIcon className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
@@ -481,7 +489,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
               {user && (
                 <li className="py-4">
                   <Link
-                    href="/account/orders"
+                    href={quickAccountLinks[0]?.href ?? "/account/settings"}
                     onClick={() => setMobileOpen(false)}
                     className="text-sm text-[#6b6b6b] transition-colors hover:text-[#0a0a0a]"
                   >

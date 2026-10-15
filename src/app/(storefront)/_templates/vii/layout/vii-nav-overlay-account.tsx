@@ -5,17 +5,7 @@ import { LogOut } from "lucide-react";
 
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-/**
- * Account links shown in vii's full-screen mobile menu (B4.4). Orders +
- * Settings — the desktop avatar menu drops Settings because `UserButton`
- * renders its own built-in Settings item; this overlay has no such
- * built-in, so it keeps its own copy. The full list (address book,
- * subscriptions, invoices, rewards, security, preferences) lives one tap
- * away via Settings, in the account sidebar.
- */
-export const VII_OVERLAY_ACCOUNT_KEYS = new Set(["orders", "settings"]);
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
 
@@ -146,9 +136,11 @@ export function ViiNavOverlayAccount({
 
   const includeAdmin =
     user.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
-  const links = getAccountNavLinks({ isEnabled, includeAdmin }).filter(
-    (link) => VII_OVERLAY_ACCOUNT_KEYS.has(link.key),
-  );
+  // Quick-access subset (`getQuickAccountNavLinks`, B4.3): Orders, Settings,
+  // Admin. The desktop avatar menu drops Settings because `UserButton`
+  // renders its own built-in Settings item; this overlay has none, so it
+  // keeps it. The full list lives one tap away via Settings.
+  const links = getQuickAccountNavLinks({ isEnabled, includeAdmin });
 
   return (
     <div className="flex flex-col gap-3">

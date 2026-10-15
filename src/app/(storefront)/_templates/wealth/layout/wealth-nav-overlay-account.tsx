@@ -5,7 +5,7 @@ import { LogOut } from "lucide-react";
 
 import type { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type HydratedSession = ReturnType<typeof useHydratedSession>["data"];
 
@@ -89,7 +89,7 @@ export function WealthNavOverlayAccount({
 
   const includeAdmin =
     user.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
-  const links = getAccountNavLinks({ isEnabled, includeAdmin });
+  const links = getQuickAccountNavLinks({ isEnabled, includeAdmin });
 
   // `name` can be blank (email-only sign-ups) — fall back to the email as the
   // primary line and drop the duplicate subtitle.

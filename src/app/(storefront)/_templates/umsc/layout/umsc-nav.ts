@@ -47,19 +47,6 @@ export function resolveUmscNav(
 }
 
 /**
- * Quick-access account subset (B4.3) for the desktop avatar menu AND the
- * dialog's account block (decision 2026-09-28): filtered from
- * `getAccountNavLinks` by key, so flag gating still applies (Orders needs
- * `orders`; Admin only exists when `includeAdmin` is passed). The full list
- * lives in the account area's own sidebar.
- */
-export const UMSC_QUICK_ACCOUNT_KEYS: ReadonlySet<string> = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);
-
-/**
  * Index of the ONE top-level item that reads as current (B3.4): every item's
  * group entries (`navGroupEntries` — its own href, then its children) go
  * through a single `activeEntryIndex` pass, so the longest matching href wins

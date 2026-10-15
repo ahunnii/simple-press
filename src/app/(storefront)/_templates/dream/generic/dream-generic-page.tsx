@@ -1,265 +1,84 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-
-import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { resolveLogoAlt } from "~/lib/logo-alt";
-import { cn } from "~/lib/utils";
-import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { routeEnabled, routeFlags } from "~/lib/features/route-flags";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 
-import { DreamPageHero } from "../shared/dream-page-hero";
-import { DreamSection } from "../shared/dream-section";
-import { DreamGenericCoverHero } from "./dream-generic-cover-hero";
+import { resolveFields } from "..";
+import { DreamQuoteCta } from "../shared/dream-quote-cta";
+import { DreamGenericPageBody } from "./dream-generic-page-body";
+import { DREAM_PAGE_CTA_KEYS } from "./index";
 
 type Business = NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 type Page = NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 
-function formatUpdated(date: Date | string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+const FIELD_KEYS = Object.values(DREAM_PAGE_CTA_KEYS);
+
+/** True when an internal href ("/estimate", "/estimate/?x#y") is `/${slug}`. */
+function linksToPage(href: string, slug: string): boolean {
+  const path = href.trim().split(/[?#]/)[0]?.replace(/\/+$/, "") ?? "";
+  return path === `/${slug}`;
 }
-
-type Heading = { id: string; text: string; level: 2 | 3 };
-
-/** Walks the Tiptap JSON to detect h2/h3 headings — decides whether to render the TOC. */
-function hasTocHeadings(content: unknown): boolean {
-  const walk = (node: unknown): boolean => {
-    if (node == null || typeof node !== "object") return false;
-    const n = node as {
-      type?: string;
-      attrs?: { level?: number };
-      content?: unknown;
-    };
-    if (
-      n.type === "heading" &&
-      (n.attrs?.level === 2 || n.attrs?.level === 3)
-    ) {
-      return true;
-    }
-    return Array.isArray(n.content) && n.content.some(walk);
-  };
-  return walk(content);
-}
-
-/** Sticky scroll-spy "On this page" nav, shown only when `hasTocHeadings` is true. */
-function DreamToc({
-  contentRef,
-}: {
-  contentRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const [headings, setHeadings] = useState<Heading[]>([]);
-  const [activeId, setActiveId] = useState<string>("");
-
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-
-    const nodes = el.querySelectorAll("h2, h3");
-    const list: Heading[] = [];
-    const seen = new Map<string, number>();
-    nodes.forEach((node) => {
-      const text = node.textContent?.trim() ?? "";
-      if (!text) return;
-      const base = text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-");
-      const count = seen.get(base) ?? 0;
-      seen.set(base, count + 1);
-      const id = count === 0 ? base : `${base}-${count + 1}`;
-      node.id = id;
-      list.push({ id, text, level: node.tagName === "H2" ? 2 : 3 });
-    });
-    setHeadings(list);
-  }, [contentRef]);
-
-  useEffect(() => {
-    if (headings.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
-        }
-      },
-      { rootMargin: "-20% 0px -70% 0px" },
-    );
-    headings.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [headings]);
-
-  if (headings.length === 0) return null;
-
-  return (
-    <nav
-      aria-label="On this page"
-      className="sticky hidden self-start lg:block"
-      style={{ top: "calc(var(--dream-header-h) + 32px)" }}
-    >
-      <p className="mb-4 text-[13px] font-semibold text-[var(--dream-ink)]">
-        On this page
-      </p>
-      <ul className="flex flex-col gap-1.5 border-l border-[var(--dream-line)]">
-        {headings.map((h) => (
-          <li key={h.id}>
-            <a
-              href={`#${h.id}`}
-              className={cn(
-                "-ml-px block border-l-2 py-1 text-[13px] transition-colors",
-                h.level === 3 ? "pl-5" : "pl-3",
-                activeId === h.id
-                  ? "border-[var(--dream-rose)] font-medium text-[var(--dream-ink)]"
-                  : "border-transparent text-[var(--dream-soft)]",
-              )}
-            >
-              {h.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-/**
- * Prose classes for `TiptapRenderer` output, mapped onto dream tokens
- * (Italiana h2/h3, rose-underline links, gold-hairline blockquotes, 66ch
- * measure, styled lists/tables).
- *
- * `.dream h1/h2/h3` and `.dream p` (globals.css, Phase 2) unconditionally
- * set `margin: 0` — written for `DreamH1`/`DreamHeading`'s flex-gap spacing
- * model, as plain unlayered CSS that beats any Tailwind Typography margin
- * utility regardless of specificity (Tailwind's generated utilities live in
- * `@layer utilities`, and unlayered rules always win over layered ones).
- * Rather than fight that with `!important` variants, heading/paragraph
- * rhythm below rides `padding` instead of `margin`, which that rule never
- * touches — see the E-phase3 report for the full note.
- */
-export const DREAM_PROSE_CLASSNAME = cn(
-  "prose w-full max-w-[66ch]",
-  "prose-headings:[font-family:var(--font-dream-display)] prose-headings:font-normal prose-headings:text-[var(--dream-ink)] prose-headings:tracking-[-0.01em]",
-  "prose-h2:m-0 prose-h2:pt-14 prose-h2:pb-4 prose-h2:text-[clamp(28px,3.2vw,38px)] prose-h2:leading-[1.15]",
-  "prose-h3:m-0 prose-h3:pt-10 prose-h3:pb-3 prose-h3:text-[clamp(22px,2.4vw,27px)] prose-h3:leading-[1.2]",
-  "prose-p:m-0 prose-p:pt-5 prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-[var(--dream-ink)]",
-  "prose-li:[font-family:var(--font-dream-body)] prose-li:text-[18px] prose-li:leading-[1.7] prose-li:text-[var(--dream-ink)] prose-li:marker:text-[var(--dream-gold)] prose-li:my-1.5",
-  "prose-ul:mt-3 prose-ul:pl-6 prose-ol:mt-3 prose-ol:pl-6",
-  "prose-strong:font-semibold prose-strong:text-[var(--dream-ink)]",
-  "prose-a:text-[var(--dream-soft)] prose-a:no-underline prose-a:pb-px prose-a:bg-no-repeat prose-a:[background-position:0_100%] prose-a:bg-[length:0%_1px] prose-a:[background-image:linear-gradient(var(--dream-rose),var(--dream-rose))] prose-a:transition-[background-size,color] prose-a:duration-200 hover:prose-a:text-[var(--dream-ink)] hover:prose-a:bg-[length:100%_1px]",
-  // `prose-p:*` above (18px/1.7 Mulish) otherwise wins the cascade on the
-  // `<p>` Tiptap nests inside `<blockquote>`, since Typography-plugin
-  // modifier utilities are equal-specificity `:where()` rules — so the
-  // pull-quote scale/face is reasserted directly on `blockquote > p` via an
-  // arbitrary-variant descendant selector (same pattern as the
-  // `sp-quote-breakout` override below), matching the testimonials
-  // featured-quote voice rather than body-copy scale.
-  "prose-blockquote:m-0 prose-blockquote:mt-8 prose-blockquote:border-l prose-blockquote:border-[var(--dream-line)] prose-blockquote:pl-6",
-  "[&_blockquote>p]:pt-0 [&_blockquote>p]:font-[family-name:var(--font-dream-display)] [&_blockquote>p]:not-italic [&_blockquote>p]:text-[1.25rem] [&_blockquote>p]:leading-[1.55] [&_blockquote>p]:text-[var(--dream-ink)]",
-  "prose-hr:my-10 prose-hr:border-[var(--dream-line)]",
-  "prose-img:rounded-[var(--dream-radius-photo)] prose-img:border prose-img:border-[var(--dream-line)] prose-img:mt-8",
-  "prose-table:text-[16px] prose-th:text-[var(--dream-ink)] prose-th:border-[var(--dream-line)] prose-td:border-[var(--dream-line)] prose-td:text-[var(--dream-ink)]",
-  // Quote-calculator breakout blocks escape the 66ch article measure.
-  "[&_.sp-quote-breakout]:max-w-none",
-);
 
 /**
  * GenericPage — renders arbitrary CMS `Page` records (any published page not
- * covered by a dedicated slot). No template fields (see generic/index.ts);
- * cover-vs-plain hero branches on `page.image` (design.md GenericPage note).
+ * covered by a dedicated slot). Server component: the hero + CMS body (with
+ * its scroll-spy TOC) is the client `DreamGenericPageBody`; this wrapper
+ * adds the closing "Request an Estimate Quote" cloud band — the same
+ * `DreamQuoteCta` that closes every service page — from the global
+ * `global.page-cta` fields (see generic/index.ts). The band is a sibling
+ * after the content section, full width, so its cloud deck melts into
+ * paper exactly as on the service pages. Regular pages only (`page.type`
+ * "page" / "custom"), never policies or blog posts.
  */
-export function DreamGenericPage({
+export async function DreamGenericPage({
   business,
   page,
 }: {
   business: Business;
   page: Page;
 }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const showToc = hasTocHeadings(page.content);
-  const isPolicy = page.type === "policy";
-  const hasCover = !!page.image?.trim();
+  const customFields = business.siteContent?.customFields;
+  const f = resolveFields(customFields, FIELD_KEYS);
 
-  const logoUrl =
-    business.siteContent?.logoUrl ?? "/templates/dream/images/logo.webp";
-  const logoAlt = resolveLogoAlt(
-    business.siteContent?.logoAltText,
-    business.name,
-  );
+  // Hideable section. A blank heading would leave an empty h2, so it hides
+  // the band too.
+  // The page the button points at (the /estimate default is itself a CMS
+  // page) never invites the visitor to the page they're already on.
+  const ctaHeading = (f[DREAM_PAGE_CTA_KEYS.heading] ?? "").trim();
+  const showCta =
+    (page.type === "page" || page.type === "custom") &&
+    ctaHeading.length > 0 &&
+    !linksToPage(f[DREAM_PAGE_CTA_KEYS.url] ?? "", page.slug) &&
+    isSectionVisible(customFields, "dream", "global.page-cta");
 
-  // No TOC → the article is the only column, so the 66ch measure centers
-  // under the (centered) page hero instead of hugging the left edge. With a
-  // TOC the prose stays left-aligned in the main column beside it.
-  const centered = !showToc;
-  const measure = centered ? "mx-auto w-full max-w-[66ch]" : undefined;
-
-  const articleBody = (
-    <div className="w-full">
-      {isPolicy ? (
-        <p className={cn("mb-8 text-[14px] text-[var(--dream-soft)]", measure)}>
-          Last updated · {formatUpdated(page.updatedAt)}
-        </p>
-      ) : null}
-
-      {/* `.dream-embed` bridges shadcn vars → dream tokens so embedded
-          Tiptap `gallery`/`quoteCalculator` nodes render on-brand. Its
-          `--centered` modifier tells the CSS where the 66ch prose column
-          sits so gallery/video blocks can break out of it symmetrically. */}
-      <div
-        ref={contentRef}
-        className={cn("dream-embed", centered && "dream-embed--centered")}
-      >
-        <TiptapRenderer
-          content={page.content as TiptapJSON}
-          className={cn(DREAM_PROSE_CLASSNAME, centered && "mx-auto")}
-        />
-      </div>
-
-      {centered ? (
-        <div className={measure}>
-          <PlatformPolicyNotice slug={page.slug} />
-        </div>
-      ) : (
-        <PlatformPolicyNotice slug={page.slug} />
-      )}
-    </div>
-  );
+  // An owner-typed link to a feature that is switched off would 404: drop the
+  // button instead (B2.5). Flags are only fetched when the link actually
+  // points at a gated route (the /estimate default needs no lookup).
+  const ctaHref = showCta ? (f[DREAM_PAGE_CTA_KEYS.url] ?? "") : "";
+  const gated = routeFlags(ctaHref).length > 0;
+  const isEnabled = gated ? (await getBusinessFlags()).isEnabled : () => true;
+  const ctaUrl =
+    ctaHref !== "" && routeEnabled(ctaHref, isEnabled) ? ctaHref : "";
 
   return (
     <>
-      {hasCover ? (
-        <DreamGenericCoverHero
-          image={page.image!}
-          title={page.title}
-          excerpt={page.excerpt ?? undefined}
-        />
-      ) : (
-        // Text-only variant: title + excerpt, no invented copy —
-        // `DreamPageHero` skips the lede when `page.excerpt` is blank.
-        <DreamPageHero
-          logoUrl={logoUrl}
-          logoAlt={logoAlt}
-          title={page.title}
-          lede={page.excerpt ?? ""}
+      <DreamGenericPageBody business={business} page={page} />
+
+      {showCta && (
+        <DreamQuoteCta
+          heading={f[DREAM_PAGE_CTA_KEYS.heading] ?? ""}
+          accent={f[DREAM_PAGE_CTA_KEYS.accent] ?? ""}
+          lede={f[DREAM_PAGE_CTA_KEYS.lede] ?? ""}
+          ctaLabel={f[DREAM_PAGE_CTA_KEYS.label] ?? ""}
+          ctaUrl={ctaUrl}
+          headingFieldKey={DREAM_PAGE_CTA_KEYS.heading}
+          accentFieldKey={DREAM_PAGE_CTA_KEYS.accent}
+          ledeFieldKey={DREAM_PAGE_CTA_KEYS.lede}
+          ctaLabelFieldKey={DREAM_PAGE_CTA_KEYS.label}
+          sectionAttrs={sectionGroupAttr("global", "page-cta")}
         />
       )}
-
-      <DreamSection tone="paper">
-        {showToc ? (
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-[220px_1fr]">
-            <DreamToc contentRef={contentRef} />
-            {articleBody}
-          </div>
-        ) : (
-          articleBody
-        )}
-      </DreamSection>
     </>
   );
 }

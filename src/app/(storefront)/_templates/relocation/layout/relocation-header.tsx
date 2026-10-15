@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { isActiveNavLink } from "~/lib/nav-utils";
@@ -17,6 +18,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import {
   donateLinkOptions,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
@@ -26,6 +28,12 @@ import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationPillButton } from "../shared/relocation-pill-button";
 import { RelocationAboutDropdown } from "./relocation-about-dropdown";
 import { RelocationMobileMenu } from "./relocation-mobile-menu";
+
+/** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
 
 /** Platform nav shape — `Business.siteContent.navigationItems` (one level of
  *  children), as validated by `navigationItemsSchema` in
@@ -160,28 +168,28 @@ export function RelocationHeader({
     </>
   );
 
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped
+  // from the desktop menu: `UserButton` renders its own built-in Settings item.
+  const quickAccountLinks = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin:
+      session?.user?.platformRole === "PLATFORM_ADMIN" ||
+      !!session?.session?.membershipId,
+  });
+  const userButtonLinks: UserButtonLink[] = quickAccountLinks
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="border-primary border"
       avatarClassName="size-10"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
-        !!session?.session?.membershipId
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 
@@ -200,14 +208,15 @@ export function RelocationHeader({
 
   // Mobile drawer: collapses to one pill link rather than squeezing the
   // above into the drawer's top bar (see RelocationMobileMenu's account
-  // props doc comment — mirrors ViiHeader's mobile pattern). Left undefined
-  // while the session is pending, which drops the row entirely — the drawer
-  // has no room for a placeholder, and a link whose destination is the
-  // session state is worse wrong than late.
+  // props doc comment — mirrors ViiHeader's mobile pattern). The signed-in
+  // destination is the first quick link: Orders while `orders` is on,
+  // otherwise Settings. Left undefined while the session is pending, which
+  // drops the row entirely — the drawer has no room for a placeholder, and a
+  // link whose destination is the session state is worse wrong than late.
   const showMobileAccount = isEnabled("customerAccounts") && !isPending;
   const mobileAccountHref = showMobileAccount
     ? session?.user
-      ? "/account/orders"
+      ? (quickAccountLinks[0]?.href ?? "/account/settings")
       : "/auth/sign-in"
     : undefined;
   const mobileAccountLabel = showMobileAccount

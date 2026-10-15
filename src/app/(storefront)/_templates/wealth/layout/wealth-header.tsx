@@ -20,7 +20,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -35,7 +35,7 @@ import { WEALTH_NAV_OVERLAY_ID, WealthNavOverlay } from "./wealth-nav-overlay";
 
 const DEFAULT_LOGO = "/templates/wealth/images/logo.png";
 
-/** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
+/** Icons for the desktop `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
 const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
   orders: <Package className="h-4 w-4" />,
   admin: <LayoutDashboard className="h-4 w-4" />,
@@ -126,8 +126,9 @@ export function WealthHeader({
   const user = session?.user;
   const isAdmin =
     user?.platformRole === "PLATFORM_ADMIN" || !!session?.session?.membershipId;
-  // Settings is dropped: `UserButton` renders its own built-in Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped:
+  // `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: isAdmin,
   })

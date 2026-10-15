@@ -9,7 +9,7 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
 import { DreamGenericCoverHero } from "../generic/dream-generic-cover-hero";
-import { DREAM_PROSE_CLASSNAME } from "../generic/dream-generic-page";
+import { DREAM_PROSE_CLASSNAME } from "../generic/dream-prose";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamQuoteCta } from "../shared/dream-quote-cta";
@@ -42,7 +42,7 @@ const FIELD_KEYS = [
  * branches on `page.image` exactly like `DreamGenericPage` (cover band vs.
  * the `DreamPageHero` masthead fallback), and the body renders through the
  * generic page's own prose styling (`DREAM_PROSE_CLASSNAME`) so post copy
- * reads at the same 66ch measure, Italiana headings, and rose links as every
+ * reads at the same `--dream-measure` width, Italiana headings, and rose links as every
  * other long-form page in the template (B1.7).
  */
 export function DreamBlogPostPage({

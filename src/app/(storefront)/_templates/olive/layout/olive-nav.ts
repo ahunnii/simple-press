@@ -32,19 +32,6 @@ export const OLIVE_DEFAULT_NAV: NavItem[] = [
   { label: "Contact", href: "/contact" },
 ];
 
-/**
- * Quick-access account subset (B4.3) for the desktop avatar menu and the
- * overlay's account block — filtered from `getAccountNavLinks` by key, so flag
- * gating (e.g. Orders needs `orders`) still applies. The full list lives in
- * the account area's own sidebar. The desktop menu also drops "settings"
- * because `UserButton` renders its own built-in Settings item.
- */
-export const OLIVE_QUICK_ACCOUNT_KEYS = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);
-
 const SHOP_HREF = "/shop";
 
 /**

@@ -11,6 +11,7 @@ import { dreamContactSections } from "./contact";
 import { dreamDonateSections } from "./donate";
 import { dreamEventsSections } from "./events";
 import { dreamFaqSections } from "./faq";
+import { dreamGenericSections } from "./generic";
 import { dreamHomepageSections } from "./homepage";
 import { dreamProductSections } from "./products";
 import { dreamServicesSections } from "./services";
@@ -55,6 +56,7 @@ export const dreamSections: Record<string, TemplateSection[]> = {
       hideable: false,
     },
     ...dreamAccountSections,
+    ...dreamGenericSections,
 
     ...dreamHomepageSections,
     ...dreamAboutSections,

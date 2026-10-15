@@ -79,16 +79,3 @@ export function pinkActiveNav(
   const index = activeEntryIndex(pathname, flat);
   return owners[index] ?? { item: -1, entry: -1 };
 }
-
-/**
- * Quick-access account subset (B4.3) for the desktop avatar menu and the
- * mobile menu's account block. Filtered from `getAccountNavLinks` by key, so
- * flag gating (Orders needs `orders`) still applies. The full list lives in
- * the account area's own sidebar. The desktop menu also drops "settings"
- * because `UserButton` renders its own built-in Settings item.
- */
-export const PINK_QUICK_ACCOUNT_KEYS: ReadonlySet<string> = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);

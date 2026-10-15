@@ -29,11 +29,3 @@ export const HB_ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
   preferences: <SlidersHorizontal className="h-4 w-4" aria-hidden />,
   admin: <LayoutDashboard className="h-4 w-4" aria-hidden />,
 };
-
-/**
- * Quick-access account keys shown in the header's desktop avatar menu and the
- * 390 mobile menu's account block (B4.3/B4.4 decision, 2026-09-27). The full
- * list (address book, subscriptions, invoices, rewards, security,
- * preferences) lives only in the account sidebar, one tap away via Settings.
- */
-export const HB_QUICK_ACCOUNT_KEYS = new Set(["orders", "settings", "admin"]);

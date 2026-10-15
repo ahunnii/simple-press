@@ -36,7 +36,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -44,10 +44,7 @@ import {
 } from "~/app/(storefront)/_components/nav";
 
 import { PollenAnnouncementBar } from "./pollen-announcement-bar";
-import {
-  POLLEN_QUICK_ACCOUNT_KEYS,
-  PollenNavOverlayAccount,
-} from "./pollen-nav-overlay-account";
+import { PollenNavOverlayAccount } from "./pollen-nav-overlay-account";
 
 /** Shipped nav when the owner hasn't saved one (Admin → Content → Navigation). */
 const POLLEN_DEFAULT_NAV: NavItem[] = [
@@ -299,17 +296,14 @@ export function PollenHeader({
       : { delay: 0.05 + Math.min(i, 8) * 0.05, duration: 0.25 };
 
   // Desktop avatar menu: the same short quick-access set as the mobile
-  // overlay (Orders, Admin) — everything else is in the account area's own
-  // nav. Settings is dropped because `UserButton` renders its own built-in
-  // Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // overlay (`getQuickAccountNavLinks`, B4.3) — everything else is in the
+  // account area's own nav. Settings is dropped because `UserButton` renders
+  // its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled: isStorefrontEnabled,
     includeAdmin: isAdmin,
   })
-    .filter(
-      (link) =>
-        POLLEN_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,

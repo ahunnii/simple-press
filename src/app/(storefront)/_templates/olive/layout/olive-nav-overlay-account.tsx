@@ -9,9 +9,7 @@ import type { Session } from "~/server/better-auth/config";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { UserView } from "~/components/auth/user/user-view";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-import { OLIVE_QUICK_ACCOUNT_KEYS } from "./olive-nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type OliveNavOverlayAccountProps = {
   initialSession?: Session | null;
@@ -38,7 +36,7 @@ const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
  * was invisible. Everything here is a plain anchor, so it is also reachable by
  * the overlay's own Tab focus trap (which only walks the dialog subtree).
  *
- * The links are the quick-access subset (`OLIVE_QUICK_ACCOUNT_KEYS`: Orders,
+ * The links are the quick-access subset (`getQuickAccountNavLinks`, B4.3: Orders,
  * Settings, Admin) of the flag-gated `getAccountNavLinks` list — never a
  * hand-written list — followed by the sign-out row.
  */
@@ -93,10 +91,10 @@ export function OliveNavOverlayAccount({
     );
   }
 
-  const accountLinks = getAccountNavLinks({
+  const accountLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
-  }).filter((link) => OLIVE_QUICK_ACCOUNT_KEYS.has(link.key));
+  });
 
   return (
     <div className="olive-nav-overlay-account">

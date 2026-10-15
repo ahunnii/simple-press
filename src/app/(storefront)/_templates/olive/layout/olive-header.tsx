@@ -24,17 +24,13 @@ import { useWishlist } from "~/providers/wishlist-context";
 import {
   activeEntryIndex,
   externalLinkProps,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
 
 import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
-import {
-  OLIVE_QUICK_ACCOUNT_KEYS,
-  oliveActiveItemIndex,
-  oliveShopPanelIndex,
-} from "./olive-nav";
+import { oliveActiveItemIndex, oliveShopPanelIndex } from "./olive-nav";
 import { OliveNavOverlay } from "./olive-nav-overlay";
 
 type OliveHeaderProps = DefaultHeaderTemplateProps & {
@@ -170,17 +166,15 @@ export function OliveHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  // Desktop avatar menu: the quick-access subset of the flag-gated account
-  // links (B4.3) — Orders only while `orders` is on. Settings is dropped
-  // here because `UserButton` renders its own built-in Settings item.
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Desktop avatar menu: the quick-access subset (`getQuickAccountNavLinks`,
+  // B4.3) of the flag-gated account links — Orders only while `orders` is on.
+  // Settings is dropped here because `UserButton` renders its own built-in
+  // Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
   })
-    .filter(
-      (link) =>
-        OLIVE_QUICK_ACCOUNT_KEYS.has(link.key) && link.key !== "settings",
-    )
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,

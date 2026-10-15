@@ -9,9 +9,7 @@ import type { Session } from "~/server/better-auth/config";
 import { AUTH_BASE_PATHS, AUTH_VIEW_PATHS } from "~/lib/auth-paths";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { UserView } from "~/components/auth/user/user-view";
-import { getAccountNavLinks } from "~/app/(storefront)/_components/nav";
-
-import { DREAM_QUICK_ACCOUNT_KEYS } from "./dream-nav";
+import { getQuickAccountNavLinks } from "~/app/(storefront)/_components/nav";
 
 type DreamNavOverlayAccountProps = {
   initialSession?: Session | null;
@@ -36,8 +34,8 @@ const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
  * was invisible. Everything here is a plain anchor, so it is also reachable by
  * the overlay's own Tab focus trap (which only walks the dialog subtree).
  *
- * The signed-in links are the quick-access subset (`DREAM_QUICK_ACCOUNT_KEYS`:
- * Orders, Settings, Admin) of the flag-gated `getAccountNavLinks` list — never
+ * The signed-in links are the quick-access subset (`getQuickAccountNavLinks`,
+ * B4.3: Orders, Settings, Admin) of the flag-gated `getAccountNavLinks` list — never
  * a hand-written list — followed by Sign out.
  */
 export function DreamNavOverlayAccount({
@@ -91,10 +89,10 @@ export function DreamNavOverlayAccount({
     );
   }
 
-  const accountLinks = getAccountNavLinks({
+  const accountLinks = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
-  }).filter((link) => DREAM_QUICK_ACCOUNT_KEYS.has(link.key));
+  });
 
   return (
     <div className="dream-nav-overlay-account">

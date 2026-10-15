@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { UserButtonLink } from "~/components/auth/user/user-button";
 import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
@@ -31,11 +32,10 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
-  getAccountNavLinks,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
-  type NavItem,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
@@ -56,13 +56,6 @@ const DEFAULT_NAV_LINKS: NavItem[] = [
   { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
-
-/** Desktop avatar menu + mobile overlay quick-access subset (B4.3 decision) —
- *  Orders and Admin. Settings is dropped from the desktop set because
- *  `UserButton` renders its own built-in Settings item (happy-bamboo
- *  pattern); the mobile overlay has no such built-in, so its own subset
- *  (`vii-nav-overlay-account.tsx`) keeps Settings. */
-const VII_QUICK_ACCOUNT_KEYS = new Set(["orders", "admin"]);
 
 export function ViiHeader({
   business,
@@ -314,14 +307,16 @@ export function ViiHeader({
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
 
-  // Desktop avatar menu: quick-access subset (B4.3) of the same flag-gated
-  // account links the mobile overlay and the account sidebar use — never a
-  // hand-written list, so `orders` off correctly drops "Orders" (PF5).
-  const userButtonLinks: UserButtonLink[] = getAccountNavLinks({
+  // Desktop avatar menu: quick-access subset (`getQuickAccountNavLinks`, B4.3)
+  // of the same flag-gated account links the mobile overlay and the account
+  // sidebar use — never a hand-written list, so `orders` off correctly drops
+  // "Orders" (PF5). Settings is dropped because `UserButton` renders its own
+  // built-in Settings item; the mobile overlay has none, so it keeps Settings.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
     isEnabled,
     includeAdmin: showAdminLink,
   })
-    .filter((link) => VII_QUICK_ACCOUNT_KEYS.has(link.key))
+    .filter((link) => link.key !== "settings")
     .map((link) => ({
       label: link.label,
       href: link.href,
@@ -450,7 +445,8 @@ export function ViiHeader({
           onFocus={(e) => {
             // Open only when focus enters the group from outside it.
             if (suppressFocusOpenRef.current) return;
-            if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+            if (e.currentTarget.contains(e.relatedTarget as Node | null))
+              return;
             setOpenDropdown(key);
           }}
           onBlur={(e) => {

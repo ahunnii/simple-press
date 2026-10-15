@@ -17,6 +17,7 @@ import {
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
@@ -31,6 +32,7 @@ import {
   donateLinkOptions,
   externalLinkProps,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   isNavItemActive,
   navGroupEntries,
   resolveNav,
@@ -42,6 +44,12 @@ const MOBILE_MENU_ID = "builders-mobile-menu";
 
 const BODY_FONT = "var(--font-builders-body, 'Agdasima', sans-serif)";
 const DISPLAY_FONT = "var(--font-builders-display, 'Jost', sans-serif)";
+
+/** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
 
 const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
@@ -326,27 +334,25 @@ export function BuildersHeader({
     </span>
   );
 
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped:
+  // `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  })
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
+
   const userMenu = session?.user && (
     <UserButton
       size="icon"
       className="h-auto w-auto rounded-none border border-gray-200 p-0"
       avatarClassName="size-7"
-      links={[
-        {
-          icon: <IconPackage className="h-4 w-4" />,
-          label: "Orders",
-          href: "/account/orders",
-        },
-        ...(showAdminLink
-          ? [
-              {
-                icon: <IconLayoutDashboard className="h-4 w-4" />,
-                label: "Admin",
-                href: "/admin",
-              },
-            ]
-          : []),
-      ]}
+      links={userButtonLinks}
     />
   );
 

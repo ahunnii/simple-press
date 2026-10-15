@@ -7,6 +7,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { UserButtonLink } from "~/components/auth/user/user-button";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { cn } from "~/lib/utils";
 import { UserButton } from "~/components/auth/user/user-button";
@@ -16,12 +17,19 @@ import { useWishlist } from "~/providers/wishlist-context";
 import {
   donateLinkOptions,
   filterNavByFlags,
+  getQuickAccountNavLinks,
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooMobileNav } from "./bamboo-mobile-nav";
+
+/** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
+const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
+  orders: <IconPackage className="h-4 w-4" />,
+  admin: <IconLayoutDashboard className="h-4 w-4" />,
+};
 
 export type NavChild = { label: string; href: string; external?: boolean };
 export type NavLink = {
@@ -118,6 +126,19 @@ export function BambooHeader({
   const showAdminLink =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
     !!session?.session?.membershipId;
+
+  // Quick-access subset (B4.3: Orders, Settings, Admin). Settings is dropped:
+  // `UserButton` renders its own built-in Settings item.
+  const userButtonLinks: UserButtonLink[] = getQuickAccountNavLinks({
+    isEnabled,
+    includeAdmin: showAdminLink,
+  })
+    .filter((link) => link.key !== "settings")
+    .map((link) => ({
+      label: link.label,
+      href: link.href,
+      icon: ACCOUNT_LINK_ICONS[link.key],
+    }));
 
   const businessName = business?.name ?? "Business";
 
@@ -263,22 +284,7 @@ export function BambooHeader({
                   size="icon"
                   className="bamboo-icon-btn"
                   avatarClassName="size-6"
-                  links={[
-                    {
-                      icon: <IconPackage className="h-4 w-4" />,
-                      label: "Orders",
-                      href: "/account/orders",
-                    },
-                    ...(showAdminLink
-                      ? [
-                          {
-                            icon: <IconLayoutDashboard className="h-4 w-4" />,
-                            label: "Admin",
-                            href: "/admin",
-                          },
-                        ]
-                      : []),
-                  ]}
+                  links={userButtonLinks}
                 />
               ) : (
                 <Link

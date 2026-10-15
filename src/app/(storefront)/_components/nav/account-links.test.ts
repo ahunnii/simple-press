@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAccountNavLinks } from "./account-links";
+import { getAccountNavLinks, getQuickAccountNavLinks } from "./account-links";
 
 describe("getAccountNavLinks", () => {
   it("returns every link, in order, when all flags are enabled and admin is included", () => {
@@ -78,5 +78,31 @@ describe("getAccountNavLinks", () => {
     expect(
       getAccountNavLinks({ isEnabled: () => false, includeAdmin: true }),
     ).toContainEqual({ key: "admin", label: "Admin", href: "/admin" });
+  });
+});
+
+describe("getQuickAccountNavLinks", () => {
+  it("returns only orders, settings, and admin, in order, with all flags on", () => {
+    expect(
+      getQuickAccountNavLinks({
+        isEnabled: () => true,
+        includeAdmin: true,
+      }).map((l) => l.key),
+    ).toEqual(["orders", "settings", "admin"]);
+  });
+
+  it("drops Orders when the 'orders' flag is off", () => {
+    expect(
+      getQuickAccountNavLinks({ isEnabled: () => false }).map((l) => l.key),
+    ).toEqual(["settings"]);
+  });
+
+  it("keeps Settings and Admin when 'orders' is off and admin is included", () => {
+    expect(
+      getQuickAccountNavLinks({
+        isEnabled: () => false,
+        includeAdmin: true,
+      }).map((l) => l.key),
+    ).toEqual(["settings", "admin"]);
   });
 });

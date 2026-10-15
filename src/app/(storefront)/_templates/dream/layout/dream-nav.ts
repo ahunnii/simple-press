@@ -58,19 +58,6 @@ export function resolveDreamNav(
 }
 
 /**
- * Quick-access account subset (B4.3) for the desktop avatar menu and the
- * overlay's account block — filtered from `getAccountNavLinks` by key, so flag
- * gating (Orders needs `orders`) still applies. The full list lives in the
- * account area's own sidebar. The desktop menu also drops "settings" because
- * `UserButton` renders its own built-in Settings item.
- */
-export const DREAM_QUICK_ACCOUNT_KEYS = new Set([
-  "orders",
-  "settings",
-  "admin",
-]);
-
-/**
  * The field-driven header CTA pill's href, or "" to hide the pill (B2.5): a
  * link into a flag-disabled feature (e.g. `/services` with `services` off)
  * would 404, so the pill is hidden — never re-pointed somewhere else.
