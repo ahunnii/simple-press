@@ -16642,6 +16642,9 @@ body:has(.pollen) {
   /* ── Layout rhythm ── */
   --dream-gutter: 24px;
   --dream-container: 1240px;
+  /* Prose reading measure (~65ch of 18px body copy). Absolute units because
+     `ch` would resolve on the 16px `.prose` root, not the 18px text. */
+  --dream-measure: 44rem;
   --dream-header-h: 72px;
   --dream-header-h-mobile: 72px;
   --dream-section-pad-y: clamp(64px, 8vw, 112px);
@@ -19857,7 +19860,7 @@ body:has(.pollen) {
   border-left: 1px solid var(--dream-line);
 }
 
-/* Gallery + video blocks break out of the 66ch prose column. `.dream-embed`
+/* Gallery + video blocks break out of the prose measure column. `.dream-embed`
    is an inline-size container so `cqw` is its exact content width (no
    100vw/scrollbar overflow). The block is capped at 1040px, never wider than
    the container (so no horizontal overflow at 375px), and — with no TOC —
@@ -19895,7 +19898,7 @@ body:has(.pollen) {
    `.dream-btn`, `.dream-card` and `DreamRadioPills`. Pure CSS: no DOM changes,
    no leakage to other `.dream-embed` content (quote calculator, gallery). ── */
 .dream .sp-form-block {
-  /* The dream generic-page column is already 66ch; drop the platform 65ch cap. */
+  /* The dream generic-page column already has its own measure; drop the platform 65ch cap. */
   max-width: none;
   width: 100%;
   color: var(--dream-ink);

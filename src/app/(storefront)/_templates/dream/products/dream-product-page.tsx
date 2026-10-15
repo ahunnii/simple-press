@@ -22,7 +22,7 @@ import { ProductGalleryHorizontal } from "~/app/(storefront)/_components/product
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveDreamProductFields } from ".";
-import { DREAM_PROSE_CLASSNAME } from "../generic/dream-generic-page";
+import { DREAM_PROSE_CLASSNAME } from "../generic/dream-prose";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamPhoto } from "../shared/dream-photo";
 import { DreamReveal } from "../shared/dream-reveal";

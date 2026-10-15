@@ -4,7 +4,7 @@ import { isContentEmpty } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { DREAM_PROSE_CLASSNAME } from "../generic/dream-generic-page";
+import { DREAM_PROSE_CLASSNAME } from "../generic/dream-prose";
 import { DreamButton } from "../shared/dream-button";
 import { DreamHeading } from "../shared/dream-heading";
 import { DreamPhoto } from "../shared/dream-photo";

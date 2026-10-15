@@ -20,6 +20,7 @@ import { dreamContactData, dreamContactFieldGroups } from "./contact";
 import { dreamDonateData, dreamDonateFieldGroups } from "./donate";
 import { dreamEventsData, dreamEventsFieldGroups } from "./events";
 import { dreamFaqData, dreamFaqFieldGroups } from "./faq";
+import { dreamGenericData, dreamGenericFieldGroups } from "./generic";
 import { dreamGlobalData, dreamGlobalFieldGroups } from "./global";
 import { dreamHomepageData, dreamHomepageFieldGroups } from "./homepage";
 import { dreamProductData, dreamProductFieldGroups } from "./products";
@@ -45,6 +46,7 @@ export const dreamData = {
     ...dreamCartCheckoutData,
     ...dreamCheckoutUnavailableData,
     ...dreamGlobalData,
+    ...dreamGenericData,
     ...dreamAccountData,
     ...dreamCollectionsData,
     ...dreamBlogData,
@@ -67,6 +69,7 @@ export const dreamFieldGroups = {
     ...dreamCartCheckoutFieldGroups,
     ...dreamCheckoutUnavailableFieldGroups,
     ...dreamGlobalFieldGroups,
+    ...dreamGenericFieldGroups,
     ...dreamAccountFieldGroups,
     ...dreamCollectionsFieldGroups,
     ...dreamBlogFieldGroups,
