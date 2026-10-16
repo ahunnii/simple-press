@@ -10,6 +10,7 @@
 
 import { EDITOR_NOTE_KEY_SEGMENT } from "~/lib/editor-notes";
 import { s3Client } from "~/lib/s3/client";
+import { LIBRARY_DOC_PREFIX } from "~/lib/s3/pdf";
 import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
 
 export type MediaKind =
@@ -19,6 +20,7 @@ export type MediaKind =
   | "favicon"
   | "testimonial"
   | "gallery"
+  | "document"
   | "other";
 
 export interface ListedObject {
@@ -42,6 +44,7 @@ const MAX_PAGES = 50;
  *   favicon.…        → "favicon"
  *   video-…          → "video"
  *   image-…          → "image"
+ *   library-doc-….pdf → "document" (Media Library PDF uploads)
  *   library-…        → "image" (Media Library bulk uploads)
  *   anything else    → "other"
  *
@@ -80,6 +83,10 @@ export function classifyKind(suffix: string): MediaKind {
   if (suffix.startsWith("favicon.")) return "favicon";
   if (suffix.startsWith("video-")) return "video";
   if (suffix.startsWith("image-")) return isImageFile ? "image" : "other";
+  // Before the generic `library-` branch: `library-doc-` is the PDF route's
+  // prefix, and anything else under it (a renamed/foreign file) is "other".
+  if (suffix.startsWith(LIBRARY_DOC_PREFIX))
+    return suffix.toLowerCase().endsWith(".pdf") ? "document" : "other";
   if (suffix.startsWith("library-")) return isImageFile ? "image" : "other";
   return "other";
 }

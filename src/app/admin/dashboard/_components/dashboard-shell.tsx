@@ -106,6 +106,9 @@ export function DashboardShell({
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState("");
   const justAddedRef = useRef<string | null>(null);
+  // The empty state's "Add a card" button unmounts once edit mode starts, so a
+  // cancelled dialog opened from it has nothing to return focus to.
+  const openedFromEmptyRef = useRef(false);
   const pendingFocusRef = useRef<FocusTarget | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
@@ -190,7 +193,15 @@ export function DashboardShell({
     typeof AddCardDialog
   >["onCloseAutoFocus"] = (event) => {
     const id = justAddedRef.current;
-    if (!id) return;
+    const fromEmpty = openedFromEmptyRef.current;
+    openedFromEmptyRef.current = false;
+    if (!id) {
+      if (fromEmpty && toolbarRef.current) {
+        event.preventDefault();
+        toolbarRef.current.focus({ preventScroll: true });
+      }
+      return;
+    }
     justAddedRef.current = null;
     const trigger = document.querySelector<HTMLElement>(
       `[data-card-settings="${CSS.escape(id)}"]`,
@@ -202,6 +213,13 @@ export function DashboardShell({
       behavior: prefersReducedMotion() ? "auto" : "smooth",
     });
     trigger.focus({ preventScroll: true });
+  };
+
+  /** Empty state's "Add a card": enter edit mode and open the add dialog. */
+  const startAddingFromEmpty = () => {
+    openedFromEmptyRef.current = true;
+    editor.start();
+    setIsAddOpen(true);
   };
 
   const handleRemove = (id: string) => {
@@ -303,6 +321,9 @@ export function DashboardShell({
           isEditing={editor.isEditing}
           highlightId={highlightId}
           widgetHrefs={widgetHrefs}
+          canEdit={canEdit}
+          hasAvailableWidgets={availableWidgetIds.length > 0}
+          onAddCard={startAddingFromEmpty}
           onReorder={(cards) => {
             editor.reorder(cards);
           }}
@@ -311,6 +332,7 @@ export function DashboardShell({
               card={card}
               index={index}
               count={editor.draftCards.length}
+              availableWidgetIds={availableWidgetIds}
               onUpdate={(patch) => editor.update(card.id, patch)}
               onMove={(move) => announce(editor.move(card.id, move))}
               onRemove={() => handleRemove(card.id)}

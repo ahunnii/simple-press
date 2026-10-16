@@ -473,7 +473,10 @@ export function FormBuilder({
                 </CardContent>
               </Card>
 
-              <FormScreeningCard form={rhf} />
+              <FormScreeningCard
+                form={rhf}
+                mediaLibraryEnabled={mediaLibraryEnabled}
+              />
             </div>
 
             {/* Right: what happens after, and a live preview. */}

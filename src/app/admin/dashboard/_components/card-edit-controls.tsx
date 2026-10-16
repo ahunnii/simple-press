@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 
 import type { CardMove, CardPatch } from "./use-dashboard-editor";
 import type { DashboardCard } from "~/lib/dashboard/layout-schema";
+import type { WidgetId } from "~/lib/dashboard/widgets";
 import { Button } from "~/components/ui/button";
 
 import { CardMenu } from "./card-menu";
@@ -25,6 +26,7 @@ export function CardEditControls({
   card,
   index,
   count,
+  availableWidgetIds,
   onUpdate,
   onMove,
   onRemove,
@@ -32,6 +34,7 @@ export function CardEditControls({
   card: DashboardCard;
   index: number;
   count: number;
+  availableWidgetIds: readonly WidgetId[];
   onUpdate: (patch: CardPatch) => void;
   onMove: (move: CardMove) => void;
   onRemove: () => void;
@@ -74,6 +77,7 @@ export function CardEditControls({
         card={card}
         index={index}
         count={count}
+        availableWidgetIds={availableWidgetIds}
         onUpdate={onUpdate}
         onMove={onMove}
         onRemove={onRemove}

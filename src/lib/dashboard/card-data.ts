@@ -17,11 +17,18 @@ import { z } from "zod";
 import type { OrderOptionsHint } from "~/lib/customizer/display";
 import type { DashboardCard } from "~/lib/dashboard/layout-schema";
 import type { DashboardRangeKey } from "~/lib/dashboard/ranges";
-import type { WidgetFormat, WidgetId } from "~/lib/dashboard/widgets";
+import type {
+  TrendStyle,
+  WidgetAvailabilityContext,
+  WidgetFormat,
+  WidgetId,
+} from "~/lib/dashboard/widgets";
 import { DASHBOARD_RANGE_KEYS } from "~/lib/dashboard/ranges";
 import {
   effectiveCompare,
   getWidget,
+  isPlottableMetric,
+  isWidgetAvailable,
   resolveCardRange,
   WIDGET_IDS,
 } from "~/lib/dashboard/widgets";
@@ -36,10 +43,30 @@ export const cardDataInputSchema = z
     compare: z.boolean(),
     /** Include a sparkline series (2x1 stat cards). */
     series: z.boolean(),
+    /**
+     * The plotted metric: a plottable id for `trend-chart`, null (or omitted)
+     * for every other widget. `toCardDataInput` always sends it.
+     */
+    metric: z.enum(WIDGET_IDS).nullable().optional(),
   })
   .strict()
   .superRefine((input, ctx) => {
     const def = getWidget(input.widget);
+    if (def.kind === "trendChart") {
+      if (!isPlottableMetric(input.metric)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["metric"],
+          message: "A trend chart needs a metric it can plot",
+        });
+      }
+    } else if (input.metric != null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["metric"],
+        message: `${def.label} has no metric`,
+      });
+    }
     if (input.range == null) return;
     if (!def.allowedRanges.includes(input.range)) {
       ctx.addIssue({
@@ -57,11 +84,33 @@ export type CardDataInput = {
   range: DashboardRangeKey | null;
   compare: boolean;
   series: boolean;
+  /** Set only for `trend-chart`; null for every other widget. */
+  metric: WidgetId | null;
 };
+
+/**
+ * Whether the card this input asks for can show for the store: its widget is
+ * available and, for a Trend chart, so is the metric it plots.
+ */
+export function isCardInputAvailable(
+  input: { widget: WidgetId; metric?: WidgetId | null },
+  availability: WidgetAvailabilityContext,
+): boolean {
+  const def = getWidget(input.widget);
+  if (!isWidgetAvailable(def, availability)) return false;
+  if (def.kind !== "trendChart") return true;
+  return (
+    input.metric != null &&
+    isPlottableMetric(input.metric) &&
+    isWidgetAvailable(getWidget(input.metric), availability)
+  );
+}
 
 /** The only builder of `dashboard.cardData` input. See the module doc. */
 export function toCardDataInput(
-  card: Pick<DashboardCard, "widget" | "size" | "range" | "compare">,
+  card: Pick<DashboardCard, "widget" | "size" | "range" | "compare"> & {
+    metric?: WidgetId;
+  },
 ): CardDataInput {
   const def = getWidget(card.widget);
   const range = resolveCardRange(def, card.range);
@@ -70,6 +119,9 @@ export function toCardDataInput(
     range,
     compare: effectiveCompare({ range, compare: card.compare }, def),
     series: card.size === "2x1" && def.sparkline,
+    // Always present (null off trend cards) so the prefetch and the client
+    // build identical objects.
+    metric: def.kind === "trendChart" ? (card.metric ?? null) : null,
   };
 }
 
@@ -80,7 +132,12 @@ export type SeriesPoint = {
   key: string;
   /** Axis / tooltip label, e.g. "Oct 12" or "Oct 2026". */
   label: string;
-  value: number;
+  /**
+   * Sums and counts zero-fill empty buckets with 0. null = nothing to average
+   * in that bucket (an average over zero orders / gifts): charts break the
+   * line there instead of plotting a $0 average.
+   */
+  value: number | null;
 };
 
 export type StatCardData = {
@@ -177,6 +234,38 @@ export type RevenueChartCardData = {
   comparisonLabel: string | null;
 };
 
+/**
+ * One metric over time. `total` / `previousTotal` are exactly the metric's own
+ * stat card value for the same range, so the header number never disagrees
+ * with the stat card.
+ */
+export type TrendChartCardData = {
+  kind: "trendChart";
+  /** The plotted widget id (a plottable stat). */
+  metric: WidgetId;
+  /** The metric's label, e.g. "Donations". */
+  metricLabel: string;
+  format: WidgetFormat;
+  /** "bar" for sums and counts, "line" for averages. */
+  style: TrendStyle;
+  granularity: "day" | "month";
+  /** The current window, one point per bucket (zero-filled). */
+  points: SeriesPoint[];
+  /**
+   * The previous window, index-aligned with `points` for the ghost line; null
+   * when comparison is off. Lengths can differ (a month has more days than
+   * another): align by index and stop at the shorter.
+   */
+  previousPoints: SeriesPoint[] | null;
+  /** null when the value can't be computed (average over zero gifts). */
+  total: number | null;
+  previousTotal: number | null;
+  /** e.g. "vs last 30 days"; null when comparison is off. */
+  comparisonLabel: string | null;
+  /** Caveat shown small under the chart, when the metric has one. */
+  note?: string;
+};
+
 export type UnavailableReason = "feature-off" | "umami-unavailable" | "error";
 
 export type UnavailableCardData = {
@@ -191,6 +280,7 @@ export type CardData =
   | LowStockCardData
   | TopProductsCardData
   | RevenueChartCardData
+  | TrendChartCardData
   | UnavailableCardData;
 
 export function unavailableCardData(

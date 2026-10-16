@@ -12,7 +12,6 @@ import {
   makeEmptyBuilderDefinition,
   makeField,
   makePictureOption,
-  makeScreeningLink,
   makeScreeningQuestion,
   normalizeBuilderDefinition,
   pictureGroupChangeDestination,
@@ -345,8 +344,15 @@ describe("screening in the builder", () => {
             id: "q1",
             prompt: "Over 18?",
             passAnswer: "no",
-            failMessage: "",
-            failLinks: [{ label: "Help", href: "/help" }],
+            failContent: {
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: "Try our youth program" }],
+                },
+              ],
+            },
           },
         ],
       },
@@ -357,20 +363,77 @@ describe("screening in the builder", () => {
     expect(screening?.questions?.[0]).toMatchObject({
       id: "q1",
       passAnswer: "no",
-      failLinks: [{ label: "Help", href: "/help" }],
+      failContent: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Try our youth program" }],
+          },
+        ],
+      },
     });
   });
 
-  it("a new question is explicit and unique; a link starts blank", () => {
+  it("normalize keeps an emptied default fail message null, and fills a missing one", () => {
+    const emptied = makeEmptyBuilderDefinition();
+    emptied.settings = {
+      ...emptied.settings,
+      screening: { ...makeEmptyFormScreening(), defaultFailContent: null },
+    };
+    expect(
+      normalizeBuilderDefinition(emptied).settings?.screening
+        ?.defaultFailContent,
+    ).toBeNull();
+
+    const missing = makeEmptyBuilderDefinition();
+    missing.settings = {
+      ...missing.settings,
+      screening: {
+        ...makeEmptyFormScreening(),
+        defaultFailContent: undefined,
+      },
+    };
+    expect(
+      normalizeBuilderDefinition(missing).settings?.screening
+        ?.defaultFailContent,
+    ).toEqual(makeEmptyFormScreening().defaultFailContent);
+  });
+
+  it("normalize carries the unlock note through and defaults it to null", () => {
+    const note = {
+      type: "doc" as const,
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "Call us" }] },
+      ],
+    };
+    const definition = makeEmptyBuilderDefinition();
+    definition.settings = {
+      ...definition.settings,
+      screening: { ...makeEmptyFormScreening(), unlockContent: note },
+    };
+    expect(
+      normalizeBuilderDefinition(definition).settings?.screening?.unlockContent,
+    ).toEqual(note);
+
+    const bare = makeEmptyBuilderDefinition();
+    bare.settings = {
+      ...bare.settings,
+      screening: { ...makeEmptyFormScreening(), unlockContent: undefined },
+    };
+    expect(
+      normalizeBuilderDefinition(bare).settings?.screening?.unlockContent,
+    ).toBeNull();
+  });
+
+  it("a new question is explicit and unique", () => {
     const first = makeScreeningQuestion();
     expect(first).toMatchObject({
       prompt: "",
       passAnswer: "yes",
-      failMessage: "",
-      failLinks: [],
+      failContent: null,
     });
     expect(makeScreeningQuestion().id).not.toBe(first.id);
-    expect(makeScreeningLink()).toEqual({ label: "", href: "" });
   });
 
   it("enabled screening with no questions fails at the questions path", () => {

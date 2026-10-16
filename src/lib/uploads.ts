@@ -12,6 +12,7 @@ export const ROUTE_MAX_FILES: Record<string, number> = {
   images: 10,
   galleryImages: 10,
   libraryImages: 10,
+  libraryDocuments: 5,
   testimonials: 5,
   editorNoteImages: 3,
 };
@@ -21,6 +22,18 @@ export const ROUTE_MAX_FILES: Record<string, number> = {
  * Larger drops are split into batches of `ROUTE_MAX_FILES.libraryImages`.
  */
 export const MEDIA_LIBRARY_UPLOAD_MAX = 50;
+
+/**
+ * Max size of one Media Library PDF. Keep in sync with the `libraryDocuments`
+ * route's `maxFileSize` in `src/app/api/upload/route.ts`.
+ */
+export const MAX_DOCUMENT_UPLOAD_BYTES = 20 * 1024 * 1024;
+export const MAX_DOCUMENT_UPLOAD_LABEL = "20MB";
+
+/** True for a PDF by MIME type or (when the browser reports none) extension. */
+export function isPdfFile(file: Pick<File, "name" | "type">): boolean {
+  return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+}
 
 export function getStoredPath(file: {
   objectInfo?: {

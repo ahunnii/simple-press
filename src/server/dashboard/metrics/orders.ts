@@ -175,11 +175,17 @@ export async function orderMoneyStat(
 
   const part: StatPart = { value: pickMoney(money, widget), detail };
   if (buckets) {
+    // Averages leave empty buckets null (no orders ≠ a $0 average); sums and
+    // counts zero-fill.
+    const isAverage = widget === "avg-order-value";
     part.series = windowSeriesPoints(
-      pickTotals(buckets, (b) => pickMoney(b, widget) ?? 0),
+      pickTotals(buckets, (b) =>
+        isAverage ? pickMoney(b, widget) : (pickMoney(b, widget) ?? 0),
+      ),
       q.win,
       q.granularity,
       q.ctx.timeZone,
+      isAverage ? null : 0,
     );
   }
   return part;
@@ -225,7 +231,7 @@ export async function revenueChart(
     buckets: gross.map((point, i) => ({
       key: point.key,
       label: point.label,
-      gross: point.value,
+      gross: point.value ?? 0,
       refunded: refunded[i]?.value ?? 0,
       net: net[i]?.value ?? 0,
     })),

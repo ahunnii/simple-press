@@ -39,6 +39,21 @@ export function formatStatValue(value: number, format: WidgetFormat): string {
   }
 }
 
+/** Whole-number axis tick for a chart, by the plotted number's format. */
+export function formatAxisValue(value: number, format: WidgetFormat): string {
+  switch (format) {
+    case "currency":
+      return formatCurrencyCompact(value);
+    case "percent":
+      return formatPercent(value);
+    case "count":
+      return new Intl.NumberFormat("en-US", {
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(value);
+  }
+}
+
 /** "5 mins ago" / "Yesterday" / a locale date. Accepts a Date or ISO string. */
 export function formatRelative(date: Date | string): string {
   const then = new Date(date);

@@ -497,8 +497,9 @@ describe("store transfer round-trip", () => {
       bytes: Buffer.from("flyer-bytes"),
       kind: "image",
     };
+    // A Media Library upload: it must stay `library-` owned on the target.
     const inline: BundleMedia = {
-      key: `${a.id}/image-inline.png`,
+      key: `${a.id}/library-0123456789abcdef.png`,
       bytes: Buffer.from("inline-bytes"),
       kind: "image",
     };
@@ -543,7 +544,7 @@ describe("store transfer round-trip", () => {
     expect(vi.mocked(putStoredObject)).toHaveBeenCalledTimes(3);
 
     const targetUrl = (m: BundleMedia, ext: string) =>
-      keyToPublicUrl(contentAddressedKey(b.id, m.kind, m.bytes, ext));
+      keyToPublicUrl(contentAddressedKey(b.id, m.kind, m.bytes, ext, m.key));
 
     const bBiz = await db.business.findUniqueOrThrow({
       where: { id: b.id },
@@ -555,8 +556,10 @@ describe("store transfer round-trip", () => {
         content: { type: string; attrs?: Record<string, unknown> }[];
       }
     ).content;
-    expect(messageNodes.find((n) => n.type === "image")?.attrs?.src).toBe(
-      targetUrl(inline, ".png"),
+    const inlineSrc = messageNodes.find((n) => n.type === "image")?.attrs?.src;
+    expect(inlineSrc).toBe(targetUrl(inline, ".png"));
+    expect(inlineSrc).toMatch(
+      new RegExp(`/${b.id}/library-[0-9a-f]{8}\\.png$`),
     );
 
     const page = await db.page.findUniqueOrThrow({

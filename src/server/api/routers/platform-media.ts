@@ -8,6 +8,7 @@
  *   delete         — mutation — delete one unused file
  *   bulkDelete     — mutation — delete many unused files (partial success)
  *   getDownloadUrl — mutation — presigned download URL
+ *   verifyDocument — mutation — confirm a fresh PDF upload
  *
  * Every procedure takes a REQUIRED `businessId` and checks the business exists
  * (any status — suspended stores still need remediation). There is no
@@ -25,6 +26,7 @@ import {
   platformMediaDeleteInput,
   platformMediaDownloadInput,
   platformMediaListInput,
+  platformMediaVerifyDocumentInput,
 } from "~/lib/validators/media";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
 import {
@@ -32,6 +34,7 @@ import {
   deleteMedia,
   getMediaDownloadUrl,
   listMedia,
+  verifyLibraryDocument,
 } from "~/server/media/library";
 
 /**
@@ -81,5 +84,13 @@ export const platformMediaRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const business = await requireBusiness(ctx.db, input.businessId);
       return getMediaDownloadUrl(business.id, input.key);
+    }),
+
+  /** Hub twin of `media.verifyDocument` — see `verifyLibraryDocument`. */
+  verifyDocument: platformAdminProcedure
+    .input(platformMediaVerifyDocumentInput)
+    .mutation(async ({ ctx, input }) => {
+      const business = await requireBusiness(ctx.db, input.businessId);
+      return verifyLibraryDocument(business.id, input.key);
     }),
 });

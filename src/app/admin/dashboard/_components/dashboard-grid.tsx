@@ -11,6 +11,7 @@ import type {
 import type { SortingStrategy } from "@dnd-kit/sortable";
 import type { ReactNode } from "react";
 import { Suspense, useId, useState } from "react";
+import Link from "next/link";
 import {
   closestCenter,
   DndContext,
@@ -37,9 +38,16 @@ import { dashboardRangeLabel } from "~/lib/dashboard/ranges";
 import { getWidget, resolveCardRange } from "~/lib/dashboard/widgets";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 
 import { CardErrorBoundary } from "./card-error-boundary";
-import { cardLabel, SIZE_META, sizeLabel } from "./edit-labels";
+import {
+  cardHref,
+  cardLabel,
+  cardTitle,
+  SIZE_META,
+  sizeLabel,
+} from "./edit-labels";
 import { GhostCells } from "./ghost-cells";
 import { DASHBOARD_GRID_CLASSES, WIDGET_SIZE_CLASSES } from "./grid-classes";
 import { WidgetFrame } from "./widget-frame";
@@ -82,6 +90,9 @@ export function DashboardGrid({
   trailing,
   highlightId,
   widgetHrefs,
+  canEdit = false,
+  hasAvailableWidgets = false,
+  onAddCard,
 }: {
   cards: DashboardCard[];
   isEditing?: boolean;
@@ -94,6 +105,12 @@ export function DashboardGrid({
   highlightId?: string | null;
   /** Per-store card links that differ from the registry's `href`. */
   widgetHrefs?: Partial<Record<WidgetId, string>>;
+  /** False for viewers without edit rights (staff, platform admins). */
+  canEdit?: boolean;
+  /** Whether this store can show at least one card right now. */
+  hasAvailableWidgets?: boolean;
+  /** Empty state: enter edit mode and open the add-card dialog. */
+  onAddCard?: () => void;
 }) {
   const dndId = useId();
   const sensors = useSensors(
@@ -106,9 +123,46 @@ export function DashboardGrid({
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
 
   if (cards.length === 0 && !isEditing) {
+    if (canEdit && hasAvailableWidgets) {
+      return (
+        <div className="rounded-xl border border-dashed p-10 text-center">
+          <p className="text-foreground text-base font-medium">
+            No cards on your dashboard yet.
+          </p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Add cards for the parts of your site you want to keep an eye on.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={onAddCard}
+          >
+            Add a card
+          </Button>
+        </div>
+      );
+    }
+    if (canEdit) {
+      return (
+        <div className="rounded-xl border border-dashed p-10 text-center">
+          <p className="text-foreground text-base font-medium">
+            No cards on your dashboard yet.
+          </p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Cards show up when you turn on features like Forms, Analytics,
+            Donations or Invoices.
+          </p>
+          <Button variant="outline" size="sm" className="mt-4" asChild>
+            <Link href="/admin/settings/features">Turn on features</Link>
+          </Button>
+        </div>
+      );
+    }
     return (
       <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
-        Your dashboard has no cards.
+        There&apos;s nothing to show on the dashboard yet.
       </div>
     );
   }
@@ -190,7 +244,7 @@ export function DashboardGrid({
                   activeId !== card.id
                 }
                 editControls={renderEditControls?.(card, index)}
-                href={widgetHrefs?.[card.widget]}
+                href={cardHref(card, widgetHrefs)}
               />
             ))}
             {isEditing && trailing}
@@ -217,7 +271,7 @@ function SortableCard({
   isHighlighted: boolean;
   isDropTarget: boolean;
   editControls: ReactNode;
-  href: string | undefined;
+  href: string;
 }) {
   const {
     attributes,
@@ -303,7 +357,7 @@ function DragPreview({ card }: { card: DashboardCard }) {
     <div className="bg-card ring-primary/40 flex h-full w-full cursor-grabbing flex-col gap-2 rounded-xl border p-4 shadow-xl ring-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-muted-foreground truncate text-sm font-medium">
-          {def.label}
+          {cardTitle(card)}
         </span>
         {range && (
           <Badge variant="secondary" className="font-normal">

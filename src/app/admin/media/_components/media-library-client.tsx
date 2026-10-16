@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Download, Images, Search, Trash2 } from "lucide-react";
+import {
+  Download,
+  ExternalLink,
+  Images,
+  Link2,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { BulkAction } from "../../_components/admin-bulk-bar";
@@ -93,7 +100,7 @@ type Props = {
    *  False OMITS every bulk affordance — see the note above `bulkActions`. */
   canBulkDelete: boolean;
   /** Whether the viewer may upload here (owner/manager/platform admin) —
-   *  gates the empty-state "Upload images" action. */
+   *  gates the empty-state "Upload images or PDFs" action. */
   canUpload: boolean;
   /** Keys of every file matching the current filters, across all pages — or
    *  `null` when more than ADMIN_BULK_SELECTION_LIMIT match and
@@ -285,40 +292,79 @@ function MediaCardActions({
   // even though `usedBy` is non-empty. See `getMediaUsageStatus`.
   const inUse = item.usageStatus === "used";
 
-  return (
-    <div className="flex gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex-1"
-        onClick={download}
-        disabled={isDownloading}
-        aria-label={`Download ${item.filename}`}
-      >
-        <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-        {isDownloading ? "Getting link…" : "Download"}
-      </Button>
+  const isDocument = item.kind === "document";
+  const copyLink = () => {
+    navigator.clipboard.writeText(item.url).then(
+      () => toast.success("Link copied"),
+      () => toast.error("Couldn't copy the link — copy it from Open instead"),
+    );
+  };
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 flex-1"
-        onClick={() => onDeleteConfirm(item)}
-        disabled={inUse || isDeleting}
-        aria-label={
-          inUse
-            ? `Cannot delete ${item.filename} — file is in use by your active setup`
-            : `Delete ${item.filename}`
-        }
-        title={
-          inUse
-            ? "Cannot delete — file is in use by your active setup"
-            : undefined
-        }
-      >
-        <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-        Delete
-      </Button>
+  return (
+    <div className="space-y-2">
+      {isDocument && (
+        // PDFs have no thumbnail to click and a public URL that opens inline,
+        // so the two things an owner wants from one are first: view it, and
+        // grab the link to paste into a page or message.
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-w-fit flex-1"
+            asChild
+            aria-label={`Open ${item.filename} in a new tab`}
+          >
+            <a href={item.url} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              Open
+            </a>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="min-w-fit flex-1"
+            onClick={copyLink}
+            aria-label={`Copy link to ${item.filename}`}
+          >
+            <Link2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+            Copy link
+          </Button>
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-w-fit flex-1"
+          onClick={download}
+          disabled={isDownloading}
+          aria-label={`Download ${item.filename}`}
+        >
+          <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+          {isDownloading ? "Getting link…" : "Download"}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 min-w-fit flex-1"
+          onClick={() => onDeleteConfirm(item)}
+          disabled={inUse || isDeleting}
+          aria-label={
+            inUse
+              ? `Cannot delete ${item.filename} — file is in use by your active setup`
+              : `Delete ${item.filename}`
+          }
+          title={
+            inUse
+              ? "Cannot delete — file is in use by your active setup"
+              : undefined
+          }
+        >
+          <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+          Delete
+        </Button>
+      </div>
     </div>
   );
 }
@@ -560,7 +606,7 @@ export function MediaLibraryClient({
         title="No media uploaded yet"
         description={
           canUpload
-            ? "Upload images here, or they'll appear as you add media to products, galleries, and pages."
+            ? "Upload images or PDFs here, or they'll appear as you add media to products, galleries, and pages."
             : "Files will appear here once images, videos, or other media are added to products, galleries, and pages."
         }
         action={

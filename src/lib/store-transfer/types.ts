@@ -41,6 +41,7 @@ export type MediaKind =
   | "favicon"
   | "testimonial"
   | "gallery"
+  | "document"
   | "other";
 
 // ─── Manifest structure ───────────────────────────────────────────────────────

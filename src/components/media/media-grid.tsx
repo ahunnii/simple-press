@@ -14,7 +14,7 @@
  */
 "use client";
 
-import { Check, File, Video } from "lucide-react";
+import { Check, File, FileText, Video } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { formatBytes } from "~/lib/format-bytes";
@@ -71,6 +71,11 @@ export function MediaThumbnail({ item }: { item: MediaItem }) {
     <div className="bg-muted flex aspect-video w-full items-center justify-center rounded-t-md">
       {item.kind === "video" ? (
         <Video className="text-muted-foreground h-10 w-10" aria-hidden="true" />
+      ) : item.kind === "document" ? (
+        <div className="text-muted-foreground flex flex-col items-center gap-1">
+          <FileText className="h-10 w-10" aria-hidden="true" />
+          <span className="text-xs font-semibold tracking-wide">PDF</span>
+        </div>
       ) : (
         <File className="text-muted-foreground h-10 w-10" aria-hidden="true" />
       )}

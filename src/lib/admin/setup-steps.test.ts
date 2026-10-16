@@ -361,12 +361,27 @@ describe("computeSetupStatus — progress percent", () => {
 });
 
 describe("FEATURE_PRESETS — re-typing undoes the previous type", () => {
-  it("every type sets all three type-defining flags explicitly", () => {
+  it("every type sets all four type-defining flags explicitly", () => {
     for (const preset of Object.values(FEATURE_PRESETS)) {
       expect(Object.keys(preset).sort()).toEqual(
-        ["donations", "products", "services"].sort(),
+        ["donations", "inventory", "products", "services"].sort(),
       );
     }
+  });
+
+  it("only informational turns inventory off (services track rentals)", () => {
+    expect(FEATURE_PRESETS.informational.inventory).toBe(false);
+    expect(FEATURE_PRESETS.services.inventory).toBe(true);
+    expect(FEATURE_PRESETS.products.inventory).toBe(true);
+    expect(FEATURE_PRESETS.donations.inventory).toBe(true);
+  });
+
+  it("informational → services (apply defaults) turns inventory back on", () => {
+    const merged = {
+      ...FEATURE_PRESETS.informational,
+      ...FEATURE_PRESETS.services,
+    };
+    expect(resolveFlags(merged).isEnabled("inventory")).toBe(true);
   });
 
   it("services → products (apply defaults) turns products back on", () => {

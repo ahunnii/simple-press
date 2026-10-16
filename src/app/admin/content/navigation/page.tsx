@@ -23,6 +23,7 @@ export default async function NavigationPage() {
   const eventsEnabled = isEnabled("events");
   const videosEnabled = isEnabled("videos");
   const donationsEnabled = isEnabled("donations");
+  const mediaEnabled = isEnabled("media");
 
   let services: Array<{ name: string; slug: string }> = [];
   if (servicesEnabled) {
@@ -70,6 +71,7 @@ export default async function NavigationPage() {
         videosEnabled={videosEnabled}
         donationsEnabled={donationsEnabled}
         donationNavLabel={resolveDonationLabel(business.donationLabel).verb}
+        mediaEnabled={mediaEnabled}
       />
     </>
   );

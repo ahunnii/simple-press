@@ -16,6 +16,16 @@ describe("rewriteMediaInHtml", () => {
     expect(out).toContain('src="../Photos/Blog/a.jpg"');
     expect(out).toContain('src="https://x.test/b.jpg"');
   });
+
+  it("points links to exported files (e.g. a library PDF) at the copy, keeping the fragment", () => {
+    const pdf = "https://cdn.example.com/biz/library-doc-ab12-menu.pdf";
+    const media = { byUrl: new Map([[pdf, "Photos/Pages/menu.pdf"]]) };
+    const html = `<p><a href="${pdf}#page=2" target="_blank">Menu</a> <a href="https://x.test/y.pdf">Other</a> <a href="/contact">Contact</a></p>`;
+    const out = rewriteMediaInHtml(html, "Pages/About.html", media);
+    expect(out).toContain('href="../Photos/Pages/menu.pdf#page=2"');
+    expect(out).toContain('href="https://x.test/y.pdf"');
+    expect(out).toContain('href="/contact"');
+  });
 });
 
 describe("imgHtml", () => {

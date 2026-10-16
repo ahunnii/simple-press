@@ -15,6 +15,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import type { MediaKind } from "~/lib/s3/list";
 import { s3Client } from "~/lib/s3/client";
+import { documentSlugFromKey, LIBRARY_DOC_PREFIX } from "~/lib/s3/pdf";
 import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
 
 // ─── contentAddressedKey ──────────────────────────────────────────────────────
@@ -25,8 +26,11 @@ import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
  * Key layout mirrors the upload/route.ts convention:
  *
  *   image     → {targetBusinessId}/image-{sha256[:8]}{ext}
+ *               or {targetBusinessId}/library-{sha256[:8]}{ext} when the source
+ *               was a Media Library upload (keeps it library-owned)
  *   gallery   → {targetBusinessId}/gallery-{sha256[:8]}{ext}
  *   video     → {targetBusinessId}/video-{sha256[:8]}{ext}
+ *   document  → {targetBusinessId}/library-doc-{sha256[:8]}[-{slug}]{ext}   (stays a Media Library PDF)
  *   testimonial → {targetBusinessId}/testimonials/{sha256[:8]}{ext}
  *   logo      → {targetBusinessId}/logo{ext}          (fixed key — always overwrite)
  *   favicon   → {targetBusinessId}/favicon{ext}       (fixed key — always overwrite)
@@ -40,12 +44,17 @@ import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
  * @param kind              Media kind from the manifest
  * @param bytes             Raw file bytes (used to compute sha256)
  * @param ext               File extension including leading dot, e.g. ".jpg"
+ * @param sourceKey         Original storage key, optional. For documents its
+ *                          name slug is kept so the PDF stays recognizable;
+ *                          for images a `library-` source keeps that prefix so
+ *                          `isLibraryOwnedKey` still shields it from cleanup.
  */
 export function contentAddressedKey(
   targetBusinessId: string,
   kind: MediaKind,
   bytes: Uint8Array | Buffer | ArrayBuffer,
   ext: string,
+  sourceKey?: string,
 ): string {
   // Compute SHA-256 hex string
   const buf =
@@ -63,9 +72,11 @@ export function contentAddressedKey(
 
   // Map kind → key prefix
   let prefix: string;
+  let slugSuffix = "";
   switch (kind) {
     case "image":
-      prefix = "image";
+      prefix =
+        sourceKey && isLibraryImageSource(sourceKey) ? "library" : "image";
       break;
     case "gallery":
       prefix = "gallery";
@@ -73,13 +84,26 @@ export function contentAddressedKey(
     case "video":
       prefix = "video";
       break;
+    case "document":
+      prefix = "library-doc";
+      slugSuffix = sourceKey ? documentSlugFromKey(sourceKey) : "";
+      break;
     default:
       // "other" or any future kind falls back to image- prefix
       prefix = "image";
       break;
   }
 
-  return `${targetBusinessId}/${prefix}-${shortHash}${ext}`;
+  return `${targetBusinessId}/${prefix}-${shortHash}${slugSuffix ? `-${slugSuffix}` : ""}${ext}`;
+}
+
+/** True for a `{biz}/library-…` Media Library upload that isn't a library PDF. */
+function isLibraryImageSource(sourceKey: string): boolean {
+  const slashIdx = sourceKey.indexOf("/");
+  const suffix = slashIdx >= 0 ? sourceKey.slice(slashIdx + 1) : sourceKey;
+  return (
+    suffix.startsWith("library-") && !suffix.startsWith(LIBRARY_DOC_PREFIX)
+  );
 }
 
 // ─── objectExists ─────────────────────────────────────────────────────────────

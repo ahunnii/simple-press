@@ -15,6 +15,13 @@ import {
   screeningStorageKey,
 } from "./screening";
 
+function doc(text: string) {
+  return {
+    type: "doc" as const,
+    content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+  };
+}
+
 function screening(overrides: Partial<FormScreening> = {}): FormScreening {
   return {
     ...makeEmptyFormScreening(),
@@ -24,15 +31,13 @@ function screening(overrides: Partial<FormScreening> = {}): FormScreening {
         id: "q1",
         prompt: "Are you over 18?",
         passAnswer: "yes",
-        failMessage: "You must be 18 or older.",
-        failLinks: [{ label: "Youth programs", href: "/youth" }],
+        failContent: doc("You must be 18 or older."),
       },
       {
         id: "q2",
         prompt: "Do you already have an active case?",
         passAnswer: "no",
-        failMessage: "",
-        failLinks: [],
+        failContent: null,
       },
     ],
     ...overrides,
@@ -116,21 +121,23 @@ describe("retryScreening", () => {
 });
 
 describe("failContent", () => {
-  it("uses the question's own message and links", () => {
-    expect(failContent(screening(), 0)).toEqual({
-      message: "You must be 18 or older.",
-      links: [{ label: "Youth programs", href: "/youth" }],
-    });
+  it("uses the question's own message", () => {
+    expect(failContent(screening(), 0)).toEqual(
+      doc("You must be 18 or older."),
+    );
   });
 
-  it("falls back to the default message when the question has none", () => {
-    expect(failContent(screening(), 1)).toEqual({
-      message: FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
-      links: [],
-    });
+  it("falls back to the default message doc when the question has none", () => {
+    expect(failContent(screening(), 1)).toEqual(
+      doc(FORM_DEFAULT_SCREENING_FAIL_MESSAGE),
+    );
     expect(
-      failContent(screening({ defaultFailMessage: "Not a fit." }), 1).message,
-    ).toBe("Not a fit.");
+      failContent(screening({ defaultFailContent: doc("Not a fit.") }), 1),
+    ).toEqual(doc("Not a fit."));
+  });
+
+  it("is null when neither the question nor the default has a message", () => {
+    expect(failContent(screening({ defaultFailContent: null }), 1)).toBeNull();
   });
 });
 

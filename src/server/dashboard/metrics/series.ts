@@ -194,12 +194,17 @@ export async function queryInvoicePaymentTotals(
  * no data at all the axis is the single bucket holding `end`.
  */
 export function toSeriesPoints(
-  totals: ReadonlyMap<string, number>,
+  totals: ReadonlyMap<string, number | null>,
   opts: {
     start: Date | null;
     end: Date;
     granularity: DashboardRangeGranularity;
     timeZone: string;
+    /**
+     * What an empty bucket holds: 0 (sums and counts, the default) or null
+     * (averages: nothing to average, so no value rather than a zero).
+     */
+    empty?: 0 | null;
   },
 ): SeriesPoint[] {
   const tz = normalizeTimeZone(opts.timeZone);
@@ -213,7 +218,7 @@ export function toSeriesPoints(
     end: opts.end,
     granularity: opts.granularity,
     timeZone: tz,
-    empty: () => 0,
+    empty: () => (opts.empty === undefined ? 0 : opts.empty),
   }).map((bucket) => ({
     key: bucket.key,
     label: bucketLabel(bucket.key, opts.granularity),
@@ -223,22 +228,25 @@ export function toSeriesPoints(
 
 /** `toSeriesPoints` for a window on instants, in the store's zone. */
 export function windowSeriesPoints(
-  totals: ReadonlyMap<string, number>,
+  totals: ReadonlyMap<string, number | null>,
   win: MetricWindow,
   granularity: DashboardRangeGranularity,
   timeZone: string,
+  /** `null` for averages: empty buckets hold no value instead of 0. */
+  empty: 0 | null = 0,
 ): SeriesPoint[] {
   return toSeriesPoints(totals, {
     start: win.start,
     end: win.endExclusive,
     granularity,
     timeZone,
+    empty,
   });
 }
 
 /** `toSeriesPoints` for calendar-date columns (UTC-midnight dates, no zone shift). */
 export function ymdSeriesPoints(
-  totals: ReadonlyMap<string, number>,
+  totals: ReadonlyMap<string, number | null>,
   win: MetricWindow,
   granularity: DashboardRangeGranularity,
 ): SeriesPoint[] {
@@ -251,10 +259,10 @@ export function ymdSeriesPoints(
   });
 }
 
-/** Pull one number out of each bucket's totals. */
+/** Pull one number (or null, for an average over nothing) out of each bucket's totals. */
 export function pickTotals<T = BucketTotals>(
   totals: ReadonlyMap<string, T>,
-  pick: (bucket: T) => number,
-): Map<string, number> {
+  pick: (bucket: T) => number | null,
+): Map<string, number | null> {
   return new Map([...totals].map(([key, value]) => [key, pick(value)]));
 }

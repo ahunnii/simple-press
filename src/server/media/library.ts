@@ -10,6 +10,7 @@
  *   bulkDeleteMedia     — delete multiple unused S3 objects (partial success
  *                         by design — see its own doc comment)
  *   getMediaDownloadUrl — generate a presigned download URL
+ *   verifyLibraryDocument — confirm a fresh PDF upload really is a PDF
  *
  * EVERY tenant guard lives here, not in the routers, so a new caller can't
  * forget one: the `${businessId}/` key-prefix guard (cross-tenant), the
@@ -32,10 +33,12 @@ import type { DbClient } from "~/server/db";
 import { isProtectedBrandAssetKey } from "~/lib/media/brand-asset-keys";
 import { scrubUrlsFromCustomFields } from "~/lib/media/scrub-custom-fields";
 import { buildUsedMediaIndex } from "~/lib/media/usage";
+import { s3Client } from "~/lib/s3/client";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { listBusinessObjects } from "~/lib/s3/list";
+import { hasPdfSignature, isLibraryDocumentKey } from "~/lib/s3/pdf";
 import { getPresignedDownloadUrl } from "~/lib/s3/presign";
-import { keyToPublicUrl } from "~/lib/s3/url";
+import { keyToPublicUrl, STORAGE_BUCKET } from "~/lib/s3/url";
 import { storageKeySchema } from "~/lib/validators/media";
 
 // ─── Guards ───────────────────────────────────────────────────────────────────
@@ -370,4 +373,68 @@ export async function getMediaDownloadUrl(
   const url = await getPresignedDownloadUrl(key, { downloadName });
 
   return { url };
+}
+
+// ─── Document verification ────────────────────────────────────────────────────
+
+/**
+ * Confirm a just-uploaded Media Library PDF really is one. The upload route
+ * only checks the browser-reported MIME type and file extension, both of which
+ * the uploader controls, so this reads the first bytes back from storage and
+ * requires the `%PDF-` signature. Anything else is deleted on the spot (the
+ * object is public and served as application/pdf) and rejected.
+ *
+ * Only `library-doc-` keys under the target business are accepted, so this
+ * can never be pointed at (or delete) an unrelated file.
+ */
+export async function verifyLibraryDocument(
+  businessId: string,
+  key: string,
+): Promise<{ ok: true; url: string }> {
+  assertBusinessId(businessId);
+
+  if (!isKeyInBusiness(businessId, key) || !isLibraryDocumentKey(key)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Key does not belong to the target business.",
+    });
+  }
+
+  const url = keyToPublicUrl(key);
+  const objectUrl = `${s3Client.buildBucketUrl(STORAGE_BUCKET)}/${key}`;
+
+  const res = await s3Client.s3.fetch(objectUrl, {
+    method: "GET",
+    headers: { Range: "bytes=0-4" },
+  });
+
+  if (res.status === 404) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "We couldn't find that upload. Please try again.",
+    });
+  }
+
+  // 416 = an empty object (range not satisfiable): not a PDF either.
+  let head = new Uint8Array();
+  if (res.ok) {
+    // A server that ignores Range sends the whole file (200) — only keep the
+    // first bytes either way.
+    head = new Uint8Array(await res.arrayBuffer()).slice(0, 5);
+  } else if (res.status !== 416) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "We couldn't check that file. Please try again.",
+    });
+  }
+
+  if (!hasPdfSignature(head)) {
+    await deleteStoredObjects([url]);
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "That file isn't a real PDF.",
+    });
+  }
+
+  return { ok: true, url };
 }

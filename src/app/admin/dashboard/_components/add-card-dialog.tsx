@@ -20,13 +20,19 @@ import { sizeLabel } from "./edit-labels";
 import { Footprint } from "./footprint";
 
 /**
+ * A Trend chart is meant to be added more than once (one per number to watch),
+ * so it never carries the "On dashboard" badge; the other cards keep it.
+ */
+const allowsMany = (def: { kind: string }) => def.kind === "trendChart";
+
+/**
  * The card catalog: every widget this store can show, grouped by family
  * (families with nothing available are left out). Picking one adds it to the
  * end of the draft and closes the dialog.
  *
  * Widgets already on the dashboard stay addable — the same widget twice with
  * different time ranges is a supported layout — and carry an "On dashboard"
- * badge.
+ * badge (except the Trend chart, which is expected to appear several times).
  */
 export function AddCardDialog({
   open,
@@ -109,7 +115,7 @@ export function AddCardDialog({
                           <span className="text-sm font-medium">
                             {def.label}
                           </span>
-                          {presentWidgetIds.has(def.id) && (
+                          {presentWidgetIds.has(def.id) && !allowsMany(def) && (
                             <Badge variant="secondary" className="font-normal">
                               On dashboard
                             </Badge>

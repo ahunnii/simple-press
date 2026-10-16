@@ -29,12 +29,16 @@ export type DashboardFeatureKey =
   | "customerAccounts"
   | "quoteCalculator"
   | "forms"
-  | "analytics";
+  | "analytics"
+  | "events"
+  | "testimonials"
+  | "emailMarketing";
 
 export const WIDGET_SIZES = ["1x1", "2x1", "2x2", "4x2"] as const;
 export type WidgetSize = (typeof WIDGET_SIZES)[number];
 
 export type WidgetFamily =
+  | "charts"
   | "sales"
   | "inventory"
   | "donations"
@@ -48,7 +52,11 @@ export type WidgetKind =
   | "recentOrders"
   | "lowStock"
   | "topProducts"
-  | "revenueChart";
+  | "revenueChart"
+  | "trendChart";
+
+/** How the Trend chart draws a metric: sums/counts as bars, averages as a line. */
+export type TrendStyle = "bar" | "line";
 
 export type WidgetFormat = "currency" | "count" | "percent";
 export type DeltaPolarity = "up-good" | "down-good";
@@ -60,6 +68,11 @@ export type WidgetRequirements = {
   anyFlags?: readonly DashboardFeatureKey[];
   /** Umami must be configured for the store. */
   umami?: boolean;
+  /**
+   * At least one of these OTHER widgets must be available. Ids are strings
+   * (not `WidgetId`) so a def can name widgets declared after it.
+   */
+  anyWidget?: readonly string[];
 };
 
 export type WidgetHrefFallback = {
@@ -87,6 +100,12 @@ export type WidgetDef = {
   deltaPolarity: DeltaPolarity;
   /** Shows a sparkline at 2x1. */
   sparkline: boolean;
+  /**
+   * Present = this stat can be plotted by the Trend chart (its stat family
+   * builds a per-bucket series), drawn as bars or a line. Sums and counts are
+   * "bar"; averages are "line".
+   */
+  trend?: TrendStyle;
   format: WidgetFormat;
   /** Where the card links to. */
   href: string;
@@ -115,6 +134,10 @@ type StatInput = {
   href: string;
   hrefFallback?: WidgetHrefFallback;
   deltaPolarity?: DeltaPolarity;
+  /** Plottable by the Trend chart; see `WidgetDef.trend`. */
+  trend?: TrendStyle;
+  /** Set false when the family builds no per-bucket series. */
+  sparkline?: boolean;
 };
 
 /** A ranged stat: 1x1 / 2x1, any range, comparison + sparkline. */
@@ -130,7 +153,7 @@ function rangedStat(input: StatInput) {
     supportsComparison: true,
     isPointInTime: false,
     deltaPolarity: input.deltaPolarity ?? "up-good",
-    sparkline: true,
+    sparkline: input.sparkline ?? true,
   } as const;
 }
 
@@ -181,10 +204,35 @@ const TRAFFIC = {
   umami: true,
 } as const satisfies WidgetRequirements;
 
+/**
+ * The ids `trend-chart` can plot, spelled out because the def for
+ * `trend-chart` is built before `WIDGETS` exists. `widgets.test.ts` asserts
+ * this equals `PLOTTABLE_METRIC_IDS` (every def with a `trend`).
+ */
+export const TREND_METRIC_CANDIDATES = [
+  "gross-revenue",
+  "net-revenue",
+  "refunds",
+  "order-count",
+  "avg-order-value",
+  "orders-fulfilled",
+  "orders-cancelled",
+  "donations-total",
+  "donations-count",
+  "donors-count",
+  "donation-average",
+  "invoices-collected",
+  "new-customers",
+  "quote-requests",
+  "form-submissions",
+  "visitors",
+] as const;
+
 /** Every widget, keyed by its persisted id. Object order = catalog order. */
 const DEFS = {
   // ── Sales ────────────────────────────────────────────────────────────────
   "gross-revenue": rangedStat({
+    trend: "bar",
     label: "Gross revenue",
     description: "Sales before refunds. Cancelled orders are left out.",
     family: "sales",
@@ -193,6 +241,7 @@ const DEFS = {
     href: "/admin/finances",
   }),
   "net-revenue": rangedStat({
+    trend: "bar",
     label: "Net revenue",
     description: "Sales minus refunds, matching Finances.",
     family: "sales",
@@ -201,6 +250,7 @@ const DEFS = {
     href: "/admin/finances",
   }),
   refunds: rangedStat({
+    trend: "bar",
     label: "Refunds",
     description: "Money refunded to customers.",
     family: "sales",
@@ -210,6 +260,7 @@ const DEFS = {
     deltaPolarity: "down-good",
   }),
   "order-count": rangedStat({
+    trend: "bar",
     label: "Orders",
     description: "Paid orders placed.",
     family: "sales",
@@ -218,6 +269,7 @@ const DEFS = {
     href: "/admin/orders",
   }),
   "avg-order-value": rangedStat({
+    trend: "line",
     label: "Average order",
     description: "Net revenue (after refunds) divided by paid orders.",
     family: "sales",
@@ -242,6 +294,7 @@ const DEFS = {
     href: "/admin/orders",
   }),
   "orders-fulfilled": rangedStat({
+    trend: "bar",
     label: "Orders fulfilled",
     description: "Of orders placed in range, how many are now fulfilled.",
     family: "sales",
@@ -250,6 +303,7 @@ const DEFS = {
     href: "/admin/orders",
   }),
   "orders-cancelled": rangedStat({
+    trend: "bar",
     label: "Orders cancelled",
     description: "Of orders placed in range, how many are now cancelled.",
     family: "sales",
@@ -280,7 +334,7 @@ const DEFS = {
   "revenue-chart": {
     label: "Revenue chart",
     description: "Gross, refunded and net revenue over time.",
-    family: "sales",
+    family: "charts",
     kind: "revenueChart",
     requires: ORDERS,
     sizes: WIDE_SIZES,
@@ -294,6 +348,25 @@ const DEFS = {
     sparkline: false,
     format: "currency",
     href: "/admin/finances",
+  },
+  "trend-chart": {
+    label: "Trend chart",
+    description: "Any number over time, as a chart.",
+    family: "charts",
+    kind: "trendChart",
+    requires: { anyWidget: TREND_METRIC_CANDIDATES },
+    sizes: WIDE_SIZES,
+    defaultSize: "4x2",
+    supportsRange: true,
+    allowedRanges: NO_TODAY_RANGES,
+    defaultRange: "30d",
+    supportsComparison: true,
+    isPointInTime: false,
+    deltaPolarity: "up-good",
+    sparkline: false,
+    format: "count",
+    // Each card links to its metric's own page; see `getWidget(metric).href`.
+    href: "/admin/dashboard",
   },
   "top-products": {
     label: "Top products",
@@ -349,6 +422,7 @@ const DEFS = {
 
   // ── Donations ────────────────────────────────────────────────────────────
   "donations-total": rangedStat({
+    trend: "bar",
     label: "Donations",
     description: "Money given, before refunds.",
     family: "donations",
@@ -357,6 +431,7 @@ const DEFS = {
     href: "/admin/donations",
   }),
   "donations-count": rangedStat({
+    trend: "bar",
     label: "Gifts",
     description: "Number of donations received.",
     family: "donations",
@@ -365,6 +440,7 @@ const DEFS = {
     href: "/admin/donations",
   }),
   "donors-count": rangedStat({
+    trend: "bar",
     label: "Donors",
     description:
       "People who gave, counted once each by email. Gifts without an email are left out.",
@@ -374,6 +450,7 @@ const DEFS = {
     href: "/admin/donations",
   }),
   "donation-average": rangedStat({
+    trend: "line",
     label: "Average gift",
     description: "Donation total divided by number of gifts.",
     family: "donations",
@@ -402,6 +479,7 @@ const DEFS = {
     deltaPolarity: "down-good",
   }),
   "invoices-collected": rangedStat({
+    trend: "bar",
     label: "Invoices collected",
     description: "Payments received on invoices.",
     family: "invoices",
@@ -431,6 +509,7 @@ const DEFS = {
 
   // ── Customers ────────────────────────────────────────────────────────────
   "new-customers": rangedStat({
+    trend: "bar",
     label: "New customers",
     description: "Customer accounts created.",
     family: "customers",
@@ -447,6 +526,7 @@ const DEFS = {
     href: "/admin/customers",
   }),
   "quote-requests": rangedStat({
+    trend: "bar",
     label: "Quote requests",
     description: "Quotes submitted through your calculators.",
     family: "customers",
@@ -455,6 +535,7 @@ const DEFS = {
     href: "/admin/quotes",
   }),
   "form-submissions": rangedStat({
+    trend: "bar",
     label: "Form submissions",
     description: "Responses submitted on your site (imports not counted).",
     family: "customers",
@@ -462,9 +543,37 @@ const DEFS = {
     format: "count",
     href: "/admin/forms",
   }),
+  "upcoming-events": pointInTimeStat({
+    label: "Upcoming events",
+    description:
+      "Published events that haven't ended yet, including ones happening now.",
+    family: "customers",
+    requires: { flags: ["events"] },
+    format: "count",
+    href: "/admin/events",
+  }),
+  "testimonials-pending": pointInTimeStat({
+    label: "Testimonials to approve",
+    description: "Testimonials waiting for your approval.",
+    family: "customers",
+    requires: { flags: ["testimonials"] },
+    format: "count",
+    href: "/admin/testimonials",
+    deltaPolarity: "down-good",
+  }),
+  "email-subscribers": pointInTimeStat({
+    label: "Email subscribers",
+    description:
+      "Customers who opted in to marketing email, matching the audience on the Email Marketing page.",
+    family: "customers",
+    requires: { flags: ["emailMarketing"] },
+    format: "count",
+    href: "/admin/marketing",
+  }),
 
   // ── Traffic ──────────────────────────────────────────────────────────────
   visitors: rangedStat({
+    trend: "bar",
     label: "Visitors",
     description: "Unique visitors to your site.",
     family: "traffic",
@@ -473,6 +582,8 @@ const DEFS = {
     href: "/admin/analytics",
   }),
   "conversion-rate": rangedStat({
+    // No per-bucket series (orders per visitor needs both), so no sparkline or trend.
+    sparkline: false,
     label: "Conversion rate",
     description: "Paid orders per visitor.",
     family: "traffic",
@@ -504,6 +615,7 @@ export const WIDGET_FAMILIES: ReadonlyArray<{
   family: WidgetFamily;
   label: string;
 }> = [
+  { family: "charts", label: "Charts" },
   { family: "sales", label: "Orders and revenue" },
   { family: "inventory", label: "Inventory" },
   { family: "donations", label: "Donations" },
@@ -535,7 +647,7 @@ export function isWidgetAvailable(
   def: WidgetDef,
   ctx: WidgetAvailabilityContext,
 ): boolean {
-  const { flags, anyFlags, umami } = def.requires;
+  const { flags, anyFlags, umami, anyWidget } = def.requires;
   if (flags && !flags.every((key) => ctx.isEnabled(key))) return false;
   if (
     anyFlags &&
@@ -544,6 +656,13 @@ export function isWidgetAvailable(
   )
     return false;
   if (umami && !ctx.umamiConfigured) return false;
+  if (anyWidget && anyWidget.length > 0) {
+    const other = anyWidget.some((id) => {
+      const target = getWidget(id);
+      return target !== undefined && isWidgetAvailable(target, ctx);
+    });
+    if (!other) return false;
+  }
   return true;
 }
 
@@ -593,4 +712,87 @@ export function resolveWidgetHref(
 ): string {
   const fallback = def.hrefFallback;
   return fallback && !isEnabled(fallback.unlessFlag) ? fallback.href : def.href;
+}
+
+// ── Trend chart metrics ─────────────────────────────────────────────────────
+
+/** Every widget the Trend chart can plot (those with a `trend`), in catalog order. */
+export const PLOTTABLE_METRIC_IDS: readonly WidgetId[] = WIDGET_IDS.filter(
+  (id) => WIDGETS[id].trend !== undefined,
+);
+
+/** Whether `id` is a widget the Trend chart can plot. */
+export function isPlottableMetric(id: unknown): id is WidgetId {
+  return isWidgetId(id) && WIDGETS[id].trend !== undefined;
+}
+
+/** How the Trend chart draws a metric. */
+export function trendStyle(id: WidgetId): TrendStyle {
+  return WIDGETS[id].trend ?? "bar";
+}
+
+/** The store's headline number first; anything else falls to catalog order. */
+const TREND_METRIC_PREFERENCE: readonly WidgetId[] = [
+  "net-revenue",
+  "donations-total",
+  "form-submissions",
+  "visitors",
+  "new-customers",
+];
+
+function hasId(
+  available: ReadonlySet<string> | readonly string[],
+  id: string,
+): boolean {
+  return Array.isArray(available)
+    ? (available as readonly string[]).includes(id)
+    : (available as ReadonlySet<string>).has(id);
+}
+
+/**
+ * The metric a new Trend chart plots: the first available of net revenue,
+ * donations, form submissions, visitors, new customers, then the first
+ * available plottable metric. Null when none is available.
+ */
+export function defaultTrendMetric(
+  available: ReadonlySet<string> | readonly string[],
+): WidgetId | null {
+  const has = (id: string) => hasId(available, id);
+  return (
+    TREND_METRIC_PREFERENCE.find(has) ?? PLOTTABLE_METRIC_IDS.find(has) ?? null
+  );
+}
+
+/** A metric's own name, e.g. "Donations" (the Shows picker's option label). */
+export function trendMetricLabel(id: WidgetId): string {
+  return WIDGETS[id].label;
+}
+
+/** Card title for a Trend chart on `metric`, e.g. "Donations over time". */
+export function trendChartTitle(metric: WidgetId): string {
+  return `${WIDGETS[metric].label} over time`;
+}
+
+/**
+ * The available plottable metrics grouped by widget family, in display order,
+ * for the Shows picker.
+ */
+export function trendMetricGroups(
+  available: ReadonlySet<string> | readonly string[],
+): Array<{
+  family: WidgetFamily;
+  label: string;
+  metrics: Array<{ id: WidgetId; label: string; style: TrendStyle }>;
+}> {
+  return WIDGET_FAMILIES.map(({ family, label }) => ({
+    family,
+    label,
+    metrics: PLOTTABLE_METRIC_IDS.filter(
+      (id) => WIDGETS[id].family === family && hasId(available, id),
+    ).map((id) => ({
+      id,
+      label: WIDGETS[id].label,
+      style: trendStyle(id),
+    })),
+  })).filter((group) => group.metrics.length > 0);
 }

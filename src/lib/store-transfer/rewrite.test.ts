@@ -215,3 +215,75 @@ describe("rewriteJsonValue — Service.customFields", () => {
     }
   });
 });
+
+// ─── Links to stored files (Media Library PDFs) ───────────────────────────────
+
+describe("store transfer — links to stored files", () => {
+  const OLD_PDF = keyToPublicUrl("source-biz/library-doc-ab12cd34-menu.pdf");
+  const NEW_PDF = keyToPublicUrl("target-biz/library-doc-ab12cd34-menu.pdf");
+  const pdfMap = new Map([[OLD_PDF, NEW_PDF]]);
+
+  const linked = (href: string) => ({
+    type: "text",
+    text: "Menu",
+    marks: [{ type: "bold" }, { type: "link", attrs: { href, target: null } }],
+  });
+
+  it("rewrites a link mark href, keeping a #fragment and other marks", () => {
+    const out = rewriteTiptapDoc(
+      doc({
+        type: "paragraph",
+        content: [linked(`${OLD_PDF}#page=3`), linked("/contact")],
+      }),
+      pdfMap,
+      galleryIdMap,
+    );
+    expect(out).toEqual(
+      doc({
+        type: "paragraph",
+        content: [linked(`${NEW_PDF}#page=3`), linked("/contact")],
+      }),
+    );
+  });
+
+  it("leaves unmapped and external link hrefs untouched", () => {
+    const input = doc({
+      type: "paragraph",
+      content: [
+        linked(keyToPublicUrl("source-biz/library-doc-ffff0000.pdf")),
+        linked("https://example.com/menu.pdf"),
+      ],
+    });
+    expect(rewriteTiptapDoc(input, pdfMap, galleryIdMap)).toEqual(input);
+  });
+
+  it("rewrites nav, footer, banner and popup hrefs via rewriteJsonValue", () => {
+    const nav = [
+      { label: "Shop", href: "/shop" },
+      {
+        label: "Menus",
+        href: "",
+        children: [{ label: "Dinner", href: OLD_PDF }],
+      },
+    ];
+    expect(rewriteJsonValue(nav, pdfMap, galleryIdMap)).toEqual([
+      { label: "Shop", href: "/shop" },
+      {
+        label: "Menus",
+        href: "",
+        children: [{ label: "Dinner", href: NEW_PDF }],
+      },
+    ]);
+
+    const banner = {
+      enabled: true,
+      content: doc({ type: "paragraph", content: [linked(OLD_PDF)] }),
+      linkUrl: OLD_PDF,
+    };
+    expect(rewriteJsonValue(banner, pdfMap, galleryIdMap)).toEqual({
+      enabled: true,
+      content: doc({ type: "paragraph", content: [linked(NEW_PDF)] }),
+      linkUrl: NEW_PDF,
+    });
+  });
+});

@@ -41,6 +41,7 @@ vi.mock("~/server/db", () => ({
     testimonial: { findMany: vi.fn() },
     productReview: { findMany: vi.fn() },
     form: { findMany: vi.fn() },
+    marketingCampaign: { findMany: vi.fn() },
   },
 }));
 
@@ -76,6 +77,7 @@ const EMPTY_TABLES = [
   db.testimonial.findMany,
   db.productReview.findMany,
   db.form.findMany,
+  db.marketingCampaign.findMany,
 ];
 
 beforeEach(() => {
@@ -581,7 +583,331 @@ describe("buildUsedMediaIndex — Business maintenance page", () => {
   });
 });
 
-// ─── buildGalleryExternalUsage ────────────────────────────────────────────────
+// ─── Links to stored files (Media Library PDFs) ───────────────────────────────
+
+describe("buildUsedMediaIndex — links to stored files", () => {
+  const pdf = keyToPublicUrl(`${BUSINESS_ID}/library-doc-ab12cd.pdf`);
+
+  /** A paragraph whose single text run carries a `link` mark to `href`. */
+  const linkDoc = (...hrefs: string[]) => ({
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: hrefs.map((href) => ({
+          type: "text",
+          text: "Download",
+          marks: [{ type: "bold" }, { type: "link", attrs: { href } }],
+        })),
+      },
+    ],
+  });
+
+  function pageRow(content: unknown, type = "page") {
+    return {
+      id: "page_1",
+      title: "Menu",
+      slug: "menu",
+      image: null,
+      ogImage: null,
+      content,
+      previewDraft: null,
+      type,
+    };
+  }
+
+  function siteContentRow(overrides: Record<string, unknown>) {
+    return {
+      heroImageUrl: null,
+      aboutImageUrl: null,
+      ogImage: null,
+      faviconUrl: null,
+      logoUrl: null,
+      pageMeta: null,
+      popupConfig: null,
+      bannerConfig: null,
+      navigationItems: null,
+      footerNavigationItems: null,
+      customFields: null,
+      previewCustomFields: null,
+      business: { templateId: "modern" },
+      ...overrides,
+    };
+  }
+
+  it("records a rich-text link mark pointing at a stored PDF, keyed canonically", async () => {
+    asMock(db.page.findMany).mockResolvedValue([
+      // `#page=2` and `?v=1` must still resolve to the object's public URL —
+      // that is the key the Media Library looks rows up by.
+      pageRow(linkDoc(`${pdf}#page=2`, `${pdf}?v=1`)),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(pdf)).toEqual([
+      {
+        url: `${pdf}#page=2`,
+        location: "Linked from page",
+        entityType: "page",
+        entityId: "page_1",
+        entityLabel: "Menu",
+        adminHref: "/admin/content/pages/page_1",
+      },
+      expect.objectContaining({ url: `${pdf}?v=1` }),
+    ]);
+  });
+
+  it("labels blog-post links as such", async () => {
+    asMock(db.page.findMany).mockResolvedValue([pageRow(linkDoc(pdf), "blog")]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(pdf)?.[0]).toMatchObject({
+      location: "Linked from blog post",
+      adminHref: "/admin/content/blog/page_1",
+    });
+  });
+
+  it("ignores link marks that do not point at our bucket", async () => {
+    asMock(db.page.findMany).mockResolvedValue([
+      pageRow(
+        linkDoc(
+          "https://example.com/menu.pdf",
+          "/contact",
+          "#faq",
+          "mailto:hi@example.com",
+          "",
+        ),
+      ),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(0);
+  });
+
+  it("records links inside template-field, product and maintenance rich text", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({ customFields: { "custom-about-body": linkDoc(pdf) } }),
+    );
+    asMock(db.product.findMany).mockResolvedValue([
+      {
+        id: "prod_1",
+        name: "Cake",
+        ogImage: null,
+        additionalFields: { additionalInformation: linkDoc(pdf) },
+      },
+    ]);
+    asMock(db.business.findUnique).mockResolvedValue({
+      maintenanceImage: null,
+      maintenanceMessage: linkDoc(pdf),
+    });
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    const locations = (index.get(pdf) ?? []).map((u) => u.location);
+
+    expect(locations).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(
+          /^Linked from .*custom-about-body \(rich text\)$/,
+        ),
+        "Linked from Product additional information",
+        "Linked from maintenance page message (rich text)",
+      ]),
+    );
+    expect(locations).toHaveLength(3);
+  });
+
+  it("records a stored file URL saved in a template url field", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({
+        customFields: { "modern.homepage.hero-cta-button-link": pdf },
+      }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(pdf)).toHaveLength(1);
+    expect(index.get(pdf)?.[0]?.entityType).toBe("siteContent");
+  });
+
+  it("never flags an inactive template's rich-text link (the scrub can't remove link marks)", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({
+        customFields: { "noise.about-story-body": linkDoc(pdf) },
+      }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    const usages = index.get(pdf) ?? [];
+
+    expect(usages).toHaveLength(1);
+    expect(usages[0]?.location).toContain("(not active)");
+    expect(usages[0]?.inactiveTemplate).toBeUndefined();
+  });
+
+  it("records navigation, footer quick-link, banner and popup hrefs", async () => {
+    asMock(db.siteContent.findUnique).mockResolvedValue(
+      siteContentRow({
+        navigationItems: [
+          { label: "Shop", href: "/shop" },
+          {
+            label: "Menus",
+            href: "",
+            children: [
+              { label: "Dinner", href: ` ${pdf} ` },
+              { label: "Elsewhere", href: "https://example.com/x.pdf" },
+            ],
+          },
+          "nonsense",
+        ],
+        footerNavigationItems: [{ label: "Price list", href: pdf }],
+        bannerConfig: {
+          enabled: true,
+          version: "v1",
+          content: linkDoc(pdf),
+          linkUrl: pdf,
+        },
+        popupConfig: {
+          mode: "text",
+          version: "v1",
+          content: null,
+          ctaUrl: pdf,
+        },
+      }),
+    );
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+    const usages = index.get(pdf) ?? [];
+
+    expect(usages).toEqual(
+      expect.arrayContaining([
+        {
+          url: pdf,
+          location: "Navigation menu",
+          entityType: "siteContent",
+          entityLabel: "Menus › Dinner",
+          adminHref: "/admin/content/navigation",
+        },
+        expect.objectContaining({
+          location: "Footer quick links",
+          entityLabel: "Price list",
+        }),
+        expect.objectContaining({
+          location: "Announcement banner",
+          entityLabel: "Banner link",
+        }),
+        expect.objectContaining({
+          location: "Announcement banner",
+          entityLabel: "Linked from message",
+        }),
+        expect.objectContaining({
+          location: "Announcement popup",
+          entityLabel: "Popup button link",
+        }),
+      ]),
+    );
+    expect(usages).toHaveLength(5);
+    expect(index.size).toBe(1);
+  });
+});
+
+// ─── Email campaigns ──────────────────────────────────────────────────────────
+
+describe("buildUsedMediaIndex — email campaigns", () => {
+  const pdf = keyToPublicUrl(`${BUSINESS_ID}/library-doc-ab12cd-menu.pdf`);
+  const photo = keyToPublicUrl(`${BUSINESS_ID}/library-77aa.jpg`);
+  const logo = keyToPublicUrl(`${BUSINESS_ID}/logo.png`);
+
+  function campaignRow(overrides: Record<string, unknown>) {
+    return {
+      id: "camp_1",
+      subject: "Fall menu",
+      status: "SENT",
+      bodyText: null,
+      bodyJson: null,
+      renderedHtml: null,
+      renderedText: null,
+      ...overrides,
+    };
+  }
+
+  it("records a tiptap campaign's linked PDF and inline image, once each", async () => {
+    asMock(db.marketingCampaign.findMany).mockResolvedValue([
+      campaignRow({
+        bodyJson: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "Menu",
+                  marks: [{ type: "link", attrs: { href: `${pdf}#page=2` } }],
+                },
+              ],
+            },
+            { type: "image", attrs: { src: photo } },
+          ],
+        },
+        // The frozen render repeats both URLs and adds the header logo.
+        renderedHtml: `<img src="${logo}"><a href="${pdf}#page=2">Menu</a><img src="${photo}">`,
+        renderedText: `Menu (${pdf}#page=2)`,
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(pdf)).toEqual([
+      {
+        url: `${pdf}#page=2`,
+        location: "Linked from email campaign",
+        entityType: "marketingCampaign",
+        entityId: "camp_1",
+        entityLabel: "Fall menu",
+        adminHref: "/admin/marketing/campaigns/camp_1",
+      },
+    ]);
+    expect(index.get(photo)).toEqual([
+      expect.objectContaining({ location: "Email campaign image" }),
+    ]);
+    expect(index.get(logo)).toEqual([
+      expect.objectContaining({ location: "Email campaign" }),
+    ]);
+  });
+
+  it("finds bare URLs in a plain-text draft and labels them (draft)", async () => {
+    asMock(db.marketingCampaign.findMany).mockResolvedValue([
+      campaignRow({
+        status: "DRAFT",
+        subject: "  ",
+        bodyText: `Our menu: ${pdf}. Elsewhere: https://example.com/x.pdf`,
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(1);
+    expect(index.get(pdf)?.[0]).toMatchObject({
+      location: "Linked from email campaign (draft)",
+      entityLabel: "Untitled campaign",
+    });
+  });
+
+  it("ignores campaigns with no stored files", async () => {
+    asMock(db.marketingCampaign.findMany).mockResolvedValue([
+      campaignRow({
+        bodyText: "Visit https://example.com/menu.pdf or /contact",
+        renderedHtml: '<a href="https://example.com">x</a>',
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.size).toBe(0);
+  });
+});
 
 // ─── Form.definition (picture choice) ─────────────────────────────────────────
 
@@ -629,6 +955,104 @@ describe("buildUsedMediaIndex — Form picture-choice media", () => {
     ]);
     expect(index.get(referenceUrl)).toHaveLength(1);
     expect(index.get(referenceUrl)?.[0]?.location).toContain("Finish");
+  });
+
+  it("reports images and linked files inside the screening unlock note", async () => {
+    const noteImage = keyToPublicUrl(`${BUSINESS_ID}/image-note.jpg`);
+    const notePdf = keyToPublicUrl(`${BUSINESS_ID}/file-guide.pdf`);
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [{ id: "f1", type: "text", label: "Name", required: false }],
+        settings: {
+          screening: {
+            enabled: true,
+            questions: [{ id: "q1", prompt: "Over 18?" }],
+            unlockContent: {
+              type: "doc",
+              content: [
+                { type: "image", attrs: { src: noteImage } },
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Guide",
+                      marks: [{ type: "link", attrs: { href: notePdf } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(noteImage)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+      location: "Form: Order Form — screening message",
+    });
+    expect(index.get(notePdf)?.[0]).toMatchObject({
+      entityId: "form_1",
+      location: "Linked from Form: Order Form — screening message",
+    });
+  });
+
+  it("reports images and linked files inside screening fail messages", async () => {
+    const failImage = keyToPublicUrl(`${BUSINESS_ID}/image-fail.jpg`);
+    const defaultPdf = keyToPublicUrl(`${BUSINESS_ID}/file-default.pdf`);
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [{ id: "f1", type: "text", label: "Name", required: false }],
+        settings: {
+          screening: {
+            enabled: true,
+            questions: [
+              {
+                id: "q1",
+                prompt: "Over 18?",
+                failContent: {
+                  type: "doc",
+                  content: [{ type: "image", attrs: { src: failImage } }],
+                },
+              },
+            ],
+            defaultFailContent: {
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Help",
+                      marks: [{ type: "link", attrs: { href: defaultPdf } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(failImage)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+      location: "Form: Order Form — screening message",
+    });
+    expect(index.get(defaultPdf)?.[0]).toMatchObject({
+      entityId: "form_1",
+      location: "Linked from Form: Order Form — screening message",
+    });
   });
 
   it("still reports media from a definition that no longer validates", async () => {

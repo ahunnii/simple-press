@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PublicFormDefinition } from "~/lib/validators/form";
 import { makeEmptyFormScreening } from "~/lib/validators/form";
 
+import { FormRenderer } from "./form-renderer";
+
 vi.mock("~/trpc/react", () => ({
   api: {
     formSubmission: {
@@ -20,8 +22,6 @@ vi.mock("~/server/better-auth/client", () => ({
 vi.mock("~/lib/captcha/use-recaptcha-v3", () => ({
   useRecaptchaV3: () => ({ execute: vi.fn(() => Promise.resolve(null)) }),
 }));
-
-import { FormRenderer } from "./form-renderer";
 
 function makeDefinition(
   screening: PublicFormDefinition["settings"]["screening"],
@@ -61,8 +61,7 @@ describe("FormRenderer screening", () => {
               id: "q1",
               prompt: "Are you a resident?",
               passAnswer: "yes",
-              failMessage: "Residents only.",
-              failLinks: [],
+              failContent: null,
             },
           ],
         })}

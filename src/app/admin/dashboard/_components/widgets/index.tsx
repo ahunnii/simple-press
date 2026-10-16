@@ -14,6 +14,7 @@ import { RecentOrdersWidget } from "./recent-orders-widget";
 import { RevenueChartWidget } from "./revenue-chart-widget";
 import { StatWidget } from "./stat-widget";
 import { TopProductsWidget } from "./top-products-widget";
+import { TrendChartWidget } from "./trend-chart-widget";
 import { UnavailableState } from "./unavailable-state";
 
 /**
@@ -47,6 +48,7 @@ export const WIDGET_RENDERERS: Record<WidgetKind, Renderer> = {
   lowStock: renderer("lowStock", LowStockWidget),
   topProducts: renderer("topProducts", TopProductsWidget),
   revenueChart: renderer("revenueChart", RevenueChartWidget),
+  trendChart: renderer("trendChart", TrendChartWidget),
 };
 
 /**

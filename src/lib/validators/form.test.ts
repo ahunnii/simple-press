@@ -6,8 +6,8 @@ import {
   FORM_DEFAULT_SUCCESS_MESSAGE,
   FORM_PICTURE_MAX_GROUPS,
   FORM_PICTURE_MAX_OPTIONS,
-  FORM_SCREENING_MAX_LINKS,
   FORM_SCREENING_MAX_QUESTIONS,
+  FORM_SCREENING_UNLOCK_MAX_JSON_LENGTH,
   formBulkAddTagsSchema,
   formBulkDeleteSchema,
   formCreateSchema,
@@ -864,6 +864,10 @@ describe("settings.screening", () => {
     prompt: `Question ${id}?`,
     ...extra,
   });
+  const note = (text: string) => ({
+    type: "doc" as const,
+    content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+  });
   const withScreening = (screening: Record<string, unknown>) => ({
     ...baseDefinition(),
     settings: { screening },
@@ -877,15 +881,14 @@ describe("settings.screening", () => {
       enabled: false,
       intro: "",
       questions: [],
-      defaultFailMessage: FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
-      unlockMessage: "",
-      unlockLinks: [],
+      defaultFailContent: note(FORM_DEFAULT_SCREENING_FAIL_MESSAGE),
+      unlockContent: null,
     });
     expect(formDefinitionSchema.safeParse(baseDefinition()).success).toBe(true);
     expect(makeEmptyFormDefinition().settings.screening.enabled).toBe(false);
   });
 
-  it("fills question defaults (passAnswer yes, blank fail message, no links)", () => {
+  it("fills question defaults (passAnswer yes, no fail message)", () => {
     const def = formDefinitionSchema.parse(
       withScreening({ enabled: true, questions: [question("q1")] }),
     );
@@ -893,8 +896,7 @@ describe("settings.screening", () => {
       id: "q1",
       prompt: "Question q1?",
       passAnswer: "yes",
-      failMessage: "",
-      failLinks: [],
+      failContent: null,
     });
   });
 
@@ -945,7 +947,7 @@ describe("settings.screening", () => {
     ).toBe(false);
   });
 
-  it("enforces the question and link caps", () => {
+  it("enforces the question cap", () => {
     const many = Array.from(
       { length: FORM_SCREENING_MAX_QUESTIONS + 1 },
       (_, i) => question(`q${i}`),
@@ -955,43 +957,192 @@ describe("settings.screening", () => {
         withScreening({ enabled: true, questions: many }),
       ).success,
     ).toBe(false);
-    const links = Array.from({ length: FORM_SCREENING_MAX_LINKS + 1 }, () => ({
-      label: "Help",
-      href: "/help",
-    }));
-    expect(
-      formDefinitionSchema.safeParse(
-        withScreening({ enabled: false, unlockLinks: links }),
-      ).success,
-    ).toBe(false);
   });
 
-  it.each([
-    ["javascript:alert(1)", false],
-    ["data:text/html,hi", false],
-    ["/contact", true],
-    ["https://example.com/help", true],
-    ["mailto:help@example.com", true],
-    ["tel:+15551234567", true],
-  ])("link href %s accepted=%s", (href, ok) => {
-    const result = formDefinitionSchema.safeParse(
-      withScreening({
-        enabled: true,
-        questions: [question("q1", { failLinks: [{ label: "Help", href }] })],
-      }),
-    );
-    expect(result.success).toBe(ok);
-  });
-
-  it("requires link text", () => {
-    expect(
+  describe("failContent / defaultFailContent", () => {
+    const parseQuestion = (failContent: unknown) =>
       formDefinitionSchema.safeParse(
         withScreening({
-          enabled: false,
-          unlockLinks: [{ label: " ", href: "/x" }],
+          enabled: true,
+          questions: [question("q1", { failContent })],
         }),
-      ).success,
-    ).toBe(false);
+      );
+
+    it("keeps a question's own message as-is", () => {
+      const doc = note("Try our youth program");
+      const def = formDefinitionSchema.parse(
+        withScreening({
+          enabled: true,
+          questions: [question("q1", { failContent: doc })],
+        }),
+      );
+      expect(def.settings.screening.questions[0]?.failContent).toEqual(doc);
+    });
+
+    it("normalizes missing, null and empty-editor question messages to null", () => {
+      for (const value of [
+        undefined,
+        null,
+        { type: "doc", content: [] },
+        { type: "doc", content: [{ type: "paragraph" }] },
+      ]) {
+        const def = formDefinitionSchema.parse(
+          withScreening({
+            enabled: true,
+            questions: [question("q1", { failContent: value })],
+          }),
+        );
+        expect(def.settings.screening.questions[0]?.failContent).toBeNull();
+      }
+    });
+
+    it("defaults the default message to the stock paragraph, but keeps an explicit null", () => {
+      const missing = formDefinitionSchema.parse(withScreening({}));
+      expect(missing.settings.screening.defaultFailContent).toEqual(
+        note(FORM_DEFAULT_SCREENING_FAIL_MESSAGE),
+      );
+      for (const value of [null, { type: "doc", content: [] }]) {
+        const def = formDefinitionSchema.parse(
+          withScreening({ defaultFailContent: value }),
+        );
+        expect(def.settings.screening.defaultFailContent).toBeNull();
+      }
+      const custom = note("Not a fit.");
+      expect(
+        formDefinitionSchema.parse(
+          withScreening({ defaultFailContent: custom }),
+        ).settings.screening.defaultFailContent,
+      ).toEqual(custom);
+    });
+
+    it("rejects non-docs, oversized docs and form nodes in both places", () => {
+      const nested = {
+        type: "doc",
+        content: [{ type: "details", content: [{ type: "form" }] }],
+      };
+      const big = note("x".repeat(FORM_SCREENING_UNLOCK_MAX_JSON_LENGTH));
+      for (const bad of ["plain text", nested, big]) {
+        expect(parseQuestion(bad).success).toBe(false);
+        expect(
+          formDefinitionSchema.safeParse(
+            withScreening({ defaultFailContent: bad }),
+          ).success,
+        ).toBe(false);
+      }
+      expect(parseQuestion(big).error?.issues.map((i) => i.message)).toContain(
+        "This message is too long",
+      );
+    });
+
+    it("strips the retired failMessage / failLinks / defaultFailMessage keys", () => {
+      const def = formDefinitionSchema.parse(
+        withScreening({
+          enabled: true,
+          defaultFailMessage: "old",
+          questions: [
+            question("q1", {
+              failMessage: "old",
+              failLinks: [{ label: "Help", href: "/help" }],
+            }),
+          ],
+        }),
+      );
+      expect(def.settings.screening).not.toHaveProperty("defaultFailMessage");
+      expect(def.settings.screening.questions[0]).not.toHaveProperty(
+        "failMessage",
+      );
+      expect(def.settings.screening.questions[0]).not.toHaveProperty(
+        "failLinks",
+      );
+    });
+  });
+
+  describe("unlockContent", () => {
+    const parseNote = (unlockContent: unknown) =>
+      formDefinitionSchema.safeParse(withScreening({ unlockContent }));
+
+    it("keeps a real note as-is", () => {
+      const doc = note("Call us at 555-1234");
+      const def = formDefinitionSchema.parse(
+        withScreening({ unlockContent: doc }),
+      );
+      expect(def.settings.screening.unlockContent).toEqual(doc);
+    });
+
+    it("normalizes missing, null and empty-editor values to null", () => {
+      for (const value of [
+        undefined,
+        null,
+        { type: "doc", content: [] },
+        { type: "doc", content: [{ type: "paragraph" }] },
+        {
+          type: "doc",
+          content: [
+            { type: "paragraph", content: [{ type: "text", text: "" }] },
+          ],
+        },
+      ]) {
+        const def = formDefinitionSchema.parse(
+          withScreening({ unlockContent: value }),
+        );
+        expect(def.settings.screening.unlockContent).toBeNull();
+      }
+    });
+
+    it("keeps an image-only or button-link note", () => {
+      const image = {
+        type: "doc",
+        content: [{ type: "image", attrs: { src: "https://x.test/a.jpg" } }],
+      };
+      expect(
+        formDefinitionSchema.parse(withScreening({ unlockContent: image }))
+          .settings.screening.unlockContent,
+      ).toEqual(image);
+    });
+
+    it("rejects anything that is not a doc", () => {
+      expect(parseNote("plain text").success).toBe(false);
+      expect(parseNote({ type: "paragraph", content: [] }).success).toBe(false);
+      expect(parseNote({ type: "doc", content: "nope" }).success).toBe(false);
+    });
+
+    it("caps the serialized size", () => {
+      const result = formDefinitionSchema.safeParse(
+        withScreening({
+          unlockContent: note(
+            "x".repeat(FORM_SCREENING_UNLOCK_MAX_JSON_LENGTH),
+          ),
+        }),
+      );
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((i) => i.message)).toContain(
+        "This message is too long",
+      );
+    });
+
+    it("rejects a form node anywhere inside the note", () => {
+      const nested = {
+        type: "doc",
+        content: [
+          {
+            type: "details",
+            content: [{ type: "form", attrs: { formId: "f1" } }],
+          },
+        ],
+      };
+      expect(parseNote(nested).success).toBe(false);
+    });
+
+    it("strips the retired unlockMessage / unlockLinks keys", () => {
+      const def = formDefinitionSchema.parse(
+        withScreening({
+          unlockMessage: "old",
+          unlockLinks: [{ label: "Help", href: "/help" }],
+        }),
+      );
+      expect(def.settings.screening).not.toHaveProperty("unlockMessage");
+      expect(def.settings.screening).not.toHaveProperty("unlockLinks");
+    });
   });
 
   it("projects screening to null when disabled or empty, passes it through when enabled", () => {
@@ -1005,7 +1156,7 @@ describe("settings.screening", () => {
         enabled: true,
         intro: "Quick check",
         questions: [question("q1", { passAnswer: "no" })],
-        unlockMessage: "You're good",
+        unlockContent: note("You're good"),
       }),
     );
     const pub = toPublicFormDefinition(on).settings.screening;

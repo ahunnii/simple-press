@@ -73,3 +73,37 @@ describe("image-kind classification", () => {
     ]);
   });
 });
+
+describe("document classification", () => {
+  it("classifies Media Library PDFs as documents, case-insensitively", () => {
+    expect(classifyKind("library-doc-0123abcd.pdf")).toBe("document");
+    expect(classifyKind("library-doc-0123abcd.PDF")).toBe("document");
+  });
+
+  it("classifies slugged document keys as documents", () => {
+    expect(
+      classifyKind("library-doc-0123456789abcdef-annual-report-2025.pdf"),
+    ).toBe("document");
+    expect(classifyKind("library-doc-0123456789abcdef-menu.png")).toBe("other");
+  });
+
+  it("keeps non-PDFs under the document prefix out of 'document' and 'image'", () => {
+    expect(classifyKind("library-doc-x.png")).toBe("other");
+    expect(classifyKind("library-doc-x")).toBe("other");
+  });
+
+  it("leaves plain library images and stray PDFs alone", () => {
+    expect(classifyKind("library-x.png")).toBe("image");
+    expect(classifyKind("library-x.pdf")).toBe("other");
+    expect(classifyKind("notes.pdf")).toBe("other");
+  });
+
+  it("lists a PDF upload as a document via parseContents", () => {
+    const objs = parseContents(
+      `<ListBucketResult>${contents("biz1/library-doc-ab12.pdf")}</ListBucketResult>`,
+    );
+    expect(objs.map((o) => [o.key, o.kind])).toEqual([
+      ["biz1/library-doc-ab12.pdf", "document"],
+    ]);
+  });
+});

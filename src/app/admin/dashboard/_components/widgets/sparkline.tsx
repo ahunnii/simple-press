@@ -4,6 +4,8 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 import type { SeriesPoint } from "~/lib/dashboard/card-data";
 
+import { seriesDot } from "./series-dots";
+
 /** A tiny axis-less area chart. Fills its (positioned) parent. */
 export function Sparkline({
   series,
@@ -13,7 +15,8 @@ export function Sparkline({
   /** Accessible summary, e.g. "Gross revenue trend". */
   label: string;
 }) {
-  if (series.length < 2) return null;
+  // Nothing to draw: too short, or every bucket empty (an average over nothing).
+  if (series.length < 2 || series.every((p) => p.value === null)) return null;
 
   return (
     <div
@@ -34,7 +37,14 @@ export function Sparkline({
               strokeWidth={1.5}
               fill="var(--chart-1)"
               fillOpacity={0.15}
-              dot={false}
+              // Null buckets break the line (connectNulls is off by default);
+              // a lone point between gaps gets a dot so it stays visible.
+              connectNulls={false}
+              dot={seriesDot(
+                series.map((p) => p.value),
+                { color: "var(--chart-1)", radius: 2 },
+              )}
+              activeDot={false}
               isAnimationActive={false}
             />
           </AreaChart>

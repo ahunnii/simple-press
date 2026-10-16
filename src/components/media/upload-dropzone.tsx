@@ -15,6 +15,7 @@
 import { useCallback, useRef } from "react";
 import { Upload } from "lucide-react";
 
+import { isPdfFile } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 
@@ -45,6 +46,12 @@ export function fileMatchesKind(file: File, kind: MediaKind): boolean {
 
 export type UploadDropzoneProps = {
   kind: MediaKind;
+  /**
+   * `kind="image"` only: also take PDFs. The picker/drop filter then passes
+   * images AND PDFs, and the copy says "files" — the parent splits them
+   * (images → `useBatchedImageUpload`, PDFs → `useDocumentUpload`).
+   */
+  acceptPdf?: boolean;
   isUploading: boolean;
   isPreparing?: boolean;
   /** Accept several files per pick/drop (multi mode, images only). */
@@ -66,6 +73,7 @@ export type UploadDropzoneProps = {
 
 export function UploadDropzone({
   kind,
+  acceptPdf = false,
   isUploading,
   isPreparing,
   multiple = false,
@@ -74,7 +82,10 @@ export function UploadDropzone({
   progressLabel,
 }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const label = kind === "image" ? "image" : "video";
+  const withPdf = acceptPdf && kind === "image";
+  const label = withPdf ? "file" : kind === "image" ? "image" : "video";
+  const matches = (file: File) =>
+    fileMatchesKind(file, kind) || (withPdf && isPdfFile(file));
   const isBusy = isUploading || Boolean(isPreparing);
 
   const triggerFileInput = useCallback(() => {
@@ -94,7 +105,13 @@ export function UploadDropzone({
       <input
         ref={fileInputRef}
         type="file"
-        accept={kind === "image" ? "image/*" : "video/*"}
+        accept={
+          withPdf
+            ? "image/*,application/pdf,.pdf"
+            : kind === "image"
+              ? "image/*"
+              : "video/*"
+        }
         multiple={multiple || undefined}
         className="hidden"
         disabled={isBusy}
@@ -128,13 +145,13 @@ export function UploadDropzone({
           if (isBusy) return;
           if (multiple) {
             const files = Array.from(e.dataTransfer.files ?? []).filter(
-              (file) => fileMatchesKind(file, kind),
+              matches,
             );
             if (files.length > 0) onFiles(files);
             return;
           }
           const file = e.dataTransfer.files?.[0];
-          if (file && fileMatchesKind(file, kind)) onFiles([file]);
+          if (file && matches(file)) onFiles([file]);
         }}
         onDragOver={(e) => e.preventDefault()}
         onClick={triggerFileInput}

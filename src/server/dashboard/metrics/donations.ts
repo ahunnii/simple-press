@@ -127,11 +127,13 @@ export async function donationStat(
             ? b.count
             : b.count > 0
               ? Math.round(b.sum / b.count)
-              : 0,
+              : null,
       ),
       win,
       q.granularity,
       ctx.timeZone,
+      // Only the average can be null; sums and counts zero-fill.
+      widget === "donation-average" ? null : 0,
     );
   }
   return part;

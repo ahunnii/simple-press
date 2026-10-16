@@ -13,6 +13,31 @@ vi.mock("./site-link-picker", () => ({
   ),
 }));
 
+// The real file picker lists the Media Library over tRPC; a button that picks
+// one PDF is enough here.
+const { PDF_URL } = vi.hoisted(() => ({
+  PDF_URL: "https://storage.example.com/bucket/biz/library-doc-ab12.pdf",
+}));
+vi.mock("~/components/media/document-picker", () => ({
+  DocumentPicker: ({
+    onSelect,
+  }: {
+    onSelect: (url: string, doc: { name: string; key: string }) => void;
+  }) => (
+    <button
+      type="button"
+      onClick={() =>
+        onSelect(PDF_URL, {
+          name: "Annual Report.pdf",
+          key: "biz/library-doc-ab12.pdf",
+        })
+      }
+    >
+      Pick file
+    </button>
+  ),
+}));
+
 const urlBox = () => screen.getByPlaceholderText("/contact or https://…");
 const newTabSwitch = () => screen.getByRole("switch");
 const isOn = () => newTabSwitch().getAttribute("aria-checked") === "true";
@@ -117,5 +142,28 @@ describe("LinkEditBlock — Open in New Tab", () => {
       false,
       null,
     );
+  });
+});
+
+describe("LinkEditBlock — Link to a file", () => {
+  const textBox = () => screen.getByPlaceholderText("Enter display text");
+
+  it("fills the URL, names an empty link after the file and opens a new tab", () => {
+    const onSave = vi.fn();
+    render(<LinkEditBlock onSave={onSave} />);
+    fireEvent.click(screen.getByRole("button", { name: "Pick file" }));
+
+    expect(urlBox()).toHaveProperty("value", PDF_URL);
+    expect(textBox()).toHaveProperty("value", "Annual Report");
+    expect(isOn()).toBe(true);
+
+    save();
+    expect(onSave).toHaveBeenCalledWith(PDF_URL, "Annual Report", true, null);
+  });
+
+  it("keeps display text the owner already typed", () => {
+    render(<LinkEditBlock defaultText="Read our report" onSave={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Pick file" }));
+    expect(textBox()).toHaveProperty("value", "Read our report");
   });
 });
