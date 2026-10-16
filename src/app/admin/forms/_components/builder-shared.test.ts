@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { PictureChoiceFieldInput } from "./builder-shared";
-import { formCreateSchema } from "~/lib/validators/form";
+import {
+  formCreateSchema,
+  makeEmptyFormScreening,
+} from "~/lib/validators/form";
 
 import {
   convertFieldType,
@@ -9,6 +12,8 @@ import {
   makeEmptyBuilderDefinition,
   makeField,
   makePictureOption,
+  makeScreeningLink,
+  makeScreeningQuestion,
   normalizeBuilderDefinition,
   pictureGroupChangeDestination,
   pictureMoveWithinSection,
@@ -308,5 +313,82 @@ describe("picture choice groups", () => {
       formCreateSchema.safeParse({ name: "Q", published: false, definition })
         .success,
     ).toBe(true);
+  });
+});
+
+describe("screening in the builder", () => {
+  it("a fresh definition carries a disabled, fully-filled screening block", () => {
+    expect(makeEmptyBuilderDefinition().settings?.screening).toEqual(
+      makeEmptyFormScreening(),
+    );
+  });
+
+  it("normalize fills screening on a stored definition that predates it", () => {
+    const definition = makeEmptyBuilderDefinition();
+    const settings = { ...definition.settings };
+    delete settings.screening;
+    const stored = { ...definition, settings };
+    const screening = normalizeBuilderDefinition(stored).settings?.screening;
+    expect(screening).toEqual(makeEmptyFormScreening());
+  });
+
+  it("normalize keeps stored screening and fills missing question keys", () => {
+    const definition = makeEmptyBuilderDefinition();
+    definition.settings = {
+      ...definition.settings,
+      screening: {
+        ...makeEmptyFormScreening(),
+        enabled: true,
+        intro: "Hi",
+        questions: [
+          {
+            id: "q1",
+            prompt: "Over 18?",
+            passAnswer: "no",
+            failMessage: "",
+            failLinks: [{ label: "Help", href: "/help" }],
+          },
+        ],
+      },
+    };
+    const screening =
+      normalizeBuilderDefinition(definition).settings?.screening;
+    expect(screening).toMatchObject({ enabled: true, intro: "Hi" });
+    expect(screening?.questions?.[0]).toMatchObject({
+      id: "q1",
+      passAnswer: "no",
+      failLinks: [{ label: "Help", href: "/help" }],
+    });
+  });
+
+  it("a new question is explicit and unique; a link starts blank", () => {
+    const first = makeScreeningQuestion();
+    expect(first).toMatchObject({
+      prompt: "",
+      passAnswer: "yes",
+      failMessage: "",
+      failLinks: [],
+    });
+    expect(makeScreeningQuestion().id).not.toBe(first.id);
+    expect(makeScreeningLink()).toEqual({ label: "", href: "" });
+  });
+
+  it("enabled screening with no questions fails at the questions path", () => {
+    const definition = makeEmptyBuilderDefinition();
+    definition.fields = [makeField("text")];
+    if (definition.fields[0]) definition.fields[0].label = "Name";
+    definition.settings = {
+      ...definition.settings,
+      screening: { ...makeEmptyFormScreening(), enabled: true },
+    };
+    const result = formCreateSchema.safeParse({
+      name: "Q",
+      published: false,
+      definition,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.path.join("."))).toContain(
+      "definition.settings.screening.questions",
+    );
   });
 });

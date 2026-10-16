@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
   FORM_DEFAULT_SUBMIT_LABEL,
   FORM_DEFAULT_SUCCESS_MESSAGE,
   FORM_PICTURE_MAX_GROUPS,
   FORM_PICTURE_MAX_OPTIONS,
+  FORM_SCREENING_MAX_LINKS,
+  FORM_SCREENING_MAX_QUESTIONS,
   formBulkAddTagsSchema,
   formBulkDeleteSchema,
   formCreateSchema,
@@ -777,6 +780,7 @@ describe("toPublicFormDefinition", () => {
       submitLabel: FORM_DEFAULT_SUBMIT_LABEL,
       successMessage: FORM_DEFAULT_SUCCESS_MESSAGE,
       confirmationFieldId: "f_email",
+      screening: null,
     });
     expect(JSON.stringify(pub)).not.toMatch(/owner@example|Secret/);
     expect(pub.fields).toHaveLength(3);
@@ -851,5 +855,162 @@ describe("router input schemas", () => {
     expect(
       formBulkAddTagsSchema.safeParse({ ids: ["a"], tags: [] }).success,
     ).toBe(false);
+  });
+});
+
+describe("settings.screening", () => {
+  const question = (id: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    prompt: `Question ${id}?`,
+    ...extra,
+  });
+  const withScreening = (screening: Record<string, unknown>) => ({
+    ...baseDefinition(),
+    settings: { screening },
+  });
+
+  it("defaults to disabled when a stored definition has no screening key", () => {
+    const parsed = parseStoredFormDefinition(baseDefinition());
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.settings.screening).toEqual({
+      enabled: false,
+      intro: "",
+      questions: [],
+      defaultFailMessage: FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
+      unlockMessage: "",
+      unlockLinks: [],
+    });
+    expect(formDefinitionSchema.safeParse(baseDefinition()).success).toBe(true);
+    expect(makeEmptyFormDefinition().settings.screening.enabled).toBe(false);
+  });
+
+  it("fills question defaults (passAnswer yes, blank fail message, no links)", () => {
+    const def = formDefinitionSchema.parse(
+      withScreening({ enabled: true, questions: [question("q1")] }),
+    );
+    expect(def.settings.screening.questions[0]).toEqual({
+      id: "q1",
+      prompt: "Question q1?",
+      passAnswer: "yes",
+      failMessage: "",
+      failLinks: [],
+    });
+  });
+
+  it("rejects duplicate question ids", () => {
+    expect(
+      issuePaths(
+        withScreening({
+          enabled: true,
+          questions: [question("q1"), question("q1")],
+        }),
+      ),
+    ).toContainEqual({
+      path: "settings.screening.questions.1.id",
+      message: "Duplicate question id",
+    });
+  });
+
+  it("rejects enabled screening with no questions, allows it when disabled", () => {
+    expect(
+      issuePaths(withScreening({ enabled: true, questions: [] })),
+    ).toContainEqual({
+      path: "settings.screening.questions",
+      message: "Add at least one screening question or turn screening off",
+    });
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({ enabled: false, questions: [] }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it("requires a question prompt and a bad passAnswer is rejected", () => {
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({
+          enabled: true,
+          questions: [question("q1", { prompt: "   " })],
+        }),
+      ).success,
+    ).toBe(false);
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({
+          enabled: true,
+          questions: [question("q1", { passAnswer: "maybe" })],
+        }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it("enforces the question and link caps", () => {
+    const many = Array.from(
+      { length: FORM_SCREENING_MAX_QUESTIONS + 1 },
+      (_, i) => question(`q${i}`),
+    );
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({ enabled: true, questions: many }),
+      ).success,
+    ).toBe(false);
+    const links = Array.from({ length: FORM_SCREENING_MAX_LINKS + 1 }, () => ({
+      label: "Help",
+      href: "/help",
+    }));
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({ enabled: false, unlockLinks: links }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it.each([
+    ["javascript:alert(1)", false],
+    ["data:text/html,hi", false],
+    ["/contact", true],
+    ["https://example.com/help", true],
+    ["mailto:help@example.com", true],
+    ["tel:+15551234567", true],
+  ])("link href %s accepted=%s", (href, ok) => {
+    const result = formDefinitionSchema.safeParse(
+      withScreening({
+        enabled: true,
+        questions: [question("q1", { failLinks: [{ label: "Help", href }] })],
+      }),
+    );
+    expect(result.success).toBe(ok);
+  });
+
+  it("requires link text", () => {
+    expect(
+      formDefinitionSchema.safeParse(
+        withScreening({
+          enabled: false,
+          unlockLinks: [{ label: " ", href: "/x" }],
+        }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it("projects screening to null when disabled or empty, passes it through when enabled", () => {
+    const off = formDefinitionSchema.parse(
+      withScreening({ enabled: false, questions: [question("q1")] }),
+    );
+    expect(toPublicFormDefinition(off).settings.screening).toBeNull();
+
+    const on = formDefinitionSchema.parse(
+      withScreening({
+        enabled: true,
+        intro: "Quick check",
+        questions: [question("q1", { passAnswer: "no" })],
+        unlockMessage: "You're good",
+      }),
+    );
+    const pub = toPublicFormDefinition(on).settings.screening;
+    expect(pub).toEqual(on.settings.screening);
+    expect(pub?.intro).toBe("Quick check");
+    expect(pub?.questions[0]?.passAnswer).toBe("no");
   });
 });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { isSafeHref } from "~/lib/safe-href";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 
 /**
@@ -121,6 +122,13 @@ export const FORM_DEFAULT_SUCCESS_MESSAGE =
 export const FORM_DEFAULT_CONFIRMATION_SUBJECT = "We received your submission";
 export const FORM_DEFAULT_CONFIRMATION_MESSAGE =
   "Thanks for reaching out! This is a quick note to confirm we received your submission. We'll be in touch soon.";
+
+/** Cap on the yes/no screening questions in front of one form. */
+export const FORM_SCREENING_MAX_QUESTIONS = 15;
+/** Cap on resource links per failing question (and on the unlock links). */
+export const FORM_SCREENING_MAX_LINKS = 5;
+export const FORM_DEFAULT_SCREENING_FAIL_MESSAGE =
+  "Thanks for your answers — this form isn't the right fit for you right now.";
 
 /** Trim + lower-case: the comparison key for labels and CSV headers. */
 export function labelKey(label: string): string {
@@ -484,6 +492,100 @@ export function visiblePictureOptions(
 
 const plainEmail = z.string().email();
 
+/** A resource link shown on the screening fail / unlock panels. */
+export const formScreeningLinkSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(1, "Link text is required")
+    .max(80, "Link text must be 80 characters or fewer"),
+  href: z
+    .string()
+    .trim()
+    .min(1, "Link address is required")
+    .max(2048, "Link address must be 2048 characters or fewer")
+    .refine(isSafeHref, {
+      message:
+        "Link must be a page path like /contact, or start with http://, https://, mailto:, tel:, or sms:",
+    }),
+});
+
+/** One yes/no gate question; `passAnswer` is the answer that lets a visitor on. */
+export const formScreeningQuestionSchema = z.object({
+  id: formIdField,
+  prompt: z
+    .string()
+    .trim()
+    .min(1, "Question is required")
+    .max(300, "Question must be 300 characters or fewer"),
+  passAnswer: z.enum(["yes", "no"]).default("yes"),
+  /** Shown when this question fails; blank → the screening default message. */
+  failMessage: z
+    .string()
+    .trim()
+    .max(1000, "Message must be 1000 characters or fewer")
+    .default(""),
+  failLinks: z
+    .array(formScreeningLinkSchema)
+    .max(
+      FORM_SCREENING_MAX_LINKS,
+      `At most ${FORM_SCREENING_MAX_LINKS} links per question`,
+    )
+    .default([]),
+});
+
+/**
+ * Optional yes/no questions that gate the form on the storefront. Lives in
+ * settings (not as field types) so entries, CSV and answer snapshots never
+ * see it: the answers are a visitor-side gate, not submitted data.
+ */
+export const formScreeningSchema = z.object({
+  enabled: z.boolean().default(false),
+  intro: z
+    .string()
+    .trim()
+    .max(500, "Intro must be 500 characters or fewer")
+    .default(""),
+  questions: z
+    .array(formScreeningQuestionSchema)
+    .max(
+      FORM_SCREENING_MAX_QUESTIONS,
+      `At most ${FORM_SCREENING_MAX_QUESTIONS} screening questions`,
+    )
+    .default([]),
+  defaultFailMessage: z
+    .string()
+    .trim()
+    .max(1000, "Message must be 1000 characters or fewer")
+    .default(FORM_DEFAULT_SCREENING_FAIL_MESSAGE),
+  /** Optional note + links shown once, after every question passes. */
+  unlockMessage: z
+    .string()
+    .trim()
+    .max(2000, "Message must be 2000 characters or fewer")
+    .default(""),
+  unlockLinks: z
+    .array(formScreeningLinkSchema)
+    .max(FORM_SCREENING_MAX_LINKS, `At most ${FORM_SCREENING_MAX_LINKS} links`)
+    .default([]),
+});
+
+export type FormScreening = z.infer<typeof formScreeningSchema>;
+export type FormScreeningQuestion = z.infer<typeof formScreeningQuestionSchema>;
+export type FormScreeningLink = z.infer<typeof formScreeningLinkSchema>;
+
+/** A disabled screening block with every default filled in. */
+export function makeEmptyFormScreening(): FormScreening {
+  return {
+    enabled: false,
+    intro: "",
+    questions: [],
+    defaultFailMessage: FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
+    unlockMessage: "",
+    unlockLinks: [],
+  };
+}
+
 export const formSettingsSchema = z.object({
   submitLabel: z
     .string()
@@ -524,6 +626,7 @@ export const formSettingsSchema = z.object({
     // `||` not `??`: the blank string must map to undefined too.
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     .transform((value) => value || undefined),
+  screening: formScreeningSchema.default(makeEmptyFormScreening()),
 });
 
 export type FormSettings = z.infer<typeof formSettingsSchema>;
@@ -675,6 +778,26 @@ function refineDefinition(
     }
   });
 
+  const { screening } = definition.settings;
+  const seenQuestionIds = new Set<string>();
+  screening.questions.forEach((question, index) => {
+    if (seenQuestionIds.has(question.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Duplicate question id",
+        path: ["settings", "screening", "questions", index, "id"],
+      });
+    }
+    seenQuestionIds.add(question.id);
+  });
+  if (screening.enabled && screening.questions.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Add at least one screening question or turn screening off",
+      path: ["settings", "screening", "questions"],
+    });
+  }
+
   const confirmationFieldId = definition.settings.confirmationFieldId;
   if (confirmationFieldId) {
     const target = definition.fields.find(
@@ -738,6 +861,7 @@ export function makeEmptyFormDefinition(): FormDefinition {
       confirmationSubject: FORM_DEFAULT_CONFIRMATION_SUBJECT,
       confirmationMessage: FORM_DEFAULT_CONFIRMATION_MESSAGE,
       notifyEmail: undefined,
+      screening: makeEmptyFormScreening(),
     },
   };
 }
@@ -748,6 +872,8 @@ export type PublicFormSettings = {
   submitLabel: string;
   successMessage: string;
   confirmationFieldId: string | null;
+  /** The visitor-facing gate; `null` when screening is off or has no questions. */
+  screening: FormScreening | null;
 };
 
 export type PublicFormDefinition = {
@@ -777,6 +903,11 @@ export function toPublicFormDefinition(
       submitLabel: definition.settings.submitLabel,
       successMessage: definition.settings.successMessage,
       confirmationFieldId: definition.settings.confirmationFieldId ?? null,
+      screening:
+        definition.settings.screening.enabled &&
+        definition.settings.screening.questions.length > 0
+          ? definition.settings.screening
+          : null,
     },
   };
 }

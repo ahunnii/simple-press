@@ -63,6 +63,7 @@ import {
 } from "./builder-shared";
 import { FormFieldCard } from "./form-field-card";
 import { FormPreviewPanel } from "./form-preview-panel";
+import { FormScreeningCard } from "./form-screening-card";
 import { FormSettingsCard } from "./form-settings-card";
 
 const LIST_PATH = "/admin/forms";
@@ -471,6 +472,8 @@ export function FormBuilder({
                   />
                 </CardContent>
               </Card>
+
+              <FormScreeningCard form={rhf} />
             </div>
 
             {/* Right: what happens after, and a live preview. */}
