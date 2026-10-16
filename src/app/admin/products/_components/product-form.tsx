@@ -320,12 +320,17 @@ export function ProductForm({
   // Stored price/compareAtPrice of 0 (persisted by the old form's `?? priceInCents`
   // fallback) means "inherit the base price" at runtime — normalize to undefined
   // on load so the submit-time $0 guard doesn't block saving legacy products.
+  // DB nulls are normalized too: the variant rows test `!== undefined`, so a
+  // null would render as "$0" instead of blank.
   const initialVariants: FormVariant[] = (
     (product?.variants as FormVariant[]) ?? []
   ).map((v) => ({
     ...v,
-    price: v.price === 0 ? undefined : v.price,
-    compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
+    price: v.price == null || v.price === 0 ? undefined : v.price,
+    compareAtPrice:
+      v.compareAtPrice == null || v.compareAtPrice === 0
+        ? undefined
+        : v.compareAtPrice,
   }));
   const [variants, setVariants] = useState<FormVariant[]>(initialVariants);
   const initialVariantsRef = useRef<FormVariant[]>(initialVariants);

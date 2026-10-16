@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { resolveBlogPageName } from "~/lib/blog-page-name";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { cn, formatDate } from "~/lib/utils";
@@ -41,14 +42,16 @@ type Props = DefaultBlogPostPageTemplateProps & {
 /**
  * `/blog/<slug>` — one post on umsc's generic page base (parity PF22):
  *
- * 1. The black `UmscPageHero` at detail scale: "← All posts", the title as
+ * 1. The black `UmscPageHero` at detail scale: "← All <page name> posts"
+ *    (`umsc.blog.page-name`, so "All Community posts" by default), the title as
  *    the page's only h1, the excerpt as the lede, the date under it.
  * 2. The article on the shared container: the cover photo as a wide
  *    hairline-framed strip (so it shows at every width — the band's
  *    right-side image slot is desktop-only), then the Tiptap body in the
  *    umsc prose system at a 66ch measure on the same left edge.
  * 3. `blog.post` (cream): "More articles" + up to three related cards and
- *    an "All posts" link. Skipped when there are no other posts.
+ *    the same "All <page name> posts" link. Skipped when there are no other
+ *    posts.
  * 4. `blog.cta` (hideable): the black closing band with a flag-gated pill.
  */
 export function UmscBlogPostPage({
@@ -59,6 +62,7 @@ export function UmscBlogPostPage({
 }: Props) {
   const fields = customFields ?? business?.siteContent?.customFields;
   const d = resolveDefaultFields(fields, ["default.blog.post-more-heading"]);
+  const allPostsLabel = `All ${resolveBlogPageName("umsc", fields)} posts`;
   const f = resolveUmscBlogFields(fields, [
     "umsc.blog.card-link-label",
     "umsc.blog.cta-heading",
@@ -76,7 +80,7 @@ export function UmscBlogPostPage({
 
       <UmscPageHero
         compact
-        leading={<UmscBackLink href="/blog">All posts</UmscBackLink>}
+        leading={<UmscBackLink href="/blog">{allPostsLabel}</UmscBackLink>}
         heading={page.title}
         lede={page.excerpt ?? undefined}
       >
@@ -126,7 +130,7 @@ export function UmscBlogPostPage({
               {nonBlank(d["default.blog.post-more-heading"]) ?? "More articles"}
             </UmscHeading>
             <UmscButton as="link" href="/blog" variant="link">
-              All posts
+              {allPostsLabel}
             </UmscButton>
           </div>
           <UmscRevealGroup className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { resolveBlogPageName } from "~/lib/blog-page-name";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { parsePageParam } from "~/lib/pagination";
 import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
@@ -58,7 +59,10 @@ export async function generateMetadata({
     business,
     path: "/blog",
     pageMetaKey: "blog",
-    title: "Blog",
+    title: resolveBlogPageName(
+      business?.templateId,
+      business?.siteContent?.customFields,
+    ),
     page: parsePageParam(page),
   });
 }

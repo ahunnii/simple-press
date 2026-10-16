@@ -110,7 +110,6 @@ export function UmscPageHero({
             fieldKey={headingFieldKey}
             className={cn(
               "break-words text-[var(--umsc-cream-on-black)]",
-              compact && "text-[clamp(34px,4.4vw,60px)] leading-[1.08]",
             )}
           >
             {heading}

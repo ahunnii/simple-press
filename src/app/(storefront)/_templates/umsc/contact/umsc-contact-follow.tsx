@@ -13,6 +13,8 @@ type Props = {
   body: string;
   /** From `resolveUmscContactDetails(...).socials` (Content → Branding). */
   socials: UmscSocialLink[];
+  /** Band tone. Contact passes "paper" when the cream stores band sits just above, so neighbours differ. */
+  tone?: "paper" | "cream";
 };
 
 /**
@@ -22,12 +24,17 @@ type Props = {
  * Stores"); hidden automatically when no social links are set in Content →
  * Branding.
  */
-export function UmscContactFollow({ heading, body, socials }: Props) {
+export function UmscContactFollow({
+  heading,
+  body,
+  socials,
+  tone = "cream",
+}: Props) {
   if (socials.length === 0) return null;
 
   return (
     <UmscSection
-      tone="cream"
+      tone={tone}
       aria-label={heading || "Follow on social"}
       sectionAttrs={sectionGroupAttr("contact", "visit")}
     >

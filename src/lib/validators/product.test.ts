@@ -380,6 +380,62 @@ describe("productFormSchema", () => {
     it("accepts compareAtPrice omitted entirely", () => {
       expect(productFormSchema.safeParse(validProduct).success).toBe(true);
     });
+
+    it("accepts a cleared (null) compareAtPrice and keeps it null rather than coercing to 0", () => {
+      const result = productFormSchema.safeParse({
+        ...validProduct,
+        compareAtPrice: null,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.compareAtPrice).toBeNull();
+      }
+    });
+
+    it("rejects a compareAtPrice of 0 when price is above 0", () => {
+      expect(
+        issuesFor(productFormSchema, { ...validProduct, compareAtPrice: 0 }),
+      ).toEqual([
+        "compareAtPrice: Compare-at price must be greater than price",
+      ]);
+    });
+  });
+
+  describe("lowInventoryThreshold", () => {
+    it("accepts a cleared (null) lowInventoryThreshold and keeps it null rather than coercing to 0", () => {
+      const result = productFormSchema.safeParse({
+        ...validProduct,
+        lowInventoryThreshold: null,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.lowInventoryThreshold).toBeNull();
+      }
+    });
+
+    it("accepts lowInventoryThreshold omitted entirely", () => {
+      expect(productFormSchema.safeParse(validProduct).success).toBe(true);
+    });
+
+    it("accepts a positive whole lowInventoryThreshold", () => {
+      expect(
+        productFormSchema.safeParse({
+          ...validProduct,
+          lowInventoryThreshold: 5,
+        }).success,
+      ).toBe(true);
+    });
+
+    it("rejects a lowInventoryThreshold of 0", () => {
+      expect(
+        issuesFor(productFormSchema, {
+          ...validProduct,
+          lowInventoryThreshold: 0,
+        }),
+      ).toEqual([
+        "lowInventoryThreshold: Low stock threshold must be greater than 0",
+      ]);
+    });
   });
 });
 
@@ -492,6 +548,13 @@ describe("productCreateSchema", () => {
     it("accepts compareAtPrice omitted entirely", () => {
       expect(productCreateSchema.safeParse(validProduct).success).toBe(true);
     });
+
+    it("accepts a cleared (null) compareAtPrice", () => {
+      expect(
+        productCreateSchema.safeParse({ ...validProduct, compareAtPrice: null })
+          .success,
+      ).toBe(true);
+    });
   });
 
   describe("sku, featured, and cost", () => {
@@ -589,6 +652,13 @@ describe("productUpdateSchema", () => {
 
     it("accepts compareAtPrice omitted entirely", () => {
       expect(productUpdateSchema.safeParse(validProduct).success).toBe(true);
+    });
+
+    it("accepts a cleared (null) compareAtPrice", () => {
+      expect(
+        productUpdateSchema.safeParse({ ...validProduct, compareAtPrice: null })
+          .success,
+      ).toBe(true);
     });
   });
 

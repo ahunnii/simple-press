@@ -1,5 +1,4 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
-import type { UmscReviewCardData } from "./umsc-reviews-section";
 import type { Product } from "~/types";
 import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
@@ -16,6 +15,11 @@ import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { nonBlank } from "../shared/umsc-non-blank";
+import {
+  toUmscReviewCards,
+  UmscReviewsSection,
+  type UmscReviewCardData,
+} from "../shared/umsc-reviews-section";
 import { UmscCategoriesSection } from "./umsc-categories-section";
 import { UmscCustomSection } from "./umsc-custom-section";
 import { UmscFaqSection } from "./umsc-faq-section";
@@ -23,7 +27,6 @@ import { UmscFeaturedSection } from "./umsc-featured-section";
 import { UmscHeroSection } from "./umsc-hero-section";
 import { UmscPopup } from "./umsc-popup";
 import { UmscRailSection } from "./umsc-rail-section";
-import { UmscReviewsSection } from "./umsc-reviews-section";
 import { UmscStorySection } from "./umsc-story-section";
 
 /**
@@ -230,11 +233,14 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
           },
         ]
       : []),
-    ...testimonials.slice(0, hasOverride ? 2 : 3).map((t) => ({
-      quote: t.text,
-      name: t.customerName,
-      source: t.source === "owner" ? ownerReviewSource : verifiedReviewSource,
-    })),
+    ...toUmscReviewCards(
+      testimonials,
+      {
+        ownerSource: ownerReviewSource,
+        verifiedSource: verifiedReviewSource,
+      },
+      hasOverride ? 2 : 3,
+    ),
   ];
 
   // ── Questions: owner-picked FAQ items, else the first three published ───
@@ -330,6 +336,10 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
             emptyText={f["umsc.homepage.reviews-empty-text"] ?? ""}
             googleReviewUrl={f["umsc.global.google-review-url"] ?? ""}
             sectionAttrs={sectionGroupAttr("homepage", "reviews")}
+            headingFieldKey="umsc.homepage.reviews-heading"
+            ledeFieldKey="umsc.homepage.reviews-lede"
+            emptyTextFieldKey="umsc.homepage.reviews-empty-text"
+            headingId="umsc-reviews-heading"
           />
         )}
 

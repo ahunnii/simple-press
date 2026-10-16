@@ -36,7 +36,7 @@ export const productImageSchema = z.object({
 
 function hasValidComparePrice(data: {
   price: number;
-  compareAtPrice?: number;
+  compareAtPrice?: number | null;
 }): boolean {
   return (
     data.compareAtPrice === undefined ||
@@ -107,7 +107,8 @@ const productFormObjectSchema = z.object({
     .number()
     .nonnegative("Compare-at price can't be negative")
     .finite("Compare-at price must be a finite number")
-    .optional(),
+    .optional()
+    .nullable(),
   cost: z.coerce
     .number()
     .nonnegative("Cost can't be negative")
@@ -132,7 +133,8 @@ const productFormObjectSchema = z.object({
     .number()
     .int("Low stock threshold must be a whole number")
     .positive("Low stock threshold must be greater than 0")
-    .optional(),
+    .optional()
+    .nullable(),
   baseInventoryUnitId: z.string().nullable().optional(),
   baseUnitsConsumed: z.coerce
     .number()
