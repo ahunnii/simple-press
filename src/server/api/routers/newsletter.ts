@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient } from "~/server/db";
+import type { DbClient, TxClient } from "~/server/db";
 import { getBusinessUrl } from "~/lib/business-url";
 import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
@@ -19,6 +19,18 @@ import {
   MARKETING_SUPPRESSION_REASONS,
   marketingOptInData,
 } from "~/lib/marketing/consent";
+import {
+  consentRequestMeta,
+  recordConsentEvent,
+} from "~/lib/marketing/consent-log";
+import {
+  NEWSLETTER_CONSENT_WORDING,
+  RESUBSCRIBE_WORDING,
+} from "~/lib/marketing/consent-wording";
+import {
+  isOnDoNotEmailList,
+  removeFromDoNotEmail,
+} from "~/lib/marketing/do-not-email";
 import { isUniqueConstraintError } from "~/lib/prisma-errors";
 import {
   getClientIpFromHeaders,
@@ -259,61 +271,104 @@ export const newsletterRouter = createTRPCRouter({
       const where = {
         businessId_email: { businessId: business.id, email },
       };
+      const meta = consentRequestMeta(ctx.headers);
       // Clicking the link proves current inbox access, which is the one
-      // thing allowed to lift a bounce / complaint suppression.
+      // thing allowed to lift a bounce / complaint suppression — on the
+      // customer row AND on the store's do-not-email list (any reason).
       const optIn = () =>
         marketingOptInData("NEWSLETTER_FORM", { clearSuppression: true });
 
-      const applyExisting = async (): Promise<
-        "missing" | "stale" | "applied"
-      > => {
-        const row = await ctx.db.customer.findUnique({
-          where,
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            acceptsMarketing: true,
-            marketingSuppressedAt: true,
-            marketingUnsubscribedAt: true,
-          },
-        });
-        if (!row) return "missing";
-        // A link minted before a later unsubscribe is a replay of consent the
-        // person has since withdrawn: never let it opt them back in.
-        if (
-          row.marketingUnsubscribedAt &&
-          iat < row.marketingUnsubscribedAt.getTime()
-        ) {
-          return "stale";
+      /**
+       * Consent evidence for a confirm, in the caller's transaction. The
+       * do-not-email entry is lifted on every confirm (it's a no-op when
+       * absent); UNSUPPRESSED is logged only when something was actually
+       * lifted (customer suppression or a list entry). OPT_IN is logged only
+       * by callers that really flip `acceptsMarketing`.
+       */
+      const liftDoNotEmail = async (
+        tx: TxClient,
+        customerId: string,
+        wasSuppressed: boolean,
+      ) => {
+        const removed = await removeFromDoNotEmail(tx, business.id, email);
+        if (wasSuppressed || removed) {
+          await recordConsentEvent(tx, {
+            businessId: business.id,
+            customerId,
+            type: "UNSUPPRESSED",
+            source: "NEWSLETTER_FORM",
+            ip: meta.ip,
+            userAgent: meta.userAgent,
+          });
         }
-        const names = {
-          ...(f && !row.firstName ? { firstName: f } : {}),
-          ...(l && !row.lastName ? { lastName: l } : {}),
-        };
-        // Already a clean subscriber: keep the original consent record.
-        const data =
-          row.acceptsMarketing && !row.marketingSuppressedAt
-            ? names
-            : { ...optIn(), ...names };
-        if (Object.keys(data).length > 0) {
-          await ctx.db.customer.update({ where: { id: row.id }, data });
-        }
-        return "applied";
       };
+      const logOptIn = (tx: TxClient, customerId: string) =>
+        recordConsentEvent(tx, {
+          businessId: business.id,
+          customerId,
+          type: "OPT_IN",
+          source: "NEWSLETTER_FORM",
+          ip: meta.ip,
+          userAgent: meta.userAgent,
+          wording: NEWSLETTER_CONSENT_WORDING,
+        });
+
+      const applyExisting = (): Promise<"missing" | "stale" | "applied"> =>
+        ctx.db.$transaction(async (tx) => {
+          const row = await tx.customer.findUnique({
+            where,
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              acceptsMarketing: true,
+              marketingSuppressedAt: true,
+              marketingUnsubscribedAt: true,
+            },
+          });
+          if (!row) return "missing" as const;
+          // A link minted before a later unsubscribe is a replay of consent
+          // the person has since withdrawn: never let it opt them back in.
+          if (
+            row.marketingUnsubscribedAt &&
+            iat < row.marketingUnsubscribedAt.getTime()
+          ) {
+            return "stale" as const;
+          }
+          const names = {
+            ...(f && !row.firstName ? { firstName: f } : {}),
+            ...(l && !row.lastName ? { lastName: l } : {}),
+          };
+          // Already a clean subscriber: keep the original consent record.
+          const alreadyOptedIn =
+            row.acceptsMarketing && !row.marketingSuppressedAt;
+          const data = alreadyOptedIn ? names : { ...optIn(), ...names };
+          if (Object.keys(data).length > 0) {
+            await tx.customer.update({ where: { id: row.id }, data });
+          }
+          await liftDoNotEmail(tx, row.id, row.marketingSuppressedAt !== null);
+          if (!alreadyOptedIn) await logOptIn(tx, row.id);
+          return "applied" as const;
+        });
 
       let outcome = await applyExisting();
       if (outcome === "missing") {
         try {
-          await ctx.db.customer.create({
-            data: {
-              businessId: business.id,
-              email,
-              firstName: f ?? null,
-              lastName: l ?? null,
-              ...optIn(),
-            },
+          await ctx.db.$transaction(async (tx) => {
+            const created = await tx.customer.create({
+              data: {
+                businessId: business.id,
+                email,
+                firstName: f ?? null,
+                lastName: l ?? null,
+                ...optIn(),
+              },
+              select: { id: true },
+            });
+            await liftDoNotEmail(tx, created.id, false);
+            await logOptIn(tx, created.id);
           });
+          outcome = "applied";
         } catch (err) {
           // Lost a race with an order / another confirm click: update instead.
           if (!isUniqueConstraintError(err)) throw err;
@@ -352,31 +407,62 @@ export const newsletterRouter = createTRPCRouter({
         businessId: business.id,
         anonymizedAt: null,
       };
-      const customer = await ctx.db.customer.findFirst({
-        where,
-        select: {
-          marketingSuppressedAt: true,
-          marketingSuppressionReason: true,
-        },
-      });
-      if (!customer) {
-        return { ok: false as const, reason: "invalid" as const };
-      }
-      if (isSuppressed(customer)) {
-        return { ok: false as const, reason: "suppressed" as const };
-      }
+      const meta = consentRequestMeta(ctx.headers);
 
-      const result = await ctx.db.customer.updateMany({
-        // Conditional, so a suppression landing in between still wins.
-        where: { ...where, marketingSuppressedAt: null },
-        data: marketingOptInData("RESUBSCRIBE_LINK", {
-          clearSuppression: false,
-        }),
-      });
-      if (result.count === 0) {
-        return { ok: false as const, reason: "invalid" as const };
-      }
+      return ctx.db.$transaction(async (tx) => {
+        const customer = await tx.customer.findFirst({
+          where,
+          select: {
+            email: true,
+            acceptsMarketing: true,
+            marketingSuppressedAt: true,
+            marketingSuppressionReason: true,
+          },
+        });
+        if (!customer) {
+          return { ok: false as const, reason: "invalid" as const };
+        }
+        // The do-not-email list outlives the customer row: only an
+        // UNSUBSCRIBED entry may be lifted by this link, never a bounce,
+        // complaint or provider block.
+        const listed = await isOnDoNotEmailList(
+          tx,
+          business.id,
+          customer.email,
+        );
+        if (
+          isSuppressed(customer) ||
+          (listed && listed.reason !== "UNSUBSCRIBED")
+        ) {
+          return { ok: false as const, reason: "suppressed" as const };
+        }
 
-      return { ok: true as const };
+        const result = await tx.customer.updateMany({
+          // Conditional, so a suppression landing in between still wins.
+          where: { ...where, marketingSuppressedAt: null },
+          data: marketingOptInData("RESUBSCRIBE_LINK", {
+            clearSuppression: false,
+          }),
+        });
+        if (result.count === 0) {
+          return { ok: false as const, reason: "invalid" as const };
+        }
+        await removeFromDoNotEmail(tx, business.id, customer.email, {
+          onlyReasons: ["UNSUBSCRIBED"],
+        });
+        // Evidence only when the switch really flipped back on.
+        if (!customer.acceptsMarketing) {
+          await recordConsentEvent(tx, {
+            businessId: business.id,
+            customerId: payload.customerId,
+            type: "OPT_IN",
+            source: "RESUBSCRIBE_LINK",
+            ip: meta.ip,
+            userAgent: meta.userAgent,
+            wording: RESUBSCRIBE_WORDING,
+          });
+        }
+        return { ok: true as const };
+      });
     }),
 });

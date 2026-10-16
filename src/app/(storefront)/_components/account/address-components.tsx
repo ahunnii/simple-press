@@ -16,6 +16,7 @@ import {
   getAllowedCountries,
   getRegionOptions,
 } from "~/lib/geo/regions";
+import { accountMarketingOptInWording } from "~/lib/marketing/consent-wording";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -754,7 +755,7 @@ export function PreferencesContent({
       <div className="rounded-lg border p-6">
         <h3 className="text-foreground font-semibold">Marketing Emails</h3>
         <p className="text-muted-foreground mt-1 text-sm">
-          Receive news, promotions, and updates from {business.name}.
+          {accountMarketingOptInWording(business.name)}
         </p>
         <div className="mt-4">
           {!customer ? (

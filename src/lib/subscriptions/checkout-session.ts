@@ -90,6 +90,11 @@ export interface SubscriptionCheckoutParamsInput {
    * actually completes.
    */
   marketingOptIn?: boolean;
+  /**
+   * The shopper's IP, stamped as `metadata.marketingOptInIp` (only when
+   * `marketingOptIn` is set) as consent evidence. Never the user agent.
+   */
+  marketingOptInIp?: string;
 }
 
 /**
@@ -229,7 +234,14 @@ export function buildSubscriptionCheckoutParams(
       // Tells /subscribe/success this session's owner holds a SIGNED
       // pending_subscription_session cookie (no legacy bare-cookie fallback).
       [PENDING_COOKIE_MARKER_KEY]: PENDING_COOKIE_MARKER_VALUE,
-      ...(input.marketingOptIn ? { marketingOptIn: "1" } : {}),
+      ...(input.marketingOptIn
+        ? {
+            marketingOptIn: "1",
+            ...(input.marketingOptInIp
+              ? { marketingOptInIp: input.marketingOptInIp }
+              : {}),
+          }
+        : {}),
     },
     success_url: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
     // Back to the same form, pre-filled with the same choices.

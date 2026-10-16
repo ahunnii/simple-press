@@ -5,6 +5,11 @@ import type * as RateLimitModule from "~/lib/rate-limit";
 import { RECAPTCHA_TEST_BYPASS_TOKEN } from "~/lib/captcha/verify-recaptcha";
 import { createNewsletterConfirmToken } from "~/lib/email/newsletter-confirm-token";
 import { createUnsubscribeToken } from "~/lib/email/unsubscribe-token";
+import { RESUBSCRIBE_WORDING } from "~/lib/marketing/consent-wording";
+import {
+  addToDoNotEmail,
+  isOnDoNotEmailList,
+} from "~/lib/marketing/do-not-email";
 
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
@@ -478,6 +483,58 @@ describe("newsletter router", () => {
         marketingConsentSource: "RESUBSCRIBE_LINK",
         marketingUnsubscribedAt: null,
       });
+      const events = await db.marketingConsentEvent.findMany({
+        where: { customerId: c.id },
+      });
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        businessId: business.id,
+        type: "OPT_IN",
+        source: "RESUBSCRIBE_LINK",
+        wording: RESUBSCRIBE_WORDING,
+      });
+    });
+
+    it("lifts an UNSUBSCRIBED do-not-email entry but keeps refusing other reasons", async () => {
+      const business = await createBusiness({
+        subdomain: "nl-biz",
+        featureFlags: ON,
+      });
+      const unsub = await createCustomer(business.id, { email: "a@test.dev" });
+      const bounced = await createCustomer(business.id, {
+        email: "b@test.dev",
+      });
+      await addToDoNotEmail(db, business.id, "a@test.dev", "UNSUBSCRIBED");
+      await addToDoNotEmail(db, business.id, "b@test.dev", "HARD_BOUNCE");
+
+      expect(
+        await createTestCaller({}).newsletter.resubscribe({
+          token: createUnsubscribeToken({
+            customerId: unsub.id,
+            businessId: business.id,
+          }),
+        }),
+      ).toEqual({ ok: true });
+      expect(
+        await isOnDoNotEmailList(db, business.id, "a@test.dev"),
+      ).toBeNull();
+
+      expect(
+        await createTestCaller({}).newsletter.resubscribe({
+          token: createUnsubscribeToken({
+            customerId: bounced.id,
+            businessId: business.id,
+          }),
+        }),
+      ).toEqual({ ok: false, reason: "suppressed" });
+      expect(await isOnDoNotEmailList(db, business.id, "b@test.dev")).toEqual({
+        reason: "HARD_BOUNCE",
+      });
+      expect(
+        await db.marketingConsentEvent.count({
+          where: { customerId: bounced.id },
+        }),
+      ).toBe(0);
     });
 
     it("refuses a suppressed customer and leaves the suppression in place", async () => {

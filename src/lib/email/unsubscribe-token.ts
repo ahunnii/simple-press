@@ -63,3 +63,27 @@ export function verifyUnsubscribeToken(
   }
   return null;
 }
+
+/**
+ * The public unsubscribe page for a recipient: `<baseUrl>/api/unsubscribe?t=…`.
+ * `baseUrl` is the business's storefront origin (`getBusinessUrl`). The token
+ * has no timestamp, so the same inputs always yield the same URL — retries of
+ * an idempotent send rebuild identical bytes.
+ */
+export function buildUnsubscribeUrl(
+  baseUrl: string,
+  payload: UnsubscribePayload,
+): string {
+  const token = createUnsubscribeToken(payload);
+  return `${baseUrl}/api/unsubscribe?t=${encodeURIComponent(token)}`;
+}
+
+/** RFC 8058 one-click unsubscribe headers (handled by /api/unsubscribe POST). */
+export function oneClickUnsubscribeHeaders(
+  unsubscribeUrl: string,
+): Record<"List-Unsubscribe" | "List-Unsubscribe-Post", string> {
+  return {
+    "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  };
+}

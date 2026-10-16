@@ -166,6 +166,16 @@ async function setupStore(
     data: {
       stripeAccountId: opts.stripeAccountId ?? ACCOUNT_ID,
       sendAbandonedCheckoutEmails: opts.sendAbandonedCheckoutEmails ?? false,
+      // Abandoned-checkout reminders are commercial email and only send with
+      // a postal address (see stripe-webhook-abandoned-checkout.test.ts).
+      ...(opts.sendAbandonedCheckoutEmails
+        ? {
+            addressStreet: "1 Market St",
+            addressCity: "Detroit",
+            addressState: "MI",
+            addressPostalCode: "48201",
+          }
+        : {}),
     },
   });
 

@@ -312,8 +312,9 @@ export function BroadcastComposer({
               <AlertTriangle aria-hidden="true" />
               <AlertTitle>Business address needed</AlertTitle>
               <AlertDescription>
-                Add your business address before sending. The law requires a
-                postal address in marketing emails.{" "}
+                Add a full mailing address before sending: a street, city, and
+                state or ZIP, or a PO box. The law requires a postal address in
+                marketing emails.{" "}
                 <Link
                   href="/admin/settings/general"
                   className="font-medium underline underline-offset-2"

@@ -29,6 +29,14 @@ export type CampaignBusiness = {
 /**
  * The business's postal address for the CAN-SPAM footer, or `null` when it has
  * none. Campaign sending must be blocked while this is `null`.
+ *
+ * - Structured parts count only when street AND city AND (state OR postal
+ *   code) are all non-blank. Then they are formatted via
+ *   `formatBusinessAddress`.
+ * - Otherwise the free-form `businessAddress` is used, but only when it is at
+ *   least 10 characters after trimming and contains a digit or a comma. This
+ *   admits PO boxes and international addresses while rejecting bare states
+ *   or city names such as "MI" or "Detroit".
  */
 export function getBusinessPostalAddress(
   business: Pick<
@@ -40,15 +48,15 @@ export function getBusinessPostalAddress(
     | "businessAddress"
   >,
 ): string | null {
-  const structured = formatBusinessAddress({
-    street: business.addressStreet,
-    city: business.addressCity,
-    state: business.addressState,
-    postalCode: business.addressPostalCode,
-  });
-  if (structured) return structured;
-  const display = business.businessAddress?.trim();
-  if (display) return display;
+  const street = business.addressStreet?.trim() ?? "";
+  const city = business.addressCity?.trim() ?? "";
+  const state = business.addressState?.trim() ?? "";
+  const postalCode = business.addressPostalCode?.trim() ?? "";
+  if (street && city && (state || postalCode)) {
+    return formatBusinessAddress({ street, city, state, postalCode });
+  }
+  const display = business.businessAddress?.trim() ?? "";
+  if (display.length >= 10 && /[\d,]/.test(display)) return display;
   return null;
 }
 

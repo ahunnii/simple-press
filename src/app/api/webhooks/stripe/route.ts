@@ -44,15 +44,17 @@ import {
   sendPoolLowInventoryAlert,
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
+import { buildUnsubscribeUrl } from "~/lib/email/unsubscribe-token";
 import { deductPoolInventory } from "~/lib/inventory";
 import { releaseReservation } from "~/lib/inventory/reservation";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { awardPointsForPaidOrder } from "~/lib/loyalty/order-hooks";
+import { resolveAbandonedCheckoutRecipient } from "~/lib/marketing/abandoned-checkout-recipient";
 import {
   applyCheckoutMarketingOptIn,
   sessionMarketingOptIn,
 } from "~/lib/marketing/checkout-consent";
-import { marketingOptInData } from "~/lib/marketing/consent";
+import { getBusinessPostalAddress } from "~/lib/marketing/render-campaign";
 import { stripeClient } from "~/lib/stripe/client";
 import {
   handleInvoicePaid,
@@ -421,11 +423,6 @@ export async function POST(req: NextRequest) {
               phone: fullSession.customer_details?.phone ?? null,
               businessId: business.id,
               userId: existingUser?.id ?? null, // Link to user if exists
-              // Checkout newsletter checkbox (create-session set the marker
-              // only when the box was ticked and emailMarketing was on).
-              ...(marketingOptIn
-                ? marketingOptInData("CHECKOUT", { clearSuppression: false })
-                : {}),
             },
             update: {
               // firstName, lastName, phone intentionally not updated on repeat orders.
@@ -437,16 +434,19 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          // Existing customer ticked the newsletter box: opt them in, but only
-          // if they aren't already (keep the original consent source/date) and
-          // aren't suppressed after a bounce/complaint. Never writes `false`:
-          // an unticked box on a later order must not undo an earlier opt-in.
+          // Checkout newsletter checkbox (create-session set the marker only
+          // when the box was ticked and emailMarketing was on). The helper is
+          // the only writer of checkout consent, new or existing customer: it
+          // keeps an earlier consent source/date, honours suppression and the
+          // do-not-email list, and logs the consent event with the IP from
+          // metadata. Never writes `false` for an unticked box.
           if (marketingOptIn) {
             try {
-              await applyCheckoutMarketingOptIn(db, {
-                businessId: business.id,
-                customerId: customer.id,
-              });
+              await applyCheckoutMarketingOptIn(
+                db,
+                { businessId: business.id, customerId: customer.id },
+                { metadata: fullSession.metadata },
+              );
             } catch (error) {
               Sentry.captureException(error, {
                 level: "warning",
@@ -1426,6 +1426,13 @@ export async function POST(req: NextRequest) {
       // "you left something in your cart" email would be wrong. Its hold was
       // released by create-session already; anything still active was
       // released above, gated by the flip as usual.
+      //
+      // Compliance: the reminder goes to non-subscribers, so it is treated as
+      // a commercial email — skipped when the store has no postal address,
+      // when the address is on the store's do-not-email list, or when the
+      // shopper's Customer row (found or created here, never opted in) is
+      // erased, suppressed, or unsubscribed without a later re-consent; sent
+      // with the marketing footer and one-click List-Unsubscribe headers.
       try {
         const superseded = !!expiredSession.metadata?.[SUPERSEDED_METADATA_KEY];
         const abandonedBusinessId = expiredSession.metadata?.businessId;
@@ -1443,6 +1450,11 @@ export async function POST(req: NextRequest) {
               domainStatus: true,
               stripeAccountId: true,
               sendAbandonedCheckoutEmails: true,
+              addressStreet: true,
+              addressCity: true,
+              addressState: true,
+              addressPostalCode: true,
+              businessAddress: true,
               siteContent: { select: { logoUrl: true } },
             },
           });
@@ -1462,26 +1474,71 @@ export async function POST(req: NextRequest) {
                 },
               );
             } else {
-              let items: AbandonedCheckoutItem[] | undefined;
-              try {
-                items = await listCheckoutSessionEmailItems({
-                  sessionId: expiredSession.id,
-                  stripeAccount: event.account,
-                  logoUrl: abandonedBusiness.siteContent?.logoUrl,
+              // The reminder reaches shoppers who never subscribed, so it is
+              // sent as a commercial email: it needs the store's postal
+              // address (CAN-SPAM), honors every opt-out, and carries the
+              // marketing footer + one-click unsubscribe headers.
+              const postalAddress = getBusinessPostalAddress(abandonedBusiness);
+              const recipient = postalAddress
+                ? await resolveAbandonedCheckoutRecipient(db, {
+                    businessId: abandonedBusinessId,
+                    email: abandonedEmail,
+                    name: expiredSession.customer_details?.name,
+                  })
+                : null;
+              if (!postalAddress || !recipient) {
+                Sentry.captureMessage(
+                  "[Webhook] abandoned-checkout reminder skipped: business has no postal address",
+                  {
+                    level: "info",
+                    tags: {
+                      "webhook.step": "abandoned-checkout-no-address",
+                      businessId: abandonedBusinessId,
+                    },
+                  },
+                );
+              } else if (!recipient.ok) {
+                // An opt-out working as intended — a breadcrumb, not an
+                // event. No address or customer id (PII) in it.
+                Sentry.addBreadcrumb({
+                  category: "webhook.abandoned-checkout",
+                  level: "info",
+                  message: "abandoned-checkout reminder skipped",
+                  data: {
+                    businessId: abandonedBusinessId,
+                    reason: recipient.reason,
+                  },
                 });
-              } catch (lineItemsErr) {
-                Sentry.captureException(lineItemsErr, {
-                  tags: { "webhook.step": "abandoned-checkout-line-items" },
+              } else {
+                let items: AbandonedCheckoutItem[] | undefined;
+                try {
+                  items = await listCheckoutSessionEmailItems({
+                    sessionId: expiredSession.id,
+                    stripeAccount: event.account,
+                    logoUrl: abandonedBusiness.siteContent?.logoUrl,
+                  });
+                } catch (lineItemsErr) {
+                  Sentry.captureException(lineItemsErr, {
+                    tags: { "webhook.step": "abandoned-checkout-line-items" },
+                  });
+                }
+                await sendAbandonedCheckoutEmail({
+                  to: abandonedEmail,
+                  customerName:
+                    expiredSession.customer_details?.name ?? undefined,
+                  business: abandonedBusiness,
+                  items,
+                  idempotencyKey: `abandoned-checkout-${expiredSession.id}`,
+                  unsubscribeUrl: buildUnsubscribeUrl(
+                    getBusinessUrl(abandonedBusiness),
+                    {
+                      customerId: recipient.customerId,
+                      businessId: abandonedBusinessId,
+                    },
+                  ),
+                  postalAddress,
                 });
               }
-              await sendAbandonedCheckoutEmail({
-                to: abandonedEmail,
-                customerName:
-                  expiredSession.customer_details?.name ?? undefined,
-                business: abandonedBusiness,
-                items,
-                idempotencyKey: `abandoned-checkout-${expiredSession.id}`,
-              });
             }
           }
         }

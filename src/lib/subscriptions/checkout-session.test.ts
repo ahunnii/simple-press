@@ -82,6 +82,7 @@ function makeInput(
     imageUrl?: string | null;
     stripeCustomerId?: string;
     marketingOptIn?: boolean;
+    marketingOptInIp?: string;
   } = {},
 ): SubscriptionCheckoutParamsInput {
   return {
@@ -102,6 +103,9 @@ function makeInput(
     ...(overrides.marketingOptIn === undefined
       ? {}
       : { marketingOptIn: overrides.marketingOptIn }),
+    ...(overrides.marketingOptInIp === undefined
+      ? {}
+      : { marketingOptInIp: overrides.marketingOptInIp }),
   };
 }
 
@@ -237,6 +241,25 @@ describe("buildSubscriptionCheckoutParams — ship + shipping (primary case)", (
     );
     expect(on.metadata).toMatchObject({ marketingOptIn: "1" });
     expect(on.subscription_data?.metadata).not.toHaveProperty("marketingOptIn");
+  });
+
+  it("stamps metadata.marketingOptInIp only alongside the opt-in marker, and nothing else about the shopper", () => {
+    const on = buildSubscriptionCheckoutParams(
+      makeInput({ marketingOptIn: true, marketingOptInIp: "203.0.113.9" }),
+    );
+    expect(on.metadata).toMatchObject({
+      marketingOptIn: "1",
+      marketingOptInIp: "203.0.113.9",
+    });
+    expect(on.metadata).not.toHaveProperty("marketingOptInUserAgent");
+
+    const off = buildSubscriptionCheckoutParams(
+      makeInput({ marketingOptIn: false, marketingOptInIp: "203.0.113.9" }),
+    );
+    expect(off.metadata).not.toHaveProperty("marketingOptInIp");
+    expect(on.subscription_data?.metadata).not.toHaveProperty(
+      "marketingOptInIp",
+    );
   });
 
   it("stamps subscription_data.metadata so it round-trips through parseSubscriptionMetadata", () => {

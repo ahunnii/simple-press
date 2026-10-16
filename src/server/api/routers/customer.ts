@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DoNotEmailReason } from "~/lib/marketing/do-not-email";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import {
@@ -13,6 +14,16 @@ import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { listLedger } from "~/lib/loyalty/ledger";
 import { marketingAudienceWhere } from "~/lib/marketing/audience";
 import { marketingOptInData } from "~/lib/marketing/consent";
+import {
+  consentRequestMeta,
+  recordConsentEvent,
+} from "~/lib/marketing/consent-log";
+import { accountMarketingOptInWording } from "~/lib/marketing/consent-wording";
+import {
+  addToDoNotEmail,
+  DO_NOT_EMAIL_REASONS,
+  removeFromDoNotEmail,
+} from "~/lib/marketing/do-not-email";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
@@ -164,14 +175,72 @@ export const customerRouter = createTRPCRouter({
         where: { userId: user.id, businessId: business.id },
       });
       if (!customer) return null;
-      return ctx.db.customer.update({
-        where: { id: customer.id },
-        // Opting in records consent evidence (and clears any earlier
-        // unsubscribe / suppression, since this is an explicit fresh opt-in
-        // by the signed-in owner of the account); opting out records when.
-        data: input.acceptsMarketing
-          ? marketingOptInData("ACCOUNT", { clearSuppression: true })
-          : { acceptsMarketing: false, marketingUnsubscribedAt: new Date() },
+
+      const meta = consentRequestMeta(ctx.headers);
+      const optingIn = input.acceptsMarketing;
+      const wasSuppressed = customer.marketingSuppressedAt !== null;
+      // Only a real change is logged: switching on when already (cleanly) on,
+      // or off when already off, writes the customer as before but no event.
+      const changed = optingIn
+        ? !customer.acceptsMarketing || wasSuppressed
+        : customer.acceptsMarketing;
+
+      return ctx.db.$transaction(async (tx) => {
+        const updated = await tx.customer.update({
+          where: { id: customer.id },
+          // Opting in records consent evidence (and clears any earlier
+          // unsubscribe / suppression, since this is an explicit fresh opt-in
+          // by the signed-in owner of the account); opting out records when.
+          data: optingIn
+            ? marketingOptInData("ACCOUNT", { clearSuppression: true })
+            : { acceptsMarketing: false, marketingUnsubscribedAt: new Date() },
+        });
+        if (optingIn) {
+          // Lift the do-not-email entry a link/account/owner unsubscribe
+          // created, so a re-subscribed person isn't blocked from
+          // list-gated sends (abandoned checkout). Only UNSUBSCRIBED: a
+          // bounce / complaint / provider entry is evidence about the
+          // address itself and stays until a double-opt-in confirm.
+          const removed = await removeFromDoNotEmail(
+            tx,
+            business.id,
+            customer.email,
+            { onlyReasons: ["UNSUBSCRIBED"] },
+          );
+          if (wasSuppressed || removed) {
+            await recordConsentEvent(tx, {
+              businessId: business.id,
+              customerId: customer.id,
+              type: "UNSUPPRESSED",
+              source: "ACCOUNT",
+              ip: meta.ip,
+              userAgent: meta.userAgent,
+            });
+          }
+        }
+        if (!optingIn) {
+          // Same as the unsubscribe link: the address outlives the Customer row.
+          await addToDoNotEmail(
+            tx,
+            business.id,
+            customer.email,
+            "UNSUBSCRIBED",
+          );
+        }
+        if (changed) {
+          await recordConsentEvent(tx, {
+            businessId: business.id,
+            customerId: customer.id,
+            type: optingIn ? "OPT_IN" : "OPT_OUT",
+            source: "ACCOUNT",
+            ip: meta.ip,
+            userAgent: meta.userAgent,
+            wording: optingIn
+              ? accountMarketingOptInWording(business.name)
+              : null,
+          });
+        }
+        return updated;
       });
     }),
 
@@ -417,6 +486,23 @@ export const customerRouter = createTRPCRouter({
       take: 1000,
     });
 
+    // The person's own consent history, including the ip / user agent we
+    // recorded with it (their data, so they get to see it).
+    const consentEvents = await ctx.db.marketingConsentEvent.findMany({
+      where: { customerId: customer.id, businessId: business.id },
+      orderBy: { createdAt: "asc" },
+      take: 1000,
+      select: {
+        type: true,
+        source: true,
+        createdAt: true,
+        wording: true,
+        campaignId: true,
+        ip: true,
+        userAgent: true,
+      },
+    });
+
     return {
       exportedAt: new Date().toISOString(),
       business: { id: business.id, name: business.name },
@@ -427,6 +513,22 @@ export const customerRouter = createTRPCRouter({
         phone: customer.phone,
         acceptsMarketing: customer.acceptsMarketing,
         createdAt: customer.createdAt,
+      },
+      marketing: {
+        consentAt: customer.marketingConsentAt,
+        consentSource: customer.marketingConsentSource,
+        unsubscribedAt: customer.marketingUnsubscribedAt,
+        suppressedAt: customer.marketingSuppressedAt,
+        suppressionReason: customer.marketingSuppressionReason,
+        consentEvents: consentEvents.map((e) => ({
+          type: e.type,
+          source: e.source,
+          createdAt: e.createdAt,
+          wording: e.wording,
+          campaignId: e.campaignId,
+          ip: e.ip,
+          userAgent: e.userAgent,
+        })),
       },
       addresses: customer.shippingAddresses.map((a) => ({
         id: a.id,
@@ -607,6 +709,35 @@ export const customerRouter = createTRPCRouter({
       const placeholder = `anonymized-${input.id}@anonymized.invalid`;
 
       await ctx.db.$transaction(async (tx) => {
+        // Erasure must not let an opt-out evaporate: if this person had
+        // unsubscribed or been suppressed, remember the ADDRESS (hashed, per
+        // store) on the do-not-email list before the row is scrubbed, so a
+        // fresh checkout / re-import can't quietly re-subscribe them. The
+        // customer's consent-event rows (ip / user agent / wording) are
+        // personal data and are deleted with the rest of the record.
+        const unsubscribed =
+          customer.marketingUnsubscribedAt !== null &&
+          !customer.acceptsMarketing;
+        if (customer.marketingSuppressedAt !== null) {
+          const reason = customer.marketingSuppressionReason;
+          await addToDoNotEmail(
+            tx,
+            businessId,
+            customer.email,
+            (DO_NOT_EMAIL_REASONS as readonly string[]).includes(
+              reason ?? "",
+            ) && reason !== "UNSUBSCRIBED"
+              ? (reason as DoNotEmailReason)
+              : "PROVIDER_SUPPRESSED",
+          );
+        }
+        if (unsubscribed) {
+          await addToDoNotEmail(tx, businessId, customer.email, "UNSUBSCRIBED");
+        }
+        await tx.marketingConsentEvent.deleteMany({
+          where: { customerId: input.id, businessId },
+        });
+
         await tx.shippingAddress.updateMany({
           where: { customerId: input.id },
           data: {
@@ -769,6 +900,101 @@ export const customerRouter = createTRPCRouter({
         where: { id: input.customerId },
         data: { notes: input.notes },
       });
+    }),
+
+  // Owner/manager records that a customer no longer wants marketing email
+  // (e.g. they asked by phone). Mirrors the unsubscribe link: opts out, stamps
+  // the time, adds the address to the do-not-email list. Idempotent — a repeat
+  // call changes nothing and logs nothing.
+  markUnsubscribed: ownerAdminProcedure
+    .input(z.object({ customerId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const customer = await ctx.db.customer.findFirst({
+        where: { id: input.customerId, businessId },
+        select: {
+          id: true,
+          email: true,
+          acceptsMarketing: true,
+          marketingUnsubscribedAt: true,
+          anonymizedAt: true,
+        },
+      });
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+      if (customer.anonymizedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer already anonymized",
+        });
+      }
+
+      return ctx.db.$transaction(async (tx) => {
+        const now = new Date();
+        const flipped = await tx.customer.updateMany({
+          where: { id: customer.id, businessId, acceptsMarketing: true },
+          data: { acceptsMarketing: false },
+        });
+        const stamped = await tx.customer.updateMany({
+          where: { id: customer.id, businessId, marketingUnsubscribedAt: null },
+          data: { marketingUnsubscribedAt: now },
+        });
+        await addToDoNotEmail(tx, businessId, customer.email, "UNSUBSCRIBED");
+        // Logged only when something actually changed (idempotent repeats
+        // match neither update).
+        if (flipped.count > 0 || stamped.count > 0) {
+          await recordConsentEvent(tx, {
+            businessId,
+            customerId: customer.id,
+            type: "OPT_OUT",
+            source: "OWNER",
+            wording: null,
+          });
+        }
+        return {
+          success: true,
+          changed: flipped.count > 0 || stamped.count > 0,
+        };
+      });
+    }),
+
+  // Recent consent history for the admin customer page. Deliberately omits
+  // ip / userAgent (evidence we hold, not something to show staff).
+  listConsentEvents: staffProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+        limit: z.number().int().min(1).max(50).default(10),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const events = await ctx.db.marketingConsentEvent.findMany({
+        where: { customerId: input.customerId, businessId },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: input.limit,
+        select: {
+          id: true,
+          type: true,
+          source: true,
+          createdAt: true,
+          campaignId: true,
+          campaign: { select: { subject: true } },
+        },
+      });
+      return events.map((e) => ({
+        id: e.id,
+        type: e.type,
+        source: e.source,
+        createdAt: e.createdAt,
+        campaignId: e.campaignId,
+        campaignSubject: e.campaign?.subject ?? null,
+      }));
     }),
 
   getById: staffProcedure

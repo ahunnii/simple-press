@@ -38,7 +38,7 @@ const AFTER_DRAIN_DEADLINE_MS = 10 * 60_000;
 const SNAPSHOT_CHUNK = 1000;
 
 const MISSING_ADDRESS_MESSAGE =
-  "Add your business address in Settings before sending — the law requires a postal address in marketing emails.";
+  "Add a full business address in Settings before sending (street, city, and state or ZIP, or a PO box) — the law requires a postal address in marketing emails.";
 
 /** Same display-name format `sendEmail` uses (`~/lib/email/send.ts`). */
 function marketingFromAddress(businessName: string): string {

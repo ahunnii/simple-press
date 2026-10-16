@@ -66,6 +66,7 @@ import { createOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
 
 import { EMAIL_FROM, sendEmail } from "./send";
+import { oneClickUnsubscribeHeaders } from "./unsubscribe-token";
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -538,6 +539,14 @@ export async function sendAbandonedCheckoutEmail(params: {
   };
   items?: AbandonedCheckoutItem[];
   idempotencyKey?: string;
+  /**
+   * The shopper's one-click unsubscribe page (`buildUnsubscribeUrl`). The
+   * reminder reaches non-subscribers, so it is sent as a commercial email:
+   * marketing footer + RFC 8058 List-Unsubscribe headers.
+   */
+  unsubscribeUrl: string;
+  /** Sender's postal address for the footer (`getBusinessPostalAddress`). */
+  postalAddress: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
   const overrides = await getEmailOverrides(params.business.subdomain);
@@ -560,7 +569,10 @@ export async function sendAbandonedCheckoutEmail(params: {
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
       items: params.items,
+      unsubscribeUrl: params.unsubscribeUrl,
+      postalAddress: params.postalAddress,
     }),
+    headers: oneClickUnsubscribeHeaders(params.unsubscribeUrl),
     tags: [
       { name: "category", value: "abandoned_checkout" },
       { name: "business", value: params.business.subdomain },

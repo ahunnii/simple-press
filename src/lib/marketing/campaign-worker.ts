@@ -12,7 +12,10 @@ import type {
 } from "~/lib/email/resend";
 import type { DbClient } from "~/server/db";
 import { isRetryableResendError, sendResendBatch } from "~/lib/email/resend";
-import { createUnsubscribeToken } from "~/lib/email/unsubscribe-token";
+import {
+  buildUnsubscribeUrl,
+  oneClickUnsubscribeHeaders,
+} from "~/lib/email/unsubscribe-token";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 
 import { marketingAudienceWhere } from "./audience";
@@ -516,12 +519,11 @@ function buildEmail(
 ): ResendBatchEmail {
   // Deterministic: the token has no timestamp, so a retry rebuilds the
   // identical URL (and identical bytes) for the idempotency key.
-  const token = createUnsubscribeToken({
+  const unsubscribeUrl = buildUnsubscribeUrl(campaign.baseUrl, {
     customerId: row.customerId,
     businessId: campaign.businessId,
     r: row.id,
   });
-  const unsubscribeUrl = `${campaign.baseUrl}/api/unsubscribe?t=${encodeURIComponent(token)}`;
   return {
     from: campaign.fromAddress,
     to: [row.email],
@@ -530,10 +532,7 @@ function buildEmail(
     html: applyUnsubscribeUrl(campaign.renderedHtml, unsubscribeUrl),
     text: applyUnsubscribeUrl(campaign.renderedText, unsubscribeUrl),
     // RFC 8058 one-click unsubscribe (handled by /api/unsubscribe POST).
-    headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
-      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-    },
+    headers: oneClickUnsubscribeHeaders(unsubscribeUrl),
     // Tag values allow only ASCII letters, digits, "_" and "-"; cuid ids comply.
     tags: [
       { name: "category", value: "marketing_broadcast" },

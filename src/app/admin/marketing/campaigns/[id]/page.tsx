@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { TRPCError } from "@trpc/server";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
@@ -36,10 +36,14 @@ export default async function CampaignPage({ params }: Props) {
   ];
 
   if (campaign.status === "DRAFT") {
-    const [audience, business, flags] = await Promise.all([
+    // A draft opens in the composer, which stays gated while emailMarketing is
+    // off. Sent and sending campaigns below remain viewable.
+    const flags = await getBusinessFlags();
+    if (!flags.isEnabled("emailMarketing")) redirect("/admin/marketing");
+
+    const [audience, business] = await Promise.all([
       api.marketing.listRecipients().catch(rethrowTrpcForErrorBoundary),
       api.business.simplifiedGet(),
-      getBusinessFlags(),
     ]);
     return (
       <>

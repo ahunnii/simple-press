@@ -667,6 +667,7 @@ export async function handleSubscriptionCheckoutCompleted(
                 businessId: tenant.business.id,
                 email: normalizeEmail(subscription.customerEmail),
               },
+          { metadata: session.metadata },
         );
       } catch (error) {
         Sentry.captureException(error, {

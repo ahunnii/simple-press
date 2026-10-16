@@ -245,6 +245,9 @@ export async function WealthFooter({
             body={newsletterBody}
             privacyNote={newsletterPrivacy}
             generalInquiriesEmail={generalEmail}
+            privacyHref={
+              privacyPolicy ? `/${privacyPolicy.slug}` : undefined
+            }
           />
         </div>
 

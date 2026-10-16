@@ -1,6 +1,7 @@
-import { Link, Section, Text } from "@react-email/components";
+import { Text } from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
+import { MarketingFooter } from "./components/marketing-footer";
 
 interface MarketingBroadcastEmailProps {
   businessName: string;
@@ -53,20 +54,12 @@ export function MarketingBroadcastEmail({
         ))
       )}
 
-      <Section style={unsubscribeSection}>
-        <Text style={unsubscribeText}>
-          You received this email because you opted in to marketing emails from{" "}
-          {businessName}.{" "}
-          <Link href={unsubscribeUrl} style={unsubscribeLink}>
-            Unsubscribe
-          </Link>
-        </Text>
-        {postalAddress ? (
-          <Text style={addressText}>
-            {businessName}, {postalAddress}
-          </Text>
-        ) : null}
-      </Section>
+      <MarketingFooter
+        businessName={businessName}
+        postalAddress={postalAddress}
+        unsubscribeUrl={unsubscribeUrl}
+        reason={`You received this email because you opted in to marketing emails from ${businessName}.`}
+      />
     </EmailLayout>
   );
 }
@@ -82,28 +75,4 @@ const richBody = {
   color: "#333",
   fontSize: "16px",
   lineHeight: "26px",
-};
-
-const unsubscribeSection = {
-  marginTop: "32px",
-};
-
-const unsubscribeText = {
-  color: "#9ca3af",
-  fontSize: "11px",
-  lineHeight: "20px",
-  textAlign: "center" as const,
-};
-
-const addressText = {
-  color: "#9ca3af",
-  fontSize: "11px",
-  lineHeight: "20px",
-  textAlign: "center" as const,
-  margin: "4px 0 0",
-};
-
-const unsubscribeLink = {
-  color: "#9ca3af",
-  textDecoration: "underline",
 };

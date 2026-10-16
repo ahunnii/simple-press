@@ -2,15 +2,24 @@
 
 import { useState } from "react";
 
+import { RESUBSCRIBE_WORDING } from "~/lib/marketing/consent-wording";
 import { api } from "~/trpc/react";
 
-type Mode = "confirm" | "unsubscribed" | "invalid" | "expired" | "unavailable";
+type Mode =
+  | "confirm"
+  | "unsubscribe"
+  | "unsubscribed"
+  | "invalid"
+  | "expired"
+  | "unavailable";
 
 type Props = {
   mode: Mode;
   businessName: string;
-  /** Signed token for the action button (confirm / resubscribe). */
+  /** Signed token for the action button (confirm / unsubscribe / resubscribe). */
   token?: string;
+  /** Unsubscribe mode: offer the Resubscribe undo afterwards (feature on). */
+  canResubscribe?: boolean;
   /** Address being confirmed (confirm mode only). */
   email?: string;
 };
@@ -33,10 +42,14 @@ export function EmailPreferencesCard({
   mode,
   businessName,
   token,
+  canResubscribe,
   email,
 }: Props) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "unsubscribe" flips to "unsubscribed" once the button's POST succeeds.
+  const [unsubscribed, setUnsubscribed] = useState(false);
+  const [unsubscribing, setUnsubscribing] = useState(false);
 
   const onSuccess = (result: ActionResult) => {
     if (result.ok) {
@@ -61,6 +74,29 @@ export function EmailPreferencesCard({
     onError,
   });
   const pending = confirm.isPending || resubscribe.isPending;
+
+  const unsubscribe = async () => {
+    if (!token) return;
+    setUnsubscribing(true);
+    setError(null);
+    try {
+      // The same endpoint the mail client's one-click POSTs to; `via=page`
+      // records this as an unsubscribe-link click in the consent log.
+      const res = await fetch(
+        `/api/unsubscribe?t=${encodeURIComponent(token)}&via=page`,
+        { method: "POST" },
+      );
+      if (res.ok) {
+        setUnsubscribed(true);
+      } else {
+        setError("We couldn't unsubscribe you right now. Please try again.");
+      }
+    } catch {
+      setError("We couldn't unsubscribe you right now. Please try again.");
+    } finally {
+      setUnsubscribing(false);
+    }
+  };
 
   if (mode === "invalid" || mode === "expired" || mode === "unavailable") {
     return (
@@ -127,7 +163,34 @@ export function EmailPreferencesCard({
     );
   }
 
-  // mode === "unsubscribed"
+  if (mode === "unsubscribe" && !unsubscribed) {
+    return (
+      <section className={CARD}>
+        <h1 className={HEADING}>Unsubscribe from {businessName}?</h1>
+        <p className={BODY}>
+          Click to stop marketing emails from {businessName}. Order and account
+          emails aren&apos;t affected.
+        </p>
+        <button
+          type="button"
+          className={BUTTON}
+          disabled={unsubscribing || !token}
+          onClick={() => void unsubscribe()}
+        >
+          {unsubscribing ? "Unsubscribing..." : "Unsubscribe"}
+        </button>
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-red-600">
+            {error}
+          </p>
+        )}
+      </section>
+    );
+  }
+
+  // mode === "unsubscribed", or "unsubscribe" after the button succeeded
+  const showResubscribe =
+    mode === "unsubscribe" ? !!canResubscribe && !!token : !!token;
   if (done) {
     return (
       <section className={CARD} role="status">
@@ -139,7 +202,10 @@ export function EmailPreferencesCard({
     );
   }
   return (
-    <section className={CARD}>
+    <section
+      className={CARD}
+      role={mode === "unsubscribe" ? "status" : undefined}
+    >
       <h1 className={HEADING}>
         You&apos;re unsubscribed from {businessName} emails
       </h1>
@@ -147,7 +213,7 @@ export function EmailPreferencesCard({
         You won&apos;t receive any more marketing emails from {businessName}.
         Order and account emails aren&apos;t affected.
       </p>
-      {token && (
+      {showResubscribe && token && (
         <>
           <p className={`${BODY} mt-6`}>Changed your mind?</p>
           <button
@@ -156,7 +222,7 @@ export function EmailPreferencesCard({
             disabled={pending}
             onClick={() => resubscribe.mutate({ token })}
           >
-            {pending ? "Resubscribing..." : "Resubscribe"}
+            {pending ? "Resubscribing..." : RESUBSCRIBE_WORDING}
           </button>
         </>
       )}

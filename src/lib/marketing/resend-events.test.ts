@@ -81,11 +81,23 @@ function makeFakeDb(rows: Row[], customers: CustomerRow[]) {
       },
     ),
   };
-  const db = {
+  const consentEvents: Array<Record<string, unknown>> = [];
+  const marketingConsentEvent = {
+    create: vi.fn(({ data }: { data: Record<string, unknown> }) => {
+      consentEvents.push(data);
+      return Promise.resolve({ id: `evt_${consentEvents.length}` });
+    }),
+  };
+  const tx = {
     marketingCampaignRecipient: recipient,
     customer,
+    marketingConsentEvent,
+  };
+  const db = {
+    ...tx,
+    $transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
   } as unknown as ResendEventsDb;
-  return { db, recipient, customer };
+  return { db, recipient, customer, consentEvents };
 }
 
 const MARKETING_TAGS = {
@@ -389,6 +401,58 @@ describe("applyResendEvent", () => {
       marketingUnsubscribedAt: NOW,
       marketingSuppressedAt: NOW,
       marketingSuppressionReason: "COMPLAINT",
+    });
+  });
+
+  it("logs exactly one SUPPRESSED/COMPLAINT consent event (with the campaign), once", async () => {
+    const e = event("email.complained");
+    await applyResendEvent(fake.db, e, { now: NOW });
+    await applyResendEvent(fake.db, e, { now: NOW });
+    expect(fake.consentEvents).toHaveLength(1);
+    expect(fake.consentEvents[0]).toMatchObject({
+      businessId: "biz_1",
+      customerId: "cus_1",
+      type: "SUPPRESSED",
+      source: "COMPLAINT",
+      campaignId: "camp_1",
+    });
+  });
+
+  it("logs SUPPRESSED/HARD_BOUNCE and SUPPRESSED/PROVIDER_SUPPRESSED, not for transient bounces", async () => {
+    await applyResendEvent(
+      fake.db,
+      event("email.bounced", {
+        bounce: { type: "Transient", subType: "x", message: "y" },
+      }),
+      { now: NOW },
+    );
+    expect(fake.consentEvents).toHaveLength(0);
+
+    await applyResendEvent(
+      fake.db,
+      event("email.bounced", {
+        bounce: { type: "Permanent", subType: "General", message: "x" },
+      }),
+      { now: NOW },
+    );
+    expect(fake.consentEvents).toHaveLength(1);
+    expect(fake.consentEvents[0]).toMatchObject({
+      type: "SUPPRESSED",
+      source: "HARD_BOUNCE",
+      campaignId: "camp_1",
+    });
+
+    customers[0]!.marketingSuppressedAt = null;
+    await applyResendEvent(
+      fake.db,
+      event("email.suppressed", {
+        suppressed: { type: "OnAccountSuppressionList", message: "On list" },
+      }),
+      { now: NOW },
+    );
+    expect(fake.consentEvents[1]).toMatchObject({
+      type: "SUPPRESSED",
+      source: "PROVIDER_SUPPRESSED",
     });
   });
 

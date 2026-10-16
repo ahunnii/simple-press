@@ -152,6 +152,23 @@ describe("privacy template", () => {
     );
   });
 
+  it("lists newsletter/marketing sign-up data in collect only when the flag is on", () => {
+    const signupLine =
+      "Your email address and name when you sign up for our newsletter or choose to receive marketing emails at checkout";
+    expect(privacy()).not.toContain(signupLine);
+    expect(privacy({ featureFlags: { emailMarketing: true } })).toContain(
+      signupLine,
+    );
+  });
+
+  it("always names email delivery providers as a recipient of data", () => {
+    const providerLine = "Email delivery providers that send our order emails";
+    expect(privacy()).toContain(providerLine);
+    expect(privacy({ featureFlags: { emailMarketing: true } })).toContain(
+      providerLine,
+    );
+  });
+
   it("does not re-explain reCAPTCHA or Sentry", () => {
     const md = privacy({ umamiEnabled: true });
     expect(md).not.toContain("reCAPTCHA");

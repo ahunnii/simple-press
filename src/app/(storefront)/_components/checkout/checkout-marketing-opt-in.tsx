@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { useId } from "react";
 
+import { checkoutMarketingOptInWording } from "~/lib/marketing/consent-wording";
+
 type Props = {
   /** `marketingOptInEnabled` from `useCheckoutForm` (the emailMarketing flag). */
   enabled: boolean;
@@ -14,7 +16,11 @@ type Props = {
   inputStyle?: CSSProperties;
   labelClassName?: string;
   labelStyle?: CSSProperties;
-  /** Overrides the default "Email me news and offers from <Store>". */
+  /**
+   * Overrides the shared wording. Do NOT use: the label is recorded in the
+   * consent log as `checkoutMarketingOptInWording(businessName)`, so a
+   * different label would make that record untrue.
+   */
   label?: string;
 };
 
@@ -61,7 +67,7 @@ export function CheckoutMarketingOptIn({
         style={inputStyle}
       />
       <label htmlFor={id} className={labelClassName} style={labelStyle}>
-        {label ?? `Email me news and offers from ${businessName}`}
+        {label ?? checkoutMarketingOptInWording(businessName)}
       </label>
     </div>
   );

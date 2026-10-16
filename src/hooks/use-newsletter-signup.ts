@@ -17,7 +17,7 @@ export type NewsletterSignupStatus =
   /** Email marketing is off for this store: render the honest fallback. */
   | "disabled";
 
-type SubmitInput = { email: string; firstName?: string };
+type SubmitInput = { email: string; firstName?: string; lastName?: string };
 
 /**
  * Shared state for every template's newsletter form.
@@ -59,7 +59,7 @@ export function useNewsletterSignup() {
   });
 
   const submit = useCallback(
-    async ({ email, firstName }: SubmitInput) => {
+    async ({ email, firstName, lastName }: SubmitInput) => {
       if (!enabled) return;
       setError(null);
       setStatus("submitting");
@@ -68,6 +68,7 @@ export function useNewsletterSignup() {
       mutate({
         email,
         firstName: firstName?.trim() ? firstName.trim() : undefined,
+        lastName: lastName?.trim() ? lastName.trim() : undefined,
         captchaToken: captchaToken ?? "",
         website: honeypotRef.current?.value ?? "",
       });

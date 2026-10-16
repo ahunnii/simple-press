@@ -334,6 +334,8 @@ model Business {
   forms                  Form[]
   formSubmissions        FormSubmission[]
   marketingCampaigns     MarketingCampaign[]
+  marketingConsentEvents MarketingConsentEvent[]
+  marketingDoNotEmail    MarketingDoNotEmail[]
   quickBooksConnection   QuickBooksConnection?
   quickBooksInvoices     QuickBooksInvoice[]
   invoiceSettings        InvoiceSettings?
@@ -1061,6 +1063,7 @@ model Customer {
   loyaltyLedger      LoyaltyLedger[]
   invoices           Invoice[]
   campaignRecipients MarketingCampaignRecipient[]
+  consentEvents      MarketingConsentEvent[]
 
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
@@ -2086,8 +2089,9 @@ model MarketingCampaign {
   canceledAt     DateTime?
   lastError      String?
 
-  batches    MarketingCampaignBatch[]
-  recipients MarketingCampaignRecipient[]
+  batches       MarketingCampaignBatch[]
+  recipients    MarketingCampaignRecipient[]
+  consentEvents MarketingConsentEvent[]
 
   @@index([businessId, createdAt])
   @@index([status])
@@ -2147,6 +2151,55 @@ model MarketingCampaignRecipient {
   @@index([campaignId, batchIndex])
   @@index([campaignId, status])
   @@index([customerId])
+}
+
+/// Append-only evidence log of email-marketing consent changes (opt-in,
+/// opt-out, suppression). `Customer.acceptsMarketing` + the marketing* columns
+/// stay the live state; these rows record every transition with how/where it
+/// happened. Written via `recordConsentEvent` (src/lib/marketing/consent-log.ts).
+/// Customer erasure deletes a customer's rows explicitly; the SetNull FK is
+/// only a backstop for a hard customer delete.
+model MarketingConsentEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  type   String // OPT_IN | OPT_OUT | SUPPRESSED | UNSUPPRESSED
+  source String // see MARKETING_CONSENT_EVENT_SOURCES in src/lib/marketing/consent-log.ts
+
+  ip        String? /// @encrypted
+  userAgent String? @db.Text /// @encrypted
+  wording   String? @db.Text // the consent text shown at the moment of opt-in
+
+  // Campaign whose unsubscribe link / complaint / bounce produced the event.
+  campaignId String?
+  campaign   MarketingCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, customerId, createdAt])
+  @@index([customerId]) // SetNull fan-out on customer delete
+  @@index([campaignId]) // SetNull fan-out on campaign delete
+}
+
+/// Per-store do-not-email list keyed by an HMAC of the normalized address
+/// (never the address itself), so an opt-out / bounce / complaint survives the
+/// Customer row being erased or re-created. See src/lib/marketing/do-not-email.ts.
+/// NOT encrypted: `emailHash` must be queryable and is already a keyed hash.
+model MarketingDoNotEmail {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  emailHash String // hex HMAC-SHA256 of normalizeEmail(email), context "dne:v1"
+  reason    String // UNSUBSCRIBED | HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
+
+  @@unique([businessId, emailHash])
 }
 
 /// One QuickBooks Online company connection per business (1:1). Updated in

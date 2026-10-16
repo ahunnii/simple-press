@@ -28,8 +28,10 @@ function first(value: string | string[] | undefined): string | undefined {
  *  - `?view=confirm&t=` : newsletter double opt-in. Confirming is a button
  *    press (POST), never page load, so email link scanners can't subscribe
  *    anyone.
- *  - `?s=unsubscribed&t=` : where /api/unsubscribe lands people, with a
- *    Resubscribe undo.
+ *  - `?s=confirm&t=` : where GET /api/unsubscribe lands people. Unsubscribing
+ *    is a button press (POST /api/unsubscribe), never a page load, so link
+ *    scanners can't unsubscribe anyone. Once unsubscribed (the state is read
+ *    from the database, not from `s`) the card offers a Resubscribe undo.
  */
 export default async function EmailPreferencesPage({
   searchParams,
@@ -85,13 +87,36 @@ export default async function EmailPreferencesPage({
         />
       );
     }
-  } else if (status === "unsubscribed" && token) {
+  } else if ((status === "confirm" || status === "unsubscribed") && token) {
     const payload = verifyUnsubscribeToken(token);
     // A token for another store (or garbage) gets the generic state: no
-    // resubscribe button, nothing implying it did anything.
-    if (payload?.businessId !== business.id) {
+    // buttons, nothing implying it did anything.
+    const customer =
+      payload?.businessId === business.id
+        ? await db.customer.findFirst({
+            where: {
+              id: payload.customerId,
+              businessId: business.id,
+              anonymizedAt: null,
+            },
+            select: { acceptsMarketing: true },
+          })
+        : null;
+    if (!customer) {
       card = (
         <EmailPreferencesCard mode="invalid" businessName={business.name} />
+      );
+    } else if (customer.acceptsMarketing) {
+      // Subscribed: ask first. `?s=unsubscribed` is never trusted, the state
+      // comes from the database, so a hand-edited or stale link can't claim
+      // someone is unsubscribed when they are not.
+      card = (
+        <EmailPreferencesCard
+          mode="unsubscribe"
+          businessName={business.name}
+          token={token}
+          canResubscribe={marketingEnabled}
+        />
       );
     } else {
       card = (

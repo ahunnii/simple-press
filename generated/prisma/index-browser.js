@@ -1093,6 +1093,27 @@ exports.Prisma.MarketingCampaignRecipientScalarFieldEnum = {
   unsubscribedAt: 'unsubscribedAt'
 };
 
+exports.Prisma.MarketingConsentEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  type: 'type',
+  source: 'source',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  wording: 'wording',
+  campaignId: 'campaignId'
+};
+
+exports.Prisma.MarketingDoNotEmailScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  emailHash: 'emailHash',
+  reason: 'reason'
+};
+
 exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1451,6 +1472,8 @@ exports.Prisma.ModelName = {
   MarketingCampaign: 'MarketingCampaign',
   MarketingCampaignBatch: 'MarketingCampaignBatch',
   MarketingCampaignRecipient: 'MarketingCampaignRecipient',
+  MarketingConsentEvent: 'MarketingConsentEvent',
+  MarketingDoNotEmail: 'MarketingDoNotEmail',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
   InvoiceSettings: 'InvoiceSettings',

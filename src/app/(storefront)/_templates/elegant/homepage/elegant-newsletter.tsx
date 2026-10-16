@@ -7,6 +7,7 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useNewsletterSignup } from "~/hooks/use-newsletter-signup";
 import { NewsletterHoneypot } from "~/app/(storefront)/_components/newsletter/newsletter-honeypot";
+import { NewsletterConsentNote } from "~/app/(storefront)/_components/newsletter/newsletter-consent-note";
 
 import { resolveFields } from "..";
 
@@ -244,6 +245,7 @@ export function ElegantNewsletter({
                   {newsletter.error}
                 </p>
               ) : null}
+              <NewsletterConsentNote className="mt-5 text-[13px] opacity-70" />
             </>
           )}
         </div>

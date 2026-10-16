@@ -21,6 +21,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { OrdersTable } from "../../orders/_components/orders-table";
+import { CustomerEmailMarketing } from "./_components/customer-email-marketing";
 import { CustomerInvoicesCard } from "./_components/customer-invoices-card";
 import { CustomerLoyaltyCard } from "./_components/customer-loyalty-card";
 import { CustomerNotes } from "./_components/customer-notes";
@@ -145,18 +146,21 @@ export default async function CustomerDetailPage({ params }: Props) {
                     <p className="font-medium">{customer.phone}</p>
                   </div>
                 )}
-                <div>
-                  <p className="text-muted-foreground text-sm">Marketing</p>
-                  <Badge
-                    variant={
-                      customer.acceptsMarketing ? "default" : "secondary"
-                    }
-                  >
-                    {customer.acceptsMarketing ? "Opted in" : "Opted out"}
-                  </Badge>
-                </div>
               </CardContent>
             </Card>
+
+            <CustomerEmailMarketing
+              customerId={customer.id}
+              displayName={name ?? customer.email}
+              acceptsMarketing={customer.acceptsMarketing}
+              marketingConsentAt={customer.marketingConsentAt}
+              marketingConsentSource={customer.marketingConsentSource}
+              marketingUnsubscribedAt={customer.marketingUnsubscribedAt}
+              marketingSuppressedAt={customer.marketingSuppressedAt}
+              marketingSuppressionReason={customer.marketingSuppressionReason}
+              canManage={canManage}
+              anonymized={!!customer.anonymizedAt}
+            />
 
             <Card>
               <CardHeader>

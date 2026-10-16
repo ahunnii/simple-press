@@ -5,6 +5,7 @@ import { useState } from "react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useNewsletterSignup } from "~/hooks/use-newsletter-signup";
 import { NewsletterHoneypot } from "~/app/(storefront)/_components/newsletter/newsletter-honeypot";
+import { NewsletterConsentNote } from "~/app/(storefront)/_components/newsletter/newsletter-consent-note";
 
 import { WealthInput } from "../shared/wealth-input";
 import { WealthLedgeButton } from "../shared/wealth-ledge-button";
@@ -15,6 +16,8 @@ type WealthNewsletterProps = {
   privacyNote: string;
   /** Shown in the honest-fallback status message once submitted. */
   generalInquiriesEmail: string;
+  /** Store privacy policy path; the footer passes the store's own page when published. */
+  privacyHref?: string;
 };
 
 /**
@@ -32,6 +35,7 @@ export function WealthNewsletter({
   body,
   privacyNote,
   generalInquiriesEmail,
+  privacyHref,
 }: WealthNewsletterProps) {
   // Fallback path only: set when email marketing is off for this store.
   const [submitted, setSubmitted] = useState(false);
@@ -49,7 +53,11 @@ export function WealthNewsletter({
       const value = data.get(name);
       return typeof value === "string" ? value.trim() : "";
     };
-    void newsletter.submit({ email: text("email"), firstName: text("firstName") });
+    void newsletter.submit({
+      email: text("email"),
+      firstName: text("firstName"),
+      lastName: text("lastName"),
+    });
   };
 
   return (
@@ -163,6 +171,10 @@ export function WealthNewsletter({
           {privacyNote}
         </p>
       ) : null}
+      <NewsletterConsentNote
+        className="wealth-footer__privacy"
+        privacyHref={privacyHref}
+      />
     </div>
   );
 }

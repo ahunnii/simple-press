@@ -1,5 +1,6 @@
 import type { MarketingSuppressionReason } from "~/lib/marketing/consent";
 import type { DbClient } from "~/server/db";
+import { recordConsentEvent } from "~/lib/marketing/consent-log";
 
 /**
  * Applies a verified Resend webhook event to the campaign-recipient row it
@@ -131,7 +132,7 @@ export type ResendWebhookEvent = {
 
 export type ResendEventsDb = Pick<
   DbClient,
-  "marketingCampaignRecipient" | "customer"
+  "marketingCampaignRecipient" | "customer" | "$transaction"
 >;
 
 export type ApplyResendEventResult =
@@ -210,12 +211,14 @@ function bounceError(
 type RecipientRef = {
   id: string;
   businessId: string;
+  campaignId: string;
   customerId: string | null;
 };
 
 const RECIPIENT_SELECT = {
   id: true,
   businessId: true,
+  campaignId: true,
   customerId: true,
 } as const;
 
@@ -280,6 +283,7 @@ async function findRecipient(
   const recipient: RecipientRef = {
     id: row.id,
     businessId: row.businessId,
+    campaignId: row.campaignId,
     customerId: row.customerId,
   };
   try {
@@ -327,7 +331,7 @@ export async function applyResendEvent(
 
   const now = opts.now ?? new Date();
   const at = eventTime(event, now);
-  const { id, businessId, customerId } = recipient;
+  const { id, businessId, campaignId, customerId } = recipient;
 
   const moveTo = async (
     target: EventTargetStatus,
@@ -345,15 +349,33 @@ export async function applyResendEvent(
     return count > 0;
   };
 
+  /**
+   * Suppress the customer (conditional on not already suppressed) and, in the
+   * same transaction, log the SUPPRESSED consent event for the change.
+   */
   const suppress = async (
     reason: MarketingSuppressionReason,
   ): Promise<boolean> => {
     if (!customerId) return false;
-    const { count } = await db.customer.updateMany({
-      where: { id: customerId, businessId, marketingSuppressedAt: null },
-      data: { marketingSuppressedAt: now, marketingSuppressionReason: reason },
+    return db.$transaction(async (tx) => {
+      const { count } = await tx.customer.updateMany({
+        where: { id: customerId, businessId, marketingSuppressedAt: null },
+        data: {
+          marketingSuppressedAt: now,
+          marketingSuppressionReason: reason,
+        },
+      });
+      if (count > 0) {
+        await recordConsentEvent(tx, {
+          businessId,
+          customerId,
+          type: "SUPPRESSED",
+          source: reason,
+          campaignId,
+        });
+      }
+      return count > 0;
     });
-    return count > 0;
   };
 
   let recipientUpdated = false;
@@ -411,16 +433,38 @@ export async function applyResendEvent(
     case "email.complained": {
       recipientUpdated = await moveTo("COMPLAINED", { complainedAt: at });
       if (customerId) {
-        const scope = { id: customerId, businessId };
-        await db.customer.updateMany({
-          where: scope,
-          data: { acceptsMarketing: false },
+        // One transaction, one event: the complaint both opts the customer out
+        // and suppresses them, and a single SUPPRESSED/COMPLAINT row records
+        // it. Logged only when the complaint changed something (a redelivery
+        // matches nothing and logs nothing).
+        customerSuppressed = await db.$transaction(async (tx) => {
+          const scope = { id: customerId, businessId };
+          const optedOut = await tx.customer.updateMany({
+            where: { ...scope, acceptsMarketing: true },
+            data: { acceptsMarketing: false },
+          });
+          await tx.customer.updateMany({
+            where: { ...scope, marketingUnsubscribedAt: null },
+            data: { marketingUnsubscribedAt: now },
+          });
+          const suppressed = await tx.customer.updateMany({
+            where: { ...scope, marketingSuppressedAt: null },
+            data: {
+              marketingSuppressedAt: now,
+              marketingSuppressionReason: "COMPLAINT",
+            },
+          });
+          if (optedOut.count > 0 || suppressed.count > 0) {
+            await recordConsentEvent(tx, {
+              businessId,
+              customerId,
+              type: "SUPPRESSED",
+              source: "COMPLAINT",
+              campaignId,
+            });
+          }
+          return suppressed.count > 0;
         });
-        await db.customer.updateMany({
-          where: { ...scope, marketingUnsubscribedAt: null },
-          data: { marketingUnsubscribedAt: now },
-        });
-        customerSuppressed = await suppress("COMPLAINT");
       }
       break;
     }

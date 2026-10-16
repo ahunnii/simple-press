@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
@@ -38,6 +39,7 @@ import SubscriptionStartedEmail from "~/emails/subscription-started";
 import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 import type { CustomizationSnapshot } from "~/lib/customizer/types";
@@ -59,6 +61,7 @@ import {
 } from "~/lib/email/default-subjects";
 import { renderEmail } from "~/lib/email/render";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -486,6 +489,9 @@ export function EmailPreview({
             businessName: business.name,
             businessLogoUrl: logoUrl,
             businessUrl,
+            // Preview only: the real send builds a per-shopper link.
+            unsubscribeUrl: `${businessUrl}/api/unsubscribe`,
+            postalAddress: business.postalAddress,
             items: sampleOrder?.items?.map((item) => ({
               name: item.productName,
               variantName: item.variantName ?? undefined,
@@ -1236,6 +1242,29 @@ export function EmailPreview({
                         receive a recovery email, regardless of the subject and
                         intro text below.
                       </p>
+                      <p className="text-muted-foreground mt-2 text-sm">
+                        Reminders include an unsubscribe link and your mailing
+                        address, and are not sent to people who unsubscribed.
+                        Add a full mailing address in Business settings or
+                        reminders won&apos;t send.
+                      </p>
+                      {!business.postalAddress && (
+                        <Alert variant="warning" className="mt-3">
+                          <AlertTriangle aria-hidden="true" />
+                          <AlertTitle>Business address needed</AlertTitle>
+                          <AlertDescription>
+                            Reminders won&apos;t send until you add a full
+                            mailing address: a street, city, and state or ZIP,
+                            or a PO box.{" "}
+                            <Link
+                              href="/admin/settings/general"
+                              className="font-medium underline underline-offset-2"
+                            >
+                              Go to business settings
+                            </Link>
+                          </AlertDescription>
+                        </Alert>
+                      )}
                     </div>
                     <Switch
                       id="send-abandoned-checkout-emails"

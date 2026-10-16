@@ -929,7 +929,14 @@ describe("discount-code uses are held at checkout start", () => {
     async function enableAbandonedEmails(store: Store) {
       await db.business.update({
         where: { id: store.business.id },
-        data: { sendAbandonedCheckoutEmails: true },
+        // Reminders only send with a postal address (CAN-SPAM).
+        data: {
+          sendAbandonedCheckoutEmails: true,
+          addressStreet: "1 Market St",
+          addressCity: "Detroit",
+          addressState: "MI",
+          addressPostalCode: "48201",
+        },
       });
     }
 

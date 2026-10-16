@@ -211,4 +211,44 @@ describe("getBusinessPostalAddress", () => {
       getBusinessPostalAddress({ addressStreet: " ", businessAddress: "" }),
     ).toBeNull();
   });
+
+  it("rejects a structured address that is only a state", () => {
+    expect(getBusinessPostalAddress({ addressState: "MI" })).toBeNull();
+  });
+
+  it("rejects structured parts missing the street", () => {
+    expect(
+      getBusinessPostalAddress({
+        addressCity: "Detroit",
+        addressState: "MI",
+        addressPostalCode: "48201",
+      }),
+    ).toBeNull();
+  });
+
+  it("accepts a complete structured address", () => {
+    expect(
+      getBusinessPostalAddress({
+        addressStreet: "123 Main St",
+        addressCity: "Detroit",
+        addressPostalCode: "48201",
+      }),
+    ).toBe("123 Main St, Detroit, 48201");
+  });
+
+  it("accepts a free-form PO box with a digit and comma", () => {
+    expect(
+      getBusinessPostalAddress({
+        businessAddress: "PO Box 123, Detroit MI 48201",
+      }),
+    ).toBe("PO Box 123, Detroit MI 48201");
+  });
+
+  it("rejects a free-form value that is only a state", () => {
+    expect(getBusinessPostalAddress({ businessAddress: "MI" })).toBeNull();
+  });
+
+  it("rejects a short free-form value with no digit or comma", () => {
+    expect(getBusinessPostalAddress({ businessAddress: "Detroit" })).toBeNull();
+  });
 });

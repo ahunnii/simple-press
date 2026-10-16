@@ -42,8 +42,10 @@ export function AudienceCard({ count, suppressedCount }: Props) {
         )}
         {count === 0 && (
           <p className="text-muted-foreground mt-3 text-sm">
-            No customers have opted in yet. Customers can enable marketing
-            emails from their account preferences page.
+            No customers have opted in yet. Customers join by ticking the
+            marketing box at checkout, signing up through the newsletter form
+            on your site (they confirm by email), or in their account
+            preferences.
           </p>
         )}
       </CardContent>

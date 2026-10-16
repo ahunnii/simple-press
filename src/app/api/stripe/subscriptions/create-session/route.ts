@@ -24,6 +24,7 @@ import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
+import { consentRequestMeta } from "~/lib/marketing/consent-log";
 import { getClientIp, subscriptionCheckoutLimiter } from "~/lib/rate-limit";
 import { createSubscriptionCheckoutSession } from "~/lib/subscriptions/checkout-session";
 import {
@@ -701,6 +702,8 @@ export async function POST(req: Request) {
           customerInfo.acceptsMarketing === true &&
           isEnabled("emailMarketing") &&
           !disabledByDependency.includes("emailMarketing"),
+        // Consent evidence: shopper IP only (stamped into session metadata).
+        marketingOptInIp: consentRequestMeta(req.headers).ip,
         subscription: {
           id: row.id,
           productId: product.id,
