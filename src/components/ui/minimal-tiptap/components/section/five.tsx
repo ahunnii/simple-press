@@ -8,7 +8,15 @@ import {
   PlusIcon,
   QuoteIcon,
 } from "@radix-ui/react-icons";
-import { Calculator, FormInput, Frame, Images, Table } from "lucide-react";
+import {
+  Calculator,
+  ChevronsDownUp,
+  Columns2,
+  FormInput,
+  Frame,
+  Images,
+  Table,
+} from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
@@ -30,7 +38,9 @@ type InsertElementAction =
   | "embed"
   | "quoteCalculator"
   | "form"
-  | "table";
+  | "table"
+  | "columns"
+  | "details";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
 }
@@ -117,6 +127,26 @@ const formatActions: InsertElement[] = [
     canExecute: (editor) => !editor.isActive("table"),
     shortcuts: [],
   },
+  {
+    value: "columns",
+    label: "Columns",
+    icon: <Columns2 className="size-5" />,
+    action: (editor) =>
+      editor.chain().focus().insertColumns({ layout: "2" }).run(),
+    isActive: (editor) => editor.isActive("columns"),
+    // Refused inside an existing row: rows don't nest.
+    canExecute: (editor) => editor.can().insertColumns({ layout: "2" }),
+    shortcuts: [],
+  },
+  {
+    value: "details",
+    label: "Collapsible section",
+    icon: <ChevronsDownUp className="size-5" />,
+    action: (editor) => editor.chain().focus().setDetails().run(),
+    isActive: (editor) => editor.isActive("details"),
+    canExecute: (editor) => editor.can().setDetails(),
+    shortcuts: [],
+  },
 ];
 
 interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
@@ -127,6 +157,7 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  layoutBlocksEnabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
@@ -139,12 +170,14 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   embedsEnabled = false,
   quotesEnabled = false,
   formsEnabled = false,
+  layoutBlocksEnabled = false,
 }) => {
   const filteredActions = activeActions
     .filter((a) => galleriesEnabled || a !== "gallery")
     .filter((a) => embedsEnabled || a !== "embed")
     .filter((a) => quotesEnabled || a !== "quoteCalculator")
-    .filter((a) => formsEnabled || a !== "form");
+    .filter((a) => formsEnabled || a !== "form")
+    .filter((a) => layoutBlocksEnabled || (a !== "columns" && a !== "details"));
   // The video extension is only registered when the editor was given a
   // `videoUploader`, so its presence doubles as the "videos enabled" flag.
   const videosEnabled = editor.extensionManager.extensions.some(

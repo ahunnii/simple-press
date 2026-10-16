@@ -86,14 +86,14 @@ export function DarkTrendGeneralLayout({
 
           {productsCount && (
             // S-11: gray-600 (#4B5563) ≈2.2:1 on dark bg — swap to white/60 (≈5.7:1)
-            <p className="text-center text-white/60">
+            <p className="text-white/60">
               {productsCount} product
               {productsCount !== 1 ? "s" : ""}
             </p>
           )}
           {excerpt && (
             <p
-              className="text-center text-xl text-white/80"
+              className="max-w-3xl text-xl text-white/80"
               {...(excerptFieldKey ? fieldAttr(excerptFieldKey) : {})}
             >
               {excerpt}

@@ -1,6 +1,7 @@
 import type { Extension } from "@tiptap/core";
 import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import * as React from "react";
+import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Typography } from "@tiptap/extension-typography";
 import { Placeholder, Selection } from "@tiptap/extensions";
@@ -8,11 +9,15 @@ import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toast } from "sonner";
 
+import { Column } from "~/lib/tiptap/columns-node";
+import { DETAILS_EXTENSIONS } from "~/lib/tiptap/details-nodes";
+import { createLinkExtension } from "~/lib/tiptap/link-extension";
 import { cn } from "~/lib/utils";
 
 import {
   CodeBlockLowlight,
   Color,
+  EditorColumns,
   Embed,
   FileHandler,
   Form,
@@ -168,19 +173,22 @@ export const createExtensions = ({
       // italic
       // listItem
       // listKeymap
-      link: {
-        enableClickSelection: true,
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "link",
-        },
-      },
+      // The shared link (below) replaces StarterKit's: same mark, plus the
+      // button `variant` attr the storefront renders.
+      link: false,
       orderedList: { HTMLAttributes: { class: "list-node" } },
       paragraph: { HTMLAttributes: { class: "text-node" } },
       // strike
       // text
       // underline
       // trailingNode
+    }),
+    createLinkExtension({
+      enableClickSelection: true,
+      openOnClick: false,
+      HTMLAttributes: {
+        class: "link",
+      },
     }),
     Image.configure({
       allowedMimeTypes: ["image/*"],
@@ -333,6 +341,8 @@ export const createExtensions = ({
       : []),
     Color,
     TextStyle,
+    // Same config as the storefront renderer, so stored alignment survives.
+    TextAlign.configure({ types: ["heading", "paragraph"] }),
     Selection,
     Typography,
     UnsetAllMarks,
@@ -351,6 +361,11 @@ export const createExtensions = ({
     }),
     Form.configure({ formsEnabled: formsEnabled !== false }),
     TableKit.configure({}),
+    // Layout containers, shared with the storefront renderer's schema so
+    // `normalize-content`'s schema (built from this list) knows them too.
+    EditorColumns,
+    Column,
+    ...DETAILS_EXTENSIONS,
   ];
 };
 

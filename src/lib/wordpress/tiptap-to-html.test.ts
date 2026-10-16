@@ -417,4 +417,148 @@ describe("tiptapToHtml", () => {
     expect(result.warnings.length).toBe(1);
     expect(result.warnings[0]).toContain("form");
   });
+
+  it("renders a columns row recursively, with nested gallery, form and image", () => {
+    const gallery: GalleryForHtml = {
+      id: "gal-nested",
+      name: "Nested",
+      showCaptions: false,
+      images: [
+        { url: "https://cdn.example.com/n.jpg", altText: "N", caption: null },
+      ],
+    };
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "columns",
+          attrs: { layout: "3" },
+          content: [
+            {
+              type: "column",
+              content: [
+                { type: "gallery", attrs: { galleryId: "gal-nested" } },
+              ],
+            },
+            {
+              type: "column",
+              content: [
+                { type: "form", attrs: { formId: "form-1" } },
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Book",
+                      marks: [
+                        {
+                          type: "link",
+                          attrs: { href: "/book", variant: "outline" },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "column",
+              content: [
+                {
+                  type: "image",
+                  attrs: { src: "https://cdn.example.com/col.jpg", alt: "C" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, galleryMap([gallery]));
+
+    expect(result.html).toContain(
+      '<div class="sp-columns sp-columns--3" data-type="columns" data-layout="3"><div class="sp-columns__grid wp-block-columns"><div class="sp-column wp-block-column" data-type="column"><figure class="wp-block-gallery">',
+    );
+    expect(
+      (result.html.match(/class="sp-column wp-block-column"/g) ?? []).length,
+    ).toBe(3);
+    expect(result.html).toContain(
+      "<em>[Form: interactive widget not exported]</em>",
+    );
+    expect(result.html).toContain('class="sp-button sp-button--outline"');
+    expect(result.html).toContain('src="https://cdn.example.com/col.jpg"');
+    expect(result.imageUrls).toEqual(
+      expect.arrayContaining([
+        "https://cdn.example.com/n.jpg",
+        "https://cdn.example.com/col.jpg",
+      ]),
+    );
+    expect(result.warnings).toEqual([
+      "Skipped form node (interactive widget has no WordPress equivalent)",
+    ]);
+    expect(result.html).not.toContain("xmlns");
+  });
+
+  it("coerces a bogus columns layout to the default", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "columns",
+          attrs: { layout: '"><script>alert(1)</script>' },
+          content: [
+            {
+              type: "column",
+              content: [
+                { type: "paragraph", content: [{ type: "text", text: "x" }] },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain('class="sp-columns sp-columns--2"');
+    expect(result.html).not.toContain("<script");
+  });
+
+  it("exports a details collapsible as native details/summary", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "details",
+          attrs: { open: true },
+          content: [
+            {
+              type: "detailsSummary",
+              content: [
+                { type: "text", text: "Hours", marks: [{ type: "bold" }] },
+              ],
+            },
+            {
+              type: "detailsContent",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: "Open daily" }],
+                },
+                { type: "embed", attrs: { src: "https://example.com/e" } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toBe(
+      '<details class="sp-details"><summary class="sp-details__summary"><strong>Hours</strong></summary><div class="sp-details__content" data-type="detailsContent"><p>Open daily</p><figure><iframe src="https://example.com/e" loading="lazy"></iframe></figure></div></details>',
+    );
+    expect(result.warnings).toEqual([]);
+  });
 });

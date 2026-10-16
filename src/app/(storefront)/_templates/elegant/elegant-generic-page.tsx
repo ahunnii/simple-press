@@ -3,11 +3,21 @@ import type { RouterOutputs } from "~/trpc/react";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import {
+  getPageWidth,
+  PROSE_WIDE_CENTERED_CLASS,
+} from "../_components/page-width";
+
 type Props = {
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
 
 export function ElegantGenericPage({ page }: Props) {
+  // Page width = Wide: the body uses elegant's 1360 inner-page container
+  // (cart/contact/product); text blocks stay centred at the 760 measure and
+  // the hero + divider stay as they are.
+  const wide = getPageWidth(page) === "wide";
+
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
       {/* ── Page hero ── */}
@@ -54,12 +64,22 @@ export function ElegantGenericPage({ page }: Props) {
 
       {/* ── Body ── */}
       <section style={{ padding: "48px 40px 80px" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div style={{ maxWidth: wide ? 1360 : 760, margin: "0 auto" }}>
           <TiptapRenderer
             content={page.content as TiptapJSON}
-            className="el-generic-body"
+            className={
+              wide
+                ? `el-generic-body ${PROSE_WIDE_CENTERED_CLASS} [--sp-prose-measure:760px]`
+                : "el-generic-body"
+            }
           />
-          <PlatformPolicyNotice slug={page.slug} />
+          {wide ? (
+            <div style={{ maxWidth: 760, margin: "0 auto" }}>
+              <PlatformPolicyNotice slug={page.slug} />
+            </div>
+          ) : (
+            <PlatformPolicyNotice slug={page.slug} />
+          )}
         </div>
       </section>
     </div>

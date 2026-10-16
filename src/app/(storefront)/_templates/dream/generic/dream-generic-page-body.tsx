@@ -9,6 +9,11 @@ import { cn } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import {
+  getPageWidth,
+  PROSE_WIDE_CENTERED_CLASS,
+  PROSE_WIDE_CLASS,
+} from "../../_components/page-width";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamSection } from "../shared/dream-section";
 import { DreamGenericCoverHero } from "./dream-generic-cover-hero";
@@ -159,7 +164,15 @@ export function DreamGenericPageBody({
   // under the (centered) page hero instead of hugging the left edge. With a
   // TOC the prose stays left-aligned in the main column beside it.
   const centered = !showToc;
-  const measure = centered ? "mx-auto w-full max-w-[var(--dream-measure)]" : undefined;
+  // Page width = Wide: the article takes the whole container (or the whole
+  // track beside the TOC) and only direct-child text blocks keep the dream
+  // measure (`.sp-prose-wide`) — centred without a TOC, left beside one.
+  // Galleries/videos then just use the full width (see `.dream-embed--wide`
+  // in globals.css), so no `--centered` breakout margin is wanted.
+  const wide = getPageWidth(page) === "wide";
+  const measure = centered
+    ? "mx-auto w-full max-w-[var(--dream-measure)]"
+    : undefined;
 
   const articleBody = (
     <div className="w-full">
@@ -175,11 +188,23 @@ export function DreamGenericPageBody({
           sits so gallery/video blocks can break out of it symmetrically. */}
       <div
         ref={contentRef}
-        className={cn("dream-embed", centered && "dream-embed--centered")}
+        className={cn(
+          "dream-embed",
+          wide ? "dream-embed--wide" : centered && "dream-embed--centered",
+        )}
       >
         <TiptapRenderer
           content={page.content as TiptapJSON}
-          className={cn(DREAM_PROSE_CLASSNAME, centered && "mx-auto")}
+          className={
+            wide
+              ? cn(
+                  DREAM_PROSE_CLASSNAME,
+                  "max-w-none",
+                  centered ? PROSE_WIDE_CENTERED_CLASS : PROSE_WIDE_CLASS,
+                  "[--sp-prose-measure:var(--dream-measure)]",
+                )
+              : cn(DREAM_PROSE_CLASSNAME, centered && "mx-auto")
+          }
         />
       </div>
 

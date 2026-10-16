@@ -179,6 +179,7 @@ export function DefaultGenericPage({ page }: { page: Page }) {
       </section>
 
       {/* ── Content ────────────────────────────────────────────────────── */}
+      {/* Always container-wide; Page width (Page.template) has no effect here. */}
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto w-full max-w-[1440px]">
           {showToc ? (

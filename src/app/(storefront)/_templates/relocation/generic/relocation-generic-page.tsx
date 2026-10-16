@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { getPageWidth, PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 
@@ -150,6 +151,11 @@ function RelocationToc({
 export function RelocationGenericPage({ page }: { page: Page }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const showToc = hasTocHeadings(page.content);
+  // Page width: the 85rem container is already the full content column in
+  // both modes. What differs is the desktop cap — Standard caps EVERY direct
+  // child at 46rem (rows and media included, see below); Wide swaps that for
+  // the shared text-only cap so rows/media/tables span the container.
+  const wide = getPageWidth(page) === "wide";
 
   const articleBody = (
     // `threshold={0}` (not the 0.08 default) on purpose: a CMS body can be
@@ -178,7 +184,13 @@ export function RelocationGenericPage({ page }: { page: Page }) {
           content={page.content as TiptapJSON}
           className={cn(
             "prose w-full max-w-none",
-            "min-[1025px]:[:where(&>:not(.sp-quote-breakout))]:max-w-[46rem]",
+            wide
+              ? cn(
+                  PROSE_WIDE_CLASS,
+                  // Same breakpoint as the Standard cap: uncapped below 1025px.
+                  "[--sp-prose-measure:none] min-[1025px]:[--sp-prose-measure:46rem]",
+                )
+              : "min-[1025px]:[:where(&>:not(.sp-quote-breakout))]:max-w-[46rem]",
             "prose-headings:[font-family:var(--font-relocation-display)] prose-headings:font-bold prose-headings:text-[var(--relocation-charcoal)]",
             "prose-h2:text-[1.75rem] prose-h2:mt-12 prose-h2:mb-4",
             "prose-h3:text-[1.25rem] prose-h3:mt-8 prose-h3:mb-3",

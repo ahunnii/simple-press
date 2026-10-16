@@ -1,15 +1,20 @@
 import { getSchema } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import { TableKit } from "@tiptap/extension-table";
-import TextAlign from "@tiptap/extension-text-align";
-import { TextStyle } from "@tiptap/extension-text-style";
-import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html/server";
-import StarterKit from "@tiptap/starter-kit";
 
+import {
+  coerceColumnLayout,
+  COLUMN_CLASS,
+  COLUMNS_GRID_CLASS,
+  columnsClassName,
+} from "~/lib/tiptap/columns-node";
+import {
+  DETAILS_CLASS,
+  DETAILS_CONTENT_CLASS,
+  DETAILS_CONTENT_DATA_TYPE,
+  DETAILS_SUMMARY_CLASS,
+} from "~/lib/tiptap/details-nodes";
+import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
-import { VideoNode } from "~/lib/tiptap/video-node";
 
 /**
  * Server-side TipTap document -> HTML serializer for the WordPress export.
@@ -54,36 +59,16 @@ interface TiptapDoc {
 }
 
 /**
- * Server-safe extension list. Mirrors `src/components/tiptap-renderer.tsx`
- * MINUS the Gallery/Embed extensions (handled manually here). `TableKit` is
- * imported directly from `@tiptap/extension-table` (server-safe) rather than
- * the client re-export.
- */
-const SERVER_EXTENSIONS = [
-  // StarterKit v3 bundles Link/Underline; disable them so the standalone
-  // configured extensions below don't register duplicates.
-  StarterKit.configure({ link: false, underline: false }),
-  Link.configure({
-    HTMLAttributes: {
-      rel: "noopener noreferrer nofollow",
-    },
-    protocols: ["http", "https", "mailto", "tel"],
-  }),
-  Image,
-  VideoNode,
-  Underline,
-  TextStyle,
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
-  TableKit,
-];
-
-/**
- * ProseMirror schema derived from `SERVER_EXTENSIONS` — the node/mark/attr
+ * ProseMirror schema derived from the storefront renderer's own node/mark
+ * half (`RENDERER_BASE_EXTENSIONS`, React-free by contract) — so the export
+ * can't drift from what the storefront renders — and the node/mark/attr
  * allowlist `sanitizeTiptapDoc` enforces before every `generateHTML` call.
+ * The Gallery/Embed/QuoteCalculator/Form extensions the renderer appends are
+ * absent: those nodes are handled by hand below. The `columns`/`column` and
+ * `details` containers are walked by hand too, with the same class helpers
+ * their `renderHTML` uses.
  */
-const SERVER_SCHEMA = getSchema(SERVER_EXTENSIONS);
+const SERVER_SCHEMA = getSchema(RENDERER_BASE_EXTENSIONS);
 
 function isContentNode(value: unknown): value is ContentNode {
   return value != null && typeof value === "object" && !Array.isArray(value);
@@ -229,9 +214,34 @@ export function tiptapToHtml(
     collectImages(node);
   }
 
-  const fragments: string[] = [];
+  /**
+   * Renders one node (and, for containers, its subtree) to HTML, or `null`
+   * when it is skipped. Recursive so the gallery/embed/quote/form handlers
+   * also apply to nodes nested inside a `columns` row or a `details`
+   * collapsible — sanitizing a whole row up front would drop those nodes,
+   * which `SERVER_SCHEMA` deliberately doesn't declare.
+   */
+  const renderNodeHtml = (node: ContentNode): string | null => {
+    if (node.type === "columns") {
+      const layout = coerceColumnLayout(node.attrs?.layout);
+      // `wp-block-columns` sits on the grid wrapper (the columns' direct
+      // parent), not the outer row, so WordPress's flex rules for
+      // `.wp-block-columns > .wp-block-column` still match after import.
+      return `<div class="${columnsClassName(layout)}" data-type="columns" data-layout="${layout}"><div class="${COLUMNS_GRID_CLASS} wp-block-columns">${renderChildren(node)}</div></div>`;
+    }
+    if (node.type === "column") {
+      return `<div class="${COLUMN_CLASS} wp-block-column" data-type="column">${renderChildren(node)}</div>`;
+    }
+    if (node.type === "details") {
+      return `<details class="${DETAILS_CLASS}">${renderChildren(node)}</details>`;
+    }
+    if (node.type === "detailsSummary") {
+      return `<summary class="${DETAILS_SUMMARY_CLASS}">${renderSummaryHtml(node)}</summary>`;
+    }
+    if (node.type === "detailsContent") {
+      return `<div class="${DETAILS_CONTENT_CLASS}" data-type="${DETAILS_CONTENT_DATA_TYPE}">${renderChildren(node)}</div>`;
+    }
 
-  for (const node of content.content) {
     if (isGalleryNode(node)) {
       const galleryId = node.attrs.galleryId
         ? String(node.attrs.galleryId)
@@ -243,30 +253,26 @@ export function tiptapToHtml(
             galleryId || "missing"
           })`,
         );
-        continue;
+        return null;
       }
       for (const img of gallery.images) {
         addUrl(img.url);
       }
-      fragments.push(renderGallery(gallery));
-      continue;
+      return renderGallery(gallery);
     }
 
     if (isEmbedNode(node)) {
       const src = node.attrs.src ? String(node.attrs.src) : "";
       if (src === "") {
         warnings.push("Skipped embed node: missing src");
-        continue;
+        return null;
       }
-      fragments.push(
-        renderEmbed({
-          src,
-          height: node.attrs.height,
-          title:
-            typeof node.attrs.title === "string" ? node.attrs.title : undefined,
-        }),
-      );
-      continue;
+      return renderEmbed({
+        src,
+        height: node.attrs.height,
+        title:
+          typeof node.attrs.title === "string" ? node.attrs.title : undefined,
+      });
     }
 
     if (isQuoteCalculatorNode(node)) {
@@ -277,18 +283,14 @@ export function tiptapToHtml(
       warnings.push(
         "Skipped quote calculator node (interactive widget has no WordPress equivalent)",
       );
-      fragments.push(
-        "<p><em>[Quote calculator: interactive widget not exported]</em></p>",
-      );
-      continue;
+      return "<p><em>[Quote calculator: interactive widget not exported]</em></p>";
     }
 
     if (isFormNode(node)) {
       warnings.push(
         "Skipped form node (interactive widget has no WordPress equivalent)",
       );
-      fragments.push("<p><em>[Form: interactive widget not exported]</em></p>");
-      continue;
+      return "<p><em>[Form: interactive widget not exported]</em></p>";
     }
 
     // Sanitize the JSON against this module's own schema BEFORE serializing.
@@ -296,8 +298,8 @@ export function tiptapToHtml(
     // guard here; this makes the node/mark/attr allowlist schema-derived, and
     // shares the exact rules the storefront renderer applies. It runs
     // per-node, after the gallery/embed/quote branches above, because those
-    // three nodes are handled by hand here and are deliberately absent from
-    // `SERVER_EXTENSIONS` — sanitizing the whole document up front would drop
+    // nodes are handled by hand here and are deliberately absent from
+    // `SERVER_SCHEMA` — sanitizing the whole document up front would drop
     // them before their handlers ever ran.
     const safeDoc = sanitizeTiptapDoc(
       { type: "doc", content: [node] },
@@ -305,14 +307,49 @@ export function tiptapToHtml(
     );
     if (!safeDoc?.content?.length) {
       warnings.push(`Skipped unknown node type: ${node.type ?? "unknown"}`);
-      continue;
+      return null;
     }
 
     try {
-      fragments.push(generateHTML(safeDoc, SERVER_EXTENSIONS));
+      return generateHTML(safeDoc, RENDERER_BASE_EXTENSIONS);
     } catch {
       warnings.push(`Skipped unknown node type: ${node.type ?? "unknown"}`);
+      return null;
     }
+  };
+
+  const renderChildren = (node: ContentNode): string => {
+    const parts: string[] = [];
+    for (const child of node.content ?? []) {
+      if (!isContentNode(child)) continue;
+      const html = renderNodeHtml(child);
+      if (html !== null) parts.push(html);
+    }
+    return parts.join("");
+  };
+
+  /**
+   * Inline HTML for a `detailsSummary` (inline content): sanitized and
+   * serialized as a paragraph so marks/links render normally, then unwrapped.
+   */
+  const renderSummaryHtml = (node: ContentNode): string => {
+    const safeDoc = sanitizeTiptapDoc(
+      { type: "doc", content: [{ type: "paragraph", content: node.content }] },
+      SERVER_SCHEMA,
+    );
+    if (!safeDoc?.content?.length) return "";
+    try {
+      const html = generateHTML(safeDoc, RENDERER_BASE_EXTENSIONS).trim();
+      return /^<p(?:\s[^>]*)?>([\s\S]*)<\/p>$/.exec(html)?.[1] ?? "";
+    } catch {
+      return "";
+    }
+  };
+
+  const fragments: string[] = [];
+  for (const node of content.content) {
+    const html = renderNodeHtml(node);
+    if (html !== null) fragments.push(html);
   }
 
   return {

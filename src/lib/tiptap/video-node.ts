@@ -7,9 +7,9 @@ import { mergeAttributes, Node } from "@tiptap/core";
  * This module must stay free of React, tRPC and `server-only` — it is
  * imported by both halves of the render pipeline:
  *  - `RENDERER_BASE_EXTENSIONS` (`~/lib/tiptap/renderer-extensions`), the
- *    storefront's client/server-shared schema source;
- *  - `SERVER_EXTENSIONS` (`~/lib/wordpress/tiptap-to-html`), the WordPress
- *    export's server-only serializer.
+ *    storefront's client/server-shared schema source, which the WordPress
+ *    export's server-only serializer (`~/lib/wordpress/tiptap-to-html`)
+ *    renders with too.
  *
  * The editor-side extension (`VideoNode.extend(...)` under
  * `~/components/ui/minimal-tiptap/extensions/video`) adds the upload

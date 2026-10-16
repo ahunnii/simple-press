@@ -40,9 +40,11 @@
  * - Walks `content` arrays recursively, so placeholders nested in
  *   blockquotes / table cells are removed too.
  * - A non-`doc` container whose content becomes empty because of the removal
- *   gets a single empty paragraph, since container nodes like `blockquote`
- *   and `tableCell` require `block+` content. An emptied paragraph/heading
- *   (an inline image) just loses its `content` key. A `doc` may end up as
+ *   gets a single empty paragraph, since container nodes like `blockquote`,
+ *   `tableCell`, `column` and `detailsContent` require `block+` content. An
+ *   emptied inline-content node (paragraph/heading/codeBlock, or a
+ *   collapsible's `detailsSummary`) just loses its `content` key — it may be
+ *   empty but can never hold a paragraph. A `doc` may end up as
  *   `{ type: "doc", content: [] }`, the app's canonical empty doc.
  */
 
@@ -93,8 +95,18 @@ function isStrippableNode(node: unknown): boolean {
   return isEmptyPlaceholderNode(node) || isUnfinishedUploadNode(node);
 }
 
-/** Inline-content containers: emptied, they stay valid with no content. */
-const TEXTBLOCK_TYPES = new Set(["paragraph", "heading"]);
+/**
+ * Inline-content containers: emptied, they stay valid with no content, and
+ * refilling them with a paragraph would make them invalid. `detailsSummary`
+ * (`text*`) is the collapsible's title line; `codeBlock` is listed for
+ * completeness.
+ */
+const TEXTBLOCK_TYPES = new Set([
+  "paragraph",
+  "heading",
+  "codeBlock",
+  "detailsSummary",
+]);
 
 function stripNode<T>(node: T): T {
   if (!isObject(node) || !Array.isArray(node.content)) return node;
@@ -114,7 +126,7 @@ function stripNode<T>(node: T): T {
   if (!changed) return node;
 
   if (next.length === 0 && TEXTBLOCK_TYPES.has(node.type as string)) {
-    // A paragraph/heading may be empty but can't hold a block — drop the key.
+    // A paragraph/heading/summary may be empty but can't hold a block — drop the key.
     const rest: JsonNode = { ...node };
     delete rest.content;
     return rest as T;

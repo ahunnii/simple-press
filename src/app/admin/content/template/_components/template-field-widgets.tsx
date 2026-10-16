@@ -371,6 +371,7 @@ export function FieldInput({
           editorClassName="focus:outline-hidden"
           editable
           galleriesEnabled={galleriesEnabled}
+          layoutBlocksEnabled={true}
           embedsEnabled={embedsEnabled}
           quotesEnabled={quotesEnabled}
           formsEnabled={formsEnabled}

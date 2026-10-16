@@ -1309,6 +1309,15 @@
   width: 100%;
 }
 
+/* "Wide" page width (GenericPage, 2026-10-15): the renderer spans the 1200
+   container, so lift the root's 68ch cap; `.sp-prose-wide` re-caps running
+   text at the same 68ch (resolved once on this root — the measure is a
+   registered length, so headings share the body's px width). */
+.animated-bamboo .bamboo-prose.bamboo-prose--wide {
+  --sp-prose-measure: 68ch;
+  max-width: none;
+}
+
 /* ── Contact form ── */
 .animated-bamboo .bamboo-contact-form label {
   display: block;
@@ -5010,6 +5019,403 @@ body:has(.pollen) {
   .maplibregl-popup-tip {
     @apply hidden!;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Rich-text layout blocks — rows (columns), collapsible sections, button links
+   ═══════════════════════════════════════════════════════════════════════════
+   Shared, template-agnostic styling for the markup the Tiptap schema emits
+   (`src/lib/tiptap/columns-node.ts`, `details-nodes.ts`, `link-extension.ts`;
+   rendered by `TiptapRenderer`). Loaded on the storefront AND in the admin
+   editor, so every rule targets a class that only that markup carries.
+
+   Unlayered on purpose: it must beat Tailwind Typography (`.prose :where(a)`)
+   and the `prose-*:` / `[&_a]:` utilities that every template's prose class
+   carries (all in cascade layers). Template-scoped unlayered link rules such
+   as `.wealth .wealth-prose a` (0,2,1) are beaten by specificity — see the
+   button selectors below.
+
+   Variables a template may set in its own scope:
+     --sp-columns-gap          row/column gap of a columns row   (1.5rem 2rem)
+     --sp-button-bg            solid button fill                 (var(--primary))
+     --sp-button-fg            solid button label                (var(--primary-foreground))
+     --sp-button-bg-hover      solid button fill on hover        (bg darkened 12%)
+     --sp-button-outline-fg    outline button label + border     (currentColor)
+     --sp-button-radius        button corner radius              (var(--radius, .5rem))
+   Per-template mappings live at the end of this block.
+
+   Editor-only chrome (dashed column outlines, the details toggle button, the
+   columns bubble menu) lives in `components/ui/minimal-tiptap/styles/`.      */
+
+/* ── Columns (rows) ───────────────────────────────────────────────────────
+   `.sp-columns` is the query container; its child `.sp-columns__grid` is the
+   grid. A row collapses on its OWN width, so a narrow measure (dream, umsc),
+   a sidebar layout or the visual editor's side panel stacks it without any
+   per-template breakout CSS. Without container-query support it just stacks.
+   Typography/templates put no margin on a bare <div>, so this margin is the
+   only one the row has; the :first/last-child rules keep a row that opens or
+   closes a body from adding a gap on top of the normal block rhythm.        */
+.sp-columns {
+  container-type: inline-size;
+  container-name: sp-columns;
+  margin-block: 1.5em;
+}
+.sp-columns:first-child {
+  margin-top: 0;
+}
+.sp-columns:last-child {
+  margin-bottom: 0;
+}
+
+.sp-columns__grid {
+  display: grid;
+  gap: var(--sp-columns-gap, 1.5rem 2rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container sp-columns (min-width: 28rem) {
+  .sp-columns--4 > .sp-columns__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container sp-columns (min-width: 32rem) {
+  .sp-columns--2 > .sp-columns__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sp-columns--1-2 > .sp-columns__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+  .sp-columns--2-1 > .sp-columns__grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+@container sp-columns (min-width: 36rem) {
+  .sp-columns--3 > .sp-columns__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container sp-columns (min-width: 48rem) {
+  .sp-columns--4 > .sp-columns__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Per-page "Wide" width (Page.template = "full-width") ─────────────────
+   Templates widen the body to their standard container and add
+   `.sp-prose-wide` to the TiptapRenderer root. Running text keeps a reading
+   measure (`--sp-prose-measure`, default 70ch; a template sets its own) while
+   rows, media, tables, forms and galleries span the container.
+   TiptapRenderer emits each plain block (p, h1-h6, lists, quote, pre, hr,
+   table, image) inside a CLASS-LESS leaf wrapper <div>; <details>, rows,
+   forms, galleries, quotes, embeds and videos are direct children and carry
+   classes. So we target the class-less wrapper's children (`div:not([class])`)
+   plus <details> itself, and text inside a column row or a details body
+   (deeper than that) is never capped. The bare `> :is(...)` arm covers markup
+   that is not wrapped (the admin editor). Add `--centered` for centred-hero
+   templates so the capped text stays centred.
+   Registered as a length so a `ch` measure resolves once, against the
+   element that declares it, and is inherited as px — otherwise every
+   heading would re-resolve `66ch` in its own larger font and run wider than
+   the body text.                                                           */
+@property --sp-prose-measure {
+  syntax: "<length> | none";
+  inherits: true;
+  initial-value: 720px;
+}
+.sp-prose-wide > details,
+.sp-prose-wide > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr),
+.sp-prose-wide
+  > div:not([class])
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr) {
+  max-width: var(--sp-prose-measure, 70ch);
+}
+.sp-prose-wide--centered > details,
+.sp-prose-wide--centered
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr),
+.sp-prose-wide--centered
+  > div:not([class])
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr) {
+  margin-inline: auto;
+}
+/* Forms carry their own 65ch cap (`max-w-prose` in form-block.tsx); in Wide
+   they span the container like the other blocks (or their column, in a row). */
+.sp-prose-wide .sp-form-block {
+  max-width: none;
+}
+/* …but text controls (and help text) keep the reading measure, so a
+   name/email or message box doesn't stretch 1200px. Choice groups and the
+   picture-choice grid still use the full width. */
+.sp-prose-wide .sp-form-block :is([data-slot="input"], [data-slot="textarea"], select),
+.sp-prose-wide .sp-form-block p[id$="-description"] {
+  max-width: var(--sp-prose-measure, 70ch);
+}
+
+/* min-width:0 lets a column shrink below its content (long words, tables). */
+.sp-column {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+/* Trim the column's top/bottom margins, through the storefront's bare leaf
+   wrapper <div> (first level) and the leaf itself (second level). In the
+   editor the leaves are direct children, so the first level hits them. */
+.sp-column > :first-child,
+.sp-column > :first-child > :first-child {
+  margin-top: 0;
+}
+.sp-column > :last-child,
+.sp-column > :last-child > :last-child {
+  margin-bottom: 0;
+}
+.sp-column img,
+.sp-column video {
+  max-width: 100%;
+  height: auto;
+}
+.sp-column iframe {
+  max-width: 100%;
+}
+/* Tables keep their prose styling (no display change); long cell text wraps
+   instead of pushing the column wider than its track. */
+.sp-column table {
+  max-width: 100%;
+}
+.sp-column :is(th, td) {
+  overflow-wrap: anywhere;
+}
+
+/* ── Collapsible sections ─────────────────────────────────────────────────
+   Native <details>/<summary>: works without JS. Only `details.sp-details` is
+   styled here — the editor's node view is a div, not a <details>. Colors are
+   all `currentColor`, so the section takes whatever the template's prose
+   sets. Consecutive sections (each in its own leaf wrapper on the storefront)
+   share one hairline and sit flush, like an accordion.                      */
+details.sp-details {
+  margin-block: 1em;
+  border-block: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+details.sp-details:first-child {
+  margin-top: 0;
+}
+details.sp-details:last-child {
+  margin-bottom: 0;
+}
+details.sp-details + details.sp-details,
+div:has(> details.sp-details) + div > details.sp-details {
+  margin-top: 0;
+  border-top-width: 0;
+}
+details.sp-details:has(+ details.sp-details),
+div:has(> details.sp-details):has(+ div > details.sp-details)
+  > details.sp-details {
+  margin-bottom: 0;
+}
+
+details.sp-details > summary.sp-details__summary {
+  position: relative;
+  display: block;
+  padding-block: 0.75em;
+  padding-inline-end: 1.75em;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+details.sp-details > summary.sp-details__summary::-webkit-details-marker {
+  display: none;
+}
+details.sp-details > summary.sp-details__summary::marker {
+  content: "";
+}
+/* Chevron: a rotated corner of a box, drawn in currentColor. */
+details.sp-details > summary.sp-details__summary::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0.35em;
+  top: 50%;
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.7;
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+details.sp-details[open] > summary.sp-details__summary::after {
+  transform: translateY(-30%) rotate(225deg);
+}
+details.sp-details > summary.sp-details__summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+/* The summary text is a <p>-less inline run, but a template rule may still
+   give nested elements a margin. */
+details.sp-details > summary.sp-details__summary > * {
+  margin: 0;
+}
+
+.sp-details__content {
+  padding-bottom: 0.75em;
+}
+.sp-details__content > :first-child,
+.sp-details__content > :first-child > :first-child {
+  margin-top: 0;
+}
+.sp-details__content > :last-child,
+.sp-details__content > :last-child > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  details.sp-details > summary.sp-details__summary::after {
+    transition: none;
+  }
+}
+
+/* ── Button links ─────────────────────────────────────────────────────────
+   `<a class="sp-button sp-button--solid|--outline">`. Beats, in order:
+   Typography's `.prose :where(a)`, the template `prose-a:*` / `[&_a]:*`
+   utilities (layered), and template-scoped unlayered link rules, which are
+   0,2,1 at rest (`.wealth .wealth-prose a`, `.olive .olive-prose a`,
+   `.vii .vii-prose a`, `.pink .pink-prose a`, `.animated-bamboo
+   .bamboo-prose a`, `.elegant .el-*-body a`) and 0,3,1 on :hover. Hence
+   `:root a.sp-button.sp-button` = 0,3,1 at rest and every :hover/:focus-visible
+   rule below = 0,4,1 — and each state sets color, background, border and
+   text-decoration itself so no template state leaks through. `background-image:
+   none` kills dream's gradient underline and the full `border` kills wealth's
+   border-bottom underline.                                                  */
+:root a.sp-button.sp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  box-sizing: border-box;
+  padding: 0.7em 1.4em;
+  border: 1px solid transparent;
+  border-radius: var(--sp-button-radius, var(--radius, 0.5rem));
+  background-image: none;
+  background-size: auto;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+:root a.sp-button.sp-button:hover {
+  text-decoration: none;
+}
+
+/* Solid: the template's primary fill. */
+:root a.sp-button.sp-button--solid {
+  border-color: transparent;
+  background-color: var(--sp-button-bg, var(--primary));
+  color: var(--sp-button-fg, var(--primary-foreground));
+}
+:root a.sp-button.sp-button--solid:hover {
+  border-color: transparent;
+  background-color: var(
+    --sp-button-bg-hover,
+    color-mix(in srgb, var(--sp-button-bg, var(--primary)) 88%, black)
+  );
+  color: var(--sp-button-fg, var(--primary-foreground));
+  /* A halo, so a near-black fill (which darkening cannot change) still reacts. */
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--sp-button-bg, var(--primary)) 25%, transparent);
+}
+
+/* Outline: transparent, label and 1px border in the surrounding text color. */
+:root a.sp-button.sp-button--outline {
+  border-color: currentColor;
+  background-color: transparent;
+  color: var(--sp-button-outline-fg, currentColor);
+}
+:root a.sp-button.sp-button--outline:hover {
+  border-color: currentColor;
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+  color: var(--sp-button-outline-fg, currentColor);
+}
+
+/* Focus ring sits outside the button, in the fill color on a solid button
+   (its label color would vanish against the page) and in the label color on
+   an outline one. */
+:root a.sp-button.sp-button--solid:focus-visible {
+  outline: 2px solid var(--sp-button-bg, var(--primary));
+  outline-offset: 2px;
+}
+:root a.sp-button.sp-button--outline:focus-visible {
+  outline: 2px solid var(--sp-button-outline-fg, currentColor);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root a.sp-button.sp-button {
+    transition: none;
+  }
+}
+
+/* ── Per-template button colors ───────────────────────────────────────────
+   Templates that don't re-map `--primary` / `--primary-foreground` globally
+   (their brand color lives in its own variable) would otherwise get the
+   neutral near-black `:root` button. Fills below are the template's primary
+   button fill and meet AA with the label (contrast in the comment). Default,
+   noise, sledge, pollen, elegant, dark-trend, happy-bamboo, builders and
+   glove already remap `--primary*` on their root, so they need nothing but
+   an optional hover. Add `--sp-button-outline-fg` only where the prose text
+   color is not the right outline color.                                     */
+.dream {
+  /* ink on paper 15.1:1; hover rose-on-paper 4.7:1 */
+  --sp-button-bg: var(--dream-ink);
+  --sp-button-fg: var(--dream-paper);
+  --sp-button-bg-hover: var(--dream-rose);
+}
+.umsc {
+  /* black on paper ~19.6:1; hover purple-on-paper 14.0:1 */
+  --sp-button-bg: var(--umsc-black);
+  --sp-button-fg: var(--umsc-paper);
+  --sp-button-bg-hover: var(--umsc-purple);
+}
+.wealth {
+  /* white on primary 6.2:1; hover forest 11.1:1 */
+  --sp-button-bg: var(--wealth-primary);
+  --sp-button-fg: var(--wealth-paper);
+  --sp-button-bg-hover: var(--wealth-forest);
+}
+.glove {
+  /* white on primary 11.0:1; hover 13.4:1 */
+  --sp-button-bg: var(--glove-primary);
+  --sp-button-fg: var(--glove-on-primary);
+  --sp-button-bg-hover: var(--glove-primary-hover);
+}
+.pink {
+  /* white on rose 4.95:1; hover ink-on-white ~19:1 */
+  --sp-button-bg: var(--pink-rose);
+  --sp-button-fg: var(--pink-on-accent);
+  --sp-button-bg-hover: var(--pink-ink);
+}
+.olive {
+  /* white on sage 5.75:1; hover leaf 7.9:1 */
+  --sp-button-bg: var(--olive-sage);
+  --sp-button-fg: var(--olive-white);
+  --sp-button-bg-hover: var(--olive-leaf);
+}
+.vii {
+  /* paper on navy 12.1:1; hover copper-deep 4.96:1 */
+  --sp-button-bg: var(--vii-navy);
+  --sp-button-fg: var(--vii-paper);
+  --sp-button-bg-hover: var(--vii-copper-deep);
+}
+.bamboo {
+  --sp-button-bg: var(--bam-forest);
+  --sp-button-fg: var(--bam-cream);
+}
+.animated-bamboo {
+  /* cream on pine 7.7:1; hover terracotta-deep-on-cream 5.3:1 */
+  --sp-button-bg: var(--bamboo-pine);
+  --sp-button-fg: var(--bamboo-cream);
+  --sp-button-bg-hover: var(--bamboo-terracotta-deep);
 }
 
 /* Unlayered so it overrides Tailwind's built-in .container max-widths
@@ -11279,6 +11685,35 @@ body:has(.pollen) {
   margin-top: 17px;
 }
 
+/* wealth — left-aligned prose column + "Wide" page width (2026-10-15).
+   GenericPage and blog-post bodies sit on the 1200 container's LEFT edge
+   (the no-photo hero title's edge) in a 680px column, not a centred one.
+   The list band (a blockquote holding a list) used to widen -170px on BOTH
+   sides, which assumed a centred column; here it only grows rightwards, at
+   most +340px and never past the container's right edge. Wide pages render
+   the prose across the whole container with `.sp-prose-wide` (text capped
+   at --sp-prose-measure); their list bands get the same 680 + 340px. */
+.wealth .wealth-generic-prose-section,
+.wealth .wealth-blog-body {
+  --sp-prose-measure: 680px;
+}
+.wealth .wealth-prose-col {
+  max-width: var(--sp-prose-measure, 680px);
+}
+@media (min-width: 1000px) {
+  .wealth .wealth-prose-col .wealth-prose blockquote:has(ul, ol) {
+    margin-inline: 0
+      max(
+        -340px,
+        calc(var(--sp-prose-measure, 680px) + var(--wealth-pad-x) * 2 - 100vw)
+      );
+  }
+  .wealth .wealth-prose.sp-prose-wide > div > blockquote:has(ul, ol) {
+    max-width: calc(var(--sp-prose-measure, 680px) + 340px);
+    margin-inline: 0;
+  }
+}
+
 /* wealth impact v2 A (devices, shared report tokens, same-tone rule, nav steps) — BEGIN (agent-owned region; 2026-10-12) */
 /* Report-only devices for the Impact Report v2 (design.md "Impact Report —
    v2"), ported from checkpoint/impact-v2/impact-v2.css (.wr-ir-* →
@@ -14229,6 +14664,28 @@ body:has(.pollen) {
 }
 .wealth .wealth-blog-post-hero .wealth-hero__rule {
   margin-top: 14px;
+}
+/* With a cover photo the panel sits flush left (photo on the right), so its
+   own padding would put the title off the page grid. Pad it to the 1200
+   container's content edge instead, so title and body share one left edge.
+   The hero is the size container, so 100cqw excludes a classic scrollbar.
+   On very wide screens the min() keeps ≥320px of title column in the 40%
+   panel (40cqw − 76px right padding − 320px); exact up to ~2040px. */
+@media (min-width: 900px) {
+  .wealth .wealth-blog-post-hero.wealth-hero--reverse:not(.wealth-hero--noimage) {
+    container-type: inline-size;
+  }
+  .wealth
+    .wealth-blog-post-hero.wealth-hero--reverse:not(.wealth-hero--noimage)
+    > .wealth-hero__panel {
+    padding-left: max(
+      var(--wealth-pad-x),
+      min(
+        calc((100cqw - var(--wealth-container)) / 2),
+        calc(40cqw - 76px - 320px)
+      )
+    );
+  }
 }
 /* "« All news": the arrow link mirrored (chevrons lead instead of trail) */
 .wealth .wealth-blog-back::after {
@@ -19880,6 +20337,15 @@ body:has(.pollen) {
 .dream .dream-embed--centered .prose > .not-prose:has(.gallery-container),
 .dream .dream-embed--centered .prose > figure.not-prose {
   margin-left: calc(50% - min(1040px, 100cqw) / 2);
+}
+
+/* Page width = Wide: the article is already the full container (or the full
+   track beside the TOC), so galleries/videos span it instead of the 1040px
+   breakout — no centring margin needed. Same specificity as the rule above,
+   later in source. */
+.dream .dream-embed--wide .prose > .not-prose:has(.gallery-container),
+.dream .dream-embed--wide .prose > figure.not-prose {
+  width: 100%;
 }
 
 .dream-embed [data-slot="card"] {

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { getSchema } from "@tiptap/core";
 import { generateHTML } from "@tiptap/html";
@@ -12,6 +13,18 @@ import {
   coerceQuoteLayout,
   coerceQuoteWidth,
 } from "~/lib/quote/quote-display";
+import {
+  coerceColumnLayout,
+  COLUMN_CLASS,
+  COLUMNS_GRID_CLASS,
+  columnsClassName,
+} from "~/lib/tiptap/columns-node";
+import {
+  DETAILS_CLASS,
+  DETAILS_CONTENT_CLASS,
+  DETAILS_CONTENT_DATA_TYPE,
+  DETAILS_SUMMARY_CLASS,
+} from "~/lib/tiptap/details-nodes";
 import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
@@ -230,6 +243,262 @@ function isVideoNode(node: ContentNode): node is ContentNode & {
   return node.type === "video" && node.attrs != null && "src" in node.attrs;
 }
 
+/** What `renderBlock` needs from the renderer's props/hooks. */
+type RenderContext = {
+  embedsEnabled: boolean;
+};
+
+/**
+ * `generateHTML` for a single block, wrapped the way every leaf has always
+ * been: one `<div>` per node. Template CSS targets that wrapper (e.g. wealth
+ * `.wealth-prose > div:has(> h2)`), so top-level output must not change.
+ */
+function renderLeafHtml(node: ContentNode, key: string): ReactNode {
+  try {
+    const html = sanitizeGeneratedHtml(
+      generateHTML(
+        {
+          type: "doc",
+          content: [node] as Parameters<typeof generateHTML>[0]["content"],
+        },
+        extensions,
+      ),
+    );
+    return <div key={key} dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Inline HTML for a `detailsSummary` (whose content is inline, not blocks):
+ * rendered as a paragraph so marks/links serialize normally, then unwrapped.
+ * The server build of `generateHTML` stamps an `xmlns` on the `<p>`, so the
+ * opening tag may carry attributes.
+ */
+function renderSummaryHtml(node: ContentNode): string {
+  try {
+    const html = generateHTML(
+      {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: node.content ?? [] },
+        ] as Parameters<typeof generateHTML>[0]["content"],
+      },
+      extensions,
+    );
+    const inner =
+      /^<p(?:\s[^>]*)?>([\s\S]*)<\/p>$/.exec(html.trim())?.[1] ?? "";
+    return sanitizeGeneratedHtml(inner);
+  } catch {
+    return "";
+  }
+}
+
+/** `renderBlock` over a container's children; keys extend the parent's path. */
+function renderChildren(
+  node: ContentNode,
+  key: string,
+  ctx: RenderContext,
+): ReactNode[] {
+  return (node.content ?? []).map((child, index) =>
+    renderBlock(child, `${key}.${index}`, ctx),
+  );
+}
+
+/**
+ * Renders one block node. Container nodes (`columns`/`column` and the
+ * `details` trio) build React shells with the exact classes/data attrs their
+ * `renderHTML` produces (`~/lib/tiptap/columns-node`,
+ * `~/lib/tiptap/details-nodes`) and recurse, so a gallery/form/embed nested
+ * inside a column or collapsible is dispatched to its live component instead
+ * of being serialized as an empty div. Every other node is a leaf, rendered
+ * exactly as it was when only the top level was dispatched.
+ *
+ * `key` is the node's index path from the doc root (`"3"` at the top level,
+ * `"3.1.0"` nested), so keys are unique across nesting and stable between
+ * renders of the same doc.
+ */
+function renderBlock(
+  node: ContentNode,
+  key: string,
+  ctx: RenderContext,
+): ReactNode {
+  if (node.type === "columns") {
+    const layout = coerceColumnLayout(node.attrs?.layout);
+    return (
+      <div
+        key={key}
+        className={columnsClassName(layout)}
+        data-type="columns"
+        data-layout={layout}
+      >
+        <div className={COLUMNS_GRID_CLASS}>
+          {renderChildren(node, key, ctx)}
+        </div>
+      </div>
+    );
+  }
+  if (node.type === "column") {
+    return (
+      <div key={key} className={COLUMN_CLASS} data-type="column">
+        {renderChildren(node, key, ctx)}
+      </div>
+    );
+  }
+  if (node.type === "details") {
+    return (
+      <details key={key} className={DETAILS_CLASS}>
+        {renderChildren(node, key, ctx)}
+      </details>
+    );
+  }
+  if (node.type === "detailsSummary") {
+    return (
+      <summary
+        key={key}
+        className={DETAILS_SUMMARY_CLASS}
+        dangerouslySetInnerHTML={{ __html: renderSummaryHtml(node) }}
+      />
+    );
+  }
+  if (node.type === "detailsContent") {
+    return (
+      <div
+        key={key}
+        className={DETAILS_CONTENT_CLASS}
+        data-type={DETAILS_CONTENT_DATA_TYPE}
+      >
+        {renderChildren(node, key, ctx)}
+      </div>
+    );
+  }
+
+  if (isGalleryNode(node) && node.attrs.galleryId) {
+    return (
+      <GalleryBlock
+        key={`gallery-${node.attrs.galleryId}-${key}`}
+        galleryId={String(node.attrs.galleryId)}
+      />
+    );
+  }
+  // A placeholder saved before anything was chosen has nothing to render;
+  // skip it instead of emitting an empty wrapper div.
+  if (isQuoteCalculatorNode(node) && !node.attrs.calculatorId) return null;
+  if (isFormNode(node) && !node.attrs.formId) return null;
+  if (isQuoteCalculatorNode(node) && node.attrs.calculatorId) {
+    return (
+      <QuoteCalculatorBlock
+        key={`quote-${node.attrs.calculatorId}-${key}`}
+        calculatorId={String(node.attrs.calculatorId)}
+        width={coerceQuoteWidth(node.attrs.width)}
+        height={coerceQuoteHeight(node.attrs.height)}
+        density={coerceQuoteDensity(node.attrs.density)}
+        layout={coerceQuoteLayout(node.attrs.layout)}
+      />
+    );
+  }
+  if (isFormNode(node) && node.attrs.formId) {
+    return (
+      <FormBlock
+        key={`form-${node.attrs.formId}-${key}`}
+        formId={String(node.attrs.formId)}
+      />
+    );
+  }
+  if (isEmbedNode(node) && node.attrs.src) {
+    const src = String(node.attrs.src);
+    const height = node.attrs.height ? Number(node.attrs.height) : undefined;
+    const title = typeof node.attrs.title === "string" ? node.attrs.title : "";
+    const aspectRatio =
+      typeof node.attrs.aspectRatio === "string"
+        ? node.attrs.aspectRatio
+        : undefined;
+    const maxWidth =
+      typeof node.attrs.maxWidth === "string" ? node.attrs.maxWidth : undefined;
+    const displayMode =
+      typeof node.attrs.displayMode === "string"
+        ? node.attrs.displayMode
+        : undefined;
+    const triggerLabel =
+      typeof node.attrs.triggerLabel === "string"
+        ? node.attrs.triggerLabel
+        : undefined;
+
+    // Embeds feature disabled — fall back to a plain external link (same
+    // behaviour as ServiceBookingDialog) instead of rendering the iframe.
+    if (!ctx.embedsEnabled) {
+      const linkLabel =
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so blank/whitespace labels also fall back
+        triggerLabel?.trim() || title.trim() || "View content";
+      // The iframe path runs `src` through `sanitizeEmbedSrc`; this
+      // fallback used to put the raw stored value straight into an
+      // `href`, which is the one place an embed's src is rendered as a
+      // navigable link. A src the embed rules refuse still shows its
+      // label, just not as something clickable.
+      const linkHref = sanitizeEmbedSrc(src);
+      if (!linkHref) {
+        return (
+          <span
+            key={`embed-${key}`}
+            className="border-input bg-muted text-muted-foreground my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium"
+          >
+            {linkLabel}
+          </span>
+        );
+      }
+      return (
+        <a
+          key={`embed-${key}`}
+          href={linkHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium shadow-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          {linkLabel}
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="sr-only">(opens in new tab)</span>
+        </a>
+      );
+    }
+
+    if (displayMode === "dialog") {
+      return (
+        <EmbedDialog
+          key={`embed-${key}`}
+          src={src}
+          title={title}
+          aspectRatio={aspectRatio}
+          height={height}
+          triggerLabel={triggerLabel}
+        />
+      );
+    }
+
+    return (
+      <EmbedFrame
+        key={`embed-${key}`}
+        src={src}
+        height={height}
+        title={title}
+        aspectRatio={aspectRatio}
+        maxWidth={maxWidth}
+      />
+    );
+  }
+  if (isVideoNode(node) && node.attrs.src) {
+    return (
+      <RichTextVideo
+        key={`video-${key}`}
+        src={node.attrs.src}
+        title={node.attrs.title}
+        ambient={node.attrs.ambient}
+      />
+    );
+  }
+  return renderLeafHtml(node, key);
+}
+
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
   const { isEnabled } = useStorefrontFlags();
   const embedsEnabled = isEnabled("embeds");
@@ -244,150 +513,10 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
       return [];
     }
 
-    const nodes = sanitized.content;
-    return nodes.map((node, index) => {
-      if (isGalleryNode(node) && node.attrs.galleryId) {
-        return (
-          <GalleryBlock
-            key={`gallery-${node.attrs.galleryId}-${index}`}
-            galleryId={String(node.attrs.galleryId)}
-          />
-        );
-      }
-      // A placeholder saved before anything was chosen has nothing to render;
-      // skip it instead of emitting an empty wrapper div.
-      if (isQuoteCalculatorNode(node) && !node.attrs.calculatorId) return null;
-      if (isFormNode(node) && !node.attrs.formId) return null;
-      if (isQuoteCalculatorNode(node) && node.attrs.calculatorId) {
-        return (
-          <QuoteCalculatorBlock
-            key={`quote-${node.attrs.calculatorId}-${index}`}
-            calculatorId={String(node.attrs.calculatorId)}
-            width={coerceQuoteWidth(node.attrs.width)}
-            height={coerceQuoteHeight(node.attrs.height)}
-            density={coerceQuoteDensity(node.attrs.density)}
-            layout={coerceQuoteLayout(node.attrs.layout)}
-          />
-        );
-      }
-      if (isFormNode(node) && node.attrs.formId) {
-        return (
-          <FormBlock
-            key={`form-${node.attrs.formId}-${index}`}
-            formId={String(node.attrs.formId)}
-          />
-        );
-      }
-      if (isEmbedNode(node) && node.attrs.src) {
-        const src = String(node.attrs.src);
-        const height = node.attrs.height
-          ? Number(node.attrs.height)
-          : undefined;
-        const title =
-          typeof node.attrs.title === "string" ? node.attrs.title : "";
-        const aspectRatio =
-          typeof node.attrs.aspectRatio === "string"
-            ? node.attrs.aspectRatio
-            : undefined;
-        const maxWidth =
-          typeof node.attrs.maxWidth === "string"
-            ? node.attrs.maxWidth
-            : undefined;
-        const displayMode =
-          typeof node.attrs.displayMode === "string"
-            ? node.attrs.displayMode
-            : undefined;
-        const triggerLabel =
-          typeof node.attrs.triggerLabel === "string"
-            ? node.attrs.triggerLabel
-            : undefined;
-
-        // Embeds feature disabled — fall back to a plain external link (same
-        // behaviour as ServiceBookingDialog) instead of rendering the iframe.
-        if (!embedsEnabled) {
-          const linkLabel =
-            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so blank/whitespace labels also fall back
-            triggerLabel?.trim() || title.trim() || "View content";
-          // The iframe path runs `src` through `sanitizeEmbedSrc`; this
-          // fallback used to put the raw stored value straight into an
-          // `href`, which is the one place an embed's src is rendered as a
-          // navigable link. A src the embed rules refuse still shows its
-          // label, just not as something clickable.
-          const linkHref = sanitizeEmbedSrc(src);
-          if (!linkHref) {
-            return (
-              <span
-                key={`embed-${index}`}
-                className="border-input bg-muted text-muted-foreground my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium"
-              >
-                {linkLabel}
-              </span>
-            );
-          }
-          return (
-            <a
-              key={`embed-${index}`}
-              href={linkHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium shadow-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {linkLabel}
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="sr-only">(opens in new tab)</span>
-            </a>
-          );
-        }
-
-        if (displayMode === "dialog") {
-          return (
-            <EmbedDialog
-              key={`embed-${index}`}
-              src={src}
-              title={title}
-              aspectRatio={aspectRatio}
-              height={height}
-              triggerLabel={triggerLabel}
-            />
-          );
-        }
-
-        return (
-          <EmbedFrame
-            key={`embed-${index}`}
-            src={src}
-            height={height}
-            title={title}
-            aspectRatio={aspectRatio}
-            maxWidth={maxWidth}
-          />
-        );
-      }
-      if (isVideoNode(node) && node.attrs.src) {
-        return (
-          <RichTextVideo
-            key={`video-${index}`}
-            src={node.attrs.src}
-            title={node.attrs.title}
-            ambient={node.attrs.ambient}
-          />
-        );
-      }
-      try {
-        const html = sanitizeGeneratedHtml(
-          generateHTML(
-            {
-              type: "doc",
-              content: [node] as Parameters<typeof generateHTML>[0]["content"],
-            },
-            extensions,
-          ),
-        );
-        return <div key={index} dangerouslySetInnerHTML={{ __html: html }} />;
-      } catch {
-        return null;
-      }
-    });
+    const ctx: RenderContext = { embedsEnabled };
+    return sanitized.content.map((node, index) =>
+      renderBlock(node, String(index), ctx),
+    );
   }, [content, embedsEnabled]);
 
   return <div className={className}>{elements}</div>;

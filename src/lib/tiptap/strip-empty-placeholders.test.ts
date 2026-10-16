@@ -170,6 +170,48 @@ describe("stripEmptyPlaceholderNodes", () => {
     );
   });
 
+  it("backfills a column emptied by the removal with an empty paragraph", () => {
+    const input = doc({
+      type: "columns",
+      attrs: { layout: "2" },
+      content: [
+        { type: "column", content: [embed()] },
+        { type: "column", content: [para("kept")] },
+      ],
+    });
+    expect(stripEmptyPlaceholderNodes(input)).toEqual(
+      doc({
+        type: "columns",
+        attrs: { layout: "2" },
+        content: [
+          { type: "column", content: [{ type: "paragraph" }] },
+          { type: "column", content: [para("kept")] },
+        ],
+      }),
+    );
+  });
+
+  it("backfills an emptied detailsContent but never refills a detailsSummary", () => {
+    const blobImage = { type: "image", attrs: { src: "blob:http://x/1" } };
+    const input = doc({
+      type: "details",
+      content: [
+        // Inline content (`text*`): a paragraph here would be invalid.
+        { type: "detailsSummary", content: [blobImage] },
+        { type: "detailsContent", content: [{ type: "form", attrs: {} }] },
+      ],
+    });
+    expect(stripEmptyPlaceholderNodes(input)).toEqual(
+      doc({
+        type: "details",
+        content: [
+          { type: "detailsSummary" },
+          { type: "detailsContent", content: [{ type: "paragraph" }] },
+        ],
+      }),
+    );
+  });
+
   it("leaves untouched branches as the same references", () => {
     const untouched = { type: "blockquote", content: [para("keep")] };
     const input = doc(untouched, embed());

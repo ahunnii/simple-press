@@ -227,6 +227,7 @@ export function CmsPagePanel({
             editorClassName="focus:outline-hidden"
             uploader={uploadRichTextImage}
             galleriesEnabled={galleriesEnabled}
+            layoutBlocksEnabled={true}
             embedsEnabled={embedsEnabled}
             quotesEnabled={quotesEnabled}
             formsEnabled={formsEnabled}

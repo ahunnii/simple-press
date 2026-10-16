@@ -6,6 +6,7 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { slugify } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { countH2Headings } from "../blog/pink-blog-shared";
 
 type Heading = { id: string; text: string };
@@ -117,6 +118,10 @@ type Props = {
    * below the article when it doesn't (the TOC column disappears, but the
    * owner's sidebar content should not — see build report for reasoning). */
   sidebar?: React.ReactNode;
+  /** Page width = Wide: lift the 74ch cap on the renderer root and re-apply
+   * it to direct-child text blocks only (`.sp-prose-wide`), so rows, media
+   * and tables span the 1400 container. */
+  wide?: boolean;
 };
 
 /**
@@ -130,6 +135,7 @@ export function PinkGenericBody({
   isPolicy,
   updatedAt,
   sidebar,
+  wide = false,
 }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const hasToc = countH2Headings(content) >= 2;
@@ -160,7 +166,11 @@ export function PinkGenericBody({
             )}
             <TiptapRenderer
               content={content as TiptapJSON}
-              className="pink-prose max-w-[74ch]"
+              className={
+                wide
+                  ? `pink-prose ${PROSE_WIDE_CLASS} [--sp-prose-measure:74ch]`
+                  : "pink-prose max-w-[74ch]"
+              }
             />
           </div>
           {!hasToc && sidebar}

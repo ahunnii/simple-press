@@ -9,6 +9,10 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
 import {
+  getPageWidth,
+  PROSE_WIDE_CENTERED_CLASS,
+} from "../../_components/page-width";
+import {
   heightClassForStackA,
   parseStackAPhotos,
   parseStackBPhotos,
@@ -293,9 +297,22 @@ function CoopGalleryPage({
  * color/font var these modifiers reference).
  */
 function CoopCmsPage({ page }: { page: Page }) {
+  // Page width = Wide: the section takes the same `max-w-425` container as
+  // coop's other inner pages (home/about/contact/mode 1) instead of the
+  // 40.16rem (922px at 2xl) reading column. The h1 stays centred; body text
+  // blocks stay centred at that same column width (the section's old width
+  // minus its 1.0625rem side padding) via `.sp-prose-wide--centered`.
+  const wide = getPageWidth(page) === "wide";
+
   return (
     <div className="coop-surface-page min-h-screen">
-      <section className="max-coop-md:w-[23.0625rem] max-coop-md:py-15 coop-md:max-coop-lg:w-[608.3px] coop-md:max-coop-lg:py-30 coop-2xl:w-[57.6625rem] mx-auto block w-[40.1625rem] max-w-full px-[1.0625rem] py-[7.8125rem]">
+      <section
+        className={
+          wide
+            ? "max-coop-md:px-5 max-coop-md:py-15 coop-md:max-coop-lg:px-9 coop-md:max-coop-lg:py-30 coop-2xl:[--sp-prose-measure:calc(57.6625rem-2.125rem)] mx-auto block max-w-425 px-[10.9375rem] py-[7.8125rem] [--sp-prose-measure:calc(40.1625rem-2.125rem)]"
+            : "max-coop-md:w-[23.0625rem] max-coop-md:py-15 coop-md:max-coop-lg:w-[608.3px] coop-md:max-coop-lg:py-30 coop-2xl:w-[57.6625rem] mx-auto block w-[40.1625rem] max-w-full px-[1.0625rem] py-[7.8125rem]"
+        }
+      >
         <h1 className="max-coop-md:text-[1.75rem] max-coop-md:leading-7 max-coop-md:tracking-[-0.01px] text-center [font-family:var(--font-coop-heading)] text-[2.4375rem] leading-[2.4375rem] tracking-[-0.78px] text-[var(--coop-color-003)]">
           {page.title}
         </h1>
@@ -305,6 +322,7 @@ function CoopCmsPage({ page }: { page: Page }) {
             content={page.content as TiptapJSON}
             className={cn(
               "prose w-full max-w-none",
+              wide && PROSE_WIDE_CENTERED_CLASS,
               "prose-headings:[font-family:var(--font-coop-heading)] prose-headings:text-[var(--coop-color-003)] prose-headings:tracking-[-0.02em]",
               "prose-h2:text-[1.75rem] prose-h2:mt-10 prose-h2:mb-4",
               "prose-h3:text-[1.25rem] prose-h3:mt-8 prose-h3:mb-3 prose-h3:[font-family:var(--font-coop-label)] prose-h3:tracking-[0.42px] prose-h3:uppercase",
@@ -318,7 +336,13 @@ function CoopCmsPage({ page }: { page: Page }) {
           />
         </div>
 
-        <PlatformPolicyNotice slug={page.slug} />
+        {wide ? (
+          <div className="mx-auto w-full max-w-[var(--sp-prose-measure)]">
+            <PlatformPolicyNotice slug={page.slug} />
+          </div>
+        ) : (
+          <PlatformPolicyNotice slug={page.slug} />
+        )}
       </section>
     </div>
   );

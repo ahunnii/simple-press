@@ -1,0 +1,69 @@
+@reference "../../../../../styles/globals.css";
+
+/*
+ * Editor chrome for collapsible sections. The package's node view renders
+ *
+ *   div.sp-details[data-type=details] > button + div(contentDOM)
+ *     contentDOM > summary.sp-details__summary + div.sp-details__content[hidden]
+ *
+ * and toggles `.is-open` on the outer div. The storefront's `<details>`
+ * styling lives in globals.css; this only lays out the toggle.
+ */
+
+.minimal-tiptap-editor .ProseMirror div[data-type="details"].sp-details {
+  @apply border-border my-3 flex items-start gap-1 rounded-md border px-2 py-1.5;
+}
+
+.minimal-tiptap-editor
+  .ProseMirror
+  div[data-type="details"].sp-details
+  > button {
+  @apply text-muted-foreground hover:bg-muted hover:text-foreground relative mt-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0;
+}
+
+/* Chevron: points right when closed, down when open. */
+.minimal-tiptap-editor
+  .ProseMirror
+  div[data-type="details"].sp-details
+  > button::before {
+  content: "";
+  @apply block size-2 border-r-2 border-b-2 border-current;
+  transform: translateX(-1px) rotate(-45deg);
+  transition: transform 150ms ease;
+}
+
+.minimal-tiptap-editor
+  .ProseMirror
+  div[data-type="details"].sp-details.is-open
+  > button::before {
+  transform: translateY(-1px) rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .minimal-tiptap-editor
+    .ProseMirror
+    div[data-type="details"].sp-details
+    > button::before {
+    transition: none;
+  }
+}
+
+.minimal-tiptap-editor .ProseMirror div[data-type="details"].sp-details > div {
+  @apply min-w-0 flex-1;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-details__summary {
+  @apply block py-0.5 font-medium;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-details__content {
+  @apply border-border mt-1 border-t pt-2;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-details__content[hidden] {
+  display: none;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-details__content > :last-child {
+  @apply mb-0;
+}

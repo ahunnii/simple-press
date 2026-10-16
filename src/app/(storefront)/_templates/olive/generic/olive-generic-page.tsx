@@ -8,6 +8,7 @@ import { formatDate } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { getPageWidth, PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { hasOliveImage, OliveReveal } from "../shared";
 import { OlivePageBand } from "./olive-page-band";
 import { OlivePageSection } from "./olive-page-section";
@@ -156,9 +157,16 @@ export function OliveGenericPage({ page }: { page: Page }) {
   const showToc = hasTocHeadings(page.content);
   const isPolicy = page.type === "policy";
   const hasCover = hasOliveImage(page.image);
+  // Wide (Page width): the article spans the page edge column; plain text
+  // blocks keep the 68ch reading measure via `.sp-prose-wide`, so column
+  // rows, media and tables can use the full width.
+  const wide = getPageWidth(page) === "wide";
 
   const articleBody = (
-    <OliveReveal threshold={0} style={{ width: "100%", maxWidth: "68ch" }}>
+    <OliveReveal
+      threshold={0}
+      style={{ width: "100%", maxWidth: wide ? undefined : "68ch" }}
+    >
       {isPolicy ? (
         <p className="olive-caption" style={{ marginBottom: "2rem" }}>
           Last updated · {formatDate(page.updatedAt)}
@@ -168,7 +176,11 @@ export function OliveGenericPage({ page }: { page: Page }) {
       <div ref={contentRef}>
         <TiptapRenderer
           content={page.content as TiptapJSON}
-          className="olive-prose"
+          className={
+            wide
+              ? `olive-prose ${PROSE_WIDE_CLASS} [--sp-prose-measure:68ch]`
+              : "olive-prose"
+          }
         />
       </div>
 

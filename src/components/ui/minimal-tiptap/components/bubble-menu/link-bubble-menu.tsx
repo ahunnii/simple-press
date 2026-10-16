@@ -4,6 +4,8 @@ import * as React from "react";
 import { BubbleMenu } from "@tiptap/react/menus";
 
 import type { ShouldShowProps } from "../../types";
+import type { LinkVariant } from "~/lib/tiptap/link-extension";
+import { coerceLinkVariant } from "~/lib/tiptap/link-extension";
 
 import { LinkEditBlock } from "../link/link-edit-block";
 import { LinkPopoverBlock } from "../link/link-popover-block";
@@ -15,6 +17,7 @@ interface LinkBubbleMenuProps {
 interface LinkAttributes {
   href: string;
   target: string;
+  variant: LinkVariant | null;
 }
 
 export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
@@ -22,15 +25,16 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
   const [linkAttrs, setLinkAttrs] = React.useState<LinkAttributes>({
     href: "",
     target: "",
+    variant: null,
   });
   const [selectedText, setSelectedText] = React.useState("");
 
   const updateLinkState = React.useCallback(() => {
     const { from, to } = editor.state.selection;
-    const { href, target } = editor.getAttributes("link");
+    const { href, target, variant } = editor.getAttributes("link");
     const text = editor.state.doc.textBetween(from, to, " ");
 
-    setLinkAttrs({ href, target });
+    setLinkAttrs({ href, target, variant: coerceLinkVariant(variant) });
     setSelectedText(text);
   }, [editor]);
 
@@ -59,7 +63,12 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
   }, []);
 
   const onSetLink = React.useCallback(
-    (url: string, text?: string, openInNewTab?: boolean) => {
+    (
+      url: string,
+      text?: string,
+      openInNewTab?: boolean,
+      variant?: LinkVariant | null,
+    ) => {
       editor
         .chain()
         .focus()
@@ -73,11 +82,16 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
               attrs: {
                 href: url,
                 target: openInNewTab ? "_blank" : "",
+                variant: variant ?? null,
               },
             },
           ],
         })
-        .setLink({ href: url, target: openInNewTab ? "_blank" : "" })
+        .setLink({
+          href: url,
+          target: openInNewTab ? "_blank" : "",
+          variant: variant ?? null,
+        })
         .run();
       setShowEdit(false);
       updateLinkState();
@@ -91,20 +105,30 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
     updateLinkState();
   }, [editor, updateLinkState]);
 
+  // Must be referentially stable: @tiptap/react re-broadcasts a changed
+  // `options` prop as a "bubbleMenu" meta that EVERY bubble-menu plugin on
+  // the editor applies, shouldShow included.
+  const bubbleOptions = React.useMemo(
+    () => ({
+      placement: "bottom-start" as const,
+      onHide: () => setShowEdit(false),
+    }),
+    [],
+  );
+
   return (
     <BubbleMenu
       editor={editor}
+      pluginKey="linkBubbleMenu"
       shouldShow={shouldShow}
-      options={{
-        placement: "bottom-start",
-        onHide: () => setShowEdit(false),
-      }}
+      options={bubbleOptions}
     >
       {showEdit ? (
         <LinkEditBlock
           defaultUrl={linkAttrs.href}
           defaultText={selectedText}
           defaultIsNewTab={linkAttrs.target === "_blank"}
+          defaultVariant={linkAttrs.variant}
           onSave={onSetLink}
           className="bg-popover text-popover-foreground w-full min-w-80 rounded-md border p-4 shadow-md outline-hidden"
         />
@@ -112,6 +136,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
         <LinkPopoverBlock
           onClear={onUnsetLink}
           url={linkAttrs.href}
+          variant={linkAttrs.variant}
           onEdit={handleEdit}
         />
       )}
