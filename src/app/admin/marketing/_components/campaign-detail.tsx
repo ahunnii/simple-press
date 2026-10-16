@@ -1,12 +1,11 @@
 "use client";
 
+import type { JSONContent } from "@tiptap/core";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Ban, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
-
-import type { JSONContent } from "@tiptap/core";
 
 import type { RouterOutputs } from "~/trpc/react";
 import {
@@ -300,7 +299,10 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
               </div>
               {campaign.contentFormat === "tiptap" && storedDoc ? (
                 <div className="mt-2">
-                  <EmailBodyPreview doc={storedDoc} />
+                  <EmailBodyPreview
+                    doc={storedDoc}
+                    baseUrl={campaign.baseUrl}
+                  />
                 </div>
               ) : campaign.bodyText ? (
                 <p className="mt-1 leading-relaxed whitespace-pre-wrap">

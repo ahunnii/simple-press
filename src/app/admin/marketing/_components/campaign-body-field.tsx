@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import type { JSONContent } from "@tiptap/core";
 import type { UseFormReturn } from "react-hook-form";
+import { useMemo, useState } from "react";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 
 import { tiptapToEmailHtml } from "~/lib/marketing/tiptap-to-email";
@@ -32,17 +32,23 @@ export function CampaignBodyField({
   form,
   disabled,
   mediaEnabled,
+  baseUrl,
   onUploadingChange,
 }: {
   form: UseFormReturn<CampaignBodyFormValues>;
   disabled?: boolean;
   /** Offer "Choose from library" in the image dialog (needs the media flag). */
   mediaEnabled?: boolean;
+  /** The store's public URL; page links in the message resolve against it. */
+  baseUrl?: string | null;
   onUploadingChange?: (uploading: boolean) => void;
 }) {
   const body = form.watch("body");
   const [showPreview, setShowPreview] = useState(false);
-  const warnings = useMemo(() => tiptapToEmailHtml(body).warnings, [body]);
+  const warnings = useMemo(
+    () => tiptapToEmailHtml(body, { baseUrl }).warnings,
+    [body, baseUrl],
+  );
 
   return (
     <div className="space-y-3">
@@ -97,7 +103,7 @@ export function CampaignBodyField({
         </Button>
         {showPreview && (
           <div className="mt-3">
-            <EmailBodyPreview doc={body} />
+            <EmailBodyPreview doc={body} baseUrl={baseUrl} />
           </div>
         )}
       </div>

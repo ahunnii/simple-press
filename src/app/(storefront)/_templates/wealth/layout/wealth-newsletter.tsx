@@ -14,8 +14,8 @@ type WealthNewsletterProps = {
   heading: string;
   body: string;
   privacyNote: string;
-  /** Shown in the honest-fallback status message once submitted. */
-  generalInquiriesEmail: string;
+  /** No longer shown: the feature-off message no longer offers an email address. */
+  generalInquiriesEmail?: string;
   /** Store privacy policy path; the footer passes the store's own page when published. */
   privacyHref?: string;
 };
@@ -34,7 +34,6 @@ export function WealthNewsletter({
   heading,
   body,
   privacyNote,
-  generalInquiriesEmail,
   privacyHref,
 }: WealthNewsletterProps) {
   // Fallback path only: set when email marketing is off for this store.
@@ -81,17 +80,7 @@ export function WealthNewsletter({
 
       {submitted ? (
         <p role="status" className="wealth-footer__status">
-          {generalInquiriesEmail ? (
-            <>
-              Newsletter sign-ups are coming soon — email us at{" "}
-              <a href={`mailto:${generalInquiriesEmail}`}>
-                {generalInquiriesEmail}
-              </a>{" "}
-              to be added to the list.
-            </>
-          ) : (
-            "Newsletter sign-ups are coming soon. Please check back."
-          )}
+          Newsletter sign-ups are coming soon — please check back.
         </p>
       ) : newsletter.isSuccess ? (
         <p role="status" className="wealth-footer__status">

@@ -37,10 +37,13 @@ function useReveal() {
 export function ElegantNewsletter({
   customFields,
   sectionAttrs,
+  privacyHref,
 }: {
   customFields?: unknown;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /** Store privacy policy path when published; otherwise the platform policy. */
+  privacyHref?: string;
 } = {}) {
   const [email, setEmail] = useState("");
   // Fallback path only (email marketing off for this store, or the flag flips
@@ -245,7 +248,10 @@ export function ElegantNewsletter({
                   {newsletter.error}
                 </p>
               ) : null}
-              <NewsletterConsentNote className="mt-5 text-[13px] opacity-70" />
+              <NewsletterConsentNote
+                className="mt-5 text-[13px] opacity-70"
+                privacyHref={privacyHref}
+              />
             </>
           )}
         </div>

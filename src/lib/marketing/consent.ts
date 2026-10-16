@@ -68,3 +68,40 @@ export function marketingOptInData(
       : {}),
   };
 }
+
+/**
+ * True when the customer's last word on marketing email is an unsubscribe: an
+ * unsubscribe is on record and no consent was given after it (a later
+ * re-subscribe lifts it). The single home of this rule — used by the
+ * abandoned-checkout reminder gate and the unsubscribe page / POST.
+ */
+export function isMarketingUnsubscribeCurrent(customer: {
+  marketingUnsubscribedAt: Date | null;
+  marketingConsentAt: Date | null;
+}): boolean {
+  return (
+    !!customer.marketingUnsubscribedAt &&
+    (!customer.marketingConsentAt ||
+      customer.marketingConsentAt < customer.marketingUnsubscribedAt)
+  );
+}
+
+/**
+ * Whether this customer ever opted in to marketing email. A resubscribe link
+ * may only restore a consent that existed: offering it to someone who never
+ * subscribed (e.g. an abandoned-checkout reminder recipient) would opt them
+ * in from an email they never asked for. Legacy subscribers (consent from
+ * before tracking) have `marketingConsentSource` but no `marketingConsentAt`;
+ * erasure clears both.
+ */
+export function hasMarketingConsentHistory(customer: {
+  acceptsMarketing: boolean;
+  marketingConsentAt: Date | null;
+  marketingConsentSource: string | null;
+}): boolean {
+  return (
+    customer.acceptsMarketing ||
+    customer.marketingConsentAt !== null ||
+    customer.marketingConsentSource !== null
+  );
+}

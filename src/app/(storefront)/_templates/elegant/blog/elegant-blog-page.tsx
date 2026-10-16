@@ -17,6 +17,8 @@ import { ElegantNewsletter } from "../homepage/elegant-newsletter";
 
 type Props = DefaultBlogPageTemplateProps & {
   customFields?: Record<string, string>;
+  /** Store privacy policy path when published (passed down by the blog route). */
+  privacyHref?: string;
 };
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -43,7 +45,7 @@ function useScrollReveal(threshold = 0.08) {
   return { ref, visible };
 }
 
-export function ElegantBlogPage({ pages, customFields }: Props) {
+export function ElegantBlogPage({ pages, customFields, privacyHref }: Props) {
   const [shown, setShown] = useState(false);
   const [query, setQuery] = useState("");
   const gridReveal = useScrollReveal();
@@ -621,6 +623,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
         <ElegantNewsletter
           customFields={customFields}
           sectionAttrs={sectionGroupAttr("blog", "newsletter")}
+          privacyHref={privacyHref}
         />
       )}
     </div>

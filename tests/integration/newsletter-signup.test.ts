@@ -463,7 +463,11 @@ describe("newsletter router", () => {
       const c = await createCustomer(business.id, { email: "u@test.dev" });
       await db.customer.update({
         where: { id: c.id },
-        data: { marketingUnsubscribedAt: new Date() },
+        data: {
+          marketingConsentAt: new Date("2026-10-01T00:00:00Z"),
+          marketingConsentSource: "CHECKOUT",
+          marketingUnsubscribedAt: new Date(),
+        },
       });
       const token = createUnsubscribeToken({
         customerId: c.id,
@@ -504,6 +508,15 @@ describe("newsletter router", () => {
       const bounced = await createCustomer(business.id, {
         email: "b@test.dev",
       });
+      // Both had opted in before (resubscribe only restores a past consent).
+      await db.customer.updateMany({
+        where: { id: { in: [unsub.id, bounced.id] } },
+        data: {
+          marketingConsentSource: "NEWSLETTER_FORM",
+          marketingConsentAt: new Date("2026-10-01T00:00:00Z"),
+          marketingUnsubscribedAt: new Date("2026-10-05T00:00:00Z"),
+        },
+      });
       await addToDoNotEmail(db, business.id, "a@test.dev", "UNSUBSCRIBED");
       await addToDoNotEmail(db, business.id, "b@test.dev", "HARD_BOUNCE");
 
@@ -535,6 +548,64 @@ describe("newsletter router", () => {
           where: { customerId: bounced.id },
         }),
       ).toBe(0);
+    });
+
+    it("refuses someone who never opted in (e.g. an abandoned-checkout reminder recipient)", async () => {
+      const business = await createBusiness({
+        subdomain: "nl-biz",
+        featureFlags: ON,
+      });
+      const c = await createCustomer(business.id, { email: "never@test.dev" });
+      // Unsubscribed from a reminder: stamped + listed, but never consented.
+      await db.customer.update({
+        where: { id: c.id },
+        data: { marketingUnsubscribedAt: new Date() },
+      });
+      await addToDoNotEmail(db, business.id, "never@test.dev", "UNSUBSCRIBED");
+      const token = createUnsubscribeToken({
+        customerId: c.id,
+        businessId: business.id,
+      });
+
+      expect(
+        await createTestCaller({}).newsletter.resubscribe({ token }),
+      ).toEqual({ ok: false, reason: "not-subscribed" });
+      const after = await db.customer.findUniqueOrThrow({
+        where: { id: c.id },
+      });
+      expect(after.acceptsMarketing).toBe(false);
+      expect(after.marketingConsentAt).toBeNull();
+      expect(after.marketingUnsubscribedAt).toBeInstanceOf(Date);
+      expect(
+        await isOnDoNotEmailList(db, business.id, "never@test.dev"),
+      ).toEqual({ reason: "UNSUBSCRIBED" });
+      expect(
+        await db.marketingConsentEvent.count({ where: { customerId: c.id } }),
+      ).toBe(0);
+    });
+
+    it("lets a legacy subscriber (source but no consent date) resubscribe", async () => {
+      const business = await createBusiness({
+        subdomain: "nl-biz",
+        featureFlags: ON,
+      });
+      const c = await createCustomer(business.id, { email: "legacy@test.dev" });
+      await db.customer.update({
+        where: { id: c.id },
+        data: {
+          marketingConsentSource: "LEGACY_ACCOUNT",
+          marketingUnsubscribedAt: new Date(),
+        },
+      });
+
+      expect(
+        await createTestCaller({}).newsletter.resubscribe({
+          token: createUnsubscribeToken({
+            customerId: c.id,
+            businessId: business.id,
+          }),
+        }),
+      ).toEqual({ ok: true });
     });
 
     it("refuses a suppressed customer and leaves the suppression in place", async () => {

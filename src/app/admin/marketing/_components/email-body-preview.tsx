@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
 import type { JSONContent } from "@tiptap/core";
+import { useMemo, useRef, useState } from "react";
 
 import { tiptapToEmailHtml } from "~/lib/marketing/tiptap-to-email";
 
@@ -13,12 +13,18 @@ import { tiptapToEmailHtml } from "~/lib/marketing/tiptap-to-email";
  */
 export function EmailBodyPreview({
   doc,
+  baseUrl,
   className,
 }: {
   doc: JSONContent | null | undefined;
+  /** The store's public URL, so page links resolve as they do in the sent email. */
+  baseUrl?: string | null;
   className?: string;
 }) {
-  const html = useMemo(() => tiptapToEmailHtml(doc).html, [doc]);
+  const html = useMemo(
+    () => tiptapToEmailHtml(doc, { baseUrl }).html,
+    [doc, baseUrl],
+  );
   const srcDoc = useMemo(
     () =>
       `<!doctype html><html><head><meta charset="utf-8">` +
@@ -55,7 +61,7 @@ export function EmailBodyPreview({
       onLoad={measure}
       style={{ height }}
       className={
-        className ?? "bg-white w-full rounded-md border border-neutral-200"
+        className ?? "w-full rounded-md border border-neutral-200 bg-white"
       }
     />
   );

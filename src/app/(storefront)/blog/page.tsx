@@ -20,9 +20,13 @@ export default async function BlogPage() {
     .catch(rethrowTrpcForErrorBoundary);
   if (!business) notFound();
 
-  const pages = await api.content
-    .getBlogPages()
-    .catch(rethrowTrpcForErrorBoundary);
+  const [pages, policies] = await Promise.all([
+    api.content.getBlogPages().catch(rethrowTrpcForErrorBoundary),
+    api.content.getSimplifiedPages({ type: "policy" }).catch(() => []),
+  ]);
+  // Newsletter consent links to the store's own privacy policy when published.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const privacyHref = privacyPolicy ? `/${privacyPolicy.slug}` : undefined;
 
   const customFields = business.siteContent?.customFields as
     | Record<string, string>
@@ -43,6 +47,7 @@ export default async function BlogPage() {
         pages={pages}
         customFields={customFields}
         business={business}
+        privacyHref={privacyHref}
       />
     </>
   );

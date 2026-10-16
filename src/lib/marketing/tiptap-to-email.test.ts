@@ -122,6 +122,97 @@ describe("tiptapToEmailHtml", () => {
     expect(text).toBe("web (http://a.test/x) mail (mailto:hi@a.test)");
   });
 
+  describe("site-relative links", () => {
+    const link = (text: string, href: string) =>
+      t(text, [{ type: "link", attrs: { href } }]);
+    const base = "https://shop.example.com";
+
+    it("resolves /paths against the base URL", () => {
+      const { html, text, warnings } = tiptapToEmailHtml(
+        doc(p(link("Contact", "/contact"), link(" Shop", "/shop?x=1#top"))),
+        { baseUrl: base },
+      );
+      expect(html).toContain('href="https://shop.example.com/contact"');
+      expect(html).toContain('href="https://shop.example.com/shop?x=1#top"');
+      expect(text).toBe(
+        "Contact (https://shop.example.com/contact) Shop (https://shop.example.com/shop?x=1#top)",
+      );
+      expect(warnings).toEqual([]);
+    });
+
+    it("works with a dev http origin and a trailing slash", () => {
+      const { html } = tiptapToEmailHtml(doc(p(link("Home", "/"))), {
+        baseUrl: "http://demo.localhost:3000/",
+      });
+      expect(html).toContain('href="http://demo.localhost:3000/"');
+    });
+
+    it("drops relative links (with a warning) when there is no base URL", () => {
+      for (const options of [
+        undefined,
+        {},
+        { baseUrl: null },
+        { baseUrl: "" },
+      ]) {
+        const { html, warnings } = tiptapToEmailHtml(
+          doc(p(link("Contact", "/contact"))),
+          options,
+        );
+        expect(html).not.toContain("<a ");
+        expect(html).toContain("Contact");
+        expect(warnings).toHaveLength(1);
+      }
+    });
+
+    it("ignores an unsafe or non-web base URL", () => {
+      for (const baseUrl of [
+        "javascript:alert(1)",
+        "not a url",
+        "mailto:a@b.c",
+      ]) {
+        const { html } = tiptapToEmailHtml(
+          doc(p(link("Contact", "/contact"))),
+          { baseUrl },
+        );
+        expect(html).not.toContain("<a ");
+      }
+    });
+
+    it("still drops protocol-relative and unsafe links when a base URL is set", () => {
+      const { html, warnings } = tiptapToEmailHtml(
+        doc(
+          p(
+            link("a", "//evil.test/x"),
+            link("b", "/\\evil.test"),
+            link("c", "javascript:alert(1)"),
+            link("d", "data:text/html,<b>x"),
+            link("e", "contact"),
+            link("f", "/ok\nbad"),
+            link("g", "#top"),
+          ),
+        ),
+        { baseUrl: base },
+      );
+      expect(html).not.toContain("<a ");
+      expect(html).not.toContain("evil.test");
+      expect(warnings).toHaveLength(1);
+    });
+
+    it("leaves absolute links unchanged and keeps the new warning text", () => {
+      const { html } = tiptapToEmailHtml(
+        doc(p(link("web", "https://other.test/a"))),
+        { baseUrl: base },
+      );
+      expect(html).toContain('href="https://other.test/a"');
+      const dropped = tiptapToEmailHtml(doc(p(link("x", "ftp://a.test"))), {
+        baseUrl: base,
+      });
+      expect(dropped.warnings).toEqual([
+        "Links must be web addresses (https://…), email addresses (mailto:) or pages on your site; other links were removed.",
+      ]);
+    });
+  });
+
   it("renders headings, clamping levels above 3", () => {
     const { html, text } = tiptapToEmailHtml(
       doc(
