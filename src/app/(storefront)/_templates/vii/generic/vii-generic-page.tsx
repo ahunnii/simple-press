@@ -9,6 +9,7 @@ import { PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { getPageWidth, PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { VII_TEXT_MEASURE } from "../shared/vii-page-edge";
 import { ViiReveal } from "../shared/vii-reveal";
 import { ViiGenericCoverHero } from "./vii-generic-cover-hero";
@@ -166,6 +167,12 @@ export function ViiGenericPage({ page }: { page: Page }) {
   const showToc = hasTocHeadings(page.content);
   const isPolicy = page.type === "policy";
   const hasCover = !!page.image?.trim();
+  // Page width: vii's column is already edge-wide (1280) in Standard, so
+  // Wide changes only the text cap. Standard caps text with a descendant
+  // selector (which also catches text inside column rows); Wide swaps it
+  // for the shared child-only class at the same 720px measure so rows can
+  // span the column.
+  const wide = getPageWidth(page) === "wide";
 
   // Article body — identical regardless of whether the TOC sidebar is shown.
   // It sits on vii's page edge (the hero's left edge, 86px at 1440 — B1.7):
@@ -192,7 +199,9 @@ export function ViiGenericPage({ page }: { page: Page }) {
           className={cn(
             "prose w-full max-w-none",
             // Readable measure for running text; media stays column-wide.
-            "[&_:is(p,h2,h3,h4,h5,h6,ul,ol,blockquote,pre,hr)]:max-w-[720px]",
+            wide
+              ? cn(PROSE_WIDE_CLASS, "[--sp-prose-measure:720px]")
+              : "[&_:is(p,h2,h3,h4,h5,h6,ul,ol,blockquote,pre,hr)]:max-w-[720px]",
             // Headings — Playfair Display, navy
             "prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight",
             "prose-headings:text-[var(--vii-navy)]",

@@ -1309,6 +1309,15 @@
   width: 100%;
 }
 
+/* "Wide" page width (GenericPage, 2026-10-15): the renderer spans the 1200
+   container, so lift the root's 68ch cap; `.sp-prose-wide` re-caps running
+   text at the same 68ch (resolved once on this root — the measure is a
+   registered length, so headings share the body's px width). */
+.animated-bamboo .bamboo-prose.bamboo-prose--wide {
+  --sp-prose-measure: 68ch;
+  max-width: none;
+}
+
 /* ── Contact form ── */
 .animated-bamboo .bamboo-contact-form label {
   display: block;
@@ -5089,6 +5098,56 @@ body:has(.pollen) {
   .sp-columns--4 > .sp-columns__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* ── Per-page "Wide" width (Page.template = "full-width") ─────────────────
+   Templates widen the body to their standard container and add
+   `.sp-prose-wide` to the TiptapRenderer root. Running text keeps a reading
+   measure (`--sp-prose-measure`, default 70ch; a template sets its own) while
+   rows, media, tables, forms and galleries span the container.
+   TiptapRenderer emits each plain block (p, h1-h6, lists, quote, pre, hr,
+   table, image) inside a CLASS-LESS leaf wrapper <div>; <details>, rows,
+   forms, galleries, quotes, embeds and videos are direct children and carry
+   classes. So we target the class-less wrapper's children (`div:not([class])`)
+   plus <details> itself, and text inside a column row or a details body
+   (deeper than that) is never capped. The bare `> :is(...)` arm covers markup
+   that is not wrapped (the admin editor). Add `--centered` for centred-hero
+   templates so the capped text stays centred.
+   Registered as a length so a `ch` measure resolves once, against the
+   element that declares it, and is inherited as px — otherwise every
+   heading would re-resolve `66ch` in its own larger font and run wider than
+   the body text.                                                           */
+@property --sp-prose-measure {
+  syntax: "<length> | none";
+  inherits: true;
+  initial-value: 720px;
+}
+.sp-prose-wide > details,
+.sp-prose-wide > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr),
+.sp-prose-wide
+  > div:not([class])
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr) {
+  max-width: var(--sp-prose-measure, 70ch);
+}
+.sp-prose-wide--centered > details,
+.sp-prose-wide--centered
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr),
+.sp-prose-wide--centered
+  > div:not([class])
+  > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr) {
+  margin-inline: auto;
+}
+/* Forms carry their own 65ch cap (`max-w-prose` in form-block.tsx); in Wide
+   they span the container like the other blocks (or their column, in a row). */
+.sp-prose-wide .sp-form-block {
+  max-width: none;
+}
+/* …but text controls (and help text) keep the reading measure, so a
+   name/email or message box doesn't stretch 1200px. Choice groups and the
+   picture-choice grid still use the full width. */
+.sp-prose-wide .sp-form-block :is([data-slot="input"], [data-slot="textarea"], select),
+.sp-prose-wide .sp-form-block p[id$="-description"] {
+  max-width: var(--sp-prose-measure, 70ch);
 }
 
 /* min-width:0 lets a column shrink below its content (long words, tables). */
@@ -11626,6 +11685,35 @@ details.sp-details > summary.sp-details__summary > * {
   margin-top: 17px;
 }
 
+/* wealth — left-aligned prose column + "Wide" page width (2026-10-15).
+   GenericPage and blog-post bodies sit on the 1200 container's LEFT edge
+   (the no-photo hero title's edge) in a 680px column, not a centred one.
+   The list band (a blockquote holding a list) used to widen -170px on BOTH
+   sides, which assumed a centred column; here it only grows rightwards, at
+   most +340px and never past the container's right edge. Wide pages render
+   the prose across the whole container with `.sp-prose-wide` (text capped
+   at --sp-prose-measure); their list bands get the same 680 + 340px. */
+.wealth .wealth-generic-prose-section,
+.wealth .wealth-blog-body {
+  --sp-prose-measure: 680px;
+}
+.wealth .wealth-prose-col {
+  max-width: var(--sp-prose-measure, 680px);
+}
+@media (min-width: 1000px) {
+  .wealth .wealth-prose-col .wealth-prose blockquote:has(ul, ol) {
+    margin-inline: 0
+      max(
+        -340px,
+        calc(var(--sp-prose-measure, 680px) + var(--wealth-pad-x) * 2 - 100vw)
+      );
+  }
+  .wealth .wealth-prose.sp-prose-wide > div > blockquote:has(ul, ol) {
+    max-width: calc(var(--sp-prose-measure, 680px) + 340px);
+    margin-inline: 0;
+  }
+}
+
 /* wealth impact v2 A (devices, shared report tokens, same-tone rule, nav steps) — BEGIN (agent-owned region; 2026-10-12) */
 /* Report-only devices for the Impact Report v2 (design.md "Impact Report —
    v2"), ported from checkpoint/impact-v2/impact-v2.css (.wr-ir-* →
@@ -14576,6 +14664,28 @@ details.sp-details > summary.sp-details__summary > * {
 }
 .wealth .wealth-blog-post-hero .wealth-hero__rule {
   margin-top: 14px;
+}
+/* With a cover photo the panel sits flush left (photo on the right), so its
+   own padding would put the title off the page grid. Pad it to the 1200
+   container's content edge instead, so title and body share one left edge.
+   The hero is the size container, so 100cqw excludes a classic scrollbar.
+   On very wide screens the min() keeps ≥320px of title column in the 40%
+   panel (40cqw − 76px right padding − 320px); exact up to ~2040px. */
+@media (min-width: 900px) {
+  .wealth .wealth-blog-post-hero.wealth-hero--reverse:not(.wealth-hero--noimage) {
+    container-type: inline-size;
+  }
+  .wealth
+    .wealth-blog-post-hero.wealth-hero--reverse:not(.wealth-hero--noimage)
+    > .wealth-hero__panel {
+    padding-left: max(
+      var(--wealth-pad-x),
+      min(
+        calc((100cqw - var(--wealth-container)) / 2),
+        calc(40cqw - 76px - 320px)
+      )
+    );
+  }
 }
 /* "« All news": the arrow link mirrored (chevrons lead instead of trail) */
 .wealth .wealth-blog-back::after {
@@ -20227,6 +20337,15 @@ details.sp-details > summary.sp-details__summary > * {
 .dream .dream-embed--centered .prose > .not-prose:has(.gallery-container),
 .dream .dream-embed--centered .prose > figure.not-prose {
   margin-left: calc(50% - min(1040px, 100cqw) / 2);
+}
+
+/* Page width = Wide: the article is already the full container (or the full
+   track beside the TOC), so galleries/videos span it instead of the 1040px
+   breakout — no centring margin needed. Same specificity as the rule above,
+   later in source. */
+.dream .dream-embed--wide .prose > .not-prose:has(.gallery-container),
+.dream .dream-embed--wide .prose > figure.not-prose {
+  width: 100%;
 }
 
 .dream-embed [data-slot="card"] {

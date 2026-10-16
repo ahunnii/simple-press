@@ -3,6 +3,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { getPageWidth, PROSE_WIDE_CLASS } from "../_components/page-width";
 import { BambooEdge } from "./shared/bamboo-edge";
 import { BambooGlyph } from "./shared/bamboo-glyph";
 import { BambooReveal } from "./shared/bamboo-reveal";
@@ -12,6 +13,11 @@ type Props = {
 };
 
 export function BambooGenericPage({ page }: Props) {
+  // Page width (admin → Pages). Standard: a left-aligned 760px column on the
+  // h1's edge (`.bamboo-prose` caps text at 68ch inside it). Wide: the whole
+  // 1200 container; `.bamboo-prose--wide` lifts the root's 68ch cap and
+  // `.sp-prose-wide` re-applies it to running text only.
+  const wide = getPageWidth(page) === "wide";
   return (
     <>
       {/* Short sage band — CMS pages and policies get the quietest hero in
@@ -74,12 +80,18 @@ export function BambooGenericPage({ page }: Props) {
 
       <section className="pt-[clamp(30px,3.6vw,54px)] pb-[clamp(56px,6vw,96px)]">
         <div className="mx-auto w-full max-w-[1200px] px-6">
-          <BambooReveal className="mx-auto max-w-[760px]">
+          <BambooReveal className={wide ? undefined : "max-w-[760px]"}>
             <TiptapRenderer
               content={page.content as TiptapJSON}
-              className="bamboo-prose"
+              className={
+                wide
+                  ? `bamboo-prose bamboo-prose--wide ${PROSE_WIDE_CLASS}`
+                  : "bamboo-prose"
+              }
             />
-            <PlatformPolicyNotice slug={page.slug} />
+            <div className={wide ? "max-w-[760px]" : undefined}>
+              <PlatformPolicyNotice slug={page.slug} />
+            </div>
           </BambooReveal>
         </div>
       </section>

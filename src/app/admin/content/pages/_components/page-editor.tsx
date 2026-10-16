@@ -56,6 +56,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
+import { SelectFormField } from "~/components/inputs/select-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import {
   SearchResultPreview,
@@ -83,9 +84,23 @@ const SEO_TAB_FIELDS = new Set<string>([
 const tabForField = (name: string): PageEditorTab =>
   SEO_TAB_FIELDS.has(name.split(".")[0] ?? name) ? "seo" : "content";
 
+/**
+ * Page width lives in the otherwise-unused `Page.template` column:
+ * "full-width" = Wide, everything else = Standard (see
+ * `_templates/_components/page-width.ts`). Kept local so this admin client
+ * component doesn't import from the storefront tree.
+ */
+const widthFromTemplate = (template?: string | null): "standard" | "wide" =>
+  template === "full-width" ? "wide" : "standard";
+
+/** Legacy "sidebar" rows keep their value — this editor never overwrites it. */
+const widthIsEditable = (template?: string | null) =>
+  template == null || template === "default" || template === "full-width";
+
 const NEW_PAGE_DEFAULTS = {
   title: "",
   slug: "",
+  width: "standard" as const,
   content: { ...EMPTY_TIPTAP_DOC },
   excerpt: "",
   published: true,
@@ -105,6 +120,7 @@ const pageFormSchema = z.object({
   content: z.any(), // TipTap JSON
   excerpt: z.string().optional().nullable(),
   published: z.boolean(),
+  width: z.enum(["standard", "wide"]),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
   metaKeywords: z.string().optional().nullable(),
@@ -126,6 +142,8 @@ type PageEditorProps = {
     excerpt: string | null;
     published: boolean;
     scheduledPublishAt?: Date | null;
+    /** "default" | "sidebar" | "full-width" — "full-width" is the Wide option. */
+    template?: string | null;
     metaTitle: string | null;
     metaDescription: string | null;
     metaKeywords: string | null;
@@ -198,6 +216,7 @@ export function PageEditor({
       content: page?.content ?? { ...EMPTY_TIPTAP_DOC },
       excerpt: page?.excerpt ?? "",
       published: page?.published ?? true,
+      width: widthFromTemplate(page?.template),
       metaTitle: page?.metaTitle ?? "",
       metaDescription: page?.metaDescription ?? "",
       metaKeywords: page?.metaKeywords ?? "",
@@ -259,7 +278,11 @@ export function PageEditor({
     if (first) setActiveTab(tabForField(first));
   };
 
-  const handleReset = (data?: PageFormValues) => {
+  // `data` is the saved page row from `updatePage` (it carries `template`,
+  // not `width`), so the width is derived from it here.
+  const handleReset = (
+    data?: Omit<PageFormValues, "width"> & { template?: string | null },
+  ) => {
     // A user-initiated Reset also un-sticks the "the owner typed their own
     // slug" latch, so a fresh draft resumes tracking the title.
     if (data === undefined) slugManuallyEditedRef.current = false;
@@ -269,6 +292,7 @@ export function PageEditor({
       content: data?.content ?? page?.content ?? EMPTY_TIPTAP_DOC,
       excerpt: data?.excerpt ?? page?.excerpt ?? "",
       published: data?.published ?? page?.published ?? true,
+      width: widthFromTemplate(data ? data.template : page?.template),
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
       metaKeywords: data?.metaKeywords ?? page?.metaKeywords ?? "",
@@ -405,16 +429,34 @@ export function PageEditor({
     };
 
     if (page?.id) {
-      // Update path: omit type/template/sortOrder — this editor doesn't
-      // manage those fields, and sending them would clobber records
-      // (e.g. blog posts) that were created with different values.
-      updatePage.mutate({ id: page.id, data: pageData });
+      // Update path: omit type/sortOrder — this editor doesn't manage those
+      // fields, and sending them would clobber records (e.g. blog posts) that
+      // were created with different values. It does manage the page width via
+      // `template`, but only while the stored value is "default"/"full-width"
+      // (or empty): a legacy "sidebar" row is never overwritten.
+      updatePage.mutate({
+        id: page.id,
+        data: {
+          ...pageData,
+          ...(widthIsEditable(page.template)
+            ? {
+                template:
+                  data.width === "wide"
+                    ? ("full-width" as const)
+                    : ("default" as const),
+              }
+            : {}),
+        },
+      });
     } else {
       createPage.mutate({
         data: {
           ...pageData,
           type: "page" as const,
-          template: "default" as const,
+          template:
+            data.width === "wide"
+              ? ("full-width" as const)
+              : ("default" as const),
           sortOrder: 0,
         },
       });
@@ -723,6 +765,19 @@ export function PageEditor({
                       inputRef={imageFileInputRef}
                       mediaLibraryEnabled={mediaEnabled}
                       urlFieldName="image"
+                    />
+
+                    <SelectFormField
+                      form={form}
+                      name="width"
+                      label="Page width"
+                      description="Wide uses your theme's full content width — best for pages built with columns, galleries or tables. Text stays at a comfortable reading width."
+                      disabled={!widthIsEditable(page?.template)}
+                      values={[
+                        { value: "standard", label: "Standard" },
+                        { value: "wide", label: "Wide" },
+                      ]}
+                      className="max-w-sm"
                     />
 
                     <MinimalTiptapFormField

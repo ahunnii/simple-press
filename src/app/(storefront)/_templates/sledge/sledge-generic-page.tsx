@@ -25,6 +25,7 @@ export function SledgeGenericPage({ page }: Props) {
         intro={page.excerpt ?? undefined}
       />
 
+      {/* Always container-wide; Page width (Page.template) has no effect here. */}
       <SledgePageSection animate>
         <TiptapRenderer
           content={page.content as TiptapJSON}

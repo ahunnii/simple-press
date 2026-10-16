@@ -66,6 +66,7 @@ export function BuildersGenericPage({ business, page }: Props) {
       </section>
 
       {/* ── Body content: full-width prose, builders-themed ── */}
+      {/* Always container-wide; Page width (Page.template) has no effect here. */}
       <section className="px-4 pt-16 pb-24 md:px-12">
         <FadeIn className="mx-auto w-full max-w-[1280px]">
           <article className="max-w-none">

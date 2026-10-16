@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { getPageWidth, PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscReveal } from "../shared/umsc-reveal";
 import { UmscSection } from "../shared/umsc-section";
@@ -150,6 +151,10 @@ export function UmscGenericPage({ page }: { page: Page }) {
   const showToc = hasTocHeadings(page.content);
   const isPolicy = page.type === "policy";
   const hasImage = !!page.image?.trim();
+  // Wide (Page width): drop the 66ch cap on the renderer root and re-apply
+  // it to direct-child text blocks only, so column rows/media/tables can
+  // span the 1280 container (Standard keeps the capped root, unchanged).
+  const wide = getPageWidth(page) === "wide";
 
   const articleBody = (
     <div className="w-full">
@@ -169,7 +174,16 @@ export function UmscGenericPage({ page }: { page: Page }) {
       <div ref={contentRef} className="umsc-embed" style={UMSC_EMBED_VARS}>
         <TiptapRenderer
           content={page.content as TiptapJSON}
-          className={UMSC_PROSE_CLASSNAME}
+          className={
+            wide
+              ? cn(
+                  UMSC_PROSE_CLASSNAME,
+                  "max-w-none",
+                  PROSE_WIDE_CLASS,
+                  "[--sp-prose-measure:66ch]",
+                )
+              : UMSC_PROSE_CLASSNAME
+          }
         />
       </div>
 

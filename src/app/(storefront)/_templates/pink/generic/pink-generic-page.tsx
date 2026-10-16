@@ -7,6 +7,7 @@ import { getListFieldValue } from "~/lib/template-fields";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 
 import { resolveFields } from "..";
+import { getPageWidth } from "../../_components/page-width";
 import { PinkFactRows } from "../shared/pink-fact-rows";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkGenericBody } from "./pink-generic-body";
@@ -114,6 +115,7 @@ export function PinkGenericPage({
       <PinkGenericBody
         content={page.content as unknown}
         isPolicy={page.type === "policy"}
+        wide={getPageWidth(page) === "wide"}
         updatedAt={page.updatedAt}
         sidebar={
           showSidebar ? (

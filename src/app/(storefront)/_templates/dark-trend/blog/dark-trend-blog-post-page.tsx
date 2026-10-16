@@ -35,14 +35,14 @@ export function DarkTrendBlogPostPage({
         parentBreadcrumb={{ label: "Blog", href: "/blog" }}
         topContent={
           <>
-            <p className="mt-4 text-center text-sm font-medium tracking-wider text-purple-400 uppercase">
+            <p className="mt-4 text-sm font-medium tracking-wider text-purple-400 uppercase">
               {formatDate(page.createdAt)}
             </p>
           </>
         }
       >
         {page.image ? (
-          <div className="relative mx-auto mb-12 aspect-16/7 max-w-4xl overflow-hidden rounded-xl">
+          <div className="relative mb-12 aspect-16/7 max-w-4xl overflow-hidden rounded-xl">
             <Image
               src={page.image}
               alt={page.title}
@@ -54,7 +54,7 @@ export function DarkTrendBlogPostPage({
           </div>
         ) : null}
 
-        <div className="mx-auto max-w-4xl">
+        <div className="max-w-4xl">
           <TiptapRenderer
             content={page.content as TiptapJSON}
             className="prose prose-lg prose-invert prose-headings:text-white prose-p:text-white/80 prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-strong:text-white prose-code:text-purple-400 prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-white/20 max-w-none"

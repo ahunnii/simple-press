@@ -12,6 +12,7 @@ type Props = {
 export function ModernGenericPage({ page }: Props) {
   return (
     <ModernGeneralLayout title={page.title} excerpt={page.excerpt ?? undefined}>
+      {/* Always container-wide; Page width (Page.template) has no effect here. */}
       <section className="bg-background py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <TiptapRenderer

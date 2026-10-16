@@ -8,6 +8,7 @@ import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
+import { getPageWidth, PROSE_WIDE_CLASS } from "../../_components/page-width";
 import { WEALTH_IMPACT_SLUG } from "../impact/constants";
 import { WealthImpactPage } from "../impact/wealth-impact-page";
 import { WealthBlock } from "../shared/wealth-block";
@@ -90,11 +91,41 @@ export async function WealthGenericPage({
   const headings = extractH2Headings(page.content);
   const showToc = headings.length >= WEALTH_TOC_MIN_H2;
 
+  // Page width (admin → Pages). Standard: a left-aligned 680px column on the
+  // container's left edge (the no-image hero title's edge). Wide: the full
+  // 1200 container, running text still capped at 680 via `.sp-prose-wide`;
+  // the TOC and the policy notice stay inside the 680 column either way.
+  const wide = getPageWidth(page) === "wide";
+
   const prose = (
     <TiptapRenderer
       content={page.content as TiptapJSON}
-      className="wealth-prose"
+      className={wide ? `wealth-prose ${PROSE_WIDE_CLASS}` : "wealth-prose"}
     />
+  );
+
+  const toc = showToc ? (
+    <nav
+      aria-label="On this page"
+      className="mb-[calc(var(--wealth-rhythm)*2.5)] border-l-[3px] border-[var(--wealth-accent)] pl-5"
+    >
+      <p className="wealth-eyebrow wealth-eyebrow--block">On this page</p>
+      <ul className="mt-3 grid list-none gap-x-8 gap-y-2 p-0 sm:grid-cols-2">
+        {headings.map((h) => (
+          <li key={h.id}>
+            <a href={`#${h.id}`} className="wealth-link">
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  ) : null;
+
+  const body = showToc ? (
+    <WealthProseAnchors headings={headings}>{prose}</WealthProseAnchors>
+  ) : (
+    prose
   );
 
   return (
@@ -142,36 +173,22 @@ export async function WealthGenericPage({
         ) : null}
       </WealthSplitHero>
 
-      <WealthBlock
-        as="div"
-        container="prose"
-        className="wealth-generic-prose-section"
-      >
-        {showToc ? (
-          <nav
-            aria-label="On this page"
-            className="mb-[calc(var(--wealth-rhythm)*2.5)] border-l-[3px] border-[var(--wealth-accent)] pl-5"
-          >
-            <p className="wealth-eyebrow wealth-eyebrow--block">On this page</p>
-            <ul className="mt-3 grid list-none gap-x-8 gap-y-2 p-0 sm:grid-cols-2">
-              {headings.map((h) => (
-                <li key={h.id}>
-                  <a href={`#${h.id}`} className="wealth-link">
-                    {h.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
-
-        {showToc ? (
-          <WealthProseAnchors headings={headings}>{prose}</WealthProseAnchors>
+      <WealthBlock as="div" className="wealth-generic-prose-section">
+        {wide ? (
+          <>
+            {toc ? <div className="wealth-prose-col">{toc}</div> : null}
+            {body}
+            <div className="wealth-prose-col">
+              <PlatformPolicyNotice slug={page.slug} />
+            </div>
+          </>
         ) : (
-          prose
+          <div className="wealth-prose-col">
+            {toc}
+            {body}
+            <PlatformPolicyNotice slug={page.slug} />
+          </div>
         )}
-
-        <PlatformPolicyNotice slug={page.slug} />
       </WealthBlock>
 
       {showCta ? (

@@ -75,13 +75,14 @@ export async function WealthBlogPostPage({
         excerpt={page.excerpt?.trim() ?? ""}
       />
 
+      {/* Left-aligned 680px column on the container's left edge — the same
+          edge as the no-photo hero's title (GenericPage does the same). */}
       <WealthBlock
         as="article"
-        container="prose"
         aria-labelledby="wealth-blog-post-title"
         className="wealth-blog-body"
       >
-        <WealthReveal threshold={0}>
+        <WealthReveal threshold={0} className="wealth-prose-col">
           <TiptapRenderer
             content={page.content as TiptapJSON}
             className="wealth-prose"
