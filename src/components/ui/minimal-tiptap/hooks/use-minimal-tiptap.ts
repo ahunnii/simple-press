@@ -21,12 +21,14 @@ import {
   CodeBlockLowlight,
   Color,
   EditorColumns,
+  EditorSpacer,
   Embed,
   FileHandler,
   Form,
   Gallery,
   HorizontalRule,
   Image,
+  LinkClickSelection,
   QuoteCalculator,
   ResetMarksOnEnter,
   TableKit,
@@ -36,7 +38,7 @@ import {
   VIDEO_MAX_FILE_SIZE,
 } from "../extensions";
 import { useThrottle } from "../hooks/use-throttle";
-import { fileToBase64, getOutput, randomId } from "../utils";
+import { fileToBase64, fillEmptyDoc, getOutput, randomId } from "../utils";
 
 export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   value?: Content;
@@ -65,8 +67,8 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   formsEnabled?: boolean;
   /**
    * Restricts the editor to what an email can show: no code, galleries,
-   * embeds, forms, quote calculators, tables, columns, collapsible sections
-   * or videos (none of those nodes are registered, so pasted content
+   * embeds, forms, quote calculators, tables, columns, collapsible sections,
+   * spacers or videos (none of those nodes are registered, so pasted content
    * flattens to text). Headings, lists, quotes, dividers, links, images,
    * alignment and colors stay. Used by the marketing campaign composer; the
    * content is rendered by `~/lib/marketing/tiptap-to-email`.
@@ -325,6 +327,9 @@ export const createExtensions = ({
         class: "link",
       },
     }),
+    // Selects the whole link from the clicked <a> (button links too, whose
+    // padding leaves the caret outside the link); runs before Link's own.
+    LinkClickSelection,
     Image.configure({
       allowedMimeTypes: ["image/*"],
       maxFileSize: imageMaxFileSize,
@@ -481,6 +486,7 @@ export const createExtensions = ({
           EditorColumns,
           Column,
           ...DETAILS_EXTENSIONS,
+          EditorSpacer,
         ]),
   ];
 };
@@ -627,7 +633,9 @@ export const useMinimalTiptapEditor = ({
     immediatelyRender: false,
     extensions,
     editorProps,
-    content: value,
+    // A childless doc leaves the editor with no textblock to put the
+    // selection in until it's clicked; see `fillEmptyDoc`.
+    content: fillEmptyDoc(value),
     onUpdate: ({ editor }) => handleUpdate(editor),
     // onCreate: ({ editor }) => handleCreate(editor),
     onBlur: ({ editor }) => handleBlur(editor),
@@ -653,7 +661,7 @@ export const useMinimalTiptapEditor = ({
     // Value-driven sync (mount, Reset, setValue, templates) must not echo back
     // through onUpdate: TipTap would hand the form its schema-normalized JSON
     // (empty doc → one empty paragraph) and mark an untouched form dirty.
-    editor.commands.setContent(value, { emitUpdate: false });
+    editor.commands.setContent(fillEmptyDoc(value), { emitUpdate: false });
   }, [editor, value]);
 
   return editor;

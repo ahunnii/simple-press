@@ -58,6 +58,7 @@ export default async function CampaignPage({ params }: Props) {
             bodyJson: campaign.bodyJson,
           }}
           mediaEnabled={flags.isEnabled("media")}
+          baseUrl={audience.baseUrl}
           recipientCount={audience.count}
           hasPostalAddress={
             business !== null && getBusinessPostalAddress(business) !== null

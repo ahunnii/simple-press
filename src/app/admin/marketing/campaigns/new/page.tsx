@@ -30,6 +30,7 @@ export default async function NewCampaignPage() {
       <BroadcastComposer
         recipientCount={audience.count}
         mediaEnabled={flags.isEnabled("media")}
+        baseUrl={audience.baseUrl}
         hasPostalAddress={
           business !== null && getBusinessPostalAddress(business) !== null
         }

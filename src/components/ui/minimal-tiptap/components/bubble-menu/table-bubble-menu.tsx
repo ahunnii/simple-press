@@ -13,24 +13,21 @@ import type { ShouldShowProps } from "../../types";
 import { Separator } from "~/components/ui/separator";
 
 import { ToolbarButton } from "../toolbar-button";
+import { isTableBubbleTarget } from "./bubble-menu-predicates";
 
 // Module-level so the reference is stable: @tiptap/react re-broadcasts a
 // changed `options` prop as a "bubbleMenu" meta that every bubble-menu
 // plugin on the editor applies (shouldShow included).
 const BUBBLE_OPTIONS = { placement: "top-start" } as const;
 
+/** Stable; a selected image or a link in a cell gets its own menu instead. */
+const shouldShow = ({ editor }: ShouldShowProps) => isTableBubbleTarget(editor);
+
 interface TableBubbleMenuProps {
   editor: Editor;
 }
 
 export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({ editor }) => {
-  const shouldShow = React.useCallback(({ editor }: ShouldShowProps) => {
-    // A selected image in a cell gets the image menu.
-    return (
-      editor.isActive("table") && !editor.isActive("image") && editor.isEditable
-    );
-  }, []);
-
   return (
     <BubbleMenu
       editor={editor}

@@ -12,6 +12,7 @@ import type { NoteSectionPick } from "./notes-panel";
 import type { PanelVariant } from "./panel-variant";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
+import type { PreviewOverlayMode } from "~/lib/preview/use-preview-bridge";
 import type { SpTextWidth } from "~/lib/sp-meta";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
@@ -1411,7 +1412,13 @@ export function VisualEditor({
       // CTA, plus site-wide chrome), so accept hotspots for those in place and
       // ignore anything else.
       if (isCmsPage(activePage)) {
-        if (activeCmsPage?.type !== "blog") return;
+        if (activeCmsPage?.type !== "blog") {
+          // Header / footer click on a custom page: reopen its panel (body
+          // clicks arrive as sp:edit-page). Not while Notes is open — a click
+          // that picks nothing shouldn't swap the panel out from under it.
+          if (!notesOpen) handleOpenCmsPanel();
+          return;
+        }
         const section = sections.find(
           (s) =>
             s.id === group &&
@@ -1449,8 +1456,17 @@ export function VisualEditor({
       isPreviewablePage,
       compact,
       focusSection,
+      handleOpenCmsPanel,
     ],
   );
+
+  // What preview clicks mean: scope a note, reopen a custom page's panel
+  // (its body has no sections), or open the clicked section's fields.
+  const overlayMode: PreviewOverlayMode = notesOpen
+    ? "note"
+    : isCmsPage(activePage)
+      ? "page"
+      : "edit";
 
   const handleSelectTheme = useCallback(() => {
     setNotesOpen(false);
@@ -1697,8 +1713,9 @@ export function VisualEditor({
             isUpdating={isUpdating}
             notice={previewNotice}
             onEditGroup={handleEditGroup}
+            onEditPage={handleOpenCmsPanel}
             onPatched={handlePatched}
-            overlayMode={notesOpen ? "note" : "edit"}
+            overlayMode={overlayMode}
             frameRef={previewRef}
           />
         </div>
@@ -1765,8 +1782,9 @@ export function VisualEditor({
           isUpdating={isUpdating}
           notice={previewNotice}
           onEditGroup={handleEditGroup}
+          onEditPage={handleOpenCmsPanel}
           onPatched={handlePatched}
-          overlayMode={notesOpen ? "note" : "edit"}
+          overlayMode={overlayMode}
           frameRef={previewRef}
         />
 

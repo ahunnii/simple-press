@@ -67,9 +67,36 @@ describe("renderer link mark", () => {
     }
   });
 
-  it("respects an explicit _self target on an external link", () => {
+  it("keeps an external link with no stored choice in a new tab", () => {
+    for (const html of [
+      render("https://example.com"),
+      render("https://example.com", ""),
+    ]) {
+      expect(html).toContain('target="_blank"');
+    }
+  });
+
+  it("renders an external _self link with no target (same tab), still nofollow", () => {
     const html = render("https://example.com", "_self");
-    expect(html).toContain('target="_self"');
-    expect(html).toContain("nofollow");
+    expect(html).not.toContain("target=");
+    expect(html).toContain('rel="noopener noreferrer nofollow"');
+  });
+
+  it("renders an internal _self link with no target", () => {
+    const html = render("/contact", "_self");
+    expect(html).not.toContain("target=");
+    expect(html).not.toContain("rel=");
+  });
+
+  it("keeps an sms: href (it is not blanked by the protocol allowlist)", () => {
+    const html = render("sms:+15551234567", "_self");
+    expect(html).toContain('href="sms:+15551234567"');
+    expect(html).toContain('rel="noopener noreferrer nofollow"');
+    expect(html).not.toContain("target=");
+  });
+
+  it("still blanks a javascript: href", () => {
+    const html = render("javascript:alert(1)");
+    expect(html).not.toContain("javascript:");
   });
 });

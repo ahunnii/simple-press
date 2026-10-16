@@ -3,6 +3,7 @@ import type { Customer } from "generated/prisma";
 import type { DbClient } from "~/server/db";
 import { upsertLocalCustomer } from "~/lib/subscriptions/customer";
 
+import { isMarketingUnsubscribeCurrent } from "./consent";
 import { isOnDoNotEmailList } from "./do-not-email";
 
 /**
@@ -35,13 +36,7 @@ export function abandonedReminderBlock(
 ): Exclude<AbandonedReminderSkipReason, "do-not-email"> | null {
   if (customer.anonymizedAt) return "anonymized";
   if (customer.marketingSuppressedAt) return "suppressed";
-  if (
-    customer.marketingUnsubscribedAt &&
-    (!customer.marketingConsentAt ||
-      customer.marketingConsentAt < customer.marketingUnsubscribedAt)
-  ) {
-    return "unsubscribed";
-  }
+  if (isMarketingUnsubscribeCurrent(customer)) return "unsubscribed";
   return null;
 }
 

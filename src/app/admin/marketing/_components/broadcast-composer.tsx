@@ -1,9 +1,9 @@
 "use client";
 
+import type { JSONContent } from "@tiptap/core";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { JSONContent } from "@tiptap/core";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertTriangle,
@@ -68,16 +68,18 @@ const composerSchema = z.object({
     .string()
     .trim()
     .max(200, "Preview text must be 200 characters or fewer"),
-  body: z.custom<JSONContent>(
-    (value) =>
-      typeof value === "object" &&
-      value !== null &&
-      (value as { type?: unknown }).type === "doc",
-    "Write a message",
-  ).refine(
-    (doc) => JSON.stringify(doc).length <= CAMPAIGN_BODY_MAX_JSON_LENGTH,
-    "The message is too large. Remove some content and try again.",
-  ),
+  body: z
+    .custom<JSONContent>(
+      (value) =>
+        typeof value === "object" &&
+        value !== null &&
+        (value as { type?: unknown }).type === "doc",
+      "Write a message",
+    )
+    .refine(
+      (doc) => JSON.stringify(doc).length <= CAMPAIGN_BODY_MAX_JSON_LENGTH,
+      "The message is too large. Remove some content and try again.",
+    ),
 });
 
 type ComposerValues = z.infer<typeof composerSchema>;
@@ -97,6 +99,8 @@ type Props = {
   hasPostalAddress: boolean;
   /** Offer the media library in the editor's image dialog. */
   mediaEnabled?: boolean;
+  /** The store's public URL, for resolving page links in the preview. */
+  baseUrl?: string | null;
 };
 
 /**
@@ -121,6 +125,7 @@ export function BroadcastComposer({
   recipientCount,
   hasPostalAddress,
   mediaEnabled,
+  baseUrl,
 }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -390,6 +395,7 @@ export function BroadcastComposer({
                 form={form}
                 disabled={saveDraft.isPending || sendCampaign.isPending}
                 mediaEnabled={mediaEnabled}
+                baseUrl={baseUrl}
                 onUploadingChange={onUploadingChange}
               />
             </CardContent>

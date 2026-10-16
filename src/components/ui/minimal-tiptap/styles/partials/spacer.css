@@ -1,0 +1,44 @@
+@reference "../../../../../styles/globals.css";
+
+/*
+ * Editor chrome for spacers. The heights are the shared `.sp-spacer--*`
+ * rules in globals.css (which load in admin too), so the editor shows the
+ * same gap the storefront will; this only makes the otherwise invisible
+ * block visible and clickable: a dashed, faintly hatched box with a centred
+ * label. None of it reaches the storefront.
+ */
+
+.minimal-tiptap-editor .ProseMirror .sp-spacer {
+  @apply border-border relative box-border cursor-pointer rounded-md border border-dashed;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--muted-foreground) 9%, transparent) 0 1px,
+    transparent 1px 7px
+  );
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-spacer:hover {
+  @apply border-muted-foreground/60;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-spacer::after {
+  @apply text-muted-foreground pointer-events-none absolute inset-0 flex items-center justify-center text-[11px] leading-none font-medium tracking-wide select-none;
+  content: "Space";
+}
+.minimal-tiptap-editor .ProseMirror .sp-spacer--sm::after {
+  content: "Small space";
+}
+.minimal-tiptap-editor .ProseMirror .sp-spacer--lg::after {
+  content: "Large space";
+}
+
+/* Clicked (node selection): the editor's selection ring. */
+.minimal-tiptap-editor .ProseMirror .sp-spacer.ProseMirror-selectednode {
+  @apply border-primary bg-primary/5 outline-primary/40 outline-2 outline-offset-2;
+}
+.minimal-tiptap-editor .ProseMirror .sp-spacer.ProseMirror-selectednode::after {
+  @apply text-primary;
+}

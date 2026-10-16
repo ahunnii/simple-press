@@ -13,6 +13,7 @@ import {
   coerceQuoteLayout,
   coerceQuoteWidth,
 } from "~/lib/quote/quote-display";
+import { preserveBlankLines } from "~/lib/tiptap/blank-lines";
 import {
   coerceColumnLayout,
   COLUMN_CLASS,
@@ -25,7 +26,7 @@ import {
   DETAILS_CONTENT_DATA_TYPE,
   DETAILS_SUMMARY_CLASS,
 } from "~/lib/tiptap/details-nodes";
-import { isInternalHref } from "~/lib/tiptap/link-extension";
+import { isInternalHref, LINK_PROTOCOLS } from "~/lib/tiptap/link-extension";
 import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
@@ -49,7 +50,8 @@ type TiptapRendererProps = {
   className?: string;
 };
 
-const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
+/** `URL.protocol` form (`"sms:"`) of the shared link allowlist, so the two can't drift. */
+const ALLOWED_LINK_PROTOCOLS = new Set(LINK_PROTOCOLS.map((p) => `${p}:`));
 
 /**
  * The node/mark half lives in `~/lib/tiptap/renderer-extensions` so a node
@@ -520,8 +522,15 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
       return [];
     }
 
+    // The editor shows a blank line (empty paragraph, trailing Shift+Enter)
+    // through ProseMirror's trailing `<br>`; `generateHTML` emits `<p></p>`,
+    // which is zero tall and lets template margins collapse through it. Pad
+    // those with a real `<br>` (and drop TrailingNode's invisible end
+    // paragraph) so the storefront keeps the owner's spacing.
+    const doc = preserveBlankLines(sanitized);
+
     const ctx: RenderContext = { embedsEnabled };
-    return sanitized.content.map((node, index) =>
+    return doc.content.map((node, index) =>
       renderBlock(node, String(index), ctx),
     );
   }, [content, embedsEnabled]);

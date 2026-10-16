@@ -166,8 +166,15 @@ describe("sanitizeTiptapDoc — link marks", () => {
     expect(out?.content?.[0]?.content?.[0]?.marks).toEqual([]);
   });
 
-  it("keeps relative, mailto and tel links", () => {
-    for (const href of ["/shop", "#top", "mailto:a@b.c", "tel:+15551234567"]) {
+  it("keeps relative, mailto, tel and sms links", () => {
+    for (const href of [
+      "/shop",
+      "#top",
+      "mailto:a@b.c",
+      "tel:+15551234567",
+      "sms:+15551234567",
+      "sms:+15551234567?body=Hi",
+    ]) {
       const out = sanitizeTiptapDoc(
         doc(para(text("t", [{ type: "link", attrs: { href } }]))),
         schema,

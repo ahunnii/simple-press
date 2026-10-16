@@ -11,7 +11,7 @@ type WealthLinkProps = {
 
 /**
  * The site's primary link treatment: sage border-bottom underline, no
- * `text-decoration`. Renders a real `<a>` for external/mailto/tel targets
+ * `text-decoration`. Renders a real `<a>` for external/mailto/tel/sms targets
  * and a Next `Link` for internal routes.
  */
 export function WealthLink({
@@ -24,7 +24,8 @@ export function WealthLink({
     external ??
     (/^https?:\/\//i.test(href) ||
       href.startsWith("mailto:") ||
-      href.startsWith("tel:"));
+      href.startsWith("tel:") ||
+      href.startsWith("sms:"));
 
   if (isExternal) {
     const opensNewTab = /^https?:\/\//i.test(href);

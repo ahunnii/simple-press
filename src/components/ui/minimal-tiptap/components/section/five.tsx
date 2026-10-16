@@ -15,6 +15,7 @@ import {
   FormInput,
   Frame,
   Images,
+  MoveVertical,
   Table,
 } from "lucide-react";
 
@@ -40,7 +41,8 @@ type InsertElementAction =
   | "form"
   | "table"
   | "columns"
-  | "details";
+  | "details"
+  | "spacer";
 interface InsertElement extends FormatAction {
   value: InsertElementAction;
 }
@@ -147,6 +149,16 @@ const formatActions: InsertElement[] = [
     canExecute: (editor) => editor.can().setDetails(),
     shortcuts: [],
   },
+  {
+    value: "spacer",
+    label: "Space",
+    icon: <MoveVertical className="size-5" />,
+    action: (editor) =>
+      editor.chain().focus().insertSpacer({ size: "md" }).run(),
+    isActive: () => false,
+    canExecute: (editor) => editor.can().insertSpacer({ size: "md" }),
+    shortcuts: [],
+  },
 ];
 
 interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
@@ -177,7 +189,11 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
     .filter((a) => embedsEnabled || a !== "embed")
     .filter((a) => quotesEnabled || a !== "quoteCalculator")
     .filter((a) => formsEnabled || a !== "form")
-    .filter((a) => layoutBlocksEnabled || (a !== "columns" && a !== "details"));
+    .filter(
+      (a) =>
+        layoutBlocksEnabled ||
+        (a !== "columns" && a !== "details" && a !== "spacer"),
+    );
   // The video extension is only registered when the editor was given a
   // `videoUploader`, so its presence doubles as the "videos enabled" flag.
   const videosEnabled = editor.extensionManager.extensions.some(

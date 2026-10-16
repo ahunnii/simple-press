@@ -190,17 +190,35 @@ describe("POST /api/unsubscribe", () => {
     expect(await db.marketingConsentEvent.count()).toBe(1);
   });
 
-  it("logs no event for a customer who was never subscribed", async () => {
-    const { customer, token } = await setup({ subscribed: false });
+  it("records the opt-out for a customer who was never subscribed (stamp, list entry, event), once", async () => {
+    const { business, customer, token } = await setup({ subscribed: false });
 
     const res = await POST(req("POST", token));
 
     expect(res.status).toBe(200);
-    expect(await db.marketingConsentEvent.count()).toBe(0);
+    const after = await db.customer.findUniqueOrThrow({
+      where: { id: customer.id },
+    });
+    expect(after.acceptsMarketing).toBe(false);
+    expect(after.marketingUnsubscribedAt).toBeInstanceOf(Date);
+    expect(await isOnDoNotEmailList(db, business.id, "u@test.dev")).toEqual({
+      reason: "UNSUBSCRIBED",
+    });
+    const events = await db.marketingConsentEvent.findMany();
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      customerId: customer.id,
+      type: "OPT_OUT",
+      source: "ONE_CLICK",
+    });
+
+    // Idempotent: a repeat keeps the first stamp and logs nothing more.
+    await POST(req("POST", token));
     expect(
       (await db.customer.findUniqueOrThrow({ where: { id: customer.id } }))
         .marketingUnsubscribedAt,
-    ).toBeInstanceOf(Date);
+    ).toEqual(after.marketingUnsubscribedAt);
+    expect(await db.marketingConsentEvent.count()).toBe(1);
   });
 
   it("rejects a tampered token with 400 and changes nothing", async () => {

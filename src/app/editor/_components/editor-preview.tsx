@@ -38,6 +38,8 @@ export type EditorPreviewProps = {
     group: string,
     target?: PreviewEditTarget,
   ) => void;
+  /** Fired when the preview body is clicked in the "page" overlay mode. */
+  onEditPage?: () => void;
   /** Fired when the iframe acks a live text patch. */
   onPatched: (applied: string[], missed: string[]) => void;
   /** Imperative handle to the underlying `PreviewFrame`. */
@@ -49,7 +51,10 @@ export type EditorPreviewProps = {
    * `width` is ignored.
    */
   compact?: boolean;
-  /** Relabels preview hotspots — "note" while the Notes panel is open. */
+  /**
+   * Relabels preview hotspots — "note" while the Notes panel is open; "page"
+   * on a custom page, where body clicks reopen the page panel.
+   */
   overlayMode?: PreviewOverlayMode;
 };
 
@@ -66,6 +71,7 @@ export function EditorPreview({
   isUpdating,
   notice,
   onEditGroup,
+  onEditPage,
   onPatched,
   frameRef,
   compact = false,
@@ -96,6 +102,7 @@ export function EditorPreview({
             minHeight={0}
             isUpdating={isUpdating}
             onEditGroup={onEditGroup}
+            onEditPage={onEditPage}
             onPatched={onPatched}
             overlayMode={overlayMode}
             // Pinned to the box so the iframe gets a definite height to fill.
@@ -145,6 +152,7 @@ export function EditorPreview({
         width={width}
         isUpdating={isUpdating}
         onEditGroup={onEditGroup}
+        onEditPage={onEditPage}
         onPatched={onPatched}
         overlayMode={overlayMode}
         className="bg-background h-full max-w-full overflow-hidden rounded-lg border shadow-sm"

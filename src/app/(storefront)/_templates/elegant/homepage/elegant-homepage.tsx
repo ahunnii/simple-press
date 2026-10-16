@@ -13,10 +13,15 @@ import { ElegantTestimonials } from "./elegant-testimonials";
 import { ElegantTrustBadges } from "./elegant-trust-badges";
 
 export async function ElegantHomePage() {
-  const [homepage, flags] = await Promise.all([
+  const [homepage, flags, policies] = await Promise.all([
     api.business.getHomepage(),
     getBusinessFlags(),
+    api.content.getSimplifiedPages({ type: "policy" }),
   ]);
+  // Newsletter consent links to the store's own privacy policy when published;
+  // otherwise the consent note falls back to the platform policy.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const privacyHref = privacyPolicy ? `/${privacyPolicy.slug}` : undefined;
 
   const testimonials = flags.isEnabled("testimonials")
     ? await api.testimonial.listRandom({ limit: 9 })
@@ -127,6 +132,7 @@ export async function ElegantHomePage() {
         <ElegantNewsletter
           customFields={customFields}
           sectionAttrs={sectionGroupAttr("homepage", "newsletter")}
+          privacyHref={privacyHref}
         />
       )}
     </>

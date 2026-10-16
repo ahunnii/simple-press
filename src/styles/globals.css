@@ -5100,6 +5100,29 @@ body:has(.pollen) {
   }
 }
 
+/* ── Spacers ──────────────────────────────────────────────────────────────
+   Deliberate vertical space between blocks (`src/lib/tiptap/spacer-node.ts`).
+   An empty, aria-hidden div: no border or fill, only height. A template may
+   retune the steps in its own scope:
+     --sp-spacer-sm   (1.5rem)
+     --sp-spacer-md   (3rem)
+     --sp-spacer-lg   (clamp(3.5rem, 9vw, 6rem) — shrinks on phones)
+   The editor adds its dashed outline + label in minimal-tiptap's styles.    */
+.sp-spacer {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.sp-spacer--sm {
+  height: var(--sp-spacer-sm, 1.5rem);
+}
+.sp-spacer--md {
+  height: var(--sp-spacer-md, 3rem);
+}
+.sp-spacer--lg {
+  height: var(--sp-spacer-lg, clamp(3.5rem, 9vw, 6rem));
+}
+
 /* ── Per-page "Wide" width (Page.template = "full-width") ─────────────────
    Templates widen the body to their standard container and add
    `.sp-prose-wide` to the TiptapRenderer root. Running text keeps a reading

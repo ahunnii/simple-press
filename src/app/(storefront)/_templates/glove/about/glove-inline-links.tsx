@@ -8,14 +8,15 @@ const LINK_PATTERN = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 const LINK_CLASS =
   "text-[var(--glove-primary)] underline decoration-1 underline-offset-4 transition-colors hover:text-[var(--glove-primary-hover)]";
 
-/** Only same-site paths, https links, mailto and tel are ever linked. */
+/** Only same-site paths, https links, mailto, tel and sms are ever linked. */
 function isSafeHref(href: string): boolean {
   if (href.startsWith("//")) return false;
   return (
     href.startsWith("/") ||
     href.startsWith("https://") ||
     href.startsWith("mailto:") ||
-    href.startsWith("tel:")
+    href.startsWith("tel:") ||
+    href.startsWith("sms:")
   );
 }
 

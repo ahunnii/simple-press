@@ -1,11 +1,6 @@
 import type { NodeType, Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Fragment } from "@tiptap/pm/model";
-import {
-  NodeSelection,
-  Plugin,
-  PluginKey,
-  TextSelection,
-} from "@tiptap/pm/state";
+import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
 import type { ColumnLayout } from "~/lib/tiptap/columns-node";
@@ -14,6 +9,15 @@ import {
   columnCountForLayout,
   Columns,
 } from "~/lib/tiptap/columns-node";
+
+import { findColumnsAbove, findColumnsInsertRange } from "./helpers";
+
+export {
+  findColumnsAbove,
+  findColumnsInsertRange,
+  type FoundColumns,
+  type InsertRange,
+} from "./helpers";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -35,27 +39,6 @@ declare module "@tiptap/core" {
   }
 }
 
-interface FoundColumns {
-  node: ProseMirrorNode;
-  /** Document position directly before the columns node. */
-  pos: number;
-}
-
-/** The nearest `columns` ancestor of a resolved position, if any. */
-function findColumnsAbove($pos: {
-  depth: number;
-  node: (depth: number) => ProseMirrorNode;
-  before: (depth: number) => number;
-}): FoundColumns | null {
-  for (let depth = $pos.depth; depth > 0; depth--) {
-    const node = $pos.node(depth);
-    if (node.type.name === "columns") {
-      return { node, pos: $pos.before(depth) };
-    }
-  }
-  return null;
-}
-
 /** An empty column holds just one empty paragraph (what `createAndFill` makes). */
 function isEmptyColumn(column: ProseMirrorNode): boolean {
   return (
@@ -66,26 +49,39 @@ function isEmptyColumn(column: ProseMirrorNode): boolean {
   );
 }
 
-/** Ancestors whose children must stay put: a row is never inserted inside them. */
-const NO_INSERT_PARENTS = new Set(["listItem", "tableCell", "tableHeader"]);
-
 const activeColumnKey = new PluginKey<DecorationSet>("columnsActiveColumn");
+
+/** Editors that have had focus at least once (see `insertColumns`). */
+const focusedEditors = new WeakSet<object>();
+
+/** Whether this editor has ever been focused (its selection is the owner's). */
+export function hasBeenFocused(editor: object): boolean {
+  return focusedEditors.has(editor);
+}
 
 /**
  * Editor-side `columns`: the shared schema node plus the insert / re-layout /
  * remove commands and a decoration that marks the column holding the cursor.
  */
 export const EditorColumns = Columns.extend({
+  onFocus() {
+    focusedEditors.add(this.editor);
+  },
+
   addCommands() {
     return {
       insertColumns:
         (attrs) =>
-        ({ state, tr, dispatch }) => {
-          const { selection, schema } = state;
-          const { $from } = selection;
+        ({ editor, state, tr, dispatch }) => {
+          const { schema } = state;
 
-          // Rows never nest.
-          if (findColumnsAbove($from)) return false;
+          // Rows never nest. An editor that's never been focused has only
+          // its default selection (the doc start, maybe inside a row), so
+          // the row goes at the end there — see the helper.
+          const range = findColumnsInsertRange(state, {
+            atDocEnd: !hasBeenFocused(editor),
+          });
+          if (!range) return false;
 
           const columnsType: NodeType | undefined = schema.nodes.columns;
           const columnType: NodeType | undefined = schema.nodes.column;
@@ -102,41 +98,7 @@ export const EditorColumns = Columns.extend({
             columns as ProseMirrorNode[],
           );
           if (!node) return false;
-
-          // Where the row goes: replacing an empty paragraph, otherwise
-          // after the current block, climbing out of list items / table cells.
-          let from: number;
-          let to: number;
-          if (selection instanceof NodeSelection) {
-            const index = $from.index();
-            if (!$from.parent.canReplaceWith(index, index, columnsType)) {
-              return false;
-            }
-            from = to = selection.to;
-          } else {
-            let found = false;
-            from = to = 0;
-            for (let depth = $from.depth; depth > 0; depth--) {
-              const parent = $from.node(depth - 1);
-              if (NO_INSERT_PARENTS.has(parent.type.name)) continue;
-              const index = $from.index(depth - 1);
-              if (!parent.canReplaceWith(index, index, columnsType)) continue;
-              const block = $from.node(depth);
-              if (
-                depth === $from.depth &&
-                block.type.name === "paragraph" &&
-                block.content.size === 0
-              ) {
-                from = $from.before(depth);
-                to = $from.after(depth);
-              } else {
-                from = to = $from.after(depth);
-              }
-              found = true;
-              break;
-            }
-            if (!found) return false;
-          }
+          const { from, to } = range;
 
           if (dispatch) {
             tr.replaceWith(from, to, node);

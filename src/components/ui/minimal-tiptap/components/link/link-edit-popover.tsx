@@ -5,6 +5,7 @@ import { Link2Icon } from "@radix-ui/react-icons";
 
 import type { toggleVariants } from "~/components/ui/toggle";
 import type { LinkVariant } from "~/lib/tiptap/link-extension";
+import { linkTargetAttr } from "~/lib/tiptap/link-target";
 import {
   Popover,
   PopoverContent,
@@ -31,6 +32,7 @@ const LinkEditPopover = ({ editor, size, variant }: LinkEditPopoverProps) => {
       openInNewTab?: boolean,
       variant?: LinkVariant | null,
     ) => {
+      const target = linkTargetAttr(!!openInNewTab);
       editor
         .chain()
         .focus()
@@ -43,13 +45,13 @@ const LinkEditPopover = ({ editor, size, variant }: LinkEditPopoverProps) => {
               type: "link",
               attrs: {
                 href: url,
-                target: openInNewTab ? "_blank" : "",
+                target,
                 variant: variant ?? null,
               },
             },
           ],
         })
-        .setLink({ href: url })
+        .setLink({ href: url, target, variant: variant ?? null })
         .run();
 
       editor.commands.enter();

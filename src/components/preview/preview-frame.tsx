@@ -43,6 +43,11 @@ type Props = {
     group: string,
     target?: PreviewEditTarget,
   ) => void;
+  /**
+   * Called when the overlay sends sp:edit-page — a click on a custom page's
+   * body (only sent in the "page" overlay mode).
+   */
+  onEditPage?: () => void;
   /** Called when the iframe acks a live text patch (sp:patched). */
   onPatched?: (applied: string[], missed: string[]) => void;
   /** Whether a draft save is in-flight — shows a shimmer over the iframe. */
@@ -59,7 +64,8 @@ type Props = {
   minHeight?: string | number;
   /**
    * What hotspot clicks mean right now — relabels the in-iframe overlay
-   * ("Edit" vs "Pick for note"). Re-sent on every `sp:ready`, so it survives
+   * ("Edit" vs "Pick for note"; "page" reopens the custom-page panel on body
+   * clicks). Re-sent on every `sp:ready`, so it survives
    * iframe reloads. Defaults to "edit".
    */
   overlayMode?: PreviewOverlayMode;
@@ -75,6 +81,7 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
     {
       path = "/",
       onEditGroup,
+      onEditPage,
       onPatched,
       isUpdating = false,
       width = "100%",
@@ -225,6 +232,9 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
       if (msg.type === "sp:edit-group") {
         const target = sanitizeEditTarget(msg.field, msg.item);
         onEditGroup?.(msg.page, msg.group, target ?? undefined);
+      }
+      if (msg.type === "sp:edit-page") {
+        onEditPage?.();
       }
       if (msg.type === "sp:patched") {
         onPatched?.(msg.applied, msg.missed);

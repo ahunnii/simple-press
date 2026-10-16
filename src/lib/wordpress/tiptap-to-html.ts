@@ -15,6 +15,11 @@ import {
 } from "~/lib/tiptap/details-nodes";
 import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
+import {
+  coerceSpacerSize,
+  SPACER_EXPORT_HEIGHT,
+  spacerClassName,
+} from "~/lib/tiptap/spacer-node";
 
 /**
  * Server-side TipTap document -> HTML serializer for the WordPress export.
@@ -240,6 +245,12 @@ export function tiptapToHtml(
     }
     if (node.type === "detailsContent") {
       return `<div class="${DETAILS_CONTENT_CLASS}" data-type="${DETAILS_CONTENT_DATA_TYPE}">${renderChildren(node)}</div>`;
+    }
+    if (node.type === "spacer") {
+      // Our `.sp-spacer--*` heights don't travel with the export, so the gap
+      // is inlined; `wp-block-spacer` is WordPress's own spacer block class.
+      const size = coerceSpacerSize(node.attrs?.size);
+      return `<div class="${spacerClassName(size)} wp-block-spacer" data-type="spacer" data-size="${size}" style="height:${SPACER_EXPORT_HEIGHT[size]}" aria-hidden="true"></div>`;
     }
 
     if (isGalleryNode(node)) {

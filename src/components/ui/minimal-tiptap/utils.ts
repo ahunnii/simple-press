@@ -61,6 +61,37 @@ export const getOutput = (
   }
 };
 
+/**
+ * Gives a childless JSON doc (`{ type: "doc", content: [] }` — what empty
+ * rich-text fields store/default to) its one empty paragraph; anything else
+ * passes through by reference.
+ *
+ * ProseMirror accepts the childless doc without complaint, but it breaks
+ * the schema (`block+`), and the editor's initial selection over it is an
+ * `AllSelection` with no textblock to sit in. Until the owner clicks in,
+ * every block command (`can()`) then fails, so Insert → Columns,
+ * Collapsible section, Code block… sat greyed out, and the placeholder
+ * couldn't show. Only the editor's copy is filled: the form value is left
+ * as stored, so nothing turns dirty.
+ */
+export const fillEmptyDoc = <T>(content: T): T => {
+  if (
+    content !== null &&
+    typeof content === "object" &&
+    !Array.isArray(content) &&
+    (content as { type?: unknown }).type === "doc"
+  ) {
+    const children = (content as { content?: unknown }).content;
+    if (
+      children === undefined ||
+      (Array.isArray(children) && !children.length)
+    ) {
+      return { ...content, content: [{ type: "paragraph" }] };
+    }
+  }
+  return content;
+};
+
 export const isUrl = (
   text: string,
   options: { requireHostname: boolean; allowBase64?: boolean } = {

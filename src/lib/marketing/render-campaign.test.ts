@@ -163,6 +163,37 @@ describe("renderCampaign with a tiptap body", () => {
     expect(text).not.toContain("__SP_BODY_TEXT__");
   });
 
+  it("resolves site-relative links against the business baseUrl in html and text", async () => {
+    const input = {
+      ...tiptapInput,
+      business: { ...business, baseUrl: "https://acme.test" },
+      bodyJson: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Contact us",
+                marks: [{ type: "link", attrs: { href: "/contact" } }],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const { html, text } = await renderCampaign(input);
+    expect(html).toContain('href="https://acme.test/contact"');
+    expect(text).toContain("Contact us (https://acme.test/contact)");
+
+    const noBase = await renderCampaign({
+      ...input,
+      business,
+    });
+    expect(noBase.html).not.toContain("/contact");
+  });
+
   it("prefers an explicit bodyHtml over bodyJson", async () => {
     const { html } = await renderCampaign({
       ...tiptapInput,

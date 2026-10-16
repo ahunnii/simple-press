@@ -17,7 +17,18 @@ import type { JSONContent } from "@tiptap/core";
  *  - marks: bold, italic, underline, strike, link, textStyle (color only),
  *    highlight
  *  - attrs: textAlign on paragraph/heading, image src/alt/width/size/align
+ *
+ * Links: absolute http(s) and mailto: pass through. A site-relative link
+ * (`/contact`, as the page picker inserts) is resolved against
+ * `options.baseUrl` (the store's public URL) into an absolute link; with no
+ * base URL it is dropped. Everything else (javascript:, data:, `//host`) is
+ * dropped.
  */
+export type TiptapEmailOptions = {
+  /** The store's public origin, e.g. `https://shop.example.com`. */
+  baseUrl?: string | null;
+};
+
 export type TiptapEmailResult = {
   html: string;
   text: string;
@@ -64,12 +75,37 @@ function safeColor(value: unknown): string | null {
   return HEX_COLOR.test(v) || RGB_COLOR.test(v) ? v : null;
 }
 
-/** An absolute http(s) or mailto URL, else `null`. */
-function safeHref(value: unknown): string | null {
+/** The http(s) origin of a base URL, else `null`. */
+function baseOrigin(baseUrl: string | null | undefined): URL | null {
+  if (typeof baseUrl !== "string" || baseUrl.trim() === "") return null;
+  try {
+    const url = new URL(baseUrl.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * An absolute http(s) or mailto URL, else `null`. A site-relative path
+ * (`/contact`, not `//host` or `/\host`) is resolved against `baseUrl`.
+ */
+function safeHref(value: unknown, baseUrl?: string | null): string | null {
   if (typeof value !== "string") return null;
   const v = value.trim();
   if (v === "" || hasControlChars(v)) return null;
   if (/^mailto:[^\s]+$/i.test(v)) return v;
+  if (v.startsWith("/")) {
+    if (v.startsWith("//") || v.startsWith("/\\")) return null;
+    const base = baseOrigin(baseUrl);
+    if (!base) return null;
+    try {
+      const resolved = new URL(v, base);
+      return resolved.origin === base.origin ? resolved.href : null;
+    } catch {
+      return null;
+    }
+  }
   try {
     const url = new URL(v);
     return url.protocol === "https:" || url.protocol === "http:" ? v : null;
@@ -122,7 +158,7 @@ const NODE_LABELS: Record<string, string> = {
 
 // ─── Walker ──────────────────────────────────────────────────────────────
 
-type Ctx = { warnings: Set<string> };
+type Ctx = { warnings: Set<string>; baseUrl: string | null };
 
 function warn(ctx: Ctx, message: string) {
   ctx.warnings.add(message);
@@ -219,11 +255,11 @@ function renderMarks(
         break;
       }
       case "link": {
-        const safe = safeHref(attrs.href);
+        const safe = safeHref(attrs.href, ctx.baseUrl);
         if (!safe) {
           warn(
             ctx,
-            "Links must start with http://, https:// or mailto:; other links were removed.",
+            "Links must be web addresses (https://…), email addresses (mailto:) or pages on your site; other links were removed.",
           );
           break;
         }
@@ -468,8 +504,12 @@ function renderBlocks(nodes: JSONContent[], ctx: Ctx, depth: number): Rendered {
 
 export function tiptapToEmailHtml(
   doc: JSONContent | null | undefined,
+  options: TiptapEmailOptions = {},
 ): TiptapEmailResult {
-  const ctx: Ctx = { warnings: new Set() };
+  const ctx: Ctx = {
+    warnings: new Set(),
+    baseUrl: options.baseUrl?.trim() ?? null,
+  };
   if (!doc || typeof doc !== "object" || doc.type !== "doc") {
     return { html: "", text: "", warnings: [] };
   }

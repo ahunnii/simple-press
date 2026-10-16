@@ -288,6 +288,41 @@ describe("tiptapToHtml", () => {
     expect(result.html).not.toContain("javascript:alert(1)");
   });
 
+  it("exports link targets and sms: hrefs the same way the storefront renders them", () => {
+    const link = (text: string, attrs: Record<string, unknown>) => ({
+      type: "text",
+      marks: [{ type: "link", attrs }],
+      text,
+    });
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            link("default", { href: "https://a.example" }),
+            link("same", { href: "https://b.example", target: "_self" }),
+            link("new", { href: "/contact", target: "_blank" }),
+            link("text", { href: "sms:+15551234567", target: "_self" }),
+          ],
+        },
+      ],
+    };
+
+    const { html } = tiptapToHtml(doc, emptyGalleries);
+    const anchors = html.match(/<a [^>]*>/g) ?? [];
+
+    expect(anchors).toHaveLength(4);
+    expect(anchors[0]).toContain('target="_blank"');
+    expect(anchors[0]).toContain('rel="noopener noreferrer nofollow"');
+    expect(anchors[1]).not.toContain("target=");
+    expect(anchors[1]).toContain('rel="noopener noreferrer nofollow"');
+    expect(anchors[2]).toContain('target="_blank"');
+    expect(anchors[2]).not.toContain("rel=");
+    expect(anchors[3]).toContain('href="sms:+15551234567"');
+    expect(anchors[3]).not.toContain("target=");
+  });
+
   it("strips onclick-style attributes from custom (gallery) HTML", () => {
     // Craft a gallery whose caption tries to inject markup — escapeAttr should
     // neutralize it, and the sanitize pass strips any surviving handler attrs.
@@ -606,6 +641,42 @@ describe("tiptapToHtml", () => {
     expect(result.html).toBe(
       '<details class="sp-details"><summary class="sp-details__summary"><strong>Hours</strong></summary><div class="sp-details__content" data-type="detailsContent"><p>Open daily</p><figure><iframe src="https://example.com/e" loading="lazy"></iframe></figure></div></details>',
     );
+    expect(result.warnings).toEqual([]);
+  });
+  it("exports a spacer with an inline height, coercing a bogus size", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        { type: "spacer", attrs: { size: "lg" } },
+        {
+          type: "columns",
+          attrs: { layout: "2" },
+          content: [
+            {
+              type: "column",
+              content: [{ type: "spacer", attrs: { size: "sm" } }],
+            },
+            {
+              type: "column",
+              content: [{ type: "spacer", attrs: { size: '"><b>' } }],
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain(
+      '<div class="sp-spacer sp-spacer--lg wp-block-spacer" data-type="spacer" data-size="lg" style="height:clamp(3.5rem, 9vw, 6rem)" aria-hidden="true"></div>',
+    );
+    expect(result.html).toContain(
+      'class="sp-spacer sp-spacer--sm wp-block-spacer" data-type="spacer" data-size="sm" style="height:1.5rem"',
+    );
+    expect(result.html).toContain(
+      'class="sp-spacer sp-spacer--md wp-block-spacer" data-type="spacer" data-size="md" style="height:3rem"',
+    );
+    expect(result.html).not.toContain("<b>");
     expect(result.warnings).toEqual([]);
   });
 });

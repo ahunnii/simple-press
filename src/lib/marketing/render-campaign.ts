@@ -17,6 +17,11 @@ export const UNSUBSCRIBE_PLACEHOLDER = "__SP_UNSUBSCRIBE_URL__";
 export type CampaignBusiness = {
   name: string;
   logoUrl?: string | null;
+  /**
+   * The store's public URL. Site-relative links in the body (`/contact`) are
+   * resolved against it; without it they are left out of the email.
+   */
+  baseUrl?: string | null;
   ownerEmail?: string | null;
   addressStreet?: string | null;
   addressCity?: string | null;
@@ -115,7 +120,9 @@ export async function renderCampaign(
   const text = useWalkerText
     ? rawText.replace(
         BODY_TEXT_PLACEHOLDER,
-        () => tiptapToEmailHtml(input.bodyJson).text,
+        () =>
+          tiptapToEmailHtml(input.bodyJson, { baseUrl: input.business.baseUrl })
+            .text,
       )
     : rawText;
   return { html, text };
@@ -138,7 +145,7 @@ export function campaignEmailElement(
     bodyHtml = explicit
       ? input.bodyHtml!
       : input.bodyJson
-        ? tiptapToEmailHtml(input.bodyJson).html
+        ? tiptapToEmailHtml(input.bodyJson, { baseUrl: business.baseUrl }).html
         : "";
   }
   return MarketingBroadcastEmail({

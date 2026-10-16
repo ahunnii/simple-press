@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
 import { verifyNewsletterConfirmToken } from "~/lib/email/newsletter-confirm-token";
-import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { resolveUnsubscribePageState } from "~/lib/marketing/unsubscribe";
 import { db } from "~/server/db";
 
 import { EmailPreferencesCard } from "./_components/email-preferences-card";
@@ -31,7 +31,8 @@ function first(value: string | string[] | undefined): string | undefined {
  *  - `?s=confirm&t=` : where GET /api/unsubscribe lands people. Unsubscribing
  *    is a button press (POST /api/unsubscribe), never a page load, so link
  *    scanners can't unsubscribe anyone. Once unsubscribed (the state is read
- *    from the database, not from `s`) the card offers a Resubscribe undo.
+ *    from the database, not from `s`) the card offers a Resubscribe undo —
+ *    only to people who had opted in before.
  */
 export default async function EmailPreferencesPage({
   searchParams,
@@ -88,34 +89,26 @@ export default async function EmailPreferencesPage({
       );
     }
   } else if ((status === "confirm" || status === "unsubscribed") && token) {
-    const payload = verifyUnsubscribeToken(token);
-    // A token for another store (or garbage) gets the generic state: no
-    // buttons, nothing implying it did anything.
-    const customer =
-      payload?.businessId === business.id
-        ? await db.customer.findFirst({
-            where: {
-              id: payload.customerId,
-              businessId: business.id,
-              anonymizedAt: null,
-            },
-            select: { acceptsMarketing: true },
-          })
-        : null;
-    if (!customer) {
+    // `?s=unsubscribed` is never trusted: the state comes from the database,
+    // so a hand-edited or stale link can't claim someone is unsubscribed when
+    // they are not. Anyone not already effectively unsubscribed (including a
+    // never-subscribed abandoned-checkout reminder recipient) is asked first,
+    // and the button's POST records the opt-out.
+    const state = await resolveUnsubscribePageState(token, business.id);
+    // Resubscribe is offered only to people who had opted in before.
+    const canResubscribe =
+      state.kind !== "invalid" && state.canResubscribe && marketingEnabled;
+    if (state.kind === "invalid") {
       card = (
         <EmailPreferencesCard mode="invalid" businessName={business.name} />
       );
-    } else if (customer.acceptsMarketing) {
-      // Subscribed: ask first. `?s=unsubscribed` is never trusted, the state
-      // comes from the database, so a hand-edited or stale link can't claim
-      // someone is unsubscribed when they are not.
+    } else if (state.kind === "unsubscribe") {
       card = (
         <EmailPreferencesCard
           mode="unsubscribe"
           businessName={business.name}
           token={token}
-          canResubscribe={marketingEnabled}
+          canResubscribe={canResubscribe}
         />
       );
     } else {
@@ -123,7 +116,7 @@ export default async function EmailPreferencesPage({
         <EmailPreferencesCard
           mode="unsubscribed"
           businessName={business.name}
-          token={marketingEnabled ? token : undefined}
+          token={canResubscribe ? token : undefined}
         />
       );
     }
@@ -134,7 +127,8 @@ export default async function EmailPreferencesPage({
   const logoUrl = row?.siteContent?.logoUrl ?? null;
 
   return (
-    <main className="mx-auto w-full max-w-xl px-6 py-16 sm:py-24">
+    // The template layout already provides the page's <main> landmark.
+    <div className="mx-auto w-full max-w-xl px-6 py-16 sm:py-24">
       <header className="mb-8 text-center">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -150,6 +144,6 @@ export default async function EmailPreferencesPage({
         )}
       </header>
       {card}
-    </main>
+    </div>
   );
 }

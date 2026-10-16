@@ -249,7 +249,7 @@ export const marketingRouter = createTRPCRouter({
    * before the owner enables the feature.
    */
   listRecipients: ownerAdminProcedure.query(async ({ ctx }) => {
-    const [count, suppressedCount] = await Promise.all([
+    const [count, suppressedCount, business] = await Promise.all([
       ctx.db.customer.count({
         where: marketingAudienceWhere(ctx.businessId),
       }),
@@ -263,8 +263,18 @@ export const marketingRouter = createTRPCRouter({
           marketingSuppressedAt: { not: null },
         },
       }),
+      // The store's public URL, so the composer's preview resolves page links
+      // the same way the sent email does.
+      ctx.db.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { subdomain: true, customDomain: true, domainStatus: true },
+      }),
     ]);
-    return { count, suppressedCount };
+    return {
+      count,
+      suppressedCount,
+      baseUrl: business ? getBusinessUrl(business) : null,
+    };
   }),
 
   /**
@@ -372,6 +382,7 @@ export const marketingRouter = createTRPCRouter({
         contentFormat: true,
         bodyText: true,
         bodyJson: true,
+        baseUrl: true,
         startedAt: true,
         canceledAt: true,
         lastError: true,

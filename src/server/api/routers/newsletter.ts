@@ -16,6 +16,7 @@ import { sendNewsletterConfirmEmail } from "~/lib/email/templates";
 import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import {
+  hasMarketingConsentHistory,
   MARKETING_SUPPRESSION_REASONS,
   marketingOptInData,
 } from "~/lib/marketing/consent";
@@ -389,7 +390,9 @@ export const newsletterRouter = createTRPCRouter({
    * back on — but NOT to lift a suppression: unsubscribe tokens never expire
    * and get forwarded with the email, so they say nothing about who controls
    * the inbox now. A suppressed address is refused (the card tells them to
-   * sign up again, whose double opt-in proves current inbox access).
+   * sign up again, whose double opt-in proves current inbox access), and so is
+   * someone who never opted in: the link would otherwise subscribe a shopper
+   * who only ever got an abandoned-checkout reminder.
    */
   resubscribe: publicProcedure
     .input(tokenInputSchema)
@@ -415,6 +418,8 @@ export const newsletterRouter = createTRPCRouter({
           select: {
             email: true,
             acceptsMarketing: true,
+            marketingConsentAt: true,
+            marketingConsentSource: true,
             marketingSuppressedAt: true,
             marketingSuppressionReason: true,
           },
@@ -435,6 +440,12 @@ export const newsletterRouter = createTRPCRouter({
           (listed && listed.reason !== "UNSUBSCRIBED")
         ) {
           return { ok: false as const, reason: "suppressed" as const };
+        }
+        // Undo only restores a consent that existed. Someone who never opted
+        // in (e.g. an abandoned-checkout reminder recipient) is never offered
+        // the button; a direct call is refused the same way.
+        if (!hasMarketingConsentHistory(customer)) {
+          return { ok: false as const, reason: "not-subscribed" as const };
         }
 
         const result = await tx.customer.updateMany({

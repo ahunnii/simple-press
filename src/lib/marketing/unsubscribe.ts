@@ -2,10 +2,18 @@ import * as Sentry from "@sentry/nextjs";
 
 import type { UnsubscribePayload } from "~/lib/email/unsubscribe-token";
 import type { MarketingConsentEventSource } from "~/lib/marketing/consent-log";
+import type { TxClient } from "~/server/db";
 import { getBusinessUrl } from "~/lib/business-url";
 import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
+import {
+  hasMarketingConsentHistory,
+  isMarketingUnsubscribeCurrent,
+} from "~/lib/marketing/consent";
 import { recordConsentEvent } from "~/lib/marketing/consent-log";
-import { addToDoNotEmail } from "~/lib/marketing/do-not-email";
+import {
+  addToDoNotEmail,
+  isOnDoNotEmailList,
+} from "~/lib/marketing/do-not-email";
 import { db } from "~/server/db";
 
 /**
@@ -64,9 +72,7 @@ export function parseUnsubscribeToken(
  * Read-only: verify the token and find the storefront origin of the business
  * it belongs to (for the branded confirm page). Writes nothing.
  */
-export async function resolveUnsubscribeToken(
-  token: string | null,
-): Promise<
+export async function resolveUnsubscribeToken(token: string | null): Promise<
   | {
       ok: true;
       token: string;
@@ -108,9 +114,12 @@ export type UnsubscribeWriteSource = Extract<
 >;
 
 /**
- * Opt the token's customer out. Idempotent. The Customer update, the
+ * Opt the token's customer out. Idempotent. Works for people who never
+ * subscribed too: abandoned-checkout reminders go to shoppers with
+ * `acceptsMarketing: false`, and their unsubscribe must still stick (it is
+ * what blocks the next reminder). The Customer update, the UNSUBSCRIBED
  * do-not-email entry and the OPT_OUT consent event commit together; the event
- * is recorded only when the customer was actually subscribed.
+ * is recorded only when this call recorded a new unsubscribe.
  */
 export async function applyUnsubscribe(
   token: string | null,
@@ -157,42 +166,54 @@ export async function applyUnsubscribe(
     const now = new Date();
     const changed = await db.$transaction(async (tx) => {
       const customer = await tx.customer.findFirst({
-        where: { id: payload.customerId, businessId: payload.businessId },
+        // An erased customer has nothing left to opt out (and its placeholder
+        // address must not land on the do-not-email list).
+        where: {
+          id: payload.customerId,
+          businessId: payload.businessId,
+          anonymizedAt: null,
+        },
         select: {
           id: true,
           email: true,
           acceptsMarketing: true,
           marketingUnsubscribedAt: true,
+          marketingConsentAt: true,
         },
       });
       if (!customer) return false;
 
-      const wasSubscribed = customer.acceptsMarketing;
-      // Already unsubscribed: keep the first click's timestamp and evidence.
-      if (!wasSubscribed && customer.marketingUnsubscribedAt) return false;
-
-      await tx.customer.update({
-        where: { id: customer.id },
-        data: { acceptsMarketing: false, marketingUnsubscribedAt: now },
-      });
+      // Always (re)assert the list entry: idempotent, and it backfills an
+      // unsubscribe recorded before the list existed.
       await addToDoNotEmail(
         tx,
         payload.businessId,
         customer.email,
         "UNSUBSCRIBED",
       );
-      if (wasSubscribed) {
-        await recordConsentEvent(tx, {
-          businessId: payload.businessId,
-          customerId: customer.id,
-          type: "OPT_OUT",
-          source: opts.source,
-          ip: opts.ip,
-          userAgent: opts.userAgent,
-          campaignId,
-        });
+
+      // Already unsubscribed: keep the first click's timestamp and evidence.
+      if (
+        !customer.acceptsMarketing &&
+        isMarketingUnsubscribeCurrent(customer)
+      ) {
+        return false;
       }
-      return wasSubscribed;
+
+      await tx.customer.update({
+        where: { id: customer.id },
+        data: { acceptsMarketing: false, marketingUnsubscribedAt: now },
+      });
+      await recordConsentEvent(tx, {
+        businessId: payload.businessId,
+        customerId: customer.id,
+        type: "OPT_OUT",
+        source: opts.source,
+        ip: opts.ip,
+        userAgent: opts.userAgent,
+        campaignId,
+      });
+      return true;
     });
 
     if (payload.r) {
@@ -232,4 +253,75 @@ export async function applyUnsubscribe(
     });
     return SERVER_ERROR;
   }
+}
+
+/**
+ * Whether marketing email to this customer is already off, so the
+ * unsubscribe page can show "You're unsubscribed" instead of asking: a
+ * current unsubscribe (`isMarketingUnsubscribeCurrent`, the rule the
+ * abandoned-checkout reminder gate uses), a suppression (bounce / complaint /
+ * provider block), or the address on the store's do-not-email list. Someone
+ * whose switch is on (`acceptsMarketing`) is never "already unsubscribed":
+ * they always get the confirm step, which turns it off.
+ */
+export async function isEffectivelyUnsubscribed(
+  client: TxClient,
+  businessId: string,
+  customer: {
+    email: string;
+    acceptsMarketing: boolean;
+    marketingUnsubscribedAt: Date | null;
+    marketingConsentAt: Date | null;
+    marketingSuppressedAt: Date | null;
+  },
+): Promise<boolean> {
+  if (customer.acceptsMarketing) return false;
+  if (isMarketingUnsubscribeCurrent(customer)) return true;
+  if (customer.marketingSuppressedAt) return true;
+  return !!(await isOnDoNotEmailList(client, businessId, customer.email));
+}
+
+export type UnsubscribePageState =
+  | { kind: "invalid" }
+  | {
+      /** "unsubscribe" asks first; "unsubscribed" is the done card. */
+      kind: "unsubscribe" | "unsubscribed";
+      /**
+       * Offer the Resubscribe undo (subject to the feature flag): only to
+       * people who had opted in before. `newsletter.resubscribe` enforces the
+       * same rule server-side.
+       */
+      canResubscribe: boolean;
+    };
+
+/**
+ * Read-only: which card /email-preferences?s=confirm shows for this token on
+ * this store. State comes from the database, never from the URL.
+ */
+export async function resolveUnsubscribePageState(
+  token: string | null,
+  businessId: string,
+): Promise<UnsubscribePageState> {
+  const parsed = parseUnsubscribeToken(token);
+  // A token for another store (or garbage) gets the generic state.
+  if (!parsed.ok || parsed.payload.businessId !== businessId) {
+    return { kind: "invalid" };
+  }
+  const customer = await db.customer.findFirst({
+    where: { id: parsed.payload.customerId, businessId, anonymizedAt: null },
+    select: {
+      email: true,
+      acceptsMarketing: true,
+      marketingUnsubscribedAt: true,
+      marketingConsentAt: true,
+      marketingConsentSource: true,
+      marketingSuppressedAt: true,
+    },
+  });
+  if (!customer) return { kind: "invalid" };
+  const done = await isEffectivelyUnsubscribed(db, businessId, customer);
+  return {
+    kind: done ? "unsubscribed" : "unsubscribe",
+    canResubscribe: hasMarketingConsentHistory(customer),
+  };
 }

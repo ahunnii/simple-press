@@ -8,6 +8,7 @@ import { Column, Columns } from "./columns-node";
 import { DETAILS_EXTENSIONS } from "./details-nodes";
 import { RendererImage } from "./image-node";
 import { createRendererLinkExtension } from "./link-extension";
+import { Spacer } from "./spacer-node";
 import { VideoNode } from "./video-node";
 
 /**
@@ -54,4 +55,6 @@ export const RENDERER_BASE_EXTENSIONS = [
   Columns,
   Column,
   ...DETAILS_EXTENSIONS,
+  // Leaf block: rendered through `renderHTML` like any other (see spacer-node.ts).
+  Spacer,
 ];
