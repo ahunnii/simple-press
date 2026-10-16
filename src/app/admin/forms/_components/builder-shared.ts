@@ -5,6 +5,7 @@ import type { formCreateSchema, FormFieldType } from "~/lib/validators/form";
 import {
   FORM_CHOICE_FIELD_TYPES,
   FORM_MAX_OPTIONS,
+  makeEmptyFormScreening,
 } from "~/lib/validators/form";
 
 /**
@@ -49,6 +50,18 @@ export type PictureOptionInput = PictureChoiceFieldInput["options"][number];
 
 export type PictureGroupInput = NonNullable<
   PictureChoiceFieldInput["groups"]
+>[number];
+
+export type ScreeningInput = NonNullable<
+  NonNullable<FormDefinitionInput["settings"]>["screening"]
+>;
+
+export type ScreeningQuestionInput = NonNullable<
+  ScreeningInput["questions"]
+>[number];
+
+export type ScreeningLinkInput = NonNullable<
+  ScreeningInput["unlockLinks"]
 >[number];
 
 export function isChoiceFieldType(
@@ -177,6 +190,26 @@ export function makePictureOption(
     imageUrl: null,
     ...(groupId ? { groupId } : {}),
   };
+}
+
+/**
+ * A fresh screening question. Every key is written (even the blank message
+ * and empty link list) so the registered inputs and RHF's defaults agree on
+ * the row's shape.
+ */
+export function makeScreeningQuestion(): ScreeningQuestionInput {
+  return {
+    id: newId(),
+    prompt: "",
+    passAnswer: "yes",
+    failMessage: "",
+    failLinks: [],
+  };
+}
+
+/** A fresh, blank resource link for a screening panel. */
+export function makeScreeningLink(): ScreeningLinkInput {
+  return { label: "", href: "" };
 }
 
 /** A fresh picture-choice group (a finish tab, e.g. "Pearl"). */
@@ -401,6 +434,7 @@ export function makeEmptyBuilderDefinition(): FormDefinitionInput {
       confirmationMessage:
         "Thanks for reaching out! This is a quick note to confirm we received your submission. We'll be in touch soon.",
       notifyEmail: "",
+      screening: makeEmptyFormScreening(),
     },
   };
 }
@@ -408,7 +442,8 @@ export function makeEmptyBuilderDefinition(): FormDefinitionInput {
 /**
  * Fill every optional key the builder's inputs register, so RHF's defaults
  * and its registered values have the same shape. Stored JSON drops
- * `undefined` keys (e.g. `settings.notifyEmail`), and RHF's form-level
+ * `undefined` keys (e.g. `settings.notifyEmail`, and `settings.screening` on
+ * every form saved before screening existed), and RHF's form-level
  * `isDirty` deep-compare counts keys — a key that exists only on the
  * registered side flips the builder to "Unsaved Changes" with nothing
  * actually changed (and arms the leave-page guard).
@@ -454,7 +489,29 @@ export function normalizeBuilderDefinition(
       ...definition.settings,
       confirmationFieldId: definition.settings?.confirmationFieldId ?? null,
       notifyEmail: definition.settings?.notifyEmail ?? "",
+      screening: normalizeScreening(definition.settings?.screening),
     },
+  };
+}
+
+/** Every screening key present, so a form that predates it loads clean. */
+function normalizeScreening(
+  screening: ScreeningInput | undefined,
+): ScreeningInput {
+  const empty = makeEmptyFormScreening();
+  return {
+    enabled: screening?.enabled ?? empty.enabled,
+    intro: screening?.intro ?? empty.intro,
+    questions: (screening?.questions ?? empty.questions).map((question) => ({
+      ...question,
+      passAnswer: question.passAnswer ?? "yes",
+      failMessage: question.failMessage ?? "",
+      failLinks: question.failLinks ?? [],
+    })),
+    defaultFailMessage:
+      screening?.defaultFailMessage ?? empty.defaultFailMessage,
+    unlockMessage: screening?.unlockMessage ?? empty.unlockMessage,
+    unlockLinks: screening?.unlockLinks ?? empty.unlockLinks,
   };
 }
 

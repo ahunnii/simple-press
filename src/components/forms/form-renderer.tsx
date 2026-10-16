@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Textarea } from "~/components/ui/textarea";
 import { RecaptchaDisclosure } from "~/components/inputs/recaptcha-field";
 import { PictureChoiceField } from "~/components/forms/picture-choice-field";
+import { FormScreeningGate } from "~/components/forms/form-screening-gate";
 
 /** reCAPTCHA v3 action asserted server-side by `formSubmission.submit`. */
 const RECAPTCHA_ACTION = "form";
@@ -349,7 +350,7 @@ export function FormRenderer({
     );
   }
 
-  return (
+  const formBody = (
     <Root
       className={cn("space-y-5", className)}
       {...rootProps}
@@ -399,6 +400,21 @@ export function FormRenderer({
         {isLive && <RecaptchaDisclosure />}
       </div>
     </Root>
+  );
+
+  // Hooks above all ran unconditionally; only the rendered JSX is gated. Keyed
+  // by form id so swapping forms restarts the gate. No screening → the bare
+  // form, exactly as before.
+  if (!settings.screening) return formBody;
+  return (
+    <FormScreeningGate
+      key={formId}
+      formId={formId}
+      screening={settings.screening}
+      mode={mode}
+    >
+      {formBody}
+    </FormScreeningGate>
   );
 }
 
