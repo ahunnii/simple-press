@@ -1,4 +1,6 @@
 @import "./partials/code.css";
+@import "./partials/columns.css";
+@import "./partials/details.css";
 @import "./partials/placeholder.css";
 @import "./partials/lists.css";
 @import "./partials/typography.css";

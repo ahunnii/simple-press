@@ -1,4 +1,5 @@
 import { getSchema, Node } from "@tiptap/core";
+import { generateHTML } from "@tiptap/html/server";
 import { describe, expect, it } from "vitest";
 
 import { RENDERER_BASE_EXTENSIONS } from "./renderer-extensions";
@@ -529,5 +530,173 @@ describe("sanitizeTiptapDoc — attrs", () => {
     const node = out?.content?.[0];
     expect(node && "attrs" in node).toBe(false);
     expect(node && "marks" in node).toBe(false);
+  });
+});
+
+describe("sanitizeTiptapDoc — layout containers and button links", () => {
+  const column = (...content: unknown[]) => ({ type: "column", content });
+  const details = (summary: unknown[], ...content: unknown[]) => ({
+    type: "details",
+    content: [
+      { type: "detailsSummary", content: summary },
+      { type: "detailsContent", content },
+    ],
+  });
+
+  it("round-trips columns, column, the details trio and a link variant", () => {
+    const input = doc(
+      {
+        type: "columns",
+        attrs: { layout: "1-2" },
+        content: [
+          column(para(text("Left"))),
+          column(
+            para(
+              text("Book now", [
+                {
+                  type: "link",
+                  attrs: { href: "/book", target: "_self", variant: "solid" },
+                },
+              ]),
+            ),
+            details([text("Q", [{ type: "bold" }])], para(text("A"))),
+          ),
+        ],
+      },
+      details([text("More")], para(text("Hidden"))),
+    );
+    const snapshot = structuredClone(input);
+
+    expect(sanitizeTiptapDoc(input, schema)).toEqual(input);
+    expect(input).toEqual(snapshot);
+  });
+
+  it("drops a stored `open` attr (persist: false) so collapsibles render closed", () => {
+    const out = sanitizeTiptapDoc(
+      doc({ ...details([text("Q")], para(text("A"))), attrs: { open: true } }),
+      schema,
+    );
+    expect(out?.content?.[0]).toEqual({
+      ...details([text("Q")], para(text("A"))),
+      attrs: {},
+    });
+  });
+
+  it("renders a bogus layout as the default 2-column class", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "columns",
+        attrs: { layout: 'x" onclick="alert(1)' },
+        content: [column(para(text("a"))), column(para(text("b")))],
+      }),
+      schema,
+    );
+    const html = generateHTML(out!, RENDERER_BASE_EXTENSIONS);
+
+    expect(html).toContain(
+      '<div class="sp-columns__grid"><div class="sp-column" data-type="column">',
+    );
+    expect(html).toContain('class="sp-columns sp-columns--2"');
+    expect(html).toContain('data-layout="2"');
+    expect(html).not.toContain("onclick");
+    expect(html).not.toContain("alert");
+  });
+
+  it("renders every known layout as its own modifier class", () => {
+    for (const layout of ["2", "3", "4", "1-2", "2-1"]) {
+      const html = generateHTML(
+        doc({
+          type: "columns",
+          attrs: { layout },
+          content: [column(para(text("a")))],
+        }) as Parameters<typeof generateHTML>[0],
+        RENDERER_BASE_EXTENSIONS,
+      );
+      expect(html).toContain(
+        `class="sp-columns sp-columns--${layout}" data-type="columns" data-layout="${layout}"`,
+      );
+    }
+  });
+
+  it("renders a known link variant as button classes and a bogus one as a plain link", () => {
+    const link = (variant: unknown) =>
+      text("Go", [{ type: "link", attrs: { href: "/go", variant } }]);
+    const out = sanitizeTiptapDoc(
+      doc(
+        para(link("solid")),
+        para(link("outline")),
+        para(link('evil" class="x')),
+        para(link(null)),
+      ),
+      schema,
+    );
+    const html = generateHTML(out!, RENDERER_BASE_EXTENSIONS);
+    const anchors = html.match(/<a [^>]*>/g) ?? [];
+
+    expect(anchors).toHaveLength(4);
+    expect(anchors[0]).toContain('class="sp-button sp-button--solid"');
+    expect(anchors[0]).toContain('data-variant="solid"');
+    expect(anchors[1]).toContain('class="sp-button sp-button--outline"');
+    expect(anchors[2]).not.toContain("class=");
+    expect(anchors[2]).not.toContain("data-variant");
+    expect(anchors[3]).not.toContain("class=");
+    // The renderer's rel is still stamped on button links.
+    expect(anchors[0]).toContain('rel="noopener noreferrer nofollow"');
+    expect(html).not.toContain("evil");
+  });
+
+  it("renders the details trio with its shared classes", () => {
+    const html = generateHTML(
+      doc(details([text("Q")], para(text("A")))) as Parameters<
+        typeof generateHTML
+      >[0],
+      RENDERER_BASE_EXTENSIONS,
+    );
+    expect(html).toContain(
+      '<details xmlns="http://www.w3.org/1999/xhtml" class="sp-details">',
+    );
+    expect(html).toContain('<summary class="sp-details__summary">Q</summary>');
+    expect(html).toContain(
+      '<div class="sp-details__content" data-type="detailsContent"><p>A</p></div>',
+    );
+    expect(html).not.toContain("open");
+  });
+
+  it("keeps a gallery and a form nested in a column when the schema declares them", () => {
+    // Same stand-in mechanism as the `form` test above: the real Gallery/Form
+    // extensions are appended in `TiptapRenderer`, so nested nodes survive
+    // there exactly as these do.
+    const fullSchema = getSchema([
+      ...RENDERER_BASE_EXTENSIONS,
+      Node.create({
+        name: "gallery",
+        group: "block",
+        atom: true,
+        addAttributes() {
+          return { galleryId: { default: null } };
+        },
+      }),
+      Node.create({
+        name: "form",
+        group: "block",
+        atom: true,
+        addAttributes() {
+          return { formId: { default: null } };
+        },
+      }),
+    ]);
+    const input = doc({
+      type: "columns",
+      attrs: { layout: "2" },
+      content: [
+        column({ type: "gallery", attrs: { galleryId: "gal-1" } }),
+        column(
+          { type: "form", attrs: { formId: "form-1" } },
+          details([text("Q")], { type: "gallery", attrs: { galleryId: "g2" } }),
+        ),
+      ],
+    });
+
+    expect(sanitizeTiptapDoc(input, fullSchema)).toEqual(input);
   });
 });

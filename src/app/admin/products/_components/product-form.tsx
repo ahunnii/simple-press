@@ -2201,6 +2201,7 @@ export function ProductForm({
                       output="json"
                       editorContentClassName={"p-4 min-h-[400px]"}
                       galleriesEnabled={galleriesEnabled}
+                      layoutBlocksEnabled={true}
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
                       formsEnabled={formsEnabled}

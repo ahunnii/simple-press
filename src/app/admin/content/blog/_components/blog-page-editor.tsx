@@ -812,6 +812,7 @@ export function BlogPostEditor({
                       output="json"
                       editorContentClassName="min-h-[400px] p-4"
                       galleriesEnabled={galleriesEnabled}
+                      layoutBlocksEnabled={true}
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
                       formsEnabled={formsEnabled}

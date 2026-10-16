@@ -30,10 +30,10 @@
   @apply mt-4 mb-2 text-sm;
 }
 
-.minimal-tiptap-editor .ProseMirror a.link {
+.minimal-tiptap-editor .ProseMirror a.link:not(.sp-button) {
   @apply text-primary underline;
 }
 
-.minimal-tiptap-editor .ProseMirror a.link:hover {
+.minimal-tiptap-editor .ProseMirror a.link:not(.sp-button):hover {
   @apply underline;
 }

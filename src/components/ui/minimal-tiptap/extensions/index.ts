@@ -1,4 +1,5 @@
 export * from "./code-block-lowlight";
+export * from "./columns";
 export * from "./color";
 export * from "./embed";
 export * from "./file-handler";

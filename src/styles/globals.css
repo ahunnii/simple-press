@@ -5012,6 +5012,353 @@ body:has(.pollen) {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Rich-text layout blocks — rows (columns), collapsible sections, button links
+   ═══════════════════════════════════════════════════════════════════════════
+   Shared, template-agnostic styling for the markup the Tiptap schema emits
+   (`src/lib/tiptap/columns-node.ts`, `details-nodes.ts`, `link-extension.ts`;
+   rendered by `TiptapRenderer`). Loaded on the storefront AND in the admin
+   editor, so every rule targets a class that only that markup carries.
+
+   Unlayered on purpose: it must beat Tailwind Typography (`.prose :where(a)`)
+   and the `prose-*:` / `[&_a]:` utilities that every template's prose class
+   carries (all in cascade layers). Template-scoped unlayered link rules such
+   as `.wealth .wealth-prose a` (0,2,1) are beaten by specificity — see the
+   button selectors below.
+
+   Variables a template may set in its own scope:
+     --sp-columns-gap          row/column gap of a columns row   (1.5rem 2rem)
+     --sp-button-bg            solid button fill                 (var(--primary))
+     --sp-button-fg            solid button label                (var(--primary-foreground))
+     --sp-button-bg-hover      solid button fill on hover        (bg darkened 12%)
+     --sp-button-outline-fg    outline button label + border     (currentColor)
+     --sp-button-radius        button corner radius              (var(--radius, .5rem))
+   Per-template mappings live at the end of this block.
+
+   Editor-only chrome (dashed column outlines, the details toggle button, the
+   columns bubble menu) lives in `components/ui/minimal-tiptap/styles/`.      */
+
+/* ── Columns (rows) ───────────────────────────────────────────────────────
+   `.sp-columns` is the query container; its child `.sp-columns__grid` is the
+   grid. A row collapses on its OWN width, so a narrow measure (dream, umsc),
+   a sidebar layout or the visual editor's side panel stacks it without any
+   per-template breakout CSS. Without container-query support it just stacks.
+   Typography/templates put no margin on a bare <div>, so this margin is the
+   only one the row has; the :first/last-child rules keep a row that opens or
+   closes a body from adding a gap on top of the normal block rhythm.        */
+.sp-columns {
+  container-type: inline-size;
+  container-name: sp-columns;
+  margin-block: 1.5em;
+}
+.sp-columns:first-child {
+  margin-top: 0;
+}
+.sp-columns:last-child {
+  margin-bottom: 0;
+}
+
+.sp-columns__grid {
+  display: grid;
+  gap: var(--sp-columns-gap, 1.5rem 2rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container sp-columns (min-width: 28rem) {
+  .sp-columns--4 > .sp-columns__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container sp-columns (min-width: 32rem) {
+  .sp-columns--2 > .sp-columns__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sp-columns--1-2 > .sp-columns__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+  .sp-columns--2-1 > .sp-columns__grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+@container sp-columns (min-width: 36rem) {
+  .sp-columns--3 > .sp-columns__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container sp-columns (min-width: 48rem) {
+  .sp-columns--4 > .sp-columns__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* min-width:0 lets a column shrink below its content (long words, tables). */
+.sp-column {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+/* Trim the column's top/bottom margins, through the storefront's bare leaf
+   wrapper <div> (first level) and the leaf itself (second level). In the
+   editor the leaves are direct children, so the first level hits them. */
+.sp-column > :first-child,
+.sp-column > :first-child > :first-child {
+  margin-top: 0;
+}
+.sp-column > :last-child,
+.sp-column > :last-child > :last-child {
+  margin-bottom: 0;
+}
+.sp-column img,
+.sp-column video {
+  max-width: 100%;
+  height: auto;
+}
+.sp-column iframe {
+  max-width: 100%;
+}
+/* Tables keep their prose styling (no display change); long cell text wraps
+   instead of pushing the column wider than its track. */
+.sp-column table {
+  max-width: 100%;
+}
+.sp-column :is(th, td) {
+  overflow-wrap: anywhere;
+}
+
+/* ── Collapsible sections ─────────────────────────────────────────────────
+   Native <details>/<summary>: works without JS. Only `details.sp-details` is
+   styled here — the editor's node view is a div, not a <details>. Colors are
+   all `currentColor`, so the section takes whatever the template's prose
+   sets. Consecutive sections (each in its own leaf wrapper on the storefront)
+   share one hairline and sit flush, like an accordion.                      */
+details.sp-details {
+  margin-block: 1em;
+  border-block: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+details.sp-details:first-child {
+  margin-top: 0;
+}
+details.sp-details:last-child {
+  margin-bottom: 0;
+}
+details.sp-details + details.sp-details,
+div:has(> details.sp-details) + div > details.sp-details {
+  margin-top: 0;
+  border-top-width: 0;
+}
+details.sp-details:has(+ details.sp-details),
+div:has(> details.sp-details):has(+ div > details.sp-details)
+  > details.sp-details {
+  margin-bottom: 0;
+}
+
+details.sp-details > summary.sp-details__summary {
+  position: relative;
+  display: block;
+  padding-block: 0.75em;
+  padding-inline-end: 1.75em;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+details.sp-details > summary.sp-details__summary::-webkit-details-marker {
+  display: none;
+}
+details.sp-details > summary.sp-details__summary::marker {
+  content: "";
+}
+/* Chevron: a rotated corner of a box, drawn in currentColor. */
+details.sp-details > summary.sp-details__summary::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0.35em;
+  top: 50%;
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.7;
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+details.sp-details[open] > summary.sp-details__summary::after {
+  transform: translateY(-30%) rotate(225deg);
+}
+details.sp-details > summary.sp-details__summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+/* The summary text is a <p>-less inline run, but a template rule may still
+   give nested elements a margin. */
+details.sp-details > summary.sp-details__summary > * {
+  margin: 0;
+}
+
+.sp-details__content {
+  padding-bottom: 0.75em;
+}
+.sp-details__content > :first-child,
+.sp-details__content > :first-child > :first-child {
+  margin-top: 0;
+}
+.sp-details__content > :last-child,
+.sp-details__content > :last-child > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  details.sp-details > summary.sp-details__summary::after {
+    transition: none;
+  }
+}
+
+/* ── Button links ─────────────────────────────────────────────────────────
+   `<a class="sp-button sp-button--solid|--outline">`. Beats, in order:
+   Typography's `.prose :where(a)`, the template `prose-a:*` / `[&_a]:*`
+   utilities (layered), and template-scoped unlayered link rules, which are
+   0,2,1 at rest (`.wealth .wealth-prose a`, `.olive .olive-prose a`,
+   `.vii .vii-prose a`, `.pink .pink-prose a`, `.animated-bamboo
+   .bamboo-prose a`, `.elegant .el-*-body a`) and 0,3,1 on :hover. Hence
+   `:root a.sp-button.sp-button` = 0,3,1 at rest and every :hover/:focus-visible
+   rule below = 0,4,1 — and each state sets color, background, border and
+   text-decoration itself so no template state leaks through. `background-image:
+   none` kills dream's gradient underline and the full `border` kills wealth's
+   border-bottom underline.                                                  */
+:root a.sp-button.sp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  box-sizing: border-box;
+  padding: 0.7em 1.4em;
+  border: 1px solid transparent;
+  border-radius: var(--sp-button-radius, var(--radius, 0.5rem));
+  background-image: none;
+  background-size: auto;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+:root a.sp-button.sp-button:hover {
+  text-decoration: none;
+}
+
+/* Solid: the template's primary fill. */
+:root a.sp-button.sp-button--solid {
+  border-color: transparent;
+  background-color: var(--sp-button-bg, var(--primary));
+  color: var(--sp-button-fg, var(--primary-foreground));
+}
+:root a.sp-button.sp-button--solid:hover {
+  border-color: transparent;
+  background-color: var(
+    --sp-button-bg-hover,
+    color-mix(in srgb, var(--sp-button-bg, var(--primary)) 88%, black)
+  );
+  color: var(--sp-button-fg, var(--primary-foreground));
+  /* A halo, so a near-black fill (which darkening cannot change) still reacts. */
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--sp-button-bg, var(--primary)) 25%, transparent);
+}
+
+/* Outline: transparent, label and 1px border in the surrounding text color. */
+:root a.sp-button.sp-button--outline {
+  border-color: currentColor;
+  background-color: transparent;
+  color: var(--sp-button-outline-fg, currentColor);
+}
+:root a.sp-button.sp-button--outline:hover {
+  border-color: currentColor;
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+  color: var(--sp-button-outline-fg, currentColor);
+}
+
+/* Focus ring sits outside the button, in the fill color on a solid button
+   (its label color would vanish against the page) and in the label color on
+   an outline one. */
+:root a.sp-button.sp-button--solid:focus-visible {
+  outline: 2px solid var(--sp-button-bg, var(--primary));
+  outline-offset: 2px;
+}
+:root a.sp-button.sp-button--outline:focus-visible {
+  outline: 2px solid var(--sp-button-outline-fg, currentColor);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root a.sp-button.sp-button {
+    transition: none;
+  }
+}
+
+/* ── Per-template button colors ───────────────────────────────────────────
+   Templates that don't re-map `--primary` / `--primary-foreground` globally
+   (their brand color lives in its own variable) would otherwise get the
+   neutral near-black `:root` button. Fills below are the template's primary
+   button fill and meet AA with the label (contrast in the comment). Default,
+   noise, sledge, pollen, elegant, dark-trend, happy-bamboo, builders and
+   glove already remap `--primary*` on their root, so they need nothing but
+   an optional hover. Add `--sp-button-outline-fg` only where the prose text
+   color is not the right outline color.                                     */
+.dream {
+  /* ink on paper 15.1:1; hover rose-on-paper 4.7:1 */
+  --sp-button-bg: var(--dream-ink);
+  --sp-button-fg: var(--dream-paper);
+  --sp-button-bg-hover: var(--dream-rose);
+}
+.umsc {
+  /* black on paper ~19.6:1; hover purple-on-paper 14.0:1 */
+  --sp-button-bg: var(--umsc-black);
+  --sp-button-fg: var(--umsc-paper);
+  --sp-button-bg-hover: var(--umsc-purple);
+}
+.wealth {
+  /* white on primary 6.2:1; hover forest 11.1:1 */
+  --sp-button-bg: var(--wealth-primary);
+  --sp-button-fg: var(--wealth-paper);
+  --sp-button-bg-hover: var(--wealth-forest);
+}
+.glove {
+  /* white on primary 11.0:1; hover 13.4:1 */
+  --sp-button-bg: var(--glove-primary);
+  --sp-button-fg: var(--glove-on-primary);
+  --sp-button-bg-hover: var(--glove-primary-hover);
+}
+.pink {
+  /* white on rose 4.95:1; hover ink-on-white ~19:1 */
+  --sp-button-bg: var(--pink-rose);
+  --sp-button-fg: var(--pink-on-accent);
+  --sp-button-bg-hover: var(--pink-ink);
+}
+.olive {
+  /* white on sage 5.75:1; hover leaf 7.9:1 */
+  --sp-button-bg: var(--olive-sage);
+  --sp-button-fg: var(--olive-white);
+  --sp-button-bg-hover: var(--olive-leaf);
+}
+.vii {
+  /* paper on navy 12.1:1; hover copper-deep 4.96:1 */
+  --sp-button-bg: var(--vii-navy);
+  --sp-button-fg: var(--vii-paper);
+  --sp-button-bg-hover: var(--vii-copper-deep);
+}
+.bamboo {
+  --sp-button-bg: var(--bam-forest);
+  --sp-button-fg: var(--bam-cream);
+}
+.animated-bamboo {
+  /* cream on pine 7.7:1; hover terracotta-deep-on-cream 5.3:1 */
+  --sp-button-bg: var(--bamboo-pine);
+  --sp-button-fg: var(--bamboo-cream);
+  --sp-button-bg-hover: var(--bamboo-terracotta-deep);
+}
+
 /* Unlayered so it overrides Tailwind's built-in .container max-widths
    (which live in the utilities layer and otherwise win on layer order). */
 .happy-bamboo .container {

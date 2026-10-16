@@ -14,6 +14,11 @@ import { Separator } from "~/components/ui/separator";
 
 import { ToolbarButton } from "../toolbar-button";
 
+// Module-level so the reference is stable: @tiptap/react re-broadcasts a
+// changed `options` prop as a "bubbleMenu" meta that every bubble-menu
+// plugin on the editor applies (shouldShow included).
+const BUBBLE_OPTIONS = { placement: "top-start" } as const;
+
 interface TableBubbleMenuProps {
   editor: Editor;
 }
@@ -26,8 +31,9 @@ export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({ editor }) => {
   return (
     <BubbleMenu
       editor={editor}
+      pluginKey="tableBubbleMenu"
       shouldShow={shouldShow}
-      options={{ placement: "top-start" }}
+      options={BUBBLE_OPTIONS}
     >
       <div className="bg-popover border-border flex items-center gap-px rounded-md border p-1 shadow-md">
         <ToolbarButton

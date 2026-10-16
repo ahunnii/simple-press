@@ -1,0 +1,37 @@
+@reference "../../../../../styles/globals.css";
+
+/*
+ * Editor chrome for column rows. The grid itself (container query,
+ * grid-template-columns per layout) is the shared `.sp-columns` block in
+ * globals.css, which loads in admin too; this only adds the editing
+ * affordances the storefront must not show.
+ */
+
+.minimal-tiptap-editor .ProseMirror .sp-columns {
+  @apply my-3;
+}
+
+.minimal-tiptap-editor .ProseMirror .sp-column {
+  @apply border-border box-border min-h-16 min-w-0 rounded-md border border-dashed p-2;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+/* The column holding the cursor (decoration from EditorColumns). */
+.minimal-tiptap-editor .ProseMirror .sp-column.is-active-column {
+  @apply border-ring/60 bg-primary/5;
+}
+
+/* Rows sit inside the editor's own flow: keep the last block flush. */
+.minimal-tiptap-editor .ProseMirror .sp-column > :last-child {
+  @apply mb-0;
+}
+
+/* Selected via a node selection (e.g. drag select over the whole row). */
+.minimal-tiptap-editor
+  .ProseMirror-focused
+  .sp-columns.ProseMirror-selectednode
+  .sp-column {
+  @apply border-ring bg-primary/10;
+}

@@ -5,6 +5,7 @@ import {
   LinkBreak2Icon,
 } from "@radix-ui/react-icons";
 
+import type { LinkVariant } from "~/lib/tiptap/link-extension";
 import { Separator } from "~/components/ui/separator";
 
 import { sanitizeUrl } from "../../utils";
@@ -12,12 +13,15 @@ import { ToolbarButton } from "../toolbar-button";
 
 interface LinkPopoverBlockProps {
   url: string;
+  /** Button style, shown as a small badge; plain links show nothing. */
+  variant?: LinkVariant | null;
   onClear: () => void;
   onEdit: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const LinkPopoverBlock: React.FC<LinkPopoverBlockProps> = ({
   url,
+  variant,
   onClear,
   onEdit,
 }) => {
@@ -47,6 +51,14 @@ export const LinkPopoverBlock: React.FC<LinkPopoverBlockProps> = ({
   return (
     <div className="bg-background flex overflow-hidden rounded p-2 shadow-lg">
       <div className="inline-flex items-center gap-1">
+        {variant && (
+          <>
+            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap">
+              {variant === "outline" ? "Outline button" : "Button"}
+            </span>
+            <Separator orientation="vertical" />
+          </>
+        )}
         <ToolbarButton tooltip="Edit link" onClick={onEdit}>
           Edit link
         </ToolbarButton>

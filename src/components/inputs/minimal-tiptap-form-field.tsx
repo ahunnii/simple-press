@@ -86,6 +86,8 @@ type Props<CurrentForm extends FieldValues> = {
   output?: "html" | "json" | "text";
   businessId?: string;
   galleriesEnabled?: boolean;
+  /** Enables the layout blocks (columns/details) in the editor. Off by default. */
+  layoutBlocksEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
@@ -123,6 +125,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   output = "json",
   businessId,
   galleriesEnabled,
+  layoutBlocksEnabled = false,
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
@@ -165,6 +168,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 editorClassName="focus:outline-hidden"
                 businessId={businessId}
                 galleriesEnabled={galleriesEnabled}
+                layoutBlocksEnabled={layoutBlocksEnabled}
                 embedsEnabled={embedsEnabled}
                 quotesEnabled={quotesEnabled}
                 formsEnabled={formsEnabled}
