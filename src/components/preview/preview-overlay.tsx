@@ -61,6 +61,9 @@ function findGroup(target: EventTarget | null): HTMLElement | null {
  * - Delegated mouseover/mouseout find the nearest [data-sp-group] ancestor.
  * - Hovering draws a fixed-position highlight + "Edit" pill ("Pick for note"
  *   while the parent's Notes panel is open — see `sp:overlay-mode`).
+ * - In "page" mode (a custom page / blog post, whose body has no sections),
+ *   a click on non-interactive content posts `sp:edit-page` instead of
+ *   showing the dead-zone hint, so the editor can reopen the page panel.
  * - Clicking anywhere inside the highlight box posts `sp:edit-group` to the parent.
  *   Pointer clicks also resolve the page element under the pointer (through
  *   the highlight button, via `elementsFromPoint`) and, when it sits in a
@@ -356,7 +359,8 @@ export function PreviewOverlay() {
   //   4. Interactive element (a, button, [role=button], input, select,
   //      textarea, label, summary, [contenteditable]) → keeps working, no hint.
   //   5. Active text selection → tail end of a selection drag, not a dead click.
-  //   6. Otherwise → non-editable page content.
+  //   6. "page" mode → ask the editor to reopen the page panel, no hint.
+  //   7. Otherwise → non-editable page content.
   useEffect(() => {
     if (!isPreviewFrame()) return;
 
@@ -383,6 +387,14 @@ export function PreviewOverlay() {
       }
 
       if (window.getSelection()?.toString()) return;
+
+      if (modeRef.current === "page") {
+        window.parent.postMessage(
+          { source: PREVIEW_SOURCE, type: "sp:edit-page" },
+          window.location.origin,
+        );
+        return;
+      }
 
       showHint(
         modeRef.current === "note"

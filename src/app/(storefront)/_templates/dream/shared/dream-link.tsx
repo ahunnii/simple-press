@@ -12,7 +12,7 @@ type DreamLinkProps = {
 /**
  * The site's primary inline-link treatment: rose 1px underline that slides
  * in on hover (design.md "Chrome › Header", "Motion › Hover"). Renders a
- * real `<a>` for external/mailto/tel targets and a Next `Link` for internal
+ * real `<a>` for external/mailto/tel/sms targets and a Next `Link` for internal
  * routes.
  */
 export function DreamLink({
@@ -25,7 +25,8 @@ export function DreamLink({
     external ??
     (/^https?:\/\//i.test(href) ||
       href.startsWith("mailto:") ||
-      href.startsWith("tel:"));
+      href.startsWith("tel:") ||
+      href.startsWith("sms:"));
 
   if (isExternal) {
     const opensNewTab = /^https?:\/\//i.test(href);

@@ -37,3 +37,16 @@
 .minimal-tiptap-editor .ProseMirror a.link:not(.sp-button):hover {
   @apply underline;
 }
+
+/*
+ * Button links in the editor: the storefront's `inline-flex` (globals.css,
+ * `:root a.sp-button.sp-button`, 0,3,1) turns the label into an anonymous
+ * flex item, where Chrome's caret placement / arrow keys inside a
+ * contenteditable are unreliable. `inline-block` looks the same for a text
+ * label and keeps the label in normal inline flow. Text cursor, since here
+ * the button is text to edit, not something to press.
+ */
+.minimal-tiptap-editor .ProseMirror a.sp-button.sp-button {
+  display: inline-block;
+  cursor: text;
+}

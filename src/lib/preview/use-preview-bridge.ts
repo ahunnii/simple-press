@@ -11,14 +11,18 @@ export const PREVIEW_SOURCE = "simplepress-preview";
 
 /**
  * What a hotspot click means right now: open the section's fields ("edit",
- * the default) or pick the section for the note being composed ("note").
- * Only changes the overlay's labels — the click still posts `sp:edit-group`.
+ * the default), pick the section for the note being composed ("note"), or —
+ * on a custom page / blog post, whose body has no sections — reopen the page
+ * panel ("page"). "edit" and "note" only change the overlay's labels (the
+ * click still posts `sp:edit-group`); "page" turns clicks on unannotated
+ * content into `sp:edit-page`.
  */
-export type PreviewOverlayMode = "edit" | "note";
+export type PreviewOverlayMode = "edit" | "note" | "page";
 
 export type PreviewMessage =
   | { source: typeof PREVIEW_SOURCE; type: "sp:ready" }
   | { source: typeof PREVIEW_SOURCE; type: "sp:refresh" }
+  | { source: typeof PREVIEW_SOURCE; type: "sp:edit-page" }
   | {
       source: typeof PREVIEW_SOURCE;
       type: "sp:edit-group";

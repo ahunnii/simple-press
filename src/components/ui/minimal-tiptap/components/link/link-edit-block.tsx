@@ -4,6 +4,10 @@ import type { LinkVariant } from "~/lib/tiptap/link-extension";
 import { normalizeEditorHref } from "~/lib/normalize-editor-href";
 import { SAFE_HREF_MESSAGE } from "~/lib/safe-href";
 import { coerceLinkVariant } from "~/lib/tiptap/link-extension";
+import {
+  autoOpenInNewTab,
+  defaultOpenInNewTab,
+} from "~/lib/tiptap/link-target";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -16,15 +20,49 @@ import { SiteLinkPicker } from "./site-link-picker";
 export interface LinkEditorProps extends React.ComponentProps<"div"> {
   defaultUrl?: string;
   defaultText?: string;
+  /**
+   * Legacy: the switch's starting state. Prefer `defaultTarget`, which lets
+   * an external link with no stored target show ON (what the storefront does).
+   */
   defaultIsNewTab?: boolean;
+  /**
+   * The link's stored `target` attr when editing an existing link. When given
+   * (even `null`/`""`), the switch starts at the link's effective behaviour
+   * (`defaultOpenInNewTab`) and `defaultIsNewTab` is ignored.
+   */
+  defaultTarget?: string | null;
   /** Current button style; `null`/`undefined` is a plain link. */
   defaultVariant?: LinkVariant | null;
+  /**
+   * `isNewTab` is the switch's state. Store it with `linkTargetAttr(isNewTab)`
+   * (`"_blank"` / `"_self"`), never `""`: an empty target on an external link
+   * renders as a new tab.
+   */
   onSave: (
     url: string,
     text?: string,
     isNewTab?: boolean,
     variant?: LinkVariant | null,
   ) => void;
+}
+
+/**
+ * Where the switch starts. Editing (`defaultUrl` set): the link's effective
+ * behaviour when its stored target is known, else the legacy boolean. New
+ * link: follows the URL type (normally empty → off).
+ */
+function initialIsNewTab(
+  defaultUrl: string | undefined,
+  defaultTarget: string | null | undefined,
+  defaultIsNewTab: boolean | undefined,
+): boolean {
+  if (defaultUrl) {
+    if (defaultTarget !== undefined) {
+      return defaultOpenInNewTab(defaultUrl, defaultTarget);
+    }
+    return defaultIsNewTab ?? defaultOpenInNewTab(defaultUrl, null);
+  }
+  return defaultIsNewTab ?? autoOpenInNewTab(defaultUrl ?? "");
 }
 
 /** What the Style control shows: a plain link or a button variant. */
@@ -39,6 +77,7 @@ const STYLE_OPTIONS: { value: LinkStyle; label: string }[] = [
 export const LinkEditBlock = ({
   onSave,
   defaultIsNewTab,
+  defaultTarget,
   defaultUrl,
   defaultText,
   defaultVariant,
@@ -47,7 +86,14 @@ export const LinkEditBlock = ({
   const [urlError, setUrlError] = React.useState<string | null>(null);
   const [url, setUrl] = React.useState(defaultUrl ?? "");
   const [text, setText] = React.useState(defaultText ?? "");
-  const [isNewTab, setIsNewTab] = React.useState(defaultIsNewTab ?? false);
+  const [isNewTab, setIsNewTab] = React.useState(() =>
+    initialIsNewTab(defaultUrl, defaultTarget, defaultIsNewTab),
+  );
+  // A new link's switch follows the URL type until the owner flips it (or
+  // picks a page); an existing link's switch never moves on its own.
+  const [isNewTabChosen, setIsNewTabChosen] = React.useState(
+    () => !!defaultUrl || defaultIsNewTab !== undefined,
+  );
   const [style, setStyle] = React.useState<LinkStyle>(
     coerceLinkVariant(defaultVariant) ?? "link",
   );
@@ -91,8 +137,12 @@ export const LinkEditBlock = ({
             aria-invalid={urlError ? true : undefined}
             aria-describedby={urlError ? "link-url-error" : undefined}
             onChange={(e) => {
-              setUrl(e.target.value);
+              const next = e.target.value;
+              setUrl(next);
               if (urlError) setUrlError(null);
+              if (!isNewTabChosen) {
+                setIsNewTab(autoOpenInNewTab(next, [window.location.host]));
+              }
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSave(e);
@@ -113,6 +163,7 @@ export const LinkEditBlock = ({
               setUrlError(null);
               // A page on this site belongs in the same tab.
               setIsNewTab(false);
+              setIsNewTabChosen(true);
             }}
           />
         </div>
@@ -154,7 +205,13 @@ export const LinkEditBlock = ({
 
         <div className="flex items-center space-x-2">
           <Label>Open in New Tab</Label>
-          <Switch checked={isNewTab} onCheckedChange={setIsNewTab} />
+          <Switch
+            checked={isNewTab}
+            onCheckedChange={(checked) => {
+              setIsNewTab(checked);
+              setIsNewTabChosen(true);
+            }}
+          />
         </div>
 
         <div className="flex justify-end space-x-2">

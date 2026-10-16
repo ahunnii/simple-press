@@ -7,9 +7,11 @@ import { BubbleMenu } from "@tiptap/react/menus";
 import type { ShouldShowProps } from "../../types";
 import type { LinkVariant } from "~/lib/tiptap/link-extension";
 import { coerceLinkVariant } from "~/lib/tiptap/link-extension";
+import { linkTargetAttr } from "~/lib/tiptap/link-target";
 
 import { LinkEditBlock } from "../link/link-edit-block";
 import { LinkPopoverBlock } from "../link/link-popover-block";
+import { isLinkBubbleTarget } from "./bubble-menu-predicates";
 
 interface LinkBubbleMenuProps {
   editor: Editor;
@@ -49,22 +51,13 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
     setSelectedText(text);
   }, [editor]);
 
+  // A collapsed cursor in a link counts (clicking a link, plain or button,
+  // or arrowing into one), not just a text selection over it.
   const shouldShow = React.useCallback(
-    ({ editor, from, to }: ShouldShowProps) => {
-      if (from === to) {
-        return false;
-      }
-      const { href } = editor.getAttributes("link");
-
-      if (!editor.isActive("link") || !editor.isEditable) {
-        return false;
-      }
-
-      if (href) {
-        updateLinkState();
-        return true;
-      }
-      return false;
+    ({ editor }: ShouldShowProps) => {
+      if (!isLinkBubbleTarget(editor)) return false;
+      updateLinkState();
+      return true;
     },
     [updateLinkState],
   );
@@ -92,7 +85,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
               type: "link",
               attrs: {
                 href: url,
-                target: openInNewTab ? "_blank" : "",
+                target: linkTargetAttr(!!openInNewTab),
                 variant: variant ?? null,
               },
             },
@@ -100,7 +93,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
         })
         .setLink({
           href: url,
-          target: openInNewTab ? "_blank" : "",
+          target: linkTargetAttr(!!openInNewTab),
           variant: variant ?? null,
         })
         .run();
@@ -138,7 +131,7 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
         <LinkEditBlock
           defaultUrl={linkAttrs.href}
           defaultText={selectedText}
-          defaultIsNewTab={linkAttrs.target === "_blank"}
+          defaultTarget={linkAttrs.target ?? null}
           defaultVariant={linkAttrs.variant}
           onSave={onSetLink}
           className="bg-popover text-popover-foreground w-full min-w-80 rounded-md border p-4 shadow-md outline-hidden"

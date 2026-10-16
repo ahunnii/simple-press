@@ -10,6 +10,7 @@ import { Separator } from "~/components/ui/separator";
 import { ColumnsBubbleMenu } from "./components/bubble-menu/columns-bubble-menu";
 import { ImageBubbleMenu } from "./components/bubble-menu/image-bubble-menu";
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
+import { SpacerBubbleMenu } from "./components/bubble-menu/spacer-bubble-menu";
 import { TableBubbleMenu } from "./components/bubble-menu/table-bubble-menu";
 import { MeasuredContainer } from "./components/measured-container";
 import { SectionFive } from "./components/section/five";
@@ -117,6 +118,7 @@ const Toolbar = ({
                 "table",
                 "columns",
                 "details",
+                "spacer",
               ]
         }
         mainActionCount={0}
@@ -224,6 +226,7 @@ export const MainMinimalTiptapEditor = ({
       <LinkBubbleMenu editor={providedEditor} />
       {!emailMode && <TableBubbleMenu editor={providedEditor} />}
       {!emailMode && <ColumnsBubbleMenu editor={providedEditor} />}
+      {!emailMode && <SpacerBubbleMenu editor={providedEditor} />}
       <ImageBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );

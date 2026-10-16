@@ -1,6 +1,10 @@
 import type { LinkOptions } from "@tiptap/extension-link";
 import Link from "@tiptap/extension-link";
 
+import { isInternalHref, resolveLinkTarget } from "./link-target";
+
+export { isInternalHref } from "./link-target";
+
 /**
  * Shared `link` mark: the stock Link extension plus a `variant` attr that
  * turns a link into a call-to-action button.
@@ -29,7 +33,7 @@ export type LinkVariant = (typeof LINK_VARIANTS)[number];
 export const BUTTON_LINK_CLASS = "sp-button";
 
 /** Schemes a link may point at, in the editor and on the storefront alike. */
-export const LINK_PROTOCOLS = ["http", "https", "mailto", "tel"];
+export const LINK_PROTOCOLS = ["http", "https", "mailto", "tel", "sms"];
 
 const VARIANT_SET: ReadonlySet<string> = new Set(LINK_VARIANTS);
 
@@ -102,26 +106,17 @@ export function createLinkExtension(options: Partial<LinkOptions> = {}) {
   });
 }
 
-/**
- * True for a link to a page on the same site: a single-slash path (`/contact`)
- * or an in-page anchor (`#faq`). Protocol-relative `//host` is external.
- */
-export function isInternalHref(href: unknown): boolean {
-  if (typeof href !== "string") return false;
-  const value = href.trim();
-  return (
-    (value.startsWith("/") && !value.startsWith("//")) || value.startsWith("#")
-  );
-}
-
 const EXTERNAL_REL = "noopener noreferrer nofollow";
 
 /**
  * The storefront / export `link` mark. External links are stamped
- * `rel="noopener noreferrer nofollow"` and open in a new tab unless the stored
- * `target` says otherwise (unchanged behaviour). Internal links (`/…`, `#…`)
- * carry no `rel` and only open in a new tab when the owner explicitly asked
- * for it — a link to your own page should not be nofollowed or leave the tab.
+ * `rel="noopener noreferrer nofollow"` whatever their target. Internal links
+ * (`/…`, `#…`) carry no `rel` — a link to your own page is not nofollowed.
+ *
+ * `target` follows `resolveLinkTarget` (see `./link-target`): stored
+ * `"_blank"` → `target="_blank"`; stored `"_self"` → no `target` (same tab);
+ * nothing stored → new tab for external links (the historical default, so
+ * older content is unchanged), same tab for internal ones.
  *
  * `target` and `rel` default to `null` here (not the stock `_blank` /
  * `rel`) so "owner chose nothing" can be told apart from "owner chose a new
@@ -135,14 +130,11 @@ export function createRendererLinkExtension() {
         target: {
           default: null,
           renderHTML: (attributes: Record<string, unknown>) => {
-            const target =
-              typeof attributes.target === "string" && attributes.target
-                ? attributes.target
-                : null;
-            if (isInternalHref(attributes.href)) {
-              return target ? { target } : {};
-            }
-            return { target: target ?? "_blank" };
+            const target = resolveLinkTarget(
+              attributes.href,
+              attributes.target,
+            );
+            return target ? { target } : {};
           },
         },
         rel: {

@@ -44,15 +44,43 @@ const MAX_PAGES = 50;
  *   image-…          → "image"
  *   library-…        → "image" (Media Library bulk uploads)
  *   anything else    → "other"
+ *
+ * The image-ish kinds (testimonial / gallery / image) are only assigned to
+ * files that really are displayable images. A stray font, PDF or other file
+ * that happens to sit under one of those prefixes is "other", so the image
+ * pickers (which filter on kind) never offer it as a broken thumbnail while
+ * the Media Library page still lists it under "Other" with a download.
  */
-function classifyKind(suffix: string): MediaKind {
-  if (suffix.startsWith("testimonials/")) return "testimonial";
-  if (suffix.startsWith("gallery-")) return "gallery";
+export const DISPLAYABLE_IMAGE_EXTENSIONS: ReadonlySet<string> = new Set([
+  ".jpg",
+  ".jpeg",
+  ".jfif",
+  ".png",
+  ".gif",
+  ".webp",
+  ".avif",
+  ".svg",
+  ".bmp",
+]);
+
+/** True when the key's file extension is a browser-displayable image type. */
+export function hasImageExtension(key: string): boolean {
+  const name = key.split("/").pop() ?? key;
+  const dot = name.lastIndexOf(".");
+  if (dot < 0) return false;
+  return DISPLAYABLE_IMAGE_EXTENSIONS.has(name.slice(dot).toLowerCase());
+}
+
+export function classifyKind(suffix: string): MediaKind {
+  const isImageFile = hasImageExtension(suffix);
+  if (suffix.startsWith("testimonials/"))
+    return isImageFile ? "testimonial" : "other";
+  if (suffix.startsWith("gallery-")) return isImageFile ? "gallery" : "other";
   if (suffix.startsWith("logo.")) return "logo";
   if (suffix.startsWith("favicon.")) return "favicon";
   if (suffix.startsWith("video-")) return "video";
-  if (suffix.startsWith("image-")) return "image";
-  if (suffix.startsWith("library-")) return "image";
+  if (suffix.startsWith("image-")) return isImageFile ? "image" : "other";
+  if (suffix.startsWith("library-")) return isImageFile ? "image" : "other";
   return "other";
 }
 
