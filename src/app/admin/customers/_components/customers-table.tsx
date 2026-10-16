@@ -21,6 +21,7 @@ import {
   TABLE_CELL,
   TABLE_HEAD,
 } from "../../_components/admin-table-style";
+import { getMarketingStatus } from "./marketing-status";
 
 const BASE_PATH = "/admin/customers";
 
@@ -28,21 +29,11 @@ const BASE_PATH = "/admin/customers";
 const TH = TABLE_HEAD;
 const TD = TABLE_CELL;
 
-// Rendered in both the desktop "Marketing" cell and the md:hidden reflow
-// line — a single constant keeps the two from ever drifting apart.
-const SUBSCRIBED_LABEL = "Subscribed";
-
-/**
- * The reflow line's counterpart for the un-subscribed state.
- *
- * The desktop cell renders a muted "—" for this, which is legible there because
- * the "Marketing" column header says what the dash is about. Below `md` that
- * header is gone, and so is every other header — so the reflow line has to
- * carry its own meaning. Rendering nothing (the obvious alternative) makes
- * "not subscribed" indistinguishable from "this row didn't render its marketing
- * state at all".
- */
-const NOT_SUBSCRIBED_LABEL = "Not subscribed";
+// The desktop cell shows a muted "—" for anyone who isn't subscribed or
+// suppressed, which is legible because the "Marketing" column header says what
+// the dash is about. Below `md` that header is gone, so the reflow line carries
+// the full status label ("Not subscribed", "Unsubscribed", "Suppressed: …")
+// from the shared `getMarketingStatus` helper instead of rendering nothing.
 
 // Hoisted out of the component: constructing a new Intl.DateTimeFormat on
 // every render (what this file used to do) is wasted work — the format
@@ -100,6 +91,8 @@ export function CustomersTable({ customers }: Props) {
             const joined = JOINED_DATE_FORMAT.format(
               new Date(customer.createdAt),
             );
+
+            const marketing = getMarketingStatus(customer);
 
             return (
               <TableRow key={customer.id}>
@@ -160,11 +153,7 @@ export function CustomersTable({ customers }: Props) {
                         spent
                       </span>
                       <span aria-hidden="true">·</span>
-                      <span>
-                        {customer.acceptsMarketing
-                          ? SUBSCRIBED_LABEL
-                          : NOT_SUBSCRIBED_LABEL}
-                      </span>
+                      <span>{marketing.label}</span>
                       <span aria-hidden="true">·</span>
                       <span>Joined {joined}</span>
                     </div>
@@ -184,8 +173,10 @@ export function CustomersTable({ customers }: Props) {
                 </TableCell>
 
                 <TableCell className={`hidden md:table-cell ${TD}`}>
-                  {customer.acceptsMarketing ? (
-                    <Badge variant="secondary">{SUBSCRIBED_LABEL}</Badge>
+                  {marketing.kind === "subscribed" ? (
+                    <Badge variant="secondary">{marketing.shortLabel}</Badge>
+                  ) : marketing.kind === "suppressed" ? (
+                    <Badge variant="warning">{marketing.shortLabel}</Badge>
                   ) : (
                     <span className="text-muted-foreground">—</span>
                   )}

@@ -23,6 +23,11 @@ export const EMAIL_FROM = {
   NOREPLY: env.NEXT_PUBLIC_EMAIL_FROM_NOREPLY ?? "noreply@yourdomain.com",
   ORDERS: env.NEXT_PUBLIC_EMAIL_FROM_ORDERS ?? "orders@yourdomain.com",
   SUPPORT: env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT ?? "support@yourdomain.com",
+  // Marketing campaigns: separate subdomain when configured, else NOREPLY.
+  MARKETING:
+    env.EMAIL_FROM_MARKETING ??
+    env.NEXT_PUBLIC_EMAIL_FROM_NOREPLY ??
+    "noreply@yourdomain.com",
 } as const;
 
 /**
@@ -35,6 +40,26 @@ export const EMAIL_FROM = {
  */
 function emailTypeFrom(tags: Array<{ name: string; value: string }>): string {
   return tags.find((tag) => tag.name === "category")?.value ?? "untagged";
+}
+
+/**
+ * Builds an RFC 5322 `From` value with a display name. The name is always
+ * emitted as a quoted-string so characters like `,` `<` `>` `"` `;` `:` `@`
+ * `(` `)` cannot break the header. Control characters (CR/LF included) are
+ * turned into spaces so the name cannot inject extra headers; whitespace is
+ * collapsed and trimmed. An empty name yields the bare address.
+ */
+export function formatFromAddress(
+  displayName: string,
+  address: string,
+): string {
+  const name = displayName
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!name) return address;
+  const escaped = name.replace(/["\\]/g, (ch) => `\\${ch}`);
+  return `"${escaped}" <${address}>`;
 }
 
 /**
@@ -71,7 +96,7 @@ export async function sendEmail({
 }: SendEmailOptions) {
   // Hoisted above the try so the catch below can read them.
   const fromAddress = fromName
-    ? `${fromName} via ${"SimplePress"} <${from}>`
+    ? formatFromAddress(`${fromName} via SimplePress`, from)
     : from;
   const emailType = emailTypeFrom(tags);
   const businessTag = tags.find((tag) => tag.name === "business")?.value;

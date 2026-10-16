@@ -61,6 +61,7 @@ model User {
   inventoryCheckoutsCreated InventoryCheckout[]
   createdInvites            PlatformInvite[]     @relation("CreatedInvites")
   editorNotes               EditorNote[]
+  marketingCampaignsCreated MarketingCampaign[]
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -245,11 +246,11 @@ model Business {
   setupCompletedAt   DateTime?
 
   // SEO / AEO / GEO controls
-  localBusinessEnabled        Boolean @default(false) // DEPRECATED — superseded by localPresence (backfilled by prisma/manual/2026-09-24-local-presence.sql); no longer read, drop in a later pass
+  localBusinessEnabled        Boolean  @default(false) // DEPRECATED — superseded by localPresence (backfilled by prisma/manual/2026-09-24-local-presence.sql); no longer read, drop in a later pass
   localPresence               String   @default("none") // none | service_area | storefront — which LocalBusiness JSON-LD (if any) the storefront emits
   areaServed                  String[] @default([]) // owner-listed cities/regions served; emitted as LocalBusiness `areaServed`
-  allowAiCrawlers             Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
-  sendAbandonedCheckoutEmails Boolean @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
+  allowAiCrawlers             Boolean  @default(true) // when false, blocks known AI-crawler bots in robots.txt
+  sendAbandonedCheckoutEmails Boolean  @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
 
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
@@ -283,7 +284,7 @@ model Business {
   // configured (emit nothing); 0 = returns not accepted; N>0 = N-day window.
   returnWindowDays       Int?
   returnFees             String? // "free" | "customer_pays" | "flat_fee"
-  returnShippingFeeCents Int?    // only when returnFees = "flat_fee"
+  returnShippingFeeCents Int? // only when returnFees = "flat_fee"
   returnMethod           String? // "by_mail" | "in_store" | "either"
 
   // IndexNow watermark. Written ONLY via $executeRaw so it never bumps updatedAt.
@@ -332,6 +333,9 @@ model Business {
   quoteSubmissions       QuoteSubmission[]
   forms                  Form[]
   formSubmissions        FormSubmission[]
+  marketingCampaigns     MarketingCampaign[]
+  marketingConsentEvents MarketingConsentEvent[]
+  marketingDoNotEmail    MarketingDoNotEmail[]
   quickBooksConnection   QuickBooksConnection?
   quickBooksInvoices     QuickBooksInvoice[]
   invoiceSettings        InvoiceSettings?
@@ -1011,7 +1015,14 @@ model Customer {
   stripeCustomerId String? // per-business Stripe Customer on the connected account
 
   // Marketing
-  acceptsMarketing Boolean @default(false)
+  acceptsMarketing           Boolean   @default(false)
+  // Consent evidence for email marketing. `acceptsMarketing` stays the live
+  // opt-in switch; these record when/how it was granted or withdrawn.
+  marketingConsentAt         DateTime?
+  marketingConsentSource     String? // CHECKOUT | NEWSLETTER_FORM | ACCOUNT | RESUBSCRIBE_LINK | LEGACY_ACCOUNT
+  marketingUnsubscribedAt    DateTime?
+  marketingSuppressedAt      DateTime? // hard bounce / complaint — excluded from all marketing sends
+  marketingSuppressionReason String? // HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
 
   // Stats
   totalSpent Int @default(0)
@@ -1051,6 +1062,8 @@ model Customer {
   subscriptions      Subscription[]
   loyaltyLedger      LoyaltyLedger[]
   invoices           Invoice[]
+  campaignRecipients MarketingCampaignRecipient[]
+  consentEvents      MarketingConsentEvent[]
 
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
@@ -1529,8 +1542,8 @@ model EditorNote {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  pageKey   String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
-  pageLabel String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
+  pageKey      String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
+  pageLabel    String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
   sectionKey   String? // section id ("homepage.hero", "global.header"), matches data-sp-group; null = page- or site-wide
   sectionLabel String? // display snapshot ("Hero") — survives section rename
 
@@ -2038,6 +2051,155 @@ model FormSubmission {
   @@index([businessId, formId, submittedAt])
   @@index([businessId, formId, status])
   @@index([tags], type: Gin)
+}
+
+/// Owner-authored email marketing campaign. Content is frozen into
+/// renderedHtml/renderedText at queue time so every retry sends byte-identical
+/// payloads (Resend idempotency).
+model MarketingCampaign {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  subject       String
+  previewText   String?
+  contentFormat String  @default("text") // "text" | "tiptap"
+  bodyText      String? @db.Text
+  bodyJson      Json?
+
+  status String @default("DRAFT") // DRAFT | QUEUED | SENDING | SENT | FAILED | CANCELED
+
+  // Frozen at queue time so every retry sends byte-identical payloads (Resend idempotency)
+  renderedHtml String? @db.Text // contains __SP_UNSUBSCRIBE_URL__ placeholder
+  renderedText String? @db.Text
+  fromAddress  String?
+  replyTo      String?
+  baseUrl      String?
+
+  recipientCount Int       @default(0)
+  queuedAt       DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  canceledAt     DateTime?
+  lastError      String?
+
+  batches       MarketingCampaignBatch[]
+  recipients    MarketingCampaignRecipient[]
+  consentEvents MarketingConsentEvent[]
+
+  @@index([businessId, createdAt])
+  @@index([status])
+}
+
+/// One Resend batch of a campaign (leased by the sender cron, retried safely).
+model MarketingCampaignBatch {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campaignId String
+  campaign   MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  businessId String
+  batchIndex Int
+  status     String @default("PENDING") // PENDING | SENDING | SENT | FAILED | CANCELED
+  attempts   Int    @default(0)
+
+  leaseUntil     DateTime?
+  notBefore      DateTime?
+  firstAttemptAt DateTime?
+  sentAt         DateTime?
+  lastError      String?
+
+  @@unique([campaignId, batchIndex])
+  @@index([campaignId, status])
+}
+
+/// One recipient of a campaign, snapshotted at queue time.
+model MarketingCampaignRecipient {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campaignId String
+  campaign   MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  businessId String
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  email      String // snapshot at queue time; blanked on customer anonymize
+  batchIndex Int
+  status     String  @default("PENDING") // PENDING | SENDING | SENT | DELIVERED | BOUNCED | COMPLAINED | FAILED | SKIPPED | CANCELED
+  resendId   String? @unique
+  error      String?
+
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  bouncedAt      DateTime?
+  complainedAt   DateTime?
+  unsubscribedAt DateTime?
+
+  @@unique([campaignId, customerId])
+  @@index([campaignId, batchIndex])
+  @@index([campaignId, status])
+  @@index([customerId])
+}
+
+/// Append-only evidence log of email-marketing consent changes (opt-in,
+/// opt-out, suppression). `Customer.acceptsMarketing` + the marketing* columns
+/// stay the live state; these rows record every transition with how/where it
+/// happened. Written via `recordConsentEvent` (src/lib/marketing/consent-log.ts).
+/// Customer erasure deletes a customer's rows explicitly; the SetNull FK is
+/// only a backstop for a hard customer delete.
+model MarketingConsentEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  type   String // OPT_IN | OPT_OUT | SUPPRESSED | UNSUPPRESSED
+  source String // see MARKETING_CONSENT_EVENT_SOURCES in src/lib/marketing/consent-log.ts
+
+  ip        String? /// @encrypted
+  userAgent String? @db.Text /// @encrypted
+  wording   String? @db.Text // the consent text shown at the moment of opt-in
+
+  // Campaign whose unsubscribe link / complaint / bounce produced the event.
+  campaignId String?
+  campaign   MarketingCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, customerId, createdAt])
+  @@index([customerId]) // SetNull fan-out on customer delete
+  @@index([campaignId]) // SetNull fan-out on campaign delete
+}
+
+/// Per-store do-not-email list keyed by an HMAC of the normalized address
+/// (never the address itself), so an opt-out / bounce / complaint survives the
+/// Customer row being erased or re-created. See src/lib/marketing/do-not-email.ts.
+/// NOT encrypted: `emailHash` must be queryable and is already a keyed hash.
+model MarketingDoNotEmail {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  emailHash String // hex HMAC-SHA256 of normalizeEmail(email), context "dne:v1"
+  reason    String // UNSUBSCRIBED | HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
+
+  @@unique([businessId, emailHash])
 }
 
 /// One QuickBooks Online company connection per business (1:1). Updated in

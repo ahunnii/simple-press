@@ -23,6 +23,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -856,6 +857,22 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
               </Alert>
             )}
           </div>
+
+          <CheckoutMarketingOptIn
+            enabled={f.marketingOptInEnabled}
+            checked={f.acceptsMarketing}
+            onCheckedChange={f.setAcceptsMarketing}
+            businessName={business.name}
+            className="flex items-start gap-2"
+            style={{
+              marginBottom: 12,
+              textAlign: "left",
+              fontSize: 11,
+              color: "var(--el-ink-soft, #6b6659)",
+              fontFamily: "var(--font-sans, sans-serif)",
+              lineHeight: 1.5,
+            }}
+          />
 
           <button
             type="submit"

@@ -1,6 +1,8 @@
 import * as React from "react";
 
 import type { LinkVariant } from "~/lib/tiptap/link-extension";
+import { normalizeEditorHref } from "~/lib/normalize-editor-href";
+import { SAFE_HREF_MESSAGE } from "~/lib/safe-href";
 import { coerceLinkVariant } from "~/lib/tiptap/link-extension";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -8,6 +10,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+
+import { SiteLinkPicker } from "./site-link-picker";
 
 export interface LinkEditorProps extends React.ComponentProps<"div"> {
   defaultUrl?: string;
@@ -40,7 +44,7 @@ export const LinkEditBlock = ({
   defaultVariant,
   className,
 }: LinkEditorProps) => {
-  const formRef = React.useRef<HTMLDivElement>(null);
+  const [urlError, setUrlError] = React.useState<string | null>(null);
   const [url, setUrl] = React.useState(defaultUrl ?? "");
   const [text, setText] = React.useState(defaultText ?? "");
   const [isNewTab, setIsNewTab] = React.useState(defaultIsNewTab ?? false);
@@ -49,38 +53,67 @@ export const LinkEditBlock = ({
   );
 
   const handleSave = React.useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (formRef.current) {
-        const isValid = Array.from(
-          formRef.current.querySelectorAll("input"),
-        ).every((input) => input.checkValidity());
-
-        if (isValid) {
-          onSave(url, text, isNewTab, style === "link" ? null : style);
-        } else {
-          formRef.current.querySelectorAll("input").forEach((input) => {
-            if (!input.checkValidity()) {
-              input.reportValidity();
-            }
-          });
-        }
+    (e?: React.SyntheticEvent) => {
+      e?.preventDefault();
+      // Site-host matches are resolved here (event handler), so SSR never
+      // touches `window`.
+      const href = normalizeEditorHref(url, {
+        siteHosts: [window.location.host],
+      });
+      if (href === null) {
+        setUrlError(url.trim() === "" ? "Enter a link." : SAFE_HREF_MESSAGE);
+        return;
       }
+      setUrlError(null);
+      onSave(
+        href,
+        text || undefined,
+        isNewTab,
+        style === "link" ? null : style,
+      );
     },
     [onSave, url, text, isNewTab, style],
   );
 
   return (
-    <div ref={formRef}>
+    <div>
       <div className={cn("space-y-4", className)}>
         <div className="space-y-1">
           <Label>URL</Label>
           <Input
-            type="url"
-            required
-            placeholder="Enter URL"
+            type="text"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="/contact or https://…"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            aria-invalid={urlError ? true : undefined}
+            aria-describedby={urlError ? "link-url-error" : undefined}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (urlError) setUrlError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave(e);
+            }}
+          />
+          {urlError && (
+            <p
+              id="link-url-error"
+              role="alert"
+              className="text-destructive text-xs"
+            >
+              {urlError}
+            </p>
+          )}
+          <SiteLinkPicker
+            onPick={(path) => {
+              setUrl(path);
+              setUrlError(null);
+              // A page on this site belongs in the same tab.
+              setIsNewTab(false);
+            }}
           />
         </div>
 

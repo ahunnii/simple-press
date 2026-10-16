@@ -25,7 +25,10 @@ interface TableBubbleMenuProps {
 
 export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({ editor }) => {
   const shouldShow = React.useCallback(({ editor }: ShouldShowProps) => {
-    return editor.isActive("table") && editor.isEditable;
+    // A selected image in a cell gets the image menu.
+    return (
+      editor.isActive("table") && !editor.isActive("image") && editor.isEditable
+    );
   }, []);
 
   return (

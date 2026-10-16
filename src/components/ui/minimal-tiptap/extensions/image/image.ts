@@ -6,6 +6,11 @@ import { ReplaceStep } from "@tiptap/pm/transform";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
 import type { FileError, FileValidationOptions } from "../../utils";
+import {
+  DEFAULT_NEW_IMAGE_LAYOUT,
+  IMAGE_LAYOUT_ATTRIBUTES,
+  renderImageHTML,
+} from "~/lib/tiptap/image-node";
 
 import { filterFiles, randomId } from "../../utils";
 import { ImageViewBlock } from "./components/image-view-block";
@@ -48,7 +53,14 @@ interface CustomImageOptions
   ) => Promise<void>;
   onValidationError?: (errors: FileError[]) => void;
   onToggle?: (editor: Editor, files: File[], pos: number) => void;
+  /**
+   * Adds "Choose from library" to the image dialog. Only `true` when the
+   * `media` feature flag is on (`media.list` throws FORBIDDEN otherwise).
+   */
+  mediaEnabled: boolean;
 }
+
+export type ImageEditorOptions = CustomImageOptions;
 
 declare module "@tiptap/react" {
   interface Commands<ReturnType> {
@@ -193,6 +205,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
       downloadImage: undefined,
       copyImage: undefined,
       copyLink: undefined,
+      mediaEnabled: false,
     };
   },
 
@@ -219,7 +232,19 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
       fileName: {
         default: null,
       },
+      // Size preset + alignment, shared with the storefront renderer.
+      ...IMAGE_LAYOUT_ATTRIBUTES,
     };
+  },
+
+  // Same markup as the storefront (`RendererImage`), so copied/exported
+  // editor HTML carries the layout too.
+  renderHTML({ node, HTMLAttributes }) {
+    return renderImageHTML(
+      node.attrs,
+      this.options.HTMLAttributes,
+      HTMLAttributes,
+    );
   },
 
   addCommands() {
@@ -247,6 +272,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
                   return {
                     type: this.type.name,
                     attrs: {
+                      ...DEFAULT_NEW_IMAGE_LAYOUT,
                       id,
                       src: blobUrl,
                       alt: image.alt,
@@ -258,6 +284,7 @@ export const Image = TiptapImage.extend<CustomImageOptions>({
                   return {
                     type: this.type.name,
                     attrs: {
+                      ...DEFAULT_NEW_IMAGE_LAYOUT,
                       id: randomId(),
                       src: image.src,
                       alt: image.alt,

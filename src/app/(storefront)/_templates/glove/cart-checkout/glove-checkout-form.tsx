@@ -13,6 +13,7 @@ import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -511,6 +512,15 @@ export function GloveCheckoutForm({
             </p>
           ) : null}
         </div>
+
+        <CheckoutMarketingOptIn
+          enabled={form.marketingOptInEnabled}
+          checked={form.acceptsMarketing}
+          onCheckedChange={form.setAcceptsMarketing}
+          businessName={business.name}
+          className="mb-4 flex items-start gap-2 text-left text-[13px] text-[var(--glove-muted)]"
+          inputClassName="mt-0.5 size-4 shrink-0 accent-[var(--glove-primary)]"
+        />
 
         <GloveButton
           type="submit"

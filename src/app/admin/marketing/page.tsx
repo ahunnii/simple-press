@@ -1,26 +1,32 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
 import { TrailHeader } from "../_components/trail-header";
-import { BroadcastComposer } from "./_components/broadcast-composer";
+import { AudienceCard } from "./_components/audience-card";
+import { CampaignHistoryTable } from "./_components/campaign-history-table";
 
+// The `emailMarketing` flag gates the composer and the write procedures (see
+// ./layout.tsx). History, the audience count and the export stay available.
 export default async function MarketingPage() {
-  // Server-side gate: the emailMarketing feature flag is enforced on the
-  // tRPC procedures (marketing.ts uses featureGate("emailMarketing")), but
-  // without a page-level check the composer still renders and looks fully
-  // functional until the mutation throws a FORBIDDEN error on submit.
-  // Mirrors the disabled-state pattern used by
-  // /admin/content/announcements for its own feature flags.
-  const flags = await getBusinessFlags();
+  const [audience, firstPage, business, flags] = await Promise.all([
+    api.marketing.listRecipients().catch(rethrowTrpcForErrorBoundary),
+    api.marketing
+      .listCampaigns({ limit: 20 })
+      .catch(rethrowTrpcForErrorBoundary),
+    api.business.simplifiedGet(),
+    getBusinessFlags(),
+  ]);
   const emailMarketingEnabled = flags.isEnabled("emailMarketing");
 
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Email Marketing" }]} />
-      <div className="admin-container">
+      <div className="admin-container space-y-6">
         <div className="admin-header">
           <div>
             <h1>Email Marketing</h1>
@@ -29,34 +35,36 @@ export default async function MarketingPage() {
               customers.
             </p>
           </div>
-        </div>
-
-        {!emailMarketingEnabled ? (
-          <div className="border-border rounded-lg border border-dashed p-12 text-center">
-            <p className="mb-2 text-lg font-medium">
-              Email Marketing is not enabled
-            </p>
-            <p className="text-muted-foreground mb-6">
-              Enable the &ldquo;Email Marketing&rdquo; feature to send
-              announcements and newsletters to your opted-in customers.
-            </p>
+          {emailMarketingEnabled && (
             <Button asChild>
-              <Link href="/admin/settings/features">
-                Go to Settings → Features
+              <Link href="/admin/marketing/campaigns/new">
+                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                New campaign
               </Link>
             </Button>
-          </div>
-        ) : (
-          <MarketingComposer />
-        )}
+          )}
+        </div>
+
+        <AudienceCard
+          count={audience.count}
+          suppressedCount={audience.suppressedCount}
+        />
+
+        <section
+          aria-labelledby="campaign-history-heading"
+          className="space-y-3"
+        >
+          <h2 id="campaign-history-heading" className="text-lg font-semibold">
+            Campaign history
+          </h2>
+          <CampaignHistoryTable
+            initialPage={firstPage}
+            timeZone={business?.timeZone ?? "UTC"}
+          />
+        </section>
       </div>
     </>
   );
-}
-
-async function MarketingComposer() {
-  const { count } = await api.marketing.listRecipients();
-  return <BroadcastComposer recipientCount={count} />;
 }
 
 export const metadata = {

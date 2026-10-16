@@ -15,6 +15,7 @@ import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -578,6 +579,15 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   {formatPrice(form.finalTotal)}
                 </span>
               </div>
+
+              <CheckoutMarketingOptIn
+                enabled={form.marketingOptInEnabled}
+                checked={form.acceptsMarketing}
+                onCheckedChange={form.setAcceptsMarketing}
+                businessName={business.name}
+                className="olive-caption flex items-start gap-2 text-left"
+                inputStyle={{ accentColor: "var(--olive-leaf)" }}
+              />
 
               <CheckoutTermsNotice
                 disclosure={form.termsDisclosure}

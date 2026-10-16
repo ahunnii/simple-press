@@ -101,6 +101,11 @@ export const env = createEnv({
     // Optional: when set on a preview env, all outbound email is rerouted to
     // this single inbox instead of being dropped.
     EMAIL_REDIRECT_TO: z.string().email().optional(),
+    // Optional: From address for marketing campaigns. Use a separate subdomain so
+    // bulk sends can't hurt transactional deliverability. Unset falls back to NOREPLY.
+    EMAIL_FROM_MARKETING: z.string().email().optional(),
+    // Optional: Resend (svix) webhook signing secret, starts with "whsec_".
+    RESEND_WEBHOOK_SECRET: z.string().optional(),
 
     // Umami platform service account credentials (server-only, never exposed to client).
     // The password may be provided either as plain text (UMAMI_API_PASSWORD) or
@@ -204,6 +209,8 @@ export const env = createEnv({
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,
+    EMAIL_FROM_MARKETING: process.env.EMAIL_FROM_MARKETING,
+    RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     UMAMI_API_USERNAME: process.env.UMAMI_API_USERNAME,
     UMAMI_API_PASSWORD: process.env.UMAMI_API_PASSWORD,
     UMAMI_API_PASSWORD_B64: process.env.UMAMI_API_PASSWORD_B64,

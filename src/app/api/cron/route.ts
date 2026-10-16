@@ -15,6 +15,7 @@
 //  10. invoiceOverdueAlerts — email an owner the first time one of their invoices goes past due
 //  11. invoiceWeeklyDigest  — Monday 8am (business time zone) owner summary of open invoices
 //  12. indexNow             — submit changed storefront URLs to IndexNow (Bing, Yandex, …)
+//  13. marketingCampaigns   — resume queued/sending email campaigns a crash or deploy cut short (60s cap)
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -42,6 +43,7 @@ import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { notifyOverdueInvoices } from "~/lib/invoices/overdue-alerts";
 import { sendInvoiceDigests } from "~/lib/invoices/weekly-digest";
 import { awardBirthdayPoints } from "~/lib/loyalty/birthday";
+import { resumeMarketingCampaigns } from "~/lib/marketing/campaign-worker";
 import { syncQuickBooksInvoices } from "~/lib/quickbooks/sync";
 import { runIndexNowSweep } from "~/lib/seo/indexnow";
 import { syncSubscriptions } from "~/lib/subscriptions/sync";
@@ -460,8 +462,8 @@ const JOBS: readonly CronJob[] = [
   },
   // IndexNow: tell participating search engines which storefront URLs
   // changed since each store's watermark (full sitemap on first run or after
-  // a canonical-host change). Last on purpose, so products/pages the
-  // scheduled-publish jobs above just flipped go out in the same tick.
+  // a canonical-host change). After the scheduled-publish jobs on purpose, so
+  // products/pages they just flipped go out in the same tick.
   // No-op unless INDEXNOW_KEY is set in a non-preview production env; up to
   // 25 stores per tick, oldest watermark first. Throttling (429) or a
   // rejected key (403) stops the sweep inside `runIndexNowSweep`.
@@ -469,6 +471,18 @@ const JOBS: readonly CronJob[] = [
     key: "indexNow",
     name: "indexnow",
     run: () => runIndexNowSweep(db),
+  },
+  // Marketing campaigns: resume every QUEUED/SENDING campaign whose post-send
+  // `after()` drain was cut short (crash, deploy, 10-minute deadline, expired
+  // lease, or the emailMarketing flag switched off and back on). Batches are
+  // claimed with SKIP LOCKED leases and sent under per-batch idempotency
+  // keys, so overlapping a still-running drain is safe. Last, and capped at
+  // 60s, because it is the only job that deliberately spends wall-clock time
+  // (the 2 req/s send throttle). Steady state is one SELECT returning 0 rows.
+  {
+    key: "marketingCampaigns",
+    name: "marketing-campaigns",
+    run: () => resumeMarketingCampaigns(db, { budgetMs: 60_000 }),
   },
 ];
 

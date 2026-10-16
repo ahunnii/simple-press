@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
+
 import { SubscribeForm } from "./subscribe-form";
 
 // `SavedAddressPicker` (mounted inside the shipping-address block) reads
@@ -74,8 +76,11 @@ function makeProduct(overrides: Partial<FakeProduct> = {}): FakeProduct {
 
 const merchantPolicies = { hasTermsOfService: false, hasRefundPolicy: false };
 
-function renderForm(overrides: Partial<FormProps> = {}) {
-  return render(
+function renderForm(
+  overrides: Partial<FormProps> = {},
+  flags?: Record<string, boolean>,
+) {
+  const form = (
     <SubscribeForm
       business={makeBusiness()}
       product={makeProduct()}
@@ -84,7 +89,14 @@ function renderForm(overrides: Partial<FormProps> = {}) {
       quantity={2}
       merchantPolicies={merchantPolicies}
       {...overrides}
-    />,
+    />
+  );
+  return render(
+    flags ? (
+      <StorefrontFlagsProvider flags={flags}>{form}</StorefrontFlagsProvider>
+    ) : (
+      form
+    ),
   );
 }
 
@@ -101,7 +113,10 @@ function jsonResponse(
 }
 
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/Email/), "shopper@example.com");
+  await user.type(
+    screen.getByLabelText(/^Email(?! me)/),
+    "shopper@example.com",
+  );
   await user.type(screen.getByLabelText(/Full name/), "Jane Shopper");
   await user.type(screen.getByLabelText(/^Phone/), "5551234567");
   await user.type(screen.getByLabelText(/Address line 1/), "123 Main St");
@@ -268,5 +283,55 @@ describe("SubscribeForm", () => {
       "This item is out of stock or no longer available.",
     );
     expect(window.location.href).toBe("");
+  });
+
+  describe("marketing opt-in checkbox", () => {
+    const optInLabel = "Email me news and offers from Acme Goods";
+
+    async function submitAndReadBody(user: ReturnType<typeof userEvent.setup>) {
+      const fetchMock = vi.fn().mockResolvedValue(
+        jsonResponse({
+          sessionUrl: "https://checkout.stripe.com/pay/cs_test_123",
+          sessionId: "cs_test_123",
+        }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+      await fillRequiredFields(user);
+      await user.click(
+        screen.getByRole("button", { name: "Continue to secure checkout" }),
+      );
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      return JSON.parse(init.body as string) as {
+        customerInfo: Record<string, unknown>;
+      };
+    }
+
+    it("is hidden when emailMarketing is off", () => {
+      renderForm();
+      expect(screen.queryByLabelText(optInLabel)).not.toBeInTheDocument();
+    });
+
+    it("is unchecked by default when emailMarketing is on", () => {
+      renderForm({}, { emailMarketing: true });
+      expect(screen.getByLabelText(optInLabel)).not.toBeChecked();
+    });
+
+    it("sends customerInfo.acceptsMarketing: true when ticked", async () => {
+      const user = userEvent.setup();
+      renderForm({}, { emailMarketing: true });
+      await user.click(screen.getByLabelText(optInLabel));
+
+      const body = await submitAndReadBody(user);
+      expect(body.customerInfo.acceptsMarketing).toBe(true);
+    });
+
+    it("omits the key entirely when left unticked", async () => {
+      const user = userEvent.setup();
+      renderForm({}, { emailMarketing: true });
+
+      const body = await submitAndReadBody(user);
+      expect(body.customerInfo).not.toHaveProperty("acceptsMarketing");
+    });
   });
 });

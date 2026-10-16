@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -572,6 +573,14 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
               </Alert>
             )}
           </div>
+
+          <CheckoutMarketingOptIn
+            enabled={f.marketingOptInEnabled}
+            checked={f.acceptsMarketing}
+            onCheckedChange={f.setAcceptsMarketing}
+            businessName={business.name}
+            className="text-muted-foreground mb-3 flex items-start gap-2 text-left text-xs"
+          />
 
           <button
             type="submit"

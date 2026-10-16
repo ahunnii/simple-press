@@ -339,7 +339,15 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconMailFast,
     section: "marketing",
     featureKey: "emailMarketing",
-    keywords: ["newsletter", "broadcast", "campaign", "email blast"],
+    keywords: [
+      "newsletter",
+      "broadcast",
+      "campaign",
+      "campaigns",
+      "email blast",
+      "email history",
+      "subscribers",
+    ],
   },
   {
     key: "quotes",

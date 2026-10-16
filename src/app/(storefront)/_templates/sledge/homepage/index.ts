@@ -150,7 +150,7 @@ const homepageSubscribeData: TemplateField[] = [
     key: "sledge.homepage-guarantee-image",
     label: "Photo",
     description:
-      "Large photo shown beside the testimonials and subscribe sections.",
+      "Large photo shown beside the testimonials and follow sections.",
     type: "image",
     page: "homepage",
     group: "homepage.subscribe",
@@ -160,7 +160,8 @@ const homepageSubscribeData: TemplateField[] = [
   {
     key: "sledge.homepage-guarantee-heading",
     label: "Heading",
-    description: "Heading for the newsletter signup section.",
+    description:
+      "Heading for the follow section, shown above your social links.",
     type: "text",
     page: "homepage",
     group: "homepage.subscribe",
@@ -212,8 +213,8 @@ export const sledgeHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.subscribe",
-    title: "Subscribe",
-    description: "Newsletter signup section and its image.",
+    title: "Follow",
+    description: "Follow section with its image and social links.",
     icon: "✉️",
     columns: 1,
   },

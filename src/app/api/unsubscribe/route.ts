@@ -1,9 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import * as Sentry from "@sentry/nextjs";
 
-import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
-import { db } from "~/server/db";
+import { consentRequestMeta } from "~/lib/marketing/consent-log";
+import {
+  applyUnsubscribe,
+  resolveUnsubscribeToken,
+} from "~/lib/marketing/unsubscribe";
 
 type PageTone = "success" | "error" | "neutral";
 
@@ -84,67 +86,6 @@ function htmlPage(title: string, message: string, tone: PageTone): Response {
   });
 }
 
-// Shared by GET (clicked link) and POST (RFC 8058 One-Click
-// List-Unsubscribe-Post) — both unsubscribe the same way given a token.
-async function unsubscribeByToken(
-  token: string | null,
-): Promise<{ success: boolean; title: string; message: string }> {
-  if (!token) {
-    return {
-      success: false,
-      title: "Invalid link",
-      message:
-        "This unsubscribe link is missing a token. Please use the link from your email.",
-    };
-  }
-
-  const payload = verifyUnsubscribeToken(token);
-
-  if (!payload) {
-    return {
-      success: false,
-      title: "Invalid link",
-      message:
-        "This unsubscribe link is invalid or has been tampered with. Please contact support if you believe this is an error.",
-    };
-  }
-
-  // Idempotent update — safe to call even if already unsubscribed. This is a
-  // CAN-SPAM-mandated flow, so a DB failure here must render the same
-  // styled failure card the caller already uses for an invalid token,
-  // rather than an unhandled Next.js error page.
-  try {
-    await db.customer.updateMany({
-      where: {
-        id: payload.customerId,
-        businessId: payload.businessId,
-      },
-      data: { acceptsMarketing: false },
-    });
-  } catch (error) {
-    console.error("Error processing unsubscribe request:", error);
-    Sentry.captureException(error, {
-      tags: { route: "unsubscribe" },
-      // customerId/businessId are opaque internal IDs, not PII — never the
-      // token or email address.
-      extra: { customerId: payload.customerId, businessId: payload.businessId },
-    });
-    return {
-      success: false,
-      title: "Something went wrong",
-      message:
-        "We couldn't process your unsubscribe request right now. Please try again in a few minutes, or contact support if the problem persists.",
-    };
-  }
-
-  return {
-    success: true,
-    title: "You've been unsubscribed",
-    message:
-      "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences.",
-  };
-}
-
 // "Send test to myself" broadcasts embed this placeholder token. There is no
 // customer behind it, so it never touches the database.
 const TEST_TOKEN = "test";
@@ -155,17 +96,21 @@ const TEST_PAGE = {
     "In a real campaign this link unsubscribes the customer from your marketing emails. Nothing was changed.",
 };
 
+// GET never writes. Mail clients and security scanners prefetch every link in
+// an email, so a GET that unsubscribed would silently opt people out. GET only
+// resolves the token and sends the person to the store's branded
+// /email-preferences page, where pressing "Unsubscribe" POSTs here.
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("t");
   if (token === TEST_TOKEN) {
     return htmlPage(TEST_PAGE.title, TEST_PAGE.message, "neutral");
   }
-  const result = await unsubscribeByToken(token);
-  return htmlPage(
-    result.title,
-    result.message,
-    result.success ? "success" : "error",
-  );
+  const result = await resolveUnsubscribeToken(token);
+  if (!result.ok) return htmlPage(result.title, result.message, "error");
+  const target = new URL("/email-preferences", result.storefrontUrl);
+  target.searchParams.set("s", "confirm");
+  target.searchParams.set("t", result.token);
+  return NextResponse.redirect(target, 303);
 }
 
 // Opt out of caching so the page is always served fresh
@@ -182,9 +127,18 @@ export async function POST(request: NextRequest) {
   if (token === TEST_TOKEN) {
     return NextResponse.json({ success: true, message: TEST_PAGE.message });
   }
-  const result = await unsubscribeByToken(token);
+  // `via=page` is set by the Unsubscribe button on /email-preferences; any
+  // other POST is the mail client's RFC 8058 one-click.
+  const source =
+    request.nextUrl.searchParams.get("via") === "page"
+      ? "UNSUBSCRIBE_LINK"
+      : "ONE_CLICK";
+  const result = await applyUnsubscribe(token, {
+    source,
+    ...consentRequestMeta(request.headers),
+  });
   return NextResponse.json(
-    { success: result.success, message: result.message },
-    { status: result.success ? 200 : 400 },
+    { success: result.ok, message: result.message },
+    { status: result.ok ? 200 : 400 },
   );
 }

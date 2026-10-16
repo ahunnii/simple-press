@@ -9,10 +9,13 @@ import { useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toast } from "sonner";
 
+import type { FileError } from "../utils";
 import { Column } from "~/lib/tiptap/columns-node";
 import { DETAILS_EXTENSIONS } from "~/lib/tiptap/details-nodes";
+import { DEFAULT_NEW_IMAGE_LAYOUT } from "~/lib/tiptap/image-node";
 import { createLinkExtension } from "~/lib/tiptap/link-extension";
 import { cn } from "~/lib/utils";
+import { MAX_UPLOAD_SIZE } from "~/components/media/upload-dropzone";
 
 import {
   CodeBlockLowlight,
@@ -51,8 +54,8 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
    */
   videoUploader?: (file: File) => Promise<string>;
   /**
-   * Adds "Choose from library" to the video dialog. Only pass `true` when
-   * the `media` feature flag is on.
+   * Adds "Choose from library" to the image and video dialogs. Only pass
+   * `true` when the `media` feature flag is on.
    */
   mediaEnabled?: boolean;
   businessId?: string;
@@ -60,6 +63,15 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /**
+   * Restricts the editor to what an email can show: no code, galleries,
+   * embeds, forms, quote calculators, tables, columns, collapsible sections
+   * or videos (none of those nodes are registered, so pasted content
+   * flattens to text). Headings, lists, quotes, dividers, links, images,
+   * alignment and colors stay. Used by the marketing campaign composer; the
+   * content is rendered by `~/lib/marketing/tiptap-to-email`.
+   */
+  emailMode?: boolean;
   /**
    * Called with `true` when this editor's first image/video upload starts
    * and `false` when its last in-flight one settles (success or failure).
@@ -84,10 +96,129 @@ async function fakeuploader(file: File): Promise<string> {
   return src;
 }
 
-const IMAGE_MAX_FILE_SIZE_FAKE = 5 * 1024 * 1024;
+/**
+ * Raw image size caps, checked before upload. With a real uploader the cap
+ * is generous on purpose: `uploadRichTextImage` shrinks photos (max 2560px,
+ * WebP) before the 5MB `/api/upload` limit applies, and throws a readable
+ * error if the result is still too big. The base64 fallback can't shrink,
+ * so it stays at the storage limit.
+ */
+const IMAGE_MAX_FILE_SIZE_FAKE = MAX_UPLOAD_SIZE.image;
 const IMAGE_MAX_FILE_SIZE_REAL = 25 * 1024 * 1024;
 
 const isVideoFile = (file: File) => file.type.startsWith("video/");
+
+const formatMb = (bytes: number) => `${Math.round(bytes / (1024 * 1024))}MB`;
+
+const fileLabel = (file: File | string) =>
+  file instanceof File ? file.name : "That image";
+
+/** One readable toast per rejected image (wrong type / too big). */
+const toastImageFileError = (error: FileError, maxFileSize: number) => {
+  const name = fileLabel(error.file);
+  if (error.reason === "size") {
+    toast.error(`${name} is too big`, {
+      position: "bottom-right",
+      description: `Images can be up to ${formatMb(maxFileSize)}.`,
+    });
+    return;
+  }
+  toast.error(`${name} isn't a supported image`, {
+    position: "bottom-right",
+    description: "Use a JPG, PNG, WebP, GIF or HEIC file.",
+  });
+};
+
+/**
+ * Uploads dropped/pasted images, then inserts them — at `pos` for drops, at
+ * the selection for pastes — with the default new-image layout. Upload-first
+ * like video (no `blob:` src in the doc); one toast tracks the batch, and a
+ * failure says why instead of the drop silently doing nothing.
+ */
+const uploadAndInsertImages = async (
+  editor: Editor,
+  files: File[],
+  upload: (file: File) => Promise<string>,
+  pos?: number,
+) => {
+  if (files.length === 0) return;
+  const toastId = toast.loading(
+    files.length === 1
+      ? `Uploading ${files[0]!.name}…`
+      : `Uploading ${files.length} images…`,
+    { position: "bottom-right" },
+  );
+
+  const results = await Promise.allSettled(files.map((file) => upload(file)));
+  if (editor.isDestroyed) {
+    toast.dismiss(toastId);
+    return;
+  }
+
+  const nodes = results.flatMap((result) =>
+    result.status === "fulfilled"
+      ? [
+          {
+            type: "image",
+            attrs: {
+              ...DEFAULT_NEW_IMAGE_LAYOUT,
+              id: randomId(),
+              src: result.value,
+            },
+          },
+        ]
+      : [],
+  );
+  const failures = results.flatMap((result, index) =>
+    result.status === "rejected"
+      ? [
+          {
+            name: files[index]!.name,
+            message:
+              result.reason instanceof Error
+                ? result.reason.message
+                : "Something went wrong.",
+          },
+        ]
+      : [],
+  );
+
+  if (nodes.length > 0) {
+    if (pos === undefined) {
+      editor.commands.insertContent(nodes);
+    } else {
+      // The doc may have shrunk while the upload was in flight.
+      editor.commands.insertContentAt(
+        Math.min(pos, editor.state.doc.content.size),
+        nodes,
+      );
+    }
+  }
+
+  if (failures.length === 0) {
+    toast.success(
+      nodes.length === 1 ? "Image added" : `${nodes.length} images added`,
+      {
+        id: toastId,
+        position: "bottom-right",
+      },
+    );
+    return;
+  }
+  toast.error(
+    failures.length === 1
+      ? `Couldn't upload ${failures[0]!.name}`
+      : `Couldn't upload ${failures.length} images`,
+    {
+      id: toastId,
+      position: "bottom-right",
+      description:
+        failures.length === 1
+          ? failures[0]!.message
+          : failures.map((f) => f.name).join(", "),
+    },
+  );
+};
 
 /**
  * Uploads a dropped/pasted clip, then inserts it — at `pos` for drops, at
@@ -137,6 +268,7 @@ export const createExtensions = ({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  emailMode,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
@@ -149,6 +281,7 @@ export const createExtensions = ({
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  emailMode?: boolean;
 }) => {
   // When a real uploader is provided (e.g., S3), allow larger files since they'll
   // be compressed. Fall back to 5MB when using the fake base64 uploader.
@@ -161,7 +294,9 @@ export const createExtensions = ({
       blockquote: { HTMLAttributes: { class: "block-node" } },
       // bold
       bulletList: { HTMLAttributes: { class: "list-node" } },
-      code: { HTMLAttributes: { class: "inline", spellcheck: "false" } },
+      code: emailMode
+        ? false
+        : { HTMLAttributes: { class: "inline", spellcheck: "false" } },
       codeBlock: false,
       // document
       dropcursor: { width: 2, class: "ProseMirror-dropcursor border" },
@@ -194,6 +329,7 @@ export const createExtensions = ({
       allowedMimeTypes: ["image/*"],
       maxFileSize: imageMaxFileSize,
       allowBase64: true,
+      mediaEnabled: !!mediaEnabled,
       uploadFn: async (file) => {
         return uploader
           ? await uploader(file)
@@ -209,10 +345,9 @@ export const createExtensions = ({
             return {
               type: "image",
               attrs: {
+                ...DEFAULT_NEW_IMAGE_LAYOUT,
                 id,
                 src: blobUrl,
-                alt: image.name,
-                title: image.name,
                 fileName: image.name,
               },
             };
@@ -220,12 +355,7 @@ export const createExtensions = ({
         );
       },
       onValidationError(errors) {
-        errors.forEach((error) => {
-          toast.error("Image validation error", {
-            position: "bottom-right",
-            description: error.reason,
-          });
-        });
+        errors.forEach((error) => toastImageFileError(error, imageMaxFileSize));
       },
       onActionSuccess({ action }) {
         const mapping = {
@@ -268,21 +398,14 @@ export const createExtensions = ({
                 void uploadAndInsertVideo(editor, file, videoUploader, pos),
             );
         }
-        void Promise.all(
-          files
-            .filter((file) => !isVideoFile(file))
-            .map(async (file) => {
-              // Prefer the configured uploader (S3) so dropped images don't end
-              // up base64-encoded in the document. Base64 is a last-resort
-              // fallback for when no uploader is configured at all.
-              const src = uploader
-                ? await uploader(file)
-                : await fileToBase64(file);
-              editor.commands.insertContentAt(pos, {
-                type: "image",
-                attrs: { src },
-              });
-            }),
+        // Prefer the configured uploader (S3) so dropped images don't end
+        // up base64-encoded in the document. Base64 is a last-resort
+        // fallback for when no uploader is configured at all.
+        void uploadAndInsertImages(
+          editor,
+          files.filter((file) => !isVideoFile(file)),
+          uploader ?? fileToBase64,
+          pos,
         );
       },
       onPaste: (editor, files) => {
@@ -293,19 +416,11 @@ export const createExtensions = ({
               (file) => void uploadAndInsertVideo(editor, file, videoUploader),
             );
         }
-        void Promise.all(
-          files
-            .filter((file) => !isVideoFile(file))
-            .map(async (file) => {
-              // Same rationale as onDrop above — use the real uploader when set.
-              const src = uploader
-                ? await uploader(file)
-                : await fileToBase64(file);
-              editor.commands.insertContent({
-                type: "image",
-                attrs: { src },
-              });
-            }),
+        // Same rationale as onDrop above — use the real uploader when set.
+        void uploadAndInsertImages(
+          editor,
+          files.filter((file) => !isVideoFile(file)),
+          uploader ?? fileToBase64,
         );
       },
       onValidationError: (errors) => {
@@ -324,14 +439,11 @@ export const createExtensions = ({
             });
             return;
           }
-          toast.error("Image validation error", {
-            position: "bottom-right",
-            description: error.reason,
-          });
+          toastImageFileError(error, imageMaxFileSize);
         });
       },
     }),
-    ...(videoUploader
+    ...(videoUploader && !emailMode
       ? [
           Video.configure({
             uploadFn: videoUploader,
@@ -348,24 +460,28 @@ export const createExtensions = ({
     UnsetAllMarks,
     HorizontalRule,
     ResetMarksOnEnter,
-    CodeBlockLowlight,
     Placeholder.configure({ placeholder: () => placeholder }),
-    Gallery.configure({
-      businessId,
-      galleriesEnabled: galleriesEnabled !== false,
-    }),
-    Embed.configure({ embedsEnabled: embedsEnabled !== false }),
-    QuoteCalculator.configure({
-      businessId,
-      quotesEnabled: quotesEnabled !== false,
-    }),
-    Form.configure({ formsEnabled: formsEnabled !== false }),
-    TableKit.configure({}),
-    // Layout containers, shared with the storefront renderer's schema so
-    // `normalize-content`'s schema (built from this list) knows them too.
-    EditorColumns,
-    Column,
-    ...DETAILS_EXTENSIONS,
+    ...(emailMode
+      ? []
+      : [
+          CodeBlockLowlight,
+          Gallery.configure({
+            businessId,
+            galleriesEnabled: galleriesEnabled !== false,
+          }),
+          Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+          QuoteCalculator.configure({
+            businessId,
+            quotesEnabled: quotesEnabled !== false,
+          }),
+          Form.configure({ formsEnabled: formsEnabled !== false }),
+          TableKit.configure({}),
+          // Layout containers, shared with the storefront renderer's schema so
+          // `normalize-content`'s schema (built from this list) knows them too.
+          EditorColumns,
+          Column,
+          ...DETAILS_EXTENSIONS,
+        ]),
   ];
 };
 
@@ -385,6 +501,7 @@ export const useMinimalTiptapEditor = ({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  emailMode,
   onUploadingChange,
   ...props
 }: UseMinimalTiptapEditorProps) => {
@@ -477,6 +594,7 @@ export const useMinimalTiptapEditor = ({
         embedsEnabled,
         quotesEnabled,
         formsEnabled,
+        emailMode,
       }) as unknown as Extension[],
     [
       placeholder,
@@ -489,6 +607,7 @@ export const useMinimalTiptapEditor = ({
       embedsEnabled,
       quotesEnabled,
       formsEnabled,
+      emailMode,
     ],
   );
 

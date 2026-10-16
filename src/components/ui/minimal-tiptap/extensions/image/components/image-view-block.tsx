@@ -4,346 +4,318 @@ import * as React from "react";
 import { InfoCircledIcon, TrashIcon } from "@radix-ui/react-icons";
 import { NodeViewWrapper } from "@tiptap/react";
 import { Controlled as ControlledZoom } from "react-medium-image-zoom";
+import { toast } from "sonner";
 
-import type { ElementDimensions } from "../hooks/use-drag-resize";
 import type { UploadReturnType } from "../image";
+import type { ImageAlign, ImageSize } from "~/lib/tiptap/image-node";
+import {
+  coerceImageAlign,
+  coerceImageSize,
+  IMAGE_SIZE_LABEL,
+  IMAGE_SIZE_PERCENT,
+  isBuggedLegacyImageWidth,
+} from "~/lib/tiptap/image-node";
 import { cn } from "~/lib/utils";
 
-import { Spinner } from "../../../components/spinner";
 import { blobUrlToBase64, randomId } from "../../../utils";
-import { useDragResize } from "../hooks/use-drag-resize";
+import { useSnapResize } from "../hooks/use-drag-resize";
 import { useImageActions } from "../hooks/use-image-actions";
 import { ActionButton, ActionWrapper, ImageActions } from "./image-actions";
 import { ImageOverlay } from "./image-overlay";
 import { ResizeHandle } from "./resize-handle";
 
-const MAX_HEIGHT = 600;
-const MIN_HEIGHT = 120;
-const MIN_WIDTH = 120;
+/** Placeholder height while an image is loading or has failed. */
+const PLACEHOLDER_HEIGHT = 120;
 
-interface ImageState {
-  src: string;
-  isServerUploading: boolean;
-  imageLoaded: boolean;
-  isZoomed: boolean;
-  error: boolean;
-  naturalSize: ElementDimensions;
-}
+type NaturalSize = { width: number; height: number };
 
 const normalizeUploadResponse = (res: UploadReturnType) => ({
   src: typeof res === "string" ? res : res.src,
   id: typeof res === "string" ? randomId() : res.id,
 });
 
+const toPositiveNumber = (value: unknown): number | null => {
+  const n = typeof value === "string" ? Number.parseFloat(value) : value;
+  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
+};
+
+const readSrc = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "src" in value) {
+    const src = (value as { src: unknown }).src;
+    return typeof src === "string" ? src : "";
+  }
+  return "";
+};
+
+const ALIGN_MARGIN: Record<ImageAlign, React.CSSProperties> = {
+  left: { marginLeft: 0, marginRight: "auto" },
+  center: { marginLeft: "auto", marginRight: "auto" },
+  right: { marginLeft: "auto", marginRight: 0 },
+};
+
+/**
+ * Editor node view for a rich-text image.
+ *
+ * Layout mirrors the storefront (`~/lib/tiptap/image-node`): a `size` preset
+ * is a share of the image's own column (the node view wrapper spans it, in a
+ * columns row as in the editor body), and `align` sets the side margins.
+ * Legacy images (pixel `width`, no `size`) keep showing at that pixel width,
+ * centred, as they always have — except the old editor's accidental 120px
+ * default, which shows unsized like the storefront does. Dragging a handle snaps to the nearest
+ * preset on release and clears the pixel pair.
+ *
+ * Nothing is written to the node just by opening the doc: the image's
+ * natural size is kept in local state only, so an untouched page stays clean.
+ */
 export const ImageViewBlock: React.FC<NodeViewProps> = ({
   editor,
   node,
   selected,
   updateAttributes,
+  deleteNode,
 }) => {
-  const {
-    src: initialSrc,
-    width: initialWidth,
-    height: initialHeight,
-    fileName,
-  } = node.attrs;
-  const uploadAttemptedRef = React.useRef(false);
+  const src = readSrc(node.attrs.src);
+  const fileName = (node.attrs.fileName as string | null) ?? null;
+  const size = coerceImageSize(node.attrs.size);
+  const align = coerceImageAlign(node.attrs.align);
+  const legacyWidth =
+    size || isBuggedLegacyImageWidth(node.attrs.width)
+      ? null
+      : toPositiveNumber(node.attrs.width);
+  // Legacy images were always shown centred in the editor.
+  const effectiveAlign: ImageAlign = align ?? "center";
 
-  const initSrc = React.useMemo(() => {
-    if (typeof initialSrc === "string") {
-      return initialSrc;
-    }
-    return (initialSrc as { src: string }).src;
-  }, [initialSrc]);
+  const columnRef = React.useRef<HTMLDivElement>(null);
+  const frameRef = React.useRef<HTMLDivElement>(null);
+  const uploadedSrcRef = React.useRef<string | null>(null);
 
-  const [imageState, setImageState] = React.useState<ImageState>({
-    src: initSrc,
-    isServerUploading: false,
-    imageLoaded: false,
-    isZoomed: false,
-    error: false,
-    naturalSize: {
-      width: initialWidth as number,
-      height: initialHeight as number,
+  const [natural, setNatural] = React.useState<NaturalSize | null>(null);
+  // Keyed by src so a replaced/uploaded image resets these without an effect.
+  const [loadedSrc, setLoadedSrc] = React.useState<string | null>(null);
+  const [everLoaded, setEverLoaded] = React.useState(false);
+  const [errorSrc, setErrorSrc] = React.useState<string | null>(null);
+  const [uploadingSrc, setUploadingSrc] = React.useState<string | null>(null);
+  const [isZoomed, setIsZoomed] = React.useState(false);
+
+  const isUploading = uploadingSrc === src;
+  // A local preview the browser can't draw (e.g. HEIC) isn't an error while
+  // the uploader is converting it; the uploaded URL replaces it.
+  const hasError = errorSrc === src && !isUploading;
+  // After the first load, keep showing the image while a new src (e.g. the
+  // uploaded URL replacing the blob preview) loads, instead of blinking out.
+  const isVisible = (loadedSrc === src || everLoaded) && !hasError;
+
+  const onCommitSize = React.useCallback(
+    (next: ImageSize) => {
+      updateAttributes({
+        size: next,
+        align: effectiveAlign,
+        width: null,
+        height: null,
+      });
     },
-  });
-
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [activeResizeHandle, setActiveResizeHandle] = React.useState<
-    "left" | "right" | null
-  >(null);
-
-  const onDimensionsChange = React.useCallback(
-    ({ width, height }: ElementDimensions) => {
-      updateAttributes({ width, height });
-    },
-    [updateAttributes],
+    [effectiveAlign, updateAttributes],
   );
 
-  const aspectRatio =
-    imageState.naturalSize.width / imageState.naturalSize.height;
-  const maxWidth = MAX_HEIGHT * aspectRatio;
-  const containerMaxWidth = containerRef.current
-    ? parseFloat(
-        getComputedStyle(containerRef.current).getPropertyValue(
-          "--editor-width",
-        ),
-      )
-    : Infinity;
-
-  const { isLink, onView, onDownload, onCopy, onCopyLink, onRemoveImg } =
-    useImageActions({
-      editor,
-      node,
-      src: imageState.src,
-      onViewClick: (isZoomed) =>
-        setImageState((prev) => ({ ...prev, isZoomed })),
-    });
-
   const {
-    currentWidth,
-    currentHeight,
-    updateDimensions,
-    initiateResize,
+    startResize,
     isResizing,
-  } = useDragResize({
-    initialWidth: (initialWidth as number) ?? imageState.naturalSize.width,
-    initialHeight: (initialHeight as number) ?? imageState.naturalSize.height,
-    contentWidth: imageState.naturalSize.width,
-    contentHeight: imageState.naturalSize.height,
-    gridInterval: 0.1,
-    onDimensionsChange,
-    minWidth: MIN_WIDTH,
-    minHeight: MIN_HEIGHT,
-    maxWidth: containerMaxWidth > 0 ? containerMaxWidth : maxWidth,
+    activeDirection,
+    dragWidth,
+    previewSize,
+    previewPercent,
+  } = useSnapResize({
+    frameRef,
+    columnRef,
+    align: effectiveAlign,
+    onCommit: onCommitSize,
   });
 
-  const shouldMerge = React.useMemo(() => currentWidth <= 180, [currentWidth]);
+  const { isLink, onView, onDownload, onCopy, onCopyLink } = useImageActions({
+    editor,
+    node,
+    src,
+    onViewClick: setIsZoomed,
+  });
 
   const handleImageLoad = React.useCallback(
     (ev: React.SyntheticEvent<HTMLImageElement>) => {
-      const img = ev.target as HTMLImageElement;
-      const newNaturalSize = {
-        width: img.naturalWidth,
-        height: img.naturalHeight,
-      };
-      setImageState((prev) => ({
-        ...prev,
-        naturalSize: newNaturalSize,
-        imageLoaded: true,
-      }));
-      updateAttributes({
-        width: img.width || newNaturalSize.width,
-        height: img.height || newNaturalSize.height,
-        alt: img.alt,
-        title: img.title,
-      });
-
-      if (!initialWidth) {
-        updateDimensions((state) => ({
-          ...state,
-          width: newNaturalSize.width,
-        }));
-      }
+      const img = ev.currentTarget;
+      setNatural({ width: img.naturalWidth, height: img.naturalHeight });
+      setLoadedSrc(img.getAttribute("src"));
+      setEverLoaded(true);
     },
-    [initialWidth, updateAttributes, updateDimensions],
+    [],
   );
 
-  const handleImageError = React.useCallback(() => {
-    setImageState((prev) => ({ ...prev, error: true, imageLoaded: true }));
-  }, []);
-
-  const handleResizeStart = React.useCallback(
-    (direction: "left" | "right") =>
-      (event: React.PointerEvent<HTMLDivElement>) => {
-        setActiveResizeHandle(direction);
-        initiateResize(direction)(event);
-      },
-    [initiateResize],
+  const handleImageError = React.useCallback(
+    (ev: React.SyntheticEvent<HTMLImageElement>) => {
+      setErrorSrc(ev.currentTarget.getAttribute("src"));
+    },
+    [],
   );
 
-  const handleResizeEnd = React.useCallback(() => {
-    setActiveResizeHandle(null);
-  }, []);
-
+  // A `blob:` src is a just-inserted local file: upload it through the
+  // extension's `uploadFn`, then swap in the stored URL.
   React.useEffect(() => {
-    if (!isResizing) {
-      handleResizeEnd();
-    }
-  }, [isResizing, handleResizeEnd]);
+    if (!src.startsWith("blob:") || uploadedSrcRef.current === src) return;
+    uploadedSrcRef.current = src;
 
-  React.useEffect(() => {
-    const handleImage = async () => {
-      if (!initSrc.startsWith("blob:") || uploadAttemptedRef.current) {
-        return;
-      }
+    const imageExtension = editor.extensionManager.extensions.find(
+      (ext) => ext.name === "image",
+    );
+    const { uploadFn } =
+      (imageExtension?.options as {
+        uploadFn?: (file: File, editor: Editor) => Promise<UploadReturnType>;
+      }) ?? {};
 
-      uploadAttemptedRef.current = true;
-      const imageExtension = editor.options.extensions.find(
-        (ext) => ext.name === "image",
-      );
-      const { uploadFn } =
-        (imageExtension?.options as {
-          uploadFn?: (file: File, editor: Editor) => Promise<UploadReturnType>;
-        }) ?? {};
-
-      if (!uploadFn) {
-        try {
-          const base64 = await blobUrlToBase64(initSrc);
-          setImageState((prev) => ({ ...prev, src: base64 }));
-          updateAttributes({ src: base64 });
-        } catch {
-          setImageState((prev) => ({ ...prev, error: true }));
-        }
-        return;
-      }
-
+    const upload = async () => {
+      setUploadingSrc(src);
       try {
-        setImageState((prev) => ({ ...prev, isServerUploading: true }));
-        const response = await fetch(initSrc);
+        if (!uploadFn) {
+          const base64 = await blobUrlToBase64(src);
+          updateAttributes({ src: base64 });
+          return;
+        }
+        const response = await fetch(src);
         const blob = await response.blob();
-        const file = new File([blob], fileName as string, { type: blob.type });
-
-        const url = await uploadFn(file, editor);
-        const normalizedData = normalizeUploadResponse(url);
-
-        setImageState((prev) => ({
-          ...prev,
-          ...normalizedData,
-          isServerUploading: false,
-        }));
-
-        updateAttributes(normalizedData);
-      } catch {
-        setImageState((prev) => ({
-          ...prev,
-          error: true,
-          isServerUploading: false,
-        }));
+        const file = new File([blob], fileName ?? "image", {
+          type: blob.type,
+        });
+        const result = await uploadFn(file, editor);
+        updateAttributes(normalizeUploadResponse(result));
+      } catch (error) {
+        setErrorSrc(src);
+        toast.error("Image upload failed", {
+          position: "bottom-right",
+          description:
+            error instanceof Error ? error.message : "Something went wrong.",
+        });
+      } finally {
+        setUploadingSrc((current) => (current === src ? null : current));
       }
     };
 
-    void handleImage();
-  }, [editor, fileName, initSrc, updateAttributes]);
+    void upload();
+  }, [editor, fileName, src, updateAttributes]);
+
+  let frameWidth: number | string | undefined;
+  if (dragWidth != null) frameWidth = dragWidth;
+  else if (size) frameWidth = `${IMAGE_SIZE_PERCENT[size]}%`;
+  else if (legacyWidth) frameWidth = legacyWidth;
+  else if (natural) frameWidth = natural.width;
+
+  const showResizeHandles =
+    editor.isEditable && isVisible && !hasError && !isUploading;
+  const shouldMerge =
+    size === "small" ||
+    (!size && (legacyWidth ?? natural?.width ?? 999) <= 180);
 
   return (
     <NodeViewWrapper
-      ref={containerRef}
+      ref={columnRef}
       data-drag-handle
-      className="relative text-center leading-none"
+      className="relative leading-none"
     >
       <div
-        className="group/node-image relative mx-auto rounded-md object-contain"
+        ref={frameRef}
+        className="group/node-image relative max-w-full rounded-md"
         style={{
-          maxWidth: `min(${maxWidth}px, 100%)`,
-          width: currentWidth,
-          maxHeight: MAX_HEIGHT,
-          aspectRatio: `${imageState.naturalSize.width} / ${imageState.naturalSize.height}`,
+          width: frameWidth,
+          ...ALIGN_MARGIN[effectiveAlign],
+          // The image's own `height: auto` sizes the frame once drawn; until
+          // then (or if it fails) keep room for the spinner / error.
+          ...(isVisible ? {} : { minHeight: PLACEHOLDER_HEIGHT }),
         }}
       >
         <div
-          className={cn(
-            "relative flex h-full cursor-default flex-col items-center gap-2 rounded",
-            {
-              "outline-primary outline-2 outline-offset-1":
-                selected || isResizing,
-            },
-          )}
+          className={cn("relative h-full cursor-default rounded", {
+            "outline-primary outline-2 outline-offset-2":
+              selected || isResizing,
+          })}
         >
-          <div className="h-full contain-paint">
-            <div className="relative h-full">
-              {imageState.isServerUploading && !imageState.error && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Spinner className="size-7" />
-                </div>
-              )}
+          <ControlledZoom
+            isZoomed={isZoomed}
+            onZoomChange={() => setIsZoomed(false)}
+          >
+            <img
+              className={cn("block h-auto w-full rounded object-contain", {
+                "opacity-0": !isVisible,
+              })}
+              src={src}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              alt={(node.attrs.alt as string | null) ?? ""}
+              title={(node.attrs.title as string | null) ?? undefined}
+              id={(node.attrs.id as string | null) ?? undefined}
+              draggable={false}
+            />
+          </ControlledZoom>
 
-              {imageState.error && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <InfoCircledIcon className="text-destructive size-8" />
-                  <p className="text-muted-foreground mt-2 text-sm">
-                    Failed to load image
-                  </p>
-                </div>
-              )}
+          {isUploading && !hasError && <ImageOverlay />}
 
-              <ControlledZoom
-                isZoomed={imageState.isZoomed}
-                onZoomChange={() =>
-                  setImageState((prev) => ({ ...prev, isZoomed: false }))
-                }
-              >
-                <img
-                  className={cn(
-                    "h-auto rounded object-contain transition-shadow",
-                    {
-                      "opacity-0": !imageState.imageLoaded || imageState.error,
-                    },
-                  )}
-                  style={{
-                    maxWidth: `min(100%, ${maxWidth}px)`,
-                    minWidth: `${MIN_WIDTH}px`,
-                    maxHeight: MAX_HEIGHT,
-                  }}
-                  width={currentWidth}
-                  height={currentHeight}
-                  src={imageState.src}
-                  onError={handleImageError}
-                  onLoad={handleImageLoad}
-                  alt={(node.attrs.alt as string) ?? ""}
-                  title={(node.attrs.title as string) ?? ""}
-                  id={node.attrs.id as string}
-                />
-              </ControlledZoom>
+          {hasError && (
+            <div className="bg-muted/60 absolute inset-0 flex flex-col items-center justify-center rounded">
+              <InfoCircledIcon className="text-destructive size-8" />
+              <p className="text-muted-foreground mt-2 text-sm">
+                {src.startsWith("blob:")
+                  ? "Upload failed"
+                  : "Failed to load image"}
+              </p>
             </div>
+          )}
 
-            {imageState.isServerUploading && <ImageOverlay />}
+          {isResizing && previewSize && (
+            <div
+              aria-hidden="true"
+              className="bg-popover text-popover-foreground pointer-events-none absolute top-2 left-1/2 z-10 -translate-x-1/2 rounded-md border px-2 py-1 text-xs font-medium whitespace-nowrap shadow-sm"
+            >
+              {IMAGE_SIZE_LABEL[previewSize]} · {previewPercent}%
+            </div>
+          )}
 
-            {editor.isEditable &&
-              imageState.imageLoaded &&
-              !imageState.error &&
-              !imageState.isServerUploading && (
-                <>
-                  <ResizeHandle
-                    onPointerDown={handleResizeStart("left")}
-                    className={cn("left-1", {
-                      hidden: isResizing && activeResizeHandle === "right",
-                    })}
-                    isResizing={isResizing && activeResizeHandle === "left"}
-                  />
-                  <ResizeHandle
-                    onPointerDown={handleResizeStart("right")}
-                    className={cn("right-1", {
-                      hidden: isResizing && activeResizeHandle === "left",
-                    })}
-                    isResizing={isResizing && activeResizeHandle === "right"}
-                  />
-                </>
-              )}
-          </div>
+          {showResizeHandles && (
+            <>
+              <ResizeHandle
+                onPointerDown={startResize("left")}
+                className={cn("-left-1", {
+                  hidden: isResizing && activeDirection === "right",
+                })}
+                visible={selected}
+                isResizing={isResizing && activeDirection === "left"}
+              />
+              <ResizeHandle
+                onPointerDown={startResize("right")}
+                className={cn("-right-1", {
+                  hidden: isResizing && activeDirection === "left",
+                })}
+                visible={selected}
+                isResizing={isResizing && activeDirection === "right"}
+              />
+            </>
+          )}
 
-          {imageState.error && (
-            <ActionWrapper>
+          {hasError && editor.isEditable && (
+            <ActionWrapper className="opacity-100">
               <ActionButton
                 icon={<TrashIcon />}
                 tooltip="Remove image"
-                onClick={onRemoveImg}
+                onClick={() => deleteNode()}
               />
             </ActionWrapper>
           )}
 
-          {!isResizing &&
-            !imageState.error &&
-            !imageState.isServerUploading && (
-              <ImageActions
-                shouldMerge={shouldMerge}
-                isLink={isLink}
-                onView={onView}
-                onDownload={onDownload}
-                onCopy={onCopy}
-                onCopyLink={onCopyLink}
-              />
-            )}
+          {!isResizing && !hasError && !isUploading && isVisible && (
+            <ImageActions
+              shouldMerge={shouldMerge}
+              isLink={isLink}
+              onView={onView}
+              onDownload={onDownload}
+              onCopy={onCopy}
+              onCopyLink={onCopyLink}
+            />
+          )}
         </div>
       </div>
     </NodeViewWrapper>

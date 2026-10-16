@@ -12,6 +12,12 @@
  *                while rows (columns), media, tables, forms and galleries
  *                span the container. Centred-hero templates also add
  *                `--centered` so the capped text stays centred.
+ *
+ * The cap is `var(--sp-text-width, var(--sp-prose-measure))`. The owner's
+ * site-wide "Text width on wide pages" (Site Editor → Style, stored at
+ * `customFields._sp.layout.textWidth`: readable | roomy | full) is applied by
+ * the storefront layout as `:root{--sp-text-width:960px|none}` — only when not
+ * "readable" — so templates need no code to honour it.
  */
 
 export type PageWidth = "standard" | "wide";

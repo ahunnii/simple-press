@@ -5103,8 +5103,13 @@ body:has(.pollen) {
 /* ── Per-page "Wide" width (Page.template = "full-width") ─────────────────
    Templates widen the body to their standard container and add
    `.sp-prose-wide` to the TiptapRenderer root. Running text keeps a reading
-   measure (`--sp-prose-measure`, default 70ch; a template sets its own) while
-   rows, media, tables, forms and galleries span the container.
+   measure (`--sp-prose-measure`, registered default 720px; a template sets
+   its own) while rows, media, tables, forms and galleries span the container.
+   The owner can override the measure site-wide in the Site Editor → Style
+   ("Text width on wide pages"): the storefront layout then emits
+   `:root{--sp-text-width:960px|none}`, which wins over the measure below.
+   `--sp-text-width` is deliberately NOT registered with @property, so when
+   it is absent the `var()` fallback to `--sp-prose-measure` applies.
    TiptapRenderer emits each plain block (p, h1-h6, lists, quote, pre, hr,
    table, image) inside a CLASS-LESS leaf wrapper <div>; <details>, rows,
    forms, galleries, quotes, embeds and videos are direct children and carry
@@ -5127,7 +5132,7 @@ body:has(.pollen) {
 .sp-prose-wide
   > div:not([class])
   > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, hr) {
-  max-width: var(--sp-prose-measure, 70ch);
+  max-width: var(--sp-text-width, var(--sp-prose-measure, 70ch));
 }
 .sp-prose-wide--centered > details,
 .sp-prose-wide--centered
@@ -5147,7 +5152,7 @@ body:has(.pollen) {
    picture-choice grid still use the full width. */
 .sp-prose-wide .sp-form-block :is([data-slot="input"], [data-slot="textarea"], select),
 .sp-prose-wide .sp-form-block p[id$="-description"] {
-  max-width: var(--sp-prose-measure, 70ch);
+  max-width: var(--sp-text-width, var(--sp-prose-measure, 70ch));
 }
 
 /* min-width:0 lets a column shrink below its content (long words, tables). */
@@ -11709,7 +11714,9 @@ details.sp-details > summary.sp-details__summary > * {
       );
   }
   .wealth .wealth-prose.sp-prose-wide > div > blockquote:has(ul, ol) {
-    max-width: calc(var(--sp-prose-measure, 680px) + 340px);
+    /* Roomy / Full (--sp-text-width) simply span; the +340px growth only
+       applies at the template's own measure. */
+    max-width: var(--sp-text-width, calc(var(--sp-prose-measure, 680px) + 340px));
     margin-inline: 0;
   }
 }

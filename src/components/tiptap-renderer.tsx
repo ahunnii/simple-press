@@ -25,6 +25,7 @@ import {
   DETAILS_CONTENT_DATA_TYPE,
   DETAILS_SUMMARY_CLASS,
 } from "~/lib/tiptap/details-nodes";
+import { isInternalHref } from "~/lib/tiptap/link-extension";
 import { RENDERER_BASE_EXTENSIONS } from "~/lib/tiptap/renderer-extensions";
 import { sanitizeTiptapDoc } from "~/lib/tiptap/sanitize";
 import { api } from "~/trpc/react";
@@ -187,7 +188,13 @@ function sanitizeGeneratedHtml(html: string): string {
       link.removeAttribute("href");
     }
 
-    link.setAttribute("rel", "noopener noreferrer nofollow");
+    // Same rule as the Link extension's own `rel`: a link to a page on this
+    // site is not nofollowed. Anything else (including mailto:/tel:) is.
+    if (isInternalHref(href)) {
+      link.removeAttribute("rel");
+    } else {
+      link.setAttribute("rel", "noopener noreferrer nofollow");
+    }
   });
 
   return doc.body.innerHTML;

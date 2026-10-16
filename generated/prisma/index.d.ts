@@ -324,6 +324,41 @@ export type Form = $Result.DefaultSelection<Prisma.$FormPayload>
  */
 export type FormSubmission = $Result.DefaultSelection<Prisma.$FormSubmissionPayload>
 /**
+ * Model MarketingCampaign
+ * Owner-authored email marketing campaign. Content is frozen into
+ * renderedHtml/renderedText at queue time so every retry sends byte-identical
+ * payloads (Resend idempotency).
+ */
+export type MarketingCampaign = $Result.DefaultSelection<Prisma.$MarketingCampaignPayload>
+/**
+ * Model MarketingCampaignBatch
+ * One Resend batch of a campaign (leased by the sender cron, retried safely).
+ */
+export type MarketingCampaignBatch = $Result.DefaultSelection<Prisma.$MarketingCampaignBatchPayload>
+/**
+ * Model MarketingCampaignRecipient
+ * One recipient of a campaign, snapshotted at queue time.
+ */
+export type MarketingCampaignRecipient = $Result.DefaultSelection<Prisma.$MarketingCampaignRecipientPayload>
+/**
+ * Model MarketingConsentEvent
+ * Append-only evidence log of email-marketing consent changes (opt-in,
+ * opt-out, suppression). `Customer.acceptsMarketing` + the marketing* columns
+ * stay the live state; these rows record every transition with how/where it
+ * happened. Written via `recordConsentEvent` (src/lib/marketing/consent-log.ts).
+ * Customer erasure deletes a customer's rows explicitly; the SetNull FK is
+ * only a backstop for a hard customer delete.
+ */
+export type MarketingConsentEvent = $Result.DefaultSelection<Prisma.$MarketingConsentEventPayload>
+/**
+ * Model MarketingDoNotEmail
+ * Per-store do-not-email list keyed by an HMAC of the normalized address
+ * (never the address itself), so an opt-out / bounce / complaint survives the
+ * Customer row being erased or re-created. See src/lib/marketing/do-not-email.ts.
+ * NOT encrypted: `emailHash` must be queryable and is already a keyed hash.
+ */
+export type MarketingDoNotEmail = $Result.DefaultSelection<Prisma.$MarketingDoNotEmailPayload>
+/**
  * Model QuickBooksConnection
  * One QuickBooks Online company connection per business (1:1). Updated in
  * place on reconnect and never deleted by the app, so deposit settings and
@@ -1113,6 +1148,56 @@ export class PrismaClient<
   get formSubmission(): Prisma.FormSubmissionDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.marketingCampaign`: Exposes CRUD operations for the **MarketingCampaign** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketingCampaigns
+    * const marketingCampaigns = await prisma.marketingCampaign.findMany()
+    * ```
+    */
+  get marketingCampaign(): Prisma.MarketingCampaignDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketingCampaignBatch`: Exposes CRUD operations for the **MarketingCampaignBatch** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketingCampaignBatches
+    * const marketingCampaignBatches = await prisma.marketingCampaignBatch.findMany()
+    * ```
+    */
+  get marketingCampaignBatch(): Prisma.MarketingCampaignBatchDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketingCampaignRecipient`: Exposes CRUD operations for the **MarketingCampaignRecipient** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketingCampaignRecipients
+    * const marketingCampaignRecipients = await prisma.marketingCampaignRecipient.findMany()
+    * ```
+    */
+  get marketingCampaignRecipient(): Prisma.MarketingCampaignRecipientDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketingConsentEvent`: Exposes CRUD operations for the **MarketingConsentEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketingConsentEvents
+    * const marketingConsentEvents = await prisma.marketingConsentEvent.findMany()
+    * ```
+    */
+  get marketingConsentEvent(): Prisma.MarketingConsentEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketingDoNotEmail`: Exposes CRUD operations for the **MarketingDoNotEmail** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketingDoNotEmails
+    * const marketingDoNotEmails = await prisma.marketingDoNotEmail.findMany()
+    * ```
+    */
+  get marketingDoNotEmail(): Prisma.MarketingDoNotEmailDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.quickBooksConnection`: Exposes CRUD operations for the **QuickBooksConnection** model.
     * Example usage:
     * ```ts
@@ -1714,6 +1799,11 @@ export namespace Prisma {
     QuoteSubmission: 'QuoteSubmission',
     Form: 'Form',
     FormSubmission: 'FormSubmission',
+    MarketingCampaign: 'MarketingCampaign',
+    MarketingCampaignBatch: 'MarketingCampaignBatch',
+    MarketingCampaignRecipient: 'MarketingCampaignRecipient',
+    MarketingConsentEvent: 'MarketingConsentEvent',
+    MarketingDoNotEmail: 'MarketingDoNotEmail',
     QuickBooksConnection: 'QuickBooksConnection',
     QuickBooksInvoice: 'QuickBooksInvoice',
     InvoiceSettings: 'InvoiceSettings',
@@ -1743,7 +1833,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "marketingCampaign" | "marketingCampaignBatch" | "marketingCampaignRecipient" | "marketingConsentEvent" | "marketingDoNotEmail" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5595,6 +5685,376 @@ export namespace Prisma {
           }
         }
       }
+      MarketingCampaign: {
+        payload: Prisma.$MarketingCampaignPayload<ExtArgs>
+        fields: Prisma.MarketingCampaignFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketingCampaignFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketingCampaignFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketingCampaignFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketingCampaignFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          findMany: {
+            args: Prisma.MarketingCampaignFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>[]
+          }
+          create: {
+            args: Prisma.MarketingCampaignCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          createMany: {
+            args: Prisma.MarketingCampaignCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketingCampaignCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketingCampaignDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          update: {
+            args: Prisma.MarketingCampaignUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketingCampaignDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketingCampaignUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketingCampaignUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketingCampaignUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketingCampaignAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketingCampaign>
+          }
+          groupBy: {
+            args: Prisma.MarketingCampaignGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketingCampaignCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketingCampaignBatch: {
+        payload: Prisma.$MarketingCampaignBatchPayload<ExtArgs>
+        fields: Prisma.MarketingCampaignBatchFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketingCampaignBatchFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketingCampaignBatchFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketingCampaignBatchFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketingCampaignBatchFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          findMany: {
+            args: Prisma.MarketingCampaignBatchFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>[]
+          }
+          create: {
+            args: Prisma.MarketingCampaignBatchCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          createMany: {
+            args: Prisma.MarketingCampaignBatchCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketingCampaignBatchCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketingCampaignBatchDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          update: {
+            args: Prisma.MarketingCampaignBatchUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketingCampaignBatchDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketingCampaignBatchUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketingCampaignBatchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketingCampaignBatchUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignBatchPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketingCampaignBatchAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketingCampaignBatch>
+          }
+          groupBy: {
+            args: Prisma.MarketingCampaignBatchGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignBatchGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketingCampaignBatchCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignBatchCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketingCampaignRecipient: {
+        payload: Prisma.$MarketingCampaignRecipientPayload<ExtArgs>
+        fields: Prisma.MarketingCampaignRecipientFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketingCampaignRecipientFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketingCampaignRecipientFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketingCampaignRecipientFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketingCampaignRecipientFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          findMany: {
+            args: Prisma.MarketingCampaignRecipientFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>[]
+          }
+          create: {
+            args: Prisma.MarketingCampaignRecipientCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          createMany: {
+            args: Prisma.MarketingCampaignRecipientCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketingCampaignRecipientCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketingCampaignRecipientDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          update: {
+            args: Prisma.MarketingCampaignRecipientUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketingCampaignRecipientDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketingCampaignRecipientUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketingCampaignRecipientUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketingCampaignRecipientUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingCampaignRecipientPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketingCampaignRecipientAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketingCampaignRecipient>
+          }
+          groupBy: {
+            args: Prisma.MarketingCampaignRecipientGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignRecipientGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketingCampaignRecipientCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketingCampaignRecipientCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketingConsentEvent: {
+        payload: Prisma.$MarketingConsentEventPayload<ExtArgs>
+        fields: Prisma.MarketingConsentEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketingConsentEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketingConsentEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketingConsentEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketingConsentEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          findMany: {
+            args: Prisma.MarketingConsentEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>[]
+          }
+          create: {
+            args: Prisma.MarketingConsentEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          createMany: {
+            args: Prisma.MarketingConsentEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketingConsentEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketingConsentEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          update: {
+            args: Prisma.MarketingConsentEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketingConsentEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketingConsentEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketingConsentEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketingConsentEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingConsentEventPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketingConsentEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketingConsentEvent>
+          }
+          groupBy: {
+            args: Prisma.MarketingConsentEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketingConsentEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketingConsentEventCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketingConsentEventCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketingDoNotEmail: {
+        payload: Prisma.$MarketingDoNotEmailPayload<ExtArgs>
+        fields: Prisma.MarketingDoNotEmailFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketingDoNotEmailFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketingDoNotEmailFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketingDoNotEmailFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketingDoNotEmailFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          findMany: {
+            args: Prisma.MarketingDoNotEmailFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>[]
+          }
+          create: {
+            args: Prisma.MarketingDoNotEmailCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          createMany: {
+            args: Prisma.MarketingDoNotEmailCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketingDoNotEmailCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketingDoNotEmailDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          update: {
+            args: Prisma.MarketingDoNotEmailUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketingDoNotEmailDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketingDoNotEmailUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketingDoNotEmailUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketingDoNotEmailUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketingDoNotEmailPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketingDoNotEmailAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketingDoNotEmail>
+          }
+          groupBy: {
+            args: Prisma.MarketingDoNotEmailGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketingDoNotEmailGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketingDoNotEmailCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketingDoNotEmailCountAggregateOutputType> | number
+          }
+        }
+      }
       QuickBooksConnection: {
         payload: Prisma.$QuickBooksConnectionPayload<ExtArgs>
         fields: Prisma.QuickBooksConnectionFieldRefs
@@ -6557,6 +7017,11 @@ export namespace Prisma {
     quoteSubmission?: QuoteSubmissionOmit
     form?: FormOmit
     formSubmission?: FormSubmissionOmit
+    marketingCampaign?: MarketingCampaignOmit
+    marketingCampaignBatch?: MarketingCampaignBatchOmit
+    marketingCampaignRecipient?: MarketingCampaignRecipientOmit
+    marketingConsentEvent?: MarketingConsentEventOmit
+    marketingDoNotEmail?: MarketingDoNotEmailOmit
     quickBooksConnection?: QuickBooksConnectionOmit
     quickBooksInvoice?: QuickBooksInvoiceOmit
     invoiceSettings?: InvoiceSettingsOmit
@@ -6656,6 +7121,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated: number
     createdInvites: number
     editorNotes: number
+    marketingCampaignsCreated: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6667,6 +7133,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: boolean | UserCountOutputTypeCountInventoryCheckoutsCreatedArgs
     createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
     editorNotes?: boolean | UserCountOutputTypeCountEditorNotesArgs
+    marketingCampaignsCreated?: boolean | UserCountOutputTypeCountMarketingCampaignsCreatedArgs
   }
 
   // Custom InputTypes
@@ -6736,6 +7203,13 @@ export namespace Prisma {
     where?: EditorNoteWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountMarketingCampaignsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignWhereInput
+  }
+
 
   /**
    * Count Type BusinessCountOutputType
@@ -6773,6 +7247,9 @@ export namespace Prisma {
     quoteSubmissions: number
     forms: number
     formSubmissions: number
+    marketingCampaigns: number
+    marketingConsentEvents: number
+    marketingDoNotEmail: number
     quickBooksInvoices: number
     invoices: number
     invoicePayments: number
@@ -6814,6 +7291,9 @@ export namespace Prisma {
     quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
     forms?: boolean | BusinessCountOutputTypeCountFormsArgs
     formSubmissions?: boolean | BusinessCountOutputTypeCountFormSubmissionsArgs
+    marketingCampaigns?: boolean | BusinessCountOutputTypeCountMarketingCampaignsArgs
+    marketingConsentEvents?: boolean | BusinessCountOutputTypeCountMarketingConsentEventsArgs
+    marketingDoNotEmail?: boolean | BusinessCountOutputTypeCountMarketingDoNotEmailArgs
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
     invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
     invoicePayments?: boolean | BusinessCountOutputTypeCountInvoicePaymentsArgs
@@ -7049,6 +7529,27 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountFormSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FormSubmissionWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountMarketingCampaignsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountMarketingConsentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingConsentEventWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountMarketingDoNotEmailArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingDoNotEmailWhereInput
   }
 
   /**
@@ -7417,6 +7918,8 @@ export namespace Prisma {
     subscriptions: number
     loyaltyLedger: number
     invoices: number
+    campaignRecipients: number
+    consentEvents: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7428,6 +7931,8 @@ export namespace Prisma {
     subscriptions?: boolean | CustomerCountOutputTypeCountSubscriptionsArgs
     loyaltyLedger?: boolean | CustomerCountOutputTypeCountLoyaltyLedgerArgs
     invoices?: boolean | CustomerCountOutputTypeCountInvoicesArgs
+    campaignRecipients?: boolean | CustomerCountOutputTypeCountCampaignRecipientsArgs
+    consentEvents?: boolean | CustomerCountOutputTypeCountConsentEventsArgs
   }
 
   // Custom InputTypes
@@ -7495,6 +8000,20 @@ export namespace Prisma {
    */
   export type CustomerCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InvoiceWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountCampaignRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignRecipientWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountConsentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingConsentEventWhereInput
   }
 
 
@@ -7912,6 +8431,55 @@ export namespace Prisma {
 
 
   /**
+   * Count Type MarketingCampaignCountOutputType
+   */
+
+  export type MarketingCampaignCountOutputType = {
+    batches: number
+    recipients: number
+    consentEvents: number
+  }
+
+  export type MarketingCampaignCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    batches?: boolean | MarketingCampaignCountOutputTypeCountBatchesArgs
+    recipients?: boolean | MarketingCampaignCountOutputTypeCountRecipientsArgs
+    consentEvents?: boolean | MarketingCampaignCountOutputTypeCountConsentEventsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * MarketingCampaignCountOutputType without action
+   */
+  export type MarketingCampaignCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignCountOutputType
+     */
+    select?: MarketingCampaignCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaignCountOutputType without action
+   */
+  export type MarketingCampaignCountOutputTypeCountBatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignBatchWhereInput
+  }
+
+  /**
+   * MarketingCampaignCountOutputType without action
+   */
+  export type MarketingCampaignCountOutputTypeCountRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignRecipientWhereInput
+  }
+
+  /**
+   * MarketingCampaignCountOutputType without action
+   */
+  export type MarketingCampaignCountOutputTypeCountConsentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingConsentEventWhereInput
+  }
+
+
+  /**
    * Count Type InvoiceCountOutputType
    */
 
@@ -8229,6 +8797,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: boolean | User$inventoryCheckoutsCreatedArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
+    marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -8281,6 +8850,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: boolean | User$inventoryCheckoutsCreatedArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
+    marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8297,6 +8867,7 @@ export namespace Prisma {
       inventoryCheckoutsCreated: Prisma.$InventoryCheckoutPayload<ExtArgs>[]
       createdInvites: Prisma.$PlatformInvitePayload<ExtArgs>[]
       editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
+      marketingCampaignsCreated: Prisma.$MarketingCampaignPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -8711,6 +9282,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated<T extends User$inventoryCheckoutsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryCheckoutsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryCheckoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdInvites<T extends User$createdInvitesArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     editorNotes<T extends User$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    marketingCampaignsCreated<T extends User$marketingCampaignsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$marketingCampaignsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9327,6 +9899,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
+  }
+
+  /**
+   * User.marketingCampaignsCreated
+   */
+  export type User$marketingCampaignsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    where?: MarketingCampaignWhereInput
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    cursor?: MarketingCampaignWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
   }
 
   /**
@@ -14594,6 +15190,9 @@ export namespace Prisma {
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     forms?: boolean | Business$formsArgs<ExtArgs>
     formSubmissions?: boolean | Business$formSubmissionsArgs<ExtArgs>
+    marketingCampaigns?: boolean | Business$marketingCampaignsArgs<ExtArgs>
+    marketingConsentEvents?: boolean | Business$marketingConsentEventsArgs<ExtArgs>
+    marketingDoNotEmail?: boolean | Business$marketingDoNotEmailArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     invoiceSettings?: boolean | Business$invoiceSettingsArgs<ExtArgs>
@@ -14887,6 +15486,9 @@ export namespace Prisma {
     quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     forms?: boolean | Business$formsArgs<ExtArgs>
     formSubmissions?: boolean | Business$formSubmissionsArgs<ExtArgs>
+    marketingCampaigns?: boolean | Business$marketingCampaignsArgs<ExtArgs>
+    marketingConsentEvents?: boolean | Business$marketingConsentEventsArgs<ExtArgs>
+    marketingDoNotEmail?: boolean | Business$marketingDoNotEmailArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     invoiceSettings?: boolean | Business$invoiceSettingsArgs<ExtArgs>
@@ -14937,6 +15539,9 @@ export namespace Prisma {
       quoteSubmissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
       forms: Prisma.$FormPayload<ExtArgs>[]
       formSubmissions: Prisma.$FormSubmissionPayload<ExtArgs>[]
+      marketingCampaigns: Prisma.$MarketingCampaignPayload<ExtArgs>[]
+      marketingConsentEvents: Prisma.$MarketingConsentEventPayload<ExtArgs>[]
+      marketingDoNotEmail: Prisma.$MarketingDoNotEmailPayload<ExtArgs>[]
       quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       invoiceSettings: Prisma.$InvoiceSettingsPayload<ExtArgs> | null
@@ -15454,6 +16059,9 @@ export namespace Prisma {
     quoteSubmissions<T extends Business$quoteSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     forms<T extends Business$formsArgs<ExtArgs> = {}>(args?: Subset<T, Business$formsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     formSubmissions<T extends Business$formSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$formSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    marketingCampaigns<T extends Business$marketingCampaignsArgs<ExtArgs> = {}>(args?: Subset<T, Business$marketingCampaignsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    marketingConsentEvents<T extends Business$marketingConsentEventsArgs<ExtArgs> = {}>(args?: Subset<T, Business$marketingConsentEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    marketingDoNotEmail<T extends Business$marketingDoNotEmailArgs<ExtArgs> = {}>(args?: Subset<T, Business$marketingDoNotEmailArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoiceSettings<T extends Business$invoiceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoiceSettingsArgs<ExtArgs>>): Prisma__InvoiceSettingsClient<$Result.GetResult<Prisma.$InvoiceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -16720,6 +17328,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FormSubmissionScalarFieldEnum | FormSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Business.marketingCampaigns
+   */
+  export type Business$marketingCampaignsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    where?: MarketingCampaignWhereInput
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    cursor?: MarketingCampaignWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * Business.marketingConsentEvents
+   */
+  export type Business$marketingConsentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    where?: MarketingConsentEventWhereInput
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    cursor?: MarketingConsentEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
+  }
+
+  /**
+   * Business.marketingDoNotEmail
+   */
+  export type Business$marketingDoNotEmailArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    where?: MarketingDoNotEmailWhereInput
+    orderBy?: MarketingDoNotEmailOrderByWithRelationInput | MarketingDoNotEmailOrderByWithRelationInput[]
+    cursor?: MarketingDoNotEmailWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingDoNotEmailScalarFieldEnum | MarketingDoNotEmailScalarFieldEnum[]
   }
 
   /**
@@ -36169,6 +36849,11 @@ export namespace Prisma {
     phone: string | null
     stripeCustomerId: string | null
     acceptsMarketing: boolean | null
+    marketingConsentAt: Date | null
+    marketingConsentSource: string | null
+    marketingUnsubscribedAt: Date | null
+    marketingSuppressedAt: Date | null
+    marketingSuppressionReason: string | null
     totalSpent: number | null
     orderCount: number | null
     loyaltyPoints: number | null
@@ -36192,6 +36877,11 @@ export namespace Prisma {
     phone: string | null
     stripeCustomerId: string | null
     acceptsMarketing: boolean | null
+    marketingConsentAt: Date | null
+    marketingConsentSource: string | null
+    marketingUnsubscribedAt: Date | null
+    marketingSuppressedAt: Date | null
+    marketingSuppressionReason: string | null
     totalSpent: number | null
     orderCount: number | null
     loyaltyPoints: number | null
@@ -36215,6 +36905,11 @@ export namespace Prisma {
     phone: number
     stripeCustomerId: number
     acceptsMarketing: number
+    marketingConsentAt: number
+    marketingConsentSource: number
+    marketingUnsubscribedAt: number
+    marketingSuppressedAt: number
+    marketingSuppressionReason: number
     totalSpent: number
     orderCount: number
     loyaltyPoints: number
@@ -36256,6 +36951,11 @@ export namespace Prisma {
     phone?: true
     stripeCustomerId?: true
     acceptsMarketing?: true
+    marketingConsentAt?: true
+    marketingConsentSource?: true
+    marketingUnsubscribedAt?: true
+    marketingSuppressedAt?: true
+    marketingSuppressionReason?: true
     totalSpent?: true
     orderCount?: true
     loyaltyPoints?: true
@@ -36279,6 +36979,11 @@ export namespace Prisma {
     phone?: true
     stripeCustomerId?: true
     acceptsMarketing?: true
+    marketingConsentAt?: true
+    marketingConsentSource?: true
+    marketingUnsubscribedAt?: true
+    marketingSuppressedAt?: true
+    marketingSuppressionReason?: true
     totalSpent?: true
     orderCount?: true
     loyaltyPoints?: true
@@ -36302,6 +37007,11 @@ export namespace Prisma {
     phone?: true
     stripeCustomerId?: true
     acceptsMarketing?: true
+    marketingConsentAt?: true
+    marketingConsentSource?: true
+    marketingUnsubscribedAt?: true
+    marketingSuppressedAt?: true
+    marketingSuppressionReason?: true
     totalSpent?: true
     orderCount?: true
     loyaltyPoints?: true
@@ -36412,6 +37122,11 @@ export namespace Prisma {
     phone: string | null
     stripeCustomerId: string | null
     acceptsMarketing: boolean
+    marketingConsentAt: Date | null
+    marketingConsentSource: string | null
+    marketingUnsubscribedAt: Date | null
+    marketingSuppressedAt: Date | null
+    marketingSuppressionReason: string | null
     totalSpent: number
     orderCount: number
     loyaltyPoints: number
@@ -36454,6 +37169,11 @@ export namespace Prisma {
     phone?: boolean
     stripeCustomerId?: boolean
     acceptsMarketing?: boolean
+    marketingConsentAt?: boolean
+    marketingConsentSource?: boolean
+    marketingUnsubscribedAt?: boolean
+    marketingSuppressedAt?: boolean
+    marketingSuppressionReason?: boolean
     totalSpent?: boolean
     orderCount?: boolean
     loyaltyPoints?: boolean
@@ -36475,6 +37195,8 @@ export namespace Prisma {
     subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
     loyaltyLedger?: boolean | Customer$loyaltyLedgerArgs<ExtArgs>
     invoices?: boolean | Customer$invoicesArgs<ExtArgs>
+    campaignRecipients?: boolean | Customer$campaignRecipientsArgs<ExtArgs>
+    consentEvents?: boolean | Customer$consentEventsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -36488,6 +37210,11 @@ export namespace Prisma {
     phone?: boolean
     stripeCustomerId?: boolean
     acceptsMarketing?: boolean
+    marketingConsentAt?: boolean
+    marketingConsentSource?: boolean
+    marketingUnsubscribedAt?: boolean
+    marketingSuppressedAt?: boolean
+    marketingSuppressionReason?: boolean
     totalSpent?: boolean
     orderCount?: boolean
     loyaltyPoints?: boolean
@@ -36513,6 +37240,11 @@ export namespace Prisma {
     phone?: boolean
     stripeCustomerId?: boolean
     acceptsMarketing?: boolean
+    marketingConsentAt?: boolean
+    marketingConsentSource?: boolean
+    marketingUnsubscribedAt?: boolean
+    marketingSuppressedAt?: boolean
+    marketingSuppressionReason?: boolean
     totalSpent?: boolean
     orderCount?: boolean
     loyaltyPoints?: boolean
@@ -36538,6 +37270,11 @@ export namespace Prisma {
     phone?: boolean
     stripeCustomerId?: boolean
     acceptsMarketing?: boolean
+    marketingConsentAt?: boolean
+    marketingConsentSource?: boolean
+    marketingUnsubscribedAt?: boolean
+    marketingSuppressedAt?: boolean
+    marketingSuppressionReason?: boolean
     totalSpent?: boolean
     orderCount?: boolean
     loyaltyPoints?: boolean
@@ -36551,7 +37288,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "stripeCustomerId" | "acceptsMarketing" | "totalSpent" | "orderCount" | "loyaltyPoints" | "loyaltyJoinedAt" | "birthMonth" | "birthDay" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "stripeCustomerId" | "acceptsMarketing" | "marketingConsentAt" | "marketingConsentSource" | "marketingUnsubscribedAt" | "marketingSuppressedAt" | "marketingSuppressionReason" | "totalSpent" | "orderCount" | "loyaltyPoints" | "loyaltyJoinedAt" | "birthMonth" | "birthDay" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -36563,6 +37300,8 @@ export namespace Prisma {
     subscriptions?: boolean | Customer$subscriptionsArgs<ExtArgs>
     loyaltyLedger?: boolean | Customer$loyaltyLedgerArgs<ExtArgs>
     invoices?: boolean | Customer$invoicesArgs<ExtArgs>
+    campaignRecipients?: boolean | Customer$campaignRecipientsArgs<ExtArgs>
+    consentEvents?: boolean | Customer$consentEventsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -36587,6 +37326,8 @@ export namespace Prisma {
       subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
       loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
+      campaignRecipients: Prisma.$MarketingCampaignRecipientPayload<ExtArgs>[]
+      consentEvents: Prisma.$MarketingConsentEventPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -36601,6 +37342,11 @@ export namespace Prisma {
       phone: string | null
       stripeCustomerId: string | null
       acceptsMarketing: boolean
+      marketingConsentAt: Date | null
+      marketingConsentSource: string | null
+      marketingUnsubscribedAt: Date | null
+      marketingSuppressedAt: Date | null
+      marketingSuppressionReason: string | null
       totalSpent: number
       orderCount: number
       loyaltyPoints: number
@@ -37019,6 +37765,8 @@ export namespace Prisma {
     subscriptions<T extends Customer$subscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     loyaltyLedger<T extends Customer$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Customer$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoices<T extends Customer$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    campaignRecipients<T extends Customer$campaignRecipientsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$campaignRecipientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    consentEvents<T extends Customer$consentEventsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$consentEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -37057,6 +37805,11 @@ export namespace Prisma {
     readonly phone: FieldRef<"Customer", 'String'>
     readonly stripeCustomerId: FieldRef<"Customer", 'String'>
     readonly acceptsMarketing: FieldRef<"Customer", 'Boolean'>
+    readonly marketingConsentAt: FieldRef<"Customer", 'DateTime'>
+    readonly marketingConsentSource: FieldRef<"Customer", 'String'>
+    readonly marketingUnsubscribedAt: FieldRef<"Customer", 'DateTime'>
+    readonly marketingSuppressedAt: FieldRef<"Customer", 'DateTime'>
+    readonly marketingSuppressionReason: FieldRef<"Customer", 'String'>
     readonly totalSpent: FieldRef<"Customer", 'Int'>
     readonly orderCount: FieldRef<"Customer", 'Int'>
     readonly loyaltyPoints: FieldRef<"Customer", 'Int'>
@@ -37672,6 +38425,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.campaignRecipients
+   */
+  export type Customer$campaignRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    where?: MarketingCampaignRecipientWhereInput
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingCampaignRecipientScalarFieldEnum | MarketingCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.consentEvents
+   */
+  export type Customer$consentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    where?: MarketingConsentEventWhereInput
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    cursor?: MarketingConsentEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
   }
 
   /**
@@ -73966,6 +74767,6131 @@ export namespace Prisma {
 
 
   /**
+   * Model MarketingCampaign
+   */
+
+  export type AggregateMarketingCampaign = {
+    _count: MarketingCampaignCountAggregateOutputType | null
+    _avg: MarketingCampaignAvgAggregateOutputType | null
+    _sum: MarketingCampaignSumAggregateOutputType | null
+    _min: MarketingCampaignMinAggregateOutputType | null
+    _max: MarketingCampaignMaxAggregateOutputType | null
+  }
+
+  export type MarketingCampaignAvgAggregateOutputType = {
+    recipientCount: number | null
+  }
+
+  export type MarketingCampaignSumAggregateOutputType = {
+    recipientCount: number | null
+  }
+
+  export type MarketingCampaignMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    createdById: string | null
+    subject: string | null
+    previewText: string | null
+    contentFormat: string | null
+    bodyText: string | null
+    status: string | null
+    renderedHtml: string | null
+    renderedText: string | null
+    fromAddress: string | null
+    replyTo: string | null
+    baseUrl: string | null
+    recipientCount: number | null
+    queuedAt: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+    canceledAt: Date | null
+    lastError: string | null
+  }
+
+  export type MarketingCampaignMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    createdById: string | null
+    subject: string | null
+    previewText: string | null
+    contentFormat: string | null
+    bodyText: string | null
+    status: string | null
+    renderedHtml: string | null
+    renderedText: string | null
+    fromAddress: string | null
+    replyTo: string | null
+    baseUrl: string | null
+    recipientCount: number | null
+    queuedAt: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+    canceledAt: Date | null
+    lastError: string | null
+  }
+
+  export type MarketingCampaignCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    createdById: number
+    subject: number
+    previewText: number
+    contentFormat: number
+    bodyText: number
+    bodyJson: number
+    status: number
+    renderedHtml: number
+    renderedText: number
+    fromAddress: number
+    replyTo: number
+    baseUrl: number
+    recipientCount: number
+    queuedAt: number
+    startedAt: number
+    completedAt: number
+    canceledAt: number
+    lastError: number
+    _all: number
+  }
+
+
+  export type MarketingCampaignAvgAggregateInputType = {
+    recipientCount?: true
+  }
+
+  export type MarketingCampaignSumAggregateInputType = {
+    recipientCount?: true
+  }
+
+  export type MarketingCampaignMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    createdById?: true
+    subject?: true
+    previewText?: true
+    contentFormat?: true
+    bodyText?: true
+    status?: true
+    renderedHtml?: true
+    renderedText?: true
+    fromAddress?: true
+    replyTo?: true
+    baseUrl?: true
+    recipientCount?: true
+    queuedAt?: true
+    startedAt?: true
+    completedAt?: true
+    canceledAt?: true
+    lastError?: true
+  }
+
+  export type MarketingCampaignMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    createdById?: true
+    subject?: true
+    previewText?: true
+    contentFormat?: true
+    bodyText?: true
+    status?: true
+    renderedHtml?: true
+    renderedText?: true
+    fromAddress?: true
+    replyTo?: true
+    baseUrl?: true
+    recipientCount?: true
+    queuedAt?: true
+    startedAt?: true
+    completedAt?: true
+    canceledAt?: true
+    lastError?: true
+  }
+
+  export type MarketingCampaignCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    createdById?: true
+    subject?: true
+    previewText?: true
+    contentFormat?: true
+    bodyText?: true
+    bodyJson?: true
+    status?: true
+    renderedHtml?: true
+    renderedText?: true
+    fromAddress?: true
+    replyTo?: true
+    baseUrl?: true
+    recipientCount?: true
+    queuedAt?: true
+    startedAt?: true
+    completedAt?: true
+    canceledAt?: true
+    lastError?: true
+    _all?: true
+  }
+
+  export type MarketingCampaignAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaign to aggregate.
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaigns to fetch.
+     */
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketingCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketingCampaigns
+    **/
+    _count?: true | MarketingCampaignCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MarketingCampaignAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MarketingCampaignSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketingCampaignMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketingCampaignMaxAggregateInputType
+  }
+
+  export type GetMarketingCampaignAggregateType<T extends MarketingCampaignAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketingCampaign]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketingCampaign[P]>
+      : GetScalarType<T[P], AggregateMarketingCampaign[P]>
+  }
+
+
+
+
+  export type MarketingCampaignGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignWhereInput
+    orderBy?: MarketingCampaignOrderByWithAggregationInput | MarketingCampaignOrderByWithAggregationInput[]
+    by: MarketingCampaignScalarFieldEnum[] | MarketingCampaignScalarFieldEnum
+    having?: MarketingCampaignScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketingCampaignCountAggregateInputType | true
+    _avg?: MarketingCampaignAvgAggregateInputType
+    _sum?: MarketingCampaignSumAggregateInputType
+    _min?: MarketingCampaignMinAggregateInputType
+    _max?: MarketingCampaignMaxAggregateInputType
+  }
+
+  export type MarketingCampaignGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    createdById: string | null
+    subject: string
+    previewText: string | null
+    contentFormat: string
+    bodyText: string | null
+    bodyJson: JsonValue | null
+    status: string
+    renderedHtml: string | null
+    renderedText: string | null
+    fromAddress: string | null
+    replyTo: string | null
+    baseUrl: string | null
+    recipientCount: number
+    queuedAt: Date | null
+    startedAt: Date | null
+    completedAt: Date | null
+    canceledAt: Date | null
+    lastError: string | null
+    _count: MarketingCampaignCountAggregateOutputType | null
+    _avg: MarketingCampaignAvgAggregateOutputType | null
+    _sum: MarketingCampaignSumAggregateOutputType | null
+    _min: MarketingCampaignMinAggregateOutputType | null
+    _max: MarketingCampaignMaxAggregateOutputType | null
+  }
+
+  type GetMarketingCampaignGroupByPayload<T extends MarketingCampaignGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketingCampaignGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketingCampaignGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketingCampaignGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketingCampaignGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketingCampaignSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    createdById?: boolean
+    subject?: boolean
+    previewText?: boolean
+    contentFormat?: boolean
+    bodyText?: boolean
+    bodyJson?: boolean
+    status?: boolean
+    renderedHtml?: boolean
+    renderedText?: boolean
+    fromAddress?: boolean
+    replyTo?: boolean
+    baseUrl?: boolean
+    recipientCount?: boolean
+    queuedAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    canceledAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+    batches?: boolean | MarketingCampaign$batchesArgs<ExtArgs>
+    recipients?: boolean | MarketingCampaign$recipientsArgs<ExtArgs>
+    consentEvents?: boolean | MarketingCampaign$consentEventsArgs<ExtArgs>
+    _count?: boolean | MarketingCampaignCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaign"]>
+
+  export type MarketingCampaignSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    createdById?: boolean
+    subject?: boolean
+    previewText?: boolean
+    contentFormat?: boolean
+    bodyText?: boolean
+    bodyJson?: boolean
+    status?: boolean
+    renderedHtml?: boolean
+    renderedText?: boolean
+    fromAddress?: boolean
+    replyTo?: boolean
+    baseUrl?: boolean
+    recipientCount?: boolean
+    queuedAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    canceledAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaign"]>
+
+  export type MarketingCampaignSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    createdById?: boolean
+    subject?: boolean
+    previewText?: boolean
+    contentFormat?: boolean
+    bodyText?: boolean
+    bodyJson?: boolean
+    status?: boolean
+    renderedHtml?: boolean
+    renderedText?: boolean
+    fromAddress?: boolean
+    replyTo?: boolean
+    baseUrl?: boolean
+    recipientCount?: boolean
+    queuedAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    canceledAt?: boolean
+    lastError?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaign"]>
+
+  export type MarketingCampaignSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    createdById?: boolean
+    subject?: boolean
+    previewText?: boolean
+    contentFormat?: boolean
+    bodyText?: boolean
+    bodyJson?: boolean
+    status?: boolean
+    renderedHtml?: boolean
+    renderedText?: boolean
+    fromAddress?: boolean
+    replyTo?: boolean
+    baseUrl?: boolean
+    recipientCount?: boolean
+    queuedAt?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    canceledAt?: boolean
+    lastError?: boolean
+  }
+
+  export type MarketingCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "createdById" | "subject" | "previewText" | "contentFormat" | "bodyText" | "bodyJson" | "status" | "renderedHtml" | "renderedText" | "fromAddress" | "replyTo" | "baseUrl" | "recipientCount" | "queuedAt" | "startedAt" | "completedAt" | "canceledAt" | "lastError", ExtArgs["result"]["marketingCampaign"]>
+  export type MarketingCampaignInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+    batches?: boolean | MarketingCampaign$batchesArgs<ExtArgs>
+    recipients?: boolean | MarketingCampaign$recipientsArgs<ExtArgs>
+    consentEvents?: boolean | MarketingCampaign$consentEventsArgs<ExtArgs>
+    _count?: boolean | MarketingCampaignCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type MarketingCampaignIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+  }
+  export type MarketingCampaignIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
+  }
+
+  export type $MarketingCampaignPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketingCampaign"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+      batches: Prisma.$MarketingCampaignBatchPayload<ExtArgs>[]
+      recipients: Prisma.$MarketingCampaignRecipientPayload<ExtArgs>[]
+      consentEvents: Prisma.$MarketingConsentEventPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      createdById: string | null
+      subject: string
+      previewText: string | null
+      contentFormat: string
+      bodyText: string | null
+      bodyJson: Prisma.JsonValue | null
+      status: string
+      renderedHtml: string | null
+      renderedText: string | null
+      fromAddress: string | null
+      replyTo: string | null
+      baseUrl: string | null
+      recipientCount: number
+      queuedAt: Date | null
+      startedAt: Date | null
+      completedAt: Date | null
+      canceledAt: Date | null
+      lastError: string | null
+    }, ExtArgs["result"]["marketingCampaign"]>
+    composites: {}
+  }
+
+  type MarketingCampaignGetPayload<S extends boolean | null | undefined | MarketingCampaignDefaultArgs> = $Result.GetResult<Prisma.$MarketingCampaignPayload, S>
+
+  type MarketingCampaignCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketingCampaignFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketingCampaignCountAggregateInputType | true
+    }
+
+  export interface MarketingCampaignDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketingCampaign'], meta: { name: 'MarketingCampaign' } }
+    /**
+     * Find zero or one MarketingCampaign that matches the filter.
+     * @param {MarketingCampaignFindUniqueArgs} args - Arguments to find a MarketingCampaign
+     * @example
+     * // Get one MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketingCampaignFindUniqueArgs>(args: SelectSubset<T, MarketingCampaignFindUniqueArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketingCampaign that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketingCampaignFindUniqueOrThrowArgs} args - Arguments to find a MarketingCampaign
+     * @example
+     * // Get one MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketingCampaignFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketingCampaignFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaign that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignFindFirstArgs} args - Arguments to find a MarketingCampaign
+     * @example
+     * // Get one MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketingCampaignFindFirstArgs>(args?: SelectSubset<T, MarketingCampaignFindFirstArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaign that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignFindFirstOrThrowArgs} args - Arguments to find a MarketingCampaign
+     * @example
+     * // Get one MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketingCampaignFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketingCampaignFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketingCampaigns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketingCampaigns
+     * const marketingCampaigns = await prisma.marketingCampaign.findMany()
+     * 
+     * // Get first 10 MarketingCampaigns
+     * const marketingCampaigns = await prisma.marketingCampaign.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketingCampaignWithIdOnly = await prisma.marketingCampaign.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketingCampaignFindManyArgs>(args?: SelectSubset<T, MarketingCampaignFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketingCampaign.
+     * @param {MarketingCampaignCreateArgs} args - Arguments to create a MarketingCampaign.
+     * @example
+     * // Create one MarketingCampaign
+     * const MarketingCampaign = await prisma.marketingCampaign.create({
+     *   data: {
+     *     // ... data to create a MarketingCampaign
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketingCampaignCreateArgs>(args: SelectSubset<T, MarketingCampaignCreateArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketingCampaigns.
+     * @param {MarketingCampaignCreateManyArgs} args - Arguments to create many MarketingCampaigns.
+     * @example
+     * // Create many MarketingCampaigns
+     * const marketingCampaign = await prisma.marketingCampaign.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketingCampaignCreateManyArgs>(args?: SelectSubset<T, MarketingCampaignCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketingCampaigns and returns the data saved in the database.
+     * @param {MarketingCampaignCreateManyAndReturnArgs} args - Arguments to create many MarketingCampaigns.
+     * @example
+     * // Create many MarketingCampaigns
+     * const marketingCampaign = await prisma.marketingCampaign.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketingCampaigns and only return the `id`
+     * const marketingCampaignWithIdOnly = await prisma.marketingCampaign.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketingCampaignCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketingCampaignCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketingCampaign.
+     * @param {MarketingCampaignDeleteArgs} args - Arguments to delete one MarketingCampaign.
+     * @example
+     * // Delete one MarketingCampaign
+     * const MarketingCampaign = await prisma.marketingCampaign.delete({
+     *   where: {
+     *     // ... filter to delete one MarketingCampaign
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketingCampaignDeleteArgs>(args: SelectSubset<T, MarketingCampaignDeleteArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketingCampaign.
+     * @param {MarketingCampaignUpdateArgs} args - Arguments to update one MarketingCampaign.
+     * @example
+     * // Update one MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketingCampaignUpdateArgs>(args: SelectSubset<T, MarketingCampaignUpdateArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketingCampaigns.
+     * @param {MarketingCampaignDeleteManyArgs} args - Arguments to filter MarketingCampaigns to delete.
+     * @example
+     * // Delete a few MarketingCampaigns
+     * const { count } = await prisma.marketingCampaign.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketingCampaignDeleteManyArgs>(args?: SelectSubset<T, MarketingCampaignDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketingCampaigns
+     * const marketingCampaign = await prisma.marketingCampaign.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketingCampaignUpdateManyArgs>(args: SelectSubset<T, MarketingCampaignUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaigns and returns the data updated in the database.
+     * @param {MarketingCampaignUpdateManyAndReturnArgs} args - Arguments to update many MarketingCampaigns.
+     * @example
+     * // Update many MarketingCampaigns
+     * const marketingCampaign = await prisma.marketingCampaign.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketingCampaigns and only return the `id`
+     * const marketingCampaignWithIdOnly = await prisma.marketingCampaign.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketingCampaignUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketingCampaignUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketingCampaign.
+     * @param {MarketingCampaignUpsertArgs} args - Arguments to update or create a MarketingCampaign.
+     * @example
+     * // Update or create a MarketingCampaign
+     * const marketingCampaign = await prisma.marketingCampaign.upsert({
+     *   create: {
+     *     // ... data to create a MarketingCampaign
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketingCampaign we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketingCampaignUpsertArgs>(args: SelectSubset<T, MarketingCampaignUpsertArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketingCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignCountArgs} args - Arguments to filter MarketingCampaigns to count.
+     * @example
+     * // Count the number of MarketingCampaigns
+     * const count = await prisma.marketingCampaign.count({
+     *   where: {
+     *     // ... the filter for the MarketingCampaigns we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketingCampaignCountArgs>(
+      args?: Subset<T, MarketingCampaignCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketingCampaignCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketingCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketingCampaignAggregateArgs>(args: Subset<T, MarketingCampaignAggregateArgs>): Prisma.PrismaPromise<GetMarketingCampaignAggregateType<T>>
+
+    /**
+     * Group by MarketingCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketingCampaignGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketingCampaignGroupByArgs['orderBy'] }
+        : { orderBy?: MarketingCampaignGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketingCampaignGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketingCampaignGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketingCampaign model
+   */
+  readonly fields: MarketingCampaignFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketingCampaign.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketingCampaignClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    createdBy<T extends MarketingCampaign$createdByArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaign$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    batches<T extends MarketingCampaign$batchesArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaign$batchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    recipients<T extends MarketingCampaign$recipientsArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaign$recipientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    consentEvents<T extends MarketingCampaign$consentEventsArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaign$consentEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketingCampaign model
+   */
+  interface MarketingCampaignFieldRefs {
+    readonly id: FieldRef<"MarketingCampaign", 'String'>
+    readonly createdAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly updatedAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly businessId: FieldRef<"MarketingCampaign", 'String'>
+    readonly createdById: FieldRef<"MarketingCampaign", 'String'>
+    readonly subject: FieldRef<"MarketingCampaign", 'String'>
+    readonly previewText: FieldRef<"MarketingCampaign", 'String'>
+    readonly contentFormat: FieldRef<"MarketingCampaign", 'String'>
+    readonly bodyText: FieldRef<"MarketingCampaign", 'String'>
+    readonly bodyJson: FieldRef<"MarketingCampaign", 'Json'>
+    readonly status: FieldRef<"MarketingCampaign", 'String'>
+    readonly renderedHtml: FieldRef<"MarketingCampaign", 'String'>
+    readonly renderedText: FieldRef<"MarketingCampaign", 'String'>
+    readonly fromAddress: FieldRef<"MarketingCampaign", 'String'>
+    readonly replyTo: FieldRef<"MarketingCampaign", 'String'>
+    readonly baseUrl: FieldRef<"MarketingCampaign", 'String'>
+    readonly recipientCount: FieldRef<"MarketingCampaign", 'Int'>
+    readonly queuedAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly startedAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly completedAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly canceledAt: FieldRef<"MarketingCampaign", 'DateTime'>
+    readonly lastError: FieldRef<"MarketingCampaign", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketingCampaign findUnique
+   */
+  export type MarketingCampaignFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaign to fetch.
+     */
+    where: MarketingCampaignWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaign findUniqueOrThrow
+   */
+  export type MarketingCampaignFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaign to fetch.
+     */
+    where: MarketingCampaignWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaign findFirst
+   */
+  export type MarketingCampaignFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaign to fetch.
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaigns to fetch.
+     */
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaigns.
+     */
+    cursor?: MarketingCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaigns.
+     */
+    distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign findFirstOrThrow
+   */
+  export type MarketingCampaignFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaign to fetch.
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaigns to fetch.
+     */
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaigns.
+     */
+    cursor?: MarketingCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaigns.
+     */
+    distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign findMany
+   */
+  export type MarketingCampaignFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaigns to fetch.
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaigns to fetch.
+     */
+    orderBy?: MarketingCampaignOrderByWithRelationInput | MarketingCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketingCampaigns.
+     */
+    cursor?: MarketingCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaigns.
+     */
+    skip?: number
+    distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign create
+   */
+  export type MarketingCampaignCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketingCampaign.
+     */
+    data: XOR<MarketingCampaignCreateInput, MarketingCampaignUncheckedCreateInput>
+  }
+
+  /**
+   * MarketingCampaign createMany
+   */
+  export type MarketingCampaignCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketingCampaigns.
+     */
+    data: MarketingCampaignCreateManyInput | MarketingCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketingCampaign createManyAndReturn
+   */
+  export type MarketingCampaignCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketingCampaigns.
+     */
+    data: MarketingCampaignCreateManyInput | MarketingCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaign update
+   */
+  export type MarketingCampaignUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketingCampaign.
+     */
+    data: XOR<MarketingCampaignUpdateInput, MarketingCampaignUncheckedUpdateInput>
+    /**
+     * Choose, which MarketingCampaign to update.
+     */
+    where: MarketingCampaignWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaign updateMany
+   */
+  export type MarketingCampaignUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketingCampaigns.
+     */
+    data: XOR<MarketingCampaignUpdateManyMutationInput, MarketingCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaigns to update
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * Limit how many MarketingCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaign updateManyAndReturn
+   */
+  export type MarketingCampaignUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketingCampaigns.
+     */
+    data: XOR<MarketingCampaignUpdateManyMutationInput, MarketingCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaigns to update
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * Limit how many MarketingCampaigns to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaign upsert
+   */
+  export type MarketingCampaignUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketingCampaign to update in case it exists.
+     */
+    where: MarketingCampaignWhereUniqueInput
+    /**
+     * In case the MarketingCampaign found by the `where` argument doesn't exist, create a new MarketingCampaign with this data.
+     */
+    create: XOR<MarketingCampaignCreateInput, MarketingCampaignUncheckedCreateInput>
+    /**
+     * In case the MarketingCampaign was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketingCampaignUpdateInput, MarketingCampaignUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketingCampaign delete
+   */
+  export type MarketingCampaignDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    /**
+     * Filter which MarketingCampaign to delete.
+     */
+    where: MarketingCampaignWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaign deleteMany
+   */
+  export type MarketingCampaignDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaigns to delete
+     */
+    where?: MarketingCampaignWhereInput
+    /**
+     * Limit how many MarketingCampaigns to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaign.createdBy
+   */
+  export type MarketingCampaign$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * MarketingCampaign.batches
+   */
+  export type MarketingCampaign$batchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    where?: MarketingCampaignBatchWhereInput
+    orderBy?: MarketingCampaignBatchOrderByWithRelationInput | MarketingCampaignBatchOrderByWithRelationInput[]
+    cursor?: MarketingCampaignBatchWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingCampaignBatchScalarFieldEnum | MarketingCampaignBatchScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign.recipients
+   */
+  export type MarketingCampaign$recipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    where?: MarketingCampaignRecipientWhereInput
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingCampaignRecipientScalarFieldEnum | MarketingCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign.consentEvents
+   */
+  export type MarketingCampaign$consentEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    where?: MarketingConsentEventWhereInput
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    cursor?: MarketingConsentEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaign without action
+   */
+  export type MarketingCampaignDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketingCampaignBatch
+   */
+
+  export type AggregateMarketingCampaignBatch = {
+    _count: MarketingCampaignBatchCountAggregateOutputType | null
+    _avg: MarketingCampaignBatchAvgAggregateOutputType | null
+    _sum: MarketingCampaignBatchSumAggregateOutputType | null
+    _min: MarketingCampaignBatchMinAggregateOutputType | null
+    _max: MarketingCampaignBatchMaxAggregateOutputType | null
+  }
+
+  export type MarketingCampaignBatchAvgAggregateOutputType = {
+    batchIndex: number | null
+    attempts: number | null
+  }
+
+  export type MarketingCampaignBatchSumAggregateOutputType = {
+    batchIndex: number | null
+    attempts: number | null
+  }
+
+  export type MarketingCampaignBatchMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    campaignId: string | null
+    businessId: string | null
+    batchIndex: number | null
+    status: string | null
+    attempts: number | null
+    leaseUntil: Date | null
+    notBefore: Date | null
+    firstAttemptAt: Date | null
+    sentAt: Date | null
+    lastError: string | null
+  }
+
+  export type MarketingCampaignBatchMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    campaignId: string | null
+    businessId: string | null
+    batchIndex: number | null
+    status: string | null
+    attempts: number | null
+    leaseUntil: Date | null
+    notBefore: Date | null
+    firstAttemptAt: Date | null
+    sentAt: Date | null
+    lastError: string | null
+  }
+
+  export type MarketingCampaignBatchCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    campaignId: number
+    businessId: number
+    batchIndex: number
+    status: number
+    attempts: number
+    leaseUntil: number
+    notBefore: number
+    firstAttemptAt: number
+    sentAt: number
+    lastError: number
+    _all: number
+  }
+
+
+  export type MarketingCampaignBatchAvgAggregateInputType = {
+    batchIndex?: true
+    attempts?: true
+  }
+
+  export type MarketingCampaignBatchSumAggregateInputType = {
+    batchIndex?: true
+    attempts?: true
+  }
+
+  export type MarketingCampaignBatchMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    batchIndex?: true
+    status?: true
+    attempts?: true
+    leaseUntil?: true
+    notBefore?: true
+    firstAttemptAt?: true
+    sentAt?: true
+    lastError?: true
+  }
+
+  export type MarketingCampaignBatchMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    batchIndex?: true
+    status?: true
+    attempts?: true
+    leaseUntil?: true
+    notBefore?: true
+    firstAttemptAt?: true
+    sentAt?: true
+    lastError?: true
+  }
+
+  export type MarketingCampaignBatchCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    batchIndex?: true
+    status?: true
+    attempts?: true
+    leaseUntil?: true
+    notBefore?: true
+    firstAttemptAt?: true
+    sentAt?: true
+    lastError?: true
+    _all?: true
+  }
+
+  export type MarketingCampaignBatchAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaignBatch to aggregate.
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignBatches to fetch.
+     */
+    orderBy?: MarketingCampaignBatchOrderByWithRelationInput | MarketingCampaignBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketingCampaignBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketingCampaignBatches
+    **/
+    _count?: true | MarketingCampaignBatchCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MarketingCampaignBatchAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MarketingCampaignBatchSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketingCampaignBatchMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketingCampaignBatchMaxAggregateInputType
+  }
+
+  export type GetMarketingCampaignBatchAggregateType<T extends MarketingCampaignBatchAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketingCampaignBatch]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketingCampaignBatch[P]>
+      : GetScalarType<T[P], AggregateMarketingCampaignBatch[P]>
+  }
+
+
+
+
+  export type MarketingCampaignBatchGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignBatchWhereInput
+    orderBy?: MarketingCampaignBatchOrderByWithAggregationInput | MarketingCampaignBatchOrderByWithAggregationInput[]
+    by: MarketingCampaignBatchScalarFieldEnum[] | MarketingCampaignBatchScalarFieldEnum
+    having?: MarketingCampaignBatchScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketingCampaignBatchCountAggregateInputType | true
+    _avg?: MarketingCampaignBatchAvgAggregateInputType
+    _sum?: MarketingCampaignBatchSumAggregateInputType
+    _min?: MarketingCampaignBatchMinAggregateInputType
+    _max?: MarketingCampaignBatchMaxAggregateInputType
+  }
+
+  export type MarketingCampaignBatchGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    campaignId: string
+    businessId: string
+    batchIndex: number
+    status: string
+    attempts: number
+    leaseUntil: Date | null
+    notBefore: Date | null
+    firstAttemptAt: Date | null
+    sentAt: Date | null
+    lastError: string | null
+    _count: MarketingCampaignBatchCountAggregateOutputType | null
+    _avg: MarketingCampaignBatchAvgAggregateOutputType | null
+    _sum: MarketingCampaignBatchSumAggregateOutputType | null
+    _min: MarketingCampaignBatchMinAggregateOutputType | null
+    _max: MarketingCampaignBatchMaxAggregateOutputType | null
+  }
+
+  type GetMarketingCampaignBatchGroupByPayload<T extends MarketingCampaignBatchGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketingCampaignBatchGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketingCampaignBatchGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketingCampaignBatchGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketingCampaignBatchGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketingCampaignBatchSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    attempts?: boolean
+    leaseUntil?: boolean
+    notBefore?: boolean
+    firstAttemptAt?: boolean
+    sentAt?: boolean
+    lastError?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignBatch"]>
+
+  export type MarketingCampaignBatchSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    attempts?: boolean
+    leaseUntil?: boolean
+    notBefore?: boolean
+    firstAttemptAt?: boolean
+    sentAt?: boolean
+    lastError?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignBatch"]>
+
+  export type MarketingCampaignBatchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    attempts?: boolean
+    leaseUntil?: boolean
+    notBefore?: boolean
+    firstAttemptAt?: boolean
+    sentAt?: boolean
+    lastError?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignBatch"]>
+
+  export type MarketingCampaignBatchSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    attempts?: boolean
+    leaseUntil?: boolean
+    notBefore?: boolean
+    firstAttemptAt?: boolean
+    sentAt?: boolean
+    lastError?: boolean
+  }
+
+  export type MarketingCampaignBatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "campaignId" | "businessId" | "batchIndex" | "status" | "attempts" | "leaseUntil" | "notBefore" | "firstAttemptAt" | "sentAt" | "lastError", ExtArgs["result"]["marketingCampaignBatch"]>
+  export type MarketingCampaignBatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }
+  export type MarketingCampaignBatchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }
+  export type MarketingCampaignBatchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+  }
+
+  export type $MarketingCampaignBatchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketingCampaignBatch"
+    objects: {
+      campaign: Prisma.$MarketingCampaignPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      campaignId: string
+      businessId: string
+      batchIndex: number
+      status: string
+      attempts: number
+      leaseUntil: Date | null
+      notBefore: Date | null
+      firstAttemptAt: Date | null
+      sentAt: Date | null
+      lastError: string | null
+    }, ExtArgs["result"]["marketingCampaignBatch"]>
+    composites: {}
+  }
+
+  type MarketingCampaignBatchGetPayload<S extends boolean | null | undefined | MarketingCampaignBatchDefaultArgs> = $Result.GetResult<Prisma.$MarketingCampaignBatchPayload, S>
+
+  type MarketingCampaignBatchCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketingCampaignBatchFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketingCampaignBatchCountAggregateInputType | true
+    }
+
+  export interface MarketingCampaignBatchDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketingCampaignBatch'], meta: { name: 'MarketingCampaignBatch' } }
+    /**
+     * Find zero or one MarketingCampaignBatch that matches the filter.
+     * @param {MarketingCampaignBatchFindUniqueArgs} args - Arguments to find a MarketingCampaignBatch
+     * @example
+     * // Get one MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketingCampaignBatchFindUniqueArgs>(args: SelectSubset<T, MarketingCampaignBatchFindUniqueArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketingCampaignBatch that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketingCampaignBatchFindUniqueOrThrowArgs} args - Arguments to find a MarketingCampaignBatch
+     * @example
+     * // Get one MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketingCampaignBatchFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketingCampaignBatchFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaignBatch that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchFindFirstArgs} args - Arguments to find a MarketingCampaignBatch
+     * @example
+     * // Get one MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketingCampaignBatchFindFirstArgs>(args?: SelectSubset<T, MarketingCampaignBatchFindFirstArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaignBatch that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchFindFirstOrThrowArgs} args - Arguments to find a MarketingCampaignBatch
+     * @example
+     * // Get one MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketingCampaignBatchFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketingCampaignBatchFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketingCampaignBatches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketingCampaignBatches
+     * const marketingCampaignBatches = await prisma.marketingCampaignBatch.findMany()
+     * 
+     * // Get first 10 MarketingCampaignBatches
+     * const marketingCampaignBatches = await prisma.marketingCampaignBatch.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketingCampaignBatchWithIdOnly = await prisma.marketingCampaignBatch.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketingCampaignBatchFindManyArgs>(args?: SelectSubset<T, MarketingCampaignBatchFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketingCampaignBatch.
+     * @param {MarketingCampaignBatchCreateArgs} args - Arguments to create a MarketingCampaignBatch.
+     * @example
+     * // Create one MarketingCampaignBatch
+     * const MarketingCampaignBatch = await prisma.marketingCampaignBatch.create({
+     *   data: {
+     *     // ... data to create a MarketingCampaignBatch
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketingCampaignBatchCreateArgs>(args: SelectSubset<T, MarketingCampaignBatchCreateArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketingCampaignBatches.
+     * @param {MarketingCampaignBatchCreateManyArgs} args - Arguments to create many MarketingCampaignBatches.
+     * @example
+     * // Create many MarketingCampaignBatches
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketingCampaignBatchCreateManyArgs>(args?: SelectSubset<T, MarketingCampaignBatchCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketingCampaignBatches and returns the data saved in the database.
+     * @param {MarketingCampaignBatchCreateManyAndReturnArgs} args - Arguments to create many MarketingCampaignBatches.
+     * @example
+     * // Create many MarketingCampaignBatches
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketingCampaignBatches and only return the `id`
+     * const marketingCampaignBatchWithIdOnly = await prisma.marketingCampaignBatch.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketingCampaignBatchCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketingCampaignBatchCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketingCampaignBatch.
+     * @param {MarketingCampaignBatchDeleteArgs} args - Arguments to delete one MarketingCampaignBatch.
+     * @example
+     * // Delete one MarketingCampaignBatch
+     * const MarketingCampaignBatch = await prisma.marketingCampaignBatch.delete({
+     *   where: {
+     *     // ... filter to delete one MarketingCampaignBatch
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketingCampaignBatchDeleteArgs>(args: SelectSubset<T, MarketingCampaignBatchDeleteArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketingCampaignBatch.
+     * @param {MarketingCampaignBatchUpdateArgs} args - Arguments to update one MarketingCampaignBatch.
+     * @example
+     * // Update one MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketingCampaignBatchUpdateArgs>(args: SelectSubset<T, MarketingCampaignBatchUpdateArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketingCampaignBatches.
+     * @param {MarketingCampaignBatchDeleteManyArgs} args - Arguments to filter MarketingCampaignBatches to delete.
+     * @example
+     * // Delete a few MarketingCampaignBatches
+     * const { count } = await prisma.marketingCampaignBatch.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketingCampaignBatchDeleteManyArgs>(args?: SelectSubset<T, MarketingCampaignBatchDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaignBatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketingCampaignBatches
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketingCampaignBatchUpdateManyArgs>(args: SelectSubset<T, MarketingCampaignBatchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaignBatches and returns the data updated in the database.
+     * @param {MarketingCampaignBatchUpdateManyAndReturnArgs} args - Arguments to update many MarketingCampaignBatches.
+     * @example
+     * // Update many MarketingCampaignBatches
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketingCampaignBatches and only return the `id`
+     * const marketingCampaignBatchWithIdOnly = await prisma.marketingCampaignBatch.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketingCampaignBatchUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketingCampaignBatchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketingCampaignBatch.
+     * @param {MarketingCampaignBatchUpsertArgs} args - Arguments to update or create a MarketingCampaignBatch.
+     * @example
+     * // Update or create a MarketingCampaignBatch
+     * const marketingCampaignBatch = await prisma.marketingCampaignBatch.upsert({
+     *   create: {
+     *     // ... data to create a MarketingCampaignBatch
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketingCampaignBatch we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketingCampaignBatchUpsertArgs>(args: SelectSubset<T, MarketingCampaignBatchUpsertArgs<ExtArgs>>): Prisma__MarketingCampaignBatchClient<$Result.GetResult<Prisma.$MarketingCampaignBatchPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketingCampaignBatches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchCountArgs} args - Arguments to filter MarketingCampaignBatches to count.
+     * @example
+     * // Count the number of MarketingCampaignBatches
+     * const count = await prisma.marketingCampaignBatch.count({
+     *   where: {
+     *     // ... the filter for the MarketingCampaignBatches we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketingCampaignBatchCountArgs>(
+      args?: Subset<T, MarketingCampaignBatchCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketingCampaignBatchCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketingCampaignBatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketingCampaignBatchAggregateArgs>(args: Subset<T, MarketingCampaignBatchAggregateArgs>): Prisma.PrismaPromise<GetMarketingCampaignBatchAggregateType<T>>
+
+    /**
+     * Group by MarketingCampaignBatch.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignBatchGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketingCampaignBatchGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketingCampaignBatchGroupByArgs['orderBy'] }
+        : { orderBy?: MarketingCampaignBatchGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketingCampaignBatchGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketingCampaignBatchGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketingCampaignBatch model
+   */
+  readonly fields: MarketingCampaignBatchFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketingCampaignBatch.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketingCampaignBatchClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    campaign<T extends MarketingCampaignDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaignDefaultArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketingCampaignBatch model
+   */
+  interface MarketingCampaignBatchFieldRefs {
+    readonly id: FieldRef<"MarketingCampaignBatch", 'String'>
+    readonly createdAt: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly updatedAt: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly campaignId: FieldRef<"MarketingCampaignBatch", 'String'>
+    readonly businessId: FieldRef<"MarketingCampaignBatch", 'String'>
+    readonly batchIndex: FieldRef<"MarketingCampaignBatch", 'Int'>
+    readonly status: FieldRef<"MarketingCampaignBatch", 'String'>
+    readonly attempts: FieldRef<"MarketingCampaignBatch", 'Int'>
+    readonly leaseUntil: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly notBefore: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly firstAttemptAt: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly sentAt: FieldRef<"MarketingCampaignBatch", 'DateTime'>
+    readonly lastError: FieldRef<"MarketingCampaignBatch", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketingCampaignBatch findUnique
+   */
+  export type MarketingCampaignBatchFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignBatch to fetch.
+     */
+    where: MarketingCampaignBatchWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignBatch findUniqueOrThrow
+   */
+  export type MarketingCampaignBatchFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignBatch to fetch.
+     */
+    where: MarketingCampaignBatchWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignBatch findFirst
+   */
+  export type MarketingCampaignBatchFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignBatch to fetch.
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignBatches to fetch.
+     */
+    orderBy?: MarketingCampaignBatchOrderByWithRelationInput | MarketingCampaignBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaignBatches.
+     */
+    cursor?: MarketingCampaignBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaignBatches.
+     */
+    distinct?: MarketingCampaignBatchScalarFieldEnum | MarketingCampaignBatchScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignBatch findFirstOrThrow
+   */
+  export type MarketingCampaignBatchFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignBatch to fetch.
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignBatches to fetch.
+     */
+    orderBy?: MarketingCampaignBatchOrderByWithRelationInput | MarketingCampaignBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaignBatches.
+     */
+    cursor?: MarketingCampaignBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignBatches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaignBatches.
+     */
+    distinct?: MarketingCampaignBatchScalarFieldEnum | MarketingCampaignBatchScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignBatch findMany
+   */
+  export type MarketingCampaignBatchFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignBatches to fetch.
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignBatches to fetch.
+     */
+    orderBy?: MarketingCampaignBatchOrderByWithRelationInput | MarketingCampaignBatchOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketingCampaignBatches.
+     */
+    cursor?: MarketingCampaignBatchWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignBatches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignBatches.
+     */
+    skip?: number
+    distinct?: MarketingCampaignBatchScalarFieldEnum | MarketingCampaignBatchScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignBatch create
+   */
+  export type MarketingCampaignBatchCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketingCampaignBatch.
+     */
+    data: XOR<MarketingCampaignBatchCreateInput, MarketingCampaignBatchUncheckedCreateInput>
+  }
+
+  /**
+   * MarketingCampaignBatch createMany
+   */
+  export type MarketingCampaignBatchCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketingCampaignBatches.
+     */
+    data: MarketingCampaignBatchCreateManyInput | MarketingCampaignBatchCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketingCampaignBatch createManyAndReturn
+   */
+  export type MarketingCampaignBatchCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketingCampaignBatches.
+     */
+    data: MarketingCampaignBatchCreateManyInput | MarketingCampaignBatchCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaignBatch update
+   */
+  export type MarketingCampaignBatchUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketingCampaignBatch.
+     */
+    data: XOR<MarketingCampaignBatchUpdateInput, MarketingCampaignBatchUncheckedUpdateInput>
+    /**
+     * Choose, which MarketingCampaignBatch to update.
+     */
+    where: MarketingCampaignBatchWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignBatch updateMany
+   */
+  export type MarketingCampaignBatchUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketingCampaignBatches.
+     */
+    data: XOR<MarketingCampaignBatchUpdateManyMutationInput, MarketingCampaignBatchUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaignBatches to update
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * Limit how many MarketingCampaignBatches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaignBatch updateManyAndReturn
+   */
+  export type MarketingCampaignBatchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketingCampaignBatches.
+     */
+    data: XOR<MarketingCampaignBatchUpdateManyMutationInput, MarketingCampaignBatchUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaignBatches to update
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * Limit how many MarketingCampaignBatches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaignBatch upsert
+   */
+  export type MarketingCampaignBatchUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketingCampaignBatch to update in case it exists.
+     */
+    where: MarketingCampaignBatchWhereUniqueInput
+    /**
+     * In case the MarketingCampaignBatch found by the `where` argument doesn't exist, create a new MarketingCampaignBatch with this data.
+     */
+    create: XOR<MarketingCampaignBatchCreateInput, MarketingCampaignBatchUncheckedCreateInput>
+    /**
+     * In case the MarketingCampaignBatch was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketingCampaignBatchUpdateInput, MarketingCampaignBatchUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketingCampaignBatch delete
+   */
+  export type MarketingCampaignBatchDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+    /**
+     * Filter which MarketingCampaignBatch to delete.
+     */
+    where: MarketingCampaignBatchWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignBatch deleteMany
+   */
+  export type MarketingCampaignBatchDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaignBatches to delete
+     */
+    where?: MarketingCampaignBatchWhereInput
+    /**
+     * Limit how many MarketingCampaignBatches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaignBatch without action
+   */
+  export type MarketingCampaignBatchDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignBatch
+     */
+    select?: MarketingCampaignBatchSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignBatch
+     */
+    omit?: MarketingCampaignBatchOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignBatchInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketingCampaignRecipient
+   */
+
+  export type AggregateMarketingCampaignRecipient = {
+    _count: MarketingCampaignRecipientCountAggregateOutputType | null
+    _avg: MarketingCampaignRecipientAvgAggregateOutputType | null
+    _sum: MarketingCampaignRecipientSumAggregateOutputType | null
+    _min: MarketingCampaignRecipientMinAggregateOutputType | null
+    _max: MarketingCampaignRecipientMaxAggregateOutputType | null
+  }
+
+  export type MarketingCampaignRecipientAvgAggregateOutputType = {
+    batchIndex: number | null
+  }
+
+  export type MarketingCampaignRecipientSumAggregateOutputType = {
+    batchIndex: number | null
+  }
+
+  export type MarketingCampaignRecipientMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    campaignId: string | null
+    businessId: string | null
+    customerId: string | null
+    email: string | null
+    batchIndex: number | null
+    status: string | null
+    resendId: string | null
+    error: string | null
+    sentAt: Date | null
+    deliveredAt: Date | null
+    bouncedAt: Date | null
+    complainedAt: Date | null
+    unsubscribedAt: Date | null
+  }
+
+  export type MarketingCampaignRecipientMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    campaignId: string | null
+    businessId: string | null
+    customerId: string | null
+    email: string | null
+    batchIndex: number | null
+    status: string | null
+    resendId: string | null
+    error: string | null
+    sentAt: Date | null
+    deliveredAt: Date | null
+    bouncedAt: Date | null
+    complainedAt: Date | null
+    unsubscribedAt: Date | null
+  }
+
+  export type MarketingCampaignRecipientCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    campaignId: number
+    businessId: number
+    customerId: number
+    email: number
+    batchIndex: number
+    status: number
+    resendId: number
+    error: number
+    sentAt: number
+    deliveredAt: number
+    bouncedAt: number
+    complainedAt: number
+    unsubscribedAt: number
+    _all: number
+  }
+
+
+  export type MarketingCampaignRecipientAvgAggregateInputType = {
+    batchIndex?: true
+  }
+
+  export type MarketingCampaignRecipientSumAggregateInputType = {
+    batchIndex?: true
+  }
+
+  export type MarketingCampaignRecipientMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    customerId?: true
+    email?: true
+    batchIndex?: true
+    status?: true
+    resendId?: true
+    error?: true
+    sentAt?: true
+    deliveredAt?: true
+    bouncedAt?: true
+    complainedAt?: true
+    unsubscribedAt?: true
+  }
+
+  export type MarketingCampaignRecipientMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    customerId?: true
+    email?: true
+    batchIndex?: true
+    status?: true
+    resendId?: true
+    error?: true
+    sentAt?: true
+    deliveredAt?: true
+    bouncedAt?: true
+    complainedAt?: true
+    unsubscribedAt?: true
+  }
+
+  export type MarketingCampaignRecipientCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    campaignId?: true
+    businessId?: true
+    customerId?: true
+    email?: true
+    batchIndex?: true
+    status?: true
+    resendId?: true
+    error?: true
+    sentAt?: true
+    deliveredAt?: true
+    bouncedAt?: true
+    complainedAt?: true
+    unsubscribedAt?: true
+    _all?: true
+  }
+
+  export type MarketingCampaignRecipientAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaignRecipient to aggregate.
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignRecipients to fetch.
+     */
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketingCampaignRecipients
+    **/
+    _count?: true | MarketingCampaignRecipientCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MarketingCampaignRecipientAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MarketingCampaignRecipientSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketingCampaignRecipientMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketingCampaignRecipientMaxAggregateInputType
+  }
+
+  export type GetMarketingCampaignRecipientAggregateType<T extends MarketingCampaignRecipientAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketingCampaignRecipient]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketingCampaignRecipient[P]>
+      : GetScalarType<T[P], AggregateMarketingCampaignRecipient[P]>
+  }
+
+
+
+
+  export type MarketingCampaignRecipientGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingCampaignRecipientWhereInput
+    orderBy?: MarketingCampaignRecipientOrderByWithAggregationInput | MarketingCampaignRecipientOrderByWithAggregationInput[]
+    by: MarketingCampaignRecipientScalarFieldEnum[] | MarketingCampaignRecipientScalarFieldEnum
+    having?: MarketingCampaignRecipientScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketingCampaignRecipientCountAggregateInputType | true
+    _avg?: MarketingCampaignRecipientAvgAggregateInputType
+    _sum?: MarketingCampaignRecipientSumAggregateInputType
+    _min?: MarketingCampaignRecipientMinAggregateInputType
+    _max?: MarketingCampaignRecipientMaxAggregateInputType
+  }
+
+  export type MarketingCampaignRecipientGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    campaignId: string
+    businessId: string
+    customerId: string | null
+    email: string
+    batchIndex: number
+    status: string
+    resendId: string | null
+    error: string | null
+    sentAt: Date | null
+    deliveredAt: Date | null
+    bouncedAt: Date | null
+    complainedAt: Date | null
+    unsubscribedAt: Date | null
+    _count: MarketingCampaignRecipientCountAggregateOutputType | null
+    _avg: MarketingCampaignRecipientAvgAggregateOutputType | null
+    _sum: MarketingCampaignRecipientSumAggregateOutputType | null
+    _min: MarketingCampaignRecipientMinAggregateOutputType | null
+    _max: MarketingCampaignRecipientMaxAggregateOutputType | null
+  }
+
+  type GetMarketingCampaignRecipientGroupByPayload<T extends MarketingCampaignRecipientGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketingCampaignRecipientGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketingCampaignRecipientGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketingCampaignRecipientGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketingCampaignRecipientGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketingCampaignRecipientSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    email?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    resendId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    deliveredAt?: boolean
+    bouncedAt?: boolean
+    complainedAt?: boolean
+    unsubscribedAt?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignRecipient"]>
+
+  export type MarketingCampaignRecipientSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    email?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    resendId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    deliveredAt?: boolean
+    bouncedAt?: boolean
+    complainedAt?: boolean
+    unsubscribedAt?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignRecipient"]>
+
+  export type MarketingCampaignRecipientSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    email?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    resendId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    deliveredAt?: boolean
+    bouncedAt?: boolean
+    complainedAt?: boolean
+    unsubscribedAt?: boolean
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingCampaignRecipient"]>
+
+  export type MarketingCampaignRecipientSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    campaignId?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    email?: boolean
+    batchIndex?: boolean
+    status?: boolean
+    resendId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    deliveredAt?: boolean
+    bouncedAt?: boolean
+    complainedAt?: boolean
+    unsubscribedAt?: boolean
+  }
+
+  export type MarketingCampaignRecipientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "campaignId" | "businessId" | "customerId" | "email" | "batchIndex" | "status" | "resendId" | "error" | "sentAt" | "deliveredAt" | "bouncedAt" | "complainedAt" | "unsubscribedAt", ExtArgs["result"]["marketingCampaignRecipient"]>
+  export type MarketingCampaignRecipientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }
+  export type MarketingCampaignRecipientIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }
+  export type MarketingCampaignRecipientIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | MarketingCampaignDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingCampaignRecipient$customerArgs<ExtArgs>
+  }
+
+  export type $MarketingCampaignRecipientPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketingCampaignRecipient"
+    objects: {
+      campaign: Prisma.$MarketingCampaignPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      campaignId: string
+      businessId: string
+      customerId: string | null
+      email: string
+      batchIndex: number
+      status: string
+      resendId: string | null
+      error: string | null
+      sentAt: Date | null
+      deliveredAt: Date | null
+      bouncedAt: Date | null
+      complainedAt: Date | null
+      unsubscribedAt: Date | null
+    }, ExtArgs["result"]["marketingCampaignRecipient"]>
+    composites: {}
+  }
+
+  type MarketingCampaignRecipientGetPayload<S extends boolean | null | undefined | MarketingCampaignRecipientDefaultArgs> = $Result.GetResult<Prisma.$MarketingCampaignRecipientPayload, S>
+
+  type MarketingCampaignRecipientCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketingCampaignRecipientFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketingCampaignRecipientCountAggregateInputType | true
+    }
+
+  export interface MarketingCampaignRecipientDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketingCampaignRecipient'], meta: { name: 'MarketingCampaignRecipient' } }
+    /**
+     * Find zero or one MarketingCampaignRecipient that matches the filter.
+     * @param {MarketingCampaignRecipientFindUniqueArgs} args - Arguments to find a MarketingCampaignRecipient
+     * @example
+     * // Get one MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketingCampaignRecipientFindUniqueArgs>(args: SelectSubset<T, MarketingCampaignRecipientFindUniqueArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketingCampaignRecipient that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketingCampaignRecipientFindUniqueOrThrowArgs} args - Arguments to find a MarketingCampaignRecipient
+     * @example
+     * // Get one MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketingCampaignRecipientFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketingCampaignRecipientFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaignRecipient that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientFindFirstArgs} args - Arguments to find a MarketingCampaignRecipient
+     * @example
+     * // Get one MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketingCampaignRecipientFindFirstArgs>(args?: SelectSubset<T, MarketingCampaignRecipientFindFirstArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingCampaignRecipient that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientFindFirstOrThrowArgs} args - Arguments to find a MarketingCampaignRecipient
+     * @example
+     * // Get one MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketingCampaignRecipientFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketingCampaignRecipientFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketingCampaignRecipients that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketingCampaignRecipients
+     * const marketingCampaignRecipients = await prisma.marketingCampaignRecipient.findMany()
+     * 
+     * // Get first 10 MarketingCampaignRecipients
+     * const marketingCampaignRecipients = await prisma.marketingCampaignRecipient.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketingCampaignRecipientWithIdOnly = await prisma.marketingCampaignRecipient.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketingCampaignRecipientFindManyArgs>(args?: SelectSubset<T, MarketingCampaignRecipientFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketingCampaignRecipient.
+     * @param {MarketingCampaignRecipientCreateArgs} args - Arguments to create a MarketingCampaignRecipient.
+     * @example
+     * // Create one MarketingCampaignRecipient
+     * const MarketingCampaignRecipient = await prisma.marketingCampaignRecipient.create({
+     *   data: {
+     *     // ... data to create a MarketingCampaignRecipient
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketingCampaignRecipientCreateArgs>(args: SelectSubset<T, MarketingCampaignRecipientCreateArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketingCampaignRecipients.
+     * @param {MarketingCampaignRecipientCreateManyArgs} args - Arguments to create many MarketingCampaignRecipients.
+     * @example
+     * // Create many MarketingCampaignRecipients
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketingCampaignRecipientCreateManyArgs>(args?: SelectSubset<T, MarketingCampaignRecipientCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketingCampaignRecipients and returns the data saved in the database.
+     * @param {MarketingCampaignRecipientCreateManyAndReturnArgs} args - Arguments to create many MarketingCampaignRecipients.
+     * @example
+     * // Create many MarketingCampaignRecipients
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketingCampaignRecipients and only return the `id`
+     * const marketingCampaignRecipientWithIdOnly = await prisma.marketingCampaignRecipient.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketingCampaignRecipientCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketingCampaignRecipientCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketingCampaignRecipient.
+     * @param {MarketingCampaignRecipientDeleteArgs} args - Arguments to delete one MarketingCampaignRecipient.
+     * @example
+     * // Delete one MarketingCampaignRecipient
+     * const MarketingCampaignRecipient = await prisma.marketingCampaignRecipient.delete({
+     *   where: {
+     *     // ... filter to delete one MarketingCampaignRecipient
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketingCampaignRecipientDeleteArgs>(args: SelectSubset<T, MarketingCampaignRecipientDeleteArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketingCampaignRecipient.
+     * @param {MarketingCampaignRecipientUpdateArgs} args - Arguments to update one MarketingCampaignRecipient.
+     * @example
+     * // Update one MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketingCampaignRecipientUpdateArgs>(args: SelectSubset<T, MarketingCampaignRecipientUpdateArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketingCampaignRecipients.
+     * @param {MarketingCampaignRecipientDeleteManyArgs} args - Arguments to filter MarketingCampaignRecipients to delete.
+     * @example
+     * // Delete a few MarketingCampaignRecipients
+     * const { count } = await prisma.marketingCampaignRecipient.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketingCampaignRecipientDeleteManyArgs>(args?: SelectSubset<T, MarketingCampaignRecipientDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaignRecipients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketingCampaignRecipients
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketingCampaignRecipientUpdateManyArgs>(args: SelectSubset<T, MarketingCampaignRecipientUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingCampaignRecipients and returns the data updated in the database.
+     * @param {MarketingCampaignRecipientUpdateManyAndReturnArgs} args - Arguments to update many MarketingCampaignRecipients.
+     * @example
+     * // Update many MarketingCampaignRecipients
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketingCampaignRecipients and only return the `id`
+     * const marketingCampaignRecipientWithIdOnly = await prisma.marketingCampaignRecipient.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketingCampaignRecipientUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketingCampaignRecipientUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketingCampaignRecipient.
+     * @param {MarketingCampaignRecipientUpsertArgs} args - Arguments to update or create a MarketingCampaignRecipient.
+     * @example
+     * // Update or create a MarketingCampaignRecipient
+     * const marketingCampaignRecipient = await prisma.marketingCampaignRecipient.upsert({
+     *   create: {
+     *     // ... data to create a MarketingCampaignRecipient
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketingCampaignRecipient we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketingCampaignRecipientUpsertArgs>(args: SelectSubset<T, MarketingCampaignRecipientUpsertArgs<ExtArgs>>): Prisma__MarketingCampaignRecipientClient<$Result.GetResult<Prisma.$MarketingCampaignRecipientPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketingCampaignRecipients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientCountArgs} args - Arguments to filter MarketingCampaignRecipients to count.
+     * @example
+     * // Count the number of MarketingCampaignRecipients
+     * const count = await prisma.marketingCampaignRecipient.count({
+     *   where: {
+     *     // ... the filter for the MarketingCampaignRecipients we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketingCampaignRecipientCountArgs>(
+      args?: Subset<T, MarketingCampaignRecipientCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketingCampaignRecipientCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketingCampaignRecipient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketingCampaignRecipientAggregateArgs>(args: Subset<T, MarketingCampaignRecipientAggregateArgs>): Prisma.PrismaPromise<GetMarketingCampaignRecipientAggregateType<T>>
+
+    /**
+     * Group by MarketingCampaignRecipient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingCampaignRecipientGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketingCampaignRecipientGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketingCampaignRecipientGroupByArgs['orderBy'] }
+        : { orderBy?: MarketingCampaignRecipientGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketingCampaignRecipientGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketingCampaignRecipientGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketingCampaignRecipient model
+   */
+  readonly fields: MarketingCampaignRecipientFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketingCampaignRecipient.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketingCampaignRecipientClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    campaign<T extends MarketingCampaignDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaignDefaultArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends MarketingCampaignRecipient$customerArgs<ExtArgs> = {}>(args?: Subset<T, MarketingCampaignRecipient$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketingCampaignRecipient model
+   */
+  interface MarketingCampaignRecipientFieldRefs {
+    readonly id: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly createdAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly updatedAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly campaignId: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly businessId: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly customerId: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly email: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly batchIndex: FieldRef<"MarketingCampaignRecipient", 'Int'>
+    readonly status: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly resendId: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly error: FieldRef<"MarketingCampaignRecipient", 'String'>
+    readonly sentAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly deliveredAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly bouncedAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly complainedAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+    readonly unsubscribedAt: FieldRef<"MarketingCampaignRecipient", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketingCampaignRecipient findUnique
+   */
+  export type MarketingCampaignRecipientFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignRecipient to fetch.
+     */
+    where: MarketingCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignRecipient findUniqueOrThrow
+   */
+  export type MarketingCampaignRecipientFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignRecipient to fetch.
+     */
+    where: MarketingCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignRecipient findFirst
+   */
+  export type MarketingCampaignRecipientFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignRecipient to fetch.
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignRecipients to fetch.
+     */
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaignRecipients.
+     */
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaignRecipients.
+     */
+    distinct?: MarketingCampaignRecipientScalarFieldEnum | MarketingCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignRecipient findFirstOrThrow
+   */
+  export type MarketingCampaignRecipientFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignRecipient to fetch.
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignRecipients to fetch.
+     */
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingCampaignRecipients.
+     */
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingCampaignRecipients.
+     */
+    distinct?: MarketingCampaignRecipientScalarFieldEnum | MarketingCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignRecipient findMany
+   */
+  export type MarketingCampaignRecipientFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingCampaignRecipients to fetch.
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingCampaignRecipients to fetch.
+     */
+    orderBy?: MarketingCampaignRecipientOrderByWithRelationInput | MarketingCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketingCampaignRecipients.
+     */
+    cursor?: MarketingCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingCampaignRecipients.
+     */
+    skip?: number
+    distinct?: MarketingCampaignRecipientScalarFieldEnum | MarketingCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingCampaignRecipient create
+   */
+  export type MarketingCampaignRecipientCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketingCampaignRecipient.
+     */
+    data: XOR<MarketingCampaignRecipientCreateInput, MarketingCampaignRecipientUncheckedCreateInput>
+  }
+
+  /**
+   * MarketingCampaignRecipient createMany
+   */
+  export type MarketingCampaignRecipientCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketingCampaignRecipients.
+     */
+    data: MarketingCampaignRecipientCreateManyInput | MarketingCampaignRecipientCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketingCampaignRecipient createManyAndReturn
+   */
+  export type MarketingCampaignRecipientCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketingCampaignRecipients.
+     */
+    data: MarketingCampaignRecipientCreateManyInput | MarketingCampaignRecipientCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaignRecipient update
+   */
+  export type MarketingCampaignRecipientUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketingCampaignRecipient.
+     */
+    data: XOR<MarketingCampaignRecipientUpdateInput, MarketingCampaignRecipientUncheckedUpdateInput>
+    /**
+     * Choose, which MarketingCampaignRecipient to update.
+     */
+    where: MarketingCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignRecipient updateMany
+   */
+  export type MarketingCampaignRecipientUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketingCampaignRecipients.
+     */
+    data: XOR<MarketingCampaignRecipientUpdateManyMutationInput, MarketingCampaignRecipientUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaignRecipients to update
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * Limit how many MarketingCampaignRecipients to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaignRecipient updateManyAndReturn
+   */
+  export type MarketingCampaignRecipientUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketingCampaignRecipients.
+     */
+    data: XOR<MarketingCampaignRecipientUpdateManyMutationInput, MarketingCampaignRecipientUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingCampaignRecipients to update
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * Limit how many MarketingCampaignRecipients to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingCampaignRecipient upsert
+   */
+  export type MarketingCampaignRecipientUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketingCampaignRecipient to update in case it exists.
+     */
+    where: MarketingCampaignRecipientWhereUniqueInput
+    /**
+     * In case the MarketingCampaignRecipient found by the `where` argument doesn't exist, create a new MarketingCampaignRecipient with this data.
+     */
+    create: XOR<MarketingCampaignRecipientCreateInput, MarketingCampaignRecipientUncheckedCreateInput>
+    /**
+     * In case the MarketingCampaignRecipient was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketingCampaignRecipientUpdateInput, MarketingCampaignRecipientUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketingCampaignRecipient delete
+   */
+  export type MarketingCampaignRecipientDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter which MarketingCampaignRecipient to delete.
+     */
+    where: MarketingCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * MarketingCampaignRecipient deleteMany
+   */
+  export type MarketingCampaignRecipientDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingCampaignRecipients to delete
+     */
+    where?: MarketingCampaignRecipientWhereInput
+    /**
+     * Limit how many MarketingCampaignRecipients to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingCampaignRecipient.customer
+   */
+  export type MarketingCampaignRecipient$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+  /**
+   * MarketingCampaignRecipient without action
+   */
+  export type MarketingCampaignRecipientDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaignRecipient
+     */
+    select?: MarketingCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaignRecipient
+     */
+    omit?: MarketingCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignRecipientInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketingConsentEvent
+   */
+
+  export type AggregateMarketingConsentEvent = {
+    _count: MarketingConsentEventCountAggregateOutputType | null
+    _min: MarketingConsentEventMinAggregateOutputType | null
+    _max: MarketingConsentEventMaxAggregateOutputType | null
+  }
+
+  export type MarketingConsentEventMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    type: string | null
+    source: string | null
+    ip: string | null
+    userAgent: string | null
+    wording: string | null
+    campaignId: string | null
+  }
+
+  export type MarketingConsentEventMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    type: string | null
+    source: string | null
+    ip: string | null
+    userAgent: string | null
+    wording: string | null
+    campaignId: string | null
+  }
+
+  export type MarketingConsentEventCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    businessId: number
+    customerId: number
+    type: number
+    source: number
+    ip: number
+    userAgent: number
+    wording: number
+    campaignId: number
+    _all: number
+  }
+
+
+  export type MarketingConsentEventMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    source?: true
+    ip?: true
+    userAgent?: true
+    wording?: true
+    campaignId?: true
+  }
+
+  export type MarketingConsentEventMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    source?: true
+    ip?: true
+    userAgent?: true
+    wording?: true
+    campaignId?: true
+  }
+
+  export type MarketingConsentEventCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    customerId?: true
+    type?: true
+    source?: true
+    ip?: true
+    userAgent?: true
+    wording?: true
+    campaignId?: true
+    _all?: true
+  }
+
+  export type MarketingConsentEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingConsentEvent to aggregate.
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingConsentEvents to fetch.
+     */
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketingConsentEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingConsentEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingConsentEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketingConsentEvents
+    **/
+    _count?: true | MarketingConsentEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketingConsentEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketingConsentEventMaxAggregateInputType
+  }
+
+  export type GetMarketingConsentEventAggregateType<T extends MarketingConsentEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketingConsentEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketingConsentEvent[P]>
+      : GetScalarType<T[P], AggregateMarketingConsentEvent[P]>
+  }
+
+
+
+
+  export type MarketingConsentEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingConsentEventWhereInput
+    orderBy?: MarketingConsentEventOrderByWithAggregationInput | MarketingConsentEventOrderByWithAggregationInput[]
+    by: MarketingConsentEventScalarFieldEnum[] | MarketingConsentEventScalarFieldEnum
+    having?: MarketingConsentEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketingConsentEventCountAggregateInputType | true
+    _min?: MarketingConsentEventMinAggregateInputType
+    _max?: MarketingConsentEventMaxAggregateInputType
+  }
+
+  export type MarketingConsentEventGroupByOutputType = {
+    id: string
+    createdAt: Date
+    businessId: string
+    customerId: string | null
+    type: string
+    source: string
+    ip: string | null
+    userAgent: string | null
+    wording: string | null
+    campaignId: string | null
+    _count: MarketingConsentEventCountAggregateOutputType | null
+    _min: MarketingConsentEventMinAggregateOutputType | null
+    _max: MarketingConsentEventMaxAggregateOutputType | null
+  }
+
+  type GetMarketingConsentEventGroupByPayload<T extends MarketingConsentEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketingConsentEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketingConsentEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketingConsentEventGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketingConsentEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketingConsentEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    source?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    wording?: boolean
+    campaignId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingConsentEvent"]>
+
+  export type MarketingConsentEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    source?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    wording?: boolean
+    campaignId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingConsentEvent"]>
+
+  export type MarketingConsentEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    source?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    wording?: boolean
+    campaignId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingConsentEvent"]>
+
+  export type MarketingConsentEventSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    type?: boolean
+    source?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    wording?: boolean
+    campaignId?: boolean
+  }
+
+  export type MarketingConsentEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "businessId" | "customerId" | "type" | "source" | "ip" | "userAgent" | "wording" | "campaignId", ExtArgs["result"]["marketingConsentEvent"]>
+  export type MarketingConsentEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }
+  export type MarketingConsentEventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }
+  export type MarketingConsentEventIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | MarketingConsentEvent$customerArgs<ExtArgs>
+    campaign?: boolean | MarketingConsentEvent$campaignArgs<ExtArgs>
+  }
+
+  export type $MarketingConsentEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketingConsentEvent"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+      campaign: Prisma.$MarketingCampaignPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      businessId: string
+      customerId: string | null
+      type: string
+      source: string
+      /**
+       * @encrypted
+       */
+      ip: string | null
+      /**
+       * @encrypted
+       */
+      userAgent: string | null
+      wording: string | null
+      campaignId: string | null
+    }, ExtArgs["result"]["marketingConsentEvent"]>
+    composites: {}
+  }
+
+  type MarketingConsentEventGetPayload<S extends boolean | null | undefined | MarketingConsentEventDefaultArgs> = $Result.GetResult<Prisma.$MarketingConsentEventPayload, S>
+
+  type MarketingConsentEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketingConsentEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketingConsentEventCountAggregateInputType | true
+    }
+
+  export interface MarketingConsentEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketingConsentEvent'], meta: { name: 'MarketingConsentEvent' } }
+    /**
+     * Find zero or one MarketingConsentEvent that matches the filter.
+     * @param {MarketingConsentEventFindUniqueArgs} args - Arguments to find a MarketingConsentEvent
+     * @example
+     * // Get one MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketingConsentEventFindUniqueArgs>(args: SelectSubset<T, MarketingConsentEventFindUniqueArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketingConsentEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketingConsentEventFindUniqueOrThrowArgs} args - Arguments to find a MarketingConsentEvent
+     * @example
+     * // Get one MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketingConsentEventFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketingConsentEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingConsentEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventFindFirstArgs} args - Arguments to find a MarketingConsentEvent
+     * @example
+     * // Get one MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketingConsentEventFindFirstArgs>(args?: SelectSubset<T, MarketingConsentEventFindFirstArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingConsentEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventFindFirstOrThrowArgs} args - Arguments to find a MarketingConsentEvent
+     * @example
+     * // Get one MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketingConsentEventFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketingConsentEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketingConsentEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketingConsentEvents
+     * const marketingConsentEvents = await prisma.marketingConsentEvent.findMany()
+     * 
+     * // Get first 10 MarketingConsentEvents
+     * const marketingConsentEvents = await prisma.marketingConsentEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketingConsentEventWithIdOnly = await prisma.marketingConsentEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketingConsentEventFindManyArgs>(args?: SelectSubset<T, MarketingConsentEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketingConsentEvent.
+     * @param {MarketingConsentEventCreateArgs} args - Arguments to create a MarketingConsentEvent.
+     * @example
+     * // Create one MarketingConsentEvent
+     * const MarketingConsentEvent = await prisma.marketingConsentEvent.create({
+     *   data: {
+     *     // ... data to create a MarketingConsentEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketingConsentEventCreateArgs>(args: SelectSubset<T, MarketingConsentEventCreateArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketingConsentEvents.
+     * @param {MarketingConsentEventCreateManyArgs} args - Arguments to create many MarketingConsentEvents.
+     * @example
+     * // Create many MarketingConsentEvents
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketingConsentEventCreateManyArgs>(args?: SelectSubset<T, MarketingConsentEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketingConsentEvents and returns the data saved in the database.
+     * @param {MarketingConsentEventCreateManyAndReturnArgs} args - Arguments to create many MarketingConsentEvents.
+     * @example
+     * // Create many MarketingConsentEvents
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketingConsentEvents and only return the `id`
+     * const marketingConsentEventWithIdOnly = await prisma.marketingConsentEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketingConsentEventCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketingConsentEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketingConsentEvent.
+     * @param {MarketingConsentEventDeleteArgs} args - Arguments to delete one MarketingConsentEvent.
+     * @example
+     * // Delete one MarketingConsentEvent
+     * const MarketingConsentEvent = await prisma.marketingConsentEvent.delete({
+     *   where: {
+     *     // ... filter to delete one MarketingConsentEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketingConsentEventDeleteArgs>(args: SelectSubset<T, MarketingConsentEventDeleteArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketingConsentEvent.
+     * @param {MarketingConsentEventUpdateArgs} args - Arguments to update one MarketingConsentEvent.
+     * @example
+     * // Update one MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketingConsentEventUpdateArgs>(args: SelectSubset<T, MarketingConsentEventUpdateArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketingConsentEvents.
+     * @param {MarketingConsentEventDeleteManyArgs} args - Arguments to filter MarketingConsentEvents to delete.
+     * @example
+     * // Delete a few MarketingConsentEvents
+     * const { count } = await prisma.marketingConsentEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketingConsentEventDeleteManyArgs>(args?: SelectSubset<T, MarketingConsentEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingConsentEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketingConsentEvents
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketingConsentEventUpdateManyArgs>(args: SelectSubset<T, MarketingConsentEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingConsentEvents and returns the data updated in the database.
+     * @param {MarketingConsentEventUpdateManyAndReturnArgs} args - Arguments to update many MarketingConsentEvents.
+     * @example
+     * // Update many MarketingConsentEvents
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketingConsentEvents and only return the `id`
+     * const marketingConsentEventWithIdOnly = await prisma.marketingConsentEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketingConsentEventUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketingConsentEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketingConsentEvent.
+     * @param {MarketingConsentEventUpsertArgs} args - Arguments to update or create a MarketingConsentEvent.
+     * @example
+     * // Update or create a MarketingConsentEvent
+     * const marketingConsentEvent = await prisma.marketingConsentEvent.upsert({
+     *   create: {
+     *     // ... data to create a MarketingConsentEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketingConsentEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketingConsentEventUpsertArgs>(args: SelectSubset<T, MarketingConsentEventUpsertArgs<ExtArgs>>): Prisma__MarketingConsentEventClient<$Result.GetResult<Prisma.$MarketingConsentEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketingConsentEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventCountArgs} args - Arguments to filter MarketingConsentEvents to count.
+     * @example
+     * // Count the number of MarketingConsentEvents
+     * const count = await prisma.marketingConsentEvent.count({
+     *   where: {
+     *     // ... the filter for the MarketingConsentEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketingConsentEventCountArgs>(
+      args?: Subset<T, MarketingConsentEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketingConsentEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketingConsentEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketingConsentEventAggregateArgs>(args: Subset<T, MarketingConsentEventAggregateArgs>): Prisma.PrismaPromise<GetMarketingConsentEventAggregateType<T>>
+
+    /**
+     * Group by MarketingConsentEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingConsentEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketingConsentEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketingConsentEventGroupByArgs['orderBy'] }
+        : { orderBy?: MarketingConsentEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketingConsentEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketingConsentEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketingConsentEvent model
+   */
+  readonly fields: MarketingConsentEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketingConsentEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketingConsentEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends MarketingConsentEvent$customerArgs<ExtArgs> = {}>(args?: Subset<T, MarketingConsentEvent$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    campaign<T extends MarketingConsentEvent$campaignArgs<ExtArgs> = {}>(args?: Subset<T, MarketingConsentEvent$campaignArgs<ExtArgs>>): Prisma__MarketingCampaignClient<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketingConsentEvent model
+   */
+  interface MarketingConsentEventFieldRefs {
+    readonly id: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly createdAt: FieldRef<"MarketingConsentEvent", 'DateTime'>
+    readonly businessId: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly customerId: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly type: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly source: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly ip: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly userAgent: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly wording: FieldRef<"MarketingConsentEvent", 'String'>
+    readonly campaignId: FieldRef<"MarketingConsentEvent", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketingConsentEvent findUnique
+   */
+  export type MarketingConsentEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingConsentEvent to fetch.
+     */
+    where: MarketingConsentEventWhereUniqueInput
+  }
+
+  /**
+   * MarketingConsentEvent findUniqueOrThrow
+   */
+  export type MarketingConsentEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingConsentEvent to fetch.
+     */
+    where: MarketingConsentEventWhereUniqueInput
+  }
+
+  /**
+   * MarketingConsentEvent findFirst
+   */
+  export type MarketingConsentEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingConsentEvent to fetch.
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingConsentEvents to fetch.
+     */
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingConsentEvents.
+     */
+    cursor?: MarketingConsentEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingConsentEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingConsentEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingConsentEvents.
+     */
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingConsentEvent findFirstOrThrow
+   */
+  export type MarketingConsentEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingConsentEvent to fetch.
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingConsentEvents to fetch.
+     */
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingConsentEvents.
+     */
+    cursor?: MarketingConsentEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingConsentEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingConsentEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingConsentEvents.
+     */
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingConsentEvent findMany
+   */
+  export type MarketingConsentEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingConsentEvents to fetch.
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingConsentEvents to fetch.
+     */
+    orderBy?: MarketingConsentEventOrderByWithRelationInput | MarketingConsentEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketingConsentEvents.
+     */
+    cursor?: MarketingConsentEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingConsentEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingConsentEvents.
+     */
+    skip?: number
+    distinct?: MarketingConsentEventScalarFieldEnum | MarketingConsentEventScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingConsentEvent create
+   */
+  export type MarketingConsentEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketingConsentEvent.
+     */
+    data: XOR<MarketingConsentEventCreateInput, MarketingConsentEventUncheckedCreateInput>
+  }
+
+  /**
+   * MarketingConsentEvent createMany
+   */
+  export type MarketingConsentEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketingConsentEvents.
+     */
+    data: MarketingConsentEventCreateManyInput | MarketingConsentEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketingConsentEvent createManyAndReturn
+   */
+  export type MarketingConsentEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketingConsentEvents.
+     */
+    data: MarketingConsentEventCreateManyInput | MarketingConsentEventCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingConsentEvent update
+   */
+  export type MarketingConsentEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketingConsentEvent.
+     */
+    data: XOR<MarketingConsentEventUpdateInput, MarketingConsentEventUncheckedUpdateInput>
+    /**
+     * Choose, which MarketingConsentEvent to update.
+     */
+    where: MarketingConsentEventWhereUniqueInput
+  }
+
+  /**
+   * MarketingConsentEvent updateMany
+   */
+  export type MarketingConsentEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketingConsentEvents.
+     */
+    data: XOR<MarketingConsentEventUpdateManyMutationInput, MarketingConsentEventUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingConsentEvents to update
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * Limit how many MarketingConsentEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingConsentEvent updateManyAndReturn
+   */
+  export type MarketingConsentEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketingConsentEvents.
+     */
+    data: XOR<MarketingConsentEventUpdateManyMutationInput, MarketingConsentEventUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingConsentEvents to update
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * Limit how many MarketingConsentEvents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingConsentEvent upsert
+   */
+  export type MarketingConsentEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketingConsentEvent to update in case it exists.
+     */
+    where: MarketingConsentEventWhereUniqueInput
+    /**
+     * In case the MarketingConsentEvent found by the `where` argument doesn't exist, create a new MarketingConsentEvent with this data.
+     */
+    create: XOR<MarketingConsentEventCreateInput, MarketingConsentEventUncheckedCreateInput>
+    /**
+     * In case the MarketingConsentEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketingConsentEventUpdateInput, MarketingConsentEventUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketingConsentEvent delete
+   */
+  export type MarketingConsentEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+    /**
+     * Filter which MarketingConsentEvent to delete.
+     */
+    where: MarketingConsentEventWhereUniqueInput
+  }
+
+  /**
+   * MarketingConsentEvent deleteMany
+   */
+  export type MarketingConsentEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingConsentEvents to delete
+     */
+    where?: MarketingConsentEventWhereInput
+    /**
+     * Limit how many MarketingConsentEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingConsentEvent.customer
+   */
+  export type MarketingConsentEvent$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+  /**
+   * MarketingConsentEvent.campaign
+   */
+  export type MarketingConsentEvent$campaignArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingCampaign
+     */
+    select?: MarketingCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingCampaign
+     */
+    omit?: MarketingCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingCampaignInclude<ExtArgs> | null
+    where?: MarketingCampaignWhereInput
+  }
+
+  /**
+   * MarketingConsentEvent without action
+   */
+  export type MarketingConsentEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingConsentEvent
+     */
+    select?: MarketingConsentEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingConsentEvent
+     */
+    omit?: MarketingConsentEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingConsentEventInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketingDoNotEmail
+   */
+
+  export type AggregateMarketingDoNotEmail = {
+    _count: MarketingDoNotEmailCountAggregateOutputType | null
+    _min: MarketingDoNotEmailMinAggregateOutputType | null
+    _max: MarketingDoNotEmailMaxAggregateOutputType | null
+  }
+
+  export type MarketingDoNotEmailMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    emailHash: string | null
+    reason: string | null
+  }
+
+  export type MarketingDoNotEmailMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    emailHash: string | null
+    reason: string | null
+  }
+
+  export type MarketingDoNotEmailCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    businessId: number
+    emailHash: number
+    reason: number
+    _all: number
+  }
+
+
+  export type MarketingDoNotEmailMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    emailHash?: true
+    reason?: true
+  }
+
+  export type MarketingDoNotEmailMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    emailHash?: true
+    reason?: true
+  }
+
+  export type MarketingDoNotEmailCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    emailHash?: true
+    reason?: true
+    _all?: true
+  }
+
+  export type MarketingDoNotEmailAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingDoNotEmail to aggregate.
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingDoNotEmails to fetch.
+     */
+    orderBy?: MarketingDoNotEmailOrderByWithRelationInput | MarketingDoNotEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketingDoNotEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingDoNotEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingDoNotEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketingDoNotEmails
+    **/
+    _count?: true | MarketingDoNotEmailCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketingDoNotEmailMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketingDoNotEmailMaxAggregateInputType
+  }
+
+  export type GetMarketingDoNotEmailAggregateType<T extends MarketingDoNotEmailAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketingDoNotEmail]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketingDoNotEmail[P]>
+      : GetScalarType<T[P], AggregateMarketingDoNotEmail[P]>
+  }
+
+
+
+
+  export type MarketingDoNotEmailGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketingDoNotEmailWhereInput
+    orderBy?: MarketingDoNotEmailOrderByWithAggregationInput | MarketingDoNotEmailOrderByWithAggregationInput[]
+    by: MarketingDoNotEmailScalarFieldEnum[] | MarketingDoNotEmailScalarFieldEnum
+    having?: MarketingDoNotEmailScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketingDoNotEmailCountAggregateInputType | true
+    _min?: MarketingDoNotEmailMinAggregateInputType
+    _max?: MarketingDoNotEmailMaxAggregateInputType
+  }
+
+  export type MarketingDoNotEmailGroupByOutputType = {
+    id: string
+    createdAt: Date
+    businessId: string
+    emailHash: string
+    reason: string
+    _count: MarketingDoNotEmailCountAggregateOutputType | null
+    _min: MarketingDoNotEmailMinAggregateOutputType | null
+    _max: MarketingDoNotEmailMaxAggregateOutputType | null
+  }
+
+  type GetMarketingDoNotEmailGroupByPayload<T extends MarketingDoNotEmailGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketingDoNotEmailGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketingDoNotEmailGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketingDoNotEmailGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketingDoNotEmailGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketingDoNotEmailSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    emailHash?: boolean
+    reason?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingDoNotEmail"]>
+
+  export type MarketingDoNotEmailSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    emailHash?: boolean
+    reason?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingDoNotEmail"]>
+
+  export type MarketingDoNotEmailSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    emailHash?: boolean
+    reason?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["marketingDoNotEmail"]>
+
+  export type MarketingDoNotEmailSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    emailHash?: boolean
+    reason?: boolean
+  }
+
+  export type MarketingDoNotEmailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "businessId" | "emailHash" | "reason", ExtArgs["result"]["marketingDoNotEmail"]>
+  export type MarketingDoNotEmailInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type MarketingDoNotEmailIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type MarketingDoNotEmailIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $MarketingDoNotEmailPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketingDoNotEmail"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      businessId: string
+      emailHash: string
+      reason: string
+    }, ExtArgs["result"]["marketingDoNotEmail"]>
+    composites: {}
+  }
+
+  type MarketingDoNotEmailGetPayload<S extends boolean | null | undefined | MarketingDoNotEmailDefaultArgs> = $Result.GetResult<Prisma.$MarketingDoNotEmailPayload, S>
+
+  type MarketingDoNotEmailCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketingDoNotEmailFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketingDoNotEmailCountAggregateInputType | true
+    }
+
+  export interface MarketingDoNotEmailDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketingDoNotEmail'], meta: { name: 'MarketingDoNotEmail' } }
+    /**
+     * Find zero or one MarketingDoNotEmail that matches the filter.
+     * @param {MarketingDoNotEmailFindUniqueArgs} args - Arguments to find a MarketingDoNotEmail
+     * @example
+     * // Get one MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketingDoNotEmailFindUniqueArgs>(args: SelectSubset<T, MarketingDoNotEmailFindUniqueArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketingDoNotEmail that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketingDoNotEmailFindUniqueOrThrowArgs} args - Arguments to find a MarketingDoNotEmail
+     * @example
+     * // Get one MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketingDoNotEmailFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketingDoNotEmailFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingDoNotEmail that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailFindFirstArgs} args - Arguments to find a MarketingDoNotEmail
+     * @example
+     * // Get one MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketingDoNotEmailFindFirstArgs>(args?: SelectSubset<T, MarketingDoNotEmailFindFirstArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketingDoNotEmail that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailFindFirstOrThrowArgs} args - Arguments to find a MarketingDoNotEmail
+     * @example
+     * // Get one MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketingDoNotEmailFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketingDoNotEmailFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketingDoNotEmails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketingDoNotEmails
+     * const marketingDoNotEmails = await prisma.marketingDoNotEmail.findMany()
+     * 
+     * // Get first 10 MarketingDoNotEmails
+     * const marketingDoNotEmails = await prisma.marketingDoNotEmail.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const marketingDoNotEmailWithIdOnly = await prisma.marketingDoNotEmail.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MarketingDoNotEmailFindManyArgs>(args?: SelectSubset<T, MarketingDoNotEmailFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketingDoNotEmail.
+     * @param {MarketingDoNotEmailCreateArgs} args - Arguments to create a MarketingDoNotEmail.
+     * @example
+     * // Create one MarketingDoNotEmail
+     * const MarketingDoNotEmail = await prisma.marketingDoNotEmail.create({
+     *   data: {
+     *     // ... data to create a MarketingDoNotEmail
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketingDoNotEmailCreateArgs>(args: SelectSubset<T, MarketingDoNotEmailCreateArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketingDoNotEmails.
+     * @param {MarketingDoNotEmailCreateManyArgs} args - Arguments to create many MarketingDoNotEmails.
+     * @example
+     * // Create many MarketingDoNotEmails
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketingDoNotEmailCreateManyArgs>(args?: SelectSubset<T, MarketingDoNotEmailCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketingDoNotEmails and returns the data saved in the database.
+     * @param {MarketingDoNotEmailCreateManyAndReturnArgs} args - Arguments to create many MarketingDoNotEmails.
+     * @example
+     * // Create many MarketingDoNotEmails
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketingDoNotEmails and only return the `id`
+     * const marketingDoNotEmailWithIdOnly = await prisma.marketingDoNotEmail.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketingDoNotEmailCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketingDoNotEmailCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketingDoNotEmail.
+     * @param {MarketingDoNotEmailDeleteArgs} args - Arguments to delete one MarketingDoNotEmail.
+     * @example
+     * // Delete one MarketingDoNotEmail
+     * const MarketingDoNotEmail = await prisma.marketingDoNotEmail.delete({
+     *   where: {
+     *     // ... filter to delete one MarketingDoNotEmail
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketingDoNotEmailDeleteArgs>(args: SelectSubset<T, MarketingDoNotEmailDeleteArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketingDoNotEmail.
+     * @param {MarketingDoNotEmailUpdateArgs} args - Arguments to update one MarketingDoNotEmail.
+     * @example
+     * // Update one MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketingDoNotEmailUpdateArgs>(args: SelectSubset<T, MarketingDoNotEmailUpdateArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketingDoNotEmails.
+     * @param {MarketingDoNotEmailDeleteManyArgs} args - Arguments to filter MarketingDoNotEmails to delete.
+     * @example
+     * // Delete a few MarketingDoNotEmails
+     * const { count } = await prisma.marketingDoNotEmail.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketingDoNotEmailDeleteManyArgs>(args?: SelectSubset<T, MarketingDoNotEmailDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingDoNotEmails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketingDoNotEmails
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketingDoNotEmailUpdateManyArgs>(args: SelectSubset<T, MarketingDoNotEmailUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketingDoNotEmails and returns the data updated in the database.
+     * @param {MarketingDoNotEmailUpdateManyAndReturnArgs} args - Arguments to update many MarketingDoNotEmails.
+     * @example
+     * // Update many MarketingDoNotEmails
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketingDoNotEmails and only return the `id`
+     * const marketingDoNotEmailWithIdOnly = await prisma.marketingDoNotEmail.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketingDoNotEmailUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketingDoNotEmailUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketingDoNotEmail.
+     * @param {MarketingDoNotEmailUpsertArgs} args - Arguments to update or create a MarketingDoNotEmail.
+     * @example
+     * // Update or create a MarketingDoNotEmail
+     * const marketingDoNotEmail = await prisma.marketingDoNotEmail.upsert({
+     *   create: {
+     *     // ... data to create a MarketingDoNotEmail
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketingDoNotEmail we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketingDoNotEmailUpsertArgs>(args: SelectSubset<T, MarketingDoNotEmailUpsertArgs<ExtArgs>>): Prisma__MarketingDoNotEmailClient<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketingDoNotEmails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailCountArgs} args - Arguments to filter MarketingDoNotEmails to count.
+     * @example
+     * // Count the number of MarketingDoNotEmails
+     * const count = await prisma.marketingDoNotEmail.count({
+     *   where: {
+     *     // ... the filter for the MarketingDoNotEmails we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketingDoNotEmailCountArgs>(
+      args?: Subset<T, MarketingDoNotEmailCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketingDoNotEmailCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketingDoNotEmail.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketingDoNotEmailAggregateArgs>(args: Subset<T, MarketingDoNotEmailAggregateArgs>): Prisma.PrismaPromise<GetMarketingDoNotEmailAggregateType<T>>
+
+    /**
+     * Group by MarketingDoNotEmail.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketingDoNotEmailGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketingDoNotEmailGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketingDoNotEmailGroupByArgs['orderBy'] }
+        : { orderBy?: MarketingDoNotEmailGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketingDoNotEmailGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketingDoNotEmailGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketingDoNotEmail model
+   */
+  readonly fields: MarketingDoNotEmailFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketingDoNotEmail.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketingDoNotEmailClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketingDoNotEmail model
+   */
+  interface MarketingDoNotEmailFieldRefs {
+    readonly id: FieldRef<"MarketingDoNotEmail", 'String'>
+    readonly createdAt: FieldRef<"MarketingDoNotEmail", 'DateTime'>
+    readonly businessId: FieldRef<"MarketingDoNotEmail", 'String'>
+    readonly emailHash: FieldRef<"MarketingDoNotEmail", 'String'>
+    readonly reason: FieldRef<"MarketingDoNotEmail", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketingDoNotEmail findUnique
+   */
+  export type MarketingDoNotEmailFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingDoNotEmail to fetch.
+     */
+    where: MarketingDoNotEmailWhereUniqueInput
+  }
+
+  /**
+   * MarketingDoNotEmail findUniqueOrThrow
+   */
+  export type MarketingDoNotEmailFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingDoNotEmail to fetch.
+     */
+    where: MarketingDoNotEmailWhereUniqueInput
+  }
+
+  /**
+   * MarketingDoNotEmail findFirst
+   */
+  export type MarketingDoNotEmailFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingDoNotEmail to fetch.
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingDoNotEmails to fetch.
+     */
+    orderBy?: MarketingDoNotEmailOrderByWithRelationInput | MarketingDoNotEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingDoNotEmails.
+     */
+    cursor?: MarketingDoNotEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingDoNotEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingDoNotEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingDoNotEmails.
+     */
+    distinct?: MarketingDoNotEmailScalarFieldEnum | MarketingDoNotEmailScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingDoNotEmail findFirstOrThrow
+   */
+  export type MarketingDoNotEmailFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingDoNotEmail to fetch.
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingDoNotEmails to fetch.
+     */
+    orderBy?: MarketingDoNotEmailOrderByWithRelationInput | MarketingDoNotEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketingDoNotEmails.
+     */
+    cursor?: MarketingDoNotEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingDoNotEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingDoNotEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketingDoNotEmails.
+     */
+    distinct?: MarketingDoNotEmailScalarFieldEnum | MarketingDoNotEmailScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingDoNotEmail findMany
+   */
+  export type MarketingDoNotEmailFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter, which MarketingDoNotEmails to fetch.
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketingDoNotEmails to fetch.
+     */
+    orderBy?: MarketingDoNotEmailOrderByWithRelationInput | MarketingDoNotEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketingDoNotEmails.
+     */
+    cursor?: MarketingDoNotEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketingDoNotEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketingDoNotEmails.
+     */
+    skip?: number
+    distinct?: MarketingDoNotEmailScalarFieldEnum | MarketingDoNotEmailScalarFieldEnum[]
+  }
+
+  /**
+   * MarketingDoNotEmail create
+   */
+  export type MarketingDoNotEmailCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MarketingDoNotEmail.
+     */
+    data: XOR<MarketingDoNotEmailCreateInput, MarketingDoNotEmailUncheckedCreateInput>
+  }
+
+  /**
+   * MarketingDoNotEmail createMany
+   */
+  export type MarketingDoNotEmailCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketingDoNotEmails.
+     */
+    data: MarketingDoNotEmailCreateManyInput | MarketingDoNotEmailCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketingDoNotEmail createManyAndReturn
+   */
+  export type MarketingDoNotEmailCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketingDoNotEmails.
+     */
+    data: MarketingDoNotEmailCreateManyInput | MarketingDoNotEmailCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingDoNotEmail update
+   */
+  export type MarketingDoNotEmailUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MarketingDoNotEmail.
+     */
+    data: XOR<MarketingDoNotEmailUpdateInput, MarketingDoNotEmailUncheckedUpdateInput>
+    /**
+     * Choose, which MarketingDoNotEmail to update.
+     */
+    where: MarketingDoNotEmailWhereUniqueInput
+  }
+
+  /**
+   * MarketingDoNotEmail updateMany
+   */
+  export type MarketingDoNotEmailUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketingDoNotEmails.
+     */
+    data: XOR<MarketingDoNotEmailUpdateManyMutationInput, MarketingDoNotEmailUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingDoNotEmails to update
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * Limit how many MarketingDoNotEmails to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingDoNotEmail updateManyAndReturn
+   */
+  export type MarketingDoNotEmailUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketingDoNotEmails.
+     */
+    data: XOR<MarketingDoNotEmailUpdateManyMutationInput, MarketingDoNotEmailUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketingDoNotEmails to update
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * Limit how many MarketingDoNotEmails to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MarketingDoNotEmail upsert
+   */
+  export type MarketingDoNotEmailUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MarketingDoNotEmail to update in case it exists.
+     */
+    where: MarketingDoNotEmailWhereUniqueInput
+    /**
+     * In case the MarketingDoNotEmail found by the `where` argument doesn't exist, create a new MarketingDoNotEmail with this data.
+     */
+    create: XOR<MarketingDoNotEmailCreateInput, MarketingDoNotEmailUncheckedCreateInput>
+    /**
+     * In case the MarketingDoNotEmail was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketingDoNotEmailUpdateInput, MarketingDoNotEmailUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketingDoNotEmail delete
+   */
+  export type MarketingDoNotEmailDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+    /**
+     * Filter which MarketingDoNotEmail to delete.
+     */
+    where: MarketingDoNotEmailWhereUniqueInput
+  }
+
+  /**
+   * MarketingDoNotEmail deleteMany
+   */
+  export type MarketingDoNotEmailDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketingDoNotEmails to delete
+     */
+    where?: MarketingDoNotEmailWhereInput
+    /**
+     * Limit how many MarketingDoNotEmails to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketingDoNotEmail without action
+   */
+  export type MarketingDoNotEmailDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketingDoNotEmail
+     */
+    select?: MarketingDoNotEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketingDoNotEmail
+     */
+    omit?: MarketingDoNotEmailOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MarketingDoNotEmailInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model QuickBooksConnection
    */
 
@@ -89175,6 +96101,11 @@ export namespace Prisma {
     phone: 'phone',
     stripeCustomerId: 'stripeCustomerId',
     acceptsMarketing: 'acceptsMarketing',
+    marketingConsentAt: 'marketingConsentAt',
+    marketingConsentSource: 'marketingConsentSource',
+    marketingUnsubscribedAt: 'marketingUnsubscribedAt',
+    marketingSuppressedAt: 'marketingSuppressedAt',
+    marketingSuppressionReason: 'marketingSuppressionReason',
     totalSpent: 'totalSpent',
     orderCount: 'orderCount',
     loyaltyPoints: 'loyaltyPoints',
@@ -89736,6 +96667,102 @@ export namespace Prisma {
   export type FormSubmissionScalarFieldEnum = (typeof FormSubmissionScalarFieldEnum)[keyof typeof FormSubmissionScalarFieldEnum]
 
 
+  export const MarketingCampaignScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    createdById: 'createdById',
+    subject: 'subject',
+    previewText: 'previewText',
+    contentFormat: 'contentFormat',
+    bodyText: 'bodyText',
+    bodyJson: 'bodyJson',
+    status: 'status',
+    renderedHtml: 'renderedHtml',
+    renderedText: 'renderedText',
+    fromAddress: 'fromAddress',
+    replyTo: 'replyTo',
+    baseUrl: 'baseUrl',
+    recipientCount: 'recipientCount',
+    queuedAt: 'queuedAt',
+    startedAt: 'startedAt',
+    completedAt: 'completedAt',
+    canceledAt: 'canceledAt',
+    lastError: 'lastError'
+  };
+
+  export type MarketingCampaignScalarFieldEnum = (typeof MarketingCampaignScalarFieldEnum)[keyof typeof MarketingCampaignScalarFieldEnum]
+
+
+  export const MarketingCampaignBatchScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    campaignId: 'campaignId',
+    businessId: 'businessId',
+    batchIndex: 'batchIndex',
+    status: 'status',
+    attempts: 'attempts',
+    leaseUntil: 'leaseUntil',
+    notBefore: 'notBefore',
+    firstAttemptAt: 'firstAttemptAt',
+    sentAt: 'sentAt',
+    lastError: 'lastError'
+  };
+
+  export type MarketingCampaignBatchScalarFieldEnum = (typeof MarketingCampaignBatchScalarFieldEnum)[keyof typeof MarketingCampaignBatchScalarFieldEnum]
+
+
+  export const MarketingCampaignRecipientScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    campaignId: 'campaignId',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    email: 'email',
+    batchIndex: 'batchIndex',
+    status: 'status',
+    resendId: 'resendId',
+    error: 'error',
+    sentAt: 'sentAt',
+    deliveredAt: 'deliveredAt',
+    bouncedAt: 'bouncedAt',
+    complainedAt: 'complainedAt',
+    unsubscribedAt: 'unsubscribedAt'
+  };
+
+  export type MarketingCampaignRecipientScalarFieldEnum = (typeof MarketingCampaignRecipientScalarFieldEnum)[keyof typeof MarketingCampaignRecipientScalarFieldEnum]
+
+
+  export const MarketingConsentEventScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    type: 'type',
+    source: 'source',
+    ip: 'ip',
+    userAgent: 'userAgent',
+    wording: 'wording',
+    campaignId: 'campaignId'
+  };
+
+  export type MarketingConsentEventScalarFieldEnum = (typeof MarketingConsentEventScalarFieldEnum)[keyof typeof MarketingConsentEventScalarFieldEnum]
+
+
+  export const MarketingDoNotEmailScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    businessId: 'businessId',
+    emailHash: 'emailHash',
+    reason: 'reason'
+  };
+
+  export type MarketingDoNotEmailScalarFieldEnum = (typeof MarketingDoNotEmailScalarFieldEnum)[keyof typeof MarketingDoNotEmailScalarFieldEnum]
+
+
   export const QuickBooksConnectionScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -90222,6 +97249,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
+    marketingCampaignsCreated?: MarketingCampaignListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -90243,6 +97271,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutOrderByRelationAggregateInput
     createdInvites?: PlatformInviteOrderByRelationAggregateInput
     editorNotes?: EditorNoteOrderByRelationAggregateInput
+    marketingCampaignsCreated?: MarketingCampaignOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -90267,6 +97296,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
+    marketingCampaignsCreated?: MarketingCampaignListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -90732,6 +97762,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionListRelationFilter
     forms?: FormListRelationFilter
     formSubmissions?: FormSubmissionListRelationFilter
+    marketingCampaigns?: MarketingCampaignListRelationFilter
+    marketingConsentEvents?: MarketingConsentEventListRelationFilter
+    marketingDoNotEmail?: MarketingDoNotEmailListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     invoiceSettings?: XOR<InvoiceSettingsNullableScalarRelationFilter, InvoiceSettingsWhereInput> | null
@@ -90856,6 +97889,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionOrderByRelationAggregateInput
     forms?: FormOrderByRelationAggregateInput
     formSubmissions?: FormSubmissionOrderByRelationAggregateInput
+    marketingCampaigns?: MarketingCampaignOrderByRelationAggregateInput
+    marketingConsentEvents?: MarketingConsentEventOrderByRelationAggregateInput
+    marketingDoNotEmail?: MarketingDoNotEmailOrderByRelationAggregateInput
     quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     invoiceSettings?: InvoiceSettingsOrderByWithRelationInput
@@ -90983,6 +98019,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionListRelationFilter
     forms?: FormListRelationFilter
     formSubmissions?: FormSubmissionListRelationFilter
+    marketingCampaigns?: MarketingCampaignListRelationFilter
+    marketingConsentEvents?: MarketingConsentEventListRelationFilter
+    marketingDoNotEmail?: MarketingDoNotEmailListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     invoiceSettings?: XOR<InvoiceSettingsNullableScalarRelationFilter, InvoiceSettingsWhereInput> | null
@@ -92932,6 +99971,11 @@ export namespace Prisma {
     phone?: StringNullableFilter<"Customer"> | string | null
     stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
+    marketingConsentAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingConsentSource?: StringNullableFilter<"Customer"> | string | null
+    marketingUnsubscribedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressionReason?: StringNullableFilter<"Customer"> | string | null
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
     loyaltyPoints?: IntFilter<"Customer"> | number
@@ -92953,6 +99997,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionListRelationFilter
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
     invoices?: InvoiceListRelationFilter
+    campaignRecipients?: MarketingCampaignRecipientListRelationFilter
+    consentEvents?: MarketingConsentEventListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -92965,6 +100011,11 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     acceptsMarketing?: SortOrder
+    marketingConsentAt?: SortOrderInput | SortOrder
+    marketingConsentSource?: SortOrderInput | SortOrder
+    marketingUnsubscribedAt?: SortOrderInput | SortOrder
+    marketingSuppressedAt?: SortOrderInput | SortOrder
+    marketingSuppressionReason?: SortOrderInput | SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
     loyaltyPoints?: SortOrder
@@ -92986,6 +100037,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionOrderByRelationAggregateInput
     loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
     invoices?: InvoiceOrderByRelationAggregateInput
+    campaignRecipients?: MarketingCampaignRecipientOrderByRelationAggregateInput
+    consentEvents?: MarketingConsentEventOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -93002,6 +100055,11 @@ export namespace Prisma {
     phone?: StringNullableFilter<"Customer"> | string | null
     stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
+    marketingConsentAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingConsentSource?: StringNullableFilter<"Customer"> | string | null
+    marketingUnsubscribedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressionReason?: StringNullableFilter<"Customer"> | string | null
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
     loyaltyPoints?: IntFilter<"Customer"> | number
@@ -93023,6 +100081,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionListRelationFilter
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
     invoices?: InvoiceListRelationFilter
+    campaignRecipients?: MarketingCampaignRecipientListRelationFilter
+    consentEvents?: MarketingConsentEventListRelationFilter
   }, "id" | "businessId_email">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -93035,6 +100095,11 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     acceptsMarketing?: SortOrder
+    marketingConsentAt?: SortOrderInput | SortOrder
+    marketingConsentSource?: SortOrderInput | SortOrder
+    marketingUnsubscribedAt?: SortOrderInput | SortOrder
+    marketingSuppressedAt?: SortOrderInput | SortOrder
+    marketingSuppressionReason?: SortOrderInput | SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
     loyaltyPoints?: SortOrder
@@ -93066,6 +100131,11 @@ export namespace Prisma {
     phone?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     stripeCustomerId?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     acceptsMarketing?: BoolWithAggregatesFilter<"Customer"> | boolean
+    marketingConsentAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    marketingConsentSource?: StringNullableWithAggregatesFilter<"Customer"> | string | null
+    marketingUnsubscribedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    marketingSuppressedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    marketingSuppressionReason?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     totalSpent?: IntWithAggregatesFilter<"Customer"> | number
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
     loyaltyPoints?: IntWithAggregatesFilter<"Customer"> | number
@@ -95970,6 +103040,516 @@ export namespace Prisma {
     businessId?: StringWithAggregatesFilter<"FormSubmission"> | string
   }
 
+  export type MarketingCampaignWhereInput = {
+    AND?: MarketingCampaignWhereInput | MarketingCampaignWhereInput[]
+    OR?: MarketingCampaignWhereInput[]
+    NOT?: MarketingCampaignWhereInput | MarketingCampaignWhereInput[]
+    id?: StringFilter<"MarketingCampaign"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    businessId?: StringFilter<"MarketingCampaign"> | string
+    createdById?: StringNullableFilter<"MarketingCampaign"> | string | null
+    subject?: StringFilter<"MarketingCampaign"> | string
+    previewText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    contentFormat?: StringFilter<"MarketingCampaign"> | string
+    bodyText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    bodyJson?: JsonNullableFilter<"MarketingCampaign">
+    status?: StringFilter<"MarketingCampaign"> | string
+    renderedHtml?: StringNullableFilter<"MarketingCampaign"> | string | null
+    renderedText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    fromAddress?: StringNullableFilter<"MarketingCampaign"> | string | null
+    replyTo?: StringNullableFilter<"MarketingCampaign"> | string | null
+    baseUrl?: StringNullableFilter<"MarketingCampaign"> | string | null
+    recipientCount?: IntFilter<"MarketingCampaign"> | number
+    queuedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    startedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    batches?: MarketingCampaignBatchListRelationFilter
+    recipients?: MarketingCampaignRecipientListRelationFilter
+    consentEvents?: MarketingConsentEventListRelationFilter
+  }
+
+  export type MarketingCampaignOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    subject?: SortOrder
+    previewText?: SortOrderInput | SortOrder
+    contentFormat?: SortOrder
+    bodyText?: SortOrderInput | SortOrder
+    bodyJson?: SortOrderInput | SortOrder
+    status?: SortOrder
+    renderedHtml?: SortOrderInput | SortOrder
+    renderedText?: SortOrderInput | SortOrder
+    fromAddress?: SortOrderInput | SortOrder
+    replyTo?: SortOrderInput | SortOrder
+    baseUrl?: SortOrderInput | SortOrder
+    recipientCount?: SortOrder
+    queuedAt?: SortOrderInput | SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    canceledAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    createdBy?: UserOrderByWithRelationInput
+    batches?: MarketingCampaignBatchOrderByRelationAggregateInput
+    recipients?: MarketingCampaignRecipientOrderByRelationAggregateInput
+    consentEvents?: MarketingConsentEventOrderByRelationAggregateInput
+  }
+
+  export type MarketingCampaignWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: MarketingCampaignWhereInput | MarketingCampaignWhereInput[]
+    OR?: MarketingCampaignWhereInput[]
+    NOT?: MarketingCampaignWhereInput | MarketingCampaignWhereInput[]
+    createdAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    businessId?: StringFilter<"MarketingCampaign"> | string
+    createdById?: StringNullableFilter<"MarketingCampaign"> | string | null
+    subject?: StringFilter<"MarketingCampaign"> | string
+    previewText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    contentFormat?: StringFilter<"MarketingCampaign"> | string
+    bodyText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    bodyJson?: JsonNullableFilter<"MarketingCampaign">
+    status?: StringFilter<"MarketingCampaign"> | string
+    renderedHtml?: StringNullableFilter<"MarketingCampaign"> | string | null
+    renderedText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    fromAddress?: StringNullableFilter<"MarketingCampaign"> | string | null
+    replyTo?: StringNullableFilter<"MarketingCampaign"> | string | null
+    baseUrl?: StringNullableFilter<"MarketingCampaign"> | string | null
+    recipientCount?: IntFilter<"MarketingCampaign"> | number
+    queuedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    startedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    batches?: MarketingCampaignBatchListRelationFilter
+    recipients?: MarketingCampaignRecipientListRelationFilter
+    consentEvents?: MarketingConsentEventListRelationFilter
+  }, "id">
+
+  export type MarketingCampaignOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    subject?: SortOrder
+    previewText?: SortOrderInput | SortOrder
+    contentFormat?: SortOrder
+    bodyText?: SortOrderInput | SortOrder
+    bodyJson?: SortOrderInput | SortOrder
+    status?: SortOrder
+    renderedHtml?: SortOrderInput | SortOrder
+    renderedText?: SortOrderInput | SortOrder
+    fromAddress?: SortOrderInput | SortOrder
+    replyTo?: SortOrderInput | SortOrder
+    baseUrl?: SortOrderInput | SortOrder
+    recipientCount?: SortOrder
+    queuedAt?: SortOrderInput | SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    canceledAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    _count?: MarketingCampaignCountOrderByAggregateInput
+    _avg?: MarketingCampaignAvgOrderByAggregateInput
+    _max?: MarketingCampaignMaxOrderByAggregateInput
+    _min?: MarketingCampaignMinOrderByAggregateInput
+    _sum?: MarketingCampaignSumOrderByAggregateInput
+  }
+
+  export type MarketingCampaignScalarWhereWithAggregatesInput = {
+    AND?: MarketingCampaignScalarWhereWithAggregatesInput | MarketingCampaignScalarWhereWithAggregatesInput[]
+    OR?: MarketingCampaignScalarWhereWithAggregatesInput[]
+    NOT?: MarketingCampaignScalarWhereWithAggregatesInput | MarketingCampaignScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MarketingCampaign"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketingCampaign"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MarketingCampaign"> | Date | string
+    businessId?: StringWithAggregatesFilter<"MarketingCampaign"> | string
+    createdById?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    subject?: StringWithAggregatesFilter<"MarketingCampaign"> | string
+    previewText?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    contentFormat?: StringWithAggregatesFilter<"MarketingCampaign"> | string
+    bodyText?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    bodyJson?: JsonNullableWithAggregatesFilter<"MarketingCampaign">
+    status?: StringWithAggregatesFilter<"MarketingCampaign"> | string
+    renderedHtml?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    renderedText?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    fromAddress?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    replyTo?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    baseUrl?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    recipientCount?: IntWithAggregatesFilter<"MarketingCampaign"> | number
+    queuedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
+    startedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
+    completedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
+    canceledAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
+    lastError?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+  }
+
+  export type MarketingCampaignBatchWhereInput = {
+    AND?: MarketingCampaignBatchWhereInput | MarketingCampaignBatchWhereInput[]
+    OR?: MarketingCampaignBatchWhereInput[]
+    NOT?: MarketingCampaignBatchWhereInput | MarketingCampaignBatchWhereInput[]
+    id?: StringFilter<"MarketingCampaignBatch"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignBatch"> | string
+    businessId?: StringFilter<"MarketingCampaignBatch"> | string
+    batchIndex?: IntFilter<"MarketingCampaignBatch"> | number
+    status?: StringFilter<"MarketingCampaignBatch"> | string
+    attempts?: IntFilter<"MarketingCampaignBatch"> | number
+    leaseUntil?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    notBefore?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    firstAttemptAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaignBatch"> | string | null
+    campaign?: XOR<MarketingCampaignScalarRelationFilter, MarketingCampaignWhereInput>
+  }
+
+  export type MarketingCampaignBatchOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    attempts?: SortOrder
+    leaseUntil?: SortOrderInput | SortOrder
+    notBefore?: SortOrderInput | SortOrder
+    firstAttemptAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    campaign?: MarketingCampaignOrderByWithRelationInput
+  }
+
+  export type MarketingCampaignBatchWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    campaignId_batchIndex?: MarketingCampaignBatchCampaignIdBatchIndexCompoundUniqueInput
+    AND?: MarketingCampaignBatchWhereInput | MarketingCampaignBatchWhereInput[]
+    OR?: MarketingCampaignBatchWhereInput[]
+    NOT?: MarketingCampaignBatchWhereInput | MarketingCampaignBatchWhereInput[]
+    createdAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignBatch"> | string
+    businessId?: StringFilter<"MarketingCampaignBatch"> | string
+    batchIndex?: IntFilter<"MarketingCampaignBatch"> | number
+    status?: StringFilter<"MarketingCampaignBatch"> | string
+    attempts?: IntFilter<"MarketingCampaignBatch"> | number
+    leaseUntil?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    notBefore?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    firstAttemptAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaignBatch"> | string | null
+    campaign?: XOR<MarketingCampaignScalarRelationFilter, MarketingCampaignWhereInput>
+  }, "id" | "campaignId_batchIndex">
+
+  export type MarketingCampaignBatchOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    attempts?: SortOrder
+    leaseUntil?: SortOrderInput | SortOrder
+    notBefore?: SortOrderInput | SortOrder
+    firstAttemptAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    lastError?: SortOrderInput | SortOrder
+    _count?: MarketingCampaignBatchCountOrderByAggregateInput
+    _avg?: MarketingCampaignBatchAvgOrderByAggregateInput
+    _max?: MarketingCampaignBatchMaxOrderByAggregateInput
+    _min?: MarketingCampaignBatchMinOrderByAggregateInput
+    _sum?: MarketingCampaignBatchSumOrderByAggregateInput
+  }
+
+  export type MarketingCampaignBatchScalarWhereWithAggregatesInput = {
+    AND?: MarketingCampaignBatchScalarWhereWithAggregatesInput | MarketingCampaignBatchScalarWhereWithAggregatesInput[]
+    OR?: MarketingCampaignBatchScalarWhereWithAggregatesInput[]
+    NOT?: MarketingCampaignBatchScalarWhereWithAggregatesInput | MarketingCampaignBatchScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MarketingCampaignBatch"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string
+    campaignId?: StringWithAggregatesFilter<"MarketingCampaignBatch"> | string
+    businessId?: StringWithAggregatesFilter<"MarketingCampaignBatch"> | string
+    batchIndex?: IntWithAggregatesFilter<"MarketingCampaignBatch"> | number
+    status?: StringWithAggregatesFilter<"MarketingCampaignBatch"> | string
+    attempts?: IntWithAggregatesFilter<"MarketingCampaignBatch"> | number
+    leaseUntil?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string | null
+    notBefore?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string | null
+    firstAttemptAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignBatch"> | Date | string | null
+    lastError?: StringNullableWithAggregatesFilter<"MarketingCampaignBatch"> | string | null
+  }
+
+  export type MarketingCampaignRecipientWhereInput = {
+    AND?: MarketingCampaignRecipientWhereInput | MarketingCampaignRecipientWhereInput[]
+    OR?: MarketingCampaignRecipientWhereInput[]
+    NOT?: MarketingCampaignRecipientWhereInput | MarketingCampaignRecipientWhereInput[]
+    id?: StringFilter<"MarketingCampaignRecipient"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignRecipient"> | string
+    businessId?: StringFilter<"MarketingCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    email?: StringFilter<"MarketingCampaignRecipient"> | string
+    batchIndex?: IntFilter<"MarketingCampaignRecipient"> | number
+    status?: StringFilter<"MarketingCampaignRecipient"> | string
+    resendId?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    error?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    deliveredAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    bouncedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    complainedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    unsubscribedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    campaign?: XOR<MarketingCampaignScalarRelationFilter, MarketingCampaignWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }
+
+  export type MarketingCampaignRecipientOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    email?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    resendId?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    deliveredAt?: SortOrderInput | SortOrder
+    bouncedAt?: SortOrderInput | SortOrder
+    complainedAt?: SortOrderInput | SortOrder
+    unsubscribedAt?: SortOrderInput | SortOrder
+    campaign?: MarketingCampaignOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+  }
+
+  export type MarketingCampaignRecipientWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    resendId?: string
+    campaignId_customerId?: MarketingCampaignRecipientCampaignIdCustomerIdCompoundUniqueInput
+    AND?: MarketingCampaignRecipientWhereInput | MarketingCampaignRecipientWhereInput[]
+    OR?: MarketingCampaignRecipientWhereInput[]
+    NOT?: MarketingCampaignRecipientWhereInput | MarketingCampaignRecipientWhereInput[]
+    createdAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignRecipient"> | string
+    businessId?: StringFilter<"MarketingCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    email?: StringFilter<"MarketingCampaignRecipient"> | string
+    batchIndex?: IntFilter<"MarketingCampaignRecipient"> | number
+    status?: StringFilter<"MarketingCampaignRecipient"> | string
+    error?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    deliveredAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    bouncedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    complainedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    unsubscribedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    campaign?: XOR<MarketingCampaignScalarRelationFilter, MarketingCampaignWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+  }, "id" | "resendId" | "campaignId_customerId">
+
+  export type MarketingCampaignRecipientOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    email?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    resendId?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    deliveredAt?: SortOrderInput | SortOrder
+    bouncedAt?: SortOrderInput | SortOrder
+    complainedAt?: SortOrderInput | SortOrder
+    unsubscribedAt?: SortOrderInput | SortOrder
+    _count?: MarketingCampaignRecipientCountOrderByAggregateInput
+    _avg?: MarketingCampaignRecipientAvgOrderByAggregateInput
+    _max?: MarketingCampaignRecipientMaxOrderByAggregateInput
+    _min?: MarketingCampaignRecipientMinOrderByAggregateInput
+    _sum?: MarketingCampaignRecipientSumOrderByAggregateInput
+  }
+
+  export type MarketingCampaignRecipientScalarWhereWithAggregatesInput = {
+    AND?: MarketingCampaignRecipientScalarWhereWithAggregatesInput | MarketingCampaignRecipientScalarWhereWithAggregatesInput[]
+    OR?: MarketingCampaignRecipientScalarWhereWithAggregatesInput[]
+    NOT?: MarketingCampaignRecipientScalarWhereWithAggregatesInput | MarketingCampaignRecipientScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MarketingCampaignRecipient"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string
+    campaignId?: StringWithAggregatesFilter<"MarketingCampaignRecipient"> | string
+    businessId?: StringWithAggregatesFilter<"MarketingCampaignRecipient"> | string
+    customerId?: StringNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | string | null
+    email?: StringWithAggregatesFilter<"MarketingCampaignRecipient"> | string
+    batchIndex?: IntWithAggregatesFilter<"MarketingCampaignRecipient"> | number
+    status?: StringWithAggregatesFilter<"MarketingCampaignRecipient"> | string
+    resendId?: StringNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | string | null
+    error?: StringNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string | null
+    deliveredAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string | null
+    bouncedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string | null
+    complainedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string | null
+    unsubscribedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaignRecipient"> | Date | string | null
+  }
+
+  export type MarketingConsentEventWhereInput = {
+    AND?: MarketingConsentEventWhereInput | MarketingConsentEventWhereInput[]
+    OR?: MarketingConsentEventWhereInput[]
+    NOT?: MarketingConsentEventWhereInput | MarketingConsentEventWhereInput[]
+    id?: StringFilter<"MarketingConsentEvent"> | string
+    createdAt?: DateTimeFilter<"MarketingConsentEvent"> | Date | string
+    businessId?: StringFilter<"MarketingConsentEvent"> | string
+    customerId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    type?: StringFilter<"MarketingConsentEvent"> | string
+    source?: StringFilter<"MarketingConsentEvent"> | string
+    ip?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    userAgent?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    wording?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    campaignId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+    campaign?: XOR<MarketingCampaignNullableScalarRelationFilter, MarketingCampaignWhereInput> | null
+  }
+
+  export type MarketingConsentEventOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    source?: SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    wording?: SortOrderInput | SortOrder
+    campaignId?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+    campaign?: MarketingCampaignOrderByWithRelationInput
+  }
+
+  export type MarketingConsentEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: MarketingConsentEventWhereInput | MarketingConsentEventWhereInput[]
+    OR?: MarketingConsentEventWhereInput[]
+    NOT?: MarketingConsentEventWhereInput | MarketingConsentEventWhereInput[]
+    createdAt?: DateTimeFilter<"MarketingConsentEvent"> | Date | string
+    businessId?: StringFilter<"MarketingConsentEvent"> | string
+    customerId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    type?: StringFilter<"MarketingConsentEvent"> | string
+    source?: StringFilter<"MarketingConsentEvent"> | string
+    ip?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    userAgent?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    wording?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    campaignId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
+    campaign?: XOR<MarketingCampaignNullableScalarRelationFilter, MarketingCampaignWhereInput> | null
+  }, "id">
+
+  export type MarketingConsentEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    source?: SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    wording?: SortOrderInput | SortOrder
+    campaignId?: SortOrderInput | SortOrder
+    _count?: MarketingConsentEventCountOrderByAggregateInput
+    _max?: MarketingConsentEventMaxOrderByAggregateInput
+    _min?: MarketingConsentEventMinOrderByAggregateInput
+  }
+
+  export type MarketingConsentEventScalarWhereWithAggregatesInput = {
+    AND?: MarketingConsentEventScalarWhereWithAggregatesInput | MarketingConsentEventScalarWhereWithAggregatesInput[]
+    OR?: MarketingConsentEventScalarWhereWithAggregatesInput[]
+    NOT?: MarketingConsentEventScalarWhereWithAggregatesInput | MarketingConsentEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MarketingConsentEvent"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketingConsentEvent"> | Date | string
+    businessId?: StringWithAggregatesFilter<"MarketingConsentEvent"> | string
+    customerId?: StringNullableWithAggregatesFilter<"MarketingConsentEvent"> | string | null
+    type?: StringWithAggregatesFilter<"MarketingConsentEvent"> | string
+    source?: StringWithAggregatesFilter<"MarketingConsentEvent"> | string
+    ip?: StringNullableWithAggregatesFilter<"MarketingConsentEvent"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"MarketingConsentEvent"> | string | null
+    wording?: StringNullableWithAggregatesFilter<"MarketingConsentEvent"> | string | null
+    campaignId?: StringNullableWithAggregatesFilter<"MarketingConsentEvent"> | string | null
+  }
+
+  export type MarketingDoNotEmailWhereInput = {
+    AND?: MarketingDoNotEmailWhereInput | MarketingDoNotEmailWhereInput[]
+    OR?: MarketingDoNotEmailWhereInput[]
+    NOT?: MarketingDoNotEmailWhereInput | MarketingDoNotEmailWhereInput[]
+    id?: StringFilter<"MarketingDoNotEmail"> | string
+    createdAt?: DateTimeFilter<"MarketingDoNotEmail"> | Date | string
+    businessId?: StringFilter<"MarketingDoNotEmail"> | string
+    emailHash?: StringFilter<"MarketingDoNotEmail"> | string
+    reason?: StringFilter<"MarketingDoNotEmail"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type MarketingDoNotEmailOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    emailHash?: SortOrder
+    reason?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type MarketingDoNotEmailWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId_emailHash?: MarketingDoNotEmailBusinessIdEmailHashCompoundUniqueInput
+    AND?: MarketingDoNotEmailWhereInput | MarketingDoNotEmailWhereInput[]
+    OR?: MarketingDoNotEmailWhereInput[]
+    NOT?: MarketingDoNotEmailWhereInput | MarketingDoNotEmailWhereInput[]
+    createdAt?: DateTimeFilter<"MarketingDoNotEmail"> | Date | string
+    businessId?: StringFilter<"MarketingDoNotEmail"> | string
+    emailHash?: StringFilter<"MarketingDoNotEmail"> | string
+    reason?: StringFilter<"MarketingDoNotEmail"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "businessId_emailHash">
+
+  export type MarketingDoNotEmailOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    emailHash?: SortOrder
+    reason?: SortOrder
+    _count?: MarketingDoNotEmailCountOrderByAggregateInput
+    _max?: MarketingDoNotEmailMaxOrderByAggregateInput
+    _min?: MarketingDoNotEmailMinOrderByAggregateInput
+  }
+
+  export type MarketingDoNotEmailScalarWhereWithAggregatesInput = {
+    AND?: MarketingDoNotEmailScalarWhereWithAggregatesInput | MarketingDoNotEmailScalarWhereWithAggregatesInput[]
+    OR?: MarketingDoNotEmailScalarWhereWithAggregatesInput[]
+    NOT?: MarketingDoNotEmailScalarWhereWithAggregatesInput | MarketingDoNotEmailScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"MarketingDoNotEmail"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketingDoNotEmail"> | Date | string
+    businessId?: StringWithAggregatesFilter<"MarketingDoNotEmail"> | string
+    emailHash?: StringWithAggregatesFilter<"MarketingDoNotEmail"> | string
+    reason?: StringWithAggregatesFilter<"MarketingDoNotEmail"> | string
+  }
+
   export type QuickBooksConnectionWhereInput = {
     AND?: QuickBooksConnectionWhereInput | QuickBooksConnectionWhereInput[]
     OR?: QuickBooksConnectionWhereInput[]
@@ -97499,6 +105079,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -97520,6 +105101,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -97541,6 +105123,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -97562,6 +105145,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -98068,6 +105652,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -98192,6 +105779,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -98316,6 +105906,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -98440,6 +106033,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -100743,6 +108339,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -100762,6 +108363,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -100774,6 +108377,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -100793,6 +108401,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -100805,6 +108415,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -100824,6 +108439,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -100836,6 +108453,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -100855,6 +108477,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -100867,6 +108491,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -100890,6 +108519,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -100911,6 +108545,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -104137,6 +111776,576 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type MarketingCampaignCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
+    createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
+    batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
+    createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
+    batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignBatchCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+    campaign: MarketingCampaignCreateNestedOneWithoutBatchesInput
+  }
+
+  export type MarketingCampaignBatchUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignBatchUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    campaign?: MarketingCampaignUpdateOneRequiredWithoutBatchesNestedInput
+  }
+
+  export type MarketingCampaignBatchUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignBatchCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignBatchUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignBatchUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignRecipientCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+    campaign: MarketingCampaignCreateNestedOneWithoutRecipientsInput
+    customer?: CustomerCreateNestedOneWithoutCampaignRecipientsInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    customerId?: string | null
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingCampaignRecipientUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    campaign?: MarketingCampaignUpdateOneRequiredWithoutRecipientsNestedInput
+    customer?: CustomerUpdateOneWithoutCampaignRecipientsNestedInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingCampaignRecipientCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    customerId?: string | null
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingCampaignRecipientUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingConsentEventCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingConsentEventsInput
+    customer?: CustomerCreateNestedOneWithoutConsentEventsInput
+    campaign?: MarketingCampaignCreateNestedOneWithoutConsentEventsInput
+  }
+
+  export type MarketingConsentEventUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
+  export type MarketingConsentEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingConsentEventsNestedInput
+    customer?: CustomerUpdateOneWithoutConsentEventsNestedInput
+    campaign?: MarketingCampaignUpdateOneWithoutConsentEventsNestedInput
+  }
+
+  export type MarketingConsentEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
+  export type MarketingConsentEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingDoNotEmailCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    emailHash: string
+    reason: string
+    business: BusinessCreateNestedOneWithoutMarketingDoNotEmailInput
+  }
+
+  export type MarketingDoNotEmailUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    emailHash: string
+    reason: string
+  }
+
+  export type MarketingDoNotEmailUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutMarketingDoNotEmailNestedInput
+  }
+
+  export type MarketingDoNotEmailUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingDoNotEmailCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    emailHash: string
+    reason: string
+  }
+
+  export type MarketingDoNotEmailUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingDoNotEmailUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+  }
+
   export type QuickBooksConnectionCreateInput = {
     id?: string
     createdAt?: Date | string
@@ -106036,6 +114245,12 @@ export namespace Prisma {
     none?: EditorNoteWhereInput
   }
 
+  export type MarketingCampaignListRelationFilter = {
+    every?: MarketingCampaignWhereInput
+    some?: MarketingCampaignWhereInput
+    none?: MarketingCampaignWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -106070,6 +114285,10 @@ export namespace Prisma {
   }
 
   export type EditorNoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MarketingCampaignOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -106641,6 +114860,18 @@ export namespace Prisma {
     none?: FormSubmissionWhereInput
   }
 
+  export type MarketingConsentEventListRelationFilter = {
+    every?: MarketingConsentEventWhereInput
+    some?: MarketingConsentEventWhereInput
+    none?: MarketingConsentEventWhereInput
+  }
+
+  export type MarketingDoNotEmailListRelationFilter = {
+    every?: MarketingDoNotEmailWhereInput
+    some?: MarketingDoNotEmailWhereInput
+    none?: MarketingDoNotEmailWhereInput
+  }
+
   export type QuickBooksConnectionNullableScalarRelationFilter = {
     is?: QuickBooksConnectionWhereInput | null
     isNot?: QuickBooksConnectionWhereInput | null
@@ -106795,6 +115026,14 @@ export namespace Prisma {
   }
 
   export type FormSubmissionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MarketingConsentEventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MarketingDoNotEmailOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -108334,7 +116573,17 @@ export namespace Prisma {
     none?: ShippingAddressWhereInput
   }
 
+  export type MarketingCampaignRecipientListRelationFilter = {
+    every?: MarketingCampaignRecipientWhereInput
+    some?: MarketingCampaignRecipientWhereInput
+    none?: MarketingCampaignRecipientWhereInput
+  }
+
   export type ShippingAddressOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -108353,6 +116602,11 @@ export namespace Prisma {
     phone?: SortOrder
     stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
+    marketingConsentAt?: SortOrder
+    marketingConsentSource?: SortOrder
+    marketingUnsubscribedAt?: SortOrder
+    marketingSuppressedAt?: SortOrder
+    marketingSuppressionReason?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
     loyaltyPoints?: SortOrder
@@ -108384,6 +116638,11 @@ export namespace Prisma {
     phone?: SortOrder
     stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
+    marketingConsentAt?: SortOrder
+    marketingConsentSource?: SortOrder
+    marketingUnsubscribedAt?: SortOrder
+    marketingSuppressedAt?: SortOrder
+    marketingSuppressionReason?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
     loyaltyPoints?: SortOrder
@@ -108407,6 +116666,11 @@ export namespace Prisma {
     phone?: SortOrder
     stripeCustomerId?: SortOrder
     acceptsMarketing?: SortOrder
+    marketingConsentAt?: SortOrder
+    marketingConsentSource?: SortOrder
+    marketingUnsubscribedAt?: SortOrder
+    marketingSuppressedAt?: SortOrder
+    marketingSuppressionReason?: SortOrder
     totalSpent?: SortOrder
     orderCount?: SortOrder
     loyaltyPoints?: SortOrder
@@ -110106,6 +118370,308 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
+  export type MarketingCampaignBatchListRelationFilter = {
+    every?: MarketingCampaignBatchWhereInput
+    some?: MarketingCampaignBatchWhereInput
+    none?: MarketingCampaignBatchWhereInput
+  }
+
+  export type MarketingCampaignBatchOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type MarketingCampaignCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    createdById?: SortOrder
+    subject?: SortOrder
+    previewText?: SortOrder
+    contentFormat?: SortOrder
+    bodyText?: SortOrder
+    bodyJson?: SortOrder
+    status?: SortOrder
+    renderedHtml?: SortOrder
+    renderedText?: SortOrder
+    fromAddress?: SortOrder
+    replyTo?: SortOrder
+    baseUrl?: SortOrder
+    recipientCount?: SortOrder
+    queuedAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    canceledAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignAvgOrderByAggregateInput = {
+    recipientCount?: SortOrder
+  }
+
+  export type MarketingCampaignMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    createdById?: SortOrder
+    subject?: SortOrder
+    previewText?: SortOrder
+    contentFormat?: SortOrder
+    bodyText?: SortOrder
+    status?: SortOrder
+    renderedHtml?: SortOrder
+    renderedText?: SortOrder
+    fromAddress?: SortOrder
+    replyTo?: SortOrder
+    baseUrl?: SortOrder
+    recipientCount?: SortOrder
+    queuedAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    canceledAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    createdById?: SortOrder
+    subject?: SortOrder
+    previewText?: SortOrder
+    contentFormat?: SortOrder
+    bodyText?: SortOrder
+    status?: SortOrder
+    renderedHtml?: SortOrder
+    renderedText?: SortOrder
+    fromAddress?: SortOrder
+    replyTo?: SortOrder
+    baseUrl?: SortOrder
+    recipientCount?: SortOrder
+    queuedAt?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    canceledAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignSumOrderByAggregateInput = {
+    recipientCount?: SortOrder
+  }
+
+  export type MarketingCampaignScalarRelationFilter = {
+    is?: MarketingCampaignWhereInput
+    isNot?: MarketingCampaignWhereInput
+  }
+
+  export type MarketingCampaignBatchCampaignIdBatchIndexCompoundUniqueInput = {
+    campaignId: string
+    batchIndex: number
+  }
+
+  export type MarketingCampaignBatchCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    attempts?: SortOrder
+    leaseUntil?: SortOrder
+    notBefore?: SortOrder
+    firstAttemptAt?: SortOrder
+    sentAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignBatchAvgOrderByAggregateInput = {
+    batchIndex?: SortOrder
+    attempts?: SortOrder
+  }
+
+  export type MarketingCampaignBatchMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    attempts?: SortOrder
+    leaseUntil?: SortOrder
+    notBefore?: SortOrder
+    firstAttemptAt?: SortOrder
+    sentAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignBatchMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    attempts?: SortOrder
+    leaseUntil?: SortOrder
+    notBefore?: SortOrder
+    firstAttemptAt?: SortOrder
+    sentAt?: SortOrder
+    lastError?: SortOrder
+  }
+
+  export type MarketingCampaignBatchSumOrderByAggregateInput = {
+    batchIndex?: SortOrder
+    attempts?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientCampaignIdCustomerIdCompoundUniqueInput = {
+    campaignId: string
+    customerId: string
+  }
+
+  export type MarketingCampaignRecipientCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    resendId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    deliveredAt?: SortOrder
+    bouncedAt?: SortOrder
+    complainedAt?: SortOrder
+    unsubscribedAt?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientAvgOrderByAggregateInput = {
+    batchIndex?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    resendId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    deliveredAt?: SortOrder
+    bouncedAt?: SortOrder
+    complainedAt?: SortOrder
+    unsubscribedAt?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    campaignId?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    batchIndex?: SortOrder
+    status?: SortOrder
+    resendId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    deliveredAt?: SortOrder
+    bouncedAt?: SortOrder
+    complainedAt?: SortOrder
+    unsubscribedAt?: SortOrder
+  }
+
+  export type MarketingCampaignRecipientSumOrderByAggregateInput = {
+    batchIndex?: SortOrder
+  }
+
+  export type MarketingCampaignNullableScalarRelationFilter = {
+    is?: MarketingCampaignWhereInput | null
+    isNot?: MarketingCampaignWhereInput | null
+  }
+
+  export type MarketingConsentEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    source?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    wording?: SortOrder
+    campaignId?: SortOrder
+  }
+
+  export type MarketingConsentEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    source?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    wording?: SortOrder
+    campaignId?: SortOrder
+  }
+
+  export type MarketingConsentEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    type?: SortOrder
+    source?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    wording?: SortOrder
+    campaignId?: SortOrder
+  }
+
+  export type MarketingDoNotEmailBusinessIdEmailHashCompoundUniqueInput = {
+    businessId: string
+    emailHash: string
+  }
+
+  export type MarketingDoNotEmailCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    emailHash?: SortOrder
+    reason?: SortOrder
+  }
+
+  export type MarketingDoNotEmailMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    emailHash?: SortOrder
+    reason?: SortOrder
+  }
+
+  export type MarketingDoNotEmailMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    emailHash?: SortOrder
+    reason?: SortOrder
+  }
+
   export type QuickBooksConnectionCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -111106,6 +119672,13 @@ export namespace Prisma {
     connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
   }
 
+  export type MarketingCampaignCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput> | MarketingCampaignCreateWithoutCreatedByInput[] | MarketingCampaignUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutCreatedByInput | MarketingCampaignCreateOrConnectWithoutCreatedByInput[]
+    createMany?: MarketingCampaignCreateManyCreatedByInputEnvelope
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -111160,6 +119733,13 @@ export namespace Prisma {
     connectOrCreate?: EditorNoteCreateOrConnectWithoutCreatedByInput | EditorNoteCreateOrConnectWithoutCreatedByInput[]
     createMany?: EditorNoteCreateManyCreatedByInputEnvelope
     connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput> | MarketingCampaignCreateWithoutCreatedByInput[] | MarketingCampaignUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutCreatedByInput | MarketingCampaignCreateOrConnectWithoutCreatedByInput[]
+    createMany?: MarketingCampaignCreateManyCreatedByInputEnvelope
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -111298,6 +119878,20 @@ export namespace Prisma {
     deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
   }
 
+  export type MarketingCampaignUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput> | MarketingCampaignCreateWithoutCreatedByInput[] | MarketingCampaignUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutCreatedByInput | MarketingCampaignCreateOrConnectWithoutCreatedByInput[]
+    upsert?: MarketingCampaignUpsertWithWhereUniqueWithoutCreatedByInput | MarketingCampaignUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: MarketingCampaignCreateManyCreatedByInputEnvelope
+    set?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    disconnect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    delete?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    update?: MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput | MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput | MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -111408,6 +120002,20 @@ export namespace Prisma {
     update?: EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput | EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: EditorNoteUpdateManyWithWhereWithoutCreatedByInput | EditorNoteUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
+  }
+
+  export type MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput> | MarketingCampaignCreateWithoutCreatedByInput[] | MarketingCampaignUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutCreatedByInput | MarketingCampaignCreateOrConnectWithoutCreatedByInput[]
+    upsert?: MarketingCampaignUpsertWithWhereUniqueWithoutCreatedByInput | MarketingCampaignUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: MarketingCampaignCreateManyCreatedByInputEnvelope
+    set?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    disconnect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    delete?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    update?: MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput | MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput | MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -111701,6 +120309,27 @@ export namespace Prisma {
     connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
   }
 
+  export type MarketingCampaignCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput> | MarketingCampaignCreateWithoutBusinessInput[] | MarketingCampaignUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBusinessInput | MarketingCampaignCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingCampaignCreateManyBusinessInputEnvelope
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput> | MarketingConsentEventCreateWithoutBusinessInput[] | MarketingConsentEventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutBusinessInput | MarketingConsentEventCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingConsentEventCreateManyBusinessInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+  }
+
+  export type MarketingDoNotEmailCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput> | MarketingDoNotEmailCreateWithoutBusinessInput[] | MarketingDoNotEmailUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingDoNotEmailCreateOrConnectWithoutBusinessInput | MarketingDoNotEmailCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingDoNotEmailCreateManyBusinessInputEnvelope
+    connect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+  }
+
   export type QuickBooksConnectionCreateNestedOneWithoutBusinessInput = {
     create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
@@ -111989,6 +120618,27 @@ export namespace Prisma {
     connectOrCreate?: FormSubmissionCreateOrConnectWithoutBusinessInput | FormSubmissionCreateOrConnectWithoutBusinessInput[]
     createMany?: FormSubmissionCreateManyBusinessInputEnvelope
     connect?: FormSubmissionWhereUniqueInput | FormSubmissionWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput> | MarketingCampaignCreateWithoutBusinessInput[] | MarketingCampaignUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBusinessInput | MarketingCampaignCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingCampaignCreateManyBusinessInputEnvelope
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput> | MarketingConsentEventCreateWithoutBusinessInput[] | MarketingConsentEventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutBusinessInput | MarketingConsentEventCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingConsentEventCreateManyBusinessInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+  }
+
+  export type MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput> | MarketingDoNotEmailCreateWithoutBusinessInput[] | MarketingDoNotEmailUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingDoNotEmailCreateOrConnectWithoutBusinessInput | MarketingDoNotEmailCreateOrConnectWithoutBusinessInput[]
+    createMany?: MarketingDoNotEmailCreateManyBusinessInputEnvelope
+    connect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
   }
 
   export type QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput = {
@@ -112530,6 +121180,48 @@ export namespace Prisma {
     update?: FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput | FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: FormSubmissionUpdateManyWithWhereWithoutBusinessInput | FormSubmissionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+  }
+
+  export type MarketingCampaignUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput> | MarketingCampaignCreateWithoutBusinessInput[] | MarketingCampaignUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBusinessInput | MarketingCampaignCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingCampaignUpsertWithWhereUniqueWithoutBusinessInput | MarketingCampaignUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingCampaignCreateManyBusinessInputEnvelope
+    set?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    disconnect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    delete?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    update?: MarketingCampaignUpdateWithWhereUniqueWithoutBusinessInput | MarketingCampaignUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingCampaignUpdateManyWithWhereWithoutBusinessInput | MarketingCampaignUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput> | MarketingConsentEventCreateWithoutBusinessInput[] | MarketingConsentEventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutBusinessInput | MarketingConsentEventCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutBusinessInput | MarketingConsentEventUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingConsentEventCreateManyBusinessInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutBusinessInput | MarketingConsentEventUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutBusinessInput | MarketingConsentEventUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+  }
+
+  export type MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput> | MarketingDoNotEmailCreateWithoutBusinessInput[] | MarketingDoNotEmailUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingDoNotEmailCreateOrConnectWithoutBusinessInput | MarketingDoNotEmailCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingDoNotEmailUpsertWithWhereUniqueWithoutBusinessInput | MarketingDoNotEmailUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingDoNotEmailCreateManyBusinessInputEnvelope
+    set?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    disconnect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    delete?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    connect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    update?: MarketingDoNotEmailUpdateWithWhereUniqueWithoutBusinessInput | MarketingDoNotEmailUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingDoNotEmailUpdateManyWithWhereWithoutBusinessInput | MarketingDoNotEmailUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingDoNotEmailScalarWhereInput | MarketingDoNotEmailScalarWhereInput[]
   }
 
   export type QuickBooksConnectionUpdateOneWithoutBusinessNestedInput = {
@@ -113102,6 +121794,48 @@ export namespace Prisma {
     update?: FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput | FormSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: FormSubmissionUpdateManyWithWhereWithoutBusinessInput | FormSubmissionUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: FormSubmissionScalarWhereInput | FormSubmissionScalarWhereInput[]
+  }
+
+  export type MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput> | MarketingCampaignCreateWithoutBusinessInput[] | MarketingCampaignUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBusinessInput | MarketingCampaignCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingCampaignUpsertWithWhereUniqueWithoutBusinessInput | MarketingCampaignUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingCampaignCreateManyBusinessInputEnvelope
+    set?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    disconnect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    delete?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+    update?: MarketingCampaignUpdateWithWhereUniqueWithoutBusinessInput | MarketingCampaignUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingCampaignUpdateManyWithWhereWithoutBusinessInput | MarketingCampaignUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput> | MarketingConsentEventCreateWithoutBusinessInput[] | MarketingConsentEventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutBusinessInput | MarketingConsentEventCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutBusinessInput | MarketingConsentEventUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingConsentEventCreateManyBusinessInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutBusinessInput | MarketingConsentEventUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutBusinessInput | MarketingConsentEventUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+  }
+
+  export type MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput> | MarketingDoNotEmailCreateWithoutBusinessInput[] | MarketingDoNotEmailUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: MarketingDoNotEmailCreateOrConnectWithoutBusinessInput | MarketingDoNotEmailCreateOrConnectWithoutBusinessInput[]
+    upsert?: MarketingDoNotEmailUpsertWithWhereUniqueWithoutBusinessInput | MarketingDoNotEmailUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: MarketingDoNotEmailCreateManyBusinessInputEnvelope
+    set?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    disconnect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    delete?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    connect?: MarketingDoNotEmailWhereUniqueInput | MarketingDoNotEmailWhereUniqueInput[]
+    update?: MarketingDoNotEmailUpdateWithWhereUniqueWithoutBusinessInput | MarketingDoNotEmailUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: MarketingDoNotEmailUpdateManyWithWhereWithoutBusinessInput | MarketingDoNotEmailUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: MarketingDoNotEmailScalarWhereInput | MarketingDoNotEmailScalarWhereInput[]
   }
 
   export type QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput = {
@@ -114434,6 +123168,20 @@ export namespace Prisma {
     connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
   }
 
+  export type MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput> | MarketingCampaignRecipientCreateWithoutCustomerInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput | MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCustomerInputEnvelope
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput> | MarketingConsentEventCreateWithoutCustomerInput[] | MarketingConsentEventUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCustomerInput | MarketingConsentEventCreateOrConnectWithoutCustomerInput[]
+    createMany?: MarketingConsentEventCreateManyCustomerInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+  }
+
   export type OrderUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -114488,6 +123236,20 @@ export namespace Prisma {
     connectOrCreate?: InvoiceCreateOrConnectWithoutCustomerInput | InvoiceCreateOrConnectWithoutCustomerInput[]
     createMany?: InvoiceCreateManyCustomerInputEnvelope
     connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput> | MarketingCampaignRecipientCreateWithoutCustomerInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput | MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCustomerInputEnvelope
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput> | MarketingConsentEventCreateWithoutCustomerInput[] | MarketingConsentEventUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCustomerInput | MarketingConsentEventCreateOrConnectWithoutCustomerInput[]
+    createMany?: MarketingConsentEventCreateManyCustomerInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
   }
 
   export type UserUpdateOneWithoutCustomersNestedInput = {
@@ -114620,6 +123382,34 @@ export namespace Prisma {
     deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
   }
 
+  export type MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput> | MarketingCampaignRecipientCreateWithoutCustomerInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput | MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput[]
+    upsert?: MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCustomerInput | MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCustomerInputEnvelope
+    set?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    disconnect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    delete?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    update?: MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCustomerInput | MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: MarketingCampaignRecipientUpdateManyWithWhereWithoutCustomerInput | MarketingCampaignRecipientUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput> | MarketingConsentEventCreateWithoutCustomerInput[] | MarketingConsentEventUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCustomerInput | MarketingConsentEventCreateOrConnectWithoutCustomerInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutCustomerInput | MarketingConsentEventUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: MarketingConsentEventCreateManyCustomerInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutCustomerInput | MarketingConsentEventUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutCustomerInput | MarketingConsentEventUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+  }
+
   export type OrderUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<OrderCreateWithoutCustomerInput, OrderUncheckedCreateWithoutCustomerInput> | OrderCreateWithoutCustomerInput[] | OrderUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutCustomerInput | OrderCreateOrConnectWithoutCustomerInput[]
@@ -114730,6 +123520,34 @@ export namespace Prisma {
     update?: InvoiceUpdateWithWhereUniqueWithoutCustomerInput | InvoiceUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: InvoiceUpdateManyWithWhereWithoutCustomerInput | InvoiceUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput> | MarketingCampaignRecipientCreateWithoutCustomerInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput | MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput[]
+    upsert?: MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCustomerInput | MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCustomerInputEnvelope
+    set?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    disconnect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    delete?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    update?: MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCustomerInput | MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: MarketingCampaignRecipientUpdateManyWithWhereWithoutCustomerInput | MarketingCampaignRecipientUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput> | MarketingConsentEventCreateWithoutCustomerInput[] | MarketingConsentEventUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCustomerInput | MarketingConsentEventCreateOrConnectWithoutCustomerInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutCustomerInput | MarketingConsentEventUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: MarketingConsentEventCreateManyCustomerInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutCustomerInput | MarketingConsentEventUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutCustomerInput | MarketingConsentEventUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
   }
 
   export type CustomerCreateNestedOneWithoutShippingAddressesInput = {
@@ -116379,6 +125197,266 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutFormSubmissionsInput, BusinessUpdateWithoutFormSubmissionsInput>, BusinessUncheckedUpdateWithoutFormSubmissionsInput>
   }
 
+  export type BusinessCreateNestedOneWithoutMarketingCampaignsInput = {
+    create?: XOR<BusinessCreateWithoutMarketingCampaignsInput, BusinessUncheckedCreateWithoutMarketingCampaignsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingCampaignsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutMarketingCampaignsCreatedInput = {
+    create?: XOR<UserCreateWithoutMarketingCampaignsCreatedInput, UserUncheckedCreateWithoutMarketingCampaignsCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMarketingCampaignsCreatedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type MarketingCampaignBatchCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput> | MarketingCampaignBatchCreateWithoutCampaignInput[] | MarketingCampaignBatchUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignBatchCreateOrConnectWithoutCampaignInput | MarketingCampaignBatchCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingCampaignBatchCreateManyCampaignInputEnvelope
+    connect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput> | MarketingCampaignRecipientCreateWithoutCampaignInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput | MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCampaignInputEnvelope
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput> | MarketingConsentEventCreateWithoutCampaignInput[] | MarketingConsentEventUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCampaignInput | MarketingConsentEventCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingConsentEventCreateManyCampaignInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput> | MarketingCampaignBatchCreateWithoutCampaignInput[] | MarketingCampaignBatchUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignBatchCreateOrConnectWithoutCampaignInput | MarketingCampaignBatchCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingCampaignBatchCreateManyCampaignInputEnvelope
+    connect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+  }
+
+  export type MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput> | MarketingCampaignRecipientCreateWithoutCampaignInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput | MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCampaignInputEnvelope
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput> | MarketingConsentEventCreateWithoutCampaignInput[] | MarketingConsentEventUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCampaignInput | MarketingConsentEventCreateOrConnectWithoutCampaignInput[]
+    createMany?: MarketingConsentEventCreateManyCampaignInputEnvelope
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput = {
+    create?: XOR<BusinessCreateWithoutMarketingCampaignsInput, BusinessUncheckedCreateWithoutMarketingCampaignsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingCampaignsInput
+    upsert?: BusinessUpsertWithoutMarketingCampaignsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutMarketingCampaignsInput, BusinessUpdateWithoutMarketingCampaignsInput>, BusinessUncheckedUpdateWithoutMarketingCampaignsInput>
+  }
+
+  export type UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput = {
+    create?: XOR<UserCreateWithoutMarketingCampaignsCreatedInput, UserUncheckedCreateWithoutMarketingCampaignsCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMarketingCampaignsCreatedInput
+    upsert?: UserUpsertWithoutMarketingCampaignsCreatedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMarketingCampaignsCreatedInput, UserUpdateWithoutMarketingCampaignsCreatedInput>, UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput>
+  }
+
+  export type MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput> | MarketingCampaignBatchCreateWithoutCampaignInput[] | MarketingCampaignBatchUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignBatchCreateOrConnectWithoutCampaignInput | MarketingCampaignBatchCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput | MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingCampaignBatchCreateManyCampaignInputEnvelope
+    set?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    disconnect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    delete?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    connect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    update?: MarketingCampaignBatchUpdateWithWhereUniqueWithoutCampaignInput | MarketingCampaignBatchUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingCampaignBatchUpdateManyWithWhereWithoutCampaignInput | MarketingCampaignBatchUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingCampaignBatchScalarWhereInput | MarketingCampaignBatchScalarWhereInput[]
+  }
+
+  export type MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput> | MarketingCampaignRecipientCreateWithoutCampaignInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput | MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput | MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCampaignInputEnvelope
+    set?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    disconnect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    delete?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    update?: MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput | MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingCampaignRecipientUpdateManyWithWhereWithoutCampaignInput | MarketingCampaignRecipientUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput> | MarketingConsentEventCreateWithoutCampaignInput[] | MarketingConsentEventUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCampaignInput | MarketingConsentEventCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutCampaignInput | MarketingConsentEventUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingConsentEventCreateManyCampaignInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutCampaignInput | MarketingConsentEventUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutCampaignInput | MarketingConsentEventUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+  }
+
+  export type MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput> | MarketingCampaignBatchCreateWithoutCampaignInput[] | MarketingCampaignBatchUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignBatchCreateOrConnectWithoutCampaignInput | MarketingCampaignBatchCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput | MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingCampaignBatchCreateManyCampaignInputEnvelope
+    set?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    disconnect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    delete?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    connect?: MarketingCampaignBatchWhereUniqueInput | MarketingCampaignBatchWhereUniqueInput[]
+    update?: MarketingCampaignBatchUpdateWithWhereUniqueWithoutCampaignInput | MarketingCampaignBatchUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingCampaignBatchUpdateManyWithWhereWithoutCampaignInput | MarketingCampaignBatchUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingCampaignBatchScalarWhereInput | MarketingCampaignBatchScalarWhereInput[]
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput> | MarketingCampaignRecipientCreateWithoutCampaignInput[] | MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput | MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput | MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingCampaignRecipientCreateManyCampaignInputEnvelope
+    set?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    disconnect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    delete?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    connect?: MarketingCampaignRecipientWhereUniqueInput | MarketingCampaignRecipientWhereUniqueInput[]
+    update?: MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput | MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingCampaignRecipientUpdateManyWithWhereWithoutCampaignInput | MarketingCampaignRecipientUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput> | MarketingConsentEventCreateWithoutCampaignInput[] | MarketingConsentEventUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: MarketingConsentEventCreateOrConnectWithoutCampaignInput | MarketingConsentEventCreateOrConnectWithoutCampaignInput[]
+    upsert?: MarketingConsentEventUpsertWithWhereUniqueWithoutCampaignInput | MarketingConsentEventUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: MarketingConsentEventCreateManyCampaignInputEnvelope
+    set?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    disconnect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    delete?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    connect?: MarketingConsentEventWhereUniqueInput | MarketingConsentEventWhereUniqueInput[]
+    update?: MarketingConsentEventUpdateWithWhereUniqueWithoutCampaignInput | MarketingConsentEventUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: MarketingConsentEventUpdateManyWithWhereWithoutCampaignInput | MarketingConsentEventUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+  }
+
+  export type MarketingCampaignCreateNestedOneWithoutBatchesInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBatchesInput, MarketingCampaignUncheckedCreateWithoutBatchesInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBatchesInput
+    connect?: MarketingCampaignWhereUniqueInput
+  }
+
+  export type MarketingCampaignUpdateOneRequiredWithoutBatchesNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutBatchesInput, MarketingCampaignUncheckedCreateWithoutBatchesInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutBatchesInput
+    upsert?: MarketingCampaignUpsertWithoutBatchesInput
+    connect?: MarketingCampaignWhereUniqueInput
+    update?: XOR<XOR<MarketingCampaignUpdateToOneWithWhereWithoutBatchesInput, MarketingCampaignUpdateWithoutBatchesInput>, MarketingCampaignUncheckedUpdateWithoutBatchesInput>
+  }
+
+  export type MarketingCampaignCreateNestedOneWithoutRecipientsInput = {
+    create?: XOR<MarketingCampaignCreateWithoutRecipientsInput, MarketingCampaignUncheckedCreateWithoutRecipientsInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutRecipientsInput
+    connect?: MarketingCampaignWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutCampaignRecipientsInput = {
+    create?: XOR<CustomerCreateWithoutCampaignRecipientsInput, CustomerUncheckedCreateWithoutCampaignRecipientsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCampaignRecipientsInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type MarketingCampaignUpdateOneRequiredWithoutRecipientsNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutRecipientsInput, MarketingCampaignUncheckedCreateWithoutRecipientsInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutRecipientsInput
+    upsert?: MarketingCampaignUpsertWithoutRecipientsInput
+    connect?: MarketingCampaignWhereUniqueInput
+    update?: XOR<XOR<MarketingCampaignUpdateToOneWithWhereWithoutRecipientsInput, MarketingCampaignUpdateWithoutRecipientsInput>, MarketingCampaignUncheckedUpdateWithoutRecipientsInput>
+  }
+
+  export type CustomerUpdateOneWithoutCampaignRecipientsNestedInput = {
+    create?: XOR<CustomerCreateWithoutCampaignRecipientsInput, CustomerUncheckedCreateWithoutCampaignRecipientsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCampaignRecipientsInput
+    upsert?: CustomerUpsertWithoutCampaignRecipientsInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutCampaignRecipientsInput, CustomerUpdateWithoutCampaignRecipientsInput>, CustomerUncheckedUpdateWithoutCampaignRecipientsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutMarketingConsentEventsInput = {
+    create?: XOR<BusinessCreateWithoutMarketingConsentEventsInput, BusinessUncheckedCreateWithoutMarketingConsentEventsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingConsentEventsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutConsentEventsInput = {
+    create?: XOR<CustomerCreateWithoutConsentEventsInput, CustomerUncheckedCreateWithoutConsentEventsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutConsentEventsInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type MarketingCampaignCreateNestedOneWithoutConsentEventsInput = {
+    create?: XOR<MarketingCampaignCreateWithoutConsentEventsInput, MarketingCampaignUncheckedCreateWithoutConsentEventsInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutConsentEventsInput
+    connect?: MarketingCampaignWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutMarketingConsentEventsNestedInput = {
+    create?: XOR<BusinessCreateWithoutMarketingConsentEventsInput, BusinessUncheckedCreateWithoutMarketingConsentEventsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingConsentEventsInput
+    upsert?: BusinessUpsertWithoutMarketingConsentEventsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutMarketingConsentEventsInput, BusinessUpdateWithoutMarketingConsentEventsInput>, BusinessUncheckedUpdateWithoutMarketingConsentEventsInput>
+  }
+
+  export type CustomerUpdateOneWithoutConsentEventsNestedInput = {
+    create?: XOR<CustomerCreateWithoutConsentEventsInput, CustomerUncheckedCreateWithoutConsentEventsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutConsentEventsInput
+    upsert?: CustomerUpsertWithoutConsentEventsInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutConsentEventsInput, CustomerUpdateWithoutConsentEventsInput>, CustomerUncheckedUpdateWithoutConsentEventsInput>
+  }
+
+  export type MarketingCampaignUpdateOneWithoutConsentEventsNestedInput = {
+    create?: XOR<MarketingCampaignCreateWithoutConsentEventsInput, MarketingCampaignUncheckedCreateWithoutConsentEventsInput>
+    connectOrCreate?: MarketingCampaignCreateOrConnectWithoutConsentEventsInput
+    upsert?: MarketingCampaignUpsertWithoutConsentEventsInput
+    disconnect?: MarketingCampaignWhereInput | boolean
+    delete?: MarketingCampaignWhereInput | boolean
+    connect?: MarketingCampaignWhereUniqueInput
+    update?: XOR<XOR<MarketingCampaignUpdateToOneWithWhereWithoutConsentEventsInput, MarketingCampaignUpdateWithoutConsentEventsInput>, MarketingCampaignUncheckedUpdateWithoutConsentEventsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutMarketingDoNotEmailInput = {
+    create?: XOR<BusinessCreateWithoutMarketingDoNotEmailInput, BusinessUncheckedCreateWithoutMarketingDoNotEmailInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingDoNotEmailInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutMarketingDoNotEmailNestedInput = {
+    create?: XOR<BusinessCreateWithoutMarketingDoNotEmailInput, BusinessUncheckedCreateWithoutMarketingDoNotEmailInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutMarketingDoNotEmailInput
+    upsert?: BusinessUpsertWithoutMarketingDoNotEmailInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutMarketingDoNotEmailInput, BusinessUpdateWithoutMarketingDoNotEmailInput>, BusinessUncheckedUpdateWithoutMarketingDoNotEmailInput>
+  }
+
   export type BusinessCreateNestedOneWithoutQuickBooksConnectionInput = {
     create?: XOR<BusinessCreateWithoutQuickBooksConnectionInput, BusinessUncheckedCreateWithoutQuickBooksConnectionInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksConnectionInput
@@ -117314,6 +126392,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -117332,6 +126415,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutUserInput = {
@@ -117344,6 +126429,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -117362,6 +126452,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutUserInput = {
@@ -117536,6 +126628,70 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type MarketingCampaignCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
+    batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignCreateOrConnectWithoutCreatedByInput = {
+    where: MarketingCampaignWhereUniqueInput
+    create: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type MarketingCampaignCreateManyCreatedByInputEnvelope = {
+    data: MarketingCampaignCreateManyCreatedByInput | MarketingCampaignCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SessionUpsertWithWhereUniqueWithoutUserInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
@@ -117664,6 +126820,11 @@ export namespace Prisma {
     phone?: StringNullableFilter<"Customer"> | string | null
     stripeCustomerId?: StringNullableFilter<"Customer"> | string | null
     acceptsMarketing?: BoolFilter<"Customer"> | boolean
+    marketingConsentAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingConsentSource?: StringNullableFilter<"Customer"> | string | null
+    marketingUnsubscribedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    marketingSuppressionReason?: StringNullableFilter<"Customer"> | string | null
     totalSpent?: IntFilter<"Customer"> | number
     orderCount?: IntFilter<"Customer"> | number
     loyaltyPoints?: IntFilter<"Customer"> | number
@@ -117816,6 +126977,50 @@ export namespace Prisma {
     createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
   }
 
+  export type MarketingCampaignUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: MarketingCampaignWhereUniqueInput
+    update: XOR<MarketingCampaignUpdateWithoutCreatedByInput, MarketingCampaignUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<MarketingCampaignCreateWithoutCreatedByInput, MarketingCampaignUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: MarketingCampaignWhereUniqueInput
+    data: XOR<MarketingCampaignUpdateWithoutCreatedByInput, MarketingCampaignUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput = {
+    where: MarketingCampaignScalarWhereInput
+    data: XOR<MarketingCampaignUpdateManyMutationInput, MarketingCampaignUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type MarketingCampaignScalarWhereInput = {
+    AND?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+    OR?: MarketingCampaignScalarWhereInput[]
+    NOT?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+    id?: StringFilter<"MarketingCampaign"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaign"> | Date | string
+    businessId?: StringFilter<"MarketingCampaign"> | string
+    createdById?: StringNullableFilter<"MarketingCampaign"> | string | null
+    subject?: StringFilter<"MarketingCampaign"> | string
+    previewText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    contentFormat?: StringFilter<"MarketingCampaign"> | string
+    bodyText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    bodyJson?: JsonNullableFilter<"MarketingCampaign">
+    status?: StringFilter<"MarketingCampaign"> | string
+    renderedHtml?: StringNullableFilter<"MarketingCampaign"> | string | null
+    renderedText?: StringNullableFilter<"MarketingCampaign"> | string | null
+    fromAddress?: StringNullableFilter<"MarketingCampaign"> | string | null
+    replyTo?: StringNullableFilter<"MarketingCampaign"> | string | null
+    baseUrl?: StringNullableFilter<"MarketingCampaign"> | string | null
+    recipientCount?: IntFilter<"MarketingCampaign"> | number
+    queuedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    startedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+  }
+
   export type UserCreateWithoutMembershipsInput = {
     id?: string
     name: string
@@ -117834,6 +127039,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -117854,6 +127060,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -117972,6 +127179,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -118095,6 +127305,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -118141,6 +127354,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -118161,6 +127375,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessUpsertWithoutMembershipsInput = {
@@ -118285,6 +127500,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -118408,6 +127626,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -118438,6 +127659,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -118458,6 +127680,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -118494,6 +127717,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -118514,6 +127738,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -118534,6 +127759,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -118554,6 +127780,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -118590,6 +127817,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -118610,6 +127838,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ProductCreateWithoutBusinessInput = {
@@ -118916,6 +128145,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -118934,6 +128168,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -118946,6 +128182,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -118964,6 +128205,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -120080,6 +129323,128 @@ export namespace Prisma {
 
   export type FormSubmissionCreateManyBusinessInputEnvelope = {
     data: FormSubmissionCreateManyBusinessInput | FormSubmissionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingCampaignCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
+    batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignCreateOrConnectWithoutBusinessInput = {
+    where: MarketingCampaignWhereUniqueInput
+    create: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingCampaignCreateManyBusinessInputEnvelope = {
+    data: MarketingCampaignCreateManyBusinessInput | MarketingCampaignCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingConsentEventCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    customer?: CustomerCreateNestedOneWithoutConsentEventsInput
+    campaign?: MarketingCampaignCreateNestedOneWithoutConsentEventsInput
+  }
+
+  export type MarketingConsentEventUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
+  export type MarketingConsentEventCreateOrConnectWithoutBusinessInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    create: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingConsentEventCreateManyBusinessInputEnvelope = {
+    data: MarketingConsentEventCreateManyBusinessInput | MarketingConsentEventCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingDoNotEmailCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    emailHash: string
+    reason: string
+  }
+
+  export type MarketingDoNotEmailUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    emailHash: string
+    reason: string
+  }
+
+  export type MarketingDoNotEmailCreateOrConnectWithoutBusinessInput = {
+    where: MarketingDoNotEmailWhereUniqueInput
+    create: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingDoNotEmailCreateManyBusinessInputEnvelope = {
+    data: MarketingDoNotEmailCreateManyBusinessInput | MarketingDoNotEmailCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -121753,6 +131118,81 @@ export namespace Prisma {
     businessId?: StringFilter<"FormSubmission"> | string
   }
 
+  export type MarketingCampaignUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingCampaignWhereUniqueInput
+    update: XOR<MarketingCampaignUpdateWithoutBusinessInput, MarketingCampaignUncheckedUpdateWithoutBusinessInput>
+    create: XOR<MarketingCampaignCreateWithoutBusinessInput, MarketingCampaignUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingCampaignUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingCampaignWhereUniqueInput
+    data: XOR<MarketingCampaignUpdateWithoutBusinessInput, MarketingCampaignUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type MarketingCampaignUpdateManyWithWhereWithoutBusinessInput = {
+    where: MarketingCampaignScalarWhereInput
+    data: XOR<MarketingCampaignUpdateManyMutationInput, MarketingCampaignUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type MarketingConsentEventUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    update: XOR<MarketingConsentEventUpdateWithoutBusinessInput, MarketingConsentEventUncheckedUpdateWithoutBusinessInput>
+    create: XOR<MarketingConsentEventCreateWithoutBusinessInput, MarketingConsentEventUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingConsentEventUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    data: XOR<MarketingConsentEventUpdateWithoutBusinessInput, MarketingConsentEventUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type MarketingConsentEventUpdateManyWithWhereWithoutBusinessInput = {
+    where: MarketingConsentEventScalarWhereInput
+    data: XOR<MarketingConsentEventUpdateManyMutationInput, MarketingConsentEventUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type MarketingConsentEventScalarWhereInput = {
+    AND?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+    OR?: MarketingConsentEventScalarWhereInput[]
+    NOT?: MarketingConsentEventScalarWhereInput | MarketingConsentEventScalarWhereInput[]
+    id?: StringFilter<"MarketingConsentEvent"> | string
+    createdAt?: DateTimeFilter<"MarketingConsentEvent"> | Date | string
+    businessId?: StringFilter<"MarketingConsentEvent"> | string
+    customerId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    type?: StringFilter<"MarketingConsentEvent"> | string
+    source?: StringFilter<"MarketingConsentEvent"> | string
+    ip?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    userAgent?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    wording?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+    campaignId?: StringNullableFilter<"MarketingConsentEvent"> | string | null
+  }
+
+  export type MarketingDoNotEmailUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingDoNotEmailWhereUniqueInput
+    update: XOR<MarketingDoNotEmailUpdateWithoutBusinessInput, MarketingDoNotEmailUncheckedUpdateWithoutBusinessInput>
+    create: XOR<MarketingDoNotEmailCreateWithoutBusinessInput, MarketingDoNotEmailUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type MarketingDoNotEmailUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: MarketingDoNotEmailWhereUniqueInput
+    data: XOR<MarketingDoNotEmailUpdateWithoutBusinessInput, MarketingDoNotEmailUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type MarketingDoNotEmailUpdateManyWithWhereWithoutBusinessInput = {
+    where: MarketingDoNotEmailScalarWhereInput
+    data: XOR<MarketingDoNotEmailUpdateManyMutationInput, MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type MarketingDoNotEmailScalarWhereInput = {
+    AND?: MarketingDoNotEmailScalarWhereInput | MarketingDoNotEmailScalarWhereInput[]
+    OR?: MarketingDoNotEmailScalarWhereInput[]
+    NOT?: MarketingDoNotEmailScalarWhereInput | MarketingDoNotEmailScalarWhereInput[]
+    id?: StringFilter<"MarketingDoNotEmail"> | string
+    createdAt?: DateTimeFilter<"MarketingDoNotEmail"> | Date | string
+    businessId?: StringFilter<"MarketingDoNotEmail"> | string
+    emailHash?: StringFilter<"MarketingDoNotEmail"> | string
+    reason?: StringFilter<"MarketingDoNotEmail"> | string
+  }
+
   export type QuickBooksConnectionUpsertWithoutBusinessInput = {
     update: XOR<QuickBooksConnectionUpdateWithoutBusinessInput, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
     create: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
@@ -122342,6 +131782,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -122465,6 +131908,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -122604,6 +132050,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -122727,6 +132176,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -122850,6 +132302,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -122973,6 +132428,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -123112,6 +132570,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -123235,6 +132696,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -123407,6 +132871,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -123530,6 +132997,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -124164,6 +133634,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -124287,6 +133760,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -125184,6 +134660,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -125307,6 +134786,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -125508,6 +134990,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -125631,6 +135116,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -126501,6 +135989,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -126624,6 +136115,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -126785,6 +136279,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -126908,6 +136405,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -127347,6 +136847,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -127470,6 +136973,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -127661,6 +137167,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -127784,6 +137293,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -128040,6 +137552,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -128163,6 +137678,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -128302,6 +137820,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -128425,6 +137946,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -128548,6 +138072,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -128671,6 +138198,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -128858,6 +138388,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -128981,6 +138514,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -129155,6 +138691,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -129278,6 +138817,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -129458,6 +139000,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -129581,6 +139126,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -129809,6 +139357,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -129932,6 +139483,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -130182,6 +139736,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -130305,6 +139862,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -130335,6 +139895,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCustomersInput = {
@@ -130355,6 +139916,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCustomersInput = {
@@ -130473,6 +140035,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -130596,6 +140161,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -131141,6 +140709,86 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type MarketingCampaignRecipientCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+    campaign: MarketingCampaignCreateNestedOneWithoutRecipientsInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingCampaignRecipientCreateOrConnectWithoutCustomerInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    create: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type MarketingCampaignRecipientCreateManyCustomerInputEnvelope = {
+    data: MarketingCampaignRecipientCreateManyCustomerInput | MarketingCampaignRecipientCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingConsentEventCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingConsentEventsInput
+    campaign?: MarketingCampaignCreateNestedOneWithoutConsentEventsInput
+  }
+
+  export type MarketingConsentEventUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
+  export type MarketingConsentEventCreateOrConnectWithoutCustomerInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    create: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type MarketingConsentEventCreateManyCustomerInputEnvelope = {
+    data: MarketingConsentEventCreateManyCustomerInput | MarketingConsentEventCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCustomersInput = {
     update: XOR<UserUpdateWithoutCustomersInput, UserUncheckedUpdateWithoutCustomersInput>
     create: XOR<UserCreateWithoutCustomersInput, UserUncheckedCreateWithoutCustomersInput>
@@ -131170,6 +140818,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -131190,6 +140839,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessUpsertWithoutCustomersInput = {
@@ -131314,6 +140964,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -131437,6 +141090,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -131598,6 +141254,60 @@ export namespace Prisma {
     data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    update: XOR<MarketingCampaignRecipientUpdateWithoutCustomerInput, MarketingCampaignRecipientUncheckedUpdateWithoutCustomerInput>
+    create: XOR<MarketingCampaignRecipientCreateWithoutCustomerInput, MarketingCampaignRecipientUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    data: XOR<MarketingCampaignRecipientUpdateWithoutCustomerInput, MarketingCampaignRecipientUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type MarketingCampaignRecipientUpdateManyWithWhereWithoutCustomerInput = {
+    where: MarketingCampaignRecipientScalarWhereInput
+    data: XOR<MarketingCampaignRecipientUpdateManyMutationInput, MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerInput>
+  }
+
+  export type MarketingCampaignRecipientScalarWhereInput = {
+    AND?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+    OR?: MarketingCampaignRecipientScalarWhereInput[]
+    NOT?: MarketingCampaignRecipientScalarWhereInput | MarketingCampaignRecipientScalarWhereInput[]
+    id?: StringFilter<"MarketingCampaignRecipient"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignRecipient"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignRecipient"> | string
+    businessId?: StringFilter<"MarketingCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    email?: StringFilter<"MarketingCampaignRecipient"> | string
+    batchIndex?: IntFilter<"MarketingCampaignRecipient"> | number
+    status?: StringFilter<"MarketingCampaignRecipient"> | string
+    resendId?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    error?: StringNullableFilter<"MarketingCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    deliveredAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    bouncedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    complainedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+    unsubscribedAt?: DateTimeNullableFilter<"MarketingCampaignRecipient"> | Date | string | null
+  }
+
+  export type MarketingConsentEventUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    update: XOR<MarketingConsentEventUpdateWithoutCustomerInput, MarketingConsentEventUncheckedUpdateWithoutCustomerInput>
+    create: XOR<MarketingConsentEventCreateWithoutCustomerInput, MarketingConsentEventUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type MarketingConsentEventUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    data: XOR<MarketingConsentEventUpdateWithoutCustomerInput, MarketingConsentEventUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type MarketingConsentEventUpdateManyWithWhereWithoutCustomerInput = {
+    where: MarketingConsentEventScalarWhereInput
+    data: XOR<MarketingConsentEventUpdateManyMutationInput, MarketingConsentEventUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type CustomerCreateWithoutShippingAddressesInput = {
     id?: string
     createdAt?: Date | string
@@ -131608,6 +141318,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -131626,6 +141341,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutShippingAddressesInput = {
@@ -131638,6 +141355,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -131656,6 +141378,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutShippingAddressesInput = {
@@ -131886,6 +141610,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -131904,6 +141633,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutShippingAddressesInput = {
@@ -131916,6 +141647,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -131934,6 +141670,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutShippingAddressInput = {
@@ -132184,6 +141922,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -132307,6 +142048,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -132334,6 +142078,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -132352,6 +142101,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutOrdersInput = {
@@ -132364,6 +142115,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -132382,6 +142138,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutOrdersInput = {
@@ -132918,6 +142676,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -133041,6 +142802,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -133074,6 +142838,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -133092,6 +142861,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutOrdersInput = {
@@ -133104,6 +142875,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -133122,6 +142898,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ShippingAddressUpsertWithoutOrdersInput = {
@@ -134097,6 +143875,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -134220,6 +144001,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -134486,6 +144270,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -134609,6 +144396,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -134986,6 +144776,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -135109,6 +144902,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -135268,6 +145064,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryHistoryInput = {
@@ -135288,6 +145085,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryHistoryInput = {
@@ -135632,6 +145430,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -135755,6 +145556,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -135932,6 +145736,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -135952,6 +145757,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessCreateWithoutBaseInventoryUnitsInput = {
@@ -136065,6 +145871,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -136188,6 +145997,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -136515,6 +146327,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -136638,6 +146453,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -136809,6 +146627,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -136932,6 +146753,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -136967,6 +146791,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput = {
@@ -136987,6 +146812,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput = {
@@ -137194,6 +147020,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -137317,6 +147146,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -137358,6 +147190,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput = {
@@ -137378,6 +147211,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput = {
@@ -137560,6 +147394,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -137683,6 +147520,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -137914,6 +147754,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -138037,6 +147880,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -138215,6 +148061,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -138338,6 +148187,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -138477,6 +148329,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -138600,6 +148455,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -138723,6 +148581,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -138846,6 +148707,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -138985,6 +148849,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -139108,6 +148975,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -139231,6 +149101,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -139354,6 +149227,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -139389,6 +149265,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutEditorNotesInput = {
@@ -139409,6 +149286,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutEditorNotesInput = {
@@ -139538,6 +149416,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -139661,6 +149542,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -139702,6 +149586,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEditorNotesInput = {
@@ -139722,6 +149607,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -139835,6 +149721,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -139958,6 +149847,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -140097,6 +149989,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -140220,6 +150115,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -140343,6 +150241,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -140466,6 +150367,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -140637,6 +150541,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -140760,6 +150667,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -140998,6 +150908,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -141121,6 +151034,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -141148,6 +151064,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -141166,6 +151087,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialsInput = {
@@ -141178,6 +151101,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -141196,6 +151124,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialsInput = {
@@ -141325,6 +151255,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -141448,6 +151381,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -141481,6 +151417,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -141499,6 +151440,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialsInput = {
@@ -141511,6 +151454,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -141529,6 +151477,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BusinessCreateWithoutTestimonialInvitesInput = {
@@ -141642,6 +151592,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -141765,6 +151718,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -141792,6 +151748,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -141810,6 +151771,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -141822,6 +151785,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -141840,6 +151808,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -141969,6 +151939,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -142092,6 +152065,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -142125,6 +152101,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -142143,6 +152124,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -142155,6 +152138,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -142173,6 +152161,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ProductCreateWithoutReviewsInput = {
@@ -142290,6 +152280,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -142308,6 +152303,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutReviewsInput = {
@@ -142320,6 +152317,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -142338,6 +152340,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutReviewsInput = {
@@ -142590,6 +152594,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -142608,6 +152617,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutReviewsInput = {
@@ -142620,6 +152631,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -142638,6 +152654,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithoutReviewsInput = {
@@ -142984,6 +153002,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -143107,6 +153128,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -143142,6 +153166,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInvitesInput = {
@@ -143162,6 +153187,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInvitesInput = {
@@ -143291,6 +153317,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -143414,6 +153443,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -143455,6 +153487,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
@@ -143475,6 +153508,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessCreateWithoutTeamInvitesInput = {
@@ -143588,6 +153622,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -143711,6 +153748,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -143850,6 +153890,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -143973,6 +154016,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -144096,6 +154142,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -144219,6 +154268,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -144380,6 +154432,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -144503,6 +154558,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -144805,6 +154863,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -144928,6 +154989,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -145178,6 +155242,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -145301,6 +155368,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -145424,6 +155494,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -145547,6 +155620,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -145738,6 +155814,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -145861,6 +155940,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -146089,6 +156171,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -146212,6 +156297,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -146398,6 +156486,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -146521,6 +156612,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -146644,6 +156738,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -146767,6 +156864,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -146944,6 +157044,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -147067,6 +157170,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -147231,6 +157337,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -147354,6 +157463,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -147524,6 +157636,9 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -147647,6 +157762,2556 @@ export namespace Prisma {
     quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutMarketingCampaignsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutMarketingCampaignsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutMarketingCampaignsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutMarketingCampaignsInput, BusinessUncheckedCreateWithoutMarketingCampaignsInput>
+  }
+
+  export type UserCreateWithoutMarketingCampaignsCreatedInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutMarketingCampaignsCreatedInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutMarketingCampaignsCreatedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMarketingCampaignsCreatedInput, UserUncheckedCreateWithoutMarketingCampaignsCreatedInput>
+  }
+
+  export type MarketingCampaignBatchCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignBatchUncheckedCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignBatchCreateOrConnectWithoutCampaignInput = {
+    where: MarketingCampaignBatchWhereUniqueInput
+    create: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignBatchCreateManyCampaignInputEnvelope = {
+    data: MarketingCampaignBatchCreateManyCampaignInput | MarketingCampaignBatchCreateManyCampaignInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingCampaignRecipientCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+    customer?: CustomerCreateNestedOneWithoutCampaignRecipientsInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingCampaignRecipientCreateOrConnectWithoutCampaignInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    create: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignRecipientCreateManyCampaignInputEnvelope = {
+    data: MarketingCampaignRecipientCreateManyCampaignInput | MarketingCampaignRecipientCreateManyCampaignInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MarketingConsentEventCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingConsentEventsInput
+    customer?: CustomerCreateNestedOneWithoutConsentEventsInput
+  }
+
+  export type MarketingConsentEventUncheckedCreateWithoutCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+  }
+
+  export type MarketingConsentEventCreateOrConnectWithoutCampaignInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    create: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingConsentEventCreateManyCampaignInputEnvelope = {
+    data: MarketingConsentEventCreateManyCampaignInput | MarketingConsentEventCreateManyCampaignInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutMarketingCampaignsInput = {
+    update: XOR<BusinessUpdateWithoutMarketingCampaignsInput, BusinessUncheckedUpdateWithoutMarketingCampaignsInput>
+    create: XOR<BusinessCreateWithoutMarketingCampaignsInput, BusinessUncheckedCreateWithoutMarketingCampaignsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutMarketingCampaignsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutMarketingCampaignsInput, BusinessUncheckedUpdateWithoutMarketingCampaignsInput>
+  }
+
+  export type BusinessUpdateWithoutMarketingCampaignsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutMarketingCampaignsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type UserUpsertWithoutMarketingCampaignsCreatedInput = {
+    update: XOR<UserUpdateWithoutMarketingCampaignsCreatedInput, UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput>
+    create: XOR<UserCreateWithoutMarketingCampaignsCreatedInput, UserUncheckedCreateWithoutMarketingCampaignsCreatedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMarketingCampaignsCreatedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMarketingCampaignsCreatedInput, UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput>
+  }
+
+  export type UserUpdateWithoutMarketingCampaignsCreatedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingCampaignBatchWhereUniqueInput
+    update: XOR<MarketingCampaignBatchUpdateWithoutCampaignInput, MarketingCampaignBatchUncheckedUpdateWithoutCampaignInput>
+    create: XOR<MarketingCampaignBatchCreateWithoutCampaignInput, MarketingCampaignBatchUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignBatchUpdateWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingCampaignBatchWhereUniqueInput
+    data: XOR<MarketingCampaignBatchUpdateWithoutCampaignInput, MarketingCampaignBatchUncheckedUpdateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignBatchUpdateManyWithWhereWithoutCampaignInput = {
+    where: MarketingCampaignBatchScalarWhereInput
+    data: XOR<MarketingCampaignBatchUpdateManyMutationInput, MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignBatchScalarWhereInput = {
+    AND?: MarketingCampaignBatchScalarWhereInput | MarketingCampaignBatchScalarWhereInput[]
+    OR?: MarketingCampaignBatchScalarWhereInput[]
+    NOT?: MarketingCampaignBatchScalarWhereInput | MarketingCampaignBatchScalarWhereInput[]
+    id?: StringFilter<"MarketingCampaignBatch"> | string
+    createdAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    updatedAt?: DateTimeFilter<"MarketingCampaignBatch"> | Date | string
+    campaignId?: StringFilter<"MarketingCampaignBatch"> | string
+    businessId?: StringFilter<"MarketingCampaignBatch"> | string
+    batchIndex?: IntFilter<"MarketingCampaignBatch"> | number
+    status?: StringFilter<"MarketingCampaignBatch"> | string
+    attempts?: IntFilter<"MarketingCampaignBatch"> | number
+    leaseUntil?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    notBefore?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    firstAttemptAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"MarketingCampaignBatch"> | Date | string | null
+    lastError?: StringNullableFilter<"MarketingCampaignBatch"> | string | null
+  }
+
+  export type MarketingCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    update: XOR<MarketingCampaignRecipientUpdateWithoutCampaignInput, MarketingCampaignRecipientUncheckedUpdateWithoutCampaignInput>
+    create: XOR<MarketingCampaignRecipientCreateWithoutCampaignInput, MarketingCampaignRecipientUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingCampaignRecipientWhereUniqueInput
+    data: XOR<MarketingCampaignRecipientUpdateWithoutCampaignInput, MarketingCampaignRecipientUncheckedUpdateWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignRecipientUpdateManyWithWhereWithoutCampaignInput = {
+    where: MarketingCampaignRecipientScalarWhereInput
+    data: XOR<MarketingCampaignRecipientUpdateManyMutationInput, MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignInput>
+  }
+
+  export type MarketingConsentEventUpsertWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    update: XOR<MarketingConsentEventUpdateWithoutCampaignInput, MarketingConsentEventUncheckedUpdateWithoutCampaignInput>
+    create: XOR<MarketingConsentEventCreateWithoutCampaignInput, MarketingConsentEventUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type MarketingConsentEventUpdateWithWhereUniqueWithoutCampaignInput = {
+    where: MarketingConsentEventWhereUniqueInput
+    data: XOR<MarketingConsentEventUpdateWithoutCampaignInput, MarketingConsentEventUncheckedUpdateWithoutCampaignInput>
+  }
+
+  export type MarketingConsentEventUpdateManyWithWhereWithoutCampaignInput = {
+    where: MarketingConsentEventScalarWhereInput
+    data: XOR<MarketingConsentEventUpdateManyMutationInput, MarketingConsentEventUncheckedUpdateManyWithoutCampaignInput>
+  }
+
+  export type MarketingCampaignCreateWithoutBatchesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
+    createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
+    recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateWithoutBatchesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignCreateOrConnectWithoutBatchesInput = {
+    where: MarketingCampaignWhereUniqueInput
+    create: XOR<MarketingCampaignCreateWithoutBatchesInput, MarketingCampaignUncheckedCreateWithoutBatchesInput>
+  }
+
+  export type MarketingCampaignUpsertWithoutBatchesInput = {
+    update: XOR<MarketingCampaignUpdateWithoutBatchesInput, MarketingCampaignUncheckedUpdateWithoutBatchesInput>
+    create: XOR<MarketingCampaignCreateWithoutBatchesInput, MarketingCampaignUncheckedCreateWithoutBatchesInput>
+    where?: MarketingCampaignWhereInput
+  }
+
+  export type MarketingCampaignUpdateToOneWithWhereWithoutBatchesInput = {
+    where?: MarketingCampaignWhereInput
+    data: XOR<MarketingCampaignUpdateWithoutBatchesInput, MarketingCampaignUncheckedUpdateWithoutBatchesInput>
+  }
+
+  export type MarketingCampaignUpdateWithoutBatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
+    createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
+    recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateWithoutBatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignCreateWithoutRecipientsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
+    createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
+    batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateWithoutRecipientsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignCreateOrConnectWithoutRecipientsInput = {
+    where: MarketingCampaignWhereUniqueInput
+    create: XOR<MarketingCampaignCreateWithoutRecipientsInput, MarketingCampaignUncheckedCreateWithoutRecipientsInput>
+  }
+
+  export type CustomerCreateWithoutCampaignRecipientsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutCampaignRecipientsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutCampaignRecipientsInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutCampaignRecipientsInput, CustomerUncheckedCreateWithoutCampaignRecipientsInput>
+  }
+
+  export type MarketingCampaignUpsertWithoutRecipientsInput = {
+    update: XOR<MarketingCampaignUpdateWithoutRecipientsInput, MarketingCampaignUncheckedUpdateWithoutRecipientsInput>
+    create: XOR<MarketingCampaignCreateWithoutRecipientsInput, MarketingCampaignUncheckedCreateWithoutRecipientsInput>
+    where?: MarketingCampaignWhereInput
+  }
+
+  export type MarketingCampaignUpdateToOneWithWhereWithoutRecipientsInput = {
+    where?: MarketingCampaignWhereInput
+    data: XOR<MarketingCampaignUpdateWithoutRecipientsInput, MarketingCampaignUncheckedUpdateWithoutRecipientsInput>
+  }
+
+  export type MarketingCampaignUpdateWithoutRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
+    createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
+    batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateWithoutRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type CustomerUpsertWithoutCampaignRecipientsInput = {
+    update: XOR<CustomerUpdateWithoutCampaignRecipientsInput, CustomerUncheckedUpdateWithoutCampaignRecipientsInput>
+    create: XOR<CustomerCreateWithoutCampaignRecipientsInput, CustomerUncheckedCreateWithoutCampaignRecipientsInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutCampaignRecipientsInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutCampaignRecipientsInput, CustomerUncheckedUpdateWithoutCampaignRecipientsInput>
+  }
+
+  export type CustomerUpdateWithoutCampaignRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutCampaignRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type BusinessCreateWithoutMarketingConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutMarketingConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutMarketingConsentEventsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutMarketingConsentEventsInput, BusinessUncheckedCreateWithoutMarketingConsentEventsInput>
+  }
+
+  export type CustomerCreateWithoutConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    user?: UserCreateNestedOneWithoutCustomersInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    orders?: OrderCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    stripeCustomerId?: string | null
+    acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
+    totalSpent?: number
+    orderCount?: number
+    loyaltyPoints?: number
+    loyaltyJoinedAt?: Date | string | null
+    birthMonth?: number | null
+    birthDay?: number | null
+    deletionRequestedAt?: Date | string | null
+    anonymizedAt?: Date | string | null
+    notes?: string | null
+    userId?: string | null
+    businessId: string
+    orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
+    shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutCustomerInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutCustomerInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutConsentEventsInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutConsentEventsInput, CustomerUncheckedCreateWithoutConsentEventsInput>
+  }
+
+  export type MarketingCampaignCreateWithoutConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
+    createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
+    batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignUncheckedCreateWithoutConsentEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+    batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
+    recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type MarketingCampaignCreateOrConnectWithoutConsentEventsInput = {
+    where: MarketingCampaignWhereUniqueInput
+    create: XOR<MarketingCampaignCreateWithoutConsentEventsInput, MarketingCampaignUncheckedCreateWithoutConsentEventsInput>
+  }
+
+  export type BusinessUpsertWithoutMarketingConsentEventsInput = {
+    update: XOR<BusinessUpdateWithoutMarketingConsentEventsInput, BusinessUncheckedUpdateWithoutMarketingConsentEventsInput>
+    create: XOR<BusinessCreateWithoutMarketingConsentEventsInput, BusinessUncheckedCreateWithoutMarketingConsentEventsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutMarketingConsentEventsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutMarketingConsentEventsInput, BusinessUncheckedUpdateWithoutMarketingConsentEventsInput>
+  }
+
+  export type BusinessUpdateWithoutMarketingConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutMarketingConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutConsentEventsInput = {
+    update: XOR<CustomerUpdateWithoutConsentEventsInput, CustomerUncheckedUpdateWithoutConsentEventsInput>
+    create: XOR<CustomerCreateWithoutConsentEventsInput, CustomerUncheckedCreateWithoutConsentEventsInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutConsentEventsInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutConsentEventsInput, CustomerUncheckedUpdateWithoutConsentEventsInput>
+  }
+
+  export type CustomerUpdateWithoutConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutCustomersNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    orders?: OrderUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    totalSpent?: IntFieldUpdateOperationsInput | number
+    orderCount?: IntFieldUpdateOperationsInput | number
+    loyaltyPoints?: IntFieldUpdateOperationsInput | number
+    loyaltyJoinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    birthMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    birthDay?: NullableIntFieldUpdateOperationsInput | number | null
+    deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
+    shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutCustomerNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutCustomerNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type MarketingCampaignUpsertWithoutConsentEventsInput = {
+    update: XOR<MarketingCampaignUpdateWithoutConsentEventsInput, MarketingCampaignUncheckedUpdateWithoutConsentEventsInput>
+    create: XOR<MarketingCampaignCreateWithoutConsentEventsInput, MarketingCampaignUncheckedCreateWithoutConsentEventsInput>
+    where?: MarketingCampaignWhereInput
+  }
+
+  export type MarketingCampaignUpdateToOneWithWhereWithoutConsentEventsInput = {
+    where?: MarketingCampaignWhereInput
+    data: XOR<MarketingCampaignUpdateWithoutConsentEventsInput, MarketingCampaignUncheckedUpdateWithoutConsentEventsInput>
+  }
+
+  export type MarketingCampaignUpdateWithoutConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
+    createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
+    batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateWithoutConsentEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type BusinessCreateWithoutMarketingDoNotEmailInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutMarketingDoNotEmailInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutMarketingDoNotEmailInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutMarketingDoNotEmailInput, BusinessUncheckedCreateWithoutMarketingDoNotEmailInput>
+  }
+
+  export type BusinessUpsertWithoutMarketingDoNotEmailInput = {
+    update: XOR<BusinessUpdateWithoutMarketingDoNotEmailInput, BusinessUncheckedUpdateWithoutMarketingDoNotEmailInput>
+    create: XOR<BusinessCreateWithoutMarketingDoNotEmailInput, BusinessUncheckedCreateWithoutMarketingDoNotEmailInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutMarketingDoNotEmailInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutMarketingDoNotEmailInput, BusinessUncheckedUpdateWithoutMarketingDoNotEmailInput>
+  }
+
+  export type BusinessUpdateWithoutMarketingDoNotEmailInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutMarketingDoNotEmailInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -147771,6 +160436,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -147894,6 +160562,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -148033,6 +160704,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -148156,6 +160830,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -148279,6 +160956,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -148402,6 +161082,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -148588,6 +161271,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -148711,6 +161397,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -148887,6 +161576,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -149010,6 +161702,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -149149,6 +161844,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -149272,6 +161970,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -149395,6 +162096,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -149518,6 +162222,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -149544,6 +162251,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -149562,6 +162274,8 @@ export namespace Prisma {
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutInvoicesInput = {
@@ -149574,6 +162288,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -149592,6 +162311,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutInvoicesInput = {
@@ -149786,6 +162507,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -149909,6 +162633,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -149941,6 +162668,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -149959,6 +162691,8 @@ export namespace Prisma {
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutInvoicesInput = {
@@ -149971,6 +162705,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -149989,6 +162728,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type InvoicePaymentUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -150243,6 +162984,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -150366,6 +163110,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -150606,6 +163353,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -150729,6 +163479,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -151048,6 +163801,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -151171,6 +163927,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -151197,6 +163956,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -151215,6 +163979,8 @@ export namespace Prisma {
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutSubscriptionsInput = {
@@ -151227,6 +163993,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -151245,6 +164016,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutSubscriptionsInput = {
@@ -151658,6 +164431,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -151781,6 +164557,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -151813,6 +164592,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -151831,6 +164615,8 @@ export namespace Prisma {
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutSubscriptionsInput = {
@@ -151843,6 +164629,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -151861,6 +164652,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type ProductUpsertWithoutSubscriptionsInput = {
@@ -152200,6 +164993,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -152323,6 +165119,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -152462,6 +165261,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -152585,6 +165387,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -152708,6 +165513,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -152831,6 +165639,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -153008,6 +165819,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -153131,6 +165945,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -153376,6 +166193,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
     forms?: FormCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
@@ -153499,6 +166319,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
     forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
     formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
@@ -153525,6 +166348,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -153543,6 +166371,8 @@ export namespace Prisma {
     reviews?: ProductReviewCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutLoyaltyLedgerInput = {
@@ -153555,6 +166385,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -153573,6 +166408,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutCustomerInput
     subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCustomerInput
+    consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutLoyaltyLedgerInput = {
@@ -153835,6 +166672,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
     forms?: FormUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
@@ -153958,6 +166798,9 @@ export namespace Prisma {
     quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
     forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
     formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
@@ -153990,6 +166833,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -154008,6 +166856,8 @@ export namespace Prisma {
     reviews?: ProductReviewUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutLoyaltyLedgerInput = {
@@ -154020,6 +166870,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -154038,6 +166893,8 @@ export namespace Prisma {
     reviews?: ProductReviewUncheckedUpdateManyWithoutCustomerNestedInput
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type OrderUpsertWithoutLoyaltyLedgerInput = {
@@ -154233,6 +167090,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -154302,6 +167164,30 @@ export namespace Prisma {
     response?: string | null
     resolvedAt?: Date | string | null
     attachmentUrls?: EditorNoteCreateattachmentUrlsInput | string[]
+  }
+
+  export type MarketingCampaignCreateManyCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
   }
 
   export type SessionUpdateWithoutUserInput = {
@@ -154431,6 +167317,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -154449,6 +167340,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutUserInput = {
@@ -154461,6 +167354,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -154479,6 +167377,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutUserInput = {
@@ -154491,6 +167391,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -154684,6 +167589,84 @@ export namespace Prisma {
     attachmentUrls?: EditorNoteUpdateattachmentUrlsInput | string[]
   }
 
+  export type MarketingCampaignUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
+    batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type ProductCreateManyBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -154804,6 +167787,11 @@ export namespace Prisma {
     phone?: string | null
     stripeCustomerId?: string | null
     acceptsMarketing?: boolean
+    marketingConsentAt?: Date | string | null
+    marketingConsentSource?: string | null
+    marketingUnsubscribedAt?: Date | string | null
+    marketingSuppressedAt?: Date | string | null
+    marketingSuppressionReason?: string | null
     totalSpent?: number
     orderCount?: number
     loyaltyPoints?: number
@@ -155185,6 +168173,49 @@ export namespace Prisma {
     tags?: FormSubmissionCreatetagsInput | string[]
     formName: string
     formId: string
+  }
+
+  export type MarketingCampaignCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdById?: string | null
+    subject: string
+    previewText?: string | null
+    contentFormat?: string
+    bodyText?: string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: string
+    renderedHtml?: string | null
+    renderedText?: string | null
+    fromAddress?: string | null
+    replyTo?: string | null
+    baseUrl?: string | null
+    recipientCount?: number
+    queuedAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    canceledAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingConsentEventCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
+  export type MarketingDoNotEmailCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    emailHash: string
+    reason: string
   }
 
   export type QuickBooksInvoiceCreateManyBusinessInput = {
@@ -155738,6 +168769,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -155756,6 +168792,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -155768,6 +168806,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -155786,6 +168829,8 @@ export namespace Prisma {
     subscriptions?: SubscriptionUncheckedUpdateManyWithoutCustomerNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    campaignRecipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -155798,6 +168843,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     acceptsMarketing?: BoolFieldUpdateOperationsInput | boolean
+    marketingConsentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingConsentSource?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingUnsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    marketingSuppressionReason?: NullableStringFieldUpdateOperationsInput | string | null
     totalSpent?: IntFieldUpdateOperationsInput | number
     orderCount?: IntFieldUpdateOperationsInput | number
     loyaltyPoints?: IntFieldUpdateOperationsInput | number
@@ -156947,6 +169997,141 @@ export namespace Prisma {
     tags?: FormSubmissionUpdatetagsInput | string[]
     formName?: StringFieldUpdateOperationsInput | string
     formId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingCampaignUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
+    batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
+    recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+    consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type MarketingCampaignUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: StringFieldUpdateOperationsInput | string
+    previewText?: NullableStringFieldUpdateOperationsInput | string | null
+    contentFormat?: StringFieldUpdateOperationsInput | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyJson?: NullableJsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    renderedHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    renderedText?: NullableStringFieldUpdateOperationsInput | string | null
+    fromAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    replyTo?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    queuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    customer?: CustomerUpdateOneWithoutConsentEventsNestedInput
+    campaign?: MarketingCampaignUpdateOneWithoutConsentEventsNestedInput
+  }
+
+  export type MarketingConsentEventUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingDoNotEmailUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingDoNotEmailUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    emailHash?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
   }
 
   export type QuickBooksInvoiceUpdateWithoutBusinessInput = {
@@ -159017,6 +172202,36 @@ export namespace Prisma {
     createdByUserId?: string | null
   }
 
+  export type MarketingCampaignRecipientCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    campaignId: string
+    businessId: string
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingConsentEventCreateManyCustomerInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+    campaignId?: string | null
+  }
+
   export type OrderUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -159676,6 +172891,96 @@ export namespace Prisma {
     firstViewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastViewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignRecipientUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    campaign?: MarketingCampaignUpdateOneRequiredWithoutRecipientsNestedInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingConsentEventUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingConsentEventsNestedInput
+    campaign?: MarketingCampaignUpdateOneWithoutConsentEventsNestedInput
+  }
+
+  export type MarketingConsentEventUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    campaignId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderCreateManyShippingAddressInput = {
@@ -161254,6 +174559,186 @@ export namespace Prisma {
     tags?: FormSubmissionUpdatetagsInput | string[]
     formName?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MarketingCampaignBatchCreateManyCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    batchIndex: number
+    status?: string
+    attempts?: number
+    leaseUntil?: Date | string | null
+    notBefore?: Date | string | null
+    firstAttemptAt?: Date | string | null
+    sentAt?: Date | string | null
+    lastError?: string | null
+  }
+
+  export type MarketingCampaignRecipientCreateManyCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    email: string
+    batchIndex: number
+    status?: string
+    resendId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    deliveredAt?: Date | string | null
+    bouncedAt?: Date | string | null
+    complainedAt?: Date | string | null
+    unsubscribedAt?: Date | string | null
+  }
+
+  export type MarketingConsentEventCreateManyCampaignInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    type: string
+    source: string
+    ip?: string | null
+    userAgent?: string | null
+    wording?: string | null
+  }
+
+  export type MarketingCampaignBatchUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignBatchUncheckedUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    attempts?: IntFieldUpdateOperationsInput | number
+    leaseUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notBefore?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    firstAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingCampaignRecipientUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    customer?: CustomerUpdateOneWithoutCampaignRecipientsNestedInput
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    batchIndex?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    resendId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deliveredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    complainedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unsubscribedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type MarketingConsentEventUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutMarketingConsentEventsNestedInput
+    customer?: CustomerUpdateOneWithoutConsentEventsNestedInput
+  }
+
+  export type MarketingConsentEventUncheckedUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type MarketingConsentEventUncheckedUpdateManyWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    wording?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type InvoicePaymentCreateManyInvoiceInput = {

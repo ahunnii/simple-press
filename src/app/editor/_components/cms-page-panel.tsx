@@ -76,6 +76,8 @@ export type CmsPagePanelProps = {
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  /** Mirrors the `media` flag — adds "Choose from library" to images. */
+  mediaEnabled?: boolean;
   /** Rich-text uploads in flight — see `useUploadingState`. */
   onUploadingChange?: (uploading: boolean) => void;
 };
@@ -111,6 +113,7 @@ export function CmsPagePanel({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  mediaEnabled,
   onUploadingChange,
 }: CmsPagePanelProps) {
   const isBlog = kind === "blog";
@@ -231,6 +234,7 @@ export function CmsPagePanel({
             embedsEnabled={embedsEnabled}
             quotesEnabled={quotesEnabled}
             formsEnabled={formsEnabled}
+            mediaEnabled={mediaEnabled}
             onUploadingChange={onUploadingChange}
           />
         </div>

@@ -358,6 +358,53 @@ describe("tiptapToHtml", () => {
     ).toBe(1);
   });
 
+  it("exports image size / align as an inline width and margins", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "image",
+          attrs: {
+            src: "https://cdn.example.com/sized.jpg",
+            size: "large",
+            align: "center",
+          },
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain('data-size="large"');
+    expect(result.html).toContain('data-align="center"');
+    expect(result.html).toContain("width: 75%");
+    expect(result.html).toContain("margin-left: auto; margin-right: auto");
+  });
+
+  it("ignores invalid image size / align and keeps legacy pixel widths", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "image",
+          attrs: {
+            src: "https://cdn.example.com/legacy.jpg",
+            size: "gigantic",
+            align: "middle",
+            width: 480,
+          },
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain('width="480"');
+    expect(result.html).not.toContain("data-size");
+    expect(result.html).not.toContain("data-align");
+    expect(result.html).not.toContain("style=");
+  });
+
   it("skips a quote calculator node with a warning and renders surrounding paragraphs", () => {
     const doc = {
       type: "doc",

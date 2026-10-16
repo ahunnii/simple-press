@@ -166,6 +166,16 @@ async function setupStore(
     data: {
       stripeAccountId: opts.stripeAccountId ?? ACCOUNT_ID,
       sendAbandonedCheckoutEmails: opts.sendAbandonedCheckoutEmails ?? false,
+      // Abandoned-checkout reminders are commercial email and only send with
+      // a postal address (see stripe-webhook-abandoned-checkout.test.ts).
+      ...(opts.sendAbandonedCheckoutEmails
+        ? {
+            addressStreet: "1 Market St",
+            addressCity: "Detroit",
+            addressState: "MI",
+            addressPostalCode: "48201",
+          }
+        : {}),
     },
   });
 
@@ -782,6 +792,154 @@ describe("stripe webhook — one-time payment path (characterization)", () => {
         where: { id: reservation.id },
       });
       expect(reservationAfter.status).toBe("active");
+    });
+
+    // Checkout newsletter box: create-session stamps metadata.marketingOptIn
+    // "1" only when the box was ticked AND emailMarketing is on. The webhook
+    // opts the customer in, never opts anyone out, keeps the first consent's
+    // source/date, and never overrides a bounce/complaint suppression.
+    describe("checkout marketing opt-in", () => {
+      const CUSTOMER_EMAIL = "jane@shopper.test"; // buildPaidSession's, normalized
+      const T0 = new Date("2026-01-15T12:00:00.000Z");
+
+      async function completeCheckout(
+        store: Store,
+        metadata: Record<string, string> = {},
+      ) {
+        const { session, fullSession } = buildPaidSession(store, { metadata });
+        await reserveFor(store, session.id);
+        const event = makeCheckoutCompletedEvent(session, ACCOUNT_ID);
+        stripeMocks.constructEvent.mockReturnValue(event);
+        stripeMocks.sessionsRetrieve.mockResolvedValue(fullSession);
+        const res = await postWebhookEvent(event);
+        expect(res.status).toBe(200);
+      }
+
+      function findCustomer(store: Store) {
+        return db.customer.findUniqueOrThrow({
+          where: {
+            businessId_email: {
+              businessId: store.business.id,
+              email: CUSTOMER_EMAIL,
+            },
+          },
+        });
+      }
+
+      it("opts a NEW customer in (source CHECKOUT, consent date set) when the box was ticked", async () => {
+        const store = await setupStore();
+        const before = Date.now();
+
+        await completeCheckout(store, { marketingOptIn: "1" });
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(true);
+        expect(customer.marketingConsentSource).toBe("CHECKOUT");
+        expect(customer.marketingConsentAt).not.toBeNull();
+        expect(customer.marketingConsentAt!.getTime()).toBeGreaterThanOrEqual(
+          before,
+        );
+        expect(customer.marketingSuppressedAt).toBeNull();
+        expect(customer.marketingUnsubscribedAt).toBeNull();
+      });
+
+      it("leaves a NEW customer opted out (no source, no date) when the box was not ticked", async () => {
+        const store = await setupStore();
+
+        await completeCheckout(store);
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(false);
+        expect(customer.marketingConsentSource).toBeNull();
+        expect(customer.marketingConsentAt).toBeNull();
+      });
+
+      it("does not read an unticked box as an opt-out for an already opted-in customer", async () => {
+        const store = await setupStore();
+        await db.customer.create({
+          data: {
+            businessId: store.business.id,
+            email: CUSTOMER_EMAIL,
+            acceptsMarketing: true,
+            marketingConsentSource: "ACCOUNT",
+            marketingConsentAt: T0,
+          },
+        });
+
+        await completeCheckout(store);
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(true);
+        expect(customer.marketingConsentSource).toBe("ACCOUNT");
+        expect(customer.marketingConsentAt).toEqual(T0);
+      });
+
+      it("keeps the first consent's source and date when an opted-in customer ticks the box again", async () => {
+        const store = await setupStore();
+        await db.customer.create({
+          data: {
+            businessId: store.business.id,
+            email: CUSTOMER_EMAIL,
+            acceptsMarketing: true,
+            marketingConsentSource: "ACCOUNT",
+            marketingConsentAt: T0,
+          },
+        });
+
+        await completeCheckout(store, { marketingOptIn: "1" });
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(true);
+        expect(customer.marketingConsentSource).toBe("ACCOUNT");
+        expect(customer.marketingConsentAt).toEqual(T0);
+      });
+
+      it("opts an existing, not-yet-opted-in customer in (source CHECKOUT) when they tick the box", async () => {
+        const store = await setupStore();
+        await db.customer.create({
+          data: {
+            businessId: store.business.id,
+            email: CUSTOMER_EMAIL,
+            acceptsMarketing: false,
+          },
+        });
+        const before = Date.now();
+
+        await completeCheckout(store, { marketingOptIn: "1" });
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(true);
+        expect(customer.marketingConsentSource).toBe("CHECKOUT");
+        expect(customer.marketingConsentAt).not.toBeNull();
+        expect(customer.marketingConsentAt!.getTime()).toBeGreaterThanOrEqual(
+          before,
+        );
+      });
+
+      it("does not override a bounce/complaint suppression when a suppressed customer ticks the box", async () => {
+        const store = await setupStore();
+        const suppressedAt = new Date("2026-02-01T09:30:00.000Z");
+        await db.customer.create({
+          data: {
+            businessId: store.business.id,
+            email: CUSTOMER_EMAIL,
+            acceptsMarketing: false,
+            marketingSuppressedAt: suppressedAt,
+            marketingSuppressionReason: "COMPLAINT",
+          },
+        });
+
+        await completeCheckout(store, { marketingOptIn: "1" });
+
+        const customer = await findCustomer(store);
+        expect(customer.acceptsMarketing).toBe(false);
+        expect(customer.marketingSuppressedAt).toEqual(suppressedAt);
+        expect(customer.marketingSuppressionReason).toBe("COMPLAINT");
+        expect(customer.marketingConsentSource).toBeNull();
+        expect(customer.marketingConsentAt).toBeNull();
+        // The order itself is unaffected.
+        expect(await db.order.count()).toBe(1);
+      });
     });
   });
 

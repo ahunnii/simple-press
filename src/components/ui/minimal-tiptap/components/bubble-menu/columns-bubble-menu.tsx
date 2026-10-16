@@ -88,6 +88,8 @@ export const ColumnsBubbleMenu: React.FC<ColumnsBubbleMenuProps> = ({
       // The link bubble owns a selected link; a table cell inside a row
       // gets the table menu.
       if (editor.isActive("link") && from !== to) return false;
+      // A selected image in a column gets the image menu.
+      if (editor.isActive("image")) return false;
       return (
         editor.isActive("columns") &&
         !editor.isActive("table") &&

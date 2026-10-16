@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { Editor } from "@tiptap/react";
 import * as React from "react";
+import { getMarkRange } from "@tiptap/core";
 import { BubbleMenu } from "@tiptap/react/menus";
 
 import type { ShouldShowProps } from "../../types";
@@ -30,9 +31,19 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
   const [selectedText, setSelectedText] = React.useState("");
 
   const updateLinkState = React.useCallback(() => {
-    const { from, to } = editor.state.selection;
+    const { state } = editor;
+    const { from, to } = state.selection;
     const { href, target, variant } = editor.getAttributes("link");
-    const text = editor.state.doc.textBetween(from, to, " ");
+    // Saving replaces the WHOLE link (extendMarkRange), so prefill the
+    // display text from the whole link — not just the selected word, which
+    // would silently drop the rest of the link's text.
+    const linkRange = getMarkRange(
+      state.doc.resolve(from),
+      state.schema.marks.link!,
+    );
+    const text = linkRange
+      ? state.doc.textBetween(linkRange.from, linkRange.to, " ")
+      : state.doc.textBetween(from, to, " ");
 
     setLinkAttrs({ href, target, variant: coerceLinkVariant(variant) });
     setSelectedText(text);

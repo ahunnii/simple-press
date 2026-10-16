@@ -24,6 +24,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -877,6 +878,15 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
             </p>
           )}
         </div>
+
+        <CheckoutMarketingOptIn
+          enabled={form.marketingOptInEnabled}
+          checked={form.acceptsMarketing}
+          onCheckedChange={form.setAcceptsMarketing}
+          businessName={business.name}
+          className="flex items-start gap-2 text-[13px]"
+          style={{ color: "var(--pink-subtle)" }}
+        />
 
         <CheckoutTermsNotice
           disclosure={form.termsDisclosure}

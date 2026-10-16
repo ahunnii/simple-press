@@ -47,8 +47,8 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "homepage.subscribe",
       page: "homepage",
-      title: "Subscribe",
-      description: "Newsletter/social block below testimonials.",
+      title: "Follow",
+      description: "Social links block below testimonials.",
       groupIds: ["homepage.subscribe"],
       order: 3,
       hideable: true,

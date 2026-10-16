@@ -1,4 +1,3 @@
-import Image from "@tiptap/extension-image";
 import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -7,7 +6,8 @@ import StarterKit from "@tiptap/starter-kit";
 
 import { Column, Columns } from "./columns-node";
 import { DETAILS_EXTENSIONS } from "./details-nodes";
-import { createLinkExtension } from "./link-extension";
+import { RendererImage } from "./image-node";
+import { createRendererLinkExtension } from "./link-extension";
 import { VideoNode } from "./video-node";
 
 /**
@@ -37,14 +37,13 @@ export const RENDERER_BASE_EXTENSIONS = [
   // renders rich text. Turning StarterKit's copies off keeps the configured
   // Link below (with the nofollow/protocol allowlist) authoritative instead of
   // leaving which one wins to registration order. The shared link adds the
-  // button `variant` attr; `createLinkExtension` keeps the protocol allowlist.
+  // button `variant` attr; `createRendererLinkExtension` keeps the protocol allowlist.
   StarterKit.configure({ link: false, underline: false }),
-  createLinkExtension({
-    HTMLAttributes: {
-      rel: "noopener noreferrer nofollow",
-    },
-  }),
-  Image,
+  // External links: `rel="noopener noreferrer nofollow"`, new tab by default.
+  // Internal links (`/…`, `#…`): no nofollow, same tab unless asked otherwise.
+  createRendererLinkExtension(),
+  // Stock image + `size`/`align` (inline width/margins; see image-node.ts).
+  RendererImage,
   VideoNode,
   Underline,
   TextStyle,

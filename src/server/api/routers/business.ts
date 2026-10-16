@@ -27,6 +27,7 @@ import {
   normalizeMaintenanceText,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
+import { getBusinessPostalAddress } from "~/lib/marketing/render-campaign";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
@@ -482,6 +483,11 @@ export const businessRouter = createTRPCRouter({
         subdomain: true,
         customDomain: true,
         sendAbandonedCheckoutEmails: true,
+        addressStreet: true,
+        addressCity: true,
+        addressState: true,
+        addressPostalCode: true,
+        businessAddress: true,
         siteContent: {
           select: {
             logoUrl: true,
@@ -495,6 +501,9 @@ export const businessRouter = createTRPCRouter({
         message: "Business not found",
       });
     }
+    // Abandoned-checkout reminders need a postal address to send (CAN-SPAM);
+    // the settings card warns when this is null. Raw parts stay server-side.
+    const postalAddress = getBusinessPostalAddress(business);
 
     const sampleOrder = await ctx.db.order.findFirst({
       where: { businessId },
@@ -509,7 +518,19 @@ export const businessRouter = createTRPCRouter({
       businessId,
       "productOptions",
     );
-    return { business, sampleOrder, productOptionsEnabled };
+    return {
+      business: {
+        id: business.id,
+        name: business.name,
+        subdomain: business.subdomain,
+        customDomain: business.customDomain,
+        sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails,
+        siteContent: business.siteContent,
+        postalAddress,
+      },
+      sampleOrder,
+      productOptionsEnabled,
+    };
   }),
 
   // Owner-customized transactional email copy (subject + intro text).

@@ -76,6 +76,26 @@ const COLORS: ColorPalette[] = [
   },
 ];
 
+/**
+ * Plain hex colors for email: CSS variables and `hsl(var(--x))` don't exist
+ * in an inbox, and the email renderer only accepts #hex / rgb() values.
+ */
+const EMAIL_COLORS: ColorPalette[] = [
+  {
+    label: "Email palette",
+    inverse: "#ffffff",
+    colors: [
+      { cssVar: "#111827", label: "Black" },
+      { cssVar: "#6b7280", label: "Gray" },
+      { cssVar: "#dc2626", label: "Red" },
+      { cssVar: "#ea580c", label: "Orange" },
+      { cssVar: "#16a34a", label: "Green" },
+      { cssVar: "#2563eb", label: "Blue" },
+      { cssVar: "#7c3aed", label: "Purple" },
+    ],
+  },
+];
+
 const MemoizedColorButton = React.memo<{
   color: ColorItem;
   isSelected: boolean;
@@ -146,13 +166,17 @@ MemoizedColorPicker.displayName = "MemoizedColorPicker";
 
 interface SectionThreeProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
+  /** Offer only hex colors an email can render. */
+  emailSafe?: boolean;
 }
 
 export const SectionThree: React.FC<SectionThreeProps> = ({
   editor,
+  emailSafe = false,
   size,
   variant,
 }) => {
+  const palettes = emailSafe ? EMAIL_COLORS : COLORS;
   const color = useEditorState({
     editor,
     selector: (ctx) =>
@@ -217,7 +241,7 @@ export const SectionThree: React.FC<SectionThreeProps> = ({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-full">
         <div className="space-y-1.5">
-          {COLORS.map((palette, index) => (
+          {palettes.map((palette, index) => (
             <MemoizedColorPicker
               key={index}
               palette={palette}

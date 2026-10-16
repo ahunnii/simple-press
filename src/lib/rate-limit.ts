@@ -228,6 +228,42 @@ export const loyaltyActionLimiter = makeLazy({
   keyPrefix: "rl:loyalty-action",
 });
 
+// 5 newsletter sign-up requests per 15 minutes per IP+business (each one can send an email)
+export const newsletterSubscribeIpLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:newsletter-ip",
+});
+
+// 3 newsletter confirmation emails per hour per business+email, so one inbox can't be mail-bombed
+export const newsletterSubscribeEmailLimiter = makeLazy({
+  points: 3,
+  duration: 3600,
+  keyPrefix: "rl:newsletter-email",
+});
+
+// 5 newsletter confirmation emails per 24 hours per email across ALL stores, so one
+// inbox can't be mail-bombed by fanning sign-ups out over many storefronts
+export const newsletterSubscribeGlobalEmailLimiter = makeLazy({
+  points: 5,
+  duration: 86_400,
+  keyPrefix: "rl:newsletter-email-global",
+});
+
+// 20 newsletter confirm / resubscribe actions per 15 minutes per IP+business (token-gated; light)
+export const newsletterConsentActionLimiter = makeLazy({
+  points: 20,
+  duration: 900,
+  keyPrefix: "rl:newsletter-action",
+});
+
+// 10 marketing campaign test sends per hour per business+user (each one sends an email)
+export const marketingTestSendLimiter = makeLazy({
+  points: 10,
+  duration: 3600,
+  keyPrefix: "rl:marketing-test-send",
+});
+
 /**
  * Extract a best-effort client IP from request headers.
  *

@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
+import { getTextWidth, textWidthCssValue } from "~/lib/sp-meta";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 import { MaintenancePreviewBar } from "~/components/maintenance/maintenance-preview-bar";
@@ -50,9 +51,19 @@ export default async function StorefrontLayout({ children }: Props) {
     );
   }
 
+  // Site-wide "Text width on wide pages" (Site Editor → Style). Read from the
+  // same customFields the templates get (preview draft already swapped in), and
+  // only emitted when it differs from the template's own measure.
+  const textWidthValue = textWidthCssValue(
+    getTextWidth(business.siteContent?.customFields),
+  );
+
   return (
     <HydrateClient>
       <StorefrontFlagsProvider flags={business.featureFlags}>
+        {textWidthValue ? (
+          <style>{`:root{--sp-text-width:${textWidthValue}}`}</style>
+        ) : null}
         {gate.showPreviewBar ? (
           <MaintenancePreviewBar mode="leave" variant={gate.variant} />
         ) : null}

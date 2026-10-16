@@ -810,6 +810,31 @@ describe("email subscribers", () => {
       "Number of orders": 2,
     });
   });
+
+  it("adds consent source and date, blank for rows without evidence", () => {
+    const base = {
+      firstName: null,
+      lastName: null,
+      orderCount: 0,
+      totalSpent: 0,
+      createdAt: at,
+    };
+    const { rows } = emailSubscribersSheet(
+      [
+        {
+          ...base,
+          email: "a@b.test",
+          marketingConsentSource: "NEWSLETTER_FORM",
+          marketingConsentAt: at,
+        },
+        { ...base, email: "c@d.test" },
+      ],
+      ctx,
+    );
+    expect(rows[0]?.["Consent source"]).toBe("Newsletter sign-up form");
+    expect(rows[0]?.["Consent date"]).toBeTruthy();
+    expect(rows[1]).toMatchObject({ "Consent source": "", "Consent date": "" });
+  });
 });
 
 describe("services and events", () => {

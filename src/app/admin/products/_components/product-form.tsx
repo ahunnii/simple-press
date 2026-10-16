@@ -2205,6 +2205,7 @@ export function ProductForm({
                       embedsEnabled={embedsEnabled}
                       quotesEnabled={quotesEnabled}
                       formsEnabled={formsEnabled}
+                      mediaEnabled={mediaEnabled}
                       onUploadingChange={onUploadingChange}
                     />
                   </CardContent>

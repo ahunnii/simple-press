@@ -65,6 +65,7 @@ import {
   sweepStaleReservations,
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
+import { consentRequestMeta } from "~/lib/marketing/consent-log";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
 import {
   buildZoneWeightConfig,
@@ -1292,6 +1293,7 @@ export async function POST(req: NextRequest) {
     // Address collection only when shipping to customer (not in-store pickup), and
     // never for locked zone_weight orders (the address is bound to the PaymentIntent below).
     // Phone: `phone_number_collection` prefills when Customer.phone is set.
+    const marketingConsentIp = consentRequestMeta(req.headers).ip;
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       line_items: lineItems,
@@ -1374,6 +1376,21 @@ export async function POST(req: NextRequest) {
           ? { freeShippingDiscountCents: String(freeShippingDiscountCents) }
           : {}),
         deliveryMethod,
+        // Newsletter opt-in checkbox. Only honored when the store has email
+        // marketing on; the webhook turns this into consent and never reads
+        // its absence as an opt-out.
+        ...(customerInfo.acceptsMarketing === true &&
+        isFeatureEnabled("emailMarketing") &&
+        !disabledByDependency.includes("emailMarketing")
+          ? {
+              marketingOptIn: "1",
+              // Consent evidence: the shopper's IP only. Never the user agent
+              // or anything else in Stripe metadata.
+              ...(marketingConsentIp
+                ? { marketingOptInIp: marketingConsentIp }
+                : {}),
+            }
+          : {}),
         ...(hasFullShipping && sa
           ? {
               shippingLine1: sa.line1.trim(),

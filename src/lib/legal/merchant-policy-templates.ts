@@ -255,6 +255,8 @@ function privacyMarkdown(v: PolicyVars): string {
     "Account login credentials (if you create an account)",
     v.backInStock &&
       "An email address if you ask us to notify you when an item is back in stock",
+    v.emailMarketing &&
+      "Your email address and name when you sign up for our newsletter or choose to receive marketing emails at checkout, plus a record of when and how you agreed",
     v.loyalty &&
       "Rewards-program details, such as your points balance and (if you choose to share it) your birthday",
   ]);
@@ -271,6 +273,7 @@ function privacyMarkdown(v: PolicyVars): string {
 
   const share = bullets([
     "Our payment processor (Stripe) to complete transactions",
+    "Email delivery providers that send our order emails and, when enabled, our marketing emails on our behalf",
     v.sellsProducts && "Shipping carriers to deliver your orders",
     "The platform that hosts this store (SimplePress), as needed for technical operations",
     v.donationProcessors &&

@@ -8,6 +8,7 @@ import {
 } from "@react-email/components";
 
 import { EmailLayout } from "./components/layout";
+import { MarketingFooter } from "./components/marketing-footer";
 
 /** One line the shopper left in their cart; `unitAmount` is in cents. */
 export type AbandonedCheckoutItem = {
@@ -32,6 +33,13 @@ type AbandonedCheckoutEmailProps = {
   introText?: string;
   /** When non-empty, the email lists what was in the cart. */
   items?: AbandonedCheckoutItem[];
+  /**
+   * One-click unsubscribe page for this shopper. The reminder is a commercial
+   * email sent to non-subscribers, so it always carries the marketing footer.
+   */
+  unsubscribeUrl: string;
+  /** Sender's postal address (CAN-SPAM). The send path never sends without one. */
+  postalAddress: string | null;
 };
 
 export default function AbandonedCheckoutEmail({
@@ -41,6 +49,8 @@ export default function AbandonedCheckoutEmail({
   businessLogoUrl,
   businessUrl,
   items,
+  unsubscribeUrl,
+  postalAddress,
 }: AbandonedCheckoutEmailProps) {
   const hasItems = !!items && items.length > 0;
   const shownItems = hasItems ? items.slice(0, MAX_ITEM_ROWS) : [];
@@ -144,6 +154,13 @@ export default function AbandonedCheckoutEmail({
         If you have questions or ran into a problem checking out, reply to this
         email and the store will get back to you.
       </Text>
+
+      <MarketingFooter
+        businessName={businessName}
+        postalAddress={postalAddress}
+        unsubscribeUrl={unsubscribeUrl}
+        reason={`You received this email because you started a checkout at ${businessName}.`}
+      />
     </EmailLayout>
   );
 }

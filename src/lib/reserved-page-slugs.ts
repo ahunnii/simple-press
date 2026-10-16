@@ -35,6 +35,7 @@ const ROUTE_SLUG_LABELS: Readonly<Record<string, string | null>> = {
   collections: "Collections page",
   contact: "Contact page",
   donate: "Donate page",
+  "email-preferences": null,
   events: "Events page",
   faq: "FAQ page",
   order: null,
