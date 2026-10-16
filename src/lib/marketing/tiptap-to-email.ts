@@ -508,7 +508,7 @@ export function tiptapToEmailHtml(
 ): TiptapEmailResult {
   const ctx: Ctx = {
     warnings: new Set(),
-    baseUrl: options.baseUrl?.trim() || null,
+    baseUrl: options.baseUrl?.trim() ?? null,
   };
   if (!doc || typeof doc !== "object" || doc.type !== "doc") {
     return { html: "", text: "", warnings: [] };
