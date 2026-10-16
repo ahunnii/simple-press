@@ -1,7 +1,11 @@
 import type { DashboardCard } from "~/lib/dashboard/layout-schema";
-import type { WidgetDef, WidgetSize } from "~/lib/dashboard/widgets";
+import type { WidgetDef, WidgetId, WidgetSize } from "~/lib/dashboard/widgets";
 import { dashboardRangeLabel } from "~/lib/dashboard/ranges";
-import { getWidget, resolveCardRange } from "~/lib/dashboard/widgets";
+import {
+  getWidget,
+  resolveCardRange,
+  trendChartTitle,
+} from "~/lib/dashboard/widgets";
 
 /** Owner-facing name and footprint for each size ("Wide", "2×1"). */
 export const SIZE_META: Record<WidgetSize, { name: string; dims: string }> = {
@@ -24,13 +28,40 @@ export function sizeHint(def: WidgetDef, size: WidgetSize): string | null {
   return null;
 }
 
-/** "Gross revenue, Last 7 days" — the card's name for menus and announcements. */
-export function cardLabel(
-  card: Pick<DashboardCard, "widget" | "range">,
+/**
+ * The card's title: the widget's label, except a Trend chart, which is named
+ * for the number it plots ("Donations over time") so several of them stay
+ * tellable apart.
+ */
+export function cardTitle(
+  card: Pick<DashboardCard, "widget" | "metric">,
 ): string {
   const def = getWidget(card.widget);
+  return card.metric ? trendChartTitle(card.metric) : def.label;
+}
+
+/** "Gross revenue, Last 7 days" — the card's name for menus and announcements. */
+export function cardLabel(
+  card: Pick<DashboardCard, "widget" | "range" | "metric">,
+): string {
+  const def = getWidget(card.widget);
+  const title = cardTitle(card);
   const range = resolveCardRange(def, card.range);
-  return range ? `${def.label}, ${dashboardRangeLabel(range)}` : def.label;
+  return range ? `${title}, ${dashboardRangeLabel(range)}` : title;
+}
+
+/**
+ * Where a card links. A Trend chart goes to the page of the number it plots
+ * (its own def's href is a placeholder); every other card uses its own def.
+ * `widgetHrefs` holds this store's overrides (see `resolveWidgetHref`), keyed
+ * by widget id.
+ */
+export function cardHref(
+  card: Pick<DashboardCard, "widget" | "metric">,
+  widgetHrefs?: Partial<Record<WidgetId, string>>,
+): string {
+  const id = card.metric ?? card.widget;
+  return widgetHrefs?.[id] ?? getWidget(id).href;
 }
 
 /**
@@ -47,6 +78,7 @@ export function layoutSignature(cards: readonly DashboardCard[]): string {
         card.size,
         resolveCardRange(def, card.range),
         card.compare ?? true,
+        card.metric ?? null,
       ];
     }),
   );

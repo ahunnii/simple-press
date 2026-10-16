@@ -202,20 +202,43 @@ export const LEGACY_SETUP_STEPS: SetupSteps = {
 /**
  * Feature-flag overrides each type writes to `Business.featureFlags`, layered
  * over registry defaults (at creation, and from the hub's "apply this type's
- * feature defaults"). Every type sets ALL THREE type-defining flags
+ * feature defaults"). Every type sets ALL FOUR type-defining flags
  * explicitly, so re-typing a store also undoes the previous type's flags —
  * a partial preset (e.g. products = {}) would leave a services store's
  * `products: false` in place. Turning `products` off cascades orders / cart /
  * checkout / payments off through the registry's `dependsOn`.
+ *
+ * Inventory is off only for informational (brochure) sites. Services keep it:
+ * service businesses track rental equipment and supplies they don't sell.
  */
 export const FEATURE_PRESETS: Record<
   BusinessTypeId,
   Record<string, boolean>
 > = {
-  products: { products: true, services: false, donations: false },
-  services: { products: false, services: true, donations: false },
-  informational: { products: false, services: false, donations: false },
-  donations: { products: false, services: false, donations: true },
+  products: {
+    products: true,
+    services: false,
+    donations: false,
+    inventory: true,
+  },
+  services: {
+    products: false,
+    services: true,
+    donations: false,
+    inventory: true,
+  },
+  informational: {
+    products: false,
+    services: false,
+    donations: false,
+    inventory: false,
+  },
+  donations: {
+    products: false,
+    services: false,
+    donations: true,
+    inventory: true,
+  },
 };
 
 /**
@@ -225,6 +248,7 @@ export const FEATURE_PRESETS: Record<
  */
 export const TYPE_RELEVANT_FEATURES = [
   "products",
+  "inventory",
   "services",
   "donations",
   "events",

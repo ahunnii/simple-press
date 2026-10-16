@@ -513,7 +513,7 @@ describe("dashboard router", () => {
 
         // Bucketed sums add back up to the window totals.
         const total = (stat: StatCardData) =>
-          (stat.series ?? []).reduce((sum, p) => sum + p.value, 0);
+          (stat.series ?? []).reduce((sum, p) => sum + (p.value ?? 0), 0);
         expect(total(gross), range).toBe(expected.totalChargedCents);
         expect(total(net), range).toBe(expected.netCollectedCents);
         expect(total(refunds), range).toBe(expected.refundedCents);
@@ -663,7 +663,9 @@ describe("dashboard router", () => {
       const yesterdayKey = zonedDayKey(localNoonDaysAgo(1), RUNNER_TZ);
       const yesterday = stat.series?.find((p) => p.key === yesterdayKey);
       expect(yesterday?.value).toBe(7000);
-      expect(stat.series?.reduce((sum, p) => sum + p.value, 0)).toBe(7000);
+      expect(stat.series?.reduce((sum, p) => sum + (p.value ?? 0), 0)).toBe(
+        7000,
+      );
 
       // SQL-bucketed series lands in the same store-local day.
       const fulfilled = expectStat(
@@ -837,7 +839,7 @@ describe("dashboard router", () => {
       const donors = await ask("donors-count");
       expect(donors.value).toBe(1);
       expect(donors.note).toMatch(/without an email/);
-      expect(donors.series?.reduce((s, p) => s + p.value, 0)).toBe(1);
+      expect(donors.series?.reduce((s, p) => s + (p.value ?? 0), 0)).toBe(1);
     }, 30_000);
   });
 });

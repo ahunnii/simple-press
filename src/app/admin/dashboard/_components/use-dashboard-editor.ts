@@ -8,14 +8,14 @@ import type {
 } from "~/lib/dashboard/layout-schema";
 import type { WidgetId } from "~/lib/dashboard/widgets";
 import { MAX_DASHBOARD_CARDS, newCardId } from "~/lib/dashboard/layout-schema";
-import { getWidget } from "~/lib/dashboard/widgets";
+import { defaultTrendMetric, getWidget } from "~/lib/dashboard/widgets";
 
 import { cardLabel, layoutSignature } from "./edit-labels";
 
 export type CardMove = "start" | "earlier" | "later" | "end";
 
 export type CardPatch = Partial<
-  Pick<DashboardCard, "size" | "range" | "compare">
+  Pick<DashboardCard, "size" | "range" | "compare" | "metric">
 >;
 
 function targetIndex(move: CardMove, from: number, count: number): number {
@@ -115,6 +115,13 @@ export function useDashboardEditor({
       size: def.defaultSize,
     };
     if (def.supportsRange && def.defaultRange) card.range = def.defaultRange;
+    if (def.kind === "trendChart") {
+      // A Trend chart is always about one number; with none available there is
+      // nothing to plot (the add dialog doesn't offer it then).
+      const metric = defaultTrendMetric(available);
+      if (!metric) return null;
+      card.metric = metric;
+    }
     const count = draftCards.length + 1;
     setDraftCards([...draftCards, card]);
     return {

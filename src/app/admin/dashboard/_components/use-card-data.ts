@@ -18,7 +18,11 @@ const STALE_UMAMI_MS = 5 * 60 * 1000;
  */
 export function useCardData(card: DashboardCard) {
   const def = getWidget(card.widget);
-  const umami = def.requires.umami === true;
+  // A Trend chart plotting Visitors reads from Umami like the Visitors card.
+  const umami =
+    def.requires.umami === true ||
+    (card.metric !== undefined &&
+      getWidget(card.metric).requires.umami === true);
 
   const [data] = api.dashboard.cardData.useSuspenseQuery(
     toCardDataInput(card),

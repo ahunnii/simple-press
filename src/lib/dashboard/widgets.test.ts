@@ -5,12 +5,20 @@ import { FEATURE_REGISTRY } from "~/lib/features/registry";
 
 import {
   availableWidgetIds,
+  defaultTrendMetric,
   effectiveCompare,
   getWidget,
+  isPlottableMetric,
   isWidgetAvailable,
   isWidgetId,
+  PLOTTABLE_METRIC_IDS,
   resolveCardRange,
   resolveWidgetHref,
+  TREND_METRIC_CANDIDATES,
+  trendChartTitle,
+  trendMetricGroups,
+  trendMetricLabel,
+  trendStyle,
   WIDGET_FAMILIES,
   WIDGET_IDS,
   WIDGETS,
@@ -29,6 +37,7 @@ describe("widget registry", () => {
         "donations-count",
         "donations-total",
         "donors-count",
+        "email-subscribers",
         "form-submissions",
         "gross-revenue",
         "invoices-collected",
@@ -48,8 +57,11 @@ describe("widget registry", () => {
         "recent-orders",
         "refunds",
         "revenue-chart",
+        "testimonials-pending",
         "top-products",
         "total-customers",
+        "trend-chart",
+        "upcoming-events",
         "visitors",
       ].sort(),
     );
@@ -87,7 +99,10 @@ describe("widget registry", () => {
       }
       if (def.kind === "stat") {
         expect(def.sizes, def.id).toEqual(["1x1", "2x1"]);
-        expect(def.sparkline, def.id).toBe(!def.isPointInTime);
+        // Conversion rate has no per-bucket series, so no sparkline.
+        expect(def.sparkline, def.id).toBe(
+          !def.isPointInTime && def.id !== "conversion-rate",
+        );
       } else {
         expect(def.sizes, def.id).toEqual(["2x2", "4x2"]);
         expect(def.sparkline, def.id).toBe(false);
@@ -119,6 +134,24 @@ describe("widget registry", () => {
       expect(getWidget(id).requires, id).toEqual({
         anyFlags: ["products", "inventory"],
       });
+    }
+    expect(getWidget("upcoming-events").requires).toEqual({
+      flags: ["events"],
+    });
+    expect(getWidget("testimonials-pending").requires).toEqual({
+      flags: ["testimonials"],
+    });
+    expect(getWidget("testimonials-pending").deltaPolarity).toBe("down-good");
+    expect(getWidget("email-subscribers").requires).toEqual({
+      flags: ["emailMarketing"],
+    });
+    for (const id of [
+      "upcoming-events",
+      "testimonials-pending",
+      "email-subscribers",
+    ] as const) {
+      expect(getWidget(id).isPointInTime, id).toBe(true);
+      expect(getWidget(id).format, id).toBe("count");
     }
     expect(getWidget("visitors").requires).toEqual({
       flags: ["analytics"],
@@ -170,8 +203,141 @@ describe("isWidgetAvailable", () => {
         "donations-count",
         "donations-total",
         "donors-count",
+        // Trend chart: available once any plottable metric is.
+        "trend-chart",
       ].sort(),
     );
+  });
+});
+
+describe("trend chart", () => {
+  const ctx = (on: DashboardFeatureKey[], umamiConfigured = false) => ({
+    isEnabled: (key: DashboardFeatureKey) => on.includes(key),
+    umamiConfigured,
+  });
+
+  it("plots exactly these ids, as bars except averages (lines)", () => {
+    expect([...PLOTTABLE_METRIC_IDS]).toEqual([
+      "gross-revenue",
+      "net-revenue",
+      "refunds",
+      "order-count",
+      "avg-order-value",
+      "orders-fulfilled",
+      "orders-cancelled",
+      "donations-total",
+      "donations-count",
+      "donors-count",
+      "donation-average",
+      "invoices-collected",
+      "new-customers",
+      "quote-requests",
+      "form-submissions",
+      "visitors",
+    ]);
+    const lines = PLOTTABLE_METRIC_IDS.filter(
+      (id) => trendStyle(id) === "line",
+    );
+    expect(lines).toEqual(["avg-order-value", "donation-average"]);
+  });
+
+  it("only plots ranged stats (never point-in-time, charts or conversion rate)", () => {
+    for (const id of PLOTTABLE_METRIC_IDS) {
+      const def = getWidget(id);
+      expect(def.kind, id).toBe("stat");
+      expect(def.isPointInTime, id).toBe(false);
+      expect(def.supportsRange, id).toBe(true);
+    }
+    for (const id of [
+      "conversion-rate",
+      "mrr",
+      "total-customers",
+      "revenue-chart",
+      "trend-chart",
+      "top-products",
+      "invoices-outstanding",
+    ]) {
+      expect(isPlottableMetric(id), id).toBe(false);
+    }
+    expect(isPlottableMetric("visitors")).toBe(true);
+    expect(isPlottableMetric("nope")).toBe(false);
+    expect(isPlottableMetric(undefined)).toBe(false);
+  });
+
+  it("keeps the registry's candidate list in sync with the plottable stats", () => {
+    expect([...TREND_METRIC_CANDIDATES]).toEqual([...PLOTTABLE_METRIC_IDS]);
+    expect(getWidget("trend-chart").requires.anyWidget).toEqual([
+      ...PLOTTABLE_METRIC_IDS,
+    ]);
+  });
+
+  it("drops conversion rate's sparkline (it has no series)", () => {
+    expect(getWidget("conversion-rate").sparkline).toBe(false);
+    expect(getWidget("visitors").sparkline).toBe(true);
+  });
+
+  it("sits in the Charts group beside Revenue chart, ahead of Sales", () => {
+    expect(WIDGET_FAMILIES[0]).toEqual({ family: "charts", label: "Charts" });
+    expect(getWidget("revenue-chart").family).toBe("charts");
+    expect(getWidget("trend-chart").family).toBe("charts");
+    expect(getWidget("trend-chart")).toMatchObject({
+      kind: "trendChart",
+      label: "Trend chart",
+      sizes: ["2x2", "4x2"],
+      defaultSize: "4x2",
+      defaultRange: "30d",
+      supportsComparison: true,
+    });
+    expect(getWidget("trend-chart").allowedRanges).not.toContain("today");
+  });
+
+  it("is available only when at least one plottable metric is", () => {
+    const def = getWidget("trend-chart");
+    expect(isWidgetAvailable(def, ctx([]))).toBe(false);
+    // Analytics flag alone isn't enough: Umami must be configured.
+    expect(isWidgetAvailable(def, ctx(["analytics"], false))).toBe(false);
+    expect(isWidgetAvailable(def, ctx(["analytics"], true))).toBe(true);
+    expect(isWidgetAvailable(def, ctx(["donations"]))).toBe(true);
+    expect(isWidgetAvailable(def, ctx(["forms"]))).toBe(true);
+    // Point-in-time-only features have nothing to plot.
+    expect(isWidgetAvailable(def, ctx(["events", "testimonials"]))).toBe(false);
+    expect(availableWidgetIds(ctx(["events"])).has("trend-chart")).toBe(false);
+  });
+
+  it("picks the store's headline number first", () => {
+    expect(
+      defaultTrendMetric(new Set(["net-revenue", "donations-total"])),
+    ).toBe("net-revenue");
+    expect(
+      defaultTrendMetric(new Set(["visitors", "form-submissions", "refunds"])),
+    ).toBe("form-submissions");
+    expect(defaultTrendMetric(["visitors", "new-customers"])).toBe("visitors");
+    expect(
+      defaultTrendMetric(new Set(["new-customers", "quote-requests"])),
+    ).toBe("new-customers");
+    // Falls to catalog order, ignoring non-plottable ids.
+    expect(
+      defaultTrendMetric(new Set(["mrr", "quote-requests", "refunds"])),
+    ).toBe("refunds");
+    expect(defaultTrendMetric(new Set(["mrr", "recent-orders"]))).toBeNull();
+    expect(defaultTrendMetric(new Set())).toBeNull();
+  });
+
+  it("labels the metric and the card", () => {
+    expect(trendMetricLabel("donations-total")).toBe("Donations");
+    expect(trendChartTitle("donations-total")).toBe("Donations over time");
+  });
+
+  it("groups available metrics by family for the Shows picker", () => {
+    const groups = trendMetricGroups(
+      new Set(["net-revenue", "avg-order-value", "visitors", "mrr"]),
+    );
+    expect(groups.map((g) => g.family)).toEqual(["sales", "traffic"]);
+    expect(groups[0]!.metrics).toEqual([
+      { id: "net-revenue", label: "Net revenue", style: "bar" },
+      { id: "avg-order-value", label: "Average order", style: "line" },
+    ]);
+    expect(trendMetricGroups(new Set())).toEqual([]);
   });
 });
 

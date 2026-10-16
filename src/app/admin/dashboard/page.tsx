@@ -11,9 +11,9 @@ import {
   WIDGET_IDS,
 } from "~/lib/dashboard/widgets";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { pendingTestimonialsWhere } from "~/server/dashboard/metrics/customers";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { DashboardShell } from "~/app/admin/dashboard/_components/dashboard-shell";
 import { AttentionStrip } from "~/app/admin/dashboard/_components/pinned/attention-strip";
 import { OversellAlert } from "~/app/admin/dashboard/_components/pinned/oversell-alert";
@@ -104,6 +104,7 @@ export default async function AdminDashboardPage() {
     recentOversells,
     ordersToFulfillCount,
     awaitingPaymentCount,
+    pendingTestimonialsCount,
   ] = await Promise.all([
     layoutPromise,
     businessDataPromise,
@@ -153,6 +154,12 @@ export default async function AdminDashboardPage() {
         status: { notIn: ["cancelled", "refunded"] },
       },
     }),
+
+    // Testimonials waiting for approval (same rule as the admin Testimonials
+    // list's "pending" status). Skipped when the feature is off.
+    flags.isEnabled("testimonials")
+      ? db.testimonial.count({ where: pendingTestimonialsWhere(business.id) })
+      : Promise.resolve(0),
   ]);
 
   // Nudge (not a gate): true when either required policy page is missing,
@@ -168,16 +175,6 @@ export default async function AdminDashboardPage() {
     <HydrateClient>
       <TrailHeader breadcrumbs={[]} />
 
-      {!flags.isEnabled("cart") && (
-        <Alert className="mx-auto my-4 w-full max-w-5xl">
-          <AlertTitle>Cart is disabled</AlertTitle>
-          <AlertDescription>
-            The cart feature is disabled for this business. Please enable it in
-            the settings to use the dashboard. You can enable it in the settings
-            to allow customers to add products to their cart and checkout.
-          </AlertDescription>
-        </Alert>
-      )}
       <DashboardShell
         business={{
           name: businessData!.name,
@@ -213,6 +210,7 @@ export default async function AdminDashboardPage() {
               ordersToFulfillCount={ordersToFulfillCount}
               awaitingPaymentCount={awaitingPaymentCount}
               missingPolicies={missingPolicies}
+              pendingTestimonialsCount={pendingTestimonialsCount}
             />
           ),
           oversell: <OversellAlert oversells={recentOversells} />,

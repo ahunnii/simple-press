@@ -8,6 +8,7 @@ import { getWidget, resolveCardRange } from "~/lib/dashboard/widgets";
 import { cn } from "~/lib/utils";
 import { Card } from "~/components/ui/card";
 
+import { cardHref, cardTitle } from "./edit-labels";
 import { WIDGET_SIZE_CLASSES } from "./grid-classes";
 
 /**
@@ -28,7 +29,7 @@ export function WidgetFrame({
   className,
   href: hrefOverride,
 }: {
-  card: Pick<DashboardCard, "widget" | "size" | "range">;
+  card: Pick<DashboardCard, "widget" | "size" | "range" | "metric">;
   children: ReactNode;
   /** Edit mode: links go inert so a drag or click on a card never navigates. */
   isEditing?: boolean;
@@ -39,7 +40,9 @@ export function WidgetFrame({
   href?: string;
 }) {
   const def = getWidget(card.widget);
-  const href = hrefOverride ?? def.href;
+  const title = cardTitle(card);
+  // A Trend chart links to its plotted number's page, not its own placeholder.
+  const href = hrefOverride ?? cardHref(card);
   const range = resolveCardRange(def, card.range);
   const showLink = !isEditing && !!href;
 
@@ -63,7 +66,7 @@ export function WidgetFrame({
                 href={href}
                 className="text-muted-foreground hover:text-foreground group inline-flex max-w-full items-center gap-1 transition-colors"
               >
-                <span className="truncate">{def.label}</span>
+                <span className="truncate">{title}</span>
                 <ArrowUpRight
                   aria-hidden="true"
                   className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
@@ -71,7 +74,7 @@ export function WidgetFrame({
               </Link>
             ) : (
               <span className="text-muted-foreground block truncate">
-                {def.label}
+                {title}
               </span>
             )}
           </h3>

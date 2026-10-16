@@ -5,19 +5,19 @@ import type { WidgetAvailabilityContext } from "~/lib/dashboard/widgets";
 import type { TxClient } from "~/server/db";
 import {
   cardDataInputSchema,
+  isCardInputAvailable,
   unavailableCardData,
 } from "~/lib/dashboard/card-data";
 import {
   dashboardLayoutSaveSchema,
+  fillDefaultStatRow,
+  getDefaultLayout,
+  isCardVisible,
   MAX_DASHBOARD_CARDS,
   parseDashboardLayout,
   splitVisible,
 } from "~/lib/dashboard/layout-schema";
-import {
-  availableWidgetIds,
-  getWidget,
-  isWidgetAvailable,
-} from "~/lib/dashboard/widgets";
+import { availableWidgetIds } from "~/lib/dashboard/widgets";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 import {
@@ -41,6 +41,7 @@ async function loadDashboardBusiness(db: TxClient, businessId: string) {
       id: true,
       createdAt: true,
       timeZone: true,
+      businessType: true,
       featureFlags: true,
       umamiEnabled: true,
       umamiWebsiteId: true,
@@ -70,7 +71,7 @@ async function loadDashboardBusiness(db: TxClient, businessId: string) {
  */
 export const dashboardRouter = createTRPCRouter({
   getLayout: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { availability } = await loadDashboardBusiness(
+    const { business, availability } = await loadDashboardBusiness(
       ctx.db,
       ctx.businessId,
     );
@@ -79,10 +80,17 @@ export const dashboardRouter = createTRPCRouter({
       ctx.session.user.id,
       ctx.businessId,
     );
-    const { layout, usedDefault } = parseDashboardLayout(
-      membership?.dashboardLayout ?? null,
-    );
     const available = availableWidgetIds(availability);
+    const parsed = parseDashboardLayout(membership?.dashboardLayout ?? null, {
+      defaultLayout: getDefaultLayout(business.businessType),
+      availableIds: available,
+    });
+    const { usedDefault } = parsed;
+    // Only a never-customized dashboard is topped up; a saved layout is
+    // exactly what its owner chose.
+    const layout = usedDefault
+      ? fillDefaultStatRow(parsed.layout, available)
+      : parsed.layout;
     const { visible, hidden } = splitVisible(layout, available);
     return {
       layout,
@@ -109,7 +117,7 @@ export const dashboardRouter = createTRPCRouter({
         });
       }
 
-      const { availability } = await loadDashboardBusiness(
+      const { business, availability } = await loadDashboardBusiness(
         ctx.db,
         ctx.businessId,
       );
@@ -121,14 +129,19 @@ export const dashboardRouter = createTRPCRouter({
       // member: getLayout reports the default's feature-off cards as hidden
       // too, and the editor counts them toward the cap and promises they come
       // back, so the first save must keep them.
+      // A Trend chart is "off" while the metric it plots is off, so it is
+      // re-attached the same way.
+      const available = availableWidgetIds(availability);
       const { layout: current } = parseDashboardLayout(
         membership.dashboardLayout,
+        {
+          defaultLayout: getDefaultLayout(business.businessType),
+          availableIds: available,
+        },
       );
       const payloadIds = new Set(input.cards.map((card) => card.id));
       const reattached: DashboardCard[] = current.cards.filter(
-        (card) =>
-          !payloadIds.has(card.id) &&
-          !isWidgetAvailable(getWidget(card.widget), availability),
+        (card) => !payloadIds.has(card.id) && !isCardVisible(card, available),
       );
 
       const cards: DashboardCard[] = [...input.cards, ...reattached];
@@ -161,7 +174,18 @@ export const dashboardRouter = createTRPCRouter({
       });
     }
     await clearDashboardLayout(ctx.db, membership.id);
-    return { layout: parseDashboardLayout(null).layout };
+    // Land exactly where getLayout will: the type's default, with its row
+    // topped up for the features this store has on.
+    const { business, availability } = await loadDashboardBusiness(
+      ctx.db,
+      ctx.businessId,
+    );
+    const available = availableWidgetIds(availability);
+    const { layout } = parseDashboardLayout(null, {
+      defaultLayout: getDefaultLayout(business.businessType),
+      availableIds: available,
+    });
+    return { layout: fillDefaultStatRow(layout, available) };
   }),
 
   cardData: ownerAdminProcedure
@@ -170,7 +194,8 @@ export const dashboardRouter = createTRPCRouter({
       const { business, flags, umamiWebsiteId, availability } =
         await loadDashboardBusiness(ctx.db, ctx.businessId);
 
-      if (!isWidgetAvailable(getWidget(input.widget), availability)) {
+      // A Trend chart is also gated on the metric it plots.
+      if (!isCardInputAvailable(input, availability)) {
         return unavailableCardData(
           "feature-off",
           "This card isn't available because its feature is turned off.",

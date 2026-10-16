@@ -11,11 +11,14 @@ import {
 
 import type { CardMove, CardPatch } from "./use-dashboard-editor";
 import type { DashboardCard } from "~/lib/dashboard/layout-schema";
+import type { WidgetId } from "~/lib/dashboard/widgets";
 import { DASHBOARD_RANGES, isDashboardRangeKey } from "~/lib/dashboard/ranges";
 import {
   effectiveCompare,
   getWidget,
+  isPlottableMetric,
   resolveCardRange,
+  trendMetricGroups,
 } from "~/lib/dashboard/widgets";
 import { Button } from "~/components/ui/button";
 import {
@@ -48,6 +51,7 @@ export function CardMenu({
   card,
   index,
   count,
+  availableWidgetIds,
   onUpdate,
   onMove,
   onRemove,
@@ -55,6 +59,8 @@ export function CardMenu({
   card: DashboardCard;
   index: number;
   count: number;
+  /** Widgets this store can show; the "Shows" list of a Trend chart is drawn from it. */
+  availableWidgetIds: readonly WidgetId[];
   onUpdate: (patch: CardPatch) => void;
   onMove: (move: CardMove) => void;
   onRemove: () => void;
@@ -65,6 +71,10 @@ export function CardMenu({
   const showCompare = def.supportsComparison && !def.isPointInTime;
   const isFirst = index === 0;
   const isLast = index === count - 1;
+  const isTrendChart = def.kind === "trendChart";
+  const metricGroups = isTrendChart
+    ? trendMetricGroups(availableWidgetIds)
+    : [];
 
   return (
     <DropdownMenu>
@@ -80,7 +90,43 @@ export function CardMenu({
           <Settings2 aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent
+        align="end"
+        className="max-h-[70vh] w-64 overflow-y-auto"
+      >
+        {isTrendChart && metricGroups.length > 0 && (
+          <>
+            <DropdownMenuLabel className={SECTION_LABEL}>
+              Shows
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={card.metric ?? ""}
+              onValueChange={(value) => {
+                if (isPlottableMetric(value)) onUpdate({ metric: value });
+              }}
+            >
+              {metricGroups.map((group) => (
+                <DropdownMenuGroup key={group.family}>
+                  <DropdownMenuLabel
+                    className={`${SECTION_LABEL} pt-1 pb-0.5 text-[11px] uppercase`}
+                  >
+                    {group.label}
+                  </DropdownMenuLabel>
+                  {group.metrics.map((metric) => (
+                    <DropdownMenuRadioItem
+                      key={metric.id}
+                      value={metric.id}
+                      onSelect={keepOpen}
+                    >
+                      {metric.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuGroup>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuLabel className={SECTION_LABEL}>Size</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={card.size}
