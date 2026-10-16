@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -107,6 +108,9 @@ export function SledgeCheckoutForm({
     shipping,
     shippingPending,
     termsDisclosure,
+    marketingOptInEnabled,
+    acceptsMarketing,
+    setAcceptsMarketing,
   } = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
@@ -494,6 +498,14 @@ export function SledgeCheckoutForm({
               </Alert>
             ) : null}
           </div>
+
+          <CheckoutMarketingOptIn
+            enabled={marketingOptInEnabled}
+            checked={acceptsMarketing}
+            onCheckedChange={setAcceptsMarketing}
+            businessName={business.name}
+            className="flex items-start gap-2 font-sans text-xs leading-relaxed tracking-[0.06em] text-[var(--sl-ink-soft)]"
+          />
 
           <button
             type="submit"

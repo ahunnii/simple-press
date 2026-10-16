@@ -11,6 +11,8 @@ import {
 } from "~/lib/customizer";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { listLedger } from "~/lib/loyalty/ledger";
+import { marketingAudienceWhere } from "~/lib/marketing/audience";
+import { marketingOptInData } from "~/lib/marketing/consent";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
@@ -164,7 +166,12 @@ export const customerRouter = createTRPCRouter({
       if (!customer) return null;
       return ctx.db.customer.update({
         where: { id: customer.id },
-        data: { acceptsMarketing: input.acceptsMarketing },
+        // Opting in records consent evidence (and clears any earlier
+        // unsubscribe / suppression, since this is an explicit fresh opt-in
+        // by the signed-in owner of the account); opting out records when.
+        data: input.acceptsMarketing
+          ? marketingOptInData("ACCOUNT", { clearSuppression: true })
+          : { acceptsMarketing: false, marketingUnsubscribedAt: new Date() },
       });
     }),
 
@@ -700,6 +707,14 @@ export const customerRouter = createTRPCRouter({
           }
         }
 
+        // Campaign recipient rows snapshot the address at queue time; blank
+        // them so the erased email doesn't survive in send history. `error`
+        // too: provider rejections ("Invalid `to` field: x@y") can quote it.
+        await tx.marketingCampaignRecipient.updateMany({
+          where: { customerId: input.id, businessId },
+          data: { email: "", error: null },
+        });
+
         await tx.customer.update({
           where: { id: input.id },
           data: {
@@ -708,6 +723,13 @@ export const customerRouter = createTRPCRouter({
             lastName: null,
             phone: null,
             acceptsMarketing: false,
+            // Consent / suppression evidence is personal data tied to the
+            // erased person; clear it with the rest of the record.
+            marketingConsentAt: null,
+            marketingConsentSource: null,
+            marketingUnsubscribedAt: null,
+            marketingSuppressedAt: null,
+            marketingSuppressionReason: null,
             userId: null,
             anonymizedAt: new Date(),
             deletionRequestedAt: null,
@@ -827,7 +849,10 @@ export const customerRouter = createTRPCRouter({
         }));
       }
 
-      // Marketing opt-in filter
+      // Marketing opt-in filter. Deliberately the raw `acceptsMarketing` flag,
+      // not `marketingAudienceWhere`: this is the owner-facing "accepts
+      // marketing" consent filter on the customer table, which should still
+      // list opted-in customers that are suppressed (bounced/complained).
       if (input.marketing === "yes") {
         where.acceptsMarketing = true;
       } else if (input.marketing === "no") {
@@ -915,8 +940,11 @@ export const customerRouter = createTRPCRouter({
           // Business-wide, NOT filtered — see the note on `totalCustomers`
           // below. When no filter is active `where` IS `{ businessId }`, so
           // this is the same query the filtered version would have been.
+          // Same predicate campaigns send to, so this card matches the
+          // audience size on the Marketing page (excludes suppressed /
+          // anonymized customers).
           ctx.db.customer.count({
-            where: { businessId, acceptsMarketing: true },
+            where: marketingAudienceWhere(businessId),
           }),
         ]),
         // Only issued when a filter actually narrows the set. Unfiltered,

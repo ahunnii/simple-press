@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import AbandonedCheckoutEmail, {
-  type AbandonedCheckoutItem,
-} from "~/emails/abandoned-checkout";
+import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
@@ -18,15 +14,18 @@ import InvoiceWeeklyDigestEmail from "~/emails/invoice-weekly-digest";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import LoyaltyBirthdayEmail from "~/emails/loyalty-birthday";
 import LoyaltyRewardRedeemedEmail from "~/emails/loyalty-reward-redeemed";
-import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewDonationNotificationEmail from "~/emails/new-donation-notification";
 import NewFormSubmissionNotificationEmail from "~/emails/new-form-submission-notification";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import NewReviewEmail from "~/emails/new-review";
+import { NewsletterConfirmEmail } from "~/emails/newsletter-confirm";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderPaymentFailedEmail from "~/emails/order-payment-failed";
+import OrderPaymentFailedOwnerEmail from "~/emails/order-payment-failed-owner";
+import OrderPaymentProcessingEmail from "~/emails/order-payment-processing";
 import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
@@ -37,9 +36,6 @@ import PaymentsDisabledEmail from "~/emails/payments-disabled";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
-import OrderPaymentFailedEmail from "~/emails/order-payment-failed";
-import OrderPaymentFailedOwnerEmail from "~/emails/order-payment-failed-owner";
-import OrderPaymentProcessingEmail from "~/emails/order-payment-processing";
 import SubscriptionCancelledEmail from "~/emails/subscription-cancelled";
 import SubscriptionManageLinksEmail from "~/emails/subscription-manage-links";
 import SubscriptionPaymentFailedEmail from "~/emails/subscription-payment-failed";
@@ -48,10 +44,10 @@ import SubscriptionUpdatedEmail from "~/emails/subscription-updated";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 
+import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import type { InvoiceSummaryLineItem } from "~/emails/components/invoice-summary";
-import type { DigestInvoiceRow } from "~/emails/invoice-weekly-digest";
 import type { OverdueInvoiceRow } from "~/emails/invoice-overdue-owner";
-
+import type { DigestInvoiceRow } from "~/emails/invoice-weekly-digest";
 import type { DonationLabel } from "~/lib/donations/label";
 import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
@@ -70,6 +66,9 @@ import { createOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
 
 import { EMAIL_FROM, sendEmail } from "./send";
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Build a signed guest order-status URL for an order, or undefined
@@ -1001,42 +1000,27 @@ export async function sendTestimonialInviteEmail({
   });
 }
 
-export async function sendMarketingBroadcast({
+export async function sendNewsletterConfirmEmail({
   to,
-  subject,
-  business,
-  body,
-  unsubscribeUrl,
+  businessName,
+  confirmUrl,
+  logoUrl,
+  ownerEmail,
 }: {
   to: string;
-  subject: string;
-  business: {
-    name: string;
-    ownerEmail?: string | null;
-    siteContent?: { logoUrl?: string | null } | null;
-  };
-  body: string;
-  unsubscribeUrl: string;
+  businessName: string;
+  confirmUrl: string;
+  logoUrl?: string;
+  ownerEmail?: string;
 }) {
   return sendEmail({
     from: EMAIL_FROM.NOREPLY,
-    fromName: business.name,
+    fromName: businessName,
     to,
-    replyTo: business.ownerEmail ?? undefined,
-    subject,
-    react: MarketingBroadcastEmail({
-      businessName: business.name,
-      logoUrl: business.siteContent?.logoUrl ?? undefined,
-      body,
-      unsubscribeUrl,
-    }),
-    tags: [{ name: "category", value: "marketing_broadcast" }],
-    // RFC 8058 one-click unsubscribe — lets mail clients POST to the
-    // unsubscribe endpoint (handled by /api/unsubscribe POST) without a visit.
-    headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
-      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-    },
+    replyTo: ownerEmail,
+    subject: `Confirm your subscription to ${businessName}`,
+    react: NewsletterConfirmEmail({ businessName, confirmUrl, logoUrl }),
+    tags: [{ name: "category", value: "newsletter_confirm" }],
   });
 }
 

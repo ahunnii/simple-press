@@ -62,6 +62,8 @@ const subscriptionCustomerInfoSchema = z.object({
   name: z.string().min(1).max(200),
   phone: z.string().max(40).optional().nullable(),
   shippingAddress: subscriptionShippingAddressSchema.optional().nullable(),
+  // Newsletter checkbox; only honored server-side when emailMarketing is on.
+  acceptsMarketing: z.boolean().optional(),
 });
 
 /**

@@ -116,6 +116,11 @@ type Props<CurrentForm extends FieldValues> = {
   mediaEnabled?: boolean;
   required?: boolean;
   /**
+   * Limits the editor to what an email can show (no code, galleries,
+   * embeds, forms, tables, columns, videos…). Fixed for the editor's life.
+   */
+  emailMode?: boolean;
+  /**
    * Image upload function passed to the editor. Defaults to an S3 uploader
    * (via `/api/upload`'s "image" route) so richtext images are never stored
    * as base64 in the DB. Override only if a call site needs different
@@ -145,6 +150,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   videosEnabled,
   mediaEnabled,
   required,
+  emailMode,
   uploader,
   onUploadingChange,
 }: Props<CurrentForm>) => {
@@ -185,6 +191,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 embedsEnabled={embedsEnabled}
                 quotesEnabled={quotesEnabled}
                 formsEnabled={formsEnabled}
+                emailMode={emailMode}
                 uploader={resolvedUploader}
                 videoUploader={videosEnabled ? uploadRichTextVideo : undefined}
                 mediaEnabled={mediaEnabled}

@@ -290,7 +290,10 @@ type PostedItem = {
 
 let sessionCounter = 0;
 
-async function startCheckout(items: PostedItem[]) {
+async function startCheckout(
+  items: PostedItem[],
+  opts: { acceptsMarketing?: boolean } = {},
+) {
   sessionCounter += 1;
   const sessionId = `cs_test_custom_${sessionCounter}`;
   stripeMocks.sessionsCreate.mockResolvedValueOnce({
@@ -317,7 +320,13 @@ async function startCheckout(items: PostedItem[]) {
         ...(item.configuration ? { configuration: item.configuration } : {}),
         ...(item.lineKey ? { lineKey: item.lineKey } : {}),
       })),
-      customerInfo: { email: "jane@shopper.test", name: "Jane Doe" },
+      customerInfo: {
+        email: "jane@shopper.test",
+        name: "Jane Doe",
+        ...(opts.acceptsMarketing === undefined
+          ? {}
+          : { acceptsMarketing: opts.acceptsMarketing }),
+      },
       deliveryMethod: "pickup",
     }),
   });
@@ -414,6 +423,52 @@ describe("product customizer checkout", () => {
   });
 
   describe("create-session", () => {
+    // Checkout newsletter box: the marker is only stamped when the shopper
+    // ticked it AND the store has emailMarketing on (the webhook turns the
+    // marker into consent; see stripe-webhook-one-time.test.ts).
+    describe("marketing opt-in marker", () => {
+      async function markerFor(opts: {
+        emailMarketing: boolean;
+        acceptsMarketing?: boolean;
+      }) {
+        const store = await setupStore({
+          flags: { ...BASE_FLAGS, emailMarketing: opts.emailMarketing },
+        });
+        const { res, params } = await startCheckout(
+          [
+            {
+              productId: store.glove.id,
+              variantId: store.pink.id,
+              configuration: build(store),
+            },
+          ],
+          { acceptsMarketing: opts.acceptsMarketing },
+        );
+        expect(res.status).toBe(200);
+        return params!.metadata!;
+      }
+
+      it("stamps marketingOptIn '1' when ticked and emailMarketing is on", async () => {
+        const metadata = await markerFor({
+          emailMarketing: true,
+          acceptsMarketing: true,
+        });
+        expect(metadata.marketingOptIn).toBe("1");
+      });
+
+      it("omits the marker when ticked but emailMarketing is off", async () => {
+        const metadata = await markerFor({
+          emailMarketing: false,
+          acceptsMarketing: true,
+        });
+        expect(metadata).not.toHaveProperty("marketingOptIn");
+      });
+
+      it("omits the marker when unticked with emailMarketing on", async () => {
+        const metadata = await markerFor({ emailMarketing: true });
+        expect(metadata).not.toHaveProperty("marketingOptIn");
+      });
+    });
     it("re-prices from ids and builds the Stripe line from the database, ignoring client price and names", async () => {
       const store = await setupStore();
       const { res, params } = await startCheckout([

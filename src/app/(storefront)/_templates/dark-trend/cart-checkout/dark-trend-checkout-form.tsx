@@ -27,6 +27,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -607,6 +608,15 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               </div>
 
               {/* S-11 + N-1: violet-600, aria-hidden icons */}
+              <CheckoutMarketingOptIn
+                enabled={f.marketingOptInEnabled}
+                checked={f.acceptsMarketing}
+                onCheckedChange={f.setAcceptsMarketing}
+                businessName={business.name}
+                className="flex items-start gap-2 text-left text-xs text-white/60"
+                inputClassName="mt-0.5 size-4 shrink-0 accent-white"
+              />
+
               <Button
                 type="submit"
                 disabled={f.isProcessing || shippingCalculating}

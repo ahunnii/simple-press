@@ -322,6 +322,84 @@ describe("POST /api/stripe/subscriptions/create-session", () => {
   });
 
   /* ---------------------------------------------------------------- *
+   * Newsletter checkbox — metadata marker gating
+   * ---------------------------------------------------------------- */
+
+  describe("marketing opt-in marker", () => {
+    async function startSession(opts: {
+      emailMarketing: boolean;
+      acceptsMarketing?: boolean;
+    }) {
+      const business = await createSubscriptionStore({
+        featureFlags: {
+          subscriptions: true,
+          products: true,
+          payments: true,
+          emailMarketing: opts.emailMarketing,
+        },
+      });
+      const { product, variant } = await createSubscribableProduct(business.id);
+      const res = await post(
+        shipBody(
+          product.id,
+          variant.id,
+          {},
+          opts.acceptsMarketing === undefined
+            ? {}
+            : { acceptsMarketing: opts.acceptsMarketing },
+        ),
+      );
+      expect(res.status).toBe(200);
+      const [params] = stripeMocks.sessionsCreate.mock.calls[0] as [
+        { metadata: Record<string, string> },
+      ];
+      return { business, metadata: params.metadata };
+    }
+
+    it("stamps marketingOptIn '1' when ticked and emailMarketing is on", async () => {
+      const { metadata } = await startSession({
+        emailMarketing: true,
+        acceptsMarketing: true,
+      });
+      expect(metadata.marketingOptIn).toBe("1");
+    });
+
+    it("omits the marker when ticked but emailMarketing is off", async () => {
+      const { metadata } = await startSession({
+        emailMarketing: false,
+        acceptsMarketing: true,
+      });
+      expect(metadata).not.toHaveProperty("marketingOptIn");
+    });
+
+    it("omits the marker when unticked (or false) with emailMarketing on", async () => {
+      const { metadata } = await startSession({ emailMarketing: true });
+      expect(metadata).not.toHaveProperty("marketingOptIn");
+    });
+
+    it("omits the marker when acceptsMarketing is explicitly false", async () => {
+      const { metadata } = await startSession({
+        emailMarketing: true,
+        acceptsMarketing: false,
+      });
+      expect(metadata).not.toHaveProperty("marketingOptIn");
+    });
+
+    it("records no consent on the local Customer at session creation", async () => {
+      const { business } = await startSession({
+        emailMarketing: true,
+        acceptsMarketing: true,
+      });
+      const customer = await db.customer.findFirstOrThrow({
+        where: { businessId: business.id },
+      });
+      expect(customer.acceptsMarketing).toBe(false);
+      expect(customer.marketingConsentAt).toBeNull();
+      expect(customer.marketingConsentSource).toBeNull();
+    });
+  });
+
+  /* ---------------------------------------------------------------- *
    * Happy path — ship, zone_weight
    * ---------------------------------------------------------------- */
 

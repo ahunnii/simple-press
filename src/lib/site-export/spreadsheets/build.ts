@@ -16,6 +16,7 @@ import { parseAnswersJson } from "~/lib/forms/answers";
 import { buildFormCsv } from "~/lib/forms/csv";
 import { buildInventoryCsv } from "~/lib/inventory/csv";
 import { getOutstandingByItem } from "~/lib/inventory/rentals";
+import { marketingAudienceWhere } from "~/lib/marketing/audience";
 import { parseWeightTiers } from "~/lib/shipping-zone-config";
 import {
   makeEmptyFormDefinition,
@@ -252,12 +253,8 @@ export async function buildSpreadsheets(
     }),
     loadInventoryItems(businessId),
     db.customer.findMany({
-      where: {
-        businessId,
-        acceptsMarketing: true,
-        anonymizedAt: null,
-        NOT: { email: "" },
-      },
+      // Same definition the campaign sender uses (opted in, not suppressed).
+      where: marketingAudienceWhere(businessId),
       select: {
         email: true,
         firstName: true,
@@ -265,6 +262,8 @@ export async function buildSpreadsheets(
         orderCount: true,
         totalSpent: true,
         createdAt: true,
+        marketingConsentSource: true,
+        marketingConsentAt: true,
       },
       orderBy: { createdAt: "desc" },
     }),

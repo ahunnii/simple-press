@@ -5,6 +5,8 @@ import { ArrowRight } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { useNewsletterSignup } from "~/hooks/use-newsletter-signup";
+import { NewsletterHoneypot } from "~/app/(storefront)/_components/newsletter/newsletter-honeypot";
 
 import { resolveFields } from "..";
 
@@ -40,7 +42,11 @@ export function ElegantNewsletter({
   sectionAttrs?: Record<string, string>;
 } = {}) {
   const [email, setEmail] = useState("");
+  // Fallback path only (email marketing off for this store, or the flag flips
+  // off mid-session): submitting shows the honest "not open yet" message.
   const [submitted, setSubmitted] = useState(false);
+  const newsletter = useNewsletterSignup();
+  const fallback = !newsletter.enabled || newsletter.status === "disabled";
   const { ref, visible } = useReveal();
   const reducedMotion = useReducedMotion();
 
@@ -59,11 +65,13 @@ export function ElegantNewsletter({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // NOTE: there is no newsletter/marketing-subscribe backend wired up yet
-    // (no public tRPC procedure exists to persist this address anywhere).
-    // Rather than fake a successful signup, tell the visitor honestly that
-    // sign-ups aren't available yet instead of silently discarding their email.
-    setSubmitted(true);
+    if (fallback) {
+      // No sign-up can be made while email marketing is off. Tell the visitor
+      // honestly rather than faking a successful signup.
+      setSubmitted(true);
+      return;
+    }
+    void newsletter.submit({ email });
   };
 
   const revealStyle = (delay: number): React.CSSProperties =>
@@ -152,67 +160,91 @@ export function ElegantNewsletter({
               Newsletter sign-ups aren&apos;t open yet — thanks for your
               interest, and please check back soon.
             </p>
+          ) : newsletter.isSuccess ? (
+            <p role="status" className="el-newsletter-success">
+              Check your inbox to confirm your subscription.
+            </p>
           ) : (
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                maxWidth: 480,
-                margin: "0 auto",
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                borderBottom: "1px solid rgba(255,255,255,0.3)",
-                paddingBottom: 6,
-              }}
-            >
-              <label htmlFor="el-newsletter-email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="el-newsletter-email"
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="el-newsletter-input"
+            <>
+              <form
+                onSubmit={handleSubmit}
                 style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: 0,
-                  color: "var(--el-paper, #fbf8f2)",
-                  fontSize: 16,
-                  padding: "12px 0",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                }}
-              />
-              <button
-                type="submit"
-                className="el-newsletter-submit"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
+                  maxWidth: 480,
+                  margin: "0 auto",
+                  display: "flex",
                   gap: 8,
-                  fontSize: 12,
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  color: "var(--el-paper, #fbf8f2)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  flexShrink: 0,
+                  alignItems: "center",
+                  borderBottom: "1px solid rgba(255,255,255,0.3)",
+                  paddingBottom: 6,
                 }}
               >
-                <span {...fieldAttr("elegant.homepage.newsletter-button")}>
-                  {buttonText}
-                </span>
-                <ArrowRight
-                  aria-hidden={true}
-                  style={{ width: 14, height: 14 }}
+                <NewsletterHoneypot inputRef={newsletter.honeypotRef} />
+                <label htmlFor="el-newsletter-email" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="el-newsletter-email"
+                  required
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="el-newsletter-input"
+                  style={{
+                    flex: 1,
+                    background: "transparent",
+                    border: 0,
+                    color: "var(--el-paper, #fbf8f2)",
+                    fontSize: 16,
+                    padding: "12px 0",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}
                 />
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={newsletter.isSubmitting}
+                  className="el-newsletter-submit"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 12,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--el-paper, #fbf8f2)",
+                    background: "none",
+                    border: "none",
+                    cursor: newsletter.isSubmitting ? "wait" : "pointer",
+                    opacity: newsletter.isSubmitting ? 0.5 : 1,
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <span {...fieldAttr("elegant.homepage.newsletter-button")}>
+                    {buttonText}
+                  </span>
+                  <ArrowRight
+                    aria-hidden={true}
+                    style={{ width: 14, height: 14 }}
+                  />
+                </button>
+              </form>
+              {newsletter.status === "error" && newsletter.error ? (
+                <p
+                  role="alert"
+                  style={{
+                    margin: "16px auto 0",
+                    maxWidth: 480,
+                    fontSize: 15,
+                    color: "rgba(255,255,255,0.8)",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}
+                >
+                  {newsletter.error}
+                </p>
+              ) : null}
+            </>
           )}
         </div>
       </div>

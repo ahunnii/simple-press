@@ -21,6 +21,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -653,6 +654,14 @@ export function UmscCheckoutForm({
                   </p>
                 )}
               </div>
+
+              <CheckoutMarketingOptIn
+                enabled={f.marketingOptInEnabled}
+                checked={f.acceptsMarketing}
+                onCheckedChange={f.setAcceptsMarketing}
+                businessName={business.name}
+                className="umsc-sans flex items-start gap-2 text-left text-[11px] leading-[1.5] text-[var(--umsc-muted)]"
+              />
 
               <button
                 type="submit"

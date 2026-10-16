@@ -4,7 +4,12 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import type { DbClient } from "~/server/db";
+import {
+  applyCheckoutMarketingOptIn,
+  sessionMarketingOptIn,
+} from "~/lib/marketing/checkout-consent";
 import { stripeClient } from "~/lib/stripe/client";
+import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
 
 import {
@@ -638,6 +643,41 @@ export async function handleSubscriptionCheckoutCompleted(
         },
       );
       return;
+    }
+
+    // Newsletter checkbox on the subscribe form. The session metadata marker is
+    // only stamped when the box was ticked and emailMarketing was on, and
+    // consent is recorded here — after checkout completed — not at session
+    // creation. Identified via the subscription row (its `customerId` was set
+    // to the local Customer when the session was created; `customerEmail` is
+    // the fallback), scoped by the tenant's business. Idempotent: see
+    // `applyCheckoutMarketingOptIn`. Non-fatal: it must never block the
+    // subscription state sync below.
+    if (sessionMarketingOptIn(session.metadata)) {
+      const { subscription } = tenant;
+      try {
+        await applyCheckoutMarketingOptIn(
+          db,
+          subscription.customerId
+            ? {
+                businessId: tenant.business.id,
+                customerId: subscription.customerId,
+              }
+            : {
+                businessId: tenant.business.id,
+                email: normalizeEmail(subscription.customerEmail),
+              },
+        );
+      } catch (error) {
+        Sentry.captureException(error, {
+          level: "warning",
+          tags: { "subscription.step": "marketing-opt-in" },
+          extra: {
+            businessId: tenant.business.id,
+            stripeSessionId: session.id,
+          },
+        });
+      }
     }
 
     // Read the subscription from the connected account rather than trusting the

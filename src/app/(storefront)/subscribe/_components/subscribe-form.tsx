@@ -12,12 +12,12 @@ import type { CheckoutAddressFormApi } from "~/app/(storefront)/_components/chec
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { SubscriptionIntervalKey } from "~/lib/subscriptions/intervals";
 import type { RouterOutputs } from "~/trpc/react";
+import { resolvePickupLocation } from "~/lib/address/pickup";
 import {
   COUNTRY_LABELS,
   getAllowedCountries,
   getRegionOptions,
 } from "~/lib/geo/regions";
-import { resolvePickupLocation } from "~/lib/address/pickup";
 import { formatPrice } from "~/lib/prices";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { getInterval } from "~/lib/subscriptions/intervals";
@@ -30,6 +30,8 @@ import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -135,6 +137,11 @@ export function SubscribeForm({
   const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
     "ship",
   );
+  // Newsletter checkbox: only offered when the store has email marketing on,
+  // unchecked by default (consent is an affirmative act).
+  const { isEnabled } = useStorefrontFlags();
+  const marketingOptInEnabled = isEnabled("emailMarketing");
+  const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -292,6 +299,9 @@ export function SubscribeForm({
                     phone: phone.trim(),
                   }
                 : null,
+            ...(marketingOptInEnabled && acceptsMarketing
+              ? { acceptsMarketing: true }
+              : {}),
           },
         }),
       });
@@ -640,6 +650,15 @@ export function SubscribeForm({
             leadText="By subscribing to the recurring charges described above, you agree to"
             className="text-muted-foreground text-xs leading-relaxed"
             linkClassName="underline underline-offset-2"
+          />
+
+          <CheckoutMarketingOptIn
+            enabled={marketingOptInEnabled}
+            checked={acceptsMarketing}
+            onCheckedChange={setAcceptsMarketing}
+            businessName={business.name}
+            className="text-muted-foreground flex items-start gap-2 text-sm"
+            inputClassName="accent-primary mt-0.5 size-4 shrink-0"
           />
 
           <Button type="submit" size="lg" disabled={isProcessing || !quote}>

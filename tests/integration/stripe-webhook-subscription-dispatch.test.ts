@@ -113,11 +113,13 @@ async function createSubscriptionRow(
     status?: string;
     stripeSubscriptionId?: string | null;
     quantity?: number;
+    customerId?: string | null;
   } = {},
 ) {
   return db.subscription.create({
     data: {
       businessId: store.id,
+      customerId: opts.customerId ?? null,
       customerEmail: "ada@shopper.test",
       customerName: "Ada Lovelace",
       productId: opts.productId ?? null,
@@ -424,5 +426,180 @@ describe("stripe webhook route — subscription dispatch", () => {
       where: { id: product.id },
     });
     expect(productAfter.inventoryQty).toBe(8);
+  });
+
+  // Subscribe-form newsletter box: create-session stamps metadata.marketingOptIn
+  // "1" only when ticked AND emailMarketing is on; consent is recorded HERE,
+  // once checkout completes (never at session creation).
+  describe("checkout marketing opt-in", () => {
+    const EMAIL = "ada@shopper.test";
+    const T0 = new Date("2026-01-15T12:00:00.000Z");
+
+    async function completeSubscriptionCheckout(
+      store: Store,
+      rowId: string,
+      metadata: Record<string, string> = {},
+    ) {
+      const { session } = makeCheckoutSession({
+        id: "cs_test_optin_1",
+        mode: "subscription",
+        metadata: {
+          businessId: store.id,
+          subscriptionId: rowId,
+          kind: "subscription",
+          ...metadata,
+        },
+        customerEmail: EMAIL,
+      });
+      const event = makeCheckoutCompletedEvent(
+        {
+          ...session,
+          subscription: "sub_live_1",
+          customer: "cus_test_1",
+        } as unknown as Stripe.Checkout.Session,
+        ACCOUNT_ID,
+      );
+      stripeMocks.constructEvent.mockReturnValue(event);
+      stripeMocks.subscriptionsRetrieve.mockResolvedValue(
+        makeStripeSubscription(),
+      );
+      const res = await postWebhookEvent(event);
+      expect(res.status).toBe(200);
+    }
+
+    const findCustomer = (store: Store) =>
+      db.customer.findUniqueOrThrow({
+        where: { businessId_email: { businessId: store.id, email: EMAIL } },
+      });
+
+    async function setup(
+      customerData: Partial<{
+        acceptsMarketing: boolean;
+        marketingConsentSource: string;
+        marketingConsentAt: Date;
+        marketingSuppressedAt: Date;
+        marketingSuppressionReason: string;
+      }> = {},
+    ) {
+      const store = await setupStore();
+      const customer = await db.customer.create({
+        data: { businessId: store.id, email: EMAIL, ...customerData },
+      });
+      const row = await createSubscriptionRow(store, {
+        customerId: customer.id,
+      });
+      return { store, customer, row };
+    }
+
+    it("opts the customer in (source CHECKOUT) when the session carries the marker", async () => {
+      const { store, row } = await setup();
+      const before = Date.now();
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+
+      const customer = await findCustomer(store);
+      expect(customer.acceptsMarketing).toBe(true);
+      expect(customer.marketingConsentSource).toBe("CHECKOUT");
+      expect(customer.marketingConsentAt!.getTime()).toBeGreaterThanOrEqual(
+        before,
+      );
+    });
+
+    it("leaves the customer alone when the marker is absent", async () => {
+      const { store, row } = await setup();
+
+      await completeSubscriptionCheckout(store, row.id);
+
+      const customer = await findCustomer(store);
+      expect(customer.acceptsMarketing).toBe(false);
+      expect(customer.marketingConsentSource).toBeNull();
+      expect(customer.marketingConsentAt).toBeNull();
+    });
+
+    it("falls back to the row's email when the subscription has no customerId", async () => {
+      const store = await setupStore();
+      await db.customer.create({
+        data: { businessId: store.id, email: EMAIL },
+      });
+      const row = await createSubscriptionRow(store);
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+
+      expect((await findCustomer(store)).acceptsMarketing).toBe(true);
+    });
+
+    it("keeps the original source/date of an already-opted-in customer", async () => {
+      const { store, row } = await setup({
+        acceptsMarketing: true,
+        marketingConsentSource: "ACCOUNT",
+        marketingConsentAt: T0,
+      });
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+
+      const customer = await findCustomer(store);
+      expect(customer.acceptsMarketing).toBe(true);
+      expect(customer.marketingConsentSource).toBe("ACCOUNT");
+      expect(customer.marketingConsentAt).toEqual(T0);
+    });
+
+    it("does not override a bounce/complaint suppression", async () => {
+      const suppressedAt = new Date("2026-02-01T09:30:00.000Z");
+      const { store, row } = await setup({
+        marketingSuppressedAt: suppressedAt,
+        marketingSuppressionReason: "COMPLAINT",
+      });
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+
+      const customer = await findCustomer(store);
+      expect(customer.acceptsMarketing).toBe(false);
+      expect(customer.marketingSuppressedAt).toEqual(suppressedAt);
+      expect(customer.marketingSuppressionReason).toBe("COMPLAINT");
+      expect(customer.marketingConsentSource).toBeNull();
+    });
+
+    it("is a no-op on redelivery (consent date does not move)", async () => {
+      const { store, row } = await setup();
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+      const first = await findCustomer(store);
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+      const second = await findCustomer(store);
+
+      expect(second.acceptsMarketing).toBe(true);
+      expect(second.marketingConsentAt).toEqual(first.marketingConsentAt);
+      expect(second.marketingConsentSource).toBe("CHECKOUT");
+    });
+
+    it("never touches another store's customer with the same email", async () => {
+      const { store, row } = await setup();
+      const other = await createBusiness({ subdomain: "other-biz" });
+      const otherCustomer = await db.customer.create({
+        data: { businessId: other.id, email: EMAIL },
+      });
+
+      await completeSubscriptionCheckout(store, row.id, {
+        marketingOptIn: "1",
+      });
+
+      const after = await db.customer.findUniqueOrThrow({
+        where: { id: otherCustomer.id },
+      });
+      expect(after.acceptsMarketing).toBe(false);
+      expect(after.marketingConsentSource).toBeNull();
+    });
   });
 });

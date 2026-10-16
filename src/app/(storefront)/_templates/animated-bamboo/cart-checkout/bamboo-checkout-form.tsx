@@ -26,6 +26,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -129,6 +130,9 @@ export function CheckoutForm({
     shippingPending,
     finalTotal,
     termsDisclosure,
+    marketingOptInEnabled,
+    acceptsMarketing,
+    setAcceptsMarketing,
   } = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
@@ -643,6 +647,15 @@ export function CheckoutForm({
                 </Alert>
               )}
             </div>
+
+            <CheckoutMarketingOptIn
+              enabled={marketingOptInEnabled}
+              checked={acceptsMarketing}
+              onCheckedChange={setAcceptsMarketing}
+              businessName={business.name}
+              className="flex items-start gap-2 text-left text-xs text-[var(--bamboo-muted)]"
+              inputClassName="mt-0.5 size-4 shrink-0 accent-[var(--bamboo-pine)]"
+            />
 
             <Button
               type="submit"

@@ -31,6 +31,7 @@ import { legalRouter } from "./routers/legal";
 import { loyaltyRouter } from "./routers/loyalty";
 import { marketingRouter } from "./routers/marketing";
 import { mediaRouter } from "./routers/media";
+import { newsletterRouter } from "./routers/newsletter";
 import { orderRouter } from "./routers/order";
 import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
@@ -109,6 +110,7 @@ export const appRouter = createTRPCRouter({
   external: externalRouter,
   faq: faqRouter,
   marketing: marketingRouter,
+  newsletter: newsletterRouter,
   team: teamRouter,
 
   upload: uploadRouter,

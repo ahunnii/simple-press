@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import { getBusinessUrl } from "~/lib/business-url";
 import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
 import { db } from "~/server/db";
 
@@ -86,9 +87,13 @@ function htmlPage(title: string, message: string, tone: PageTone): Response {
 
 // Shared by GET (clicked link) and POST (RFC 8058 One-Click
 // List-Unsubscribe-Post) — both unsubscribe the same way given a token.
-async function unsubscribeByToken(
-  token: string | null,
-): Promise<{ success: boolean; title: string; message: string }> {
+async function unsubscribeByToken(token: string | null): Promise<{
+  success: boolean;
+  title: string;
+  message: string;
+  /** Storefront origin of the business the token belongs to (success only). */
+  storefrontUrl?: string;
+}> {
   if (!token) {
     return {
       success: false,
@@ -100,7 +105,10 @@ async function unsubscribeByToken(
 
   const payload = verifyUnsubscribeToken(token);
 
-  if (!payload) {
+  // `!payload.customerId || !payload.businessId`: belt-and-braces on top of the
+  // shape check in verifyUnsubscribeToken — an undefined id would be dropped
+  // from the `where` below by Prisma and opt out every customer platform-wide.
+  if (!payload?.customerId || !payload.businessId) {
     return {
       success: false,
       title: "Invalid link",
@@ -113,14 +121,53 @@ async function unsubscribeByToken(
   // CAN-SPAM-mandated flow, so a DB failure here must render the same
   // styled failure card the caller already uses for an invalid token,
   // rather than an unhandled Next.js error page.
+  let storefrontUrl: string | undefined;
   try {
+    const now = new Date();
     await db.customer.updateMany({
       where: {
         id: payload.customerId,
         businessId: payload.businessId,
       },
-      data: { acceptsMarketing: false },
+      data: { acceptsMarketing: false, marketingUnsubscribedAt: now },
     });
+
+    // Per-campaign attribution: the token carries the recipient row id.
+    // Scoped by customer + business so a token can never stamp someone else's
+    // row; `unsubscribedAt: null` keeps the first click's timestamp.
+    // Attribution is best-effort: the opt-out above is what the law requires,
+    // so a failure here must not turn it into an error card.
+    if (payload.r) {
+      try {
+        await db.marketingCampaignRecipient.updateMany({
+          where: {
+            id: payload.r,
+            customerId: payload.customerId,
+            businessId: payload.businessId,
+            unsubscribedAt: null,
+          },
+          data: { unsubscribedAt: now },
+        });
+      } catch (error) {
+        Sentry.captureException(error, {
+          level: "warning",
+          tags: { route: "unsubscribe", step: "recipient-attribution" },
+          extra: { recipientId: payload.r },
+        });
+      }
+    }
+
+    // Only for the branded redirect on GET. A failed lookup must not turn a
+    // successful unsubscribe into an error, so it falls back to the HTML card.
+    try {
+      const business = await db.business.findUnique({
+        where: { id: payload.businessId },
+        select: { subdomain: true, customDomain: true, domainStatus: true },
+      });
+      if (business) storefrontUrl = getBusinessUrl(business);
+    } catch {
+      storefrontUrl = undefined;
+    }
   } catch (error) {
     console.error("Error processing unsubscribe request:", error);
     Sentry.captureException(error, {
@@ -142,6 +189,7 @@ async function unsubscribeByToken(
     title: "You've been unsubscribed",
     message:
       "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences.",
+    storefrontUrl,
   };
 }
 
@@ -161,6 +209,14 @@ export async function GET(request: NextRequest) {
     return htmlPage(TEST_PAGE.title, TEST_PAGE.message, "neutral");
   }
   const result = await unsubscribeByToken(token);
+  // The unsubscribe has already happened; the redirect only lands the person on
+  // the store's branded confirmation page (which offers a Resubscribe undo).
+  if (result.success && result.storefrontUrl && token) {
+    const target = new URL("/email-preferences", result.storefrontUrl);
+    target.searchParams.set("s", "unsubscribed");
+    target.searchParams.set("t", token);
+    return NextResponse.redirect(target, 303);
+  }
   return htmlPage(
     result.title,
     result.message,

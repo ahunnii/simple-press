@@ -48,6 +48,11 @@ import { deductPoolInventory } from "~/lib/inventory";
 import { releaseReservation } from "~/lib/inventory/reservation";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { awardPointsForPaidOrder } from "~/lib/loyalty/order-hooks";
+import {
+  applyCheckoutMarketingOptIn,
+  sessionMarketingOptIn,
+} from "~/lib/marketing/checkout-consent";
+import { marketingOptInData } from "~/lib/marketing/consent";
 import { stripeClient } from "~/lib/stripe/client";
 import {
   handleInvoicePaid,
@@ -371,6 +376,8 @@ export async function POST(req: NextRequest) {
           });
         }
 
+        const marketingOptIn = sessionMarketingOptIn(fullSession.metadata);
+
         if (customerEmail !== "unknown@example.com") {
           // Parse customer name from Stripe (use 'name' field, not 'individual_name')
           // BOTH names land as NULL rather than "" or a placeholder when Stripe
@@ -414,6 +421,11 @@ export async function POST(req: NextRequest) {
               phone: fullSession.customer_details?.phone ?? null,
               businessId: business.id,
               userId: existingUser?.id ?? null, // Link to user if exists
+              // Checkout newsletter checkbox (create-session set the marker
+              // only when the box was ticked and emailMarketing was on).
+              ...(marketingOptIn
+                ? marketingOptInData("CHECKOUT", { clearSuppression: false })
+                : {}),
             },
             update: {
               // firstName, lastName, phone intentionally not updated on repeat orders.
@@ -424,6 +436,25 @@ export async function POST(req: NextRequest) {
               userId: existingUser?.id ?? undefined,
             },
           });
+
+          // Existing customer ticked the newsletter box: opt them in, but only
+          // if they aren't already (keep the original consent source/date) and
+          // aren't suppressed after a bounce/complaint. Never writes `false`:
+          // an unticked box on a later order must not undo an earlier opt-in.
+          if (marketingOptIn) {
+            try {
+              await applyCheckoutMarketingOptIn(db, {
+                businessId: business.id,
+                customerId: customer.id,
+              });
+            } catch (error) {
+              Sentry.captureException(error, {
+                level: "warning",
+                tags: { "webhook.step": "marketing-opt-in" },
+                extra: { businessId, stripeSessionId: session.id },
+              });
+            }
+          }
         }
 
         // Create or reuse shipping address if provided (see resolveCheckoutShipping)

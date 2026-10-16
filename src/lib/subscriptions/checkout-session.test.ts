@@ -81,6 +81,7 @@ function makeInput(
     productSlug?: string;
     imageUrl?: string | null;
     stripeCustomerId?: string;
+    marketingOptIn?: boolean;
   } = {},
 ): SubscriptionCheckoutParamsInput {
   return {
@@ -98,6 +99,9 @@ function makeInput(
         : overrides.imageUrl,
     stripeCustomerId: overrides.stripeCustomerId ?? "cus_test_1",
     subscription: { ...BASE_SUBSCRIPTION, ...overrides.subscription },
+    ...(overrides.marketingOptIn === undefined
+      ? {}
+      : { marketingOptIn: overrides.marketingOptIn }),
   };
 }
 
@@ -222,6 +226,17 @@ describe("buildSubscriptionCheckoutParams — ship + shipping (primary case)", (
       expect(params).not.toHaveProperty("payment_intent_data");
       expect(params).not.toHaveProperty("customer_email");
     }
+  });
+
+  it("stamps session metadata.marketingOptIn only when asked to, never on subscription_data", () => {
+    const off = buildSubscriptionCheckoutParams(makeInput());
+    expect(off.metadata).not.toHaveProperty("marketingOptIn");
+
+    const on = buildSubscriptionCheckoutParams(
+      makeInput({ marketingOptIn: true }),
+    );
+    expect(on.metadata).toMatchObject({ marketingOptIn: "1" });
+    expect(on.subscription_data?.metadata).not.toHaveProperty("marketingOptIn");
   });
 
   it("stamps subscription_data.metadata so it round-trips through parseSubscriptionMetadata", () => {

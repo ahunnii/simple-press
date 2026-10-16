@@ -21,6 +21,7 @@ import {
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId } from "~/providers/cart-context";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -1314,6 +1315,23 @@ export function ViiCheckoutForm({
               </div>
 
               {/* Submit CTA */}
+              <CheckoutMarketingOptIn
+                enabled={f.marketingOptInEnabled}
+                checked={f.acceptsMarketing}
+                onCheckedChange={f.setAcceptsMarketing}
+                businessName={business.name}
+                className="flex items-start gap-2"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 11,
+                  color: "var(--vii-ink-soft)",
+                  textAlign: "left",
+                  letterSpacing: "0.04em",
+                  lineHeight: 1.5,
+                  margin: "0 0 8px",
+                }}
+              />
+
               <button
                 type="submit"
                 disabled={f.isProcessing || shippingCalculating}

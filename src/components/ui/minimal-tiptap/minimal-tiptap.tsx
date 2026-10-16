@@ -36,6 +36,10 @@ export interface MinimalTiptapProps extends Omit<
   layoutBlocksEnabled?: boolean;
 }
 
+// Module-level so the arrays are stable props for the toolbar sections.
+const ALL_HEADING_LEVELS: Array<1 | 2 | 3 | 4 | 5 | 6> = [1, 2, 3, 4, 5, 6];
+const EMAIL_HEADING_LEVELS: Array<1 | 2 | 3 | 4 | 5 | 6> = [1, 2, 3];
+
 const Toolbar = ({
   editor,
   galleriesEnabled,
@@ -43,6 +47,7 @@ const Toolbar = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  emailMode,
 }: {
   editor: Editor;
   galleriesEnabled?: boolean;
@@ -50,29 +55,37 @@ const Toolbar = ({
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   layoutBlocksEnabled?: boolean;
+  emailMode?: boolean;
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
-      <SectionOne editor={editor} activeLevels={[1, 2, 3, 4, 5, 6]} />
+      <SectionOne
+        editor={editor}
+        activeLevels={emailMode ? EMAIL_HEADING_LEVELS : ALL_HEADING_LEVELS}
+      />
 
       <Separator orientation="vertical" className="mx-2" />
 
       <SectionTwo
         editor={editor}
-        activeActions={[
-          "bold",
-          "italic",
-          "underline",
-          "strikethrough",
-          "code",
-          "clearFormatting",
-        ]}
+        activeActions={
+          emailMode
+            ? ["bold", "italic", "underline", "strikethrough", "clearFormatting"]
+            : [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "code",
+                "clearFormatting",
+              ]
+        }
         mainActionCount={3}
       />
 
       <Separator orientation="vertical" className="mx-2" />
 
-      <SectionThree editor={editor} />
+      <SectionThree editor={editor} emailSafe={emailMode} />
 
       <Separator orientation="vertical" className="mx-2" />
 
@@ -90,18 +103,22 @@ const Toolbar = ({
 
       <SectionFive
         editor={editor}
-        activeActions={[
-          "codeBlock",
-          "blockquote",
-          "horizontalRule",
-          "gallery",
-          "embed",
-          "quoteCalculator",
-          "form",
-          "table",
-          "columns",
-          "details",
-        ]}
+        activeActions={
+          emailMode
+            ? ["blockquote", "horizontalRule"]
+            : [
+                "codeBlock",
+                "blockquote",
+                "horizontalRule",
+                "gallery",
+                "embed",
+                "quoteCalculator",
+                "form",
+                "table",
+                "columns",
+                "details",
+              ]
+        }
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
@@ -123,6 +140,7 @@ export const MinimalTiptapEditor = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  emailMode,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
@@ -132,6 +150,7 @@ export const MinimalTiptapEditor = ({
     embedsEnabled,
     quotesEnabled,
     formsEnabled,
+    emailMode,
     ...props,
   });
 
@@ -150,6 +169,7 @@ export const MinimalTiptapEditor = ({
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
         layoutBlocksEnabled={layoutBlocksEnabled}
+        emailMode={emailMode}
       />
     </EditorContext.Provider>
   );
@@ -168,6 +188,7 @@ export const MainMinimalTiptapEditor = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  emailMode,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
   // or every transaction (e.g. from gallery) re-renders the whole toolbar and
@@ -194,14 +215,15 @@ export const MainMinimalTiptapEditor = ({
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
         layoutBlocksEnabled={layoutBlocksEnabled}
+        emailMode={emailMode}
       />
       <EditorContent
         editor={providedEditor}
         className={cn("minimal-tiptap-editor", editorContentClassName)}
       />
       <LinkBubbleMenu editor={providedEditor} />
-      <TableBubbleMenu editor={providedEditor} />
-      <ColumnsBubbleMenu editor={providedEditor} />
+      {!emailMode && <TableBubbleMenu editor={providedEditor} />}
+      {!emailMode && <ColumnsBubbleMenu editor={providedEditor} />}
       <ImageBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );

@@ -1374,6 +1374,14 @@ export async function POST(req: NextRequest) {
           ? { freeShippingDiscountCents: String(freeShippingDiscountCents) }
           : {}),
         deliveryMethod,
+        // Newsletter opt-in checkbox. Only honored when the store has email
+        // marketing on; the webhook turns this into consent and never reads
+        // its absence as an opt-out.
+        ...(customerInfo.acceptsMarketing === true &&
+        isFeatureEnabled("emailMarketing") &&
+        !disabledByDependency.includes("emailMarketing")
+          ? { marketingOptIn: "1" }
+          : {}),
         ...(hasFullShipping && sa
           ? {
               shippingLine1: sa.line1.trim(),

@@ -11,7 +11,7 @@ import { allowedHosts, syncAllowedHostsFromDb } from "~/lib/auth/allowed-hosts";
 import { getBusinessUrl } from "~/lib/business-url";
 import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { sendResendEmail } from "~/lib/email/resend";
-import { EMAIL_FROM } from "~/lib/email/send";
+import { EMAIL_FROM, formatFromAddress } from "~/lib/email/send";
 import { createRedisSecondaryStorage } from "~/lib/redis";
 import { recaptcha } from "~/server/better-auth/plugins/recaptcha";
 import { resolvePlatformTermsAcceptance } from "~/server/better-auth/terms-acceptance";
@@ -132,7 +132,10 @@ export const auth = betterAuth({
       // Better Auth has already issued the reset token by this point.
       try {
         await sendResendEmail({
-          from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          from: formatFromAddress(
+            `${business?.name ?? "SimplePress"} via SimplePress`,
+            EMAIL_FROM.NOREPLY,
+          ),
           to: user.email,
           subject: "Reset your SimplePress password",
           react: ResetPasswordEmail({
@@ -175,7 +178,10 @@ export const auth = betterAuth({
         : url;
       try {
         await sendResendEmail({
-          from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          from: formatFromAddress(
+            `${business?.name ?? "SimplePress"} via SimplePress`,
+            EMAIL_FROM.NOREPLY,
+          ),
           to: user.email,
           subject: "Verify your email",
           react: VerifyEmail({

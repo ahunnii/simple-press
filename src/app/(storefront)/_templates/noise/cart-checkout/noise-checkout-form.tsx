@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutMarketingOptIn } from "~/app/(storefront)/_components/checkout/checkout-marketing-opt-in";
 import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
@@ -107,6 +108,9 @@ export function NoiseCheckoutForm({
     shipping,
     shippingPending,
     termsDisclosure,
+    marketingOptInEnabled,
+    acceptsMarketing,
+    setAcceptsMarketing,
   } = useCheckoutForm(business, merchantPolicies);
 
   const cartCopy = resolveNoiseCartCopy(business.siteContent?.customFields);
@@ -596,6 +600,15 @@ export function NoiseCheckoutForm({
           </div>
 
           {/* Submit */}
+          <CheckoutMarketingOptIn
+            enabled={marketingOptInEnabled}
+            checked={acceptsMarketing}
+            onCheckedChange={setAcceptsMarketing}
+            businessName={business.name}
+            className="flex items-start gap-2 font-mono text-[9.5px] leading-relaxed tracking-[0.1em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+          />
+
           <button
             type="submit"
             disabled={isProcessing || shippingCalculating}

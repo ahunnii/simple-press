@@ -41,6 +41,11 @@ type UseCheckoutFormReturn = {
   setName: (v: string) => void;
   phone: string;
   setPhone: (v: string) => void;
+  // Email-marketing opt-in checkbox (unchecked by default). Only offered when
+  // the `emailMarketing` flag is on — see `CheckoutMarketingOptIn`.
+  marketingOptInEnabled: boolean;
+  acceptsMarketing: boolean;
+  setAcceptsMarketing: (v: boolean) => void;
   // Shipping address fields
   addressLine1: string;
   setAddressLine1: (v: string) => void;
@@ -360,6 +365,7 @@ export function useCheckoutForm(
 ): UseCheckoutFormReturn {
   const { isEnabled } = useStorefrontFlags();
   const couponsEnabled = isEnabled("coupons");
+  const marketingOptInEnabled = isEnabled("emailMarketing");
   const { items, removeLine, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
@@ -394,6 +400,7 @@ export function useCheckoutForm(
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [acceptsMarketing, setAcceptsMarketing] = useState(false);
 
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -736,6 +743,11 @@ export function useCheckoutForm(
             email,
             name,
             phone: phone.trim(),
+            // Sent only when the box is offered AND ticked: the server never
+            // treats an absent / false value as an opt-out.
+            ...(marketingOptInEnabled && acceptsMarketing
+              ? { acceptsMarketing: true }
+              : {}),
             shippingAddress:
               deliveryMethod === "ship"
                 ? {
@@ -863,6 +875,9 @@ export function useCheckoutForm(
     setName,
     phone,
     setPhone,
+    marketingOptInEnabled,
+    acceptsMarketing,
+    setAcceptsMarketing,
     addressLine1,
     setAddressLine1,
     addressLine2,

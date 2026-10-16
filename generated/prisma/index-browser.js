@@ -560,6 +560,11 @@ exports.Prisma.CustomerScalarFieldEnum = {
   phone: 'phone',
   stripeCustomerId: 'stripeCustomerId',
   acceptsMarketing: 'acceptsMarketing',
+  marketingConsentAt: 'marketingConsentAt',
+  marketingConsentSource: 'marketingConsentSource',
+  marketingUnsubscribedAt: 'marketingUnsubscribedAt',
+  marketingSuppressedAt: 'marketingSuppressedAt',
+  marketingSuppressionReason: 'marketingSuppressionReason',
   totalSpent: 'totalSpent',
   orderCount: 'orderCount',
   loyaltyPoints: 'loyaltyPoints',
@@ -1028,6 +1033,66 @@ exports.Prisma.FormSubmissionScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.MarketingCampaignScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  createdById: 'createdById',
+  subject: 'subject',
+  previewText: 'previewText',
+  contentFormat: 'contentFormat',
+  bodyText: 'bodyText',
+  bodyJson: 'bodyJson',
+  status: 'status',
+  renderedHtml: 'renderedHtml',
+  renderedText: 'renderedText',
+  fromAddress: 'fromAddress',
+  replyTo: 'replyTo',
+  baseUrl: 'baseUrl',
+  recipientCount: 'recipientCount',
+  queuedAt: 'queuedAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  canceledAt: 'canceledAt',
+  lastError: 'lastError'
+};
+
+exports.Prisma.MarketingCampaignBatchScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  campaignId: 'campaignId',
+  businessId: 'businessId',
+  batchIndex: 'batchIndex',
+  status: 'status',
+  attempts: 'attempts',
+  leaseUntil: 'leaseUntil',
+  notBefore: 'notBefore',
+  firstAttemptAt: 'firstAttemptAt',
+  sentAt: 'sentAt',
+  lastError: 'lastError'
+};
+
+exports.Prisma.MarketingCampaignRecipientScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  campaignId: 'campaignId',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  email: 'email',
+  batchIndex: 'batchIndex',
+  status: 'status',
+  resendId: 'resendId',
+  error: 'error',
+  sentAt: 'sentAt',
+  deliveredAt: 'deliveredAt',
+  bouncedAt: 'bouncedAt',
+  complainedAt: 'complainedAt',
+  unsubscribedAt: 'unsubscribedAt'
+};
+
 exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1383,6 +1448,9 @@ exports.Prisma.ModelName = {
   QuoteSubmission: 'QuoteSubmission',
   Form: 'Form',
   FormSubmission: 'FormSubmission',
+  MarketingCampaign: 'MarketingCampaign',
+  MarketingCampaignBatch: 'MarketingCampaignBatch',
+  MarketingCampaignRecipient: 'MarketingCampaignRecipient',
   QuickBooksConnection: 'QuickBooksConnection',
   QuickBooksInvoice: 'QuickBooksInvoice',
   InvoiceSettings: 'InvoiceSettings',

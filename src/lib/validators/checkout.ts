@@ -38,6 +38,9 @@ const checkoutCustomerInfoSchema = z.object({
   name: z.string().max(200),
   phone: z.string().max(40).optional().nullable(),
   shippingAddress: checkoutShippingAddressSchema.optional().nullable(),
+  // Email-marketing opt-in checkbox. Only ever sent as `true`; the server
+  // acts on it only when the business has the `emailMarketing` feature on.
+  acceptsMarketing: z.boolean().optional(),
 });
 
 export const checkoutSessionSchema = z.object({

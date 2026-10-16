@@ -64,6 +64,15 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   /**
+   * Restricts the editor to what an email can show: no code, galleries,
+   * embeds, forms, quote calculators, tables, columns, collapsible sections
+   * or videos (none of those nodes are registered, so pasted content
+   * flattens to text). Headings, lists, quotes, dividers, links, images,
+   * alignment and colors stay. Used by the marketing campaign composer; the
+   * content is rendered by `~/lib/marketing/tiptap-to-email`.
+   */
+  emailMode?: boolean;
+  /**
    * Called with `true` when this editor's first image/video upload starts
    * and `false` when its last in-flight one settles (success or failure).
    * While an image uploads the doc holds a temporary `blob:` src that the
@@ -259,6 +268,7 @@ export const createExtensions = ({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  emailMode,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
@@ -271,6 +281,7 @@ export const createExtensions = ({
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
+  emailMode?: boolean;
 }) => {
   // When a real uploader is provided (e.g., S3), allow larger files since they'll
   // be compressed. Fall back to 5MB when using the fake base64 uploader.
@@ -283,7 +294,9 @@ export const createExtensions = ({
       blockquote: { HTMLAttributes: { class: "block-node" } },
       // bold
       bulletList: { HTMLAttributes: { class: "list-node" } },
-      code: { HTMLAttributes: { class: "inline", spellcheck: "false" } },
+      code: emailMode
+        ? false
+        : { HTMLAttributes: { class: "inline", spellcheck: "false" } },
       codeBlock: false,
       // document
       dropcursor: { width: 2, class: "ProseMirror-dropcursor border" },
@@ -430,7 +443,7 @@ export const createExtensions = ({
         });
       },
     }),
-    ...(videoUploader
+    ...(videoUploader && !emailMode
       ? [
           Video.configure({
             uploadFn: videoUploader,
@@ -447,24 +460,28 @@ export const createExtensions = ({
     UnsetAllMarks,
     HorizontalRule,
     ResetMarksOnEnter,
-    CodeBlockLowlight,
     Placeholder.configure({ placeholder: () => placeholder }),
-    Gallery.configure({
-      businessId,
-      galleriesEnabled: galleriesEnabled !== false,
-    }),
-    Embed.configure({ embedsEnabled: embedsEnabled !== false }),
-    QuoteCalculator.configure({
-      businessId,
-      quotesEnabled: quotesEnabled !== false,
-    }),
-    Form.configure({ formsEnabled: formsEnabled !== false }),
-    TableKit.configure({}),
-    // Layout containers, shared with the storefront renderer's schema so
-    // `normalize-content`'s schema (built from this list) knows them too.
-    EditorColumns,
-    Column,
-    ...DETAILS_EXTENSIONS,
+    ...(emailMode
+      ? []
+      : [
+          CodeBlockLowlight,
+          Gallery.configure({
+            businessId,
+            galleriesEnabled: galleriesEnabled !== false,
+          }),
+          Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+          QuoteCalculator.configure({
+            businessId,
+            quotesEnabled: quotesEnabled !== false,
+          }),
+          Form.configure({ formsEnabled: formsEnabled !== false }),
+          TableKit.configure({}),
+          // Layout containers, shared with the storefront renderer's schema so
+          // `normalize-content`'s schema (built from this list) knows them too.
+          EditorColumns,
+          Column,
+          ...DETAILS_EXTENSIONS,
+        ]),
   ];
 };
 
@@ -484,6 +501,7 @@ export const useMinimalTiptapEditor = ({
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
+  emailMode,
   onUploadingChange,
   ...props
 }: UseMinimalTiptapEditorProps) => {
@@ -576,6 +594,7 @@ export const useMinimalTiptapEditor = ({
         embedsEnabled,
         quotesEnabled,
         formsEnabled,
+        emailMode,
       }) as unknown as Extension[],
     [
       placeholder,
@@ -588,6 +607,7 @@ export const useMinimalTiptapEditor = ({
       embedsEnabled,
       quotesEnabled,
       formsEnabled,
+      emailMode,
     ],
   );
 

@@ -19,8 +19,8 @@ import {
   computePoolDemand,
 } from "~/lib/checkout/validate-cart";
 import { splitCustomerName } from "~/lib/customer-name";
-import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { PRODUCT_OPTIONS_FEATURE_KEY } from "~/lib/customizer/load";
+import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
@@ -694,6 +694,13 @@ export async function POST(req: Request) {
         // Server-fetched, never client-supplied.
         imageUrl: product.images[0]?.url ?? null,
         stripeCustomerId,
+        // Newsletter box: only honored when the store has email marketing on
+        // (dependencies included). Consent itself is recorded by the webhook
+        // after checkout completes, never here.
+        marketingOptIn:
+          customerInfo.acceptsMarketing === true &&
+          isEnabled("emailMarketing") &&
+          !disabledByDependency.includes("emailMarketing"),
         subscription: {
           id: row.id,
           productId: product.id,

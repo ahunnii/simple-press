@@ -12,6 +12,7 @@
  */
 import type { Row, Sheet } from "./format";
 import { orderItemOptionLines } from "~/lib/customizer/display";
+import { marketingConsentSourceLabel } from "~/lib/marketing/consent";
 
 import {
   centsToMoney,
@@ -1370,6 +1371,9 @@ export interface EmailSubscriberRow {
   orderCount: number;
   totalSpent: number;
   createdAt: Date;
+  /** `Customer.marketingConsentSource`; null for rows from before tracking. */
+  marketingConsentSource?: string | null;
+  marketingConsentAt?: Date | null;
 }
 
 export const EMAIL_SUBSCRIBER_COLUMNS = [
@@ -1379,6 +1383,8 @@ export const EMAIL_SUBSCRIBER_COLUMNS = [
   "Number of orders",
   "Total spent",
   "Customer since",
+  "Consent source",
+  "Consent date",
 ] as const;
 
 export function emailSubscribersSheet(
@@ -1394,6 +1400,10 @@ export function emailSubscribersSheet(
       "Number of orders": c.orderCount,
       "Total spent": centsToMoney(c.totalSpent),
       "Customer since": formatDateTime(c.createdAt, ctx.timeZone),
+      "Consent source": marketingConsentSourceLabel(c.marketingConsentSource),
+      "Consent date": c.marketingConsentAt
+        ? formatDateTime(c.marketingConsentAt, ctx.timeZone)
+        : "",
     })),
   );
 }

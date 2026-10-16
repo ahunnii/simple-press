@@ -83,6 +83,13 @@ export interface SubscriptionCheckoutParamsInput {
   /** Stripe Customer id on the CONNECTED account. Prefills and locks the email. */
   stripeCustomerId: string;
   subscription: SubscriptionCheckoutSnapshot;
+  /**
+   * The shopper ticked the newsletter box AND the store has email marketing on
+   * (the route decides). Stamps `metadata.marketingOptIn = "1"` so the
+   * `checkout.session.completed` handler records consent only once checkout
+   * actually completes.
+   */
+  marketingOptIn?: boolean;
 }
 
 /**
@@ -222,6 +229,7 @@ export function buildSubscriptionCheckoutParams(
       // Tells /subscribe/success this session's owner holds a SIGNED
       // pending_subscription_session cookie (no legacy bare-cookie fallback).
       [PENDING_COOKIE_MARKER_KEY]: PENDING_COOKIE_MARKER_VALUE,
+      ...(input.marketingOptIn ? { marketingOptIn: "1" } : {}),
     },
     success_url: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
     // Back to the same form, pre-filled with the same choices.
