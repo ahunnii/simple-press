@@ -25,5 +25,5 @@ export function resolveBlogPageName(
     [key],
     new Map([[key, field]]),
   )[key];
-  return value?.trim() || DEFAULT_BLOG_PAGE_NAME;
+  return value?.trim() ?? DEFAULT_BLOG_PAGE_NAME;
 }
