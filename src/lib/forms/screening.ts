@@ -1,4 +1,4 @@
-import type { FormScreening, FormScreeningLink } from "~/lib/validators/form";
+import type { FormScreening } from "~/lib/validators/form";
 
 /**
  * Pure stepping logic for the storefront screening gate (yes/no questions in
@@ -55,18 +55,20 @@ export function backScreening(state: ScreeningState): ScreeningState {
     : state;
 }
 
-/** What to show for a failed question: its own message (else the default) plus its links. */
+/**
+ * The rich-text doc to show for a failed question: its own message, else the
+ * screening default. `null` when both are empty; the gate then renders
+ * `FORM_DEFAULT_SCREENING_FAIL_MESSAGE` as a plain paragraph.
+ */
 export function failContent(
   screening: FormScreening,
   index: number,
-): { message: string; links: FormScreeningLink[] } {
-  const question = screening.questions[index];
-  return {
-    // `||`: a blank per-question message falls back to the default.
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    message: question?.failMessage || screening.defaultFailMessage,
-    links: question?.failLinks ?? [],
-  };
+): FormScreening["defaultFailContent"] {
+  return (
+    screening.questions[index]?.failContent ??
+    screening.defaultFailContent ??
+    null
+  );
 }
 
 /** sessionStorage key under which the gate remembers a form was unlocked. */

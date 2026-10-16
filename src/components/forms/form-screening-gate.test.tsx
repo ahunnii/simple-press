@@ -3,10 +3,41 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { FormScreening } from "~/lib/validators/form";
-import { makeEmptyFormScreening } from "~/lib/validators/form";
 import { screeningStorageKey } from "~/lib/forms/screening";
+import {
+  FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
+  makeEmptyFormScreening,
+} from "~/lib/validators/form";
 
 import { FormScreeningGate } from "./form-screening-gate";
+
+// The real TiptapRenderer is used so the note's marks (button links) are
+// exercised end to end. These are only its embedded-block renderers, which
+// pull in server-only code (DB client, auth) that can't load in jsdom and
+// never render in an unlock note.
+vi.mock("~/components/forms/form-block", () => ({ FormBlock: () => null }));
+vi.mock("~/components/quote/quote-calculator-block", () => ({
+  QuoteCalculatorBlock: () => null,
+}));
+vi.mock("~/components/gallery-renderer", () => ({
+  GalleryRenderer: () => null,
+}));
+vi.mock("~/trpc/react", () => ({ api: {} }));
+
+function doc(text: string) {
+  return {
+    type: "doc" as const,
+    content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+  };
+}
+
+function link(text: string, href: string) {
+  return {
+    type: "text",
+    text,
+    marks: [{ type: "link", attrs: { href, variant: "outline" } }],
+  };
+}
 
 function makeScreening(overrides: Partial<FormScreening> = {}): FormScreening {
   return {
@@ -18,22 +49,55 @@ function makeScreening(overrides: Partial<FormScreening> = {}): FormScreening {
         id: "q1",
         prompt: "Are you over 18?",
         passAnswer: "yes",
-        failMessage: "You must be 18 or older.",
-        failLinks: [
-          { label: "Youth programs", href: "/youth" },
-          { label: "Partner site", href: "https://example.org/help" },
-        ],
+        failContent: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "You must be 18 or older." }],
+            },
+            {
+              type: "paragraph",
+              content: [
+                link("Youth programs", "/youth"),
+                { type: "text", text: " " },
+                link("Partner site", "https://example.org/help"),
+              ],
+            },
+          ],
+        },
       },
       {
         id: "q2",
         prompt: "Do you have an active case?",
         passAnswer: "no",
-        failMessage: "",
-        failLinks: [],
+        failContent: null,
       },
     ],
-    unlockMessage: "Thanks. Have your ID ready.",
-    unlockLinks: [{ label: "What to bring", href: "/bring" }],
+    unlockContent: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Thanks. Have your ID ready." }],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "What to bring",
+              marks: [
+                {
+                  type: "link",
+                  attrs: { href: "/bring", variant: "solid" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     ...overrides,
   };
 }
@@ -81,18 +145,19 @@ describe("FormScreeningGate", () => {
     // q2 passes on "no".
     await user.click(screen.getByRole("button", { name: "No" }));
     expect(screen.getByText("Thanks. Have your ID ready.")).toBeVisible();
-    expect(screen.getByRole("link", { name: "What to bring" })).toHaveAttribute(
-      "href",
-      "/bring",
-    );
+    const bring = screen.getByRole("link", { name: "What to bring" });
+    expect(bring).toHaveAttribute("href", "/bring");
+    expect(bring).toHaveClass("sp-button", "sp-button--solid");
     expect(screen.getByTestId("the-form")).toBeVisible();
-    expect(screen.queryByRole("button", { name: "Restart screening" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Restart screening" }),
+    ).toBeNull();
   });
 
   it("renders no unlock panel text when there is no unlock content", async () => {
     const user = userEvent.setup();
     renderGate({
-      screening: makeScreening({ unlockMessage: "", unlockLinks: [] }),
+      screening: makeScreening({ unlockContent: null }),
     });
     await user.click(screen.getByRole("button", { name: "Yes" }));
     await user.click(screen.getByRole("button", { name: "No" }));
@@ -112,7 +177,7 @@ describe("FormScreeningGate", () => {
     expect(internal).not.toHaveAttribute("target");
     const external = screen.getByRole("link", { name: "Partner site" });
     expect(external).toHaveAttribute("target", "_blank");
-    expect(external).toHaveAttribute("rel", "noopener noreferrer");
+    expect(external.getAttribute("rel")).toContain("noopener");
 
     await user.click(screen.getByRole("button", { name: "Change my answer" }));
     expect(screen.getByText("Question 1 of 2")).toBeVisible();
@@ -122,7 +187,9 @@ describe("FormScreeningGate", () => {
   it("falls back to the default fail message and honors passAnswer no", async () => {
     const user = userEvent.setup();
     renderGate({
-      screening: makeScreening({ defaultFailMessage: "Not a fit right now." }),
+      screening: makeScreening({
+        defaultFailContent: doc("Not a fit right now."),
+      }),
     });
     await user.click(screen.getByRole("button", { name: "Yes" }));
     // q2 passAnswer is "no", so "Yes" fails it and uses the default message.
@@ -132,6 +199,15 @@ describe("FormScreeningGate", () => {
     expect(screen.getByText("Question 2 of 2")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "No" }));
     expect(screen.getByTestId("the-form")).toBeVisible();
+  });
+
+  it("falls back to the built-in message when no fail message is set anywhere", async () => {
+    const user = userEvent.setup();
+    renderGate({ screening: makeScreening({ defaultFailContent: null }) });
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+    expect(screen.getByText(FORM_DEFAULT_SCREENING_FAIL_MESSAGE)).toBeVisible();
+    expect(screen.queryByTestId("the-form")).toBeNull();
   });
 
   it("Back returns to the previous question", async () => {
@@ -166,9 +242,13 @@ describe("FormScreeningGate", () => {
       renderGate({ mode: "preview" });
       await user.click(screen.getByRole("button", { name: "Skip to form" }));
       expect(screen.getByTestId("the-form")).toBeVisible();
-      expect(window.sessionStorage.getItem(screeningStorageKey("form-1"))).toBeNull();
+      expect(
+        window.sessionStorage.getItem(screeningStorageKey("form-1")),
+      ).toBeNull();
 
-      await user.click(screen.getByRole("button", { name: "Restart screening" }));
+      await user.click(
+        screen.getByRole("button", { name: "Restart screening" }),
+      );
       expect(screen.queryByTestId("the-form")).toBeNull();
       expect(screen.getByText("Question 1 of 2")).toBeVisible();
     });

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { eventDateTimeAttr, formatEventDateParts } from "~/lib/events/format";
+import { isEmptyDoc } from "~/lib/tiptap/empty-doc";
 
 /**
  * Client-safe maintenance-mode config: schemas, types, and pure resolvers
@@ -10,67 +11,6 @@ import { eventDateTimeAttr, formatEventDateParts } from "~/lib/events/format";
  *
  * Deliberately has NO imports from `~/server/*` or anything else server-only.
  */
-
-/**
- * Node types that carry their meaning via `attrs` rather than a nested
- * `content` array (e.g. a standalone image has no children but is obviously
- * not empty). Mirrors `LEAF_CONTENT_NODE_TYPES` / `isContentEmpty` in
- * `~/lib/template-fields.ts`.
- *
- * Duplicated locally rather than importing `template-fields.ts`: that module
- * re-exports every storefront template's field registry, and several
- * templates' page components import `~/server/db` / `~/server/better-auth/server`
- * directly (e.g. `_templates/pink/products/pink-product-page.tsx`,
- * `_templates/vii/homepage/vii-homepage.tsx`,
- * `_templates/sledge/homepage/sledge-homepage.tsx`). Auditing every template's
- * import graph to prove none of that leaks into the aggregated exports isn't
- * worth the risk for a module that must stay importable from client
- * components, so this file keeps its own minimal equivalent instead.
- */
-const LEAF_CONTENT_NODE_TYPES = new Set([
-  "image",
-  "horizontalRule",
-  "hardBreak",
-  "gallery",
-  "embed",
-  "quoteCalculator",
-  "form",
-]);
-
-/** Local equivalent of `isContentEmpty` from `~/lib/template-fields.ts` (see note above). */
-function isEmptyDoc(content: unknown): boolean {
-  if (content === null || content === undefined) {
-    return true;
-  }
-
-  if (typeof content === "string") {
-    return content === "";
-  }
-
-  if (Array.isArray(content)) {
-    return content.every((item) => isEmptyDoc(item));
-  }
-
-  if (typeof content !== "object") {
-    return true;
-  }
-
-  const node = content as { type?: unknown; text?: unknown; content?: unknown };
-
-  if (typeof node.type === "string" && LEAF_CONTENT_NODE_TYPES.has(node.type)) {
-    return false;
-  }
-
-  if (typeof node.text === "string" && node.text !== "") {
-    return false;
-  }
-
-  if (!node.content) {
-    return true;
-  }
-
-  return isEmptyDoc(node.content);
-}
 
 /**
  * Validates a TipTap doc (as stored, e.g. in `Business.maintenanceMessage`).

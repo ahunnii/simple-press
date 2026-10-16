@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { isSafeHref } from "~/lib/safe-href";
+import { isEmptyDoc } from "~/lib/tiptap/empty-doc";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 
 /**
@@ -125,8 +125,8 @@ export const FORM_DEFAULT_CONFIRMATION_MESSAGE =
 
 /** Cap on the yes/no screening questions in front of one form. */
 export const FORM_SCREENING_MAX_QUESTIONS = 15;
-/** Cap on resource links per failing question (and on the unlock links). */
-export const FORM_SCREENING_MAX_LINKS = 5;
+/** Cap on the serialized size of one screening rich-text message. */
+export const FORM_SCREENING_UNLOCK_MAX_JSON_LENGTH = 50_000;
 export const FORM_DEFAULT_SCREENING_FAIL_MESSAGE =
   "Thanks for your answers — this form isn't the right fit for you right now.";
 
@@ -492,23 +492,53 @@ export function visiblePictureOptions(
 
 const plainEmail = z.string().email();
 
-/** A resource link shown on the screening fail / unlock panels. */
-export const formScreeningLinkSchema = z.object({
-  label: z
-    .string()
-    .trim()
-    .min(1, "Link text is required")
-    .max(80, "Link text must be 80 characters or fewer"),
-  href: z
-    .string()
-    .trim()
-    .min(1, "Link address is required")
-    .max(2048, "Link address must be 2048 characters or fewer")
-    .refine(isSafeHref, {
-      message:
-        "Link must be a page path like /contact, or start with http://, https://, mailto:, tel:, or sms:",
-    }),
-});
+/** The default fail message as a one-paragraph TipTap doc. */
+function makeDefaultFailContent() {
+  return {
+    type: "doc" as const,
+    content: [
+      {
+        type: "paragraph",
+        content: [{ type: "text", text: FORM_DEFAULT_SCREENING_FAIL_MESSAGE }],
+      },
+    ],
+  };
+}
+
+/** True when a TipTap node or any descendant has this node type. */
+function containsNodeType(node: unknown, type: string): boolean {
+  if (!node || typeof node !== "object") return false;
+  if (Array.isArray(node)) return node.some((n) => containsNodeType(n, type));
+  const { type: nodeType, content } = node as {
+    type?: unknown;
+    content?: unknown;
+  };
+  return nodeType === type || containsNodeType(content, type);
+}
+
+/**
+ * A screening rich-text message (unlock note, fail messages): a TipTap doc.
+ * Loose on node shape (the storefront renderer sanitizes against its own
+ * schema) but capped in size, and it may never hold a `form` node — a form
+ * can't be embedded inside its own screening message. An empty doc (or
+ * missing value) normalizes to `null`, so "has a message" is a null check.
+ */
+const screeningRichTextSchema = z
+  .object({
+    type: z.literal("doc"),
+    content: z.array(z.record(z.string(), z.unknown())),
+  })
+  .passthrough()
+  .refine(
+    (doc) =>
+      JSON.stringify(doc).length <= FORM_SCREENING_UNLOCK_MAX_JSON_LENGTH,
+    { message: "This message is too long" },
+  )
+  .refine((doc) => !containsNodeType(doc.content, "form"), {
+    message: "A form can't be placed inside this message",
+  })
+  .nullish()
+  .transform((doc) => (doc && !isEmptyDoc(doc) ? doc : null));
 
 /** One yes/no gate question; `passAnswer` is the answer that lets a visitor on. */
 export const formScreeningQuestionSchema = z.object({
@@ -519,19 +549,11 @@ export const formScreeningQuestionSchema = z.object({
     .min(1, "Question is required")
     .max(300, "Question must be 300 characters or fewer"),
   passAnswer: z.enum(["yes", "no"]).default("yes"),
-  /** Shown when this question fails; blank → the screening default message. */
-  failMessage: z
-    .string()
-    .trim()
-    .max(1000, "Message must be 1000 characters or fewer")
-    .default(""),
-  failLinks: z
-    .array(formScreeningLinkSchema)
-    .max(
-      FORM_SCREENING_MAX_LINKS,
-      `At most ${FORM_SCREENING_MAX_LINKS} links per question`,
-    )
-    .default([]),
+  /**
+   * Rich-text message shown when this question fails; `null` → the screening
+   * default message.
+   */
+  failContent: screeningRichTextSchema.default(null),
 });
 
 /**
@@ -553,26 +575,21 @@ export const formScreeningSchema = z.object({
       `At most ${FORM_SCREENING_MAX_QUESTIONS} screening questions`,
     )
     .default([]),
-  defaultFailMessage: z
-    .string()
-    .trim()
-    .max(1000, "Message must be 1000 characters or fewer")
-    .default(FORM_DEFAULT_SCREENING_FAIL_MESSAGE),
-  /** Optional note + links shown once, after every question passes. */
-  unlockMessage: z
-    .string()
-    .trim()
-    .max(2000, "Message must be 2000 characters or fewer")
-    .default(""),
-  unlockLinks: z
-    .array(formScreeningLinkSchema)
-    .max(FORM_SCREENING_MAX_LINKS, `At most ${FORM_SCREENING_MAX_LINKS} links`)
-    .default([]),
+  /**
+   * Rich-text message shown to anyone who fails a question that has no
+   * message of its own. `null` (owner emptied it) → the gate falls back to
+   * `FORM_DEFAULT_SCREENING_FAIL_MESSAGE` as a plain paragraph.
+   */
+  defaultFailContent: screeningRichTextSchema.default(makeDefaultFailContent()),
+  /**
+   * Optional rich-text note shown once, after every question passes (contact
+   * info, next steps, a button link). A TipTap doc, or `null` for none.
+   */
+  unlockContent: screeningRichTextSchema.default(null),
 });
 
 export type FormScreening = z.infer<typeof formScreeningSchema>;
 export type FormScreeningQuestion = z.infer<typeof formScreeningQuestionSchema>;
-export type FormScreeningLink = z.infer<typeof formScreeningLinkSchema>;
 
 /** A disabled screening block with every default filled in. */
 export function makeEmptyFormScreening(): FormScreening {
@@ -580,9 +597,8 @@ export function makeEmptyFormScreening(): FormScreening {
     enabled: false,
     intro: "",
     questions: [],
-    defaultFailMessage: FORM_DEFAULT_SCREENING_FAIL_MESSAGE,
-    unlockMessage: "",
-    unlockLinks: [],
+    defaultFailContent: makeDefaultFailContent(),
+    unlockContent: null,
   };
 }
 

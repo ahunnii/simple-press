@@ -60,10 +60,6 @@ export type ScreeningQuestionInput = NonNullable<
   ScreeningInput["questions"]
 >[number];
 
-export type ScreeningLinkInput = NonNullable<
-  ScreeningInput["unlockLinks"]
->[number];
-
 export function isChoiceFieldType(
   type: FormFieldType,
 ): type is (typeof FORM_CHOICE_FIELD_TYPES)[number] {
@@ -193,23 +189,16 @@ export function makePictureOption(
 }
 
 /**
- * A fresh screening question. Every key is written (even the blank message
- * and empty link list) so the registered inputs and RHF's defaults agree on
- * the row's shape.
+ * A fresh screening question. Every key is written (even the empty message)
+ * so the registered inputs and RHF's defaults agree on the row's shape.
  */
 export function makeScreeningQuestion(): ScreeningQuestionInput {
   return {
     id: newId(),
     prompt: "",
     passAnswer: "yes",
-    failMessage: "",
-    failLinks: [],
+    failContent: null,
   };
-}
-
-/** A fresh, blank resource link for a screening panel. */
-export function makeScreeningLink(): ScreeningLinkInput {
-  return { label: "", href: "" };
 }
 
 /** A fresh picture-choice group (a finish tab, e.g. "Pearl"). */
@@ -505,13 +494,15 @@ function normalizeScreening(
     questions: (screening?.questions ?? empty.questions).map((question) => ({
       ...question,
       passAnswer: question.passAnswer ?? "yes",
-      failMessage: question.failMessage ?? "",
-      failLinks: question.failLinks ?? [],
+      failContent: question.failContent ?? null,
     })),
-    defaultFailMessage:
-      screening?.defaultFailMessage ?? empty.defaultFailMessage,
-    unlockMessage: screening?.unlockMessage ?? empty.unlockMessage,
-    unlockLinks: screening?.unlockLinks ?? empty.unlockLinks,
+    // `null` is a real value here (the owner emptied the default message), so
+    // only a missing key gets the stock paragraph.
+    defaultFailContent:
+      screening?.defaultFailContent === undefined
+        ? empty.defaultFailContent
+        : screening.defaultFailContent,
+    unlockContent: screening?.unlockContent ?? empty.unlockContent,
   };
 }
 

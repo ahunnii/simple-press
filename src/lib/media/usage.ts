@@ -1243,8 +1243,10 @@ async function scanMediaReferences(
     });
 
   // ── 10b. Forms (picture-choice option photos + reference image) ─────────────
-  // `Form.definition` is a JSON blob. Only `picturechoice` fields carry media:
-  // each option's `imageUrl` and the field's `referenceImageUrl`.
+  // `Form.definition` is a JSON blob. Media lives in `picturechoice` fields
+  // (each option's `imageUrl` and the field's `referenceImageUrl`) and in the
+  // screening "shown when they qualify" note (a TipTap doc: images, and links
+  // to uploaded files such as a PDF).
   const formsPromise = db.form
     .findMany({
       where: { businessId },
@@ -1293,6 +1295,30 @@ async function scanMediaReferences(
               url: option.imageUrl,
             });
           }
+        }
+        const screening = parsed.data.settings.screening;
+        const noteLocation = `Form: ${form.name} — screening message`;
+        const screeningDocs = [
+          screening.unlockContent,
+          screening.defaultFailContent,
+          ...screening.questions.map((question) => question.failContent),
+        ];
+        for (const doc of screeningDocs) {
+          if (!doc) continue;
+          walkTiptap(
+            doc,
+            (src) =>
+              addUsage(map, src, {
+                ...formUsage(noteLocation),
+                url: src,
+              }),
+            () => undefined,
+            (href) =>
+              addUsage(map, href, {
+                ...formUsage(`Linked from ${noteLocation}`),
+                url: href,
+              }),
+          );
         }
       }
     });

@@ -957,6 +957,104 @@ describe("buildUsedMediaIndex — Form picture-choice media", () => {
     expect(index.get(referenceUrl)?.[0]?.location).toContain("Finish");
   });
 
+  it("reports images and linked files inside the screening unlock note", async () => {
+    const noteImage = keyToPublicUrl(`${BUSINESS_ID}/image-note.jpg`);
+    const notePdf = keyToPublicUrl(`${BUSINESS_ID}/file-guide.pdf`);
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [{ id: "f1", type: "text", label: "Name", required: false }],
+        settings: {
+          screening: {
+            enabled: true,
+            questions: [{ id: "q1", prompt: "Over 18?" }],
+            unlockContent: {
+              type: "doc",
+              content: [
+                { type: "image", attrs: { src: noteImage } },
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Guide",
+                      marks: [{ type: "link", attrs: { href: notePdf } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(noteImage)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+      location: "Form: Order Form — screening message",
+    });
+    expect(index.get(notePdf)?.[0]).toMatchObject({
+      entityId: "form_1",
+      location: "Linked from Form: Order Form — screening message",
+    });
+  });
+
+  it("reports images and linked files inside screening fail messages", async () => {
+    const failImage = keyToPublicUrl(`${BUSINESS_ID}/image-fail.jpg`);
+    const defaultPdf = keyToPublicUrl(`${BUSINESS_ID}/file-default.pdf`);
+    asMock(db.form.findMany).mockResolvedValue([
+      formRow({
+        version: 1,
+        fields: [{ id: "f1", type: "text", label: "Name", required: false }],
+        settings: {
+          screening: {
+            enabled: true,
+            questions: [
+              {
+                id: "q1",
+                prompt: "Over 18?",
+                failContent: {
+                  type: "doc",
+                  content: [{ type: "image", attrs: { src: failImage } }],
+                },
+              },
+            ],
+            defaultFailContent: {
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Help",
+                      marks: [{ type: "link", attrs: { href: defaultPdf } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      }),
+    ]);
+
+    const index = await buildUsedMediaIndex(BUSINESS_ID);
+
+    expect(index.get(failImage)?.[0]).toMatchObject({
+      entityType: "form",
+      entityId: "form_1",
+      location: "Form: Order Form — screening message",
+    });
+    expect(index.get(defaultPdf)?.[0]).toMatchObject({
+      entityId: "form_1",
+      location: "Linked from Form: Order Form — screening message",
+    });
+  });
+
   it("still reports media from a definition that no longer validates", async () => {
     asMock(db.form.findMany).mockResolvedValue([
       formRow({ fields: [{ options: [{ imageUrl: optionUrl }] }] }),

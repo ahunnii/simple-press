@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type {
-  FormScreening,
-  FormScreeningLink,
-} from "~/lib/validators/form";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { ScreeningAnswer, ScreeningState } from "~/lib/forms/screening";
+import type { FormScreening } from "~/lib/validators/form";
 import {
   answerScreening,
   backScreening,
@@ -13,11 +12,11 @@ import {
   initialScreeningState,
   retryScreening,
   screeningStorageKey,
-  type ScreeningAnswer,
-  type ScreeningState,
 } from "~/lib/forms/screening";
-import { isInternalHref } from "~/lib/tiptap/link-target";
+import { cn } from "~/lib/utils";
+import { FORM_DEFAULT_SCREENING_FAIL_MESSAGE } from "~/lib/validators/form";
 import { Button } from "~/components/ui/button";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 export type FormScreeningGateProps = {
   formId: string;
@@ -47,37 +46,12 @@ function writePassed(formId: string) {
   }
 }
 
-function ScreeningLinks({ links }: { links: FormScreeningLink[] }) {
-  if (links.length === 0) return null;
-  // Plain div, not ul/li: template prose rules (e.g. `.wealth-prose ul > li`)
-  // would paint bullets on the buttons. The rich-text button classes beat
-  // template prose link rules and pick up each template's button styling.
-  return (
-    <div className="flex flex-wrap gap-2">
-      {links.map((link, index) => {
-        const internal = isInternalHref(link.href);
-        return (
-          <a
-            key={`${link.href}-${index}`}
-            href={link.href}
-            className="sp-button sp-button--outline text-sm"
-            {...(internal
-              ? {}
-              : { target: "_blank", rel: "noopener noreferrer" })}
-          >
-            {link.label}
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
 /**
  * Yes/no questions in front of a form (see `~/lib/forms/screening` for the
  * state machine). Questions are asked one at a time; the first answer that
  * isn't a question's `passAnswer` shows that question's fail panel. Once every
- * question passes, the unlock note (if any) shows above the form (`children`).
+ * question passes, the unlock note (rich text, if any) shows above the form
+ * (`children`).
  */
 export function FormScreeningGate({
   formId,
@@ -91,8 +65,7 @@ export function FormScreeningGate({
   );
   // The builder preview edits `screening` live; a deleted question restarts.
   const state =
-    rawState.kind !== "passed" &&
-    rawState.index >= screening.questions.length
+    rawState.kind !== "passed" && rawState.index >= screening.questions.length
       ? initialScreeningState(screening)
       : rawState;
 
@@ -181,7 +154,8 @@ export function FormScreeningGate({
       </div>
     );
   } else if (state.kind === "failed") {
-    const { message, links } = failContent(screening, state.index);
+    // `null` (owner emptied the default message): fall back to the built-in text.
+    const failDoc = failContent(screening, state.index) as TiptapJSON | null;
     step = (
       <div className="sp-form-screening__fail space-y-4">
         <div
@@ -189,10 +163,19 @@ export function FormScreeningGate({
             stepRef.current = el;
           }}
           tabIndex={-1}
-          className="border-input bg-muted/30 space-y-4 rounded-lg border p-5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="border-input bg-muted/30 focus-visible:ring-ring/50 space-y-4 rounded-lg border p-5 text-sm outline-none focus-visible:ring-[3px]"
         >
-          {message && <p className="whitespace-pre-line">{message}</p>}
-          <ScreeningLinks links={links} />
+          {failDoc ? (
+            <TiptapRenderer
+              content={failDoc}
+              className={cn(
+                "sp-form-screening__note [&>*+*]:mt-3",
+                !isLive && "prose prose-sm max-w-none",
+              )}
+            />
+          ) : (
+            <p>{FORM_DEFAULT_SCREENING_FAIL_MESSAGE}</p>
+          )}
         </div>
         <Button
           type="button"
@@ -207,8 +190,9 @@ export function FormScreeningGate({
   }
 
   if (state.kind === "passed") {
-    const hasUnlock =
-      screening.unlockMessage !== "" || screening.unlockLinks.length > 0;
+    // The schema normalizes an empty editor to null, so a null check is enough.
+    const unlockContent = screening.unlockContent as TiptapJSON | null;
+    const hasUnlock = unlockContent != null;
     return (
       <div className="sp-form-screening space-y-5">
         <div aria-live="polite" className="space-y-3">
@@ -219,15 +203,27 @@ export function FormScreeningGate({
             tabIndex={-1}
             className={
               hasUnlock
-                ? "sp-form-screening__unlock border-input bg-muted/30 space-y-4 rounded-lg border p-5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                ? "sp-form-screening__unlock border-input bg-muted/30 focus-visible:ring-ring/50 space-y-4 rounded-lg border p-5 text-sm outline-none focus-visible:ring-[3px]"
                 : "sr-only outline-none"
             }
           >
-            {screening.unlockMessage && (
-              <p className="whitespace-pre-line">{screening.unlockMessage}</p>
+            {unlockContent ? (
+              // On the storefront the form block sits inside the template's
+              // prose container, which styles the note. The admin preview has
+              // no such ancestor, so give it the generic typography.
+              <TiptapRenderer
+                content={unlockContent}
+                // The renderer wraps each block in its own div, so template
+                // prose rhythm (`> * + *` rules) never reaches these; space
+                // the blocks here.
+                className={cn(
+                  "sp-form-screening__note [&>*+*]:mt-3",
+                  !isLive && "prose prose-sm max-w-none",
+                )}
+              />
+            ) : (
+              <span>Screening complete. The form follows.</span>
             )}
-            <ScreeningLinks links={screening.unlockLinks} />
-            {!hasUnlock && <span>Screening complete. The form follows.</span>}
           </div>
           {!isLive && (
             <Button
