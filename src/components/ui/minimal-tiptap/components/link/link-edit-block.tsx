@@ -14,6 +14,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import { DocumentPicker } from "~/components/media/document-picker";
+import { documentLinkText } from "~/lib/s3/pdf";
 
 import { SiteLinkPicker } from "./site-link-picker";
 
@@ -163,6 +165,20 @@ export const LinkEditBlock = ({
               setUrlError(null);
               // A page on this site belongs in the same tab.
               setIsNewTab(false);
+              setIsNewTabChosen(true);
+            }}
+          />
+          {/* Inline (no portal) for the same bubble-menu reason as
+              SiteLinkPicker. The storage URL is absolute https, which
+              `normalizeEditorHref` keeps as is. */}
+          <DocumentPicker
+            inline
+            onSelect={(fileUrl, doc) => {
+              setUrl(fileUrl);
+              setUrlError(null);
+              if (!text.trim()) setText(documentLinkText(doc.name));
+              // A PDF reads best in its own tab, away from the site.
+              setIsNewTab(true);
               setIsNewTabChosen(true);
             }}
           />

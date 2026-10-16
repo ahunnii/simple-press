@@ -9,6 +9,7 @@ import { env } from "~/env";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
+import { libraryDocumentKey, pdfExtOrNull } from "~/lib/s3/pdf";
 import { keyToPublicUrl } from "~/lib/s3/url";
 import { ROUTE_MAX_FILES } from "~/lib/uploads";
 import { auth } from "~/server/better-auth";
@@ -63,6 +64,13 @@ function safeRasterImageExt(filename: string): string {
 function safeVideoExt(filename: string): string {
   const ext = path.extname(filename).toLowerCase();
   if (!ALLOWED_VIDEO_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+/** PDF only — the Media Library's document route. */
+function safePdfExt(filename: string): string {
+  const ext = pdfExtOrNull(filename);
+  if (!ext) throw new RejectUpload("Invalid file type");
   return ext;
 }
 
@@ -366,6 +374,45 @@ const router: Router = {
           generateObjectInfo: ({ file }) => {
             const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(businessId, "library", ext);
+            return {
+              key,
+              metadata: { pathname: keyToPublicUrl(key) },
+            };
+          },
+        };
+      },
+    }),
+    // Media Library PDFs. Same `library-` protection from auto-cleanup as
+    // `libraryImages` (the `library-doc-` prefix still starts with `library-`),
+    // and `classifyKind` (src/lib/s3/list.ts) reads the prefix to list them as
+    // "document". `fileTypes` pins the browser-reported type to
+    // application/pdf, which better-upload signs as the object's Content-Type
+    // (no Content-Disposition is set), so the public URL opens inline in the
+    // browser. The client confirms the real bytes with `media.verifyDocument`.
+    libraryDocuments: route({
+      fileTypes: ["application/pdf"],
+      multipleFiles: true,
+      // Keep in sync with ROUTE_MAX_FILES.libraryDocuments (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.libraryDocuments,
+      maxFileSize: 1024 * 1024 * 20, // 20MB
+
+      // Honors the same platform-hub business override as `libraryImages`.
+      onBeforeUpload: async ({ req, clientMetadata }) => {
+        const { businessId } = await resolveLibraryUploadBusiness(
+          req,
+          clientMetadata,
+        );
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            safePdfExt(file.name);
+            // Original file name rides along as a slug so owners (and anyone
+            // they share the link with) can tell their PDFs apart.
+            const key = libraryDocumentKey(
+              businessId,
+              file.name,
+              crypto.randomBytes(8).toString("hex"),
+            );
             return {
               key,
               metadata: { pathname: keyToPublicUrl(key) },

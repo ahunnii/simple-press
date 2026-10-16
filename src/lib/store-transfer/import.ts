@@ -346,7 +346,13 @@ export async function importStoreBundle(args: {
 
     const ext =
       path.extname(entry.zipPath) || path.extname(entry.originalKey) || "";
-    const key = contentAddressedKey(targetBusinessId, entry.kind, bytes, ext);
+    const key = contentAddressedKey(
+      targetBusinessId,
+      entry.kind,
+      bytes,
+      ext,
+      entry.originalKey,
+    );
 
     try {
       const exists = await objectExists(key);
@@ -739,12 +745,27 @@ export async function importStoreBundle(args: {
       // emailOverrides holds copy text only (subject/introText) — no URLs to
       // rewrite.
       const rewrittenEmailOverrides = toJsonOrUndefined(sc.emailOverrides);
-      // footerNavigationItems is internal hrefs/labels only — no URLs to
-      // rewrite. `undefined` (absent from an older manifest) stays untouched;
-      // an explicit `null` must write as `Prisma.DbNull`, same as the
-      // JSON? columns above.
+      // Menu hrefs are mostly internal (`/shop`), but an item can point at a
+      // stored file (a Media Library PDF) — rewrite those like any other
+      // storage URL (usage.ts scans both menus). For the footer list,
+      // `undefined` (absent from an older manifest) stays untouched; an
+      // explicit `null` must write as `Prisma.DbNull`, same as the JSON?
+      // columns above.
+      const rewrittenNavigationItems = rewriteJsonValue(
+        sc.navigationItems,
+        urlMap,
+        galleryIdMap,
+        undefined,
+        embedIdMaps,
+      );
       const rewrittenFooterNavigationItems = toJsonOrUndefined(
-        sc.footerNavigationItems,
+        rewriteJsonValue(
+          sc.footerNavigationItems,
+          urlMap,
+          galleryIdMap,
+          undefined,
+          embedIdMaps,
+        ),
       );
 
       await db.siteContent.upsert({
@@ -776,7 +797,7 @@ export async function importStoreBundle(args: {
           primaryColor: sc.primaryColor ?? null,
           secondaryColor: sc.secondaryColor ?? null,
           accentColor: sc.accentColor ?? null,
-          navigationItems: sc.navigationItems ?? undefined,
+          navigationItems: rewrittenNavigationItems ?? undefined,
           footerNavigationItems: rewrittenFooterNavigationItems,
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,
@@ -816,7 +837,7 @@ export async function importStoreBundle(args: {
           primaryColor: sc.primaryColor ?? null,
           secondaryColor: sc.secondaryColor ?? null,
           accentColor: sc.accentColor ?? null,
-          navigationItems: sc.navigationItems ?? undefined,
+          navigationItems: rewrittenNavigationItems ?? undefined,
           footerNavigationItems: rewrittenFooterNavigationItems,
           customFields: rewrittenCustomFields ?? undefined,
           bannerConfig: rewrittenBannerConfig ?? undefined,

@@ -92,6 +92,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
 import { EmbedFrame } from "~/components/embed-frame";
+import { DocumentPicker } from "~/components/media/document-picker";
 
 import { TemplateListFieldEditor } from "./template-list-field-editor";
 import {
@@ -460,19 +461,33 @@ export function FieldInput({
             )}
           </div>
         )
+      ) : field.type === "url" ? (
+        <div className="flex items-center gap-2">
+          <Input
+            id={field.key}
+            // `text`, not `url`: `type="url"` flags `/contact` as invalid, but
+            // site paths are valid links (scheme safety is `safeHref`'s job).
+            type="text"
+            inputMode="url"
+            value={displayValue}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder ?? "/contact or https://…"}
+            aria-describedby={descId}
+            className="flex-1"
+          />
+          <DocumentPicker
+            libraryEnabled={mediaLibraryEnabled}
+            triggerAriaLabel={`Choose a file for ${field.label}`}
+            onSelect={(url) => onChange(url)}
+          />
+        </div>
       ) : (
         <Input
           id={field.key}
-          // `text`, not `url`: `type="url"` flags `/contact` as invalid, but
-          // site paths are valid links (scheme safety is `safeHref`'s job).
           type="text"
-          inputMode={field.type === "url" ? "url" : undefined}
           value={displayValue}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={
-            field.placeholder ??
-            (field.type === "url" ? "/contact or https://…" : undefined)
-          }
+          placeholder={field.placeholder}
           aria-describedby={descId}
         />
       )}

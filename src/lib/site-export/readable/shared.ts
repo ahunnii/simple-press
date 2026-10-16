@@ -152,23 +152,39 @@ function decodeEntities(value: string): string {
 const MEDIA_TAG_RE = /<(?:img|video|source)\b[^>]*>/gi;
 const SRC_ATTR_RE = /(\bsrc\s*=\s*)(?:"([^"]*)"|'([^']*)')/i;
 
+const ANCHOR_TAG_RE = /<a\b[^>]*>/gi;
+const HREF_ATTR_RE = /(\bhref\s*=\s*)(?:"([^"]*)"|'([^']*)')/i;
+
 /**
  * Post-process serialized rich-text HTML so `<img>` / `<video>` / `<source>`
- * sources point at the photos inside the export when we have them.
+ * sources point at the photos inside the export when we have them, and
+ * `<a href>` links to a stored file (a Media Library PDF) open the copy in
+ * the export — keeping any `#page=…` fragment.
  */
 export function rewriteMediaInHtml(
   html: string,
   docPath: string,
   media: Pick<MediaIndex, "byUrl">,
 ): string {
-  return html.replace(MEDIA_TAG_RE, (tag) =>
-    tag.replace(SRC_ATTR_RE, (whole, pre: string, dq?: string, sq?: string) => {
-      const original = decodeEntities(dq ?? sq ?? "");
-      const resolved = resolveMediaHref(media, docPath, original);
-      if (!resolved || resolved === original) return whole;
-      return `${pre}"${esc(resolved)}"`;
-    }),
-  );
+  return html
+    .replace(MEDIA_TAG_RE, (tag) =>
+      tag.replace(SRC_ATTR_RE, (whole, pre: string, dq?: string, sq?: string) => {
+        const original = decodeEntities(dq ?? sq ?? "");
+        const resolved = resolveMediaHref(media, docPath, original);
+        if (!resolved || resolved === original) return whole;
+        return `${pre}"${esc(resolved)}"`;
+      }),
+    )
+    .replace(ANCHOR_TAG_RE, (tag) =>
+      tag.replace(HREF_ATTR_RE, (whole, pre: string, dq?: string, sq?: string) => {
+        const original = decodeEntities(dq ?? sq ?? "");
+        const resolved = resolveMediaHref(media, docPath, original);
+        if (!resolved || resolved === original) return whole;
+        const h = original.indexOf("#");
+        const fragment = h >= 0 ? original.slice(h) : "";
+        return `${pre}"${esc(resolved + fragment)}"`;
+      }),
+    );
 }
 
 export interface RichTextResult {

@@ -12,7 +12,11 @@
  *  - Targeted URL keys inside small config blobs (SiteContent.pageMeta
  *    `ogImage`s, SiteContent.popupConfig `imagePath`)
  *  - TipTap rich-text documents embedded in content columns and additionalFields
- *    (including Page.previewDraft and Business.maintenanceMessage)
+ *    (including Page.previewDraft and Business.maintenanceMessage) — image /
+ *    video `src`s AND `link` mark `href`s that point at our bucket (a PDF
+ *    linked from a page must not read as unused)
+ *  - Navigation menus (SiteContent.navigationItems + children,
+ *    footerNavigationItems) and the banner / popup link targets
  *  - Gallery images that are referenced by gallery-type template fields or by
  *    `gallery` nodes inside TipTap documents
  *  - Logo / favicon fixed-key objects are never auto-cleaned (`isAlwaysInUseKey`);
@@ -20,7 +24,7 @@
  */
 
 import type { TemplateField } from "~/lib/template-fields";
-import { isStorageUrl } from "~/lib/s3/url";
+import { isStorageUrl, STORAGE_BASE } from "~/lib/s3/url";
 import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
@@ -112,9 +116,20 @@ export function normalizeUrl(url: string): string {
   return q >= 0 ? url.slice(0, q) : url;
 }
 
+/**
+ * Drop a `#fragment` so the map key stays the canonical object URL. Only
+ * links realistically carry one (`…/library-doc-ab12.pdf#page=3`), but a
+ * fragment never names a different object, so stripping it everywhere is safe.
+ */
+function stripHash(url: string): string {
+  const h = url.indexOf("#");
+  return h >= 0 ? url.slice(0, h) : url;
+}
+
 function addUsage(map: UsageMap, rawUrl: string, usage: MediaUsage): void {
   if (!rawUrl || !isStorageUrl(rawUrl)) return;
-  const key = normalizeUrl(rawUrl);
+  // Map keys are what `keyToPublicUrl(key)` yields — no query, no fragment.
+  const key = normalizeUrl(stripHash(rawUrl));
   const existing = map.get(key);
   if (existing) {
     existing.push(usage);
@@ -134,16 +149,35 @@ function addUsage(map: UsageMap, rawUrl: string, usage: MediaUsage): void {
  *   path as an image's, otherwise uploaded clips used in a page/post would
  *   show as unused in the Media Library and be eligible for deletion)
  * - `gallery` nodes → calls `onGalleryId` with `attrs.galleryId`
+ * - `link` marks (on any node, normally text) whose `attrs.href` points at
+ *   our bucket → calls `onLinkHref` (e.g. a Media Library PDF linked from a
+ *   page). Off-bucket hrefs (other sites, `/contact`, `mailto:`) are skipped.
+ *   Storage hrefs are always absolute — `normalizeEditorHref` only relativises
+ *   the store's OWN hosts, never the storage host — so no relative-href
+ *   resolution is needed. Omit `onLinkHref` to report links via `onImageSrc`.
  * - `embed` nodes are deliberately ignored (external iframes)
  */
 function walkTiptap(
   node: unknown,
   onImageSrc: (src: string) => void,
   onGalleryId: (id: string) => void,
+  onLinkHref: (href: string) => void = onImageSrc,
 ): void {
   if (!node || typeof node !== "object" || Array.isArray(node)) return;
 
   const n = node as Record<string, unknown>;
+
+  if (Array.isArray(n.marks)) {
+    for (const mark of n.marks) {
+      if (!mark || typeof mark !== "object") continue;
+      const m = mark as Record<string, unknown>;
+      if (m.type !== "link") continue;
+      const href = (m.attrs as Record<string, unknown> | undefined)?.href;
+      if (typeof href !== "string") continue;
+      const trimmed = href.trim();
+      if (trimmed && isStorageUrl(trimmed)) onLinkHref(trimmed);
+    }
+  }
 
   if (n.type === "image" || n.type === "video") {
     const attrs = n.attrs as Record<string, unknown> | undefined;
@@ -161,7 +195,7 @@ function walkTiptap(
   const content = n.content;
   if (Array.isArray(content)) {
     for (const child of content) {
-      walkTiptap(child, onImageSrc, onGalleryId);
+      walkTiptap(child, onImageSrc, onGalleryId, onLinkHref);
     }
   }
 }
@@ -201,6 +235,31 @@ function deepWalkJson(
       deepWalkJson(v, onStorageUrl, onTiptapDoc);
     }
   }
+}
+
+// ─── Storage URLs in plain text / HTML ────────────────────────────────────────
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Our storage base, then everything up to whitespace, a quote, `<>`, `()` or `[]`. */
+const STORAGE_URL_RE = new RegExp(
+  `${escapeRegExp(STORAGE_BASE)}[^\\s"'<>()\\[\\]]+`,
+  "g",
+);
+
+/**
+ * Every storage URL written out in a plain-text or HTML string (an email
+ * body, a frozen email render). Sentence punctuation stuck to the end of a
+ * bare URL ("…/menu.pdf.") is dropped so the key still matches.
+ */
+export function findStorageUrlsInText(text: string): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(STORAGE_URL_RE)) {
+    const url = m[0].replace(/[.,;:!?]+$/, "");
+    if (url.length > STORAGE_BASE.length) out.push(url);
+  }
+  return out;
 }
 
 // ─── Main scanner ─────────────────────────────────────────────────────────────
@@ -259,6 +318,9 @@ async function scanMediaReferences(
         logoUrl: true,
         pageMeta: true,
         popupConfig: true,
+        bannerConfig: true,
+        navigationItems: true,
+        footerNavigationItems: true,
         customFields: true,
         previewCustomFields: true,
         business: { select: { templateId: true } },
@@ -316,7 +378,9 @@ async function scanMediaReferences(
       }
 
       // Announcement popup image (PopupConfig.imagePath —
-      // src/lib/validators/site-banner.ts). BannerConfig has no media field.
+      // src/lib/validators/site-banner.ts). BannerConfig has no dedicated
+      // media field; both blobs' `content` docs and link targets (`linkUrl`,
+      // `ctaUrl`) are scanned below.
       const popup = sc.popupConfig;
       if (popup && typeof popup === "object" && !Array.isArray(popup)) {
         const imagePath = (popup as Record<string, unknown>).imagePath;
@@ -329,6 +393,97 @@ async function scanMediaReferences(
             adminHref: "/admin/content/announcements",
           });
         }
+      }
+
+      // Link targets: an owner can point a menu item, the banner or the popup
+      // button at a Media Library file (e.g. a PDF menu). Read raw — like
+      // pageMeta, a blob that no longer validates still holds live links.
+      const linkUsage = (
+        href: unknown,
+        location: string,
+        entityLabel: string | undefined,
+        adminHref: string,
+      ) => {
+        if (typeof href !== "string") return;
+        const trimmed = href.trim();
+        if (!trimmed) return;
+        addUsage(map, trimmed, {
+          url: trimmed,
+          location,
+          entityType: "siteContent",
+          entityLabel,
+          adminHref,
+        });
+      };
+      const asRecord = (v: unknown): Record<string, unknown> | null =>
+        v && typeof v === "object" && !Array.isArray(v)
+          ? (v as Record<string, unknown>)
+          : null;
+      /** A non-blank string label, else undefined (menu labels can be ""). */
+      const labelOf = (v: unknown): string | undefined =>
+        typeof v === "string" && v.trim() !== "" ? v : undefined;
+      const scanNavItems = (items: unknown, location: string) => {
+        if (!Array.isArray(items)) return;
+        for (const raw of items) {
+          const item = asRecord(raw);
+          if (!item) continue;
+          const label = labelOf(item.label);
+          linkUsage(item.href, location, label, "/admin/content/navigation");
+          if (Array.isArray(item.children)) {
+            for (const rawChild of item.children) {
+              const child = asRecord(rawChild);
+              if (!child) continue;
+              const childLabel = labelOf(child.label);
+              linkUsage(
+                child.href,
+                location,
+                label && childLabel ? `${label} › ${childLabel}` : childLabel,
+                "/admin/content/navigation",
+              );
+            }
+          }
+        }
+      };
+      scanNavItems(sc.navigationItems, "Navigation menu");
+      scanNavItems(sc.footerNavigationItems, "Footer quick links");
+
+      // Banner / popup messages are TipTap docs (`content`) that were never
+      // scanned — walk them for media AND links like any other rich text.
+      const walkAnnouncementDoc = (doc: unknown, location: string) => {
+        const usage = (entityLabel: string) => ({
+          location,
+          entityType: "siteContent",
+          entityLabel,
+          adminHref: "/admin/content/announcements",
+        });
+        walkTiptap(
+          doc,
+          (src) =>
+            addUsage(map, src, { url: src, ...usage("Message (rich text)") }),
+          (id) => galleryRefs.push({ id, ...usage("Message (rich text)") }),
+          (href) =>
+            addUsage(map, href, { url: href, ...usage("Linked from message") }),
+        );
+      };
+      const banner = asRecord(sc.bannerConfig);
+      if (banner) {
+        linkUsage(
+          banner.linkUrl,
+          "Announcement banner",
+          "Banner link",
+          "/admin/content/announcements",
+        );
+        walkAnnouncementDoc(banner.content, "Announcement banner");
+      }
+      const popupLinks = asRecord(sc.popupConfig);
+      if (popupLinks) {
+        linkUsage(
+          popupLinks.ctaUrl,
+          "Announcement popup",
+          "Popup button link",
+          "/admin/content/announcements",
+        );
+        walkAnnouncementDoc(popupLinks.content, "Announcement popup");
       }
 
       const templateId = sc.business?.templateId ?? "";
@@ -395,7 +550,12 @@ async function scanMediaReferences(
                 location,
                 entityType: "siteContent",
                 adminHref: "/admin/content/template",
-                inactiveTemplate,
+                // `scrubMediaUrlsFromSiteContent` matches exact / query-stripped
+                // strings only, so a `…pdf#page=2` value would survive the
+                // scrub and dangle — keep it blocking instead of flagging it.
+                inactiveTemplate: url.includes("#")
+                  ? undefined
+                  : inactiveTemplate,
               });
             },
             (doc) => {
@@ -417,6 +577,18 @@ async function scanMediaReferences(
                     entityType: "siteContent",
                     adminHref: "/admin/content/template",
                     inactiveTemplate,
+                  });
+                },
+                (href) => {
+                  // Never flagged `inactiveTemplate`, even from an inactive
+                  // template: the delete-time scrub removes `src` nodes, not
+                  // `link` marks, so a flagged link would let the file be
+                  // deleted while the stored link still points at it.
+                  addUsage(map, href, {
+                    url: href,
+                    location: `Linked from ${location} (rich text)`,
+                    entityType: "siteContent",
+                    adminHref: "/admin/content/template",
                   });
                 },
               );
@@ -501,6 +673,12 @@ async function scanMediaReferences(
                     galleryRefs.push({
                       id,
                       ...productUsage(richTextLocation),
+                    });
+                  },
+                  (href) => {
+                    addUsage(map, href, {
+                      url: href,
+                      ...productUsage(`Linked from ${richTextLocation}`),
                     });
                   },
                 );
@@ -716,6 +894,12 @@ async function scanMediaReferences(
                       ...serviceUsage(`${location} (rich text)`),
                     });
                   },
+                  (href) => {
+                    addUsage(map, href, {
+                      url: href,
+                      ...serviceUsage(`Linked from ${location} (rich text)`),
+                    });
+                  },
                 );
               },
             );
@@ -860,7 +1044,18 @@ async function scanMediaReferences(
             adminHref: pageHref,
           });
         }
-        const walkPageDoc = (doc: unknown, location: string) => {
+        const linkLocation = `Linked from ${
+          page.type === "blog"
+            ? "blog post"
+            : page.type === "policy"
+              ? "policy page"
+              : "page"
+        }`;
+        const walkPageDoc = (
+          doc: unknown,
+          location: string,
+          linkLoc: string,
+        ) => {
           walkTiptap(
             doc,
             (src) => {
@@ -883,9 +1078,21 @@ async function scanMediaReferences(
                 adminHref: pageHref,
               });
             },
+            (href) => {
+              // Renders as "Linked from page — <title>" in the Media Library.
+              addUsage(map, href, {
+                url: href,
+                location: linkLoc,
+                entityType: "page",
+                entityId: page.id,
+                entityLabel: page.title,
+                adminHref: pageHref,
+              });
+            },
           );
         };
-        if (page.content) walkPageDoc(page.content, "Page content");
+        if (page.content)
+          walkPageDoc(page.content, "Page content", linkLocation);
 
         // Visual-editor draft: { title, excerpt, content } — only `content`
         // (a TipTap doc) can hold media. An image placed in the draft but not
@@ -893,7 +1100,12 @@ async function scanMediaReferences(
         const draft = page.previewDraft;
         if (draft && typeof draft === "object" && !Array.isArray(draft)) {
           const draftContent = (draft as Record<string, unknown>).content;
-          if (draftContent) walkPageDoc(draftContent, "Page content (draft)");
+          if (draftContent)
+            walkPageDoc(
+              draftContent,
+              "Page content (draft)",
+              `${linkLocation} (draft)`,
+            );
         }
       }
     });
@@ -935,6 +1147,14 @@ async function scanMediaReferences(
             galleryRefs.push({
               id,
               ...maintenanceUsage("Maintenance page message (rich text)"),
+            });
+          },
+          (href) => {
+            addUsage(map, href, {
+              url: href,
+              ...maintenanceUsage(
+                "Linked from maintenance page message (rich text)",
+              ),
             });
           },
         );
@@ -1077,6 +1297,68 @@ async function scanMediaReferences(
       }
     });
 
+  // ── 10c. Email campaigns (body + frozen send render) ──────────────────────
+  // A campaign that went out points at storage objects from people's inboxes
+  // — deleting a linked PDF (or an inline image) would break mail that was
+  // already delivered, so every campaign counts, in every status. Drafts are
+  // labelled "(draft)" like page drafts. Sources:
+  //  - `bodyJson` (tiptap): link marks + image nodes via `walkTiptap`
+  //    (gallery nodes are not rendered into email, so they are ignored)
+  //  - `bodyText` (plain text): bare URLs, which mail clients turn into links
+  //  - `renderedHtml` / `renderedText`: the copy frozen at queue time, which
+  //    is what was actually sent (also catches the header logo)
+  const campaignsPromise = db.marketingCampaign
+    .findMany({
+      where: { businessId },
+      select: {
+        id: true,
+        subject: true,
+        status: true,
+        bodyText: true,
+        bodyJson: true,
+        renderedHtml: true,
+        renderedText: true,
+      },
+    })
+    .then((campaigns) => {
+      for (const c of campaigns) {
+        const draft = c.status === "DRAFT" ? " (draft)" : "";
+        const seen = new Set<string>();
+        const campaignUsage = (rawUrl: string, location: string) => {
+          if (!isStorageUrl(rawUrl)) return;
+          const key = normalizeUrl(stripHash(rawUrl));
+          if (seen.has(key)) return; // one row per file per campaign
+          seen.add(key);
+          addUsage(map, rawUrl, {
+            url: rawUrl,
+            location: `${location}${draft}`,
+            entityType: "marketingCampaign",
+            entityId: c.id,
+            entityLabel: c.subject.trim() || "Untitled campaign",
+            adminHref: `/admin/marketing/campaigns/${c.id}`,
+          });
+        };
+
+        if (c.bodyJson) {
+          walkTiptap(
+            c.bodyJson,
+            (src) => campaignUsage(src, "Email campaign image"),
+            () => undefined,
+            (href) => campaignUsage(href, "Linked from email campaign"),
+          );
+        }
+        if (c.bodyText) {
+          for (const url of findStorageUrlsInText(c.bodyText))
+            campaignUsage(url, "Linked from email campaign");
+        }
+        for (const rendered of [c.renderedHtml, c.renderedText]) {
+          if (!rendered) continue;
+          for (const url of findStorageUrlsInText(rendered))
+            campaignUsage(url, "Email campaign");
+        }
+      }
+    });
+
   // Run all independent queries in parallel
   await Promise.all([
     siteContentPromise,
@@ -1094,6 +1376,7 @@ async function scanMediaReferences(
     testimonialsPromise,
     reviewsPromise,
     formsPromise,
+    campaignsPromise,
   ]);
 
   return { map, galleryRefs };

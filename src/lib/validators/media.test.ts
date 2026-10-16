@@ -399,6 +399,7 @@ describe("value tuples and defaults", () => {
       "favicon",
       "testimonial",
       "gallery",
+      "document",
       "other",
     ]);
   });

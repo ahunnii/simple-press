@@ -6,10 +6,15 @@ import { Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import type { BatchedImageUploadProgress } from "~/hooks/use-batched-image-upload";
-import { MEDIA_LIBRARY_UPLOAD_MAX } from "~/lib/uploads";
+import {
+  isPdfFile,
+  MAX_DOCUMENT_UPLOAD_LABEL,
+  MEDIA_LIBRARY_UPLOAD_MAX,
+} from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useBatchedImageUpload } from "~/hooks/use-batched-image-upload";
+import { useDocumentUpload } from "~/hooks/use-document-upload";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -28,6 +33,10 @@ import {
 
 type Summary = {
   uploaded: number;
+  /** PDFs that landed — `useDocumentUpload` toasts the ones that didn't. */
+  documents: number;
+  /** PDFs that were sent but didn't land. */
+  documentsFailed: number;
   oversizedNames: string[];
   failedNames: string[];
   aborted: boolean;
@@ -35,6 +44,19 @@ type Summary = {
 
 function pluralizeImages(n: number): string {
   return `${n} image${n === 1 ? "" : "s"}`;
+}
+
+function pluralizePdfs(n: number): string {
+  return `${n} PDF${n === 1 ? "" : "s"}`;
+}
+
+/** "3 images", "2 PDFs" or "3 images and 2 PDFs" — zero parts are dropped. */
+function describeUploaded(images: number, pdfs: number): string {
+  const parts = [
+    images > 0 ? pluralizeImages(images) : null,
+    pdfs > 0 ? pluralizePdfs(pdfs) : null,
+  ].filter(Boolean);
+  return parts.join(" and ");
 }
 
 /** Scrollable filename list so a 40-file failure can't stretch the dialog. */
@@ -67,9 +89,10 @@ type Props = {
 };
 
 /**
- * "Upload images" button + dialog for the Media Library page (shop admin and
- * the platform hub). Files go to the `libraryImages` route (kept until deleted
- * from the Media Library). The dialog is a SIBLING of the button, never inside
+ * "Upload images or PDFs" button + dialog for the Media Library page (shop
+ * admin and the platform hub). Images go to the `libraryImages` route and PDFs
+ * to `libraryDocuments` (via `useDocumentUpload`); both are kept until deleted
+ * from the Media Library. The dialog is a SIBLING of the button, never inside
  * a drop target — React events bubble through portals.
  */
 export function MediaUploadButton({
@@ -85,6 +108,9 @@ export function MediaUploadButton({
     { businessId },
   );
 
+  const { upload: uploadDocuments, isPending: isUploadingDocuments } =
+    useDocumentUpload({ businessId });
+
   const [open, setOpen] = useState(false);
   // Spans the whole `uploadImages` call, including the gaps between batches.
   const [running, setRunning] = useState(false);
@@ -93,7 +119,7 @@ export function MediaUploadButton({
   );
   const [summary, setSummary] = useState<Summary | null>(null);
 
-  const busy = running || isPreparing || isUploading;
+  const busy = running || isPreparing || isUploading || isUploadingDocuments;
 
   // Closing mid-upload would strand the progress UI and (on navigation) kill
   // the in-flight requests, so warn on tab close/reload while busy.
@@ -119,40 +145,59 @@ export function MediaUploadButton({
     setOpen(next);
   };
 
-  const progressLabel =
-    progress && !(isPreparing && progress.done === 0)
+  const progressLabel = isUploadingDocuments
+    ? "Uploading PDFs…"
+    : progress && !(isPreparing && progress.done === 0)
       ? `Uploading… ${progress.done} of ${progress.total} done`
       : "Preparing photos…";
 
   const handleFiles = (files: File[]) => {
     if (busy) return;
 
-    const candidates: File[] = [];
+    const imageCandidates: File[] = [];
+    const pdfs: File[] = [];
     for (const file of files) {
-      if (fileMatchesKind(file, "image")) candidates.push(file);
-      else toast.error(`Skipped "${file.name}": not an image`);
+      if (isPdfFile(file)) pdfs.push(file);
+      else if (fileMatchesKind(file, "image")) imageCandidates.push(file);
+      else toast.error(`Skipped "${file.name}": not an image or PDF`);
     }
-    if (candidates.length === 0) return;
+    if (imageCandidates.length === 0 && pdfs.length === 0) return;
 
-    const total = candidates.length;
-    const kept = candidates.slice(0, MEDIA_LIBRARY_UPLOAD_MAX);
-    if (kept.length < total) {
+    const total = imageCandidates.length;
+    const images = imageCandidates.slice(0, MEDIA_LIBRARY_UPLOAD_MAX);
+    if (images.length < total) {
       toast.warning(
-        `Uploading ${kept.length} of ${total} images — add the rest after this finishes`,
+        `Uploading ${images.length} of ${total} images — add the rest after this finishes`,
       );
     }
 
     setSummary(null);
-    setProgress({ done: 0, total: kept.length });
+    setProgress(images.length > 0 ? { done: 0, total: images.length } : null);
     setRunning(true);
 
     void (async () => {
       try {
-        const { urls, failedNames, oversizedNames, aborted } =
-          await uploadImages(kept, { onProgress: setProgress });
-        const landed = urls.length;
+        let landed = 0;
+        let failedNames: string[] = [];
+        let oversizedNames: string[] = [];
+        let aborted = false;
+        if (images.length > 0) {
+          const result = await uploadImages(images, {
+            onProgress: setProgress,
+          });
+          landed = result.urls.length;
+          failedNames = result.failedNames;
+          oversizedNames = result.oversizedNames;
+          aborted = result.aborted;
+        }
 
-        if (landed > 0) {
+        // PDFs go after the images; skips and rejections are toasted by the
+        // hook, so only the count matters here.
+        setProgress(null);
+        const documents = pdfs.length > 0 ? await uploadDocuments(pdfs) : [];
+        const documentsFailed = pdfs.length - documents.length;
+
+        if (landed > 0 || documents.length > 0) {
           if (businessId) {
             void utils.platformMedia.list.invalidate({ businessId });
           } else {
@@ -161,22 +206,33 @@ export function MediaUploadButton({
           router.refresh();
         }
 
+        const uploadedLabel = describeUploaded(landed, documents.length);
         if (aborted) {
           toast.error(
             landed > 0
               ? `Upload stopped — ${pluralizeImages(landed)} ${landed === 1 ? "was" : "were"} added before the error`
               : "Failed to upload images",
           );
-        } else if (failedNames.length === 0 && oversizedNames.length === 0) {
-          toast.success(`${pluralizeImages(landed)} uploaded`);
+        } else if (
+          failedNames.length === 0 &&
+          oversizedNames.length === 0 &&
+          documentsFailed === 0
+        ) {
+          toast.success(`${uploadedLabel} uploaded`);
           reset();
           setOpen(false);
           return;
         }
 
         // Partial / failed: stay open so the owner can see what to retry.
-        setProgress(null);
-        setSummary({ uploaded: landed, oversizedNames, failedNames, aborted });
+        setSummary({
+          uploaded: landed,
+          documents: documents.length,
+          documentsFailed,
+          oversizedNames,
+          failedNames,
+          aborted,
+        });
       } finally {
         setRunning(false);
       }
@@ -197,7 +253,7 @@ export function MediaUploadButton({
         onClick={() => setOpen(true)}
       >
         <Upload className="mr-2 h-4 w-4" />
-        Upload images
+        Upload images or PDFs
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -208,10 +264,11 @@ export function MediaUploadButton({
           onPointerDownOutside={blockWhileBusy}
         >
           <DialogHeader>
-            <DialogTitle>Upload images</DialogTitle>
+            <DialogTitle>Upload images or PDFs</DialogTitle>
             <DialogDescription>
               Add photos to your library, then pick them from any “Choose from
-              library” menu — products, collections, galleries and more.
+              library” menu — products, collections, galleries and more. PDFs
+              get a link you can copy or add to a page.
             </DialogDescription>
           </DialogHeader>
 
@@ -219,14 +276,16 @@ export function MediaUploadButton({
             <div
               className={cn(
                 "bg-muted/50 space-y-3 rounded-md border p-3",
-                summary.uploaded === 0 && "border-destructive/40",
+                summary.uploaded === 0 &&
+                  summary.documents === 0 &&
+                  "border-destructive/40",
               )}
               role="status"
             >
               <p className="text-sm font-medium">
-                {summary.uploaded > 0
-                  ? `${pluralizeImages(summary.uploaded)} uploaded`
-                  : "No images were uploaded"}
+                {summary.uploaded > 0 || summary.documents > 0
+                  ? `${describeUploaded(summary.uploaded, summary.documents)} uploaded`
+                  : "Nothing was uploaded"}
                 {summary.aborted &&
                   " — the upload stopped early because of an error"}
               </p>
@@ -235,16 +294,25 @@ export function MediaUploadButton({
                 names={summary.oversizedNames}
               />
               <NameList title="Failed to upload" names={summary.failedNames} />
+              {summary.documentsFailed > 0 && (
+                <p className="text-sm">
+                  {pluralizePdfs(summary.documentsFailed)} couldn&apos;t be
+                  added — see the messages above for why.
+                </p>
+              )}
             </div>
           )}
 
           <UploadDropzone
             kind="image"
+            acceptPdf
             multiple
-            isUploading={isUploading || (running && !isPreparing)}
+            isUploading={
+              isUploading || isUploadingDocuments || (running && !isPreparing)
+            }
             isPreparing={isPreparing}
             onFiles={handleFiles}
-            helperText={`Up to ${MEDIA_LIBRARY_UPLOAD_MAX} images at a time, ${MAX_UPLOAD_LABEL.image} each`}
+            helperText={`Up to ${MEDIA_LIBRARY_UPLOAD_MAX} images at a time, ${MAX_UPLOAD_LABEL.image} each · PDFs up to ${MAX_DOCUMENT_UPLOAD_LABEL}`}
             progressLabel={busy ? progressLabel : undefined}
           />
 

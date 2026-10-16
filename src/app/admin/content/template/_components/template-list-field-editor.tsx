@@ -84,6 +84,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { DocumentPicker } from "~/components/media/document-picker";
 
 import { AdminThumb } from "../../../_components/admin-thumb";
 import {
@@ -247,17 +248,28 @@ export function ListItemSubFieldInput({
   return (
     <div className="space-y-1.5">
       {labelNode}
-      <Input
-        id={fieldId}
-        type="text"
-        inputMode={isUrl ? "url" : undefined}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={
-          subField.placeholder ?? (isUrl ? "/contact or https://…" : undefined)
-        }
-        aria-describedby={descId}
-      />
+      <div className="flex items-center gap-2">
+        <Input
+          id={fieldId}
+          type="text"
+          inputMode={isUrl ? "url" : undefined}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={
+            subField.placeholder ??
+            (isUrl ? "/contact or https://…" : undefined)
+          }
+          aria-describedby={descId}
+          className="flex-1"
+        />
+        {isUrl && (
+          <DocumentPicker
+            libraryEnabled={mediaLibraryEnabled}
+            triggerAriaLabel={`Choose a file for ${mediaName}`}
+            onSelect={(url) => onChange(url)}
+          />
+        )}
+      </div>
       {descNode}
     </div>
   );

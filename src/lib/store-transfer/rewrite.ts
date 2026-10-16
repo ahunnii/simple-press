@@ -36,15 +36,45 @@ export { normalizeUrl };
 
 /**
  * Look up a URL in the urlMap and return the replacement, or the original if
- * not found.  The lookup is performed on the normalized URL (query stripped)
- * to match how keys were inserted into the map.
+ * not found.  The lookup is performed on the normalized URL (query and
+ * `#fragment` stripped) to match how keys were inserted into the map. A
+ * fragment is carried over to the replacement — a link such as
+ * `…/library-doc-ab12.pdf#page=3` keeps pointing at the same page.
  *
  * External (non-storage) URLs are returned unchanged.
  */
 export function rewriteUrl(url: string, urlMap: Map<string, string>): string {
   if (!url || !isStorageUrl(url)) return url;
-  const normalized = normalizeUrl(url);
-  return urlMap.get(normalized) ?? url;
+  const h = url.indexOf("#");
+  const base = h >= 0 ? url.slice(0, h) : url;
+  const fragment = h >= 0 ? url.slice(h) : "";
+  const mapped = urlMap.get(normalizeUrl(base));
+  return mapped ? mapped + fragment : url;
+}
+
+/**
+ * Rewrite `link` marks' `attrs.href` (a Media Library PDF linked from rich
+ * text — usage.ts walkTiptap reports the same hrefs). Returns the input array
+ * when nothing changed.
+ */
+function rewriteLinkMarks(
+  marks: unknown[],
+  urlMap: Map<string, string>,
+): unknown[] {
+  let changed = false;
+  const out = marks.map((mark) => {
+    if (!mark || typeof mark !== "object" || Array.isArray(mark)) return mark;
+    const m = mark as Record<string, unknown>;
+    if (m.type !== "link") return mark;
+    const attrs = m.attrs as Record<string, unknown> | undefined;
+    const href = attrs?.href;
+    if (typeof href !== "string" || !href) return mark;
+    const next = rewriteUrl(href.trim(), urlMap);
+    if (next === href.trim()) return mark;
+    changed = true;
+    return { ...m, attrs: { ...attrs, href: next } };
+  });
+  return changed ? out : marks;
 }
 
 // ─── Embed ID maps ────────────────────────────────────────────────────────────
@@ -92,6 +122,7 @@ function remapAttr(
  * Deep-clone and rewrite a TipTap JSON document node.
  *
  *   image / video nodes → attrs.src rewritten via urlMap
+ *   link marks (any node) → attrs.href rewritten via urlMap
  *   gallery nodes → attrs.galleryId rewritten via galleryIdMap
  *   form nodes    → attrs.formId rewritten via embedIdMaps.form
  *   quoteCalculator nodes → attrs.calculatorId rewritten via embedIdMaps.quoteCalculator
@@ -117,6 +148,10 @@ export function rewriteTiptapDoc(
 
   // Shallow-clone this node so we don't mutate the original
   const result: Record<string, unknown> = { ...n };
+
+  if (Array.isArray(n.marks)) {
+    result.marks = rewriteLinkMarks(n.marks, urlMap);
+  }
 
   // `video` nodes carry an uploaded clip's URL in `attrs.src` exactly like
   // `image` nodes (usage.ts walkTiptap treats them the same way).

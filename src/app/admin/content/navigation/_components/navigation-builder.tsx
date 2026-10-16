@@ -3,7 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronDown, Info, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  FileText,
+  Info,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { COMMON_SITE_LINKS, filterSiteLinks } from "~/lib/site-links";
@@ -15,6 +23,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { DocumentPicker } from "~/components/media/document-picker";
+import { documentLinkText } from "~/lib/s3/pdf";
 import {
   FOOTER_QUICK_LINKS_BUILT_IN_FALLBACK,
   FOOTER_QUICK_LINKS_TEMPLATES,
@@ -61,6 +71,8 @@ type Props = {
   donationsEnabled?: boolean;
   /** Label for the Donate quick-add button (e.g., "Donate", "Contribute"). */
   donationNavLabel?: string;
+  /** Media Library flag — off makes "Choose a file" upload-only. */
+  mediaEnabled?: boolean;
 };
 
 export function NavigationBuilder({
@@ -75,6 +87,7 @@ export function NavigationBuilder({
   videosEnabled,
   donationsEnabled,
   donationNavLabel,
+  mediaEnabled,
 }: Props) {
   const router = useRouter();
 
@@ -142,6 +155,20 @@ export function NavigationBuilder({
     setNavItems(navItems.filter((_, i) => i !== index));
   };
 
+  // A picked PDF fills the URL, names an unnamed item after the file and
+  // opens in a new tab (the owner can untick it).
+  const pickNavFile = (index: number, url: string, name: string) => {
+    const updated = [...navItems];
+    const item = updated[index]!;
+    updated[index] = {
+      ...item,
+      href: url,
+      label: item.label.trim() ? item.label : documentLinkText(name),
+      external: true,
+    };
+    setNavItems(updated);
+  };
+
   const moveItem = (index: number, direction: "up" | "down") => {
     if (
       (direction === "up" && index === 0) ||
@@ -179,6 +206,27 @@ export function NavigationBuilder({
     setNavItems(updated);
   };
 
+  // Sub-items have no "Open in new tab" box, so only URL + label are filled.
+  const pickChildFile = (
+    parentIndex: number,
+    childIndex: number,
+    url: string,
+    name: string,
+  ) => {
+    const updated = [...navItems];
+    const parent = { ...updated[parentIndex]! };
+    const children = [...(parent.children ?? [])];
+    const child = children[childIndex]!;
+    children[childIndex] = {
+      ...child,
+      href: url,
+      label: child.label.trim() ? child.label : documentLinkText(name),
+    };
+    parent.children = children;
+    updated[parentIndex] = parent;
+    setNavItems(updated);
+  };
+
   const deleteChildItem = (parentIndex: number, childIndex: number) => {
     const updated = [...navItems];
     const parent = { ...updated[parentIndex]! };
@@ -209,6 +257,18 @@ export function NavigationBuilder({
   ) => {
     const updated = [...footerItems];
     updated[index] = { ...updated[index]!, [field]: value };
+    setFooterItems(updated);
+  };
+
+  const pickFooterFile = (index: number, url: string, name: string) => {
+    const updated = [...footerItems];
+    const item = updated[index]!;
+    updated[index] = {
+      ...item,
+      href: url,
+      label: item.label.trim() ? item.label : documentLinkText(name),
+      external: true,
+    };
     setFooterItems(updated);
   };
 
@@ -443,14 +503,23 @@ export function NavigationBuilder({
 
                             <div>
                               <Label>URL</Label>
-                              <Input
-                                value={item.href}
-                                onChange={(e) =>
-                                  updateNavItem(index, "href", e.target.value)
-                                }
-                                placeholder="/products"
-                                className="mt-1"
-                              />
+                              <div className="mt-1 flex items-center gap-2">
+                                <Input
+                                  value={item.href}
+                                  onChange={(e) =>
+                                    updateNavItem(index, "href", e.target.value)
+                                  }
+                                  placeholder="/products"
+                                  className="flex-1"
+                                />
+                                <DocumentPicker
+                                  libraryEnabled={mediaEnabled}
+                                  triggerAriaLabel={`Choose a file for menu item ${index + 1}`}
+                                  onSelect={(url, doc) =>
+                                    pickNavFile(index, url, doc.name)
+                                  }
+                                />
+                              </div>
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -509,19 +578,44 @@ export function NavigationBuilder({
                                         </div>
                                         <div>
                                           <Label className="text-xs">URL</Label>
-                                          <Input
-                                            value={child.href}
-                                            onChange={(e) =>
-                                              updateChildItem(
-                                                index,
-                                                ci,
-                                                "href",
-                                                e.target.value,
-                                              )
-                                            }
-                                            placeholder="/sub-page"
-                                            className="mt-1 h-8 text-sm"
-                                          />
+                                          <div className="mt-1 flex items-center gap-2">
+                                            <Input
+                                              value={child.href}
+                                              onChange={(e) =>
+                                                updateChildItem(
+                                                  index,
+                                                  ci,
+                                                  "href",
+                                                  e.target.value,
+                                                )
+                                              }
+                                              placeholder="/sub-page"
+                                              className="h-8 flex-1 text-sm"
+                                            />
+                                            <DocumentPicker
+                                              libraryEnabled={mediaEnabled}
+                                              onSelect={(url, doc) =>
+                                                pickChildFile(
+                                                  index,
+                                                  ci,
+                                                  url,
+                                                  doc.name,
+                                                )
+                                              }
+                                              trigger={
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  size="icon"
+                                                  className="size-8 shrink-0"
+                                                  aria-label={`Choose a file for sub-item ${ci + 1} of menu item ${index + 1}`}
+                                                  title="Choose a file"
+                                                >
+                                                  <FileText className="size-4" />
+                                                </Button>
+                                              }
+                                            />
+                                          </div>
                                         </div>
                                       </div>
                                       <button
@@ -700,19 +794,28 @@ export function NavigationBuilder({
                                   <Label htmlFor={`footer-href-${index}`}>
                                     URL
                                   </Label>
-                                  <Input
-                                    id={`footer-href-${index}`}
-                                    value={item.href}
-                                    onChange={(e) =>
-                                      updateFooterItem(
-                                        index,
-                                        "href",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="/products"
-                                    className="mt-1"
-                                  />
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <Input
+                                      id={`footer-href-${index}`}
+                                      value={item.href}
+                                      onChange={(e) =>
+                                        updateFooterItem(
+                                          index,
+                                          "href",
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder="/products"
+                                      className="flex-1"
+                                    />
+                                    <DocumentPicker
+                                      libraryEnabled={mediaEnabled}
+                                      triggerAriaLabel={`Choose a file for footer link ${index + 1}`}
+                                      onSelect={(url, doc) =>
+                                        pickFooterFile(index, url, doc.name)
+                                      }
+                                    />
+                                  </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">

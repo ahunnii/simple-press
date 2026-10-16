@@ -66,6 +66,10 @@ export const mediaDownloadInput = z.object({
   key: storageKeySchema,
 });
 
+export const mediaVerifyDocumentInput = z.object({
+  key: storageKeySchema,
+});
+
 /**
  * The accepted values for the admin Media Library list's filter and sort
  * params.
@@ -103,6 +107,7 @@ export const MEDIA_TYPE_VALUES = [
   "favicon",
   "testimonial",
   "gallery",
+  "document",
   "other",
 ] as const;
 export const MEDIA_TYPE_DEFAULT = "all";
@@ -192,6 +197,12 @@ export const platformMediaListInput = z.object({
 export const platformMediaDeleteInput = mediaDeleteInput.extend({
   businessId: platformBusinessIdSchema,
 });
+
+export const platformMediaVerifyDocumentInput = mediaVerifyDocumentInput.extend(
+  {
+    businessId: platformBusinessIdSchema,
+  },
+);
 
 export const platformMediaDownloadInput = mediaDownloadInput.extend({
   businessId: platformBusinessIdSchema,

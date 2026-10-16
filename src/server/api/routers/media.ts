@@ -1,13 +1,15 @@
 /**
  * Media Library tRPC router (shop admin).
  *
- * Provides four procedures gated behind the `media` feature flag:
+ * Provides these procedures (all but `verifyDocument` gated behind the `media`
+ * feature flag):
  *
  *   list          — query   — list all S3 objects for a business with usage info
  *   delete        — mutation — delete an unused S3 object (blocks if in use)
  *   bulkDelete    — mutation — delete multiple unused S3 objects (owner-only,
  *                              partial success by design — see its own doc comment)
  *   getDownloadUrl — mutation — generate a presigned download URL
+ *   verifyDocument — mutation — confirm a fresh PDF upload (see its comment)
  *
  * Every procedure acts on the HOST-resolved business (`ctx.businessId`) only.
  * There is deliberately no `businessId` override: platform admins manage
@@ -22,12 +24,14 @@ import {
   mediaDeleteInput,
   mediaDownloadInput,
   mediaListInput,
+  mediaVerifyDocumentInput,
 } from "~/lib/validators/media";
 import {
   bulkDeleteMedia,
   deleteMedia,
   getMediaDownloadUrl,
   listMedia,
+  verifyLibraryDocument,
 } from "~/server/media/library";
 
 import {
@@ -81,5 +85,18 @@ export const mediaRouter = createTRPCRouter({
     .input(mediaDownloadInput)
     .mutation(({ ctx, input }) =>
       getMediaDownloadUrl(ctx.businessId, input.key),
+    ),
+
+  /**
+   * Check a just-uploaded `libraryDocuments` PDF for the `%PDF-` signature,
+   * deleting it and rejecting if it isn't one. NOT feature-gated: the upload
+   * route isn't (inline "Upload a PDF" buttons in link pickers work without the
+   * Media Library page), and it mirrors that route's OWNER/MANAGER/platform
+   * admin check. See `verifyLibraryDocument`.
+   */
+  verifyDocument: ownerAdminProcedure
+    .input(mediaVerifyDocumentInput)
+    .mutation(({ ctx, input }) =>
+      verifyLibraryDocument(ctx.businessId, input.key),
     ),
 });

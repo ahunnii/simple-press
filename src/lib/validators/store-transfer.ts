@@ -39,6 +39,7 @@ const mediaKindSchema = z.enum([
   "favicon",
   "testimonial",
   "gallery",
+  "document",
   "other",
 ]);
 

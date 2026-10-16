@@ -11,6 +11,7 @@
 import type { MediaRow } from "../_components/media-library-client";
 import type { FilterDefFor } from "../../_components/admin-filters";
 import type { MediaItem } from "~/components/media/media-grid";
+import { documentDisplayName } from "~/lib/s3/pdf";
 import {
   getMediaSearchFields,
   getMediaUsageStatus,
@@ -48,6 +49,7 @@ const TYPE_FILTER: FilterDefFor<typeof MEDIA_TYPE_VALUES> = {
     { value: "favicon", label: "Favicon" },
     { value: "testimonial", label: "Testimonials" },
     { value: "gallery", label: "Gallery" },
+    { value: "document", label: "Documents" },
     { value: "other", label: "Other" },
   ],
 };
@@ -113,7 +115,12 @@ export function buildMediaLibraryPage(
   const rows: MediaRow[] = items.map((item) => ({
     ...item,
     id: item.key,
-    filename: item.key.split("/").pop() ?? item.key,
+    // Documents show their original name (kept as a slug in the key) rather
+    // than `library-doc-{hex}…`; the full key stays searchable.
+    filename:
+      item.kind === "document"
+        ? documentDisplayName(item.key)
+        : (item.key.split("/").pop() ?? item.key),
     // Precomputed once per row, same reasoning as `filename` — the "used"
     // filter option below and `UsageBadge` on the client both need the same
     // three-bucket classification, so it's derived here rather than
