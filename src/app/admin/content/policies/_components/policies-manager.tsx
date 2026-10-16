@@ -107,9 +107,11 @@ type Props = {
       published: boolean;
     }>;
   };
+  /** Mirrors the `media` feature flag — adds "Choose from library" to images. */
+  mediaEnabled?: boolean;
 };
 
-export function PoliciesManager({ business }: Props) {
+export function PoliciesManager({ business, mediaEnabled = false }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
   const [templateUsed, setTemplateUsed] = useState(false);
@@ -601,6 +603,7 @@ export function PoliciesManager({ business }: Props) {
                         placeholder="Write your policy or use the template..."
                         output="json"
                         editorContentClassName="min-h-[500px] p-4"
+                        mediaEnabled={mediaEnabled}
                         onUploadingChange={onUploadingChange}
                       />
                     </Form>

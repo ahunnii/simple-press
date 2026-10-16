@@ -172,6 +172,10 @@ export function NavigationGuardProvider({ children }: { children: ReactNode }) {
 
       const anchor = targetEl.closest("a");
       if (!anchor) return;
+      // Links inside a rich-text editor are content being edited (the
+      // editor sets openOnClick: false) — a same-site `/contact` there is
+      // not a navigation.
+      if (anchor.isContentEditable) return;
 
       const decision = computeNavigationIntercept({
         hasActiveBlocker: true,

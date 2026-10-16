@@ -3,6 +3,8 @@ import type { NodeType, Schema } from "@tiptap/pm/model";
 
 import { safeHref } from "~/lib/safe-href";
 
+import { coerceImageAlign, coerceImageSize } from "./image-node";
+
 /**
  * Schema-derived, isomorphic sanitizer for stored TipTap JSON.
  *
@@ -263,6 +265,14 @@ function sanitizeNode(
     for (const key of ["alt", "title"] as const) {
       const value: unknown = attrs[key];
       if (value != null && typeof value !== "string") delete attrs[key];
+    }
+    // `size`/`align` become an inline style; `renderImageHTML` coerces them
+    // too, but an unknown value has no business surviving in the JSON.
+    if (attrs.size != null && coerceImageSize(attrs.size) === null) {
+      delete attrs.size;
+    }
+    if (attrs.align != null && coerceImageAlign(attrs.align) === null) {
+      delete attrs.align;
     }
   }
 

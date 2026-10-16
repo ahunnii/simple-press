@@ -376,6 +376,7 @@ export function FieldInput({
           quotesEnabled={quotesEnabled}
           formsEnabled={formsEnabled}
           uploader={uploadRichTextImage}
+          mediaEnabled={mediaLibraryEnabled}
           onUploadingChange={onUploadingChange}
         />
       ) : field.type === "textarea" ? (
@@ -462,10 +463,16 @@ export function FieldInput({
       ) : (
         <Input
           id={field.key}
-          type={field.type === "url" ? "url" : "text"}
+          // `text`, not `url`: `type="url"` flags `/contact` as invalid, but
+          // site paths are valid links (scheme safety is `safeHref`'s job).
+          type="text"
+          inputMode={field.type === "url" ? "url" : undefined}
           value={displayValue}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder}
+          placeholder={
+            field.placeholder ??
+            (field.type === "url" ? "/contact or https://…" : undefined)
+          }
           aria-describedby={descId}
         />
       )}

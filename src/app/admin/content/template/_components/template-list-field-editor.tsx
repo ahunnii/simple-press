@@ -56,7 +56,10 @@ import {
   getLucideTemplateIcon,
   TEMPLATE_LUCIDE_ICON_NAMES,
 } from "~/lib/lucide-template-icons";
-import { getListRowSummary, parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getListRowSummary,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -94,7 +97,9 @@ import {
  *  every word after the first. Display-only — stored values are untouched. */
 function formatIconLabel(name: string): string {
   const words = name.match(/[A-Z][a-z0-9]*/g) ?? [name];
-  return words.map((word, i) => (i === 0 ? word : word.toLowerCase())).join(" ");
+  return words
+    .map((word, i) => (i === 0 ? word : word.toLowerCase()))
+    .join(" ");
 }
 
 export function ListItemSubFieldInput({
@@ -191,7 +196,11 @@ export function ListItemSubFieldInput({
             <Preview className="text-muted-foreground h-5 w-5 shrink-0" />
           ) : null}
           <Select value={selected} onValueChange={(v) => onChange(v)}>
-            <SelectTrigger id={fieldId} aria-describedby={descId} className="flex-1">
+            <SelectTrigger
+              id={fieldId}
+              aria-describedby={descId}
+              className="flex-1"
+            >
               <SelectValue placeholder="Icon" />
             </SelectTrigger>
             <SelectContent>
@@ -231,17 +240,22 @@ export function ListItemSubFieldInput({
     );
   }
 
-  const inputType = subField.type === "url" ? "url" : "text";
+  // `text`, not `url`: `type="url"` flags `/contact` as invalid, but site
+  // paths are valid links (scheme safety is `safeHref`'s job).
+  const isUrl = subField.type === "url";
 
   return (
     <div className="space-y-1.5">
       {labelNode}
       <Input
         id={fieldId}
-        type={inputType}
+        type="text"
+        inputMode={isUrl ? "url" : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={subField.placeholder}
+        placeholder={
+          subField.placeholder ?? (isUrl ? "/contact or https://…" : undefined)
+        }
         aria-describedby={descId}
       />
       {descNode}
@@ -344,7 +358,10 @@ function RowPreview({
       cellString(row[iconField.key]) || (TEMPLATE_LUCIDE_ICON_NAMES[0] ?? "");
     const Icon = getLucideTemplateIcon(name);
     return Icon ? (
-      <Icon aria-hidden="true" className="text-muted-foreground size-4 shrink-0" />
+      <Icon
+        aria-hidden="true"
+        className="text-muted-foreground size-4 shrink-0"
+      />
     ) : null;
   }
   const imageField = itemSchema.find(
@@ -471,7 +488,10 @@ function SortableListRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled={index === 0} onSelect={() => onMove(-1)}>
+            <DropdownMenuItem
+              disabled={index === 0}
+              onSelect={() => onMove(-1)}
+            >
               Move up
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -569,9 +589,7 @@ export function TemplateListFieldEditor({
   const [openIds, setOpenIds] = useState<Set<string>>(() =>
     rows.length === 1 && rows[0]?._id ? new Set([rows[0]._id]) : new Set(),
   );
-  const [pendingFocus, setPendingFocus] = useState<{ id: string } | null>(
-    null,
-  );
+  const [pendingFocus, setPendingFocus] = useState<{ id: string } | null>(null);
 
   /** Icon sub-fields first (display order only — storage order untouched). */
   const displaySchema = useMemo(
@@ -818,8 +836,8 @@ export function TemplateListFieldEditor({
     <div ref={containerRef} className="space-y-3">
       {showingDefaults && (
         <p className="text-muted-foreground text-xs">
-          Showing the built-in {itemLabel}s — edit any of them to make them
-          your own.
+          Showing the built-in {itemLabel}s — edit any of them to make them your
+          own.
         </p>
       )}
       {rows.length === 0 ? (
@@ -827,8 +845,8 @@ export function TemplateListFieldEditor({
           <p>No {itemLabel}s yet.</p>
           {field.defaultsWhenEmpty && (
             <p className="mt-1 text-xs">
-              Your site is showing the built-in {itemLabel}s. Add one to
-              replace them.
+              Your site is showing the built-in {itemLabel}s. Add one to replace
+              them.
             </p>
           )}
         </div>

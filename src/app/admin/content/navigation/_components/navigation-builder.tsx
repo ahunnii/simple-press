@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ChevronDown, Info, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { COMMON_SITE_LINKS, filterSiteLinks } from "~/lib/site-links";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -879,6 +880,20 @@ function QuickAddPanel({
     toast.success("Added Services menu to navigation");
   };
 
+  // Same flag semantics as before: a flag prop left undefined counts as off;
+  // routes gated by anything else (FAQ, contact, about) are always listed.
+  const flagState: Record<string, boolean | undefined> = {
+    collections: collectionsEnabled,
+    products: productsEnabled,
+    blog: blogEnabled,
+    events: eventsEnabled,
+    videos: videosEnabled,
+    donations: donationsEnabled,
+  };
+  const commonLinks = filterSiteLinks(COMMON_SITE_LINKS, (flag) =>
+    flag in flagState ? Boolean(flagState[flag]) : true,
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -888,90 +903,23 @@ function QuickAddPanel({
         <div>
           <h4 className="mb-2 text-sm font-medium">Common Pages</h4>
           <div className="space-y-2">
-            {collectionsEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("collections", "Collections")}
-              >
-                Collections
-              </Button>
-            )}
-            {productsEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("shop", "Shop")}
-              >
-                Shop
-              </Button>
-            )}
-            {blogEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("blog", "Blog")}
-              >
-                Blog
-              </Button>
-            )}
-            {eventsEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("events", "Events")}
-              >
-                Events
-              </Button>
-            )}
-            {videosEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("videos", "Videos")}
-              >
-                Videos
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => addPage("faq", "FAQ")}
-            >
-              FAQ
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => addPage("contact", "Contact")}
-            >
-              Contact
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => addPage("about", "About")}
-            >
-              About
-            </Button>
-            {donationsEnabled && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => addPage("donate", donationNavLabel ?? "Donate")}
-              >
-                {donationNavLabel ?? "Donate"}
-              </Button>
-            )}
+            {commonLinks.map((link) => {
+              const label =
+                link.id === "donate"
+                  ? (donationNavLabel ?? link.label)
+                  : link.label;
+              return (
+                <Button
+                  key={link.id}
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => addPage(link.path.slice(1), label)}
+                >
+                  {label}
+                </Button>
+              );
+            })}
           </div>
         </div>
 

@@ -17,6 +17,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
+import {
+  MAX_UPLOAD_LABEL,
+  MAX_UPLOAD_SIZE,
+} from "~/components/media/upload-dropzone";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
@@ -36,6 +40,15 @@ const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
  */
 export async function uploadRichTextImage(file: File): Promise<string> {
   const prepared = await prepareImageForUpload(file);
+  // Photos are shrunk above, so the editor accepts bigger originals than the
+  // route's 5MB cap; say so plainly when one (e.g. a GIF, which is never
+  // re-encoded) is still over it, rather than surfacing a raw route error.
+  if (prepared.size > MAX_UPLOAD_SIZE.image) {
+    const mb = Math.round((prepared.size / (1024 * 1024)) * 10) / 10;
+    throw new Error(
+      `${file.name} is ${mb}MB even after resizing. Images must be ${MAX_UPLOAD_LABEL.image} or smaller.`,
+    );
+  }
   const result = await uploadFile({
     api: "/api/upload",
     route: "image",
@@ -97,7 +110,7 @@ type Props<CurrentForm extends FieldValues> = {
    */
   videosEnabled?: boolean;
   /**
-   * Adds "Choose from library" to the video dialog. Only pass `true` when
+   * Adds "Choose from library" to the image and video dialogs. Only pass `true` when
    * the `media` feature flag is on — `media.list` throws FORBIDDEN otherwise.
    */
   mediaEnabled?: boolean;

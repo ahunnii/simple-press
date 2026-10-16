@@ -771,7 +771,7 @@ export function PageEditor({
                       form={form}
                       name="width"
                       label="Page width"
-                      description="Wide uses your theme's full content width — best for pages built with columns, galleries or tables. Text stays at a comfortable reading width."
+                      description="Wide uses your theme's full content width — best for pages built with columns, galleries or tables. Text stays at a comfortable reading width; how wide that is can be changed in the Site Editor → Style."
                       disabled={!widthIsEditable(page?.template)}
                       values={[
                         { value: "standard", label: "Standard" },

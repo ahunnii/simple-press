@@ -101,3 +101,59 @@ export function createLinkExtension(options: Partial<LinkOptions> = {}) {
     ...options,
   });
 }
+
+/**
+ * True for a link to a page on the same site: a single-slash path (`/contact`)
+ * or an in-page anchor (`#faq`). Protocol-relative `//host` is external.
+ */
+export function isInternalHref(href: unknown): boolean {
+  if (typeof href !== "string") return false;
+  const value = href.trim();
+  return (
+    (value.startsWith("/") && !value.startsWith("//")) || value.startsWith("#")
+  );
+}
+
+const EXTERNAL_REL = "noopener noreferrer nofollow";
+
+/**
+ * The storefront / export `link` mark. External links are stamped
+ * `rel="noopener noreferrer nofollow"` and open in a new tab unless the stored
+ * `target` says otherwise (unchanged behaviour). Internal links (`/…`, `#…`)
+ * carry no `rel` and only open in a new tab when the owner explicitly asked
+ * for it — a link to your own page should not be nofollowed or leave the tab.
+ *
+ * `target` and `rel` default to `null` here (not the stock `_blank` /
+ * `rel`) so "owner chose nothing" can be told apart from "owner chose a new
+ * tab"; their `renderHTML` then applies the rules above.
+ */
+export function createRendererLinkExtension() {
+  return ButtonLink.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        target: {
+          default: null,
+          renderHTML: (attributes: Record<string, unknown>) => {
+            const target =
+              typeof attributes.target === "string" && attributes.target
+                ? attributes.target
+                : null;
+            if (isInternalHref(attributes.href)) {
+              return target ? { target } : {};
+            }
+            return { target: target ?? "_blank" };
+          },
+        },
+        rel: {
+          default: null,
+          renderHTML: (attributes: Record<string, unknown>) =>
+            isInternalHref(attributes.href) ? {} : { rel: EXTERNAL_REL },
+        },
+      };
+    },
+  }).configure({
+    protocols: LINK_PROTOCOLS,
+    HTMLAttributes: { target: null, rel: null, class: null },
+  });
+}

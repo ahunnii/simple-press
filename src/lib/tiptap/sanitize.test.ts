@@ -303,6 +303,73 @@ describe("sanitizeTiptapDoc — images", () => {
     expect(out?.content?.[0]?.attrs).toEqual({ src: "/a.png" });
   });
 
+  it("keeps a known size / align", () => {
+    const attrs = { src: "/a.png", size: "medium", align: "right" };
+    const out = sanitizeTiptapDoc(doc({ type: "image", attrs }), schema);
+    expect(out?.content?.[0]?.attrs).toEqual(attrs);
+  });
+
+  it.each([
+    ["an unknown size", { size: "huge" }],
+    ["an unknown align", { align: "justify" }],
+    ["a css-injection size", { size: "50%;position:fixed" }],
+    ["a numeric size", { size: 50 }],
+  ])("drops %s, keeping the image", (_label, extra) => {
+    const out = sanitizeTiptapDoc(
+      doc({ type: "image", attrs: { src: "/a.png", ...extra } }),
+      schema,
+    );
+    expect(out?.content?.[0]?.attrs).toEqual({ src: "/a.png" });
+  });
+
+  it("renders size / align as data attrs plus an inline width + margins", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "image",
+        attrs: { src: "/a.png", size: "small", align: "left", width: 640 },
+      }),
+      schema,
+    );
+    const html = generateHTML(out as never, RENDERER_BASE_EXTENSIONS);
+    expect(html).toContain('data-size="small"');
+    expect(html).toContain('data-align="left"');
+    expect(html).toContain("width: 25%");
+    expect(html).toContain("margin-right: auto");
+    // A size supersedes a stale pixel width.
+    expect(html).not.toContain('width="640"');
+  });
+
+  it("renders a legacy pixel-width image exactly as before (no style)", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "image",
+        attrs: { src: "/a.png", alt: "A", width: 320, height: 200 },
+      }),
+      schema,
+    );
+    const html = generateHTML(out as never, RENDERER_BASE_EXTENSIONS);
+    expect(html).toContain('width="320"');
+    expect(html).toContain('height="200"');
+    expect(html).not.toContain("style=");
+    expect(html).not.toContain("data-size");
+  });
+
+  it("renders the old editor's accidental 120px width as unsized", () => {
+    const out = sanitizeTiptapDoc(
+      doc({
+        type: "image",
+        attrs: { src: "/a.png", alt: "A", width: 120, height: 90 },
+      }),
+      schema,
+    );
+    // Stored JSON is untouched — only the rendered markup drops the pair.
+    expect(out?.content?.[0]?.attrs?.width).toBe(120);
+    const html = generateHTML(out as never, RENDERER_BASE_EXTENSIONS);
+    expect(html).not.toContain('width="120"');
+    expect(html).not.toContain('height="90"');
+    expect(html).not.toContain("style=");
+  });
+
   it("isSafeImageSrc refuses non-strings and blanks", () => {
     expect(isSafeImageSrc(null)).toBe(false);
     expect(isSafeImageSrc("")).toBe(false);
@@ -620,7 +687,9 @@ describe("sanitizeTiptapDoc — layout containers and button links", () => {
 
   it("renders a known link variant as button classes and a bogus one as a plain link", () => {
     const link = (variant: unknown) =>
-      text("Go", [{ type: "link", attrs: { href: "/go", variant } }]);
+      text("Go", [
+        { type: "link", attrs: { href: "https://example.com/go", variant } },
+      ]);
     const out = sanitizeTiptapDoc(
       doc(
         para(link("solid")),
@@ -640,7 +709,7 @@ describe("sanitizeTiptapDoc — layout containers and button links", () => {
     expect(anchors[2]).not.toContain("class=");
     expect(anchors[2]).not.toContain("data-variant");
     expect(anchors[3]).not.toContain("class=");
-    // The renderer's rel is still stamped on button links.
+    // The renderer's rel is still stamped on (external) button links.
     expect(anchors[0]).toContain('rel="noopener noreferrer nofollow"');
     expect(html).not.toContain("evil");
   });

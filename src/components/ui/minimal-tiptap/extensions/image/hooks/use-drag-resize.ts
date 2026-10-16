@@ -1,171 +1,145 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-type ResizeDirection = "left" | "right";
-export type ElementDimensions = { width: number; height: number };
+import type { ImageAlign, ImageSize } from "~/lib/tiptap/image-node";
+import { IMAGE_SIZE_PERCENT, nearestImageSize } from "~/lib/tiptap/image-node";
 
-type HookParams = {
-  initialWidth?: number;
-  initialHeight?: number;
-  contentWidth?: number;
-  contentHeight?: number;
-  gridInterval: number;
-  minWidth: number;
-  minHeight: number;
-  maxWidth: number;
-  onDimensionsChange?: (dimensions: ElementDimensions) => void;
+export type ResizeDirection = "left" | "right";
+
+/** Smallest width a drag can shrink to, as a share of the column. */
+const MIN_FRACTION = 0.12;
+
+type DragState = {
+  direction: ResizeDirection;
+  originX: number;
+  startWidth: number;
+  columnWidth: number;
 };
 
-export function useDragResize({
-  initialWidth,
-  initialHeight,
-  contentWidth,
-  contentHeight,
-  gridInterval,
-  minWidth,
-  minHeight,
-  maxWidth,
-  onDimensionsChange,
+type HookParams = {
+  /** The element whose width is being dragged (the image frame). */
+  frameRef: React.RefObject<HTMLElement | null>;
+  /**
+   * The full-width block the frame sits in (the node view wrapper), i.e.
+   * the image's own column: in a columns row that's the column, otherwise
+   * the editor body. Size presets are shares of this width.
+   */
+  columnRef: React.RefObject<HTMLElement | null>;
+  /** Centered images grow from both sides, so the pointer delta counts twice. */
+  align: ImageAlign;
+  /** Called once on release with the nearest preset. Not called on Escape. */
+  onCommit: (size: ImageSize) => void;
+};
+
+/**
+ * Drag-to-resize for rich-text images that snaps to the size presets.
+ *
+ * While dragging, the frame follows the pointer in pixels (`dragWidth`) and
+ * `previewSize` names the preset a release would pick; on release the
+ * nearest preset is committed and the pixel width is discarded, so a saved
+ * image is always "a share of its column" and adapts to columns and phones.
+ * Escape cancels the drag without writing anything.
+ */
+export function useSnapResize({
+  frameRef,
+  columnRef,
+  align,
+  onCommit,
 }: HookParams) {
-  const [dimensions, updateDimensions] = useState<ElementDimensions>({
-    width: Math.max(initialWidth ?? minWidth, minWidth),
-    height: Math.max(initialHeight ?? minHeight, minHeight),
-  });
-  const [boundaryWidth, setBoundaryWidth] = useState(Infinity);
-  const [resizeOrigin, setResizeOrigin] = useState(0);
-  const [initialDimensions, setInitialDimensions] = useState(dimensions);
-  const [resizeDirection, setResizeDirection] = useState<
-    ResizeDirection | undefined
-  >();
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const [dragWidth, setDragWidth] = useState<number | null>(null);
+  const dragWidthRef = useRef<number | null>(null);
+  const onCommitRef = useRef(onCommit);
+  onCommitRef.current = onCommit;
 
-  const widthConstraint = useCallback(
-    (proposedWidth: number, maxAllowedWidth: number) => {
-      const effectiveMinWidth = Math.max(
-        minWidth,
-        Math.min(
-          contentWidth ?? minWidth,
-          (gridInterval / 100) * maxAllowedWidth,
-        ),
-      );
-      return Math.min(
-        maxAllowedWidth,
-        Math.max(proposedWidth, effectiveMinWidth),
-      );
-    },
-    [gridInterval, contentWidth, minWidth],
-  );
+  const reset = useCallback(() => {
+    setDrag(null);
+    setDragWidth(null);
+    dragWidthRef.current = null;
+  }, []);
 
-  const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
-      event.preventDefault();
-      const movementDelta =
-        (resizeDirection === "left"
-          ? resizeOrigin - event.pageX
-          : event.pageX - resizeOrigin) * 2;
-      const gridUnitWidth = (gridInterval / 100) * boundaryWidth;
-      const proposedWidth = initialDimensions.width + movementDelta;
-      const alignedWidth =
-        Math.round(proposedWidth / gridUnitWidth) * gridUnitWidth;
-      const finalWidth = widthConstraint(alignedWidth, boundaryWidth);
-      const aspectRatio =
-        contentHeight && contentWidth ? contentHeight / contentWidth : 1;
-
-      updateDimensions({
-        width: Math.max(finalWidth, minWidth),
-        height: Math.max(
-          contentWidth
-            ? finalWidth * aspectRatio
-            : (contentHeight ?? minHeight),
-          minHeight,
-        ),
-      });
-    },
-    [
-      widthConstraint,
-      resizeDirection,
-      boundaryWidth,
-      resizeOrigin,
-      gridInterval,
-      contentHeight,
-      contentWidth,
-      initialDimensions.width,
-      minWidth,
-      minHeight,
-    ],
-  );
-
-  const handlePointerUp = useCallback(
-    (event: PointerEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      setResizeOrigin(0);
-      setResizeDirection(undefined);
-      onDimensionsChange?.(dimensions);
-    },
-    [onDimensionsChange, dimensions],
-  );
-
-  const handleKeydown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        updateDimensions({
-          width: Math.max(initialDimensions.width, minWidth),
-          height: Math.max(initialDimensions.height, minHeight),
-        });
-        setResizeDirection(undefined);
-      }
-    },
-    [initialDimensions, minWidth, minHeight],
-  );
-
-  const initiateResize = useCallback(
+  const startResize = useCallback(
     (direction: ResizeDirection) =>
-      (event: React.PointerEvent<HTMLDivElement>) => {
+      (event: React.PointerEvent<HTMLElement>) => {
         event.preventDefault();
         event.stopPropagation();
-
-        setBoundaryWidth(maxWidth);
-        setInitialDimensions({
-          width: Math.max(
-            widthConstraint(dimensions.width, maxWidth),
-            minWidth,
-          ),
-          height: Math.max(dimensions.height, minHeight),
+        const frame = frameRef.current;
+        const column = columnRef.current;
+        if (!frame || !column) return;
+        const columnWidth = column.getBoundingClientRect().width;
+        const startWidth = frame.getBoundingClientRect().width;
+        if (columnWidth <= 0) return;
+        dragWidthRef.current = startWidth;
+        setDragWidth(startWidth);
+        setDrag({
+          direction,
+          originX: event.clientX,
+          startWidth,
+          columnWidth,
         });
-        setResizeOrigin(event.pageX);
-        setResizeDirection(direction);
       },
-    [
-      maxWidth,
-      widthConstraint,
-      dimensions.width,
-      dimensions.height,
-      minWidth,
-      minHeight,
-    ],
+    [frameRef, columnRef],
   );
 
   useEffect(() => {
-    if (resizeDirection) {
-      document.addEventListener("keydown", handleKeydown);
-      document.addEventListener("pointermove", handlePointerMove);
-      document.addEventListener("pointerup", handlePointerUp);
+    if (!drag) return;
+    const factor = align === "center" ? 2 : 1;
 
-      return () => {
-        document.removeEventListener("keydown", handleKeydown);
-        document.removeEventListener("pointermove", handlePointerMove);
-        document.removeEventListener("pointerup", handlePointerUp);
-      };
-    }
-  }, [resizeDirection, handleKeydown, handlePointerMove, handlePointerUp]);
+    const handleMove = (event: PointerEvent) => {
+      event.preventDefault();
+      const delta =
+        drag.direction === "right"
+          ? event.clientX - drag.originX
+          : drag.originX - event.clientX;
+      const next = Math.min(
+        drag.columnWidth,
+        Math.max(
+          drag.columnWidth * MIN_FRACTION,
+          drag.startWidth + delta * factor,
+        ),
+      );
+      dragWidthRef.current = next;
+      setDragWidth(next);
+    };
+
+    const handleUp = (event: PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const width = dragWidthRef.current;
+      reset();
+      if (width == null) return;
+      onCommitRef.current(nearestImageSize((width / drag.columnWidth) * 100));
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      reset();
+    };
+
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", handleUp);
+    document.addEventListener("keydown", handleKeydown, true);
+    return () => {
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", handleUp);
+      document.removeEventListener("keydown", handleKeydown, true);
+    };
+  }, [drag, align, reset]);
+
+  const previewSize =
+    drag && dragWidth != null
+      ? nearestImageSize((dragWidth / drag.columnWidth) * 100)
+      : null;
 
   return {
-    initiateResize,
-    isResizing: !!resizeDirection,
-    updateDimensions,
-    currentWidth: Math.max(dimensions.width, minWidth),
-    currentHeight: Math.max(dimensions.height, minHeight),
+    startResize,
+    isResizing: drag !== null,
+    activeDirection: drag?.direction ?? null,
+    /** Live pixel width while dragging, else `null`. */
+    dragWidth,
+    /** The preset a release would commit, while dragging. */
+    previewSize,
+    previewPercent: previewSize ? IMAGE_SIZE_PERCENT[previewSize] : null,
   };
 }

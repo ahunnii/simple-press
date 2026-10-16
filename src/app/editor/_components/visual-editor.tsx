@@ -12,6 +12,7 @@ import type { NoteSectionPick } from "./notes-panel";
 import type { PanelVariant } from "./panel-variant";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { PreviewEditTarget } from "~/lib/preview/preview-target";
+import type { SpTextWidth } from "~/lib/sp-meta";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import {
@@ -21,8 +22,10 @@ import {
 import { PREVIEW_SOURCE } from "~/lib/preview/use-preview-bridge";
 import {
   getSpMeta,
+  getTextWidth,
   getThemeSelection,
   setSectionHidden,
+  setTextWidth,
   setThemeSelection,
   SP_META_KEY,
 } from "~/lib/sp-meta";
@@ -1338,6 +1341,26 @@ export function VisualEditor({
     [scheduleFlush, notifyEditBlocked],
   );
 
+  // ── Text width on wide pages (site-wide, any template) ──
+  const textWidth = useMemo(() => getTextWidth(fields), [fields]);
+
+  const handleTextWidthSelect = useCallback(
+    (value: SpTextWidth) => {
+      if (mutationPendingRef.current) {
+        notifyEditBlocked();
+        return;
+      }
+      // "readable" clears the stored value (the template default).
+      setFields((prev) =>
+        setTextWidth(prev, value === "readable" ? undefined : value),
+      );
+      // The width is emitted by the storefront layout (server-side) — reload.
+      refreshNeededRef.current = true;
+      scheduleFlush();
+    },
+    [scheduleFlush, notifyEditBlocked],
+  );
+
   // Patch ack from the iframe (sp:patched).
   const handlePatched = useCallback((applied: string[], missed: string[]) => {
     for (const key of applied) unackedPatchKeysRef.current.delete(key);
@@ -1453,7 +1476,7 @@ export function VisualEditor({
     ? "notes"
     : activeCmsPage && cmsPanelOpen && activeCmsId !== null
       ? "cms"
-      : themeOpen && templateTheme
+      : themeOpen
         ? "theme"
         : !themeOpen && activeSection
           ? "field"
@@ -1502,13 +1525,16 @@ export function VisualEditor({
         embedsEnabled={embedsEnabled}
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
+        mediaEnabled={mediaEnabled}
         onUploadingChange={onUploadingChange}
       />
-    ) : themeOpen && templateTheme ? (
+    ) : themeOpen ? (
       <ThemePanel
         theme={templateTheme}
         selection={themeSelection}
         onSelect={handleThemeSelect}
+        textWidth={textWidth}
+        onTextWidthSelect={handleTextWidthSelect}
         disabled={isPublishing || mutationPending}
         onClose={() => setThemeOpen(false)}
         variant={variant}
@@ -1592,7 +1618,6 @@ export function VisualEditor({
         hiddenSectionIds={hiddenSectionIds}
         onSelectSection={railHandlers.onSelectSection}
         onToggleVisibility={handleToggleVisibility}
-        hasTheme={templateTheme !== null}
         themeActive={themeOpen}
         onSelectTheme={railHandlers.onSelectTheme}
         isPlatformAdmin={isPlatformAdmin}
@@ -1638,7 +1663,7 @@ export function VisualEditor({
         : activePanel === "cms"
           ? `Edit ${titleOrUntitled(activeCmsTitle)}`
           : activePanel === "theme"
-            ? "Theme"
+            ? "Style"
             : activePanel === "field" && activeSection
               ? `Edit ${activeSection.title}`
               : "Editor";

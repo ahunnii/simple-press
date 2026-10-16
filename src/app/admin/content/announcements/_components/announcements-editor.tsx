@@ -326,6 +326,7 @@ function PopupForm({
                 output="json"
                 placeholder="Welcome to our store! Sign up for 15% off your first order…"
                 editorContentClassName="min-h-[140px] p-4"
+                mediaEnabled={mediaEnabled}
                 onUploadingChange={onUploadingChange}
               />
             )}

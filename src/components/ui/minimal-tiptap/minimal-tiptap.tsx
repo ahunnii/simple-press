@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
 import { ColumnsBubbleMenu } from "./components/bubble-menu/columns-bubble-menu";
+import { ImageBubbleMenu } from "./components/bubble-menu/image-bubble-menu";
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
 import { TableBubbleMenu } from "./components/bubble-menu/table-bubble-menu";
 import { MeasuredContainer } from "./components/measured-container";
@@ -201,6 +202,7 @@ export const MainMinimalTiptapEditor = ({
       <LinkBubbleMenu editor={providedEditor} />
       <TableBubbleMenu editor={providedEditor} />
       <ColumnsBubbleMenu editor={providedEditor} />
+      <ImageBubbleMenu editor={providedEditor} />
     </MeasuredContainer>
   );
 };
