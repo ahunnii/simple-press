@@ -142,6 +142,7 @@ import { DefaultEventsPage } from "./default/events/default-events-page";
 import { DefaultFaqPage } from "./default/faq/default-faq-page";
 import { DefaultLayout } from "./default/layout/default-layout";
 import { DefaultProductPage } from "./default/products/default-product-page";
+import { DefaultSearchPage } from "./default/search/default-search-page";
 import { DefaultServicesIndexPage } from "./default/services/default-services-index-page";
 import { DefaultProductsPage } from "./default/shop/default-shop-page";
 import { DefaultTestimonialsPage } from "./default/testimonials/default-testimonials-page";
@@ -616,6 +617,12 @@ export type TemplateComponentSet = {
    * maintenance; platform-scope always renders the shared screen.
    */
   MaintenancePage?: AnyComponent;
+  /**
+   * Optional per-template override of /search (flag `siteSearch`);
+   * defaultEntry always supplies `DefaultSearchPage`, which is built to look
+   * native in any template via the scoped `.sp-search` variables.
+   */
+  SearchPage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -653,6 +660,7 @@ const defaultEntry: TemplateComponentSet = {
   DonatePage: DefaultDonatePage,
   VideosPage: DefaultVideosPage,
   FaqPage: DefaultFaqPage,
+  SearchPage: DefaultSearchPage,
 };
 
 const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {

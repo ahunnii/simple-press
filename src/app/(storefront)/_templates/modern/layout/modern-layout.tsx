@@ -8,7 +8,10 @@ export function ModernLayout({
   children,
 }: DefaultLayoutTemplateProps) {
   return (
-    <div className="flex min-h-screen flex-col font-sans antialiased">
+    <div
+      data-sp-template-root=""
+      className="flex min-h-screen flex-col font-sans antialiased"
+    >
       {/* Skip navigation — first focusable element on every page */}
       <a
         href="#main-content"

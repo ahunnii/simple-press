@@ -17,6 +17,7 @@ import {
   externalLinkProps,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { GloveMobileAccount } from "./glove-mobile-account";
 import {
@@ -70,6 +71,7 @@ export function GloveMobileNav({
   toggleRef,
 }: GloveMobileNavProps) {
   const pathname = usePathname();
+  const siteSearch = useSiteSearch();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -266,12 +268,26 @@ export function GloveMobileNav({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
-          {isEnabled("products") ? (
+          {isEnabled("products") || siteSearch.enabled ? (
             <form
               action="/shop"
               method="get"
               role="search"
               className="glove-search mb-4"
+              // Site search on: the drawer field is a doorway to the shared
+              // dialog (tap/click, or Enter for keyboard users) — close the
+              // drawer first so its focus trap and inert background don't
+              // fight the dialog. Flag off: the plain GET form, unchanged.
+              onSubmit={(e) => {
+                if (!siteSearch.enabled) return;
+                e.preventDefault();
+                const q = new FormData(e.currentTarget).get("q");
+                onClose();
+                siteSearch.open({
+                  query: typeof q === "string" ? q : undefined,
+                  trigger: toggleRef.current,
+                });
+              }}
             >
               <label htmlFor="glove-drawer-search" className="sr-only">
                 Search for products
@@ -282,6 +298,11 @@ export function GloveMobileNav({
                 name="q"
                 placeholder="Search for products"
                 autoComplete="off"
+                onClick={() => {
+                  if (!siteSearch.enabled) return;
+                  onClose();
+                  siteSearch.open({ trigger: toggleRef.current });
+                }}
               />
               <button type="submit" aria-label="Search">
                 <Search className="size-5" aria-hidden="true" />

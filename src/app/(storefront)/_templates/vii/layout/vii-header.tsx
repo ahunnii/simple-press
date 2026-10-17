@@ -10,6 +10,7 @@ import {
   Heart,
   Menu,
   Phone,
+  Search,
   ShoppingBag,
   User,
   X,
@@ -38,6 +39,10 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import {
+  SiteSearchButton,
+  useSiteSearch,
+} from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "../index";
 import { resolveViiLocationTag } from "../shared/vii-location-tag";
@@ -63,6 +68,7 @@ export function ViiHeader({
   banner,
 }: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
+  const siteSearch = useSiteSearch();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
@@ -866,6 +872,22 @@ export function ViiHeader({
                 {links.map((link, index) => renderDesktopNavLink(link, index))}
               </nav>
 
+              {/* Site search — renders nothing unless the `siteSearch` flag is
+                  on. The wrapper carries the scroll-aware icon colour (the
+                  button inherits it) and `empty:hidden` keeps it out of the
+                  flex gap while the flag is off. From `md` only; the mobile
+                  menu carries a Search row instead. */}
+              <span
+                className="hidden empty:hidden md:inline-flex"
+                style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+              >
+                <SiteSearchButton
+                  className="-m-2 p-2"
+                  iconClassName="h-[18px] w-[18px]"
+                  strokeWidth={1.4}
+                />
+              </span>
+
               {isEnabled("customerAccounts") && (
                 <div className="hidden md:block">
                   {isPending ? (
@@ -1057,6 +1079,30 @@ export function ViiHeader({
             aria-label="Mobile navigation"
           >
             <ul className="flex flex-col">
+              {siteSearch.enabled ? (
+                <li>
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    onPointerEnter={siteSearch.prefetch}
+                    onClick={(e) => {
+                      siteSearch.open({ trigger: e.currentTarget });
+                      setMobileOpen(false);
+                    }}
+                    style={{
+                      ...mobileLinkStyle(false),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 12,
+                      cursor: "pointer",
+                      background: "transparent",
+                    }}
+                  >
+                    <Search className="h-4 w-4" aria-hidden="true" />
+                    Search
+                  </button>
+                </li>
+              ) : null}
               {links.map((link, i) => renderMobileNavLink(link, i))}
             </ul>
           </nav>

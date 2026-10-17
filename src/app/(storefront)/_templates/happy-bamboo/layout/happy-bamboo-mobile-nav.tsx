@@ -5,7 +5,7 @@ import type { Ref, RefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronDown, LogOut } from "lucide-react";
+import { ArrowRight, ChevronDown, LogOut, Search } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -22,6 +22,7 @@ import {
   isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { resolveHappyBambooNav } from "../lib/nav";
 import { HappyBambooSocialIcons } from "./happy-bamboo-social-icons";
@@ -236,6 +237,7 @@ function MobileMenuPanel({
   headerRef,
 }: MobileMenuPanelProps) {
   const reduceMotion = useReducedMotion();
+  const siteSearch = useSiteSearch();
 
   // The panel can't be `position: fixed` — the header's backdrop-blur makes
   // it the containing block for fixed children — so it's absolutely placed
@@ -332,6 +334,35 @@ function MobileMenuPanel({
       <div className="flex min-h-full flex-col px-6 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
         <nav aria-label="Mobile navigation">
           <ul className="flex flex-col">
+            {/* Search — first row; phones have no room for a top-bar icon.
+                Closes the panel (its inert/scroll lock would fight the
+                dialog), then opens search. Nothing unless `siteSearch` is on. */}
+            {siteSearch.enabled && (
+              <motion.li
+                custom={0}
+                variants={rowVariants}
+                className="border-b border-[var(--hb-brand)]/10"
+              >
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  onClick={(e) => {
+                    const trigger = e.currentTarget;
+                    onClose();
+                    siteSearch.open({ trigger });
+                  }}
+                  onPointerEnter={siteSearch.prefetch}
+                  className={cn(
+                    "group flex min-h-16 w-full cursor-pointer items-center gap-3 py-4 text-left font-serif text-3xl leading-tight transition-colors",
+                    focusRing,
+                    "text-foreground hover:text-[var(--hb-brand-deep)]",
+                  )}
+                >
+                  <Search aria-hidden="true" className="size-6 shrink-0" />
+                  <span className="font-serif">Search</span>
+                </button>
+              </motion.li>
+            )}
             {links.map((link, i) => {
               if (link.children?.length) {
                 const active = isNavItemActive(pathname, link);

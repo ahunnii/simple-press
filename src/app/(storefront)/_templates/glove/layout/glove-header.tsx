@@ -23,6 +23,7 @@ import {
   navGroupEntries,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { GloveAccountMenu } from "./glove-account-menu";
 import { GloveCartDrawer } from "./glove-cart-drawer";
@@ -63,6 +64,9 @@ export function GloveHeader({
 }: GloveHeaderProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
+  // Site search (flag `siteSearch`): when on, both search icons open the shared
+  // dialog instead of the inline `/shop` form row below.
+  const siteSearch = useSiteSearch();
   const { data: session, isPending } = useHydratedSession(initialSession);
   const { itemCount, subtotal, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
@@ -115,6 +119,25 @@ export function GloveHeader({
   const toggleSearch = (opener: HTMLButtonElement | null) => {
     searchOpenerRef.current = opener;
     setSearchOpen((o) => !o);
+  };
+
+  // The icon shows with products (inline /shop form) or with site search,
+  // which also covers services-only stores.
+  const showSearchToggle = productsEnabled || siteSearch.enabled;
+  const searchToggleLabel = siteSearch.enabled
+    ? "Search"
+    : searchOpen
+      ? "Close search"
+      : "Search products";
+  const onSearchToggle = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    ref: React.RefObject<HTMLButtonElement | null>,
+  ) => {
+    if (siteSearch.enabled) {
+      siteSearch.open({ trigger: e.currentTarget });
+      return;
+    }
+    toggleSearch(ref.current);
   };
 
   const searchForm = (
@@ -215,14 +238,18 @@ export function GloveHeader({
           )}
 
           <div className="flex shrink-0 items-center gap-2 xl:gap-3">
-            {productsEnabled ? (
+            {showSearchToggle ? (
               <button
                 ref={desktopSearchToggleRef}
                 type="button"
-                aria-label={searchOpen ? "Close search" : "Search products"}
-                aria-expanded={searchOpen}
-                aria-controls="glove-search-row"
-                onClick={() => toggleSearch(desktopSearchToggleRef.current)}
+                aria-label={searchToggleLabel}
+                aria-expanded={siteSearch.enabled ? undefined : searchOpen}
+                aria-controls={
+                  siteSearch.enabled ? undefined : "glove-search-row"
+                }
+                aria-haspopup={siteSearch.enabled ? "dialog" : undefined}
+                onClick={(e) => onSearchToggle(e, desktopSearchToggleRef)}
+                onPointerEnter={siteSearch.prefetch}
                 className="glove-icon-btn"
               >
                 <Search className="size-6" aria-hidden="true" />
@@ -283,14 +310,18 @@ export function GloveHeader({
             />
           </Link>
           <div className="flex items-center justify-end">
-            {productsEnabled ? (
+            {showSearchToggle ? (
               <button
                 ref={mobileSearchToggleRef}
                 type="button"
-                aria-label={searchOpen ? "Close search" : "Search products"}
-                aria-expanded={searchOpen}
-                aria-controls="glove-search-row"
-                onClick={() => toggleSearch(mobileSearchToggleRef.current)}
+                aria-label={searchToggleLabel}
+                aria-expanded={siteSearch.enabled ? undefined : searchOpen}
+                aria-controls={
+                  siteSearch.enabled ? undefined : "glove-search-row"
+                }
+                aria-haspopup={siteSearch.enabled ? "dialog" : undefined}
+                onClick={(e) => onSearchToggle(e, mobileSearchToggleRef)}
+                onPointerEnter={siteSearch.prefetch}
                 className="glove-icon-btn"
               >
                 <Search className="size-6" aria-hidden="true" />

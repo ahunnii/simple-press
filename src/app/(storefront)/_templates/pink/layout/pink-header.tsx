@@ -25,6 +25,7 @@ import {
   getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
@@ -260,6 +261,14 @@ export function PinkHeader({
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* Renders nothing unless the `siteSearch` flag is on. From `lg`
+                only, like the account + wishlist icons; below that the mobile
+                menu carries a Search row. */}
+            <SiteSearchButton
+              className="relative hidden size-6 text-(color:--pink-ink) lg:inline-flex"
+              iconClassName="h-[18px] w-[18px]"
+            />
+
             {isEnabled("customerAccounts") && (
               <div className="hidden lg:block">
                 {isPending ? (

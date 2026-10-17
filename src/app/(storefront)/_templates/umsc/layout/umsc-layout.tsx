@@ -81,6 +81,7 @@ export async function UmscLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontSerif.variable} ${fontSans.variable} umsc flex min-h-screen flex-col`}
       style={themeVars ?? undefined}
     >

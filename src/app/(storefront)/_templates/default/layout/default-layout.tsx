@@ -35,6 +35,7 @@ export async function DefaultLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${inter.variable} ${poppins.variable} default-template flex min-h-screen flex-col`}
       style={themeVars ?? undefined}
     >

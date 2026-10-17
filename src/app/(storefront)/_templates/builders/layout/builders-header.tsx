@@ -39,6 +39,7 @@ import {
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 const MOBILE_MENU_ID = "builders-mobile-menu";
 
@@ -401,6 +402,18 @@ export function BuildersHeader({
 
           {/* Right actions */}
           <div className="flex items-center gap-4">
+            {/* Search — all widths (same compact 18px glyph as wishlist/cart,
+                so the phone bar still fits brand + 3 icons + burger).
+                Renders nothing unless the `siteSearch` flag is on. */}
+            <SiteSearchButton
+              className={cn(
+                "relative -m-3 p-3 transition-opacity hover:opacity-60",
+                solid ? "text-gray-700" : "text-white",
+              )}
+              iconClassName="h-[18px] w-[18px]"
+              strokeWidth={1.4}
+            />
+
             {/* Desktop auth */}
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:flex md:items-center md:gap-4">

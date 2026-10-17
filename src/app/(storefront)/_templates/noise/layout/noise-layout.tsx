@@ -63,6 +63,7 @@ export async function NoiseLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} noise visual-noise dark:noise`}
       style={{ color: "var(--vn-ink)" }}
     >

@@ -94,6 +94,7 @@ export async function CoopLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className="coop default-template flex min-h-screen flex-col"
       style={themeVars ?? undefined}
     >

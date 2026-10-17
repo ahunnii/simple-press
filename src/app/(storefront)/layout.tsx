@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
 import { getTextWidth, textWidthCssValue } from "~/lib/sp-meta";
 import { api, HydrateClient } from "~/trpc/server";
@@ -14,6 +15,8 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { CartRevalidator } from "./_components/cart-revalidator";
+import { resolveSearchPopular } from "./_components/search/popular";
+import { SiteSearchProvider } from "./_components/search/site-search-context";
 import { getTemplate } from "./_templates/registry";
 
 type Props = {
@@ -58,6 +61,17 @@ export default async function StorefrontLayout({ children }: Props) {
     getTextWidth(business.siteContent?.customFields),
   );
 
+  // Site search (flag `siteSearch`): the provider owns the dialog + global
+  // shortcuts once per page; a pass-through when the flag is off. Chips are
+  // only resolved when it is on.
+  const flags = resolveFlags(business.featureFlags);
+  const searchPopular = flags.isEnabled("siteSearch")
+    ? resolveSearchPopular(
+        business.siteContent?.navigationItems,
+        flags.isEnabled,
+      )
+    : [];
+
   return (
     <HydrateClient>
       <StorefrontFlagsProvider flags={business.featureFlags}>
@@ -67,9 +81,11 @@ export default async function StorefrontLayout({ children }: Props) {
         {gate.showPreviewBar ? (
           <MaintenancePreviewBar mode="leave" variant={gate.variant} />
         ) : null}
-        <t.Layout business={business}>
-          <>{children}</>
-        </t.Layout>
+        <SiteSearchProvider popular={searchPopular}>
+          <t.Layout business={business}>
+            <>{children}</>
+          </t.Layout>
+        </SiteSearchProvider>
         <CartRevalidator />
         <PreviewOverlay />
         <PreviewFieldPatcher />

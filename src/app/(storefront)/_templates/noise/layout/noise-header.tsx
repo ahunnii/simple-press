@@ -51,6 +51,7 @@ import {
   getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveNoiseCartCopy } from "../cart-checkout/noise-cart-copy";
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
@@ -777,6 +778,15 @@ export function NoiseHeader({
                 )}
               </nav>
             ) : null}
+
+            {/* Renders nothing unless the `siteSearch` flag is on. On phones the
+                negative margin tightens the icon row so three icons still fit
+                beside the wordmark at 375px. */}
+            <SiteSearchButton
+              className="relative -m-3 p-3 text-(color:--vn-ink-soft) transition-opacity hover:opacity-60 max-md:-mx-[18px]"
+              iconClassName="h-[18px] w-[18px]"
+              strokeWidth={1.4}
+            />
 
             {accountsEnabled && (
               <div className="hidden md:block">

@@ -87,6 +87,7 @@ export async function RelocationLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={cn(
         fontBody.variable,
         "relocation default-template flex min-h-screen flex-col",

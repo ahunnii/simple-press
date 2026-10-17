@@ -7,6 +7,7 @@ import {
   buildOrganizationSchema,
   buildProductSchema,
   buildVideoObjectSchema,
+  buildWebSiteSchema,
 } from "./structured-data";
 
 const business = {
@@ -1028,5 +1029,29 @@ describe("buildOrganizationSchema — return policy", () => {
       buildOrganizationSchema(business, { returnPolicy })
         .hasMerchantReturnPolicy,
     ).toEqual(returnPolicy);
+  });
+});
+
+describe("buildWebSiteSchema — SearchAction", () => {
+  it("omits potentialAction by default (site search off)", () => {
+    expect(buildWebSiteSchema(business)).not.toHaveProperty("potentialAction");
+    expect(
+      buildWebSiteSchema(business, { siteSearch: false }),
+    ).not.toHaveProperty("potentialAction");
+  });
+
+  it("emits a /search SearchAction when site search is on", () => {
+    const schema = buildWebSiteSchema(
+      { ...business, customDomain: "shop.example.com", domainStatus: "ACTIVE" },
+      { siteSearch: true },
+    );
+    expect(schema.potentialAction).toEqual({
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://shop.example.com/search?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    });
   });
 });

@@ -65,6 +65,7 @@ export async function WealthLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontTitilliumWeb.variable} ${fontJost.variable} ${fontPTSans.variable} ${fontRobotoMono.variable} wealth flex min-h-screen flex-col`}
       style={{ fontFamily: "var(--font-wealth-body)", ...themeVars }}
     >

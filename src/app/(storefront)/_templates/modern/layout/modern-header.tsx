@@ -31,6 +31,7 @@ import {
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 /** Icons for the `UserButton` menu, keyed by `getQuickAccountNavLinks` key. */
 const ACCOUNT_LINK_ICONS: Record<string, React.ReactNode> = {
@@ -309,6 +310,12 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Renders nothing unless the `siteSearch` flag is on. */}
+            <SiteSearchButton
+              className="text-foreground hover:text-muted-foreground relative transition-colors"
+              iconClassName="h-5 w-5"
+            />
+
             {isEnabled("wishlist") && (
               <Link
                 href="/wishlist"

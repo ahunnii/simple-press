@@ -9,6 +9,7 @@ import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { donateLinkOptions } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { CoopMobileMenu } from "./coop-mobile-menu";
@@ -106,6 +107,13 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
           </div>
 
           <div className="flex max-w-full min-w-0 grow items-center justify-end text-right">
+            {/* No cart/account icons in this header — search sits beside the
+                burger. Renders nothing unless `siteSearch` is on. */}
+            <SiteSearchButton
+              className="min-w-0 shrink-0 p-2 leading-0"
+              iconClassName="h-5 w-5"
+              strokeWidth={2}
+            />
             <button
               ref={hamburgerRef}
               type="button"
@@ -204,6 +212,13 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
                     {donate.label}
                   </Link>
                 )}
+                {/* Icon after the text links; renders nothing unless the
+                    `siteSearch` flag is on. */}
+                <SiteSearchButton
+                  className={`mx-[0.5375rem] cursor-pointer py-[0.5375rem] align-middle ${navLinkColorClass}`}
+                  iconClassName="h-4 w-4"
+                  strokeWidth={2}
+                />
               </div>
             </nav>
           </div>

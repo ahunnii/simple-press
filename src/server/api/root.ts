@@ -47,6 +47,7 @@ import { reviewRouter } from "./routers/review";
 import { searchRouter } from "./routers/search";
 import { serviceRouter } from "./routers/service";
 import { shippingRouter } from "./routers/shipping";
+import { storefrontSearchRouter } from "./routers/storefront-search";
 import { subscriptionRouter } from "./routers/subscription";
 import { teamRouter } from "./routers/team";
 import { testimonialRouter } from "./routers/testimonials";
@@ -115,6 +116,7 @@ export const appRouter = createTRPCRouter({
 
   upload: uploadRouter,
   search: searchRouter,
+  storefrontSearch: storefrontSearchRouter,
   legal: legalRouter,
   loyalty: loyaltyRouter,
 });

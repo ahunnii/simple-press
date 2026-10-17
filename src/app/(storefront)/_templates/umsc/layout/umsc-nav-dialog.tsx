@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Heart, Phone, X } from "lucide-react";
+import { ChevronDown, Heart, Phone, Search, X } from "lucide-react";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
@@ -13,6 +13,7 @@ import {
   externalLinkProps,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { UmscButton } from "../shared/umsc-button";
 import { umscTelHref } from "../shared/umsc-contact-details";
@@ -91,6 +92,7 @@ export function UmscNavDialog({
 }: Props) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
+  const siteSearch = useSiteSearch();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
@@ -241,6 +243,26 @@ export function UmscNavDialog({
 
       <nav className="flex-1 px-6 py-2" aria-label="Mobile navigation">
         <ul className="flex flex-col">
+          {/* Site search (flag `siteSearch`) — the phone entry point; the
+              header icon only shows from 960px. Closes the sheet, then opens
+              the dialog. */}
+          {siteSearch.enabled ? (
+            <li className="border-b border-[var(--umsc-line-gold)]">
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onPointerEnter={siteSearch.prefetch}
+                onClick={(e) => {
+                  siteSearch.open({ trigger: e.currentTarget });
+                  onClose();
+                }}
+                className="umsc-serif flex w-full items-center justify-between py-5 text-[30px] text-[var(--umsc-cream-on-black)]"
+              >
+                Search
+                <Search className="size-6" aria-hidden="true" />
+              </button>
+            </li>
+          ) : null}
           {links.map((item, i) => {
             const current = i === activeIndex;
 

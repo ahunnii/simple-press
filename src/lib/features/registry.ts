@@ -185,6 +185,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  siteSearch: {
+    key: "siteSearch",
+    label: "Site search",
+    description:
+      "A search box in your site header and a search results page that finds your products, services, pages, posts, events, and FAQs.",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
   videos: {
     key: "videos",
     label: "Videos",

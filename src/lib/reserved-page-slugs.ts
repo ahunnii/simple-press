@@ -40,6 +40,7 @@ const ROUTE_SLUG_LABELS: Readonly<Record<string, string | null>> = {
   faq: "FAQ page",
   order: null,
   "order-status": "Order Status page",
+  search: "Search page",
   services: "Services page",
   shop: "Shop",
   subscribe: null,

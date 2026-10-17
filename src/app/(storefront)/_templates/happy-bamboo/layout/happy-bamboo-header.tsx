@@ -28,6 +28,7 @@ import {
   isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
@@ -334,6 +335,13 @@ export function HappyBambooHeader({
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
+            {/* md+ only: the phone bar is already logo + account + wishlist +
+                cart + burger, so phones get a Search row at the top of the
+                drop-down menu. Renders nothing unless `siteSearch` is on. */}
+            <SiteSearchButton
+              className="text-background hover:bg-background/10 relative hidden size-9 rounded-md transition-all outline-none hover:text-[var(--hb-gold)] focus-visible:ring-[3px] focus-visible:ring-[var(--hb-gold)] md:inline-flex"
+              iconClassName="h-5 w-5"
+            />
             {isEnabled("customerAccounts") && (
               <>
                 {isPending ? (

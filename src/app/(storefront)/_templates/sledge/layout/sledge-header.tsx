@@ -15,6 +15,7 @@ import {
   Heart,
   Menu,
   Package,
+  Search,
   Settings,
   ShoppingBag,
   User,
@@ -41,6 +42,10 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import {
+  SiteSearchButton,
+  useSiteSearch,
+} from "~/app/(storefront)/_components/search";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -237,6 +242,7 @@ export function SledgeHeader({
   });
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
+  const siteSearch = useSiteSearch();
 
   // Mobile bottom tiles that survive their flag gates (cart / wishlist /
   // account) — the grid sizes to them and the strip hides when none remain.
@@ -609,6 +615,16 @@ export function SledgeHeader({
               })}
             </nav>
 
+            {/* Site search — renders nothing unless the `siteSearch` flag is
+                on. From `md` only: below that the right cluster is a 72px
+                slot beside the centred logo, so the mobile menu carries a
+                Search row instead. */}
+            <SiteSearchButton
+              className="hidden text-white/80 transition-opacity hover:opacity-70 md:inline-flex"
+              iconClassName="h-[25px] w-[25px]"
+              strokeWidth={1.4}
+            />
+
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:block">
                 {isPending ? (
@@ -732,6 +748,23 @@ export function SledgeHeader({
                 exit="closed"
                 variants={mobileNavListVariants}
               >
+                {siteSearch.enabled ? (
+                  <motion.div variants={mobileNavItemVariants}>
+                    <button
+                      type="button"
+                      aria-haspopup="dialog"
+                      onPointerEnter={siteSearch.prefetch}
+                      onClick={(e) => {
+                        siteSearch.open({ trigger: e.currentTarget });
+                        closeMobileMenu();
+                      }}
+                      className="font-heading sl-nav-inactive flex w-full items-center gap-3 border-b border-white/10 py-4 text-3xl transition-colors sm:text-4xl"
+                    >
+                      <Search className="h-6 w-6" aria-hidden="true" />
+                      Search
+                    </button>
+                  </motion.div>
+                ) : null}
                 {navItems.map((link, i) => renderMobileNavLink(link, i))}
               </motion.nav>
 

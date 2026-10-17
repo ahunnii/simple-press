@@ -39,6 +39,7 @@ import {
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
@@ -76,6 +77,9 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const router = useRouter();
   const dd = useNavDropdown(pathname, "el-nav");
+  // Site search (flag `siteSearch`): when on, the search icon opens the shared
+  // dialog instead of expanding the inline `/shop?q=` field below.
+  const siteSearch = useSiteSearch();
   // Mobile accordion: one group open at a time; reset to the group holding the
   // current route each time the menu opens.
   const [mobileExpanded, setMobileExpanded] = useState<number | null>(null);
@@ -547,8 +551,16 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               ) : (
                 <button
                   type="button"
-                  onClick={openSearch}
-                  aria-label="Search products"
+                  onClick={(e) => {
+                    if (siteSearch.enabled) {
+                      siteSearch.open({ trigger: e.currentTarget });
+                      return;
+                    }
+                    openSearch();
+                  }}
+                  onPointerEnter={siteSearch.prefetch}
+                  aria-haspopup={siteSearch.enabled ? "dialog" : undefined}
+                  aria-label={siteSearch.enabled ? "Search" : "Search products"}
                   style={iconBtnStyle}
                   className="el-icon-btn"
                 >

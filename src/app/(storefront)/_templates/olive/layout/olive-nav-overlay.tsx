@@ -15,6 +15,7 @@ import {
   externalLinkProps,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
@@ -96,6 +97,9 @@ export function OliveNavOverlay({
 }: OliveNavOverlayProps) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
+  // Site search (flag `siteSearch`): the utility icon opens the dialog
+  // instead of linking to /shop; flag off ⇒ unchanged.
+  const siteSearch = useSiteSearch();
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -475,12 +479,18 @@ export function OliveNavOverlay({
         style={{ borderTop: "1px solid var(--olive-hairline)" }}
       >
         <div className="flex items-center gap-1">
-          {productsEnabled ? (
+          {productsEnabled || siteSearch.enabled ? (
             <Link
               href="/shop"
-              onClick={onClose}
+              onClick={(e) => {
+                if (siteSearch.enabled) {
+                  e.preventDefault();
+                  siteSearch.open({ trigger: e.currentTarget });
+                }
+                onClose();
+              }}
               className="olive-icon-btn"
-              aria-label="Search products"
+              aria-label={siteSearch.enabled ? "Search" : "Search products"}
             >
               <Search
                 className="h-[18px] w-[18px]"

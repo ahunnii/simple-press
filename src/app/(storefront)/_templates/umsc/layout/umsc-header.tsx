@@ -45,6 +45,7 @@ import {
   navGroupEntries,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "../index";
 import { resolveUmscContactDetails } from "../shared/umsc-contact-details";
@@ -451,6 +452,16 @@ export function UmscHeader({
           ) : null}
 
           <div className="flex items-center gap-5">
+            {/* Renders nothing unless the `siteSearch` flag is on. From 960px
+                only, like the account + wishlist icons; below that the nav
+                dialog carries a Search row (the bar has no room beside the
+                brand + cart). */}
+            <SiteSearchButton
+              className="relative -m-2 hidden p-2 text-[var(--umsc-cream)] min-[960px]:flex"
+              iconClassName="size-[18px]"
+              strokeWidth={1.5}
+            />
+
             {accountsEnabled && (
               <div className="hidden min-[960px]:block">
                 {isPending ? (
