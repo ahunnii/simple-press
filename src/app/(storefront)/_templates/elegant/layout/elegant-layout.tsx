@@ -38,6 +38,7 @@ export async function ElegantLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontSerif.variable} ${fontSans.variable} ${fontMono.variable} elegant min-h-screen`}
       style={{
         background: "var(--el-cream, #f5f1ea)",

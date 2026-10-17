@@ -35,6 +35,7 @@ export async function HappyBambooLayout({
   );
   return (
     <main
+      data-sp-template-root=""
       className={`${fontSans.variable} ${fontSerif.variable} happy-bamboo dark:happy-bamboo`}
       style={themeVars ?? undefined}
     >

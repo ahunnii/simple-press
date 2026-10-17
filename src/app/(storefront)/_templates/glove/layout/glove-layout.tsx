@@ -60,6 +60,7 @@ export async function GloveLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontDisplay.variable} ${fontBody.variable} glove flex min-h-screen flex-col`}
       style={themeVars ?? undefined}
     >

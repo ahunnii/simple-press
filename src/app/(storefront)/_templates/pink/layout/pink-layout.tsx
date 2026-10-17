@@ -69,6 +69,7 @@ export async function PinkLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${PINK_SCOPE_CLASS} flex min-h-screen flex-col`}
       style={themeVars ?? undefined}
     >

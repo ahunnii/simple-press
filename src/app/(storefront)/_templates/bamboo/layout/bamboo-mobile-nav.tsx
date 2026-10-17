@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Heart } from "lucide-react";
+import { ChevronDown, Heart, Search } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { NavItem } from "~/app/(storefront)/_components/nav";
@@ -31,6 +31,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { BambooLeafSprig } from "../shared/bamboo-leaf-sprig";
 import { BambooNavSheetAccount } from "./bamboo-nav-sheet-account";
@@ -122,6 +123,7 @@ export function BambooMobileNav({
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const { count: wishlistCount } = useWishlist();
   const { isEnabled } = useStorefrontFlags();
+  const siteSearch = useSiteSearch();
   const socialLinks = readBambooSocialLinks(business?.siteContent?.socialLinks);
 
   // The sheet portals to document.body by default, which escapes the .bamboo
@@ -257,7 +259,7 @@ export function BambooMobileNav({
                 <span className="sr-only">{businessName}</span>
               </>
             ) : (
-              <span className="font-heading uppercase tracking-[0.18em]">
+              <span className="font-heading tracking-[0.18em] uppercase">
                 {businessName}
               </span>
             )}
@@ -273,6 +275,29 @@ export function BambooMobileNav({
           className="flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8"
           aria-label="Mobile navigation"
         >
+          {/* Search row — first in the menu; the phone top bar has no room
+              for an icon. Closes the sheet, then opens the search dialog.
+              Renders nothing unless the `siteSearch` flag is on. */}
+          {siteSearch.enabled && (
+            <div className="border-b border-[var(--bam-gold-soft)]/25 pb-2">
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={(e) => {
+                  const trigger = e.currentTarget;
+                  onOpenChange(false);
+                  siteSearch.open({ trigger });
+                }}
+                onPointerEnter={siteSearch.prefetch}
+                style={fadeUpStyle(0)}
+                className="bamboo-mobile-nav-item flex w-full cursor-pointer items-center gap-2.5 py-3 text-left text-lg text-[var(--bam-cream)] transition-colors hover:text-[var(--bam-gold-soft)]"
+              >
+                <Search className="size-4" aria-hidden="true" />
+                <span>Search</span>
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col">
             {links.map((link, i) => {
               if (link.children?.length) {

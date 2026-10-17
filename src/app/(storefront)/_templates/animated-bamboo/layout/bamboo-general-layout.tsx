@@ -24,6 +24,7 @@ export function BambooLayout({
 }: DefaultLayoutTemplateProps) {
   return (
     <div
+      data-sp-template-root=""
       className={cn(
         display.variable,
         body.variable,

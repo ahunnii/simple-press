@@ -40,6 +40,7 @@ import {
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 const externalHint = <span className="sr-only"> (opens in new tab)</span>;
 
@@ -84,6 +85,9 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const searchButtonRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const dd = useNavDropdown(pathname, "dark-trend-nav");
+  // Site search (flag `siteSearch`): when on, the search icon opens the
+  // shared dialog instead of this header's inline `/shop?q=` row.
+  const siteSearch = useSiteSearch();
 
   // Auto-focus the search input when the search row opens
   useEffect(() => {
@@ -321,10 +325,24 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           <button
             ref={searchButtonRef}
             type="button"
-            onClick={() => setSearchOpen(!searchOpen)}
-            aria-label={searchOpen ? "Close search" : "Search products"}
-            aria-expanded={searchOpen}
-            aria-controls="header-search"
+            onClick={(e) => {
+              if (siteSearch.enabled) {
+                siteSearch.open({ trigger: e.currentTarget });
+                return;
+              }
+              setSearchOpen(!searchOpen);
+            }}
+            onPointerEnter={siteSearch.prefetch}
+            aria-label={
+              siteSearch.enabled
+                ? "Search"
+                : searchOpen
+                  ? "Close search"
+                  : "Search products"
+            }
+            aria-haspopup={siteSearch.enabled ? "dialog" : undefined}
+            aria-expanded={siteSearch.enabled ? undefined : searchOpen}
+            aria-controls={siteSearch.enabled ? undefined : "header-search"}
             className="-m-3 p-3 text-white/90 transition-colors hover:text-white"
           >
             <Search aria-hidden="true" className="h-5 w-5" />

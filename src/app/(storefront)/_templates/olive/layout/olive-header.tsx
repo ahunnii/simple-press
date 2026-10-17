@@ -27,6 +27,7 @@ import {
   getQuickAccountNavLinks,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
@@ -86,6 +87,9 @@ export function OliveHeader({
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   const productsEnabled = isEnabled("products");
+  // Site search (flag `siteSearch`): the existing icon opens the dialog.
+  // Flag off ⇒ it is the same "Search products" link as before.
+  const siteSearch = useSiteSearch();
   const collectionsEnabled = isEnabled("collections");
   // `cart` depends on `products`, so this is off whenever products is.
   const cartEnabled = isEnabled("cart");
@@ -480,11 +484,19 @@ export function OliveHeader({
 
           {/* ── Right: search, account, wishlist, bag ── */}
           <div className="flex items-center justify-end">
-            {productsEnabled ? (
+            {productsEnabled || siteSearch.enabled ? (
               <Link
                 href="/shop"
                 className="olive-icon-btn olive-sm-hide hidden sm:inline-flex"
-                aria-label="Search products"
+                aria-label={siteSearch.enabled ? "Search" : "Search products"}
+                onClick={(e) => {
+                  if (!siteSearch.enabled) return;
+                  e.preventDefault();
+                  siteSearch.open({ trigger: e.currentTarget });
+                }}
+                onPointerEnter={
+                  siteSearch.enabled ? siteSearch.prefetch : undefined
+                }
               >
                 <Search
                   className="h-[18px] w-[18px]"

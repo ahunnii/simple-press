@@ -3,9 +3,10 @@
 import type { CSSProperties, RefObject } from "react";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import type { NavLink } from "./bamboo-header";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 
@@ -58,6 +59,7 @@ export function BambooMobileNav({
   phone,
   email,
 }: BambooMobileNavProps) {
+  const siteSearch = useSiteSearch();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
@@ -154,6 +156,16 @@ export function BambooMobileNav({
     onClose();
   };
 
+  // Search lives at the top of the menu on phones (the top bar has no room).
+  // Close the menu first — its focus trap and `inert` would otherwise fight
+  // the search dialog — and hand focus back to the burger when search closes.
+  const handleSearchClick = () => {
+    wasOpenRef.current = false;
+    const trigger = triggerRef.current;
+    onClose();
+    siteSearch.open({ trigger });
+  };
+
   // Trimmed here so a whitespace-only Settings value renders nothing rather
   // than an empty `tel:`/`mailto:` link.
   const phoneText = phone?.trim();
@@ -243,6 +255,28 @@ export function BambooMobileNav({
 
         <nav aria-label="Mobile">
           <ul className="bamboo-menu-list">
+            {siteSearch.enabled ? (
+              <li
+                className="bamboo-menu-item"
+                style={{ "--i": 0 } as CSSProperties}
+              >
+                <button
+                  type="button"
+                  onClick={handleSearchClick}
+                  aria-haspopup="dialog"
+                  className="bamboo-menu-link w-full cursor-pointer text-left"
+                >
+                  <span className="inline-flex items-center gap-3">
+                    <Search
+                      className="h-[0.8em] w-[0.8em]"
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
+                    Search
+                  </span>
+                </button>
+              </li>
+            ) : null}
             {links.map((link, i) => (
               <li
                 key={`${link.href}-${link.label}`}

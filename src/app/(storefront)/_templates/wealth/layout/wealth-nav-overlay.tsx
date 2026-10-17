@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Search } from "lucide-react";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { ResolvedSocialLink } from "~/lib/social-links";
@@ -15,6 +16,7 @@ import {
   isNavItemActive,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { wealthLedgeButtonClasses } from "../shared/wealth-ledge-button";
 import { WealthNavOverlayAccount } from "./wealth-nav-overlay-account";
@@ -75,6 +77,7 @@ export function WealthNavOverlay({
   accountsEnabled,
 }: WealthNavOverlayProps) {
   const pathname = usePathname();
+  const siteSearch = useSiteSearch();
   const { data: session, isPending } = useHydratedSession(initialSession);
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -271,8 +274,32 @@ export function WealthNavOverlay({
           )}
         </Link>
 
-        {/* Right spacer keeps the logo optically centered. */}
-        <span aria-hidden="true" />
+        {/* Right slot: the phone entry point for site search (flag
+            `siteSearch`; the header icon only shows from 1100px). Closes the
+            overlay, then opens the dialog. Otherwise a spacer keeps the logo
+            optically centered. */}
+        {siteSearch.enabled ? (
+          <button
+            type="button"
+            aria-label="Search"
+            aria-haspopup="dialog"
+            onPointerEnter={siteSearch.prefetch}
+            onClick={(e) => {
+              siteSearch.open({ trigger: e.currentTarget });
+              onClose();
+            }}
+            className="wealth-nav-overlay-line -mr-2.5 grid size-11 cursor-pointer place-items-center justify-self-end text-[var(--wealth-btn-ink)]"
+            style={{ "--i": 0 } as React.CSSProperties}
+          >
+            <Search
+              className="size-[22px]"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            />
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
       </div>
 
       {/* One scroll region for nav + account: the signed-in account block can

@@ -44,6 +44,27 @@ function isEmptyParagraph(node: JSONContent | undefined) {
   return node?.type === "paragraph" && isContentEmpty(node);
 }
 
+const PADDED_CONTAINERS = new Set(["column", "detailsContent"]);
+
+/**
+ * ContainerTrailingParagraph pads a column / collapsible body that ends in a
+ * non-paragraph (image, table, ...) with an empty paragraph, so the owner has
+ * somewhere to click. Drop that paragraph (only when it follows a
+ * non-paragraph sibling, which is the only case it is added) at any depth.
+ */
+function stripContainerPadding(node: JSONContent): JSONContent {
+  if (!Array.isArray(node.content)) return node;
+  let content = node.content.map(stripContainerPadding);
+  if (node.type && PADDED_CONTAINERS.has(node.type) && content.length >= 2) {
+    const last = content[content.length - 1];
+    const before = content[content.length - 2];
+    if (isEmptyParagraph(last) && before?.type !== "paragraph") {
+      content = content.slice(0, -1);
+    }
+  }
+  return { ...node, content };
+}
+
 function computeKey(content: unknown): string {
   if (isContentEmpty(content as TiptapJSON)) return EMPTY_KEY;
 
@@ -60,6 +81,8 @@ function computeKey(content: unknown): string {
     // Unknown node/mark for this schema — fall back to the raw JSON.
     json = content as JSONContent;
   }
+
+  json = stripContainerPadding(json);
 
   // The TrailingNode extension appends an empty paragraph after a trailing
   // heading/list/etc.; it's invisible, so it's not a change.

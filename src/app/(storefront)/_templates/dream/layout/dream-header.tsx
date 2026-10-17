@@ -26,6 +26,7 @@ import {
   navGroupEntries,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveDreamFields } from "../lib/resolve-fields";
 import { dreamCtaHref, resolveDreamNav } from "./dream-nav";
@@ -367,6 +368,15 @@ export function DreamHeader({
           </div>
 
           <div className="dream-header-cell dream-header-cell--right">
+            {/* Desktop only (this cell is display:none below 960px, where
+                the bar is already logo + pill + cart + hamburger): phones
+                get a Search row at the top of the overlay. Renders nothing
+                unless the `siteSearch` flag is on. */}
+            <SiteSearchButton
+              className="min-h-11 min-w-11 p-2 text-[var(--dream-soft)] transition-colors hover:text-[var(--dream-ink)]"
+              iconClassName="h-5 w-5"
+              strokeWidth={1.5}
+            />
             {!isPending && session?.user ? (
               <UserButton
                 size="icon"

@@ -1,7 +1,9 @@
+@import "./partials/block-handle.css";
 @import "./partials/code.css";
 @import "./partials/columns.css";
 @import "./partials/details.css";
 @import "./partials/placeholder.css";
+@import "./partials/slash-command.css";
 @import "./partials/spacer.css";
 @import "./partials/lists.css";
 @import "./partials/typography.css";
@@ -163,8 +165,30 @@
   @apply outline-muted-foreground rounded-full outline-2 outline-offset-1;
 }
 
+/* Gap cursor: the blinking caret ProseMirror shows between/around atoms
+   (images, tables, ...) where no text caret fits. Shown only while focused. */
 .minimal-tiptap-editor .ProseMirror .ProseMirror-gapcursor {
   @apply pointer-events-none absolute hidden;
+}
+
+.minimal-tiptap-editor .ProseMirror.ProseMirror-focused .ProseMirror-gapcursor {
+  @apply block;
+}
+
+.minimal-tiptap-editor .ProseMirror .ProseMirror-gapcursor::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid var(--foreground);
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
 }
 
 .minimal-tiptap-editor .ProseMirror .ProseMirror-hideselection {

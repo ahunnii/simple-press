@@ -21,6 +21,8 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
+import { resolveSearchPopular } from "./(storefront)/_components/search/popular";
+import { SiteSearchProvider } from "./(storefront)/_components/search/site-search-context";
 import { BambooHomepage as AnimatedBambooHomepage } from "./(storefront)/_templates/animated-bamboo/homepage/bamboo-homepage";
 import { BambooLayout as AnimatedBambooLayout } from "./(storefront)/_templates/animated-bamboo/layout/bamboo-general-layout";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
@@ -177,12 +179,20 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
     });
   }
 
+  // Site search (flag `siteSearch`): same provider the storefront layout
+  // mounts — the homepage renders its layout outside that route group.
+  const { isEnabled: flagEnabled } = resolveFlags(business.featureFlags);
+  const searchEnabled = flagEnabled("siteSearch");
+  const searchPopular = searchEnabled
+    ? resolveSearchPopular(business.siteContent?.navigationItems, flagEnabled)
+    : [];
+
   return (
     <HydrateClient>
       <JsonLd
         data={[
           buildOrganizationSchema(business, { returnPolicy }),
-          buildWebSiteSchema(business),
+          buildWebSiteSchema(business, { siteSearch: searchEnabled }),
           ...(parseLocalPresence(business.localPresence) !== "none"
             ? [buildLocalBusinessSchema(business)]
             : []),
@@ -192,9 +202,11 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
         {gate.showPreviewBar ? (
           <MaintenancePreviewBar mode="leave" variant={gate.variant} />
         ) : null}
-        <TemplateLayout business={business}>
-          <TemplateComponent business={business} />
-        </TemplateLayout>
+        <SiteSearchProvider popular={searchPopular}>
+          <TemplateLayout business={business}>
+            <TemplateComponent business={business} />
+          </TemplateLayout>
+        </SiteSearchProvider>
       </StorefrontFlagsProvider>
       {isPreview && <PreviewOverlay />}
     </HydrateClient>

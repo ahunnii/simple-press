@@ -29,6 +29,7 @@ export async function BuildersLayout({
 
   return (
     <div
+      data-sp-template-root=""
       // `default-template` is added alongside `builders` so that DEFAULT-TEMPLATE
       // FALLBACK pages (Shop, Cart, Checkout, Product, Blog, Account, etc. —
       // builders is a partial template; see registry.ts `builders` entry,

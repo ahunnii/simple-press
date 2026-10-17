@@ -40,6 +40,7 @@ export async function BambooLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontSans.variable} ${fontSerif.variable} bamboo bg-background relative flex min-h-screen flex-col`}
       style={themeVars ?? undefined}
     >

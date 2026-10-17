@@ -9,15 +9,14 @@ import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
-
-import { DreamAmbientController } from "../shared/dream-ambient-controller";
-import { dreamMarkUrlVar } from "../shared/dream-mark";
-import { nonBlank } from "../shared/dream-non-blank";
 import {
   donateLinkOptions,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
 
+import { DreamAmbientController } from "../shared/dream-ambient-controller";
+import { dreamMarkUrlVar } from "../shared/dream-mark";
+import { nonBlank } from "../shared/dream-non-blank";
 import { DreamFooter } from "./dream-footer";
 import { DreamHeader } from "./dream-header";
 import { resolveDreamNav } from "./dream-nav";
@@ -114,6 +113,7 @@ export async function DreamLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontItaliana.variable} ${fontParisienne.variable} ${fontMulish.variable} dream flex min-h-screen flex-col`}
       style={{
         fontFamily: "var(--font-dream-body)",

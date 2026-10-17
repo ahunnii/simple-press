@@ -23,6 +23,7 @@ import {
   VIDEO_ACCEPTED_MIME_TYPES,
   VIDEO_MAX_FILE_SIZE,
 } from "../../extensions/video";
+import { useInsertDialogState } from "../insert-dialog-context";
 import { Spinner } from "../spinner";
 import { ToolbarButton } from "../toolbar-button";
 
@@ -50,7 +51,8 @@ export const VideoInsertDialog = ({
   const maxFileSize = options?.maxFileSize ?? VIDEO_MAX_FILE_SIZE;
   const mediaEnabled = options?.mediaEnabled ?? false;
 
-  const [open, setOpen] = React.useState(false);
+  // Shared through InsertDialogContext so the "/" menu opens this dialog.
+  const [open, setOpen] = useInsertDialogState("video");
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [ambient, setAmbient] = React.useState(false);
   const [uploadingName, setUploadingName] = React.useState<string | null>(null);
@@ -60,18 +62,22 @@ export const VideoInsertDialog = ({
 
   const isUploading = uploadingName !== null;
 
+  // Start fresh each time it opens, however it was opened (toolbar or "/").
+  React.useEffect(() => {
+    if (open) {
+      setAmbient(false);
+      setError(null);
+    }
+  }, [open]);
+
   const handleOpenChange = React.useCallback(
     (next: boolean) => {
       // Keep the dialog up until the upload settles so the result always
       // has somewhere to land (and the owner sees the failure if it fails).
       if (!next && isUploading) return;
-      if (next) {
-        setAmbient(false);
-        setError(null);
-      }
       setOpen(next);
     },
-    [isUploading],
+    [isUploading, setOpen],
   );
 
   const insertVideo = React.useCallback(
@@ -113,7 +119,7 @@ export const VideoInsertDialog = ({
         });
       }
     },
-    [insertVideo, maxFileSize, uploadFn],
+    [insertVideo, maxFileSize, setOpen, uploadFn],
   );
 
   return (

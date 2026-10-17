@@ -92,6 +92,7 @@ export async function OliveLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={cn(
         fontDisplay.variable,
         fontBody.variable,

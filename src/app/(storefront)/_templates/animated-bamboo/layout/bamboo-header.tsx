@@ -21,6 +21,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooMobileNav } from "./bamboo-mobile-nav";
@@ -276,6 +277,14 @@ export function BambooHeader({
           </nav>
 
           <div className="ml-auto flex items-center gap-2 min-[901px]:ml-0">
+            {/* Desktop only: at ≤900px the top bar is full (wreath + name +
+                account/wishlist/cart/burger at 44px each), so phones get the
+                search row at the top of the menu instead. */}
+            <SiteSearchButton
+              className="bamboo-icon-btn bamboo-m-hide"
+              iconClassName="h-[18px] w-[18px]"
+              strokeWidth={1.8}
+            />
             {isEnabled("customerAccounts") &&
               (isPending ? (
                 <div className="size-11 animate-pulse rounded-full bg-[var(--bamboo-sage)]" />

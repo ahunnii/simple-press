@@ -36,6 +36,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { BambooCartDrawer } from "../cart-checkout/bamboo-cart-drawer";
@@ -774,6 +775,14 @@ export function BambooHeader({
                 />
               </>
             )}
+
+            {/* lg-only, like the account + wishlist icons — below lg the bar
+                is burger · brand · cart and the menu sheet carries a Search
+                row. Renders nothing unless the `siteSearch` flag is on. */}
+            <SiteSearchButton
+              className="focus-visible:ring-ring/50 hidden size-9 rounded-md text-[var(--bam-gold-soft)] transition-all outline-none hover:bg-[var(--bam-forest-deep)] hover:text-[var(--bam-cream)] focus-visible:ring-[3px] lg:inline-flex"
+              iconClassName="size-5"
+            />
 
             {isEnabled("customerAccounts") && (
               <>

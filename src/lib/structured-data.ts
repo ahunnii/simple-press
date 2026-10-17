@@ -445,18 +445,33 @@ export function buildOrganizationSchema(
 /**
  * Build a schema.org WebSite object for the storefront homepage.
  *
- * SearchAction is intentionally omitted — SimplePress has no storefront search
- * URL yet. It can be added once a search route exists.
+ * `potentialAction` (a SearchAction pointing at `/search?q=…`) is emitted only
+ * when the store has site search on (`options.siteSearch`, flag `siteSearch`)
+ * — with it off `/search` 404s, so advertising it would be a dead target.
+ * Defaults to off, so callers that don't pass the flag are unchanged.
  */
 export function buildWebSiteSchema(
   business: CanonicalBusiness & { name: string },
+  options: { siteSearch?: boolean } = {},
 ): Record<string, unknown> {
-  return {
+  const baseUrl = getCanonicalBaseUrl(business);
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: business.name,
-    url: getCanonicalBaseUrl(business),
+    url: baseUrl,
   };
+  if (options.siteSearch) {
+    schema.potentialAction = {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${baseUrl}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    };
+  }
+  return schema;
 }
 
 // ---------------------------------------------------------------------------

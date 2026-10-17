@@ -163,6 +163,7 @@ export function WealthNewsletter({
       <NewsletterConsentNote
         className="wealth-footer__privacy"
         privacyHref={privacyHref}
+        showRecaptcha={!fallback}
       />
     </div>
   );

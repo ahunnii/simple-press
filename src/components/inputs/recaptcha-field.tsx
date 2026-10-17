@@ -20,10 +20,21 @@ import { useRecaptchaAutoRefresh } from "~/lib/captcha/use-recaptcha-v3";
  * renders the identical text rather than keeping a second copy that can
  * drift.
  */
-export function RecaptchaDisclosure({ className }: { className?: string }) {
+export function RecaptchaDisclosure({
+  className,
+  inheritStyle = false,
+}: {
+  className?: string;
+  /**
+   * Drop the default muted color and `text-xs` size so the caller's
+   * `className` (or the surrounding template) controls them, e.g. on a dark
+   * footer where `text-muted-foreground` is illegible.
+   */
+  inheritStyle?: boolean;
+}) {
   return (
     <p
-      className={`text-muted-foreground text-xs leading-relaxed ${className ?? ""}`}
+      className={`${inheritStyle ? "" : "text-muted-foreground text-xs "}leading-relaxed ${className ?? ""}`}
     >
       This site is protected by reCAPTCHA and the Google{" "}
       <a

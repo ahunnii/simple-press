@@ -3,12 +3,13 @@
 import type { RefObject } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { Heart, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { Heart, Minus, Plus, Search, ShoppingBag, X } from "lucide-react";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
 import { cn } from "~/lib/utils";
 import { externalLinkProps } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { pinkNavEntries } from "./pink-nav";
 import { PinkNavOverlayAccount } from "./pink-nav-overlay-account";
@@ -207,8 +208,12 @@ export function PinkMobileMenu({
 
   // Cart, wishlist and accounts all off → no bottom stack at all (an empty
   // bordered band would be left behind otherwise).
+  const siteSearch = useSiteSearch();
   const hasActions =
-    basket !== null || wishlist !== null || isEnabled("customerAccounts");
+    siteSearch.enabled ||
+    basket !== null ||
+    wishlist !== null ||
+    isEnabled("customerAccounts");
 
   const topLevelStyle = (current: boolean) => ({
     fontSize: "1.5rem",
@@ -357,6 +362,24 @@ export function PinkMobileMenu({
           className="pink-dark flex flex-col gap-3 px-8 pt-6 pb-8"
           style={{ borderTop: "1px solid var(--pink-ink-line)" }}
         >
+          {/* Site search (flag `siteSearch`) — the phone entry point; the
+              header icon only shows from `lg`. Closes the menu, then opens
+              the dialog. */}
+          {siteSearch.enabled && (
+            <button
+              type="button"
+              onClick={(e) => {
+                siteSearch.open({ trigger: e.currentTarget });
+                onClose();
+              }}
+              onPointerEnter={siteSearch.prefetch}
+              aria-haspopup="dialog"
+              className="pink-btn pink-btn-ghost w-full justify-center gap-2 py-3.5"
+            >
+              <Search className="h-4 w-4" aria-hidden="true" />
+              Search
+            </button>
+          )}
           {basket && (
             <button
               type="button"

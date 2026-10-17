@@ -10,7 +10,7 @@ export type BlogSearchablePage = {
   content?: unknown;
 };
 
-function extractTiptapLikeText(node: unknown): string {
+export function extractTiptapLikeText(node: unknown): string {
   if (node === null || node === undefined) return "";
   if (typeof node !== "object") return "";
   const o = node as Record<string, unknown>;

@@ -22,6 +22,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveFields } from "..";
 import { relocationTelHref } from "../shared/relocation-phone";
@@ -316,36 +317,51 @@ export function RelocationHeader({
             )}
           </nav>
 
+          {/* Site search — renders nothing unless the `siteSearch` flag is on. */}
+          <SiteSearchButton
+            className="relocation-hover-fade size-10 text-[var(--relocation-ink)]"
+            iconClassName="h-[22px] w-[22px]"
+            strokeWidth={1.5}
+          />
+
           {accountSlot && (
             <div className="flex items-center gap-2 border-l border-[var(--relocation-border)] pl-6">
               {accountSlot}
             </div>
           )}
         </div>
-        {/* ── Hamburger — <1025px ───────────────────────────────────────── */}
-        <button
-          ref={hamburgerRef}
-          type="button"
-          aria-label="Open navigation menu"
-          aria-expanded={mobileOpen}
-          aria-controls={mobileMenuId}
-          onClick={() => setMobileOpen(true)}
-          className="relocation-hover-fade flex h-11 w-11 cursor-pointer items-center justify-center text-[var(--relocation-ink)] min-[1025px]:hidden"
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 28 18"
-            width={28}
-            height={18}
-            fill="none"
-            stroke="currentColor"
+        {/* ── Search + hamburger — <1025px ──────────────────────────────── */}
+        <div className="flex items-center min-[1025px]:hidden">
+          <SiteSearchButton
+            className="relocation-hover-fade size-11 text-[var(--relocation-ink)]"
+            iconClassName="h-[22px] w-[22px]"
             strokeWidth={1.5}
-            strokeLinecap="round"
-            className="block"
+          />
+          {/* ── Hamburger ───────────────────────────────────────── */}
+          <button
+            ref={hamburgerRef}
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded={mobileOpen}
+            aria-controls={mobileMenuId}
+            onClick={() => setMobileOpen(true)}
+            className="relocation-hover-fade flex h-11 w-11 cursor-pointer items-center justify-center text-[var(--relocation-ink)] min-[1025px]:hidden"
           >
-            <path d="M1 5.5H27M1 12.5H27" />
-          </svg>
-        </button>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 28 18"
+              width={28}
+              height={18}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              className="block"
+            >
+              <path d="M1 5.5H27M1 12.5H27" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <RelocationMobileMenu

@@ -251,6 +251,7 @@ export function ElegantNewsletter({
               <NewsletterConsentNote
                 className="mt-5 text-[13px] opacity-70"
                 privacyHref={privacyHref}
+                showRecaptcha={!fallback}
               />
             </>
           )}

@@ -38,6 +38,7 @@ export async function ViiLayout({
 
   return (
     <div
+      data-sp-template-root=""
       className={`${fontSerif.variable} ${fontSans.variable} vii`}
       style={{ fontFamily: "var(--font-sans)", ...themeVars }}
     >

@@ -5047,6 +5047,18 @@ body:has(.pollen) {
    Editor-only chrome (dashed column outlines, the details toggle button, the
    columns bubble menu) lives in `components/ui/minimal-tiptap/styles/`.      */
 
+/* ── Highlight mark ────────────────────────────────────────────────────────
+   Rich-text `<mark class="sp-mark">` (TiptapRenderer / Highlight extension).
+   A soft translucent yellow that keeps the surrounding text colour, so every
+   template's palette stays readable instead of showing the harsh UA yellow
+   with black text.                                                          */
+mark.sp-mark {
+  background-color: color-mix(in srgb, #facc15 35%, transparent);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}
+
 /* ── Columns (rows) ───────────────────────────────────────────────────────
    `.sp-columns` is the query container; its child `.sp-columns__grid` is the
    grid. A row collapses on its OWN width, so a narrow measure (dream, umsc),
@@ -5444,6 +5456,760 @@ details.sp-details > summary.sp-details__summary > * {
   --sp-button-bg: var(--bamboo-pine);
   --sp-button-fg: var(--bamboo-cream);
   --sp-button-bg-hover: var(--bamboo-terracotta-deep);
+}
+
+/* ══ Site search (flag `siteSearch`) ═══════════════════════════════════════
+   Shared header dialog (`_components/search/site-search-dialog.tsx`) and the
+   Default /search page (`_templates/default/search/default-search-page.tsx`),
+   used by every template. Template-neutral: everything derives from the
+   variables below, which fall back to the template's own tokens.
+
+   The dialog portals INTO the template root (`[data-sp-template-root]`), so
+   `--sp-button-*`, `--radius`, fonts and colours set on the root still apply.
+   On open it also reads the root's computed text colour and first opaque
+   background and sets them inline as `--sp-search-surface-fg/-bg`.
+
+   Variables (override per template with `.<template> .sp-search { … }`):
+     --sp-search-accent        tabs underline, hover/active tint source
+                               (var(--sp-button-bg, var(--primary)))
+     --sp-search-accent-fg     text on an accent fill (submit button)
+     --sp-search-radius        corner radius source (var(--sp-button-radius))
+     --sp-search-bg / -fg      dialog surface + text (computed from the root)
+     --sp-search-muted         secondary text (fg 62%)
+     --sp-search-line          hairlines (fg 12%)
+     --sp-search-tint          hover / highlighted row (accent 14%)
+     --sp-search-mark          matched-text highlight (accent 18%)
+     --sp-search-heading-font  page title font; set it on the template root
+                               (e.g. `.wealth { --sp-search-heading-font: … }`)
+   Unlayered rules at (0,2,0) so template-wide `a`, `input`, `button` rules
+   (usually (0,1,1)) don't leak in.                                         */
+.sp-search {
+  --sp-search-accent: var(--sp-button-bg, var(--primary));
+  --sp-search-accent-fg: var(--sp-button-fg, var(--primary-foreground));
+  --sp-search-radius: var(--sp-button-radius, var(--radius, 0.5rem));
+  --sp-search-bg: var(--sp-search-surface-bg, var(--background, #fff));
+  --sp-search-fg: var(--sp-search-surface-fg, var(--foreground, #0a0a0a));
+  --sp-search-muted: color-mix(in srgb, var(--sp-search-fg) 62%, transparent);
+  --sp-search-line: color-mix(in srgb, var(--sp-search-fg) 12%, transparent);
+  --sp-search-control-line: color-mix(
+    in srgb,
+    var(--sp-search-fg) 45%,
+    transparent
+  );
+  --sp-search-tint: color-mix(in srgb, var(--sp-search-accent) 14%, transparent);
+  --sp-search-mark: color-mix(
+    in srgb,
+    var(--sp-search-accent) 18%,
+    transparent
+  );
+  --sp-search-heading-font: inherit;
+}
+/* The page sits on the template's own background and text colour. */
+.sp-search.sp-search-page {
+  --sp-search-bg: transparent;
+  --sp-search-fg: currentColor;
+}
+/* Default's display face (next/font Inter on the layout root). */
+.default-template {
+  --sp-search-heading-font: var(--font-serif);
+}
+/* Each template's display face for the /search page title (after
+   .default-template so relocation, which carries both classes, wins). */
+.animated-bamboo {
+  --sp-search-heading-font: var(--font-heading);
+}
+.bamboo,
+.noise,
+.elegant,
+.happy-bamboo {
+  --sp-search-heading-font: var(--font-serif);
+}
+.builders {
+  --sp-search-heading-font: var(--font-builders-display);
+}
+.coop {
+  --sp-search-heading-font: var(--font-coop-heading);
+}
+.dream {
+  --sp-search-heading-font: var(--font-dream-display);
+}
+.glove {
+  --sp-search-heading-font: var(--glove-font-display);
+}
+.olive {
+  --sp-search-heading-font: var(--font-olive-display);
+}
+.pink {
+  --sp-search-heading-font: var(--font-pink-display);
+}
+.relocation {
+  --sp-search-heading-font: var(--font-relocation-display);
+}
+.sledge {
+  --sp-search-heading-font: var(--font-heading);
+}
+.umsc {
+  --sp-search-heading-font: var(--font-umsc-serif);
+}
+.vii {
+  --sp-search-heading-font: var(--font-vii-serif);
+}
+.wealth {
+  --sp-search-heading-font: var(--font-wealth-display);
+}
+
+.sp-search mark.sp-search-mark {
+  background-color: var(--sp-search-mark);
+  color: inherit;
+  font-weight: inherit;
+  padding: 0 0.05em;
+  border-radius: 2px;
+}
+.sp-search .sp-search-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-group-label {
+  margin: 0;
+  padding: 0.75rem 1rem 0.375rem;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sp-search-muted);
+}
+
+/* Chips (empty / no-results) */
+.sp-search .sp-search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.25rem 1rem 0.75rem;
+  list-style: none;
+}
+.sp-search .sp-search-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.3125rem 0.875rem;
+  border: 1px solid var(--sp-search-line);
+  border-radius: min(var(--sp-search-radius), 999px);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+.sp-search .sp-search-chip:hover {
+  background-color: var(--sp-search-tint);
+  border-color: var(--sp-search-accent);
+  color: inherit;
+}
+.sp-search .sp-search-chip:focus-visible,
+.sp-search .sp-search-row:focus-visible,
+.sp-search .sp-search-card:focus-visible,
+.sp-search .sp-search-tab:focus-visible,
+.sp-search .sp-search-seeall:focus-visible,
+.sp-search .sp-search-close:focus-visible {
+  outline: 2px solid var(--sp-search-accent);
+  outline-offset: 2px;
+}
+
+/* Result rows (dialog + page list) */
+.sp-search .sp-search-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0.375rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: min(var(--sp-search-radius), 10px);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sp-search .sp-search-row[data-active],
+.sp-search .sp-search-row--page:hover {
+  background-color: var(--sp-search-tint);
+  color: inherit;
+}
+.sp-search .sp-search-thumb {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: min(var(--sp-search-radius), 8px);
+  background-color: color-mix(in srgb, var(--sp-search-fg) 6%, transparent);
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sp-search .sp-search-thumb svg {
+  width: 18px;
+  height: 18px;
+}
+.sp-search .sp-search-row-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.sp-search .sp-search-row-title {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-search .sp-search-row-sub {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--sp-search-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-search .sp-search-row-snippet {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-row-price {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sp-search .sp-search-seeall {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--sp-search-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.sp-search .sp-search-seeall:hover {
+  color: inherit;
+  text-decoration-thickness: 2px;
+}
+.sp-search .sp-search-none-title {
+  margin: 0;
+  padding: 1rem 1rem 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* ── Dialog ── */
+.sp-search.sp-search-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  text-align: left;
+}
+.sp-search .sp-search-scrim {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+  /* Always dims: a hint of the template's ink over black, so light-on-dark
+     templates (white fg) don't get a lightening scrim. */
+  background-color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sp-search-fg) 30%, #000) 42%,
+    transparent
+  );
+  animation: sp-search-fade 0.16s ease-out;
+}
+.sp-search .sp-search-panel {
+  position: fixed;
+  top: 10vh;
+  right: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 2rem));
+  max-height: min(36rem, 80vh);
+  margin: 0 auto;
+  overflow: hidden;
+  pointer-events: auto;
+  border: 1px solid var(--sp-search-line);
+  border-radius: min(calc(var(--sp-search-radius) + 4px), 16px);
+  background-color: var(--sp-search-bg);
+  color: var(--sp-search-fg);
+  font-size: 1rem;
+  line-height: 1.4;
+  box-shadow:
+    0 24px 64px -16px color-mix(in srgb, var(--sp-search-fg) 30%, transparent),
+    0 2px 8px -2px color-mix(in srgb, var(--sp-search-fg) 12%, transparent);
+  outline: none;
+  animation: sp-search-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.sp-search .sp-search-bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.625rem;
+  height: 3.5rem;
+  padding: 0 0.75rem 0 1rem;
+  border-bottom: 1px solid var(--sp-search-line);
+  background-color: var(--sp-search-bg);
+}
+.sp-search .sp-search-bar-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem; /* ≥16px: no iOS focus zoom */
+  outline: none;
+}
+/* The bar row is the field; beat template-wide `input:focus-visible` rings
+   (e.g. `.wealth input:focus-visible`, specificity 0,2,1). */
+.sp-search .sp-search-input:focus,
+.sp-search .sp-search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.sp-search .sp-search-input::placeholder {
+  color: var(--sp-search-muted);
+  opacity: 1;
+}
+.sp-search .sp-search-spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 2px solid var(--sp-search-line);
+  border-top-color: var(--sp-search-muted);
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.sp-search .sp-search-spinner[data-active] {
+  opacity: 1;
+  animation: sp-search-spin 0.7s linear infinite;
+}
+.sp-search kbd,
+.sp-search .sp-search-esc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3125rem;
+  border: 1px solid var(--sp-search-line);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: min(var(--sp-search-radius), 999px);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.sp-search .sp-search-close:hover {
+  background-color: var(--sp-search-tint);
+}
+.sp-search .sp-search-close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.sp-search .sp-search-body {
+  flex: 1;
+  min-height: 9rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem 0 0.5rem;
+}
+.sp-search .sp-search-list {
+  transition: opacity 0.15s ease;
+}
+.sp-search .sp-search-list[data-stale] {
+  opacity: 0.65;
+}
+.sp-search .sp-search-group + .sp-search-group {
+  margin-top: 0.25rem;
+}
+.sp-search .sp-search-empty {
+  padding-top: 0.25rem;
+}
+.sp-search .sp-search-foot {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--sp-search-line);
+  font-size: 0.75rem;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-foot .sp-search-seeall {
+  margin-left: auto;
+  color: var(--sp-search-fg);
+}
+.sp-search .sp-search-hints {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.sp-search .sp-search-dot {
+  padding: 0 0.125rem;
+}
+@media (hover: none), (max-width: 639px) {
+  .sp-search .sp-search-hints {
+    display: none;
+  }
+}
+/* Phones: a full-height sheet pinned to the top, input row sticky. */
+@media (max-width: 639px) {
+  .sp-search .sp-search-panel {
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .sp-search .sp-search-esc {
+    display: none;
+  }
+  .sp-search .sp-search-close {
+    display: inline-flex;
+  }
+  .sp-search .sp-search-row {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+}
+@keyframes sp-search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+}
+@keyframes sp-search-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sp-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-search .sp-search-panel,
+  .sp-search .sp-search-scrim,
+  .sp-search .sp-search-spinner[data-active] {
+    animation: none;
+  }
+  .sp-search .sp-search-card-media img {
+    transition: none;
+  }
+}
+
+/* ── /search page ── */
+.sp-search .sp-search-page-inner {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4.5rem) 1rem 5rem;
+}
+@media (min-width: 640px) {
+  .sp-search .sp-search-page-inner {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+}
+.sp-search .sp-search-title {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: inherit;
+}
+/* Heading face. Layered (base) on purpose: when neither the template root
+   nor `.<template> .sp-search` sets `--sp-search-heading-font`, the var is
+   invalid → the title simply inherits, and a template's own unlayered
+   `h1` font rule still wins — so it never fights the template. */
+@layer base {
+  :where(.sp-search) .sp-search-title {
+    font-family: var(--sp-search-heading-font);
+  }
+}
+.sp-search .sp-search-page-sub {
+  margin: 0.625rem 0 0;
+  font-size: 1rem;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-page-form {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 40rem;
+  margin-top: 1.75rem;
+}
+.sp-search .sp-search-page-field {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+.sp-search .sp-search-page-field-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.875rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--sp-search-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.sp-search .sp-search-page-input {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 0.875rem 0 2.625rem;
+  border: 1px solid var(--sp-search-control-line);
+  border-radius: min(var(--sp-search-radius), 999px);
+  background-color: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+}
+.sp-search .sp-search-page-input::placeholder {
+  color: var(--sp-search-muted);
+  opacity: 1;
+}
+.sp-search .sp-search-page-input:focus {
+  border-color: var(--sp-search-accent);
+  outline: 2px solid
+    color-mix(in srgb, var(--sp-search-accent) 35%, transparent);
+  outline-offset: 0;
+}
+.sp-search .sp-search-page-submit {
+  height: 44px;
+  margin: 0;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: min(var(--sp-search-radius), 999px);
+  background-color: var(--sp-search-accent);
+  color: var(--sp-search-accent-fg);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.sp-search .sp-search-page-submit:hover {
+  background-color: var(
+    --sp-button-bg-hover,
+    color-mix(in srgb, var(--sp-search-accent) 88%, black)
+  );
+}
+.sp-search .sp-search-page-submit:focus-visible {
+  outline: 2px solid var(--sp-search-accent);
+  outline-offset: 2px;
+}
+.sp-search .sp-search-tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--sp-search-line);
+  scrollbar-width: none;
+}
+.sp-search .sp-search-tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: -1px;
+  padding: 0.75rem 0 0.6875rem;
+  border-bottom: 2px solid transparent;
+  font-size: 0.9375rem;
+  color: var(--sp-search-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sp-search .sp-search-tab:hover {
+  color: var(--sp-search-fg);
+}
+.sp-search .sp-search-tab[aria-current="page"] {
+  border-bottom-color: var(--sp-search-accent);
+  color: var(--sp-search-fg);
+  font-weight: 500;
+}
+.sp-search .sp-search-tab-count {
+  font-size: 0.75em;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-page-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2.75rem;
+  margin-top: 2rem;
+}
+.sp-search .sp-search-page-body .sp-search-note,
+.sp-search .sp-search-page-body .sp-search-none-title,
+.sp-search .sp-search-page-body .sp-search-group-label,
+.sp-search .sp-search-page-body .sp-search-chips {
+  padding-right: 0;
+  padding-left: 0;
+}
+.sp-search .sp-search-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.sp-search .sp-search-section-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: inherit;
+}
+.sp-search .sp-search-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 640px) {
+  .sp-search .sp-search-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem 1.25rem;
+  }
+}
+.sp-search .sp-search-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  color: inherit;
+  text-decoration: none;
+}
+.sp-search .sp-search-card:hover {
+  color: inherit;
+}
+.sp-search .sp-search-card-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  margin-bottom: 0.375rem;
+  overflow: hidden;
+  border-radius: min(var(--sp-search-radius), 12px);
+  background-color: color-mix(in srgb, var(--sp-search-fg) 6%, transparent);
+  color: var(--sp-search-muted);
+}
+.sp-search .sp-search-card-media img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.sp-search .sp-search-card:hover .sp-search-card-media img {
+  transform: scale(1.02);
+}
+.sp-search .sp-search-card-icon {
+  width: 2rem;
+  height: 2rem;
+}
+.sp-search .sp-search-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.sp-search .sp-search-card-price {
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+.sp-search .sp-search-rows {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--sp-search-line);
+  list-style: none;
+}
+.sp-search .sp-search-rows > li {
+  border-bottom: 1px solid var(--sp-search-line);
+}
+.sp-search .sp-search-row--page {
+  align-items: start;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem 0.5rem;
+  border-radius: 0;
+}
+.sp-search .sp-search-row--page .sp-search-thumb {
+  width: 48px;
+  height: 48px;
+}
+.sp-search .sp-search-row--page .sp-search-row-title {
+  font-size: 1rem;
+  white-space: normal;
+}
+.sp-search .sp-search-row--page .sp-search-row-sub {
+  white-space: normal;
+}
+.sp-search .sp-search-row--page .sp-search-row-price {
+  padding-top: 0.125rem;
 }
 
 /* Unlayered so it overrides Tailwind's built-in .container max-widths
@@ -10935,7 +11701,9 @@ details.sp-details > summary.sp-details__summary > * {
 .wealth .wealth-prose li > p + ol {
   margin-top: 8px;
 }
-.wealth .wealth-prose li > p > strong:first-child {
+/* "**Title** description" items: TiptapRenderer tags bold that OPENS the
+   item with data-lead (strong:first-child also matched mid-sentence bold). */
+.wealth .wealth-prose li > p > strong[data-lead] {
   display: block;
   margin-bottom: 2px;
   font-family: var(--font-wealth-sub);
@@ -11009,7 +11777,7 @@ details.sp-details > summary.sp-details__summary > * {
   width: 1px;
   background: var(--wealth-rule-strong);
 }
-.wealth .wealth-prose ol > li > p > strong:first-child {
+.wealth .wealth-prose ol > li > p > strong[data-lead] {
   padding-top: 8px;
 }
 
@@ -11047,7 +11815,7 @@ details.sp-details > summary.sp-details__summary > * {
 .wealth .wealth-prose blockquote ul > li::before {
   background: var(--wealth-forest);
 }
-.wealth .wealth-prose blockquote ul > li > p > strong:first-child {
+.wealth .wealth-prose blockquote ul > li > p > strong[data-lead] {
   font-size: 20px;
   line-height: 1.35;
 }
@@ -11068,7 +11836,7 @@ details.sp-details > summary.sp-details__summary > * {
   .wealth .wealth-prose blockquote ul > li::before {
     display: none;
   }
-  .wealth .wealth-prose blockquote ul > li > p > strong:first-child {
+  .wealth .wealth-prose blockquote ul > li > p > strong[data-lead] {
     margin-bottom: 8px;
   }
 }

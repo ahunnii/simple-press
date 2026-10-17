@@ -23,6 +23,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
@@ -354,8 +355,14 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
             )}
           </Link>
 
-          {/* Right — cart + user/sign-in */}
+          {/* Right — search + user/sign-in + wishlist + cart. Search renders
+              nothing unless the `siteSearch` flag is on; it is the only
+              search entry on phones too (this row stays visible). */}
           <div className="flex items-center justify-end gap-2 sm:gap-3">
+            <SiteSearchButton
+              className="relative rounded-(--radius)"
+              iconClassName="h-6 w-6"
+            />
             {isPending ? (
               <div className="h-8 w-8 animate-pulse rounded-full bg-[#f6f6f6]" />
             ) : user ? (

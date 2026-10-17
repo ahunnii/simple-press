@@ -1,6 +1,9 @@
 import type { Extension } from "@tiptap/core";
 import type { Content, Editor, UseEditorOptions } from "@tiptap/react";
 import * as React from "react";
+import Highlight from "@tiptap/extension-highlight";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Typography } from "@tiptap/extension-typography";
@@ -20,6 +23,7 @@ import { MAX_UPLOAD_SIZE } from "~/components/media/upload-dropzone";
 import {
   CodeBlockLowlight,
   Color,
+  ContainerTrailingParagraph,
   EditorColumns,
   EditorSpacer,
   Embed,
@@ -31,12 +35,14 @@ import {
   LinkClickSelection,
   QuoteCalculator,
   ResetMarksOnEnter,
+  SlashCommand,
   TableKit,
   UnsetAllMarks,
   Video,
   VIDEO_ACCEPTED_MIME_TYPES,
   VIDEO_MAX_FILE_SIZE,
 } from "../extensions";
+import { BlockMove } from "../extensions/block-move";
 import { useThrottle } from "../hooks/use-throttle";
 import { fileToBase64, fillEmptyDoc, getOutput, randomId } from "../utils";
 
@@ -458,13 +464,20 @@ export const createExtensions = ({
       : []),
     Color,
     TextStyle,
+    Highlight.configure({ multicolor: false }),
+    Subscript,
+    Superscript,
     // Same config as the storefront renderer, so stored alignment survives.
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     Selection,
     Typography,
     UnsetAllMarks,
     HorizontalRule,
+    ContainerTrailingParagraph,
     ResetMarksOnEnter,
+    BlockMove,
+    // "/" insert menu trigger; the menu is rendered by MainMinimalTiptapEditor.
+    SlashCommand,
     Placeholder.configure({ placeholder: () => placeholder }),
     ...(emailMode
       ? []

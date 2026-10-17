@@ -7,18 +7,22 @@ import type { UseMinimalTiptapEditorProps } from "./hooks/use-minimal-tiptap";
 import { cn } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
 
+import { BlockSideMenu } from "./components/block-handle/block-side-menu";
 import { ColumnsBubbleMenu } from "./components/bubble-menu/columns-bubble-menu";
 import { ImageBubbleMenu } from "./components/bubble-menu/image-bubble-menu";
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
 import { SpacerBubbleMenu } from "./components/bubble-menu/spacer-bubble-menu";
 import { TableBubbleMenu } from "./components/bubble-menu/table-bubble-menu";
+import { InsertDialogProvider } from "./components/insert-dialog-context";
 import { MeasuredContainer } from "./components/measured-container";
 import { SectionFive } from "./components/section/five";
 import { SectionFour } from "./components/section/four";
+import { SectionHistory } from "./components/section/history";
 import { SectionOne } from "./components/section/one";
 import { SectionSix } from "./components/section/six";
 import { SectionThree } from "./components/section/three";
 import { SectionTwo } from "./components/section/two";
+import { SlashMenu } from "./components/slash-menu/slash-menu";
 import { useMinimalTiptapEditor } from "./hooks/use-minimal-tiptap";
 
 export interface MinimalTiptapProps extends Omit<
@@ -60,6 +64,10 @@ const Toolbar = ({
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
+      <SectionHistory editor={editor} />
+
+      <Separator orientation="vertical" className="mx-2" />
+
       <SectionOne
         editor={editor}
         activeLevels={emailMode ? EMAIL_HEADING_LEVELS : ALL_HEADING_LEVELS}
@@ -71,12 +79,24 @@ const Toolbar = ({
         editor={editor}
         activeActions={
           emailMode
-            ? ["bold", "italic", "underline", "strikethrough", "clearFormatting"]
+            ? [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "highlight",
+                "superscript",
+                "subscript",
+                "clearFormatting",
+              ]
             : [
                 "bold",
                 "italic",
                 "underline",
                 "strikethrough",
+                "highlight",
+                "superscript",
+                "subscript",
                 "code",
                 "clearFormatting",
               ]
@@ -86,9 +106,14 @@ const Toolbar = ({
 
       <Separator orientation="vertical" className="mx-2" />
 
-      <SectionThree editor={editor} emailSafe={emailMode} />
+      {/* Storefront renderer drops text color; email renders it, so the picker is email-only. */}
+      {emailMode && (
+        <>
+          <SectionThree editor={editor} emailSafe />
 
-      <Separator orientation="vertical" className="mx-2" />
+          <Separator orientation="vertical" className="mx-2" />
+        </>
+      )}
 
       <SectionFour
         editor={editor}
@@ -104,23 +129,7 @@ const Toolbar = ({
 
       <SectionFive
         editor={editor}
-        activeActions={
-          emailMode
-            ? ["blockquote", "horizontalRule"]
-            : [
-                "codeBlock",
-                "blockquote",
-                "horizontalRule",
-                "gallery",
-                "embed",
-                "quoteCalculator",
-                "form",
-                "table",
-                "columns",
-                "details",
-                "spacer",
-              ]
-        }
+        emailMode={emailMode}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
@@ -205,29 +214,45 @@ export const MainMinimalTiptapEditor = ({
       as="div"
       name="editor"
       className={cn(
-        "border-input min-data-[orientation=vertical]:h-72 flex h-auto w-full flex-col rounded-md border shadow-xs",
+        "border-input min-data-[orientation=vertical]:h-72 relative flex h-auto w-full flex-col rounded-md border shadow-xs",
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
         className,
       )}
     >
-      <Toolbar
-        editor={providedEditor}
-        galleriesEnabled={galleriesEnabled}
-        embedsEnabled={embedsEnabled}
-        quotesEnabled={quotesEnabled}
-        formsEnabled={formsEnabled}
-        layoutBlocksEnabled={layoutBlocksEnabled}
-        emailMode={emailMode}
-      />
-      <EditorContent
-        editor={providedEditor}
-        className={cn("minimal-tiptap-editor", editorContentClassName)}
-      />
-      <LinkBubbleMenu editor={providedEditor} />
-      {!emailMode && <TableBubbleMenu editor={providedEditor} />}
-      {!emailMode && <ColumnsBubbleMenu editor={providedEditor} />}
-      {!emailMode && <SpacerBubbleMenu editor={providedEditor} />}
-      <ImageBubbleMenu editor={providedEditor} />
+      {/* Shares the insert dialogs' open state between their toolbar
+          buttons and the "/" menu. */}
+      <InsertDialogProvider>
+        <Toolbar
+          editor={providedEditor}
+          galleriesEnabled={galleriesEnabled}
+          embedsEnabled={embedsEnabled}
+          quotesEnabled={quotesEnabled}
+          formsEnabled={formsEnabled}
+          layoutBlocksEnabled={layoutBlocksEnabled}
+          emailMode={emailMode}
+        />
+        <EditorContent
+          editor={providedEditor}
+          className={cn("minimal-tiptap-editor", editorContentClassName)}
+        />
+        <LinkBubbleMenu editor={providedEditor} />
+        {!emailMode && <TableBubbleMenu editor={providedEditor} />}
+        {!emailMode && <ColumnsBubbleMenu editor={providedEditor} />}
+        {!emailMode && <SpacerBubbleMenu editor={providedEditor} />}
+        <ImageBubbleMenu editor={providedEditor} />
+        {/* After EditorContent: the side menu is positioned against this
+            (relative) frame and hidden by CSS when the editor is read-only. */}
+        <BlockSideMenu editor={providedEditor} />
+        <SlashMenu
+          editor={providedEditor}
+          emailMode={emailMode}
+          galleriesEnabled={galleriesEnabled}
+          embedsEnabled={embedsEnabled}
+          quotesEnabled={quotesEnabled}
+          formsEnabled={formsEnabled}
+          layoutBlocksEnabled={layoutBlocksEnabled}
+        />
+      </InsertDialogProvider>
     </MeasuredContainer>
   );
 };

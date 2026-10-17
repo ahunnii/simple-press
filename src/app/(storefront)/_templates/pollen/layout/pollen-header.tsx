@@ -42,6 +42,7 @@ import {
   resolveNav,
   withDonateLink,
 } from "~/app/(storefront)/_components/nav";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { PollenAnnouncementBar } from "./pollen-announcement-bar";
 import { PollenNavOverlayAccount } from "./pollen-nav-overlay-account";
@@ -486,6 +487,13 @@ export function PollenHeader({
             </nav>
 
             <div className="flex items-center gap-3">
+              {/* Site search — renders nothing unless the `siteSearch` flag
+                  is on; same icon-button box as the wishlist + cart. */}
+              <SiteSearchButton
+                className="relative p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
+                iconClassName="size-5"
+              />
+
               {/* Wishlist icon — gated on the storefront `wishlist` flag. */}
               {isStorefrontEnabled("wishlist") && (
                 <Link

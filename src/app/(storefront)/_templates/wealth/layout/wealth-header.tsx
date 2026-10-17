@@ -26,6 +26,7 @@ import {
   resolveNav,
 } from "~/app/(storefront)/_components/nav";
 import { useNavDropdown } from "~/app/(storefront)/_components/nav/use-nav-dropdown";
+import { SiteSearchButton } from "~/app/(storefront)/_components/search";
 
 import { resolveWealthFields } from "../lib/resolve-fields";
 import { wealthLedgeButtonClasses } from "../shared/wealth-ledge-button";
@@ -269,6 +270,16 @@ export function WealthHeader({
           </nav>
 
           <div className="wealth-header__end">
+            {/* Site search — renders nothing unless the `siteSearch` flag is
+                on. From 1100px only, like the account entry; on phones the
+                nav overlay's top bar carries it (the bar has no room beside
+                the logo + DONATE). */}
+            <SiteSearchButton
+              className="hidden size-10 rounded-full text-[var(--wealth-btn-ink)] transition-colors duration-200 hover:text-[var(--wealth-primary)] min-[1100px]:inline-flex"
+              iconClassName="size-[22px]"
+              strokeWidth={1.5}
+            />
+
             {/* Desktop account entry (B4); on phones it lives in the overlay. */}
             {accountsEnabled ? (
               <div className="wealth-header__account">

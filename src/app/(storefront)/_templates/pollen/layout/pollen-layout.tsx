@@ -32,7 +32,7 @@ export async function PollenLayout({
   });
 
   return (
-    <div className="pollen min-h-screen">
+    <div data-sp-template-root="" className="pollen min-h-screen">
       {/* S-1: skip link — mirrors sledge-layout.tsx pattern */}
       <a
         href="#main-content"

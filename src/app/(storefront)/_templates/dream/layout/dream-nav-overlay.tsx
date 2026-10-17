@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
@@ -14,6 +14,7 @@ import {
   externalLinkProps,
   navGroupEntries,
 } from "~/app/(storefront)/_components/nav";
+import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
 import { DreamSocialLinks } from "../shared/dream-social-links";
 import { DreamNavOverlayAccount } from "./dream-nav-overlay-account";
@@ -73,6 +74,7 @@ export function DreamNavOverlay({
   isEnabled,
 }: DreamNavOverlayProps) {
   const pathname = usePathname();
+  const siteSearch = useSiteSearch();
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -241,6 +243,33 @@ export function DreamNavOverlay({
 
       <nav className="dream-nav-overlay-nav" aria-label="Primary navigation">
         <ul className="dream-nav-overlay-list">
+          {/* Search — first row on phones (no room in the header bar).
+              Closes the overlay (its focus trap / inert siblings would fight
+              the dialog), then opens search. Nothing unless `siteSearch` is
+              on. */}
+          {siteSearch.enabled ? (
+            <li>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={(e) => {
+                  const trigger = e.currentTarget;
+                  onClose();
+                  siteSearch.open({ trigger });
+                }}
+                onPointerEnter={siteSearch.prefetch}
+                className="dream-nav-overlay-line dream-nav-overlay-item dream-nav-overlay-item--toggle"
+                style={{ "--i": 1 } as React.CSSProperties}
+              >
+                Search
+                <Search
+                  className="h-6 w-6 shrink-0"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+              </button>
+            </li>
+          ) : null}
           {items.map((item, i) => {
             if (item.children?.length) {
               const hasParentLink = !!item.href && item.href !== "#";

@@ -15,7 +15,10 @@ export async function DarkTrendLayout({
   const banner = resolveBanner(business.siteContent, isEnabled);
 
   return (
-    <div className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased">
+    <div
+      data-sp-template-root=""
+      className="dark-trend bg-background text-foreground min-h-screen font-sans antialiased"
+    >
       {/* Skip link — visible on keyboard focus, hidden otherwise (WCAG 2.4.1) */}
       <a href="#main-content" className="dt-skip-link">
         Skip to main content

@@ -109,6 +109,15 @@ export const orderLookupLimiter = makeLazy({
   keyPrefix: "rl:order-lookup",
 });
 
+// 60 storefront site-search requests per minute per IP (typeahead-adjacent: one
+// request per debounced pause). Callers MUST fail open on limiter
+// infrastructure errors — see `storefront-search.ts`.
+export const siteSearchLimiter = makeLazy({
+  points: 60,
+  duration: 60,
+  keyPrefix: "rl:site-search",
+});
+
 // 10 attempts per minute per IP — for review votes
 export const reviewVoteLimiter = makeLazy({
   points: 10,

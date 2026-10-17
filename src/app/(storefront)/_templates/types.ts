@@ -1,5 +1,10 @@
+import type { SearchPopularLink } from "~/app/(storefront)/_components/search/popular";
 import type { StorefrontMaintenance } from "~/lib/maintenance";
 import type { Session } from "~/server/better-auth/config";
+import type {
+  SiteSearchResult,
+  SiteSearchType,
+} from "~/server/search/site-search-types";
 import type { RouterOutputs } from "~/trpc/react";
 
 export type DefaultHomepageTemplateProps = {
@@ -106,6 +111,22 @@ export type DefaultVideosPageTemplateProps = {
 export type DefaultFaqPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   items: RouterOutputs["faq"]["list"];
+};
+
+/**
+ * `/search` (flag `siteSearch`). `result` always carries every non-empty
+ * group's count (for the type tabs); with `type` set, only that group is
+ * rendered. `popular` = flag-filtered top-level nav for the empty and
+ * no-results states (`resolveSearchPopular`).
+ */
+export type SearchPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  result: SiteSearchResult;
+  /** The raw query as typed ("" when none). */
+  q: string;
+  /** Active type tab, or null for "All". */
+  type: SiteSearchType | null;
+  popular: SearchPopularLink[];
 };
 
 export type DefaultCartPageTemplateProps = {

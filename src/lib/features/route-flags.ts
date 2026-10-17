@@ -22,6 +22,7 @@ const ROUTE_FLAGS: ReadonlyArray<readonly [prefix: string, flag: string]> = [
   ["services", "services"],
   ["events", "events"],
   ["videos", "videos"],
+  ["search", "siteSearch"],
   ["donate", "donations"],
   ["testimonials", "testimonials"],
   ["wishlist", "wishlist"],
