@@ -29,6 +29,7 @@ import { Separator } from "~/components/ui/separator";
 import { randomId } from "../../utils";
 import { ImageInsertDialog } from "../image/image-edit-dialog";
 import { ToolbarButton } from "../toolbar-button";
+import { isImageBubbleTarget } from "./bubble-menu-predicates";
 
 // Module-level so the reference is stable: @tiptap/react re-broadcasts a
 // changed `options` prop as a "bubbleMenu" meta that every bubble-menu
@@ -78,11 +79,11 @@ function selectedImage(editor: Editor) {
     : null;
 }
 
-/** Stable: shows only for a node-selected image in an editable editor. */
-const shouldShow = ({ editor, state }: ShouldShowProps) =>
-  editor.isEditable &&
-  state.selection instanceof NodeSelection &&
-  state.selection.node.type.name === "image";
+/**
+ * Stable: shows only for a node-selected image in an editable editor, and
+ * never while the "/" menu is open.
+ */
+const shouldShow = ({ editor }: ShouldShowProps) => isImageBubbleTarget(editor);
 
 interface ImageBubbleMenuProps {
   editor: Editor;

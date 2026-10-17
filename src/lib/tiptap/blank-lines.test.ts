@@ -206,3 +206,52 @@ describe("preserveBlankLines — rendering", () => {
     expect(html).not.toMatch(/<p[^>]*><\/p>/);
   });
 });
+
+describe("preserveBlankLines — container padding", () => {
+  const image = { type: "image", attrs: { src: "/a.png" } };
+  const table = { type: "table", content: [] };
+
+  it("drops the editor's trailing empty paragraph after an image in a column", () => {
+    const out = preserveBlankLines(
+      doc({
+        type: "columns",
+        attrs: { layout: "2" },
+        content: [
+          { type: "column", content: [para(text("A")), image, empty()] },
+          { type: "column", content: [para(text("B"))] },
+        ],
+      }),
+    );
+    expect(out).toEqual(
+      doc({
+        type: "columns",
+        attrs: { layout: "2" },
+        content: [
+          { type: "column", content: [para(text("A")), image] },
+          { type: "column", content: [para(text("B"))] },
+        ],
+      }),
+    );
+  });
+
+  it("drops the trailing empty paragraph after a table in a collapsible body", () => {
+    const out = preserveBlankLines(
+      doc({
+        type: "details",
+        content: [
+          { type: "detailsSummary", content: [text("Q")] },
+          { type: "detailsContent", content: [table, empty()] },
+        ],
+      }),
+    );
+    expect(out).toEqual(
+      doc({
+        type: "details",
+        content: [
+          { type: "detailsSummary", content: [text("Q")] },
+          { type: "detailsContent", content: [table] },
+        ],
+      }),
+    );
+  });
+});

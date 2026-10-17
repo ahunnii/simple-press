@@ -1,3 +1,6 @@
+import Highlight from "@tiptap/extension-highlight";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
 import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
@@ -48,6 +51,14 @@ export const RENDERER_BASE_EXTENSIONS = [
   VideoNode,
   Underline,
   TextStyle,
+  // Single-colour highlight: no `color` attr, so nothing owner-controlled
+  // reaches a style. `sp-mark` is the neutral storefront style (globals.css).
+  Highlight.configure({
+    multicolor: false,
+    HTMLAttributes: { class: "sp-mark" },
+  }),
+  Subscript,
+  Superscript,
   TextAlign.configure({
     types: ["heading", "paragraph"],
   }),

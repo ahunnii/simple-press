@@ -50,3 +50,10 @@
   display: inline-block;
   cursor: text;
 }
+
+.minimal-tiptap-editor .ProseMirror mark {
+  background-color: color-mix(in srgb, #facc15 35%, transparent);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}

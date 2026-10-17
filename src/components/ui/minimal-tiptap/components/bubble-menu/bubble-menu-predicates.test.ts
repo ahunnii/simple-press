@@ -1,8 +1,9 @@
 import type { JSONContent } from "@tiptap/core";
-import { Editor } from "@tiptap/core";
+import type { Transaction } from "@tiptap/pm/state";
+import { Editor, getAttributes, isActive } from "@tiptap/core";
 import Image from "@tiptap/extension-image";
 import { TableKit } from "@tiptap/extension-table";
-import { NodeSelection, TextSelection } from "@tiptap/pm/state";
+import { EditorState, NodeSelection, TextSelection } from "@tiptap/pm/state";
 import { StarterKit } from "@tiptap/starter-kit";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -10,10 +11,16 @@ import { Column } from "~/lib/tiptap/columns-node";
 import { createLinkExtension } from "~/lib/tiptap/link-extension";
 
 import { EditorColumns } from "../../extensions/columns";
+import {
+  SlashCommand,
+  slashCommandPluginKey,
+} from "../../extensions/slash-command";
 import { EditorSpacer } from "../../extensions/spacer";
 import {
   isColumnsBubbleTarget,
+  isImageBubbleTarget,
   isLinkBubbleTarget,
+  isSlashMenuOpen,
   isSpacerBubbleTarget,
   isTableBubbleTarget,
 } from "./bubble-menu-predicates";
@@ -34,6 +41,7 @@ function makeEditor(content: JSONContent) {
       EditorColumns,
       Column,
       EditorSpacer,
+      SlashCommand,
     ],
     content,
   });
@@ -279,5 +287,123 @@ describe("spacer menu target", () => {
     );
     editor.setEditable(false);
     expect(isSpacerBubbleTarget(editor)).toBe(false);
+  });
+});
+
+describe("while the slash menu is open", () => {
+  // A headless Editor's own state carries no plugins, so (like the
+  // container-trailing-paragraph tests) drive a real EditorState built from
+  // the editor's plugins, and judge it through a state-backed MenuEditor.
+  function makeSlashHarness(content: JSONContent) {
+    const editor = makeEditor(content);
+    let state = EditorState.create({
+      doc: editor.state.doc,
+      plugins: editor.extensionManager.plugins,
+    });
+    const menuEditor = {
+      get state() {
+        return state;
+      },
+      isEditable: true,
+      isActive: (name: string, attrs?: Record<string, unknown>) =>
+        isActive(state, name, attrs),
+      getAttributes: (name: string) => getAttributes(state, name),
+    };
+    const apply = (build: (tr: Transaction) => Transaction) => {
+      state = state.apply(build(state.tr));
+    };
+    return {
+      menuEditor,
+      cursorAt: (pos: number) =>
+        apply((tr) => tr.setSelection(TextSelection.create(tr.doc, pos))),
+      /** Types "/" at the cursor, as a keystroke would. */
+      typeSlash: () => apply((tr) => tr.insertText("/")),
+      /** What Escape does: Suggestion's exit meta (no doc/selection change). */
+      escape: () =>
+        apply((tr) => tr.setMeta(slashCommandPluginKey, { exit: true })),
+      deleteRange: (from: number, to: number) =>
+        apply((tr) => tr.delete(from, to)),
+    };
+  }
+
+  it("hides the row menu on an empty line in a column, back after Escape", () => {
+    const h = makeSlashHarness(doc(row([para()], [para(text("Right"))])));
+    // columns(0) > column(1) > paragraph(2): inside it at 3.
+    h.cursorAt(3);
+    expect(isColumnsBubbleTarget(h.menuEditor)).toBe(true);
+
+    h.typeSlash();
+    expect(isSlashMenuOpen(h.menuEditor)).toBe(true);
+    expect(isColumnsBubbleTarget(h.menuEditor)).toBe(false);
+    expect(isLinkBubbleTarget(h.menuEditor)).toBe(false);
+    expect(isTableBubbleTarget(h.menuEditor)).toBe(false);
+
+    h.escape();
+    expect(isSlashMenuOpen(h.menuEditor)).toBe(false);
+    expect(isColumnsBubbleTarget(h.menuEditor)).toBe(true);
+  });
+
+  it("hides the table menu in a cell, back once the query is deleted", () => {
+    const h = makeSlashHarness(
+      doc({
+        type: "table",
+        content: [
+          {
+            type: "tableRow",
+            content: [{ type: "tableCell", content: [para()] }],
+          },
+        ],
+      }),
+    );
+    // table(0) > row(1) > cell(2) > paragraph(3): inside it at 4.
+    h.cursorAt(4);
+    h.typeSlash();
+    expect(isSlashMenuOpen(h.menuEditor)).toBe(true);
+    expect(isTableBubbleTarget(h.menuEditor)).toBe(false);
+
+    h.deleteRange(4, 5);
+    expect(isSlashMenuOpen(h.menuEditor)).toBe(false);
+    expect(isTableBubbleTarget(h.menuEditor)).toBe(true);
+  });
+
+  it("a slash after text never opens it, so the row menu stays", () => {
+    const h = makeSlashHarness(doc(row([para(text("and"))], [para()])));
+    // columns(0) > column(1) > paragraph(2) > "and" at 3..6.
+    h.cursorAt(6);
+    h.typeSlash();
+    expect(isSlashMenuOpen(h.menuEditor)).toBe(false);
+    expect(isColumnsBubbleTarget(h.menuEditor)).toBe(true);
+  });
+});
+
+describe("image menu target", () => {
+  it("a node-selected image: the image menu; a cursor: none", () => {
+    const editor = makeEditor(
+      doc(para(text("A")), {
+        type: "image",
+        attrs: { src: "https://x.test/a.png" },
+      }),
+    );
+    // paragraph(0..3) > image at 3.
+    editor.view.dispatch(
+      editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 3)),
+    );
+    expect(isImageBubbleTarget(editor)).toBe(true);
+    cursorAt(editor, 1);
+    expect(isImageBubbleTarget(editor)).toBe(false);
+  });
+
+  it("read-only editor: no image menu", () => {
+    const editor = makeEditor(
+      doc(para(text("A")), {
+        type: "image",
+        attrs: { src: "https://x.test/a.png" },
+      }),
+    );
+    editor.view.dispatch(
+      editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, 3)),
+    );
+    editor.setEditable(false);
+    expect(isImageBubbleTarget(editor)).toBe(false);
   });
 });

@@ -1,0 +1,9 @@
+@reference "../../../../../styles/globals.css";
+
+/* The "/query" being typed while the insert menu (components/slash-menu)
+   is open: a soft chip so it reads as a command, not text. */
+.minimal-tiptap-editor .slash-command-query {
+  @apply bg-muted rounded-sm;
+  box-decoration-break: clone;
+  padding: 0 2px;
+}

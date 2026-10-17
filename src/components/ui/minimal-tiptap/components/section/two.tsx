@@ -10,6 +10,7 @@ import {
   TextNoneIcon,
   UnderlineIcon,
 } from "@radix-ui/react-icons";
+import { Highlighter, Subscript, Superscript } from "lucide-react";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
@@ -21,6 +22,9 @@ type TextStyleAction =
   | "italic"
   | "underline"
   | "strikethrough"
+  | "highlight"
+  | "superscript"
+  | "subscript"
   | "code"
   | "clearFormatting";
 
@@ -72,6 +76,39 @@ const formatActions: TextStyle[] = [
       editor.can().chain().focus().toggleStrike().run() &&
       !editor.isActive("codeBlock"),
     shortcuts: ["mod", "shift", "S"],
+  },
+  {
+    value: "highlight",
+    label: "Highlight",
+    icon: <Highlighter className="size-5" />,
+    action: (editor) => editor.chain().focus().toggleHighlight().run(),
+    isActive: (editor) => editor.isActive("highlight"),
+    canExecute: (editor) =>
+      editor.can().chain().focus().toggleHighlight().run() &&
+      !editor.isActive("codeBlock"),
+    shortcuts: ["mod", "shift", "H"],
+  },
+  {
+    value: "superscript",
+    label: "Superscript",
+    icon: <Superscript className="size-5" />,
+    action: (editor) => editor.chain().focus().toggleSuperscript().run(),
+    isActive: (editor) => editor.isActive("superscript"),
+    canExecute: (editor) =>
+      editor.can().chain().focus().toggleSuperscript().run() &&
+      !editor.isActive("codeBlock"),
+    shortcuts: ["mod", "."],
+  },
+  {
+    value: "subscript",
+    label: "Subscript",
+    icon: <Subscript className="size-5" />,
+    action: (editor) => editor.chain().focus().toggleSubscript().run(),
+    isActive: (editor) => editor.isActive("subscript"),
+    canExecute: (editor) =>
+      editor.can().chain().focus().toggleSubscript().run() &&
+      !editor.isActive("codeBlock"),
+    shortcuts: ["mod", ","],
   },
   {
     value: "code",

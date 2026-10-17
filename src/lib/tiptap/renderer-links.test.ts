@@ -1,8 +1,10 @@
+import { getSchema } from "@tiptap/core";
 import { generateHTML } from "@tiptap/html/server";
 import { describe, expect, it } from "vitest";
 
 import { isInternalHref } from "./link-extension";
 import { RENDERER_BASE_EXTENSIONS } from "./renderer-extensions";
+import { sanitizeTiptapDoc } from "./sanitize";
 
 function render(href: string, target?: string): string {
   return generateHTML(
@@ -98,5 +100,40 @@ describe("renderer link mark", () => {
   it("still blanks a javascript: href", () => {
     const html = render("javascript:alert(1)");
     expect(html).not.toContain("javascript:");
+  });
+});
+
+describe("renderer highlight / subscript / superscript marks", () => {
+  const sanitized = sanitizeTiptapDoc(
+    {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "hi",
+              marks: [{ type: "highlight", attrs: { color: "red" } }],
+            },
+            { type: "text", text: "2", marks: [{ type: "superscript" }] },
+            { type: "text", text: "3", marks: [{ type: "subscript" }] },
+          ],
+        },
+      ],
+    },
+    getSchema(RENDERER_BASE_EXTENSIONS),
+  );
+  const html = generateHTML(sanitized!, RENDERER_BASE_EXTENSIONS);
+
+  it("survives the sanitizer and renders <mark>, <sup> and <sub>", () => {
+    expect(html).toContain('<mark class="sp-mark">hi</mark>');
+    expect(html).toContain("<sup>2</sup>");
+    expect(html).toContain("<sub>3</sub>");
+  });
+
+  it("never emits a colour from stored highlight attrs", () => {
+    expect(html).not.toContain("red");
+    expect(html).not.toContain("style=");
   });
 });

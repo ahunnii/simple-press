@@ -1,23 +1,7 @@
 import type { Editor } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
-import {
-  CaretDownIcon,
-  CodeIcon,
-  DividerHorizontalIcon,
-  PlusIcon,
-  QuoteIcon,
-} from "@radix-ui/react-icons";
-import {
-  Calculator,
-  ChevronsDownUp,
-  Columns2,
-  FormInput,
-  Frame,
-  Images,
-  MoveVertical,
-  Table,
-} from "lucide-react";
+import { CaretDownIcon, PlusIcon } from "@radix-ui/react-icons";
 
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
@@ -26,145 +10,16 @@ import { EmbedInsertDialog } from "../embed/embed-insert-dialog";
 import { FormInsertDialog } from "../form/form-insert-dialog";
 import { GalleryInsertDialog } from "../gallery/gallery-insert-dialog";
 import { ImageEditDialog } from "../image/image-edit-dialog";
+import { getInsertItems, hasExtension } from "../insert-items";
 import { LinkEditPopover } from "../link/link-edit-popover";
 import { QuoteCalculatorInsertDialog } from "../quote-calculator/quote-calculator-insert-dialog";
 import { ToolbarSection } from "../toolbar-section";
 import { VideoInsertDialog } from "../video/video-insert-dialog";
 
-type InsertElementAction =
-  | "codeBlock"
-  | "blockquote"
-  | "horizontalRule"
-  | "gallery"
-  | "embed"
-  | "quoteCalculator"
-  | "form"
-  | "table"
-  | "columns"
-  | "details"
-  | "spacer";
-interface InsertElement extends FormatAction {
-  value: InsertElementAction;
-}
-
-const formatActions: InsertElement[] = [
-  {
-    value: "codeBlock",
-    label: "Code block",
-    icon: <CodeIcon className="size-5" />,
-    action: (editor) => editor.chain().focus().toggleCodeBlock().run(),
-    isActive: (editor) => editor.isActive("codeBlock"),
-    canExecute: (editor) =>
-      editor.can().chain().focus().toggleCodeBlock().run(),
-    shortcuts: ["mod", "alt", "C"],
-  },
-  {
-    value: "blockquote",
-    label: "Blockquote",
-    icon: <QuoteIcon className="size-5" />,
-    action: (editor) => editor.chain().focus().toggleBlockquote().run(),
-    isActive: (editor) => editor.isActive("blockquote"),
-    canExecute: (editor) =>
-      editor.can().chain().focus().toggleBlockquote().run(),
-    shortcuts: ["mod", "shift", "B"],
-  },
-  {
-    value: "horizontalRule",
-    label: "Divider",
-    icon: <DividerHorizontalIcon className="size-5" />,
-    action: (editor) => editor.chain().focus().setHorizontalRule().run(),
-    isActive: () => false,
-    canExecute: (editor) =>
-      editor.can().chain().focus().setHorizontalRule().run(),
-    shortcuts: ["mod", "alt", "-"],
-  },
-  {
-    value: "gallery",
-    label: "Gallery",
-    icon: <Images className="size-5" />,
-    action: (editor) => editor.chain().focus().insertGallery().run(),
-    isActive: () => false,
-    canExecute: (editor) => editor.can().chain().focus().insertGallery().run(),
-    shortcuts: [],
-  },
-  {
-    value: "embed",
-    label: "Embed",
-    icon: <Frame className="size-5" />,
-    action: (editor) => editor.chain().focus().insertEmbed().run(),
-    isActive: () => false,
-    canExecute: (editor) => editor.can().chain().focus().insertEmbed().run(),
-    shortcuts: [],
-  },
-  {
-    value: "quoteCalculator",
-    label: "Quote calculator",
-    icon: <Calculator className="size-5" />,
-    action: (editor) => editor.chain().focus().insertQuoteCalculator().run(),
-    isActive: () => false,
-    canExecute: (editor) =>
-      editor.can().chain().focus().insertQuoteCalculator().run(),
-    shortcuts: [],
-  },
-  {
-    value: "form",
-    label: "Form",
-    icon: <FormInput className="size-5" />,
-    action: (editor) => editor.chain().focus().insertForm().run(),
-    isActive: () => false,
-    canExecute: (editor) => editor.can().chain().focus().insertForm().run(),
-    shortcuts: [],
-  },
-  {
-    value: "table",
-    label: "Table",
-    icon: <Table className="size-5" />,
-    action: (editor) =>
-      editor
-        .chain()
-        .focus()
-        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-        .run(),
-    isActive: (editor) => editor.isActive("table"),
-    canExecute: (editor) => !editor.isActive("table"),
-    shortcuts: [],
-  },
-  {
-    value: "columns",
-    label: "Columns",
-    icon: <Columns2 className="size-5" />,
-    action: (editor) =>
-      editor.chain().focus().insertColumns({ layout: "2" }).run(),
-    isActive: (editor) => editor.isActive("columns"),
-    // Refused inside an existing row: rows don't nest.
-    canExecute: (editor) => editor.can().insertColumns({ layout: "2" }),
-    shortcuts: [],
-  },
-  {
-    value: "details",
-    label: "Collapsible section",
-    icon: <ChevronsDownUp className="size-5" />,
-    action: (editor) => editor.chain().focus().setDetails().run(),
-    isActive: (editor) => editor.isActive("details"),
-    canExecute: (editor) => editor.can().setDetails(),
-    shortcuts: [],
-  },
-  {
-    value: "spacer",
-    label: "Space",
-    icon: <MoveVertical className="size-5" />,
-    action: (editor) =>
-      editor.chain().focus().insertSpacer({ size: "md" }).run(),
-    isActive: () => false,
-    canExecute: (editor) => editor.can().insertSpacer({ size: "md" }),
-    shortcuts: [],
-  },
-];
-
 interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
-  activeActions?: InsertElementAction[];
   mainActionCount?: number;
+  emailMode?: boolean;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
@@ -174,30 +29,49 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
   editor,
-  activeActions = formatActions.map((action) => action.value),
   mainActionCount = 0,
   size,
   variant,
+  emailMode = false,
   galleriesEnabled = false,
   embedsEnabled = false,
   quotesEnabled = false,
   formsEnabled = false,
   layoutBlocksEnabled = false,
 }) => {
-  const filteredActions = activeActions
-    .filter((a) => galleriesEnabled || a !== "gallery")
-    .filter((a) => embedsEnabled || a !== "embed")
-    .filter((a) => quotesEnabled || a !== "quoteCalculator")
-    .filter((a) => formsEnabled || a !== "form")
-    .filter(
-      (a) =>
-        layoutBlocksEnabled ||
-        (a !== "columns" && a !== "details" && a !== "spacer"),
-    );
   // The video extension is only registered when the editor was given a
   // `videoUploader`, so its presence doubles as the "videos enabled" flag.
-  const videosEnabled = editor.extensionManager.extensions.some(
-    (ext) => ext.name === "video",
+  const videosEnabled = hasExtension(editor, "video");
+
+  // Same registry and gates as the "/" menu (see `insert-items.tsx`).
+  const insertActions = React.useMemo<FormatAction[]>(
+    () =>
+      getInsertItems("toolbar", {
+        emailMode,
+        galleriesEnabled,
+        embedsEnabled,
+        quotesEnabled,
+        formsEnabled,
+        layoutBlocksEnabled,
+        videosEnabled,
+      }).map((item) => ({
+        value: item.value,
+        label: item.label,
+        icon: item.icon,
+        action: (ed) => item.run?.(ed),
+        isActive: item.isActive ?? (() => false),
+        canExecute: item.canExecute,
+        shortcuts: item.shortcuts,
+      })),
+    [
+      emailMode,
+      galleriesEnabled,
+      embedsEnabled,
+      quotesEnabled,
+      formsEnabled,
+      layoutBlocksEnabled,
+      videosEnabled,
+    ],
   );
 
   return (
@@ -237,8 +111,7 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
       )}
       <ToolbarSection
         editor={editor}
-        actions={formatActions}
-        activeActions={filteredActions}
+        actions={insertActions}
         mainActionCount={mainActionCount}
         dropdownIcon={
           <>

@@ -182,10 +182,16 @@ async function mintToken(
  * also loads nothing at all, mirroring the server: it cannot be enforcing
  * verification without a key either.
  *
+ * Pass `enabled: false` for a form that can't submit yet (e.g. the newsletter
+ * form while email marketing is off): nothing is loaded from Google and
+ * `execute` resolves `null`.
+ *
  * Deliberately hand-rolled instead of pulling in `react-google-recaptcha-v3`,
  * which is thinly maintained and adds nothing over these ~40 lines.
  */
-export function useRecaptchaV3(): {
+export function useRecaptchaV3({
+  enabled = true,
+}: { enabled?: boolean } = {}): {
   execute: (action: string) => Promise<string | null>;
 } {
   const siteKey = env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
@@ -193,21 +199,22 @@ export function useRecaptchaV3(): {
   // Warm the script as soon as a consumer mounts so the first `execute()` —
   // which usually happens on that same mount — isn't waiting on a cold fetch.
   useEffect(() => {
-    if (isTestBypass() || !siteKey) return;
+    if (!enabled || isTestBypass() || !siteKey) return;
     void loadRecaptchaScript(siteKey).catch(() => {
       /* handled per-call in mintToken */
     });
-  }, [siteKey]);
+  }, [enabled, siteKey]);
 
   return useMemo(
     () => ({
       execute: async (action: string) => {
+        if (!enabled) return null;
         if (isTestBypass()) return RECAPTCHA_TEST_BYPASS_TOKEN;
         if (!siteKey) return null;
         return mintToken(siteKey, action);
       },
     }),
-    [siteKey],
+    [enabled, siteKey],
   );
 }
 

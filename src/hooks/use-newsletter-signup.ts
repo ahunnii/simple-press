@@ -32,7 +32,7 @@ type SubmitInput = { email: string; firstName?: string; lastName?: string };
  */
 export function useNewsletterSignup() {
   const enabled = useStorefrontFlags().isEnabled("emailMarketing");
-  const { execute: executeRecaptcha } = useRecaptchaV3();
+  const { execute: executeRecaptcha } = useRecaptchaV3({ enabled });
   const honeypotRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<NewsletterSignupStatus>(
     enabled ? "idle" : "disabled",

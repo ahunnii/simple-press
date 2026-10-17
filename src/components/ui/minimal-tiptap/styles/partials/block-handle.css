@@ -1,0 +1,94 @@
+@reference "../../../../../styles/globals.css";
+
+/*
+ * Block side menu (components/block-handle): "+" and ⋮⋮ grip just left of
+ * the hovered block. The menu is absolutely positioned inside the editor
+ * frame (MainMinimalTiptapEditor's container is `relative`) and moved with a
+ * transform; the content gets a left gutter so the buttons sit beside
+ * top-level blocks instead of over the frame. Touch screens get neither the
+ * menu nor the gutter (touch drag is out of scope; Alt+↑/↓ still work).
+ */
+
+@media not (pointer: coarse) {
+  .minimal-tiptap-editor .ProseMirror {
+    padding-left: 28px;
+  }
+}
+
+.mt-block-side-menu {
+  @apply absolute top-0 left-0 z-10 flex items-center;
+  margin-left: -2px;
+  transition: opacity 120ms ease;
+}
+
+.mt-block-side-menu[data-visible="false"] {
+  @apply pointer-events-none invisible opacity-0;
+}
+
+.mt-block-side-menu__button {
+  @apply text-muted-foreground relative flex h-[22px] w-5 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent p-0;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.mt-block-side-menu__button:hover,
+.mt-block-side-menu__button[aria-expanded="true"] {
+  @apply bg-muted;
+  color: var(--mt-drag-handle-hover);
+}
+
+.mt-block-side-menu__button:focus-visible {
+  @apply ring-ring/50 ring-2 outline-none;
+}
+
+.mt-block-side-menu__grip {
+  cursor: grab;
+}
+
+.mt-block-side-menu__grip:active {
+  cursor: grabbing;
+}
+
+/* Radix positioning anchor for the grip's menu; never interactive. */
+.mt-block-side-menu__anchor {
+  @apply pointer-events-none absolute inset-0;
+}
+
+/* Read-only editors and touch screens: no side menu. */
+.minimal-tiptap-editor:has(> .ProseMirror[contenteditable="false"])
+  ~ .mt-block-side-menu {
+  @apply hidden;
+}
+
+@media (pointer: coarse) {
+  .mt-block-side-menu {
+    @apply hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-block-side-menu,
+  .mt-block-side-menu__button {
+    transition: none;
+  }
+}
+
+/* A drop that would nest a column row is refused: hide the drop cursor. */
+.mt-drop-refused > .ProseMirror-dropcursor {
+  @apply hidden;
+}
+
+/*
+ * Drop indicator drawn by extensions/block-move/node-view-drop.ts while a
+ * block is dragged over an image / gallery / other node view (where the
+ * stock drop cursor can't follow). Same look as the configured Dropcursor.
+ */
+.mt-drop-indicator {
+  @apply border-border pointer-events-none absolute z-50 border;
+  background-color: currentColor;
+}
+
+.mt-drop-own-indicator > .ProseMirror-dropcursor {
+  @apply hidden;
+}

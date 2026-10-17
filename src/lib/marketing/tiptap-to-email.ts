@@ -15,7 +15,7 @@ import type { JSONContent } from "@tiptap/core";
  *    hardBreak, bulletList, orderedList, listItem, blockquote,
  *    horizontalRule, image
  *  - marks: bold, italic, underline, strike, link, textStyle (color only),
- *    highlight
+ *    highlight, subscript, superscript
  *  - attrs: textAlign on paragraph/heading, image src/alt/width/size/align
  *
  * Links: absolute http(s) and mailto: pass through. A site-relative link
@@ -248,6 +248,14 @@ function renderMarks(
         }
         break;
       }
+      case "subscript":
+        open += "<sub>";
+        close = "</sub>" + close;
+        break;
+      case "superscript":
+        open += "<sup>";
+        close = "</sup>" + close;
+        break;
       case "highlight": {
         const color = safeColor(attrs.color) ?? "#fef08a";
         open += `<span style="background-color:${escapeHtml(color)}">`;

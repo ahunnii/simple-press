@@ -19,6 +19,7 @@ import {
   MAX_UPLOAD_SIZE,
 } from "~/components/media/upload-dropzone";
 
+import { useInsertDialogState } from "../insert-dialog-context";
 import { ToolbarButton } from "../toolbar-button";
 import { ImageEditBlock } from "./image-edit-block";
 
@@ -182,9 +183,13 @@ interface ImageEditDialogProps extends VariantProps<typeof toggleVariants> {
   editor: Editor;
 }
 
-/** Toolbar button that opens `ImageInsertDialog` in insert mode. */
+/**
+ * Toolbar button that opens `ImageInsertDialog` in insert mode. Its open
+ * state is shared through `InsertDialogContext`, so the "/" menu opens this
+ * same dialog.
+ */
 const ImageEditDialog = ({ editor, size, variant }: ImageEditDialogProps) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useInsertDialogState("image");
 
   return (
     <>

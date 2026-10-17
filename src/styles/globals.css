@@ -5047,6 +5047,18 @@ body:has(.pollen) {
    Editor-only chrome (dashed column outlines, the details toggle button, the
    columns bubble menu) lives in `components/ui/minimal-tiptap/styles/`.      */
 
+/* ── Highlight mark ────────────────────────────────────────────────────────
+   Rich-text `<mark class="sp-mark">` (TiptapRenderer / Highlight extension).
+   A soft translucent yellow that keeps the surrounding text colour, so every
+   template's palette stays readable instead of showing the harsh UA yellow
+   with black text.                                                          */
+mark.sp-mark {
+  background-color: color-mix(in srgb, #facc15 35%, transparent);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}
+
 /* ── Columns (rows) ───────────────────────────────────────────────────────
    `.sp-columns` is the query container; its child `.sp-columns__grid` is the
    grid. A row collapses on its OWN width, so a narrow measure (dream, umsc),

@@ -334,6 +334,22 @@ describe("tiptapToEmailHtml", () => {
     expect(html).not.toContain("expression");
   });
 
+  it("renders subscript and superscript as <sub>/<sup> without warnings", () => {
+    const out = tiptapToEmailHtml(
+      doc(
+        p(
+          t("H", []),
+          t("2", [{ type: "subscript" }]),
+          t("O x", []),
+          t("2", [{ type: "superscript" }]),
+        ),
+      ),
+    );
+    expect(out.html).toContain("<sub>2</sub>");
+    expect(out.html).toContain("<sup>2</sup>");
+    expect(out.warnings).toEqual([]);
+  });
+
   it("keeps https images and drops data:, http: and relative ones with a warning", () => {
     const ok = tiptapToEmailHtml(
       doc({

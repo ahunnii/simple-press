@@ -1,6 +1,7 @@
 export * from "./code-block-lowlight";
 export * from "./columns";
 export * from "./color";
+export * from "./container-trailing-paragraph";
 export * from "./embed";
 export * from "./file-handler";
 export * from "./form";
@@ -10,6 +11,7 @@ export * from "./image";
 export * from "./link-click-selection";
 export * from "./quote-calculator";
 export * from "./reset-marks-on-enter";
+export * from "./slash-command";
 export * from "./spacer";
 export * from "./table";
 export * from "./unset-all-marks";

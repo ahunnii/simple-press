@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/react";
+import { useEditorState } from "@tiptap/react";
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { Link2Icon } from "@radix-ui/react-icons";
@@ -21,6 +22,15 @@ interface LinkEditPopoverProps extends VariantProps<typeof toggleVariants> {
 
 const LinkEditPopover = ({ editor, size, variant }: LinkEditPopoverProps) => {
   const [open, setOpen] = React.useState(false);
+  // Subscribe so the button's highlight follows the caret; a bare
+  // editor.isActive() in render only updates when the parent re-renders.
+  const { isLink, inCodeBlock } = useEditorState({
+    editor,
+    selector: (ctx) => ({
+      isLink: ctx.editor.isActive("link"),
+      inCodeBlock: ctx.editor.isActive("codeBlock"),
+    }),
+  });
 
   const { from, to } = editor.state.selection;
   const text = editor.state.doc.textBetween(from, to, " ");
@@ -63,10 +73,10 @@ const LinkEditPopover = ({ editor, size, variant }: LinkEditPopoverProps) => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <ToolbarButton
-          isActive={editor.isActive("link")}
+          isActive={isLink}
           tooltip="Link"
           aria-label="Insert link"
-          disabled={editor.isActive("codeBlock")}
+          disabled={inCodeBlock}
           size={size}
           variant={variant}
         >
