@@ -262,6 +262,17 @@ type RenderContext = {
  * been: one `<div>` per node. Template CSS targets that wrapper (e.g. wealth
  * `.wealth-prose > div:has(> h2)`), so top-level output must not change.
  */
+/**
+ * Tags a `<strong>` that opens a list item's first paragraph — nothing before
+ * it — with `data-lead`, so a template can style "**Title** description"
+ * items as a title line (wealth). CSS can't tell on its own:
+ * `strong:first-child` ignores text nodes, so it also matches bold that sits
+ * mid-sentence ("Actively practice **democratic decision-making**, …").
+ * The server build of `generateHTML` stamps an `xmlns` on tags, hence the
+ * optional attributes.
+ */
+const LEAD_BOLD = /(<li(?:\s[^>]*)?>\s*<p(?:\s[^>]*)?>)<strong>/g;
+
 function renderLeafHtml(node: ContentNode, key: string): ReactNode {
   try {
     const html = sanitizeGeneratedHtml(
@@ -271,7 +282,7 @@ function renderLeafHtml(node: ContentNode, key: string): ReactNode {
           content: [node] as Parameters<typeof generateHTML>[0]["content"],
         },
         extensions,
-      ),
+      ).replace(LEAD_BOLD, '$1<strong data-lead="">'),
     );
     return <div key={key} dangerouslySetInnerHTML={{ __html: html }} />;
   } catch {

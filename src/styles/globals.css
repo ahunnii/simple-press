@@ -10935,7 +10935,9 @@ details.sp-details > summary.sp-details__summary > * {
 .wealth .wealth-prose li > p + ol {
   margin-top: 8px;
 }
-.wealth .wealth-prose li > p > strong:first-child {
+/* "**Title** description" items: TiptapRenderer tags bold that OPENS the
+   item with data-lead (strong:first-child also matched mid-sentence bold). */
+.wealth .wealth-prose li > p > strong[data-lead] {
   display: block;
   margin-bottom: 2px;
   font-family: var(--font-wealth-sub);
@@ -11009,7 +11011,7 @@ details.sp-details > summary.sp-details__summary > * {
   width: 1px;
   background: var(--wealth-rule-strong);
 }
-.wealth .wealth-prose ol > li > p > strong:first-child {
+.wealth .wealth-prose ol > li > p > strong[data-lead] {
   padding-top: 8px;
 }
 
@@ -11047,7 +11049,7 @@ details.sp-details > summary.sp-details__summary > * {
 .wealth .wealth-prose blockquote ul > li::before {
   background: var(--wealth-forest);
 }
-.wealth .wealth-prose blockquote ul > li > p > strong:first-child {
+.wealth .wealth-prose blockquote ul > li > p > strong[data-lead] {
   font-size: 20px;
   line-height: 1.35;
 }
@@ -11068,7 +11070,7 @@ details.sp-details > summary.sp-details__summary > * {
   .wealth .wealth-prose blockquote ul > li::before {
     display: none;
   }
-  .wealth .wealth-prose blockquote ul > li > p > strong:first-child {
+  .wealth .wealth-prose blockquote ul > li > p > strong[data-lead] {
     margin-bottom: 8px;
   }
 }
