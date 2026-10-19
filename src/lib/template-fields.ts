@@ -705,8 +705,10 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "default.global.image-overlay-color",
   // glove, retired 2026-10-08 — the contact page drops the small labels above
   // its headings and replaces the repeated FAQ accordion (and its question
-  // picker) with a link to /faq. Hidden from the admin's custom pairs and
-  // preserved on save; nothing reads them.
+  // picker) with a link to /faq. The accordion came back 2026-10-19 under the
+  // NEW key `glove.contact.faq-items`; the old `glove.contact.faq` stays
+  // retired. Hidden from the admin's custom pairs and preserved on save;
+  // nothing reads them.
   "glove.contact.faq-overline",
   "glove.contact.form-overline",
   "glove.contact.faq",
@@ -714,6 +716,24 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   // buy column keeps the wishlist and one category/SKU line). Hidden from the
   // admin's custom pairs and preserved on save; nothing reads it.
   "glove.product.share-label",
+  // glove, retired 2026-10-19 — the footer's payment logos now come from the
+  // store's Stripe payment method settings (`getAcceptedPaymentMarks`),
+  // switched on/off by `glove.global.footer-payment-marks`. A saved image URL
+  // is hidden from the admin's custom pairs and preserved on save; nothing
+  // reads it.
+  "glove.global.footer-payment-image",
+  // glove, retired 2026-10-19 — the product page's collection-based chain and
+  // charm picker is gone; chains and charms are each product's option groups
+  // (Products → Options, `GloveCustomizer`). The two collection slugs only fed
+  // that picker (the homepage charms band has its own
+  // `glove.homepage.charms-collection-slug`), and the charm limit note sat
+  // beside its charms row (option groups show "Up to N" themselves). Hidden
+  // from the admin's custom pairs and preserved on save (so
+  // scripts/glove/migrate-addons-to-options.ts can still read them); nothing
+  // on the storefront reads them.
+  "glove.product.chains-collection-slug",
+  "glove.product.charms-collection-slug",
+  "glove.product.charms-limit-text",
 ]);
 
 export function isRetiredTemplateKey(key: string): boolean {

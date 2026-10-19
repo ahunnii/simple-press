@@ -15,6 +15,7 @@ export { GloveMedallion } from "./glove-medallion";
 export { GloveMistPanel } from "./glove-mist-panel";
 export { GloveNotice } from "./glove-notice";
 export { GloveOverline } from "./glove-overline";
+export { resolveGlovePrivacyHref } from "./glove-privacy-href";
 export { GlovePrice } from "./glove-price";
 export { GloveProductCard } from "./glove-product-card";
 export { GloveProductGrid } from "./glove-product-grid";

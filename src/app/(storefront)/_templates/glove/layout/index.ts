@@ -22,7 +22,9 @@ export const GLOVE_FIELD_KEYS = {
   footerContactHeading: "glove.global.footer-contact-heading",
   footerContactIntro: "glove.global.footer-contact-intro",
   footerQuestionLabel: "glove.global.footer-question-label",
-  footerPaymentImage: "glove.global.footer-payment-image",
+  footerPaymentMarks: "glove.global.footer-payment-marks",
+  footerNewsletterHeading: "glove.global.footer-newsletter-heading",
+  footerNewsletterBody: "glove.global.footer-newsletter-body",
 } as const;
 
 export const gloveLayoutData: TemplateField[] = [
@@ -156,15 +158,38 @@ export const gloveLayoutData: TemplateField[] = [
     defaultValue: "Have any question?",
   },
   {
-    key: GLOVE_FIELD_KEYS.footerPaymentImage,
-    label: "Payment methods image",
+    key: GLOVE_FIELD_KEYS.footerNewsletterHeading,
+    label: "Newsletter heading",
     description:
-      "Row of accepted payment logos at the right of the footer's bottom bar. Leave blank to hide.",
-    type: "image",
+      "Heading above the email sign-up in the footer's contact column. The sign-up only shows when Email marketing is turned on in Settings → Features.",
+    type: "text",
+    page: "global",
+    group: "global.footer",
+    gridColumn: "col-span-1",
+    defaultValue: "Stay in the know",
+  },
+  {
+    key: GLOVE_FIELD_KEYS.footerNewsletterBody,
+    label: "Newsletter text",
+    description:
+      "Sentence under the footer newsletter heading. Leave blank to hide.",
+    type: "textarea",
     page: "global",
     group: "global.footer",
     gridColumn: "col-span-full",
-    defaultValue: "/templates/glove/images/payment-icons.png",
+    defaultValue: "New gloves, charms and restocks, straight to your inbox.",
+    placeholder: "Why someone should sign up",
+  },
+  {
+    key: GLOVE_FIELD_KEYS.footerPaymentMarks,
+    label: "Show payment logos",
+    description:
+      "Shows the payment options turned on in your Stripe account (cards, Apple Pay, Klarna and so on) at the right of the footer's bottom bar. Change them in Stripe under Settings → Payment methods; the logos here catch up within a few hours.",
+    type: "boolean",
+    page: "global",
+    group: "global.footer",
+    gridColumn: "col-span-full",
+    defaultValue: "true",
   },
 ];
 
@@ -181,7 +206,7 @@ export const gloveLayoutFieldGroups: TemplateFieldGroup[] = [
     id: "global.footer",
     title: "Footer",
     description:
-      "Badge, blurb, column headings, contact text and payment logos. Social links and quick links come from Content → Branding and Content → Navigation.",
+      "Badge, blurb, column headings, contact text, newsletter sign-up and payment logos. Social links and quick links come from Content → Branding and Content → Navigation.",
     icon: "🦶",
     columns: 2,
   },

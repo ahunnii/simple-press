@@ -33,7 +33,7 @@ type Props = {
   numbered: boolean;
   /**
    * Step number per option key, computed once by the buy box so the numbers
-   * run on through the add-on picker. Omitted: this selector numbers its own
+   * run on through the product options panel. Omitted: this selector numbers its own
    * rows from 1.
    */
   steps?: Record<string, number>;

@@ -186,36 +186,51 @@ async function mintToken(
  * form while email marketing is off): nothing is loaded from Google and
  * `execute` resolves `null`.
  *
+ * `warm` picks when Google's script is fetched:
+ * - `"mount"` (default): as soon as the consumer mounts, so the first
+ *   `execute()` isn't waiting on a cold fetch.
+ * - `"interaction"`: not on mount. For a form that sits on every page (a
+ *   footer sign-up) and is used by few visitors, so the ~100 KB script is not
+ *   paid for by everyone. Call the returned `warm()` on first focus / input;
+ *   `execute()` still loads the script on demand if `warm()` never ran.
+ *
+ * `warm()` is a no-op when disabled, under the test bypass, or without a site
+ * key, and safe to call repeatedly (the script is injected once per page).
+ *
  * Deliberately hand-rolled instead of pulling in `react-google-recaptcha-v3`,
  * which is thinly maintained and adds nothing over these ~40 lines.
  */
 export function useRecaptchaV3({
   enabled = true,
-}: { enabled?: boolean } = {}): {
+  warm: warmMode = "mount",
+}: { enabled?: boolean; warm?: "mount" | "interaction" } = {}): {
   execute: (action: string) => Promise<string | null>;
+  warm: () => void;
 } {
   const siteKey = env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-  // Warm the script as soon as a consumer mounts so the first `execute()` —
-  // which usually happens on that same mount — isn't waiting on a cold fetch.
-  useEffect(() => {
+  const warm = useCallback(() => {
     if (!enabled || isTestBypass() || !siteKey) return;
     void loadRecaptchaScript(siteKey).catch(() => {
       /* handled per-call in mintToken */
     });
   }, [enabled, siteKey]);
 
-  return useMemo(
-    () => ({
-      execute: async (action: string) => {
-        if (!enabled) return null;
-        if (isTestBypass()) return RECAPTCHA_TEST_BYPASS_TOKEN;
-        if (!siteKey) return null;
-        return mintToken(siteKey, action);
-      },
-    }),
+  useEffect(() => {
+    if (warmMode === "mount") warm();
+  }, [warmMode, warm]);
+
+  const execute = useCallback(
+    async (action: string) => {
+      if (!enabled) return null;
+      if (isTestBypass()) return RECAPTCHA_TEST_BYPASS_TOKEN;
+      if (!siteKey) return null;
+      return mintToken(siteKey, action);
+    },
     [enabled, siteKey],
   );
+
+  return useMemo(() => ({ execute, warm }), [execute, warm]);
 }
 
 /**

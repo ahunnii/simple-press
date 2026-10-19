@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Headset } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { PaymentMarkId } from "~/lib/stripe/accepted-payment-marks";
 import type { Session } from "~/server/better-auth/config";
 import type { RouterOutputs } from "~/trpc/react";
 import {
@@ -22,7 +23,11 @@ import {
   externalLinkProps,
   resolveFooterQuickLinks,
 } from "~/app/(storefront)/_components/nav";
+import { PaymentMarks } from "~/app/(storefront)/_components/payment-marks";
 
+// Direct import, not the ../shared barrel: the form pulls in ~/trpc/react,
+// which would drag ~/server/db into every barrel consumer's tests.
+import { GloveNewsletterForm } from "../shared/glove-newsletter-form";
 import { GLOVE_DEFAULT_FOOTER_LINKS, GLOVE_FALLBACK_LOGO } from "./glove-nav";
 import { GLOVE_FIELD_KEYS } from "./index";
 
@@ -41,7 +46,8 @@ export type GloveFooterFields = {
   contactHeading: string;
   contactIntro: string;
   questionLabel: string;
-  paymentImage: string;
+  newsletterHeading: string;
+  newsletterBody: string;
   trackLabel: string;
   trackHref: string;
 };
@@ -51,6 +57,8 @@ type GloveFooterProps = DefaultFooterTemplateProps & {
   policyPages?: PolicyPage[];
   /** Session the layout already resolved for the header; seeds the SSR pass. */
   initialSession?: Session | null;
+  /** Logos from the store's Stripe payment method settings; `[]` hides the row. */
+  paymentMarks?: readonly PaymentMarkId[];
   fields: GloveFooterFields;
 };
 
@@ -63,6 +71,7 @@ export function GloveFooter({
   business,
   policyPages = [],
   initialSession,
+  paymentMarks = [],
   fields,
 }: GloveFooterProps) {
   const { isEnabled } = resolveFlags(business.featureFlags);
@@ -321,6 +330,30 @@ export function GloveFooter({
                 {address}
               </p>
             ) : null}
+            {/* Renders nothing unless Email marketing is on for the store. */}
+            <div id="newsletter" className="mt-8 max-w-[420px] empty:hidden">
+              <GloveNewsletterForm
+                variant="footer"
+                idPrefix="glove-footer-newsletter"
+                privacyHref={privacyHref}
+                heading={
+                  fields.newsletterHeading ? (
+                    <span
+                      {...fieldAttr(GLOVE_FIELD_KEYS.footerNewsletterHeading)}
+                    >
+                      {fields.newsletterHeading}
+                    </span>
+                  ) : undefined
+                }
+                body={
+                  fields.newsletterBody ? (
+                    <span {...fieldAttr(GLOVE_FIELD_KEYS.footerNewsletterBody)}>
+                      {fields.newsletterBody}
+                    </span>
+                  ) : undefined
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -332,14 +365,13 @@ export function GloveFooter({
             {business.name} - &copy; {new Date().getFullYear()} All Rights
             Reserved
           </p>
-          {fields.paymentImage ? (
-            <Image
-              src={fields.paymentImage}
-              alt="Accepted payment methods"
-              width={255}
-              height={22}
-              className="h-[22px] w-auto object-contain"
-            />
+          {paymentMarks.length > 0 ? (
+            <div {...fieldAttr(GLOVE_FIELD_KEYS.footerPaymentMarks)}>
+              <PaymentMarks
+                marks={paymentMarks}
+                className="justify-center md:justify-end"
+              />
+            </div>
           ) : null}
         </div>
         <div className="border-t border-white/10">

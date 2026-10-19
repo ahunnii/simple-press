@@ -2,8 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import type { GloveAddOnCopy } from "./glove-addon-picker";
-import type { GloveAddOn } from "./glove-addons";
+import type { GloveAddOnCopy } from "./glove-customizer";
 import type {
   CustomizerDefinition,
   PublicCustomizerDefinition,
@@ -22,13 +21,13 @@ import { GloveLineOptions } from "../shared/glove-line-options";
 import { GloveBuyBox } from "./glove-buy-box";
 import { GloveCustomizer } from "./glove-customizer";
 
-// ---- mocks (same shape as glove-addon-picker.test.tsx) --------------------
+// ---- mocks (same shape as glove-buy-box.test.tsx) -------------------------
 
 const addItem = vi.fn<(item: Record<string, unknown>, qty?: number) => void>();
 const setIsOpen = vi.fn();
 
 vi.mock("~/providers/cart-context", async (importOriginal) => ({
-  cartLineKey: (await importOriginal<typeof CartContext>()).cartLineKey,
+  ...(await importOriginal<typeof CartContext>()),
   useCart: () => ({
     addItem,
     setIsOpen,
@@ -74,7 +73,6 @@ const copy: GloveAddOnCopy = {
   chainLabel: "Chain",
   noChainLabel: "No chain",
   charmsLabel: "Charms",
-  charmsLimit: "Choose up to 3",
   gloveLine: "Glove",
   charmLine: "Charm",
   totalLine: "Total",
@@ -258,7 +256,7 @@ describe("GloveCustomizer - included picks and the running total", () => {
     expect(totalRegion()).toBeEmptyDOMElement();
   });
 
-  it("totals the glove, chain and charms like the legacy picker", () => {
+  it("totals the glove, chain and charms", () => {
     render(<Harness />);
     fireEvent.click(chip(/silver chain/i)); // 25
     fireEvent.click(chip(/star charm/i)); // 35
@@ -402,34 +400,11 @@ function productWith(customizer: PublicCustomizerDefinition | null): Product {
   } as unknown as Product;
 }
 
-const legacyAddOn: GloveAddOn = {
-  id: "chain-gold",
-  slug: "chain-gold",
-  name: "Brass Chain",
-  imageUrl: null,
-  unitPrice: 1500,
-  available: true,
-  cartItem: {
-    productId: "chain-gold",
-    productSlug: "chain-gold",
-    variantId: null,
-    productName: "Brass Chain",
-    variantName: null,
-    price: 1500,
-    compareAtPrice: null,
-    imageUrl: null,
-    sku: null,
-    maxInventory: 10,
-  },
-};
-
 function renderBuyBox({
   customizer = buildDefinition(),
-  addOns = null,
   customizerVisible,
 }: {
   customizer?: PublicCustomizerDefinition | null;
-  addOns?: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null;
   customizerVisible?: boolean;
 } = {}) {
   return render(
@@ -437,7 +412,6 @@ function renderBuyBox({
       product={productWith(customizer)}
       numbered
       intro={null}
-      addOns={addOns}
       customizerVisible={customizerVisible}
       categories={[]}
       linkCategories={false}
@@ -527,17 +501,6 @@ describe("GloveBuyBox - product options path", () => {
     expect(totalRegion()).toBeEmptyDOMElement();
   });
 
-  it("takes over from the legacy add-ons: the old picker is not rendered", () => {
-    renderBuyBox({
-      addOns: { chains: [legacyAddOn], charms: [] },
-    });
-    expect(screen.queryByRole("radio", { name: /brass chain/i })).toBeNull();
-    expect(screen.getByRole("radio", { name: /silver chain/i })).toBeTruthy();
-    fireEvent.click(addToCart());
-    // No separate chain line.
-    expect(addItem).toHaveBeenCalledTimes(1);
-  });
-
   it("hides the picker when the owner hides the section (and nothing is required)", () => {
     renderBuyBox({ customizerVisible: false });
     expect(screen.queryByText(copy.heading)).toBeNull();
@@ -546,19 +509,17 @@ describe("GloveBuyBox - product options path", () => {
   });
 });
 
-describe("GloveBuyBox - no customizer keeps the legacy path", () => {
-  it("shows the legacy picker and adds separate addOnFor lines", () => {
-    renderBuyBox({
-      customizer: null,
-      addOns: { chains: [legacyAddOn], charms: [] },
-    });
-    fireEvent.click(chip(/brass chain/i));
+describe("GloveBuyBox - a product without option groups", () => {
+  it("shows no chain/charm UI and adds one plain line (no addOnFor)", () => {
+    renderBuyBox({ customizer: null });
+    expect(screen.queryByText(copy.heading)).toBeNull();
+    expect(screen.queryByRole("radiogroup")).toBeNull();
+    expect(addToCart()).not.toHaveAttribute("aria-disabled");
     fireEvent.click(addToCart());
-    expect(addItem).toHaveBeenCalledTimes(2);
-    expect(addItem.mock.calls[1]![0]).toMatchObject({
-      productId: "chain-gold",
-      addOnFor: "glove-1:glove-v-m",
-    });
-    expect(addItem.mock.calls[0]![0]).not.toHaveProperty("configuration");
+    expect(addItem).toHaveBeenCalledTimes(1);
+    const [line] = addItem.mock.calls[0]!;
+    expect(line).toMatchObject({ productId: "glove-1", price: GLOVE_PRICE });
+    expect(line).not.toHaveProperty("addOnFor");
+    expect(line).not.toHaveProperty("configuration");
   });
 });

@@ -27,7 +27,8 @@ export function orderGloveGroups<T extends { key: string }>(
  * Only dimensions the Easy Guide knows get a number; they are numbered 1, 2,
  * 3 ... in display order, so a glove without a Grommet option reads 1, 2, 3
  * instead of skipping to the guide's own 2, 3, 5. `next` is the number the
- * add-on picker's first row starts at.
+ * first product option group (`GloveCustomizer`) starts at; the groups it
+ * actually shows then count up from there.
  */
 export function gloveStepPlan(
   orderedKeys: string[],

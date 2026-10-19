@@ -24407,34 +24407,41 @@ details.sp-details > summary.sp-details__summary > * {
   transform: translateX(3px);
 }
 
-/* Image well: photos sit contained on the wash and multiply into it, so a
-   white photo background melts away instead of showing as a box. */
-.glove .glove-product-img {
-  mix-blend-mode: multiply;
-}
-
-.glove .glove-product-img-main {
+/* Image well: each photo is a layer (blurred cover copy + contained photo) over
+   the wash, which only shows while images load. The layer fades as a unit so
+   the 2nd photo brings its own backdrop. No multiply blend: it muddies the
+   blur. */
+.glove .glove-product-layer-main {
   transition: opacity 300ms ease;
 }
 
-.glove .glove-product-img-alt {
+.glove .glove-product-layer-alt {
   opacity: 0;
   transition: opacity 300ms ease;
 }
 
-/* Multiplied layers would stack and darken, so the 2nd photo replaces the 1st. */
+/* Crossfade: the 1st layer fades out as the 2nd fades in, so a transparent
+   PNG never shows the other photo through it. :has() keeps single-image
+   cards from fading to the bare wash. */
 .glove
-  .glove-product-card:has(.glove-product-img-alt):hover
-  .glove-product-img-main,
+  .glove-product-card:has(.glove-product-layer-alt):hover
+  .glove-product-layer-main,
 .glove
-  .glove-product-card:has(.glove-product-img-alt):focus-within
-  .glove-product-img-main {
+  .glove-product-card:has(.glove-product-layer-alt):focus-within
+  .glove-product-layer-main {
   opacity: 0;
 }
 
-.glove .glove-product-card:hover .glove-product-img-alt,
-.glove .glove-product-card:focus-within .glove-product-img-alt {
+.glove .glove-product-card:hover .glove-product-layer-alt,
+.glove .glove-product-card:focus-within .glove-product-layer-alt {
   opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glove .glove-product-layer-main,
+  .glove .glove-product-layer-alt {
+    transition: none;
+  }
 }
 
 .glove .glove-product-title-link::after {

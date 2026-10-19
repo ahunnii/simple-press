@@ -15,7 +15,6 @@ import {
 import { cartItemId, useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-import { groupGloveCartLines } from "../cart-checkout/glove-cart-groups";
 import { gloveButtonClass } from "../shared/glove-button";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
 import { GloveCartItem } from "./glove-cart-item";
@@ -82,12 +81,10 @@ export function GloveCartDrawer() {
         ) : (
           <>
             <ul className="m-0 min-h-0 flex-1 list-none overflow-y-auto px-5 py-1">
-              {groupGloveCartLines(items).map(({ item, addOns, total }) => (
+              {items.map((item) => (
                 <GloveCartItem
                   key={cartItemId(item)}
                   item={item}
-                  addOns={addOns}
-                  groupTotal={total}
                   onNavigate={close}
                 />
               ))}

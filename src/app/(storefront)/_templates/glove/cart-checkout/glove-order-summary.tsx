@@ -9,7 +9,6 @@ import { formatPrice } from "~/lib/prices";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
 import { GloveLineOptions } from "../shared/glove-line-options";
-import { groupGloveCartLines } from "./glove-cart-groups";
 
 type GloveOrderSummaryProps = {
   heading: string;
@@ -33,24 +32,15 @@ const DD = "glove-body m-0 text-[15px] font-bold text-[var(--glove-ink)]";
  * One order line: thumbnail with a quantity badge, name / variant / chosen
  * options (a configured line), line total.
  */
-function SummaryLine({
-  item,
-  compact = false,
-}: {
-  item: CartItem;
-  /** Smaller, for a chain or charm nested under its glove. */
-  compact?: boolean;
-}) {
+function SummaryLine({ item }: { item: CartItem }) {
   return (
     <div className="flex items-center gap-3">
-      <div
-        className={`relative shrink-0 overflow-hidden bg-[var(--glove-paper)] ${compact ? "size-10" : "size-14"}`}
-      >
+      <div className="relative size-14 shrink-0 overflow-hidden bg-[var(--glove-paper)]">
         <Image
           src={item.imageUrl ?? "/placeholder.svg"}
           alt=""
           fill
-          sizes={compact ? "40px" : "56px"}
+          sizes="56px"
           className="object-cover"
         />
         <span
@@ -61,24 +51,18 @@ function SummaryLine({
         </span>
       </div>
       <div className="min-w-0 flex-1">
-        <p
-          className={`glove-display leading-snug font-medium text-[var(--glove-ink)] ${compact ? "text-[13px]" : "text-[14px]"}`}
-        >
+        <p className="glove-display text-[14px] leading-snug font-medium text-[var(--glove-ink)]">
           {item.productName}
           <span className="sr-only"> × {item.quantity}</span>
         </p>
         {item.variantName ? (
-          <p
-            className={`text-[var(--glove-muted)] ${compact ? "text-[12px]" : "text-[13px]"}`}
-          >
+          <p className="text-[13px] text-[var(--glove-muted)]">
             {item.variantName}
           </p>
         ) : null}
         <GloveLineOptions item={item} size="sm" />
       </div>
-      <span
-        className={`glove-body shrink-0 font-bold text-[var(--glove-ink)] ${compact ? "text-[14px]" : "text-[15px]"}`}
-      >
+      <span className="glove-body shrink-0 text-[15px] font-bold text-[var(--glove-ink)]">
         {formatPrice(item.price * item.quantity)}
       </span>
     </div>
@@ -113,32 +97,12 @@ export function GloveOrderSummary({
       </h2>
 
       <ul className="m-0 mt-5 flex list-none flex-col p-0">
-        {groupGloveCartLines(items).map(({ item, addOns, total }) => (
+        {items.map((item) => (
           <li
             key={cartItemId(item)}
             className="border-b border-[var(--glove-mist-line)] py-3"
           >
             <SummaryLine item={item} />
-            {addOns.length > 0 ? (
-              <>
-                <ul
-                  aria-label={`Added to ${item.productName}`}
-                  className="m-0 mt-2 ml-[68px] flex list-none flex-col gap-2 border-l border-[var(--glove-mist-line)] p-0 pl-3"
-                >
-                  {addOns.map((addOn) => (
-                    <li key={cartItemId(addOn)}>
-                      <SummaryLine item={addOn} compact />
-                    </li>
-                  ))}
-                </ul>
-                <p className="m-0 mt-2 ml-[68px] flex items-baseline justify-between gap-3 pl-3 text-[13px] text-[var(--glove-muted)]">
-                  <span>Total with add-ons</span>
-                  <span className="glove-body font-bold text-[var(--glove-ink)]">
-                    {formatPrice(total)}
-                  </span>
-                </p>
-              </>
-            ) : null}
           </li>
         ))}
       </ul>

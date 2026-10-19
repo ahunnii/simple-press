@@ -14,6 +14,7 @@ import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
 
 import { resolveFields } from "..";
+import { resolveGlovePrivacyHref } from "../shared";
 import { gloveLinkAllowed } from "../steps/glove-links";
 import { resolveGloveListRows } from "../steps/glove-list-rows";
 import { GloveSteps } from "../steps/glove-steps";
@@ -123,11 +124,11 @@ function resolveStoryVideo(raw: string): GloveStoryVideo | null {
 /**
  * The LuvGluv homepage: hero, glove styles, founder story, six easy steps,
  * gift cards, collections, featured gloves, promise strip, charms, sorority
- * and the VIP list (design.md "Per-page section concepts › Homepage").
+ * and the VIP list / newsletter band (design.md "Per-page section concepts › Homepage").
  *
  * Every section except the hero is hideable. Sections that depend on store
- * data (featured gloves, charms) and on feature flags (VIP list needs
- * customer accounts) hide themselves when there is nothing honest to show.
+ * data (featured gloves, charms) and on feature flags (the VIP band needs Email
+ * marketing or customer accounts) hide themselves when there is nothing honest to show.
  * Links to a switched-off feature are dropped, never redirected (B2.5).
  */
 export async function GloveHomepage({
@@ -151,19 +152,32 @@ export async function GloveHomepage({
     isSectionVisible(customFields, "glove", `homepage.${group}`);
   const productsEnabled = isEnabled("products");
 
-  // VIP band is a sign-up prompt: hide it once a customer is signed in (D8).
-  // `getSession` is request-cached and the layout already reads it, so this
-  // adds no new dynamic work. The editor preview (`x-sp-preview`) keeps the
-  // band so owners signed in to the admin can still edit it.
+  // VIP band has two modes. With Email marketing on it is a real newsletter
+  // sign-up (double opt-in) shown to everyone, signed in or not. Otherwise it
+  // is an account sign-up prompt, hidden once a customer is signed in (D8).
+  // `isEnabled` already folds in flag dependencies. `getSession` is
+  // request-cached and the layout already reads it, so this adds no new
+  // dynamic work. The editor preview (`x-sp-preview`) keeps the account CTA so
+  // owners signed in to the admin can still edit it.
   const [session, requestHeaders] = await Promise.all([
     getSession(),
     headers(),
   ]);
   const isEditorPreview = requestHeaders.get("x-sp-preview") === "1";
+  const newsletterEnabled = isEnabled("emailMarketing");
   const showVip =
     show("vip") &&
-    isEnabled("customerAccounts") &&
-    (!session?.user || isEditorPreview);
+    (newsletterEnabled ||
+      (isEnabled("customerAccounts") && (!session?.user || isEditorPreview)));
+  // Only the newsletter mode needs the privacy link; a failed read falls back
+  // to the platform policy.
+  const vipPrivacyHref = newsletterEnabled
+    ? resolveGlovePrivacyHref(
+        await api.content
+          .getSimplifiedPages({ type: "policy" })
+          .catch(() => []),
+      )
+    : undefined;
 
   // ── Remote reads: each is flag-gated server side and may throw, so every
   // one is caught; one failing read must never take the homepage down. ─────
@@ -367,6 +381,7 @@ export async function GloveHomepage({
           note={field("vip-note")}
           buttonLabel={field("vip-button-label")}
           buttonUrl={link("vip-button-url")}
+          newsletterPrivacyHref={vipPrivacyHref}
           sectionAttrs={sectionGroupAttr("homepage", "vip")}
         />
       ) : null}

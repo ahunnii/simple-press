@@ -12,7 +12,7 @@ const contactFaqData: TemplateField[] = [
     key: "glove.contact.faq-heading",
     label: "Heading",
     description:
-      "Heading above the link to your FAQ page. The section stays out of view until at least one question is published (Site Setup → FAQ).",
+      "Heading above the questions. The section stays out of view until at least one question is published (Site Setup → FAQ).",
     type: "text",
     page: "contact",
     group: "contact.faq",
@@ -30,15 +30,28 @@ const contactFaqData: TemplateField[] = [
     defaultValue: "Find quick answers about our gloves, sizing and shipping.",
   },
   {
+    // New key 2026-10-19; the old `glove.contact.faq` stays retired.
+    key: "glove.contact.faq-items",
+    label: "Questions",
+    description:
+      "Pick questions from Site Setup → FAQ. Leave empty to show the first 6 published questions.",
+    type: "faq",
+    page: "contact",
+    group: "contact.faq",
+    gridColumn: "col-span-full",
+    minItems: 0,
+    maxItems: 6,
+  },
+  {
     key: "glove.contact.faq-link-label",
     label: "Button label",
     description:
-      "Label of the button that opens the FAQ page. Leave blank to hide it.",
+      "Label of the button under the questions that opens the full FAQ page. Leave blank to hide it.",
     type: "text",
     page: "contact",
     group: "contact.faq",
     gridColumn: "col-span-1",
-    defaultValue: "Read the FAQ",
+    defaultValue: "See all questions",
   },
 ];
 
@@ -139,7 +152,7 @@ export const gloveContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.faq",
     title: "Frequently asked questions",
-    description: "Heading and link to the FAQ page, shown beside the form",
+    description: "Heading, questions and link to the FAQ page, shown beside the form",
     icon: "❓",
     columns: 2,
   },
@@ -166,7 +179,7 @@ export const gloveContactSections: TemplateSection[] = [
     page: "contact",
     title: "Frequently asked questions",
     description:
-      "Heading and a link to the FAQ page, on the left. Hidden until a question is published.",
+      "Heading, a few questions and a link to the FAQ page, on the left. Hidden until a question is published.",
     groupIds: ["contact.faq"],
     order: 0,
     hideable: true,

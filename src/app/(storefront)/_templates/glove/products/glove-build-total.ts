@@ -47,7 +47,7 @@ export function pickLineLabel(
 /**
  * The parts joined into the running-total line: the glove first, then every
  * chosen value in group order, then filled text options. Amounts are per
- * line (unit price x quantity), like the legacy picker's.
+ * line (unit price x quantity).
  */
 export function gloveBuildTotalParts({
   gloveLine,

@@ -3,6 +3,7 @@ import { Lato, Poppins } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { getAcceptedPaymentMarksForBusiness } from "~/lib/stripe/accepted-payment-marks";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
@@ -40,16 +41,6 @@ export async function GloveLayout({
   business,
 }: DefaultLayoutTemplateProps) {
   const { isEnabled } = resolveFlags(business.featureFlags);
-  const [session, policyPages] = await Promise.all([
-    getSession(),
-    api.content.getSimplifiedPages({ type: "policy" }),
-  ]);
-
-  const banner = resolveBanner(business.siteContent, isEnabled);
-  const themeVars = resolveThemeVars(
-    "glove",
-    business.siteContent?.customFields,
-  );
 
   const f = resolveFields(
     business.siteContent?.customFields,
@@ -57,6 +48,24 @@ export async function GloveLayout({
   );
   const get = (key: string) => f[key] ?? "";
   const trackHref = get(GLOVE_FIELD_KEYS.trackLink);
+  // Boolean field: anything but an explicit "false" keeps the default (on).
+  const showPaymentMarks = get(GLOVE_FIELD_KEYS.footerPaymentMarks) !== "false";
+
+  const [session, policyPages, paymentMarks] = await Promise.all([
+    getSession(),
+    api.content.getSimplifiedPages({ type: "policy" }),
+    // Logos come from the store's Stripe payment method settings (cached 6h;
+    // never throws — `[]` on any problem).
+    showPaymentMarks && business.isStripeConnected
+      ? getAcceptedPaymentMarksForBusiness(business.id)
+      : Promise.resolve([]),
+  ]);
+
+  const banner = resolveBanner(business.siteContent, isEnabled);
+  const themeVars = resolveThemeVars(
+    "glove",
+    business.siteContent?.customFields,
+  );
 
   return (
     <div
@@ -92,6 +101,7 @@ export async function GloveLayout({
         business={business}
         policyPages={policyPages}
         initialSession={session ?? null}
+        paymentMarks={paymentMarks}
         fields={{
           badge: get(GLOVE_FIELD_KEYS.footerBadge),
           blurb: get(GLOVE_FIELD_KEYS.footerBlurb),
@@ -100,7 +110,8 @@ export async function GloveLayout({
           contactHeading: get(GLOVE_FIELD_KEYS.footerContactHeading),
           contactIntro: get(GLOVE_FIELD_KEYS.footerContactIntro),
           questionLabel: get(GLOVE_FIELD_KEYS.footerQuestionLabel),
-          paymentImage: get(GLOVE_FIELD_KEYS.footerPaymentImage),
+          newsletterHeading: get(GLOVE_FIELD_KEYS.footerNewsletterHeading),
+          newsletterBody: get(GLOVE_FIELD_KEYS.footerNewsletterBody),
           trackLabel: get(GLOVE_FIELD_KEYS.trackLabel),
           trackHref: trackHref === "" ? "/order-status" : trackHref,
         }}

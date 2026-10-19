@@ -150,7 +150,7 @@ export const productRouter = createTRPCRouter({
       const products = await ctx.db.product.findMany({
         where: { businessId, published: true },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          images: { orderBy: { sortOrder: "asc" }, take: 2 },
           variants: true,
           // Card data: lets a card link to the product page instead of
           // quick-adding (see `checkProductStatus` `hasOptions`).
@@ -185,7 +185,7 @@ export const productRouter = createTRPCRouter({
           ...(featuredOnly ? { featured: true } : {}),
         },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          images: { orderBy: { sortOrder: "asc" }, take: 2 },
           variants: true,
           _count: { select: { optionGroups: true } },
         },

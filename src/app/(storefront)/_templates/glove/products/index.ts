@@ -192,14 +192,17 @@ const detailsData: TemplateField[] = [
   },
 ];
 
-// ─── Add-on picker ("Complete your LuvGluv") ───────────────────────────────
+// ─── Options panel ("Complete your LuvGluv") ───────────────────────────────
+// The rows are the product's option groups (Products -> Options). The old
+// collection-based picker is retired (2026-10-19); its collection slugs and
+// charm limit note are in RETIRED_TEMPLATE_KEYS (~/lib/template-fields).
 
 const addonsData: TemplateField[] = [
   {
     key: "glove.product.addons-heading",
     label: "Heading",
     description:
-      "Heading of the chain and charm picker on made-to-order products.",
+      "Heading of the panel that lists a product's options (chain, charms, engraving). It shows on any product that has options.",
     type: "text",
     page: "product",
     group: "product.addons",
@@ -209,7 +212,8 @@ const addonsData: TemplateField[] = [
   {
     key: "glove.product.addons-helper",
     label: "Helper text",
-    description: "One line under the picker heading. Leave blank to hide.",
+    description:
+      "One line under the options panel heading. Leave blank to hide.",
     type: "textarea",
     page: "product",
     group: "product.addons",
@@ -218,33 +222,10 @@ const addonsData: TemplateField[] = [
       "Your first charm is included with every glove — add extras here.",
   },
   {
-    key: "glove.product.chains-collection-slug",
-    label: "Chains collection",
-    description:
-      "Slug of the collection whose products fill the Chain row. The row hides when the collection is missing or empty.",
-    type: "text",
-    page: "product",
-    group: "product.addons",
-    gridColumn: "col-span-1",
-    defaultValue: "chains",
-    placeholder: "e.g. chains",
-  },
-  {
-    key: "glove.product.charms-collection-slug",
-    label: "Charms collection",
-    description:
-      "Slug of the collection whose products fill the Charms row. The row hides when the collection is missing or empty.",
-    type: "text",
-    page: "product",
-    group: "product.addons",
-    gridColumn: "col-span-1",
-    defaultValue: "charms",
-    placeholder: "e.g. charms",
-  },
-  {
     key: "glove.product.chain-label",
-    label: "Chain row label",
-    description: "Label of the chain row (one choice).",
+    label: "Chain option name",
+    description:
+      'Name of your chain option, as you named it under Products → Options. When an option is called this, its "none" choice uses the No chain wording below and the running total uses this word.',
     type: "text",
     page: "product",
     group: "product.addons",
@@ -254,7 +235,8 @@ const addonsData: TemplateField[] = [
   {
     key: "glove.product.no-chain-label",
     label: "No chain option",
-    description: "First choice in the chain row, for gloves without a chain.",
+    description:
+      "First choice in the chain row when choosing a chain is optional, for gloves without a chain.",
     type: "text",
     page: "product",
     group: "product.addons",
@@ -263,8 +245,9 @@ const addonsData: TemplateField[] = [
   },
   {
     key: "glove.product.charms-label",
-    label: "Charms row label",
-    description: "Label of the charms row (up to three choices).",
+    label: "Charms option name",
+    description:
+      "Name of your charms option, as you named it under Products → Options. When an option is called this, each pick reads as the charm word below in the running total.",
     type: "text",
     page: "product",
     group: "product.addons",
@@ -272,20 +255,10 @@ const addonsData: TemplateField[] = [
     defaultValue: "Charms",
   },
   {
-    key: "glove.product.charms-limit-text",
-    label: "Charm limit note",
-    description: "Shown beside the charms row label.",
-    type: "text",
-    page: "product",
-    group: "product.addons",
-    gridColumn: "col-span-1",
-    defaultValue: "Choose up to 3",
-  },
-  {
     key: "glove.product.glove-line-label",
     label: "Total line: glove",
     description:
-      "Word for the glove itself in the running total under the picker.",
+      "Word for the glove itself in the running total under the options panel.",
     type: "text",
     page: "product",
     group: "product.addons",
@@ -385,7 +358,7 @@ export const gloveProductFieldGroups: TemplateFieldGroup[] = [
     id: "product.addons",
     title: "Chain and charm picker",
     description:
-      'The "Complete your LuvGluv" picker on made-to-order products: which collections fill it and its labels',
+      'Wording of the "Complete your LuvGluv" panel. The chains, charms and engraving in it are each product\'s options, set under Products → Options',
     icon: "🔗",
     columns: 2,
   },
@@ -439,7 +412,7 @@ export const gloveProductSections: TemplateSection[] = [
     page: "product",
     title: "Chain and charm picker",
     description:
-      '"Complete your LuvGluv" picker on made-to-order products, filled from your chains and charms collections',
+      '"Complete your LuvGluv" panel with each product\'s options (chain, charms, engraving) from Products → Options',
     groupIds: ["product.addons"],
     order: 2,
     hideable: true,

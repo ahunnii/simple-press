@@ -30,9 +30,22 @@ type SubmitInput = { email: string; firstName?: string; lastName?: string };
  * value rides along on submit. When `enabled` is false (flag off) show the
  * template's existing fallback and don't offer a form that can't work.
  */
-export function useNewsletterSignup() {
+export function useNewsletterSignup({
+  warm = "mount",
+}: {
+  /**
+   * When to load Google's reCAPTCHA script. Default `"mount"`. A sign-up that
+   * renders on every page (a footer) should pass `"interaction"` and call
+   * `warmCaptcha()` on first focus so the script isn't loaded for visitors who
+   * never touch the form.
+   */
+  warm?: "mount" | "interaction";
+} = {}) {
   const enabled = useStorefrontFlags().isEnabled("emailMarketing");
-  const { execute: executeRecaptcha } = useRecaptchaV3({ enabled });
+  const { execute: executeRecaptcha, warm: warmCaptcha } = useRecaptchaV3({
+    enabled,
+    warm,
+  });
   const honeypotRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<NewsletterSignupStatus>(
     enabled ? "idle" : "disabled",
@@ -88,6 +101,7 @@ export function useNewsletterSignup() {
     isSuccess: status === "success",
     error,
     honeypotRef,
+    warmCaptcha,
     submit,
     reset,
   };

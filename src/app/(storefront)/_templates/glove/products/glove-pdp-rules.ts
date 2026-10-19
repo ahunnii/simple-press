@@ -1,9 +1,10 @@
 /**
  * Which products count as made-to-order gloves: members of the
  * `notice-collection-slug` collection, or every product when that slug is
- * blank. Gloves get the made-to-order notice, the numbered option steps, the
- * add-on picker and the Easy Guide banner; charms, chains and gift cards get
- * none of them.
+ * blank. Gloves get the made-to-order notice, the numbered steps (variant
+ * rows, then their option groups) and the Easy Guide banner; charms, chains
+ * and gift cards get none of them. Chains and charms themselves come from the
+ * product's option groups, shown for any product that has them.
  */
 export function isGloveMadeToOrder(
   noticeSlug: string,

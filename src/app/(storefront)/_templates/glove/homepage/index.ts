@@ -685,7 +685,7 @@ const vipData: TemplateField[] = [
     key: "glove.homepage.vip-heading",
     label: "Heading",
     description:
-      "Heading of the newsletter band. The band hides itself when customer accounts are switched off.",
+      "Heading of the newsletter band. With Email marketing on, the band is a real email sign-up (double opt-in) for every visitor. Otherwise it is an account sign-up prompt and hides itself when customer accounts are switched off.",
     type: "text",
     page: "homepage",
     group: "homepage.vip",
@@ -708,7 +708,7 @@ const vipData: TemplateField[] = [
     key: "glove.homepage.vip-note",
     label: "Helper text",
     description:
-      "Explains how shoppers opt in. Shoppers create an account, then choose email updates in their account preferences. Leave blank to hide.",
+      "Only used when Email marketing is off: explains that shoppers create an account, then choose email updates in their account preferences. With Email marketing on, the band shows a sign-up form and this text is not shown. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.vip",
@@ -720,7 +720,8 @@ const vipData: TemplateField[] = [
   {
     key: "glove.homepage.vip-button-label",
     label: "Button label",
-    description: "Button that sends shoppers to create an account.",
+    description:
+      "With Email marketing on, the label of the form's Subscribe button. Otherwise the button that sends shoppers to create an account.",
     type: "text",
     page: "homepage",
     group: "homepage.vip",
@@ -730,7 +731,8 @@ const vipData: TemplateField[] = [
   {
     key: "glove.homepage.vip-button-url",
     label: "Button link",
-    description: "Where the VIP button goes.",
+    description:
+      "Only used when Email marketing is off: where the VIP button goes. Ignored when the band shows the sign-up form.",
     type: "url",
     page: "homepage",
     group: "homepage.vip",

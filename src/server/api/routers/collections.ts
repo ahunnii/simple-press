@@ -149,7 +149,7 @@ export const collectionsRouter = createTRPCRouter({
             include: {
               product: {
                 include: {
-                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  images: { orderBy: { sortOrder: "asc" }, take: 2 },
                   variants: true,
                   baseInventoryUnit: {
                     select: { inventoryQty: true, allowBackorders: true },
@@ -647,7 +647,7 @@ export const collectionsRouter = createTRPCRouter({
             include: {
               product: {
                 include: {
-                  images: { orderBy: { sortOrder: "asc" }, take: 1 },
+                  images: { orderBy: { sortOrder: "asc" }, take: 2 },
                   variants: true,
                   baseInventoryUnit: {
                     select: { inventoryQty: true, allowBackorders: true },
