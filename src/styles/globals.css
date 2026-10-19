@@ -24373,6 +24373,27 @@ details.sp-details > summary.sp-details__summary > * {
   animation: glove-swing 700ms ease-in-out 1;
 }
 
+/* Option photos (chip + preview). The owner's product photos are centred on
+   wide white backdrops, so a plain contain-fit leaves the charm tiny. The
+   <img> is zoomed toward the centre inside its overflow-hidden frame. The
+   transform sits on the image, never on .glove-swing (that span animates). */
+.glove .glove-option-photo {
+  transform: scale(1.4);
+}
+
+@keyframes glove-option-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.glove .glove-option-fade {
+  animation: glove-option-fade 150ms ease-out 1;
+}
+
 /* Cards */
 /* The photo multiplies into the circle's mist fill, so a white photo
    background (charms) reads as mist inside its ring instead of vanishing. */
@@ -24882,6 +24903,10 @@ body:has(.glove) [data-slot="dialog-content"] .text-gray-500 {
   .glove .glove-charm-card:hover .glove-swing,
   .glove .glove-charm-card:focus-within .glove-swing,
   .glove .glove-swing.is-swinging {
+    animation: none;
+  }
+
+  .glove .glove-option-fade {
     animation: none;
   }
 

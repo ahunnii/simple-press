@@ -12,6 +12,7 @@ import { cn } from "~/lib/utils";
 
 import { gloveBuildTotalParts, pickLineLabel } from "./glove-build-total";
 import { ChipRow } from "./glove-chip-row";
+import { GloveOptionPreview } from "./glove-option-preview";
 import { GloveOptionLabel } from "./glove-variant-selector";
 
 /**
@@ -30,6 +31,12 @@ export type GloveAddOnCopy = {
   charmLine: string;
   totalLine: string;
 };
+
+/** A choice shown in the preview: a value of one of the choice groups. */
+type PreviewTarget = { groupId: string; valueId: string };
+
+const sameTarget = (a: PreviewTarget | null, b: PreviewTarget) =>
+  a?.groupId === b.groupId && a.valueId === b.valueId;
 
 /** Marks a group's wrapper, so a failed add can find the first invalid one. */
 const GROUP_ATTR = { "data-glove-option-group": "" };
@@ -60,6 +67,8 @@ type Props = {
  *   "No chain" chip, which clears the group
  * - a multi-pick group is a checkbox row with an "N of max" count; chips past
  *   the limit turn inert; "first N included" picks read "Included"
+ * - an unpicked chip also reads "Included" while picking it would be free
+ *   (an included single-pick group, or free picks left in a multi-pick one)
  * - a text group (engraving) is a glove input with a character counter
  *
  * Prices are the controller's preview (the server re-prices). The itemised
@@ -77,6 +86,10 @@ export function GloveCustomizer({
   const headingId = useId();
   const rootRef = useRef<HTMLElement | null>(null);
   const [swingId, setSwingId] = useState<string | null>(null);
+  // What the preview shows: a hovered/focused chip wins, otherwise the most
+  // recently picked value that is still selected.
+  const [hovered, setHovered] = useState<PreviewTarget | null>(null);
+  const [picks, setPicks] = useState<PreviewTarget[]>([]);
   const { definition, attempt } = controller;
 
   // After a failed add, take the shopper to the first group with a problem.
@@ -103,6 +116,21 @@ export function GloveCustomizer({
   const { selectedValues, selectedTexts } = controller;
   const hasSelection = selectedValues.length > 0 || selectedTexts.length > 0;
   const total = controller.unitPrice * quantity;
+
+  const targetItem = (target: PreviewTarget | null) => {
+    const group = target ? groupById.get(target.groupId) : undefined;
+    const value = group?.values.find((v) => v.id === target?.valueId);
+    return group && value
+      ? { group, item: valueChipItem(group, value, controller) }
+      : null;
+  };
+  const lastPick = [...picks]
+    .reverse()
+    .find((pick) => controller.isSelected(pick.groupId, pick.valueId));
+  const shown = targetItem(hovered) ?? targetItem(lastPick ?? null);
+  const hasPreviewMedia = groups.some((group) =>
+    group.values.some((value) => value.imageUrl ?? value.swatchColor),
+  );
   const parts = gloveBuildTotalParts({
     gloveLine: copy.gloveLine,
     gloveAmount,
@@ -140,7 +168,21 @@ export function GloveCustomizer({
         </p>
       ) : null}
 
-      <div className="mt-4 flex flex-col gap-5">
+      {hasPreviewMedia ? (
+        <GloveOptionPreview
+          groupName={shown?.group.name ?? null}
+          item={shown?.item ?? null}
+        />
+      ) : null}
+
+      <div
+        className="mt-4 flex flex-col gap-5"
+        onPointerLeave={() => setHovered(null)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+            setHovered(null);
+        }}
+      >
         {groups.map((group, index) => {
           const step = firstStep === null ? null : firstStep + index;
           return group.kind === "text" ? (
@@ -159,6 +201,19 @@ export function GloveCustomizer({
               copy={copy}
               swingId={swingId}
               setSwingId={setSwingId}
+              onPreview={(valueId) =>
+                setHovered(valueId ? { groupId: group.id, valueId } : null)
+              }
+              onPicked={(valueId, nowSelected) => {
+                const target = { groupId: group.id, valueId };
+                setPicks((prev) => [
+                  ...prev.filter((p) => !sameTarget(p, target)),
+                  ...(nowSelected ? [target] : []),
+                ]);
+                // Picking previews the value; deselecting the shown one
+                // falls back to the previous pick.
+                setHovered(nowSelected ? target : null);
+              }}
             />
           );
         })}
@@ -195,6 +250,44 @@ function noneLabel(group: PublicCustomizerGroup, copy: GloveAddOnCopy) {
   return `No ${name.toLowerCase()}`;
 }
 
+/**
+ * One value of a choice group as a chip item (also what the preview shows, so
+ * the chip and the preview always agree on name, photo and status).
+ */
+function valueChipItem(
+  group: PublicCustomizerGroup,
+  value: PublicCustomizerGroup["values"][number],
+  controller: ProductCustomizerController,
+): ChipItem {
+  const single = group.maxSelections <= 1;
+  const pickedCount = group.values.filter((v) =>
+    controller.isSelected(group.id, v.id),
+  ).length;
+  const selected = controller.isSelected(group.id, value.id);
+  const atLimit = !single && pickedCount >= group.maxSelections;
+  // An unpicked chip reads "Included" when picking it adds nothing to the
+  // price: any swap in an included single-pick group, or the next pick while
+  // the group still has free picks left. Shoppers see the glove price covers
+  // it before they choose, not only after.
+  const nextPickFree = single
+    ? group.includedCount >= 1
+    : pickedCount < group.includedCount;
+  return {
+    id: value.id,
+    name: value.label,
+    imageUrl: value.imageUrl,
+    swatchColor: value.swatchColor,
+    price: value.price > 0 ? value.price : null,
+    // A chosen value that has since sold out can still be removed.
+    available: value.available || selected,
+    blocked: atLimit && !selected,
+    included: selected
+      ? controller.includedValueIds.has(value.id)
+      : nextPickFree,
+    unoptimized: true,
+  };
+}
+
 function ChoiceRow({
   group,
   controller,
@@ -202,6 +295,8 @@ function ChoiceRow({
   copy,
   swingId,
   setSwingId,
+  onPreview,
+  onPicked,
 }: {
   group: PublicCustomizerGroup;
   controller: ProductCustomizerController;
@@ -209,6 +304,10 @@ function ChoiceRow({
   copy: GloveAddOnCopy;
   swingId: string | null;
   setSwingId: (id: string | null) => void;
+  /** A value chip was hovered/focused; null for the "No chain" chip. */
+  onPreview: (valueId: string | null) => void;
+  /** A value was picked (true) or deselected (false). */
+  onPicked: (valueId: string, nowSelected: boolean) => void;
 }) {
   const single = group.maxSelections <= 1;
   const clearable = single && !group.required;
@@ -216,7 +315,6 @@ function ChoiceRow({
   const picked = group.values.filter((v) =>
     controller.isSelected(group.id, v.id),
   );
-  const atLimit = !single && picked.length >= group.maxSelections;
   const errors = controller.groupErrors[group.id] ?? [];
 
   const items: ChipItem[] = [
@@ -231,32 +329,20 @@ function ChoiceRow({
           },
         ]
       : []),
-    ...group.values.map((value) => {
-      const selected = controller.isSelected(group.id, value.id);
-      return {
-        id: value.id,
-        name: value.label,
-        imageUrl: value.imageUrl,
-        swatchColor: value.swatchColor,
-        price: value.price > 0 ? value.price : null,
-        // A chosen value that has since sold out can still be removed.
-        available: value.available || selected,
-        blocked: atLimit && !selected,
-        included: selected && controller.includedValueIds.has(value.id),
-        unoptimized: true,
-      };
-    }),
+    ...group.values.map((value) => valueChipItem(group, value, controller)),
   ];
 
   const onPick = (id: string) => {
     if (id === noneId) {
       controller.clearGroup(group.id);
+      onPreview(null);
       return;
     }
     const wasSelected = controller.isSelected(group.id, id);
     if (single) controller.selectValue(group.id, id);
     else controller.toggleValue(group.id, id);
     if (!wasSelected) setSwingId(id);
+    onPicked(id, !wasSelected || single);
   };
 
   const selectedLabel = single
@@ -298,6 +384,7 @@ function ChoiceRow({
       onPick={onPick}
       swingId={swingId}
       onSwingEnd={() => setSwingId(null)}
+      onPreview={(id) => onPreview(id === noneId ? null : id)}
     />
   );
 }
