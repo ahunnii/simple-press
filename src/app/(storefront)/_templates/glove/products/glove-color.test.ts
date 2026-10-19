@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { optionDisplayName, sortSizes } from "./glove-color";
+import { optionDisplayName, resolveSwatch, sortSizes } from "./glove-color";
 
 describe("sortSizes", () => {
   it("orders clothing sizes smallest first", () => {
@@ -49,5 +49,52 @@ describe("optionDisplayName", () => {
   it("leaves already-capitalised and empty names alone", () => {
     expect(optionDisplayName("Glove Size")).toBe("Glove Size");
     expect(optionDisplayName("")).toBe("");
+  });
+});
+
+describe("resolveSwatch", () => {
+  const LUVGLUV_COLORS = [
+    "Black",
+    "Bluish Purple",
+    "Gold",
+    "Gold with Stones",
+    "Green",
+    "Hot Pink",
+    "Hunter Green",
+    "Navy",
+    "Red",
+    "Silver",
+  ];
+
+  it("resolves every luvgluv color to a known swatch", () => {
+    for (const name of LUVGLUV_COLORS) {
+      const swatch = resolveSwatch(name);
+      expect(swatch.unknown, name).toBe(false);
+      expect(swatch.color, name).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  it("keeps compound shades distinct from their last word", () => {
+    expect(resolveSwatch("Hunter Green").color).not.toBe(
+      resolveSwatch("Green").color,
+    );
+    expect(resolveSwatch("Hot Pink").color).not.toBe(
+      resolveSwatch("Pink").color,
+    );
+    expect(resolveSwatch("Gold with Stones").color).toBe(
+      resolveSwatch("Gold").color,
+    );
+  });
+
+  it("passes CSS colors through and leaves unknown names unknown", () => {
+    expect(resolveSwatch("#355e3b")).toEqual({
+      color: "#355e3b",
+      unknown: false,
+    });
+    expect(resolveSwatch("Mystery Shimmer")).toEqual({
+      color: "var(--glove-paper)",
+      unknown: true,
+    });
+    expect(resolveSwatch("  ").unknown).toBe(true);
   });
 });

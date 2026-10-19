@@ -1,6 +1,6 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import type { UmscReviewCardData } from "../shared/umsc-reviews-section";
 import type { Product } from "~/types";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -12,13 +12,13 @@ import {
 } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { nonBlank } from "../shared/umsc-non-blank";
 import {
   toUmscReviewCards,
   UmscReviewsSection,
-  type UmscReviewCardData,
 } from "../shared/umsc-reviews-section";
 import { UmscCategoriesSection } from "./umsc-categories-section";
 import { UmscCustomSection } from "./umsc-custom-section";
@@ -102,7 +102,6 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
     "umsc.homepage.reviews-heading",
     "umsc.homepage.reviews-lede",
     "umsc.homepage.reviews-empty-text",
-    "umsc.homepage.reviews-owner-source",
     "umsc.homepage.reviews-verified-source",
     "umsc.homepage.reviews-anonymous-name",
     // Custom band
@@ -221,7 +220,6 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
     ) ?? "";
   const hasOverride = overrideQuote.length > 0;
   const anonymousReviewerName = f["umsc.homepage.reviews-anonymous-name"] ?? "";
-  const ownerReviewSource = f["umsc.homepage.reviews-owner-source"] ?? "";
   const verifiedReviewSource = f["umsc.homepage.reviews-verified-source"] ?? "";
   const reviewCards: UmscReviewCardData[] = [
     ...(hasOverride
@@ -229,16 +227,12 @@ export async function UmscHomepage(props?: DefaultHomepageTemplateProps) {
           {
             quote: overrideQuote,
             name: overrideName || anonymousReviewerName,
-            source: "Featured review",
           },
         ]
       : []),
     ...toUmscReviewCards(
       testimonials,
-      {
-        ownerSource: ownerReviewSource,
-        verifiedSource: verifiedReviewSource,
-      },
+      { verifiedSource: verifiedReviewSource },
       hasOverride ? 2 : 3,
     ),
   ];

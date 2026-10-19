@@ -23,19 +23,20 @@ type UmscReviewTestimonial = {
 };
 
 /**
- * Maps the latest approved testimonials to review cards: the owner's own
- * quotes get `ownerSource`, customer-submitted ones `verifiedSource`.
- * Server-safe (no client code) so any page's data layer can call it.
+ * Maps the latest approved testimonials to review cards: customer-submitted
+ * ones get `verifiedSource`; the owner's own quotes get no source line at all
+ * (the reviewer name shows alone). Server-safe (no client code) so any page's
+ * data layer can call it.
  */
 export function toUmscReviewCards(
   testimonials: UmscReviewTestimonial[],
-  sources: { ownerSource: string; verifiedSource: string },
+  sources: { verifiedSource: string },
   limit: number,
 ): UmscReviewCardData[] {
   return testimonials.slice(0, limit).map((t) => ({
     quote: t.text,
     name: t.customerName,
-    source: t.source === "owner" ? sources.ownerSource : sources.verifiedSource,
+    source: t.source === "owner" ? undefined : sources.verifiedSource,
   }));
 }
 
@@ -85,11 +86,7 @@ export function UmscReviewsSection({
     >
       <div className="mb-10 flex flex-wrap items-end justify-between gap-6 sm:mb-14">
         <div>
-          <UmscHeading
-            as="h2"
-            id={headingId}
-            fieldKey={headingFieldKey}
-          >
+          <UmscHeading as="h2" id={headingId} fieldKey={headingFieldKey}>
             {heading}
           </UmscHeading>
           {lede && (

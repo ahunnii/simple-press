@@ -342,7 +342,8 @@ function ReviewCard({
           <div className="text-sm text-gray-600">
             <span className="font-medium">{review.customerName}</span>
             {" • "}
-            {formatDistanceToNow(new Date(review.createdAt), {
+            {/* reviewDate, not createdAt: owners backdate imported reviews */}
+            {formatDistanceToNow(new Date(review.reviewDate), {
               addSuffix: true,
             })}
           </div>

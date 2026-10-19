@@ -9,6 +9,8 @@ import type {
   FormVariant,
   FormVariantOption,
 } from "../_validators/schema";
+import type { ColorSwatches } from "~/lib/products/color-swatches";
+import { colorOptionValues } from "~/lib/products/color-swatches";
 import { cn, formatCurrency } from "~/lib/utils";
 import {
   AlertDialog,
@@ -41,6 +43,7 @@ import {
 
 import { WARNING_TEXT } from "../../_components/admin-table-style";
 import { AdminThumb } from "../../_components/admin-thumb";
+import { VariantColorSwatches } from "./variant-color-swatches";
 
 const MAX_VARIANTS = 100;
 
@@ -138,6 +141,10 @@ type Props = {
    * Optional so either side can land first without breaking the build.
    */
   errors?: Record<number, string>;
+  /** Owner-picked dot colors, keyed by color value (`additionalFields`). */
+  colorSwatches: ColorSwatches;
+  /** Always receives a whole new map (names can contain "." and spaces). */
+  onColorSwatchesChange: (next: ColorSwatches) => void;
 };
 
 export function VariantManager({
@@ -148,6 +155,8 @@ export function VariantManager({
   existingVariantOptions,
   images,
   errors,
+  colorSwatches,
+  onColorSwatchesChange,
 }: Props) {
   // `getExistingVariantOptions` returns `[]` for a new product, never nullish,
   // so the old `??` fallback never fired and the editor opened with zero rows —
@@ -465,6 +474,7 @@ export function VariantManager({
   const allSelected =
     variants.length > 0 && selectedIndices.size === variants.length;
   const someSelected = selectedIndices.size > 0 && !allSelected;
+  const hasColorValues = colorOptionValues(variants).length > 0;
 
   const variantRowKeys = useMemo(
     () => buildVariantRowKeys(variants),
@@ -944,6 +954,31 @@ export function VariantManager({
               })}
             </div>
           </div>
+        )}
+
+        {hasColorValues && (
+          <section
+            aria-labelledby="variant-color-swatches-heading"
+            className="space-y-3"
+          >
+            <div>
+              <h4
+                id="variant-color-swatches-heading"
+                className="text-sm font-medium"
+              >
+                Color swatches
+              </h4>
+              <p className="text-muted-foreground text-xs">
+                Pick the exact color shown for each color on your store. Leave
+                on Auto to match by name.
+              </p>
+            </div>
+            <VariantColorSwatches
+              variants={variants}
+              value={colorSwatches}
+              onChange={onColorSwatchesChange}
+            />
+          </section>
         )}
 
         {variants.length === 0 && !showOptionsEditor && (

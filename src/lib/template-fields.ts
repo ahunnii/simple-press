@@ -653,6 +653,9 @@ export const RETIRED_TEMPLATE_KEYS: ReadonlySet<string> = new Set([
   "umsc.contact.visit-link-label",
   "umsc.contact.visit-link-url",
   "umsc.global.visit-stores-url",
+  // umsc, retired 2026-10-19 — owner-added testimonials no longer carry an
+  // "owner" caption; the reviewer name shows alone. Saved values are not read.
+  "umsc.homepage.reviews-owner-source",
   // dark-trend, retired 2026-09-27.
   // - `about.feature-N-header` / `-description`: the about page's numbered
   //   cards from before the `dark-trend.about.features-list` list field.

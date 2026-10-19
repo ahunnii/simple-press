@@ -13,11 +13,23 @@ type Props = {
   emptyMessage: string;
 };
 
-function attribution(testimonial: Testimonial, sourceLabel: string): string {
+/**
+ * The caption under a reviewer's name: their title/company when set, else the
+ * template's source label for customer-submitted reviews only. Owner-added
+ * reviews with neither show no caption ("" — the card hides the line).
+ */
+function attribution(
+  testimonial: Pick<
+    Testimonial,
+    "source" | "customerTitle" | "customerCompany"
+  >,
+  sourceLabel: string,
+): string {
   const context = [testimonial.customerTitle, testimonial.customerCompany]
     .filter(Boolean)
     .join(", ");
-  return context || sourceLabel;
+  if (context) return context;
+  return testimonial.source === "customer" ? sourceLabel : "";
 }
 
 /**
@@ -33,6 +45,7 @@ export function UmscTestimonialsFeatured({
   emptyMessage,
 }: Props) {
   const [featured, ...rest] = testimonials;
+  const featuredCaption = featured ? attribution(featured, sourceLabel) : "";
 
   return (
     <UmscSection
@@ -54,10 +67,14 @@ export function UmscTestimonialsFeatured({
               <span className="font-semibold text-[var(--umsc-ink)]">
                 {featured.customerName}
               </span>
-              {" · "}
-              <span {...fieldAttr("umsc.testimonials.review-source-label")}>
-                {attribution(featured, sourceLabel)}
-              </span>
+              {featuredCaption && (
+                <>
+                  {" · "}
+                  <span {...fieldAttr("umsc.testimonials.review-source-label")}>
+                    {featuredCaption}
+                  </span>
+                </>
+              )}
             </figcaption>
           </UmscReveal>
 
@@ -75,7 +92,7 @@ export function UmscTestimonialsFeatured({
                   <UmscReviewCard
                     quote={testimonial.text}
                     name={testimonial.customerName}
-                    source={attribution(testimonial, sourceLabel)}
+                    source={attribution(testimonial, sourceLabel) || undefined}
                   />
                 </div>
               ))}

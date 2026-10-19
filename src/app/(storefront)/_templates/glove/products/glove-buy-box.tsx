@@ -11,6 +11,7 @@ import type { GloveAddOnCopy } from "./glove-customizer";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { readColorSwatches } from "~/lib/products/color-swatches";
 import { cn } from "~/lib/utils";
 import { resolveVariantPrice } from "~/lib/variant-price";
 import { useProduct } from "~/hooks/use-product";
@@ -141,6 +142,11 @@ export function GloveBuyBox({
   const useOptions = customizer.enabled;
 
   const hasVariants = product.variants.length > 0;
+  // Owner-pinned color dots for this product (falls back to name lookup).
+  const swatchOverrides = useMemo(
+    () => readColorSwatches(product.additionalFields),
+    [product.additionalFields],
+  );
   const comingSoon = additionalFields?.comingSoon === true;
 
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -417,6 +423,7 @@ export function GloveBuyBox({
                 }}
                 numbered={numbered}
                 steps={stepPlan.options}
+                swatchOverrides={swatchOverrides}
               />
             </div>
           ) : null}

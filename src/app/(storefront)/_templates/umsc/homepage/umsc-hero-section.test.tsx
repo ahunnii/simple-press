@@ -68,6 +68,42 @@ afterEach(() => {
   intersect = undefined;
 });
 
+describe("UmscHeroSection layout", () => {
+  it("anchors a left-aligned caption block (corner caption, not centred)", () => {
+    render(
+      <UmscHeroSection
+        {...baseProps}
+        lede="Small-batch soy candles."
+        primaryLabel="Shop"
+        primaryUrl="/shop"
+        secondaryLabel="All products"
+        secondaryUrl="/shop"
+      />,
+    );
+    const h1 = screen.getByRole("heading", { level: 1 });
+    const block = h1.parentElement!;
+    const content = block.parentElement!;
+    expect(block.className).toContain("max-w-[520px]");
+    expect(content.className).toContain("text-left");
+    expect(content.className).not.toContain("text-center");
+    expect(content.className).not.toContain("mx-auto");
+    expect(h1.className).toContain("clamp(26px,2.8vw,40px)");
+    // CTA row is left-aligned and carries the hook for the phone pill padding.
+    const ctas = screen.getByRole("link", { name: "Shop" }).parentElement!;
+    expect(ctas.className).toContain("umsc-hero-ctas");
+    expect(ctas.className).not.toContain("justify-center");
+  });
+
+  it("crops media toward her face", () => {
+    const { container } = render(
+      <UmscHeroSection {...baseProps} video="/hero.mp4" />,
+    );
+    expect(container.querySelector("video")?.className).toContain(
+      "umsc-hero-media",
+    );
+  });
+});
+
 describe("UmscHeroSection background video", () => {
   it("renders no pause button without a video", () => {
     render(<UmscHeroSection {...baseProps} />);

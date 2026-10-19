@@ -11,17 +11,23 @@ export type UmscBreadcrumbItem = {
 type Props = {
   items: UmscBreadcrumbItem[];
   style?: CSSProperties;
+  /** Cream/gold trail for black surfaces (collection hero). */
+  onBlack?: boolean;
 };
 
 /**
  * UmscBreadcrumb — 13px uppercase Work Sans trail. The last item (or any
  * item without `href`) renders as a plain `aria-current="page"` span.
  */
-export function UmscBreadcrumb({ items, style }: Props) {
+export function UmscBreadcrumb({ items, style, onBlack = false }: Props) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="umsc-sans flex flex-wrap items-center gap-2 text-[13px] font-medium tracking-[0.06em] text-[var(--umsc-muted)] uppercase"
+      className={`umsc-sans flex flex-wrap items-center gap-2 text-[13px] font-medium tracking-[0.06em] uppercase ${
+        onBlack
+          ? "text-[var(--umsc-cream-on-black)]"
+          : "text-[var(--umsc-muted)]"
+      }`}
       style={style}
     >
       {items.map((item, i) => {
@@ -31,7 +37,11 @@ export function UmscBreadcrumb({ items, style }: Props) {
             {isLast || !item.href ? (
               <span
                 aria-current={isLast ? "page" : undefined}
-                className="text-[var(--umsc-ink)]"
+                className={
+                  onBlack
+                    ? "text-[var(--umsc-gold-soft)]"
+                    : "text-[var(--umsc-ink)]"
+                }
               >
                 {item.label}
               </span>
@@ -44,7 +54,14 @@ export function UmscBreadcrumb({ items, style }: Props) {
               </Link>
             )}
             {!isLast && (
-              <span aria-hidden="true" className="text-[var(--umsc-line)]">
+              <span
+                aria-hidden="true"
+                className={
+                  onBlack
+                    ? "text-[var(--umsc-line-gold)]"
+                    : "text-[var(--umsc-line)]"
+                }
+              >
                 /
               </span>
             )}

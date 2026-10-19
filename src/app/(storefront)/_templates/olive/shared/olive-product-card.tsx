@@ -7,6 +7,10 @@ import Link from "next/link";
 
 import type { OliveCartAddedDetail } from "../layout/olive-toast";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import {
+  readColorSwatches,
+  swatchOverrideFor,
+} from "~/lib/products/color-swatches";
 import { cn } from "~/lib/utils";
 import {
   resolveVariantCompareAtPrice,
@@ -288,6 +292,8 @@ export function OliveProductCard({
 
   const trackStock = product.trackInventory && !product.allowBackorders;
   const swatches = cardSwatches(variants, trackStock);
+  // Owner-pinned hex per color; absent when the query omits additionalFields.
+  const swatchOverrides = readColorSwatches(product.additionalFields);
   const visibleSwatches = swatches.slice(0, MAX_CARD_SWATCHES);
   const hiddenSwatches = swatches.length - visibleSwatches.length;
   const choices = hasOptions ? null : singleDimensionChoices(variants);
@@ -533,7 +539,10 @@ export function OliveProductCard({
               {visibleSwatches.map((swatch) => (
                 <OliveChip
                   key={swatch.value}
-                  color={swatch.label}
+                  color={
+                    swatchOverrideFor(swatchOverrides, swatch.label) ??
+                    swatch.label
+                  }
                   label={swatch.label}
                   size={14}
                   state={swatch.soldOut ? "sold-out" : undefined}

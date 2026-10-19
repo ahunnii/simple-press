@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { gtinFieldSchema } from "~/lib/gtin";
 import {
+  HEX_COLOR_RE,
+  MAX_COLOR_SWATCHES,
+} from "~/lib/products/color-swatches";
+import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
 } from "~/lib/validators/admin-table";
@@ -12,12 +16,32 @@ const productFeatureSchema = z.object({
   text: z.string(),
 });
 
+// Product create/update REPLACE `additionalFields` wholesale, and zod strips
+// unknown keys, so every writer must send all of these keys back or they are
+// lost on save.
 const additionalFieldsSchema = z
   .object({
     additionalInformation: z.record(z.string(), z.unknown()).optional(),
     productFeatures: z.array(productFeatureSchema).optional(),
     comingSoon: z.boolean().optional().nullable(),
     productTagline: z.string().optional().nullable(),
+    // Owner-picked color dots, keyed by the variant's color value.
+    colorSwatches: z
+      .record(
+        z.string().trim().min(1).max(100),
+        z
+          .string()
+          .trim()
+          .regex(HEX_COLOR_RE, "Enter a color like #ff8800")
+          .transform((value) => value.toLowerCase()),
+      )
+      .refine(
+        (swatches) => Object.keys(swatches).length <= MAX_COLOR_SWATCHES,
+        {
+          message: `Use at most ${MAX_COLOR_SWATCHES} color swatches`,
+        },
+      )
+      .optional(),
   })
   .optional();
 

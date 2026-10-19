@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { TemplateListItemField } from "./template-fields";
 
+import { getLucideTemplateIcon } from "./lucide-template-icons";
 import {
   getListRowSummary,
   getRawCustomFieldString,
@@ -17,7 +18,6 @@ import {
   RETIRED_TEMPLATE_KEYS,
   TEMPLATE_FIELDS,
 } from "./template-fields";
-import { getLucideTemplateIcon } from "./lucide-template-icons";
 
 /**
  * List rows live inside `customFields` (`z.any()` on the wire), so the row
@@ -275,6 +275,7 @@ describe("isRetiredTemplateKey", () => {
       "umsc.contact.hours",
       "umsc.homepage.reviews-override-quote",
       "umsc.homepage.reviews-override-name",
+      "umsc.homepage.reviews-owner-source",
     ]) {
       expect(RETIRED_TEMPLATE_KEYS.has(key)).toBe(true);
     }

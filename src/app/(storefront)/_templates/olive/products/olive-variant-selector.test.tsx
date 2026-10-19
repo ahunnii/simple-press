@@ -22,7 +22,11 @@ vi.mock("~/trpc/react", () => ({
   api: {
     backInStock: {
       subscribe: {
-        useMutation: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+        useMutation: () => ({
+          mutate: vi.fn(),
+          isPending: false,
+          isError: false,
+        }),
       },
     },
   },
@@ -99,5 +103,47 @@ describe("OliveVariantSelector", () => {
         />,
       ),
     ).not.toThrow();
+  });
+
+  it("paints an owner-pinned hex for a color chip", () => {
+    const product = makeProduct();
+    (product as unknown as { variants: unknown[] }).variants = [
+      {
+        id: "var_1",
+        name: "Hunter Green",
+        price: null,
+        compareAtPrice: null,
+        imageUrl: null,
+        sku: "SKU-1",
+        inventoryQty: 10,
+        options: { color: "Hunter Green" },
+      },
+      {
+        id: "var_2",
+        name: "Green",
+        price: null,
+        compareAtPrice: null,
+        imageUrl: null,
+        sku: "SKU-2",
+        inventoryQty: 10,
+        options: { color: "Green" },
+      },
+    ];
+    (product as unknown as { additionalFields: unknown }).additionalFields = {
+      colorSwatches: { "Hunter Green": "#355e3b" },
+    };
+
+    const { container } = render(
+      <OliveVariantSelector
+        product={product}
+        selectedVariantId="var_1"
+        setSelectedVariantId={vi.fn()}
+      />,
+    );
+
+    const painted = Array.from(
+      container.querySelectorAll<HTMLElement>("[style]"),
+    ).map((node) => node.style.backgroundColor);
+    expect(painted).toContain("#355e3b");
   });
 });

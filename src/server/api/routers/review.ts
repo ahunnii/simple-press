@@ -2,7 +2,7 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient, TxClient } from "~/server/db";
+import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { sendNewReviewNotification } from "~/lib/email/templates";
@@ -13,6 +13,7 @@ import {
   reviewBulkDeleteSchema,
   reviewBulkHideSchema,
 } from "~/lib/validators/reviews";
+import { updateProductStats } from "~/server/reviews/product-stats";
 
 import {
   createTRPCRouter,
@@ -87,26 +88,6 @@ async function getReviewAndAssertOwner(
   }
   await assertBusinessOwner(db, userId, review.product.businessId);
   return review;
-}
-
-// Takes `TxClient`, not `DbClient`, so it can run either standalone or inside a
-// `$transaction` callback (the bulk mutations recompute stats in-transaction).
-// `DbClient` is structurally assignable to `TxClient`, so plain `ctx.db` callers
-// still work unchanged.
-async function updateProductStats(db: TxClient, productId: string) {
-  const reviews = await db.productReview.findMany({
-    where: { productId, isApproved: true, isHidden: false },
-    select: { rating: true },
-  });
-  const reviewCount = reviews.length;
-  const averageRating =
-    reviewCount > 0
-      ? reviews.reduce((sum: number, r) => sum + r.rating, 0) / reviewCount
-      : null;
-  await db.product.update({
-    where: { id: productId },
-    data: { reviewCount, averageRating },
-  });
 }
 
 async function updateVoteCounts(db: DbClient, reviewId: string) {

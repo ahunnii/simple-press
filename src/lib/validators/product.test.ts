@@ -763,3 +763,76 @@ describe("barcode", () => {
     ).toEqual([`barcode: ${MESSAGE}`]);
   });
 });
+
+describe("additionalFields.colorSwatches", () => {
+  const baseProduct = {
+    name: "Test Product",
+    slug: "test-product",
+    price: 10,
+    published: true,
+    featured: false,
+    trackInventory: true,
+    allowBackorders: false,
+    variants: [],
+  };
+  const withSwatches = (colorSwatches: unknown) => ({
+    ...baseProduct,
+    additionalFields: { colorSwatches },
+  });
+
+  it("accepts a map and lowercases the hex", () => {
+    const result = productCreateSchema.safeParse(
+      withSwatches({ "Hunter Green": "#355E3B", " Gold ": " #C7A44A " }),
+    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.additionalFields?.colorSwatches).toEqual({
+        "Hunter Green": "#355e3b",
+        Gold: "#c7a44a",
+      });
+    }
+  });
+
+  it("is optional and survives on update", () => {
+    expect(productCreateSchema.safeParse(baseProduct).success).toBe(true);
+    const result = productUpdateSchema.safeParse({
+      ...withSwatches({ Red: "#b02a2a" }),
+      id: "prod_1",
+    });
+    expect(
+      result.success && result.data.additionalFields?.colorSwatches,
+    ).toEqual({
+      Red: "#b02a2a",
+    });
+  });
+
+  it("rejects values that are not six-digit hex", () => {
+    for (const bad of ["#fff", "red", "url(x)", "#gggggg", "", "355e3b"]) {
+      expect(
+        issuesFor(productCreateSchema, withSwatches({ Red: bad })).length,
+        bad,
+      ).toBeGreaterThan(0);
+    }
+    expect(
+      issuesFor(productCreateSchema, withSwatches({ Red: "#fff" })),
+    ).toContain(
+      "additionalFields.colorSwatches.Red: Enter a color like #ff8800",
+    );
+  });
+
+  it("rejects empty keys and more than 100 entries", () => {
+    expect(
+      issuesFor(productCreateSchema, withSwatches({ "": "#000000" })).length,
+    ).toBeGreaterThan(0);
+    const many = Object.fromEntries(
+      Array.from({ length: 101 }, (_, i) => [`c${i}`, "#000000"]),
+    );
+    expect(issuesFor(productCreateSchema, withSwatches(many))).toContain(
+      "additionalFields.colorSwatches: Use at most 100 color swatches",
+    );
+    const max = Object.fromEntries(
+      Array.from({ length: 100 }, (_, i) => [`c${i}`, "#000000"]),
+    );
+    expect(productCreateSchema.safeParse(withSwatches(max)).success).toBe(true);
+  });
+});

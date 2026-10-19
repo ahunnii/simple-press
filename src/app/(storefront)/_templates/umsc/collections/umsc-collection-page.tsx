@@ -5,6 +5,7 @@ import type { Product } from "~/types";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
+import { UmscBreadcrumb } from "../shared/umsc-breadcrumb";
 import { UmscButton } from "../shared/umsc-button";
 import { UmscCollectionDoor } from "../shared/umsc-collection-door";
 import { UmscHeading } from "../shared/umsc-heading";
@@ -58,6 +59,17 @@ export function UmscCollectionPage({
           style={{ maxWidth: "var(--umsc-container)" }}
         >
           <div>
+            {/* Mirrors the page's BreadcrumbList JSON-LD; /collections always
+                exists here (the whole route is gated on the same flag). */}
+            <UmscBreadcrumb
+              onBlack
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Collections", href: "/collections" },
+                { label: collection.name },
+              ]}
+              style={{ marginBottom: 20 }}
+            />
             <UmscHeading as="h1" className="text-[var(--umsc-cream-on-black)]">
               {collection.name}
             </UmscHeading>
@@ -121,10 +133,11 @@ export function UmscCollectionPage({
           aria-label="Other collections"
           className="border-t border-[var(--umsc-line)]"
         >
-          <UmscReveal>
-            <UmscHeading as="h2" className="mb-8">
-              Other collections
-            </UmscHeading>
+          <UmscReveal className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <UmscHeading as="h2">Other collections</UmscHeading>
+            <UmscButton href="/collections" variant="link">
+              All collections
+            </UmscButton>
           </UmscReveal>
           <UmscRevealGroup className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {others.map((c, i) => (
