@@ -3,10 +3,12 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveFaqPickerItems } from "~/lib/template-fields";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 import {
+  GloveAccordion,
   GloveButton,
   GloveContainer,
   GloveHandIcon,
@@ -46,10 +48,16 @@ export async function GloveContactPage({
 
   const formEnabled = isEnabled("contactForm");
 
-  // /faq has no feature flag of its own: it renders whenever a published
-  // question exists, so the link follows the same rule (and the section toggle).
+  // Picked questions (new key; the old `glove.contact.faq` is retired). Empty
+  // picker = first 6 published. /faq has no feature flag of its own, so the
+  // section follows the same rule: it needs a published question (and its toggle).
+  const faqs = resolveFaqPickerItems(
+    customFields?.["glove.contact.faq-items"],
+    faqItems,
+    6,
+  );
   const showFaq =
-    faqItems.length > 0 &&
+    faqs.length > 0 &&
     isSectionVisible(customFields, "glove", "contact.faq");
 
   // Contact details all come from Settings (Business) — never template fields.
@@ -112,6 +120,19 @@ export async function GloveContactPage({
                         {get("faq-body")}
                       </p>
                     ) : null}
+                    {/* FAQPage JSON-LD intentionally lives only on /faq: no competing markup on two URLs. */}
+                    <GloveAccordion
+                      className="mb-8"
+                      items={faqs.map((item) => ({
+                        id: item.id,
+                        question: item.question,
+                        answer: (
+                          <p className="glove-body whitespace-pre-wrap">
+                            {item.answer}
+                          </p>
+                        ),
+                      }))}
+                    />
                     {get("faq-link-label") ? (
                       <GloveButton href="/faq" variant="wooOutline">
                         <span {...fieldAttr("glove.contact.faq-link-label")}>

@@ -31,8 +31,8 @@ export type ChipItem = {
 };
 
 /**
- * One labelled row of chips (the product add-on rows, legacy and options
- * alike): a horizontal track of 104px chips (56px image, name, price). A
+ * One labelled row of chips (a choice row of the product options panel,
+ * `GloveCustomizer`): a horizontal track of 104px chips (56px image, name, price). A
  * chosen chip gets the purple ring, a check and (signature 2) swings once
  * from its top edge. Single rows are a radio group with a roving tab stop;
  * multi rows are checkbox groups. Sold-out chips stay visible but inert.

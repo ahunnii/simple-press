@@ -7,8 +7,7 @@ import { Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import type { GloveAddOnCopy } from "./glove-addon-picker";
-import type { GloveAddOn } from "./glove-addons";
+import type { GloveAddOnCopy } from "./glove-customizer";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
@@ -17,18 +16,16 @@ import { resolveVariantPrice } from "~/lib/variant-price";
 import { useProduct } from "~/hooks/use-product";
 import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useProductCustomizer } from "~/components/customizer/use-product-customizer";
-import { cartLineKey, useCart } from "~/providers/cart-context";
+import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 import { SubscribePanel } from "~/app/(storefront)/_components/product/subscribe-panel";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { gloveButtonClass, GlovePrice } from "../shared";
-import { GloveAddOnPicker } from "./glove-addon-picker";
 import { variantOptionGroups } from "./glove-color";
 import { GloveCustomizer } from "./glove-customizer";
 import { gloveStepPlan, orderGloveGroups } from "./glove-steps";
-import { gloveConfiguredTotal } from "./glove-total";
 import { GloveVariantSelector } from "./glove-variant-selector";
 
 type Product = DefaultProductPageTemplateProps["product"];
@@ -53,17 +50,13 @@ export type GloveBuyBoxCopy = {
 
 type Props = {
   product: Product;
-  /** Made-to-order product: numbered option steps + add-on picker. */
+  /**
+   * Made-to-order product: Easy Guide step medallions on the variant rows
+   * and, continuing from them, on the product option groups.
+   */
   numbered: boolean;
   /** Notice, short description and attribute table (server-rendered). */
   intro: ReactNode;
-  /**
-   * LEGACY chains/charms (two collections) for the old picker; null hides it.
-   * Ignored when the product has a `customizer` (product options), which
-   * takes over the whole add-on area. TODO: retire with the collection-slug
-   * fields (plan: ~/.claude/plans/i-need-to-add-noble-volcano.md, Phase 6).
-   */
-  addOns: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null;
   addOnSectionAttrs?: Record<string, string>;
   /**
    * Show the product-options picker (the owner can hide the "add-ons"
@@ -76,24 +69,28 @@ type Props = {
   linkCategories: boolean;
   /**
    * `cart` feature flag (B6.11 catalog mode). Off: no Add to Cart, qty
-   * stepper or add-on picker; price, variants, wishlist and notify-me stay.
+   * stepper or options panel; price, variants, wishlist and notify-me stay.
    */
   cartEnabled: boolean;
   copy: GloveBuyBoxCopy;
 };
 
 /**
- * The PDP buy column from the price down: price (range-aware; once a chain or
- * charm is chosen it becomes the configured total with a muted "Glove $X"
- * sub-line, the same number the add-on picker totals), the server-rendered
- * intro, the grouped option selector, the add-on picker, the
+ * The PDP buy column from the price down: price (range-aware; once a priced
+ * option is chosen it becomes the configured total with a muted "Glove $X"
+ * sub-line, the same number the options panel totals), the server-rendered
+ * intro, the grouped variant selector, the product options panel, the
  * qty stepper + full-width ADD TO CART, then wishlist beside one quiet
  * category/SKU line.
  *
- * Two add-on paths. A product with `product.customizer` (product options)
- * renders `GloveCustomizer` over `useProductCustomizer` and adds ONE
- * configured line (`applyCustomizerToCartItem`). Without one, the legacy
- * collection-based `GloveAddOnPicker` adds separate `addOnFor` lines.
+ * Chains, charms and engraving are the product's option groups
+ * (`product.customizer`, Products -> Options): `GloveCustomizer` over
+ * `useProductCustomizer`, added as ONE configured line
+ * (`applyCustomizerToCartItem`). A product without option groups has no
+ * chain/charm UI at all. While a required group is unanswered the button is
+ * aria-disabled with a line naming what is missing ("Choose your chain");
+ * pressing it (or the mobile bar's) shows the group errors and moves focus to
+ * the first one.
  *
  * Built on the shared `useProduct` hook (selection, quantity, the plain
  * add-to-cart path) and `buildVariantCartItem` for variants. Coming-soon is
@@ -104,7 +101,6 @@ export function GloveBuyBox({
   product,
   numbered,
   intro,
-  addOns,
   addOnSectionAttrs,
   customizerVisible = true,
   categories,
@@ -132,13 +128,11 @@ export function GloveBuyBox({
   const { addItem, setIsOpen } = useCart();
   const { setVariantImageUrl } = useVariantImage();
 
-  const [chainId, setChainId] = useState<string | null>(null);
-  const [charmIds, setCharmIds] = useState<string[]>([]);
   const [announce, setAnnounce] = useState("");
 
   // Product options. `product.customizer` is null with the feature off or no
-  // groups attached; then `customizer.enabled` is false and the legacy
-  // add-on path below applies unchanged.
+  // groups attached; then `customizer.enabled` is false and the product adds
+  // as a plain line.
   const customizer = useProductCustomizer({
     customizer: product.customizer,
     basePrice: displayPrice,
@@ -157,7 +151,8 @@ export function GloveBuyBox({
   const [sentinel, setSentinel] = useState<HTMLSpanElement | null>(null);
   const [pastAddButton, setPastAddButton] = useState(false);
 
-  // Contiguous Easy Guide numbers across the option rows and the add-on rows.
+  // Contiguous Easy Guide numbers across the variant rows and the option
+  // groups (`stepPlan.next` is the first group's number).
   const stepPlan = useMemo(
     () =>
       gloveStepPlan(
@@ -223,7 +218,6 @@ export function GloveBuyBox({
     // add; the customizer shows what is wrong and moves focus to it.
     if (useOptions && !customizer.revealErrors()) return;
     const qty = Math.min(quantity, Math.max(1, maxQty));
-    let gloveKey: string;
     if (hasVariants && selectedVariant) {
       const line = buildVariantCartItem(product, selectedVariant, variantMax);
       // ONE configured line: the options ride on it (price + configuration).
@@ -231,35 +225,18 @@ export function GloveBuyBox({
         useOptions ? applyCustomizerToCartItem(line, customizer) : line,
         qty,
       );
-      gloveKey = cartLineKey(product.id, selectedVariant.id);
       setQuantity(1);
     } else if (useOptions) {
       handleAddToCartWith((line) =>
         applyCustomizerToCartItem(line, customizer),
       );
-      gloveKey = cartLineKey(product.id, selectedVariantId);
     } else {
       handleAddToCart();
-      gloveKey = cartLineKey(product.id, selectedVariantId);
     }
-    if (useOptions) {
-      customizer.reset();
-    } else if (addOns) {
-      // Tied to the glove line so the cart nests them under it (and the same
-      // chain picked for two gloves stays two lines).
-      const chain = addOns.chains.find((c) => c.id === chainId);
-      if (chain) addItem({ ...chain.cartItem, addOnFor: gloveKey }, qty);
-      for (const charm of addOns.charms.filter((c) =>
-        charmIds.includes(c.id),
-      )) {
-        addItem({ ...charm.cartItem, addOnFor: gloveKey }, qty);
-      }
-      setChainId(null);
-      setCharmIds([]);
-    }
+    if (useOptions) customizer.reset();
     setIsOpen(true);
     // The drawer is the confirmation; the platform's "added to cart" toast
-    // (one per addItem, so the add-ons too) would sit on its CHECKOUT button.
+    // would sit on its CHECKOUT button.
     // The live region below still announces the add to screen readers.
     // Deferred a tick: sonner drops a dismiss that lands in the same batch as
     // the toast it targets.
@@ -268,47 +245,45 @@ export function GloveBuyBox({
   };
 
   const sku = (selectedVariant?.sku ?? product.sku)?.trim() ?? "";
-  const showLegacyPicker =
-    !useOptions &&
-    cartEnabled &&
-    addOns !== null &&
-    (addOns.chains.length > 0 || addOns.charms.length > 0) &&
-    !comingSoon &&
-    !productSoldOut;
   const showCustomizer =
     useOptions &&
     customizerVisible &&
     cartEnabled &&
     !comingSoon &&
     !productSoldOut;
-  const showPicker = showLegacyPicker || showCustomizer;
   const showAddButton = cartEnabled && !comingSoon && !productSoldOut;
 
-  // One price: with a chain or charm chosen, the price spots show the
-  // configured total (the picker's number, from the shared helper) with the
-  // glove-only price as a muted sub-line. Silent here: the picker's total is
-  // the one polite live region. While a variant range is still open (nothing
-  // chosen) the glove has no single price, so the range stays and the add-ons
-  // are named on their own.
+  // What the build still needs before it can be added ("Choose your chain.
+  // Choose your charms."): the customizer's strict errors, one line each.
+  // Muted until an add is attempted, then in the alert colour; the groups'
+  // own alerts are the live announcement, so this line is not a live region
+  // (both add buttons point at it with aria-describedby instead).
+  const optionsReason =
+    showAddButton && useOptions && !blockedReason && !customizer.isComplete
+      ? [...new Set(customizer.errors.map((error) => error.message))]
+          .map((message) => (/[.!?]$/.test(message) ? message : `${message}.`))
+          .join(" ")
+      : null;
+  const addBlocked = blockedReason !== null || optionsReason !== null;
+  const addReasonId = blockedReason
+    ? "glove-atc-reason"
+    : optionsReason
+      ? "glove-atc-options"
+      : undefined;
+
+  // One price: with a priced option chosen, the price spots show the
+  // configured total (the options panel's number, from the customizer's live
+  // price) with the glove-only price as a muted sub-line. Picks that cost
+  // nothing (an included charm) leave the glove price as it is. Silent here:
+  // the panel's total is the one polite live region. While a variant range is
+  // still open (nothing chosen) the glove has no single price, so the range
+  // stays and the add-ons are named on their own.
   const gloveAmount = displayPrice * quantity;
-  const legacyConfig = gloveConfiguredTotal({
-    gloveAmount,
-    quantity,
-    chains: showLegacyPicker ? (addOns?.chains ?? []) : [],
-    charms: showLegacyPicker ? (addOns?.charms ?? []) : [],
-    chainId,
-    charmIds,
-  });
-  // Options path: the same shape, from the customizer's live price. Picks
-  // that cost nothing (an included charm) leave the glove price as it is.
-  const config = showCustomizer
-    ? {
-        total: customizer.unitPrice * quantity,
-        addOnsAmount: customizer.addOnTotal * quantity,
-        hasAddOns: customizer.addOnTotal > 0,
-      }
-    : legacyConfig;
-  const configured = showPicker && config.hasAddOns;
+  const config = {
+    total: customizer.unitPrice * quantity,
+    addOnsAmount: customizer.addOnTotal * quantity,
+  };
+  const configured = showCustomizer && customizer.addOnTotal > 0;
   const rangeOpen = range !== null && !selectedVariant;
   const gloveSubLine = `${copy.addOns.gloveLine} ${formatPrice(gloveAmount)}`;
   const addOnsSubLine = `+ ${formatPrice(config.addOnsAmount)} add-ons`;
@@ -360,7 +335,9 @@ export function GloveBuyBox({
   }, [pastAddButton, barRoom]);
 
   // Same add path as the main button. A step still open (no variant chosen)
-  // takes the shopper to it; a blocked add shows the main button's reason.
+  // takes the shopper to it; a blocked add shows the main button's reason;
+  // a missing option pick goes through `onAdd`, which reveals the group
+  // errors and focuses the first one.
   const onBarAdd = () => {
     if (hasVariants && !selectedVariant) {
       const target = configRef.current?.querySelector<HTMLElement>(
@@ -455,22 +432,6 @@ export function GloveBuyBox({
             />
           ) : null}
 
-          {showLegacyPicker && addOns ? (
-            <GloveAddOnPicker
-              chains={addOns.chains}
-              charms={addOns.charms}
-              chainId={chainId}
-              onChainChange={setChainId}
-              charmIds={charmIds}
-              onCharmsChange={setCharmIds}
-              gloveAmount={displayPrice * quantity}
-              quantity={quantity}
-              copy={copy.addOns}
-              sectionAttrs={addOnSectionAttrs}
-              firstStep={stepPlan.next}
-            />
-          ) : null}
-
           {productSoldOut ? (
             <SoldOut
               productId={product.id}
@@ -512,10 +473,8 @@ export function GloveBuyBox({
                     ref={addButtonRef}
                     type="button"
                     onClick={onAdd}
-                    aria-disabled={blockedReason ? true : undefined}
-                    aria-describedby={
-                      blockedReason ? "glove-atc-reason" : undefined
-                    }
+                    aria-disabled={addBlocked ? true : undefined}
+                    aria-describedby={addReasonId}
                     className={gloveButtonClass({
                       variant: "woo",
                       size: "lg",
@@ -542,6 +501,17 @@ export function GloveBuyBox({
                     : {})}
                 >
                   {blockedReason}
+                </p>
+              ) : optionsReason ? (
+                <p
+                  id="glove-atc-options"
+                  className={
+                    customizer.showErrors
+                      ? "glove-error m-0"
+                      : "m-0 text-[14px] text-[var(--glove-muted)]"
+                  }
+                >
+                  {optionsReason}
                 </p>
               ) : null}
               {variantSoldOut && selectedVariant ? (
@@ -671,7 +641,8 @@ export function GloveBuyBox({
           <button
             type="button"
             onClick={onBarAdd}
-            aria-disabled={blockedReason ? true : undefined}
+            aria-disabled={addBlocked ? true : undefined}
+            aria-describedby={addReasonId}
             className={gloveButtonClass({
               variant: "woo",
               size: "md",
@@ -688,7 +659,7 @@ export function GloveBuyBox({
 
 /**
  * The configured total in a price spot, with the glove-only price as a muted
- * sub-line. Not a live region (the add-on picker announces the total).
+ * sub-line. Not a live region (the options panel announces the total).
  */
 function ConfiguredPrice({
   total,

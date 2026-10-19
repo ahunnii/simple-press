@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
-import type { GloveAddOn, GloveAddOnSource } from "./glove-addons";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -21,7 +20,6 @@ import {
   GloveNotice,
   GloveReveal,
 } from "../shared";
-import { toGloveAddOn } from "./glove-addons";
 import { GloveBuyBox } from "./glove-buy-box";
 import { optionDisplayName, variantOptionGroups } from "./glove-color";
 import { isGloveMadeToOrder, showGloveEasyGuide } from "./glove-pdp-rules";
@@ -30,40 +28,6 @@ import { GloveProductReviews } from "./glove-product-reviews";
 import { GloveRelatedProducts } from "./glove-related-products";
 import { visibleSpecGroups } from "./glove-steps";
 import { GLOVE_PRODUCT_FIELD_KEYS } from "./index";
-
-const ADDON_PRODUCT_SELECT = {
-  id: true,
-  slug: true,
-  name: true,
-  price: true,
-  compareAtPrice: true,
-  sku: true,
-  trackInventory: true,
-  allowBackorders: true,
-  inventoryQty: true,
-  baseUnitsConsumed: true,
-  additionalFields: true,
-  images: {
-    select: { url: true },
-    orderBy: { sortOrder: "asc" as const },
-    take: 1,
-  },
-  variants: {
-    select: {
-      id: true,
-      name: true,
-      price: true,
-      compareAtPrice: true,
-      inventoryQty: true,
-      imageUrl: true,
-      sku: true,
-    },
-    orderBy: { createdAt: "asc" as const },
-  },
-  baseInventoryUnit: {
-    select: { inventoryQty: true, allowBackorders: true },
-  },
-};
 
 /** Tiptap prose on glove tokens: Poppins headings, Lato body, purple links. */
 const PROSE_CLASS = [
@@ -80,11 +44,13 @@ const PROSE_CLASS = [
  *
  * Server half: resolves the owner's copy, decides whether this product is a
  * made-to-order glove (member of the `notice-collection-slug` collection),
- * and loads the chain/charm add-ons with one tenant-scoped query. The buy
- * column from the price down is the client `GloveBuyBox` (useProduct).
+ * and whether the product options panel shows. Chains and charms are the
+ * product's own option groups (`product.customizer`); there is no
+ * collection-based add-on query any more. The buy column from the price down
+ * is the client `GloveBuyBox` (useProduct).
  * Order: breadcrumb → gallery | title, price, notice, short description,
  * attribute table, Easy Guide banner (gloves only, right above the options
- * it explains), numbered options, add-on picker, qty + ADD TO CART,
+ * it explains), numbered variant rows, option groups, qty + ADD TO CART,
  * wishlist + category/SKU line, support rows → description → reviews →
  * related products. On phones the column stacks under the gallery; with the
  * banner out of the way the title and price sit in the first viewport.
@@ -104,8 +70,6 @@ export async function GloveProductPage({
   const { isEnabled } = await getBusinessFlags();
 
   const noticeSlug = get("glove.product.notice-collection-slug").trim();
-  const chainsSlug = get("glove.product.chains-collection-slug").trim();
-  const charmsSlug = get("glove.product.charms-collection-slug").trim();
 
   const memberships = await db.collectionProduct.findMany({
     where: { productId: product.id, collection: { businessId: business.id } },
@@ -123,61 +87,15 @@ export async function GloveProductPage({
     .filter((m) => m.collection.published)
     .map((m) => ({ name: m.collection.name, slug: m.collection.slug }));
 
-  // ── Product options (customizer) or, for a product without any, the legacy
-  // collection-based add-ons. Options win: when the product has groups
-  // attached the chains/charms collections are not even queried.
-  // TODO: drop the legacy path (and the two collection-slug fields) once
-  // every store is migrated — plan Phase 6,
-  // ~/.claude/plans/i-need-to-add-noble-volcano.md.
+  // ── Product options (customizer): chains, charms, engraving. A product
+  // with no option groups has no chain/charm UI at all.
   const customizer = product.customizer ?? null;
-  const addOnsSectionVisible = isSectionVisible(
-    customFields,
-    "glove",
-    "product.addons",
-  );
-  // Hiding the section hides the picker, unless a group must be answered to
+  // Hiding the section hides the panel, unless a group must be answered to
   // buy at all.
   const customizerVisible =
     customizer !== null &&
-    (addOnsSectionVisible ||
+    (isSectionVisible(customFields, "glove", "product.addons") ||
       customizer.groups.some((g) => g.required || g.minSelections > 0));
-
-  // ── Legacy add-ons: one query for both collections, own product excluded
-  const showAddOns =
-    customizer === null &&
-    madeToOrder &&
-    addOnsSectionVisible &&
-    (chainsSlug !== "" || charmsSlug !== "");
-  let addOns: { chains: GloveAddOn[]; charms: GloveAddOn[] } | null = null;
-  if (showAddOns) {
-    const rows = await db.collection.findMany({
-      where: {
-        businessId: business.id,
-        published: true,
-        slug: { in: [chainsSlug, charmsSlug].filter((s) => s !== "") },
-      },
-      select: {
-        slug: true,
-        collectionProducts: {
-          where: {
-            product: { published: true },
-            productId: { not: product.id },
-          },
-          orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-          select: { product: { select: ADDON_PRODUCT_SELECT } },
-        },
-      },
-    });
-    const pick = (slug: string): GloveAddOn[] =>
-      slug === ""
-        ? []
-        : (rows
-            .find((r) => r.slug === slug)
-            ?.collectionProducts.map((cp) =>
-              toGloveAddOn(cp.product as GloveAddOnSource),
-            ) ?? []);
-    addOns = { chains: pick(chainsSlug), charms: pick(charmsSlug) };
-  }
 
   // ── Copy ────────────────────────────────────────────────────────────────
   const guideText = get("glove.product.guide-text");
@@ -332,7 +250,6 @@ export async function GloveProductPage({
               product={product}
               numbered={madeToOrder}
               intro={intro}
-              addOns={addOns}
               addOnSectionAttrs={sectionGroupAttr("product", "addons")}
               customizerVisible={customizerVisible}
               categories={categories}
@@ -350,7 +267,6 @@ export async function GloveProductPage({
                   chainLabel: get("glove.product.chain-label"),
                   noChainLabel: get("glove.product.no-chain-label"),
                   charmsLabel: get("glove.product.charms-label"),
-                  charmsLimit: get("glove.product.charms-limit-text"),
                   gloveLine: get("glove.product.glove-line-label"),
                   charmLine: get("glove.product.charm-line-label"),
                   totalLine: get("glove.product.total-label"),

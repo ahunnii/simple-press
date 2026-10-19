@@ -433,7 +433,7 @@ export const businessRouter = createTRPCRouter({
             description: true,
             variants: true,
             images: {
-              take: 1,
+              take: 2,
               orderBy: { sortOrder: "asc" },
             },
             additionalFields: true,
@@ -670,7 +670,7 @@ export const businessRouter = createTRPCRouter({
               images: {
                 select: { id: true, url: true, altText: true },
                 orderBy: { sortOrder: "asc" },
-                take: 1,
+                take: 2,
               },
               variants: {
                 select: {

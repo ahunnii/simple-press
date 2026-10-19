@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-import type { GloveAddOnCopy } from "./glove-addon-picker";
 import type { ChipItem } from "./glove-chip-row";
 import type { ProductCustomizerController } from "~/components/customizer";
 import type { PublicCustomizerGroup } from "~/lib/customizer";
@@ -14,6 +13,23 @@ import { cn } from "~/lib/utils";
 import { gloveBuildTotalParts, pickLineLabel } from "./glove-build-total";
 import { ChipRow } from "./glove-chip-row";
 import { GloveOptionLabel } from "./glove-variant-selector";
+
+/**
+ * Owner copy for the options panel (`glove.product.addons` fields). The chain
+ * and charms labels are not row labels (each row is named by its option
+ * group); they only pick the template's own wording for the group with that
+ * name: "No chain" for an optional Chain, "Charm" in the running total.
+ */
+export type GloveAddOnCopy = {
+  heading: string;
+  helper: string;
+  chainLabel: string;
+  noChainLabel: string;
+  charmsLabel: string;
+  gloveLine: string;
+  charmLine: string;
+  totalLine: string;
+};
 
 /** Marks a group's wrapper, so a failed add can find the first invalid one. */
 const GROUP_ATTR = { "data-glove-option-group": "" };
@@ -34,10 +50,11 @@ type Props = {
 
 /**
  * "Complete your LuvGluv" over the product customizer: the glove-styled
- * face of `useProductCustomizer`. Same chips as the legacy add-on picker -
- * a horizontal track of 56px image chips with the purple ring, a check and
- * the one-shot swing (signature 2) - but the rows are the owner's option
- * groups, not two hard-wired collections:
+ * face of `useProductCustomizer`, and the only chain/charm UI on the PDP
+ * (the old collection-based picker is retired). Each row is a horizontal
+ * track of 56px image chips with the purple ring, a check and the one-shot
+ * swing (signature 2); the rows are the owner's option groups (Products ->
+ * Options):
  *
  * - a single-pick group is a radio row; when it is optional it starts with a
  *   "No chain" chip, which clears the group

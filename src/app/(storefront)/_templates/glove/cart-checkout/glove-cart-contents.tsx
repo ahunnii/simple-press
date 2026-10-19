@@ -14,7 +14,6 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { GloveButton } from "../shared/glove-button";
 import { GloveHandIcon } from "../shared/glove-hand-icon";
 import { GloveMistPanel } from "../shared/glove-mist-panel";
-import { groupGloveCartLines } from "./glove-cart-groups";
 import { GloveCartRow } from "./glove-cart-row";
 
 type GloveCartContentsProps = {
@@ -138,12 +137,10 @@ export function GloveCartContents({
           {columnProduct}
         </h2>
         <ul className="m-0 list-none p-0">
-          {groupGloveCartLines(items).map(({ item, addOns, total }) => (
+          {items.map((item) => (
             <GloveCartRow
               key={cartItemId(item)}
               item={item}
-              addOns={addOns}
-              groupTotal={total}
               labels={{
                 price: columnPrice,
                 quantity: columnQuantity,

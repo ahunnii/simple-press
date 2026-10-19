@@ -6,6 +6,7 @@ import {
   GloveReveal,
   GloveSection,
 } from "../shared";
+import { GloveNewsletterForm } from "../shared/glove-newsletter-form";
 import { gloveIsExternal } from "../steps/glove-links";
 
 const DECO_BASE = "/templates/glove/images";
@@ -16,6 +17,12 @@ type GloveHomeVipProps = {
   note: string;
   buttonLabel: string;
   buttonUrl: string;
+  /**
+   * Set when Email marketing is on: the band becomes a real newsletter
+   * sign-up (value = privacy policy path) and `note` / `buttonUrl` are unused.
+   * Unset: the account sign-up CTA.
+   */
+  newsletterPrivacyHref?: string;
   sectionAttrs?: Record<string, string>;
 };
 
@@ -40,9 +47,9 @@ function Deco({ file, className }: { file: string; className: string }) {
 
 /**
  * Newsletter band on mist (not purple: the two bands above it already are).
- * There is no public subscribe endpoint, so the button sends shoppers to
- * create an account and the helper text says where they opt in. No email
- * input: nothing here pretends to subscribe anyone.
+ * Two modes: with Email marketing on it holds a real double opt-in sign-up
+ * form; otherwise the button sends shoppers to create an account and the
+ * helper text says where they opt in. Nothing here ever fakes a subscribe.
  */
 export function GloveHomeVip({
   heading,
@@ -50,8 +57,10 @@ export function GloveHomeVip({
   note,
   buttonLabel,
   buttonUrl,
+  newsletterPrivacyHref,
   sectionAttrs,
 }: GloveHomeVipProps) {
+  const newsletterMode = newsletterPrivacyHref !== undefined;
   return (
     <GloveSection
       tone="mist"
@@ -90,25 +99,39 @@ export function GloveHomeVip({
               ) : null}
             </div>
             <div className="flex flex-col items-center gap-3 text-center md:items-start md:text-left">
-              {buttonLabel && buttonUrl ? (
-                <GloveButton
-                  href={buttonUrl}
-                  external={gloveIsExternal(buttonUrl)}
-                  size="md"
-                >
-                  <span {...fieldAttr("glove.homepage.vip-button-label")}>
-                    {buttonLabel}
-                  </span>
-                </GloveButton>
-              ) : null}
-              {note ? (
-                <p
-                  className="glove-body max-w-[38ch] text-[14px] leading-[1.6] text-[var(--glove-muted)]"
-                  {...fieldAttr("glove.homepage.vip-note")}
-                >
-                  {note}
-                </p>
-              ) : null}
+              {newsletterMode ? (
+                <div className="w-full max-w-[460px]">
+                  <GloveNewsletterForm
+                    variant="band"
+                    idPrefix="glove-vip"
+                    privacyHref={newsletterPrivacyHref}
+                    buttonLabel={buttonLabel || undefined}
+                    buttonLabelField="glove.homepage.vip-button-label"
+                  />
+                </div>
+              ) : (
+                <>
+                  {buttonLabel && buttonUrl ? (
+                    <GloveButton
+                      href={buttonUrl}
+                      external={gloveIsExternal(buttonUrl)}
+                      size="md"
+                    >
+                      <span {...fieldAttr("glove.homepage.vip-button-label")}>
+                        {buttonLabel}
+                      </span>
+                    </GloveButton>
+                  ) : null}
+                  {note ? (
+                    <p
+                      className="glove-body max-w-[38ch] text-[14px] leading-[1.6] text-[var(--glove-muted)]"
+                      {...fieldAttr("glove.homepage.vip-note")}
+                    >
+                      {note}
+                    </p>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </GloveReveal>

@@ -18,9 +18,10 @@ type GloveProductCardProps = {
 };
 
 /**
- * Square wash well holding the photo (contained with padding, multiplied so a
- * white photo background melts into the wash), a hover swap to the 2nd photo, wishlist heart, and
- * centered Poppins name / primary price. Sale and sold-out
+ * Square wash well holding the photo (object-contain over a blurred cover
+ * copy of itself, so letterboxing reads as a glow), a hover crossfade to the
+ * 2nd photo (which brings its own backdrop), wishlist heart, and centered
+ * Poppins name / primary price. Sale and sold-out
  * states show a --glove-alert badge. The title link is stretched over the
  * whole card; the heart sits above it.
  */
@@ -73,22 +74,50 @@ export function GloveProductCard({
       )}
     >
       <div className="relative aspect-square w-full overflow-hidden bg-[var(--glove-wash)]">
-        <Image
-          src={primary}
-          alt=""
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
-          priority={priority}
-          className="glove-product-img glove-product-img-main object-contain p-3"
-        />
-        {secondary ? (
+        <div className="glove-product-layer glove-product-layer-main absolute inset-0">
+          {/* Blurred backdrop: a scaled-up, blurred cover copy of the photo
+              fills the letterbox around the contained photo, so a glove
+              shot on white or a narrow crop reads as a soft glow instead of
+              a flat wash. scale-150: CSS blur() fades to transparent at the
+              element's own edges (a ~40px halo at blur-2xl) and the frame is
+              only ~160-400px, so the overscan pushes the halo outside the
+              overflow-hidden well. Decorative, so aria-hidden with empty alt;
+              the stretched title link names the card. */}
           <Image
-            src={secondary}
+            src={primary}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="128px"
+            className="scale-150 object-cover opacity-90 blur-2xl saturate-125"
+          />
+          <Image
+            src={primary}
             alt=""
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
-            className="glove-product-img glove-product-img-alt object-contain p-3"
+            priority={priority}
+            className="glove-product-img object-contain"
           />
+        </div>
+        {secondary ? (
+          <div className="glove-product-layer glove-product-layer-alt absolute inset-0">
+            <Image
+              src={secondary}
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="128px"
+              className="scale-150 object-cover opacity-90 blur-2xl saturate-125"
+            />
+            <Image
+              src={secondary}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
+              className="glove-product-img object-contain"
+            />
+          </div>
         ) : null}
 
         {showBadge && badgeLabel ? (

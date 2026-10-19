@@ -39,7 +39,7 @@ describe("gloveStepPlan", () => {
     expect(plan.next).toBe(3);
   });
 
-  it("hands the add-on picker the next number (or 1 with no option rows)", () => {
+  it("hands the first option group the next number (or 1 with no option rows)", () => {
     expect(gloveStepPlan(["Colors", "Size", "Grommet"], true).next).toBe(4);
     expect(gloveStepPlan([], true).next).toBe(1);
   });
