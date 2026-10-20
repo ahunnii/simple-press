@@ -9,6 +9,7 @@ import { BadgeCheck, Star, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { ReviewOwnerReply } from "~/components/review-owner-reply";
 
 import { UmscButton } from "../shared/umsc-button";
 import { UmscRevealGroup } from "../shared/umsc-reveal";
@@ -400,6 +401,16 @@ function UmscReviewItem({ review }: { review: Review }) {
           className="w-full max-w-md border border-[var(--umsc-line)]"
         />
       )}
+
+      <ReviewOwnerReply
+        reply={review.reply}
+        classNames={{
+          root: "ml-0 border-[var(--umsc-line-gold)] sm:ml-4",
+          label: "umsc-sans text-[14px] font-semibold text-[var(--umsc-ink)]",
+          time: "font-normal text-[var(--umsc-muted)]",
+          text: "umsc-sans max-w-[66ch] text-[15px] leading-[1.6] text-[var(--umsc-muted)]",
+        }}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-[var(--umsc-line)] pt-3">
         <p className="umsc-sans text-[14px] text-[var(--umsc-muted)]">

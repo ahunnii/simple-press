@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { ReviewOwnerReply } from "~/components/review-owner-reply";
 
 type ProductReviewsProps = {
   productId: string;
@@ -336,6 +337,9 @@ function ReviewCard({
             />
           </div>
         )}
+
+        {/* Owner reply */}
+        <ReviewOwnerReply reply={review.reply} classNames={{ root: "mb-4" }} />
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t pt-4">

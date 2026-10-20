@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { PUBLIC_REVIEW_SELECT } from "./review";
+import { PUBLIC_REVIEW_SELECT, toPublicReview } from "./review";
 
 // Importing the router pulls in `../trpc` → the real better-auth singleton,
 // whose construction eagerly fires `trustedOrigins()` (a live
@@ -30,6 +30,13 @@ describe("PUBLIC_REVIEW_SELECT", () => {
     expect(select.customerEmail).toBeUndefined();
     expect(select.customerId).toBeUndefined();
     expect(select.orderId).toBeUndefined();
+  });
+
+  it("selects the owner reply text/date but never who replied", () => {
+    expect(select.ownerReply).toBe(true);
+    expect(select.ownerReplyAt).toBe(true);
+    expect(select.ownerReplyById).toBeUndefined();
+    expect(select.ownerReplyBy).toBeUndefined();
   });
 
   it("never selects other columns ReviewCard/ReviewForSchema don't need", () => {
@@ -66,5 +73,56 @@ describe("PUBLIC_REVIEW_SELECT", () => {
         true,
       );
     }
+  });
+});
+
+describe("toPublicReview", () => {
+  const base = {
+    id: "r1",
+    rating: 5,
+    title: "Great",
+    comment: "Loved it",
+    images: [],
+    videoUrl: null,
+    verifiedPurchase: true,
+    customerName: "Sam",
+    reviewDate: new Date("2026-01-01T00:00:00Z"),
+    createdAt: new Date("2026-01-02T00:00:00Z"),
+    helpfulCount: 0,
+    notHelpfulCount: 0,
+  };
+
+  it("folds the reply columns into a reply object attributed to the business", () => {
+    const repliedAt = new Date("2026-02-01T00:00:00Z");
+    const out = toPublicReview(
+      { ...base, ownerReply: "Thank you!", ownerReplyAt: repliedAt },
+      "Acme Co",
+    );
+    expect(out.reply).toEqual({
+      text: "Thank you!",
+      repliedAt,
+      from: "Acme Co",
+    });
+    expect(out).not.toHaveProperty("ownerReply");
+    expect(out).not.toHaveProperty("ownerReplyAt");
+    expect(out.id).toBe("r1");
+  });
+
+  it("falls back to the review date when ownerReplyAt is missing", () => {
+    const out = toPublicReview(
+      { ...base, ownerReply: "Thanks", ownerReplyAt: null },
+      "Acme Co",
+    );
+    expect(out.reply?.repliedAt).toEqual(base.reviewDate);
+  });
+
+  it("returns reply: null when there is no reply", () => {
+    const out = toPublicReview(
+      { ...base, ownerReply: null, ownerReplyAt: null },
+      "Acme Co",
+    );
+    expect(out.reply).toBeNull();
+    expect(out).not.toHaveProperty("ownerReply");
+    expect(out).not.toHaveProperty("ownerReplyAt");
   });
 });

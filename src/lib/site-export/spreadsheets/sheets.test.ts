@@ -31,6 +31,7 @@ import {
   PRODUCT_COLUMNS,
   productsSheet,
   quotesSheet,
+  reviewsSheet,
   serviceItemsSheet,
   servicesSheet,
   shippingRatesSheet,
@@ -541,6 +542,42 @@ describe("moderation + testimonials", () => {
     expect(moderationStatus({ isApproved: true, isHidden: true })).toBe(
       "Hidden",
     );
+  });
+
+  it("maps owner replies on the reviews sheet, empty when there is none", () => {
+    const review = {
+      product: { name: "Mug", sku: null },
+      rating: 5,
+      title: null,
+      comment: "Love it",
+      customerName: "Sam",
+      customerEmail: null,
+      verifiedPurchase: true,
+      isApproved: true,
+      isHidden: false,
+      source: "customer",
+      reviewDate: at,
+      images: [],
+      videoUrl: null,
+      ownerReply: null,
+      ownerReplyAt: null,
+    };
+    const { columns, rows } = reviewsSheet(
+      [
+        review,
+        { ...review, ownerReply: "Thanks!", ownerReplyAt: at },
+      ],
+      ctx,
+    );
+    const replyIdx = columns.indexOf("Owner reply");
+    expect(columns[replyIdx + 1]).toBe("Reply date");
+    expect(columns.indexOf("Review")).toBe(replyIdx - 1);
+    expect(rows[0]).toMatchObject({ "Owner reply": "", "Reply date": "" });
+    expect(rows[1]).toMatchObject({
+      "Owner reply": "Thanks!",
+      "Reply date": rows[1]?.["Review date"],
+    });
+    expect(rows[1]?.["Reply date"]).not.toBe("");
   });
 
   it("maps testimonials", () => {

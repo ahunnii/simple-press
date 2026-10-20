@@ -84,6 +84,7 @@ import {
 } from "../../_lib/admin-mutation-toast";
 import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 import { OwnerReviewDialog } from "./owner-review-dialog";
+import { ReviewReplyDialog } from "./review-reply-dialog";
 
 // The row shape `review.listAll` returns, plus the one derivation the page
 // computes once (via `getReviewStatus` in `~/lib/validators/reviews`) and
@@ -181,6 +182,7 @@ export function ReviewsClient({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<ReviewRow | null>(null);
+  const [replyingReview, setReplyingReview] = useState<ReviewRow | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   // ── Selection ──────────────────────────────────────────────────────────────
@@ -695,6 +697,16 @@ export function ReviewsClient({
                               {review.comment}
                             </p>
 
+                            {review.ownerReply && (
+                              <p className="text-muted-foreground mt-1 inline-flex items-center gap-1 text-xs">
+                                <MessageSquare
+                                  className="h-3 w-3"
+                                  aria-hidden="true"
+                                />
+                                Replied
+                              </p>
+                            )}
+
                             {review.images.length > 0 && (
                               <div className="mt-1.5 flex items-center gap-1.5">
                                 {review.images.slice(0, 3).map((img, i) => (
@@ -796,6 +808,14 @@ export function ReviewsClient({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuItem
+                                  onClick={() => setReplyingReview(review)}
+                                >
+                                  <MessageSquare className="mr-2 h-4 w-4" />
+                                  {review.ownerReply ? "Edit reply" : "Reply"}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+
                                 {/* Only owner-added rows are editable — a
                                     customer's own words are not the owner's to
                                     rewrite. */}
@@ -917,6 +937,20 @@ export function ReviewsClient({
           onClose={() => setEditingReview(null)}
           onSuccess={() => {
             setEditingReview(null);
+            afterWrite();
+          }}
+        />
+      )}
+
+      {/* Reply dialog. Mounted only while a row is being replied to so its
+          textarea seeds from that row's current reply. */}
+      {replyingReview && (
+        <ReviewReplyDialog
+          review={replyingReview}
+          isOpen
+          onClose={() => setReplyingReview(null)}
+          onSuccess={() => {
+            setReplyingReview(null);
             afterWrite();
           }}
         />

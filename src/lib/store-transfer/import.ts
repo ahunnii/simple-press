@@ -1232,6 +1232,10 @@ export async function importStoreBundle(args: {
               customerEmail: review.customerEmail ?? null,
               customerTitle: review.customerTitle ?? null,
               reviewDate: new Date(review.reviewDate),
+              ownerReply: review.ownerReply ?? null,
+              ownerReplyAt: review.ownerReplyAt
+                ? new Date(review.ownerReplyAt)
+                : null,
               customerId: null,
               orderId: null,
             },

@@ -152,3 +152,25 @@ export const reviewBulkDeleteSchema = z.object({
       `Too many reviews selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
     ),
 });
+
+/**
+ * Owner's public reply to a product review (`review.setReply` /
+ * `review.deleteReply`). One reply per review; posting again edits it. The
+ * text is trimmed server-side so a whitespace-only reply is rejected rather
+ * than stored as an empty bubble on the storefront.
+ */
+export const REVIEW_REPLY_MAX_LENGTH = 2000;
+
+export const reviewSetReplySchema = z.object({
+  id: z.string(),
+  reply: z
+    .string()
+    .trim()
+    .min(1, "Write a reply before posting")
+    .max(
+      REVIEW_REPLY_MAX_LENGTH,
+      `Replies can be at most ${REVIEW_REPLY_MAX_LENGTH} characters`,
+    ),
+});
+
+export const reviewDeleteReplySchema = z.object({ id: z.string() });

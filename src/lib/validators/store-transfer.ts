@@ -234,6 +234,9 @@ const exportedProductReviewSchema = z.object({
   customerEmail: nullableString.optional(),
   customerTitle: nullableString.optional(),
   reviewDate: z.string(),
+  // Owner reply — absent in exports made before replies existed.
+  ownerReply: nullableString.optional(),
+  ownerReplyAt: nullableString.optional(),
 });
 
 const exportedProductOptionGroupAttachmentSchema = z.object({

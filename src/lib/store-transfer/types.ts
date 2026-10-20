@@ -262,6 +262,10 @@ export interface ExportedProductReview {
   customerEmail: string | null;
   customerTitle: string | null;
   reviewDate: string; // ISO string
+  // Owner's public reply. Optional so export files made before replies
+  // existed still import. ownerReplyById excluded (no users transferred).
+  ownerReply?: string | null;
+  ownerReplyAt?: string | null; // ISO string
   // helpfulCount / notHelpfulCount excluded (runtime votes)
   // customerId / orderId excluded (no customer/order data transferred)
 }

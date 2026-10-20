@@ -258,6 +258,61 @@ describe("parseManifest back-compat", () => {
     expect(parsedNull.content.siteContent?.footerNavigationItems).toBeNull();
   });
 
+  it("parses owner replies on product reviews and still accepts reviews without them", () => {
+    const review = (extra: Record<string, unknown>) => ({
+      exportId: "r1",
+      source: "owner",
+      rating: 5,
+      title: null,
+      comment: "Great",
+      images: [],
+      videoUrl: null,
+      verifiedPurchase: true,
+      isApproved: true,
+      isHidden: false,
+      customerName: "Sam",
+      customerEmail: null,
+      customerTitle: null,
+      reviewDate: "2026-10-01T00:00:00.000Z",
+      ...extra,
+    });
+    const product = (reviews: unknown[]) => ({
+      exportId: "p1",
+      name: "Glove",
+      slug: "glove",
+      price: 5000,
+      trackInventory: false,
+      allowBackorders: false,
+      published: true,
+      featured: false,
+      sortOrder: 0,
+      additionalFields: null,
+      images: [],
+      variants: [],
+      ownerReviews: reviews,
+    });
+    const content = {
+      ...minimalContent(),
+      products: [
+        product([
+          review({
+            ownerReply: "Thank you!",
+            ownerReplyAt: "2026-10-02T12:00:00.000Z",
+          }),
+        ]),
+        product([review({ exportId: "r2" })]),
+      ],
+    };
+    const parsed = parseManifest(manifest(content));
+    expect(parsed.content.products[0]?.ownerReviews[0]).toMatchObject({
+      ownerReply: "Thank you!",
+      ownerReplyAt: "2026-10-02T12:00:00.000Z",
+    });
+    const legacy = parsed.content.products[1]?.ownerReviews[0];
+    expect(legacy?.ownerReply).toBeUndefined();
+    expect(legacy?.ownerReplyAt).toBeUndefined();
+  });
+
   it("accepts maintenanceMessage as a TipTap doc (current) or a string (legacy)", () => {
     const doc = {
       type: "doc",
