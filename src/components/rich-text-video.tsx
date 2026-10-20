@@ -1,6 +1,17 @@
 "use client";
 
+import { useCallback, useState } from "react";
+
 import { useVideoAutoplay } from "~/app/(storefront)/_templates/_service-pages/_shared/use-video-autoplay";
+
+/**
+ * Landscape clips fill the column; portrait clips (phone reels) are capped to
+ * the viewport height and centered — full-width 9:16 would run ~1200px tall
+ * and push the controls below the fold.
+ */
+const LANDSCAPE_CLASS = "h-auto w-full rounded-md";
+const PORTRAIT_CLASS =
+  "mx-auto block h-auto max-h-[80svh] w-auto max-w-full rounded-md";
 
 type RichTextVideoProps = {
   src: string;
@@ -23,13 +34,25 @@ type RichTextVideoProps = {
  */
 export function RichTextVideo({ src, title, ambient }: RichTextVideoProps) {
   const { videoRef, reduceMotion } = useVideoAutoplay();
+  const [portrait, setPortrait] = useState(false);
+  const measure = useCallback((el: HTMLVideoElement | null) => {
+    // readyState >= 1 (HAVE_METADATA): metadata may have loaded before
+    // hydration, in which case onLoadedMetadata never fires for us.
+    if (el && el.readyState >= 1 && el.videoHeight > el.videoWidth)
+      setPortrait(true);
+  }, []);
+  const className = portrait ? PORTRAIT_CLASS : LANDSCAPE_CLASS;
 
   return (
     <figure className="not-prose my-6">
       {ambient ? (
         <video
-          ref={videoRef}
-          className="h-auto w-full rounded-md"
+          ref={(el) => {
+            videoRef.current = el;
+            measure(el);
+          }}
+          onLoadedMetadata={(e) => measure(e.currentTarget)}
+          className={className}
           preload="metadata"
           playsInline
           muted
@@ -43,7 +66,9 @@ export function RichTextVideo({ src, title, ambient }: RichTextVideoProps) {
         </video>
       ) : (
         <video
-          className="h-auto w-full rounded-md"
+          ref={measure}
+          onLoadedMetadata={(e) => measure(e.currentTarget)}
+          className={className}
           preload="metadata"
           playsInline
           controls

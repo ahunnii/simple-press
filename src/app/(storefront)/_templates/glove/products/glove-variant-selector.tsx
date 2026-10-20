@@ -3,6 +3,8 @@
 import type { KeyboardEvent, ReactNode } from "react";
 import { useId, useMemo, useRef } from "react";
 
+import type { ColorSwatches } from "~/lib/products/color-swatches";
+import { swatchOverrideFor } from "~/lib/products/color-swatches";
 import { cn } from "~/lib/utils";
 
 import { GloveMedallion, GloveSelect } from "../shared";
@@ -37,6 +39,11 @@ type Props = {
    * rows from 1.
    */
   steps?: Record<string, number>;
+  /**
+   * Owner-pinned hex per color value (`Product.additionalFields.colorSwatches`).
+   * Wins over the name lookup; a color with no entry stays name-based.
+   */
+  swatchOverrides?: ColorSwatches;
 };
 
 /**
@@ -56,6 +63,7 @@ export function GloveVariantSelector({
   onSelect,
   numbered,
   steps,
+  swatchOverrides,
 }: Props) {
   // Easy Guide order (Color, Size, Grommet) whatever order the owner entered
   // the options in; unnumbered dimensions trail.
@@ -139,7 +147,9 @@ export function GloveVariantSelector({
               onChange={(next) => chooseValue(group.key, next)}
               className="gap-1"
               renderItem={(item, isSelected) => {
-                const swatch = resolveSwatch(item.value);
+                const swatch = resolveSwatch(
+                  swatchOverrideFor(swatchOverrides, item.value) ?? item.value,
+                );
                 return (
                   <span
                     aria-hidden="true"

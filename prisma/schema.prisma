@@ -62,6 +62,7 @@ model User {
   createdInvites            PlatformInvite[]     @relation("CreatedInvites")
   editorNotes               EditorNote[]
   marketingCampaignsCreated MarketingCampaign[]
+  productReviewReplies      ProductReview[]      @relation("ProductReviewOwnerReply")
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -1747,6 +1748,11 @@ model ProductReview {
   helpfulCount    Int @default(0)
   notHelpfulCount Int @default(0)
 
+  // Owner's public reply (one per review). ownerReplyAt = first posted; edits
+  // keep it. ownerReplyBy is admin-only (never in the public select).
+  ownerReply     String?   @db.Text
+  ownerReplyAt   DateTime?
+
   // Relationships
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -1757,12 +1763,16 @@ model ProductReview {
   orderId String?
   order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
+  ownerReplyById String?
+  ownerReplyBy   User?   @relation("ProductReviewOwnerReply", fields: [ownerReplyById], references: [id], onDelete: SetNull)
+
   votes ReviewVote[]
 
   @@index([productId, isApproved, isHidden])
   @@index([productId, source])
   @@index([customerId])
   @@index([orderId])
+  @@index([ownerReplyById])
 }
 
 model ReviewVote {

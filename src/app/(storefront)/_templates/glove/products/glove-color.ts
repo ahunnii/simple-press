@@ -1,83 +1,31 @@
 /**
  * Swatch + option-name helpers for the glove product page.
  *
- * Logic ported from olive's `shared/olive-color.ts` (kept local so the two
- * templates never couple). The hex values below are PRODUCT colours (the
- * leather a glove is cut from), not brand surfaces: they are the only colour
- * literals in the glove template, and they live in a `.ts` module so no
- * `.tsx` component carries one. Everything the template paints for itself
- * rides a `--glove-*` token. An unrecognised colour name never gets an
- * invented swatch: it resolves to `unknown` and the chip draws a labelled
- * paper disc instead.
+ * Name lookup is shared with olive via `~/lib/products/color-swatches`. The
+ * hex values there are PRODUCT colours (the leather a glove is cut from), not
+ * brand surfaces: they are the only colour literals the glove template draws
+ * with, and they live in `.ts` modules so no `.tsx` component carries one.
+ * Everything the template paints for itself rides a `--glove-*` token. An
+ * unrecognised colour name never gets an invented swatch: it resolves to
+ * `unknown` and the chip draws a labelled paper disc instead.
  */
 
+import {
+  BASE_PRODUCT_COLORS,
+  matchColorName,
+} from "~/lib/products/color-swatches";
+
+/**
+ * Every built-in name now lives in the shared `BASE_PRODUCT_COLORS`; glove adds
+ * nothing of its own. Owners can also pin a hex per color on the product.
+ */
 const GLOVE_COLOR_NAMES: Record<string, string> = {
-  black: "#1a1a1a",
-  white: "#ffffff",
-  ivory: "#f4f0e6",
-  cream: "#f2e8d5",
-  navy: "#1f2a44",
-  brown: "#6b4a32",
-  tan: "#d2a679",
-  camel: "#c19a6b",
-  cognac: "#9a4a1f",
-  chocolate: "#4a2c1d",
-  blush: "#e8c4c0",
-  pink: "#e8a0b4",
-  fuchsia: "#c2185b",
-  fushia: "#c2185b",
-  fuschia: "#c2185b",
-  magenta: "#b0237a",
-  red: "#b02a2a",
-  burgundy: "#6e1f2e",
-  wine: "#5a1b2b",
-  maroon: "#5c1a1f",
-  purple: "#601b76",
-  plum: "#5b2a4e",
-  lavender: "#c3b5de",
-  lilac: "#c8a2c8",
-  green: "#3e7a4e",
-  emerald: "#1f7a52",
-  olive: "#6b7043",
-  forest: "#23422f",
-  blue: "#2f5d8c",
-  royal: "#2a4bab",
-  denim: "#4a6d96",
-  teal: "#2e7d80",
-  grey: "#8e918f",
-  gray: "#8e918f",
-  charcoal: "#36393b",
-  gold: "#c7a44a",
-  silver: "#c4c7c9",
-  beige: "#e3d9c6",
-  taupe: "#a79c8e",
-  orange: "#d2703a",
-  coral: "#e1735d",
-  yellow: "#e3c04c",
-  mustard: "#c9971f",
+  ...BASE_PRODUCT_COLORS,
 };
 
-function normalizeName(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[_/\\]+/g, " ")
-    .replace(/[^a-z\s-]/g, "")
-    .replace(/[-\s]+/g, " ")
-    .trim();
-}
-
-/** Colour NAME → swatch, or null. Whole string, then first word, then last. */
+/** Colour NAME → swatch, or null. Whole string, then the longest known run of words. */
 function colorFromName(value: string): string | null {
-  const normalized = normalizeName(value);
-  if (!normalized) return null;
-  const exact = GLOVE_COLOR_NAMES[normalized];
-  if (exact) return exact;
-  const words = normalized.split(" ").filter(Boolean);
-  if (words.length < 2) return null;
-  const first = words[0] ? GLOVE_COLOR_NAMES[words[0]] : undefined;
-  if (first) return first;
-  const last = words[words.length - 1];
-  return (last ? GLOVE_COLOR_NAMES[last] : undefined) ?? null;
+  return matchColorName(GLOVE_COLOR_NAMES, value);
 }
 
 function isCssColorValue(value: string): boolean {

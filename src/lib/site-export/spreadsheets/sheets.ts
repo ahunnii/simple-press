@@ -673,6 +673,8 @@ export interface ReviewSheetReview {
   reviewDate: Date;
   images: string[];
   videoUrl: string | null;
+  ownerReply: string | null;
+  ownerReplyAt: Date | null;
 }
 
 export function moderationStatus(item: {
@@ -689,6 +691,8 @@ export const REVIEW_COLUMNS = [
   "Rating (1-5)",
   "Review title",
   "Review",
+  "Owner reply",
+  "Reply date",
   "Reviewer name",
   "Reviewer email",
   "Verified purchase",
@@ -711,6 +715,10 @@ export function reviewsSheet(
       "Rating (1-5)": r.rating,
       "Review title": r.title ?? "",
       Review: r.comment,
+      "Owner reply": r.ownerReply ?? "",
+      "Reply date": r.ownerReplyAt
+        ? formatDateTime(r.ownerReplyAt, ctx.timeZone)
+        : "",
       "Reviewer name": r.customerName,
       "Reviewer email": r.customerEmail ?? "",
       "Verified purchase": yesNo(r.verifiedPurchase),

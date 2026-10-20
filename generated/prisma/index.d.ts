@@ -7122,6 +7122,7 @@ export namespace Prisma {
     createdInvites: number
     editorNotes: number
     marketingCampaignsCreated: number
+    productReviewReplies: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7134,6 +7135,7 @@ export namespace Prisma {
     createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
     editorNotes?: boolean | UserCountOutputTypeCountEditorNotesArgs
     marketingCampaignsCreated?: boolean | UserCountOutputTypeCountMarketingCampaignsCreatedArgs
+    productReviewReplies?: boolean | UserCountOutputTypeCountProductReviewRepliesArgs
   }
 
   // Custom InputTypes
@@ -7208,6 +7210,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountMarketingCampaignsCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: MarketingCampaignWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountProductReviewRepliesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductReviewWhereInput
   }
 
 
@@ -8798,6 +8807,7 @@ export namespace Prisma {
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
+    productReviewReplies?: boolean | User$productReviewRepliesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -8851,6 +8861,7 @@ export namespace Prisma {
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
+    productReviewReplies?: boolean | User$productReviewRepliesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8868,6 +8879,7 @@ export namespace Prisma {
       createdInvites: Prisma.$PlatformInvitePayload<ExtArgs>[]
       editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
       marketingCampaignsCreated: Prisma.$MarketingCampaignPayload<ExtArgs>[]
+      productReviewReplies: Prisma.$ProductReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9283,6 +9295,7 @@ export namespace Prisma {
     createdInvites<T extends User$createdInvitesArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     editorNotes<T extends User$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     marketingCampaignsCreated<T extends User$marketingCampaignsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$marketingCampaignsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    productReviewReplies<T extends User$productReviewRepliesArgs<ExtArgs> = {}>(args?: Subset<T, User$productReviewRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9923,6 +9936,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: MarketingCampaignScalarFieldEnum | MarketingCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * User.productReviewReplies
+   */
+  export type User$productReviewRepliesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProductReview
+     */
+    select?: ProductReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProductReview
+     */
+    omit?: ProductReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductReviewInclude<ExtArgs> | null
+    where?: ProductReviewWhereInput
+    orderBy?: ProductReviewOrderByWithRelationInput | ProductReviewOrderByWithRelationInput[]
+    cursor?: ProductReviewWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductReviewScalarFieldEnum | ProductReviewScalarFieldEnum[]
   }
 
   /**
@@ -61045,9 +61082,12 @@ export namespace Prisma {
     reviewDate: Date | null
     helpfulCount: number | null
     notHelpfulCount: number | null
+    ownerReply: string | null
+    ownerReplyAt: Date | null
     productId: string | null
     customerId: string | null
     orderId: string | null
+    ownerReplyById: string | null
   }
 
   export type ProductReviewMaxAggregateOutputType = {
@@ -61068,9 +61108,12 @@ export namespace Prisma {
     reviewDate: Date | null
     helpfulCount: number | null
     notHelpfulCount: number | null
+    ownerReply: string | null
+    ownerReplyAt: Date | null
     productId: string | null
     customerId: string | null
     orderId: string | null
+    ownerReplyById: string | null
   }
 
   export type ProductReviewCountAggregateOutputType = {
@@ -61092,9 +61135,12 @@ export namespace Prisma {
     reviewDate: number
     helpfulCount: number
     notHelpfulCount: number
+    ownerReply: number
+    ownerReplyAt: number
     productId: number
     customerId: number
     orderId: number
+    ownerReplyById: number
     _all: number
   }
 
@@ -61129,9 +61175,12 @@ export namespace Prisma {
     reviewDate?: true
     helpfulCount?: true
     notHelpfulCount?: true
+    ownerReply?: true
+    ownerReplyAt?: true
     productId?: true
     customerId?: true
     orderId?: true
+    ownerReplyById?: true
   }
 
   export type ProductReviewMaxAggregateInputType = {
@@ -61152,9 +61201,12 @@ export namespace Prisma {
     reviewDate?: true
     helpfulCount?: true
     notHelpfulCount?: true
+    ownerReply?: true
+    ownerReplyAt?: true
     productId?: true
     customerId?: true
     orderId?: true
+    ownerReplyById?: true
   }
 
   export type ProductReviewCountAggregateInputType = {
@@ -61176,9 +61228,12 @@ export namespace Prisma {
     reviewDate?: true
     helpfulCount?: true
     notHelpfulCount?: true
+    ownerReply?: true
+    ownerReplyAt?: true
     productId?: true
     customerId?: true
     orderId?: true
+    ownerReplyById?: true
     _all?: true
   }
 
@@ -61287,9 +61342,12 @@ export namespace Prisma {
     reviewDate: Date
     helpfulCount: number
     notHelpfulCount: number
+    ownerReply: string | null
+    ownerReplyAt: Date | null
     productId: string
     customerId: string | null
     orderId: string | null
+    ownerReplyById: string | null
     _count: ProductReviewCountAggregateOutputType | null
     _avg: ProductReviewAvgAggregateOutputType | null
     _sum: ProductReviewSumAggregateOutputType | null
@@ -61330,12 +61388,16 @@ export namespace Prisma {
     reviewDate?: boolean
     helpfulCount?: boolean
     notHelpfulCount?: boolean
+    ownerReply?: boolean
+    ownerReplyAt?: boolean
     productId?: boolean
     customerId?: boolean
     orderId?: boolean
+    ownerReplyById?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
     votes?: boolean | ProductReview$votesArgs<ExtArgs>
     _count?: boolean | ProductReviewCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["productReview"]>
@@ -61359,12 +61421,16 @@ export namespace Prisma {
     reviewDate?: boolean
     helpfulCount?: boolean
     notHelpfulCount?: boolean
+    ownerReply?: boolean
+    ownerReplyAt?: boolean
     productId?: boolean
     customerId?: boolean
     orderId?: boolean
+    ownerReplyById?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
   }, ExtArgs["result"]["productReview"]>
 
   export type ProductReviewSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -61386,12 +61452,16 @@ export namespace Prisma {
     reviewDate?: boolean
     helpfulCount?: boolean
     notHelpfulCount?: boolean
+    ownerReply?: boolean
+    ownerReplyAt?: boolean
     productId?: boolean
     customerId?: boolean
     orderId?: boolean
+    ownerReplyById?: boolean
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
   }, ExtArgs["result"]["productReview"]>
 
   export type ProductReviewSelectScalar = {
@@ -61413,16 +61483,20 @@ export namespace Prisma {
     reviewDate?: boolean
     helpfulCount?: boolean
     notHelpfulCount?: boolean
+    ownerReply?: boolean
+    ownerReplyAt?: boolean
     productId?: boolean
     customerId?: boolean
     orderId?: boolean
+    ownerReplyById?: boolean
   }
 
-  export type ProductReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "rating" | "title" | "comment" | "images" | "videoUrl" | "verifiedPurchase" | "isApproved" | "isHidden" | "customerName" | "customerEmail" | "customerTitle" | "reviewDate" | "helpfulCount" | "notHelpfulCount" | "productId" | "customerId" | "orderId", ExtArgs["result"]["productReview"]>
+  export type ProductReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "source" | "rating" | "title" | "comment" | "images" | "videoUrl" | "verifiedPurchase" | "isApproved" | "isHidden" | "customerName" | "customerEmail" | "customerTitle" | "reviewDate" | "helpfulCount" | "notHelpfulCount" | "ownerReply" | "ownerReplyAt" | "productId" | "customerId" | "orderId" | "ownerReplyById", ExtArgs["result"]["productReview"]>
   export type ProductReviewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
     votes?: boolean | ProductReview$votesArgs<ExtArgs>
     _count?: boolean | ProductReviewCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -61430,11 +61504,13 @@ export namespace Prisma {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
   }
   export type ProductReviewIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | ProductDefaultArgs<ExtArgs>
     customer?: boolean | ProductReview$customerArgs<ExtArgs>
     order?: boolean | ProductReview$orderArgs<ExtArgs>
+    ownerReplyBy?: boolean | ProductReview$ownerReplyByArgs<ExtArgs>
   }
 
   export type $ProductReviewPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -61443,6 +61519,7 @@ export namespace Prisma {
       product: Prisma.$ProductPayload<ExtArgs>
       customer: Prisma.$CustomerPayload<ExtArgs> | null
       order: Prisma.$OrderPayload<ExtArgs> | null
+      ownerReplyBy: Prisma.$UserPayload<ExtArgs> | null
       votes: Prisma.$ReviewVotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -61464,9 +61541,12 @@ export namespace Prisma {
       reviewDate: Date
       helpfulCount: number
       notHelpfulCount: number
+      ownerReply: string | null
+      ownerReplyAt: Date | null
       productId: string
       customerId: string | null
       orderId: string | null
+      ownerReplyById: string | null
     }, ExtArgs["result"]["productReview"]>
     composites: {}
   }
@@ -61864,6 +61944,7 @@ export namespace Prisma {
     product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     customer<T extends ProductReview$customerArgs<ExtArgs> = {}>(args?: Subset<T, ProductReview$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     order<T extends ProductReview$orderArgs<ExtArgs> = {}>(args?: Subset<T, ProductReview$orderArgs<ExtArgs>>): Prisma__OrderClient<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    ownerReplyBy<T extends ProductReview$ownerReplyByArgs<ExtArgs> = {}>(args?: Subset<T, ProductReview$ownerReplyByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     votes<T extends ProductReview$votesArgs<ExtArgs> = {}>(args?: Subset<T, ProductReview$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -61912,9 +61993,12 @@ export namespace Prisma {
     readonly reviewDate: FieldRef<"ProductReview", 'DateTime'>
     readonly helpfulCount: FieldRef<"ProductReview", 'Int'>
     readonly notHelpfulCount: FieldRef<"ProductReview", 'Int'>
+    readonly ownerReply: FieldRef<"ProductReview", 'String'>
+    readonly ownerReplyAt: FieldRef<"ProductReview", 'DateTime'>
     readonly productId: FieldRef<"ProductReview", 'String'>
     readonly customerId: FieldRef<"ProductReview", 'String'>
     readonly orderId: FieldRef<"ProductReview", 'String'>
+    readonly ownerReplyById: FieldRef<"ProductReview", 'String'>
   }
     
 
@@ -62346,6 +62430,25 @@ export namespace Prisma {
      */
     include?: OrderInclude<ExtArgs> | null
     where?: OrderWhereInput
+  }
+
+  /**
+   * ProductReview.ownerReplyBy
+   */
+  export type ProductReview$ownerReplyByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -96502,9 +96605,12 @@ export namespace Prisma {
     reviewDate: 'reviewDate',
     helpfulCount: 'helpfulCount',
     notHelpfulCount: 'notHelpfulCount',
+    ownerReply: 'ownerReply',
+    ownerReplyAt: 'ownerReplyAt',
     productId: 'productId',
     customerId: 'customerId',
-    orderId: 'orderId'
+    orderId: 'orderId',
+    ownerReplyById: 'ownerReplyById'
   };
 
   export type ProductReviewScalarFieldEnum = (typeof ProductReviewScalarFieldEnum)[keyof typeof ProductReviewScalarFieldEnum]
@@ -97250,6 +97356,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
     marketingCampaignsCreated?: MarketingCampaignListRelationFilter
+    productReviewReplies?: ProductReviewListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -97272,6 +97379,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteOrderByRelationAggregateInput
     editorNotes?: EditorNoteOrderByRelationAggregateInput
     marketingCampaignsCreated?: MarketingCampaignOrderByRelationAggregateInput
+    productReviewReplies?: ProductReviewOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -97297,6 +97405,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteListRelationFilter
     editorNotes?: EditorNoteListRelationFilter
     marketingCampaignsCreated?: MarketingCampaignListRelationFilter
+    productReviewReplies?: ProductReviewListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -102102,12 +102211,16 @@ export namespace Prisma {
     reviewDate?: DateTimeFilter<"ProductReview"> | Date | string
     helpfulCount?: IntFilter<"ProductReview"> | number
     notHelpfulCount?: IntFilter<"ProductReview"> | number
+    ownerReply?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyAt?: DateTimeNullableFilter<"ProductReview"> | Date | string | null
     productId?: StringFilter<"ProductReview"> | string
     customerId?: StringNullableFilter<"ProductReview"> | string | null
     orderId?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyById?: StringNullableFilter<"ProductReview"> | string | null
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    ownerReplyBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     votes?: ReviewVoteListRelationFilter
   }
 
@@ -102130,12 +102243,16 @@ export namespace Prisma {
     reviewDate?: SortOrder
     helpfulCount?: SortOrder
     notHelpfulCount?: SortOrder
+    ownerReply?: SortOrderInput | SortOrder
+    ownerReplyAt?: SortOrderInput | SortOrder
     productId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     orderId?: SortOrderInput | SortOrder
+    ownerReplyById?: SortOrderInput | SortOrder
     product?: ProductOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
     order?: OrderOrderByWithRelationInput
+    ownerReplyBy?: UserOrderByWithRelationInput
     votes?: ReviewVoteOrderByRelationAggregateInput
   }
 
@@ -102161,12 +102278,16 @@ export namespace Prisma {
     reviewDate?: DateTimeFilter<"ProductReview"> | Date | string
     helpfulCount?: IntFilter<"ProductReview"> | number
     notHelpfulCount?: IntFilter<"ProductReview"> | number
+    ownerReply?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyAt?: DateTimeNullableFilter<"ProductReview"> | Date | string | null
     productId?: StringFilter<"ProductReview"> | string
     customerId?: StringNullableFilter<"ProductReview"> | string | null
     orderId?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyById?: StringNullableFilter<"ProductReview"> | string | null
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     order?: XOR<OrderNullableScalarRelationFilter, OrderWhereInput> | null
+    ownerReplyBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     votes?: ReviewVoteListRelationFilter
   }, "id">
 
@@ -102189,9 +102310,12 @@ export namespace Prisma {
     reviewDate?: SortOrder
     helpfulCount?: SortOrder
     notHelpfulCount?: SortOrder
+    ownerReply?: SortOrderInput | SortOrder
+    ownerReplyAt?: SortOrderInput | SortOrder
     productId?: SortOrder
     customerId?: SortOrderInput | SortOrder
     orderId?: SortOrderInput | SortOrder
+    ownerReplyById?: SortOrderInput | SortOrder
     _count?: ProductReviewCountOrderByAggregateInput
     _avg?: ProductReviewAvgOrderByAggregateInput
     _max?: ProductReviewMaxOrderByAggregateInput
@@ -102221,9 +102345,12 @@ export namespace Prisma {
     reviewDate?: DateTimeWithAggregatesFilter<"ProductReview"> | Date | string
     helpfulCount?: IntWithAggregatesFilter<"ProductReview"> | number
     notHelpfulCount?: IntWithAggregatesFilter<"ProductReview"> | number
+    ownerReply?: StringNullableWithAggregatesFilter<"ProductReview"> | string | null
+    ownerReplyAt?: DateTimeNullableWithAggregatesFilter<"ProductReview"> | Date | string | null
     productId?: StringWithAggregatesFilter<"ProductReview"> | string
     customerId?: StringNullableWithAggregatesFilter<"ProductReview"> | string | null
     orderId?: StringNullableWithAggregatesFilter<"ProductReview"> | string | null
+    ownerReplyById?: StringNullableWithAggregatesFilter<"ProductReview"> | string | null
   }
 
   export type ReviewVoteWhereInput = {
@@ -105080,6 +105207,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -105102,6 +105230,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUpdateInput = {
@@ -105124,6 +105253,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -105146,6 +105276,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -110756,9 +110887,12 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     product: ProductCreateNestedOneWithoutReviewsInput
     customer?: CustomerCreateNestedOneWithoutReviewsInput
     order?: OrderCreateNestedOneWithoutReviewsInput
+    ownerReplyBy?: UserCreateNestedOneWithoutProductReviewRepliesInput
     votes?: ReviewVoteCreateNestedManyWithoutReviewInput
   }
 
@@ -110781,9 +110915,12 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     customerId?: string | null
     orderId?: string | null
+    ownerReplyById?: string | null
     votes?: ReviewVoteUncheckedCreateNestedManyWithoutReviewInput
   }
 
@@ -110806,9 +110943,12 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product?: ProductUpdateOneRequiredWithoutReviewsNestedInput
     customer?: CustomerUpdateOneWithoutReviewsNestedInput
     order?: OrderUpdateOneWithoutReviewsNestedInput
+    ownerReplyBy?: UserUpdateOneWithoutProductReviewRepliesNestedInput
     votes?: ReviewVoteUpdateManyWithoutReviewNestedInput
   }
 
@@ -110831,9 +110971,12 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: ReviewVoteUncheckedUpdateManyWithoutReviewNestedInput
   }
 
@@ -110856,9 +110999,12 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     customerId?: string | null
     orderId?: string | null
+    ownerReplyById?: string | null
   }
 
   export type ProductReviewUpdateManyMutationInput = {
@@ -110880,6 +111026,8 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ProductReviewUncheckedUpdateManyInput = {
@@ -110901,9 +111049,12 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ReviewVoteCreateInput = {
@@ -114251,6 +114402,12 @@ export namespace Prisma {
     none?: MarketingCampaignWhereInput
   }
 
+  export type ProductReviewListRelationFilter = {
+    every?: ProductReviewWhereInput
+    some?: ProductReviewWhereInput
+    none?: ProductReviewWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -114289,6 +114446,10 @@ export namespace Prisma {
   }
 
   export type MarketingCampaignOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProductReviewOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -115595,12 +115756,6 @@ export namespace Prisma {
     none?: ProductOptionValueWhereInput
   }
 
-  export type ProductReviewListRelationFilter = {
-    every?: ProductReviewWhereInput
-    some?: ProductReviewWhereInput
-    none?: ProductReviewWhereInput
-  }
-
   export type ProductVariantOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -115618,10 +115773,6 @@ export namespace Prisma {
   }
 
   export type ProductOptionValueOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ProductReviewOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -117877,9 +118028,12 @@ export namespace Prisma {
     reviewDate?: SortOrder
     helpfulCount?: SortOrder
     notHelpfulCount?: SortOrder
+    ownerReply?: SortOrder
+    ownerReplyAt?: SortOrder
     productId?: SortOrder
     customerId?: SortOrder
     orderId?: SortOrder
+    ownerReplyById?: SortOrder
   }
 
   export type ProductReviewAvgOrderByAggregateInput = {
@@ -117906,9 +118060,12 @@ export namespace Prisma {
     reviewDate?: SortOrder
     helpfulCount?: SortOrder
     notHelpfulCount?: SortOrder
+    ownerReply?: SortOrder
+    ownerReplyAt?: SortOrder
     productId?: SortOrder
     customerId?: SortOrder
     orderId?: SortOrder
+    ownerReplyById?: SortOrder
   }
 
   export type ProductReviewMinOrderByAggregateInput = {
@@ -117929,9 +118086,12 @@ export namespace Prisma {
     reviewDate?: SortOrder
     helpfulCount?: SortOrder
     notHelpfulCount?: SortOrder
+    ownerReply?: SortOrder
+    ownerReplyAt?: SortOrder
     productId?: SortOrder
     customerId?: SortOrder
     orderId?: SortOrder
+    ownerReplyById?: SortOrder
   }
 
   export type ProductReviewSumOrderByAggregateInput = {
@@ -119679,6 +119839,13 @@ export namespace Prisma {
     connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
   }
 
+  export type ProductReviewCreateNestedManyWithoutOwnerReplyByInput = {
+    create?: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput> | ProductReviewCreateWithoutOwnerReplyByInput[] | ProductReviewUncheckedCreateWithoutOwnerReplyByInput[]
+    connectOrCreate?: ProductReviewCreateOrConnectWithoutOwnerReplyByInput | ProductReviewCreateOrConnectWithoutOwnerReplyByInput[]
+    createMany?: ProductReviewCreateManyOwnerReplyByInputEnvelope
+    connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -119740,6 +119907,13 @@ export namespace Prisma {
     connectOrCreate?: MarketingCampaignCreateOrConnectWithoutCreatedByInput | MarketingCampaignCreateOrConnectWithoutCreatedByInput[]
     createMany?: MarketingCampaignCreateManyCreatedByInputEnvelope
     connect?: MarketingCampaignWhereUniqueInput | MarketingCampaignWhereUniqueInput[]
+  }
+
+  export type ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput = {
+    create?: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput> | ProductReviewCreateWithoutOwnerReplyByInput[] | ProductReviewUncheckedCreateWithoutOwnerReplyByInput[]
+    connectOrCreate?: ProductReviewCreateOrConnectWithoutOwnerReplyByInput | ProductReviewCreateOrConnectWithoutOwnerReplyByInput[]
+    createMany?: ProductReviewCreateManyOwnerReplyByInputEnvelope
+    connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -119892,6 +120066,20 @@ export namespace Prisma {
     deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
   }
 
+  export type ProductReviewUpdateManyWithoutOwnerReplyByNestedInput = {
+    create?: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput> | ProductReviewCreateWithoutOwnerReplyByInput[] | ProductReviewUncheckedCreateWithoutOwnerReplyByInput[]
+    connectOrCreate?: ProductReviewCreateOrConnectWithoutOwnerReplyByInput | ProductReviewCreateOrConnectWithoutOwnerReplyByInput[]
+    upsert?: ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput | ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput[]
+    createMany?: ProductReviewCreateManyOwnerReplyByInputEnvelope
+    set?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    disconnect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    delete?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    update?: ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput | ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput[]
+    updateMany?: ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput | ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput[]
+    deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -120016,6 +120204,20 @@ export namespace Prisma {
     update?: MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput | MarketingCampaignUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput | MarketingCampaignUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: MarketingCampaignScalarWhereInput | MarketingCampaignScalarWhereInput[]
+  }
+
+  export type ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput = {
+    create?: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput> | ProductReviewCreateWithoutOwnerReplyByInput[] | ProductReviewUncheckedCreateWithoutOwnerReplyByInput[]
+    connectOrCreate?: ProductReviewCreateOrConnectWithoutOwnerReplyByInput | ProductReviewCreateOrConnectWithoutOwnerReplyByInput[]
+    upsert?: ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput | ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput[]
+    createMany?: ProductReviewCreateManyOwnerReplyByInputEnvelope
+    set?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    disconnect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    delete?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+    update?: ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput | ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput[]
+    updateMany?: ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput | ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput[]
+    deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -124734,6 +124936,12 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutProductReviewRepliesInput = {
+    create?: XOR<UserCreateWithoutProductReviewRepliesInput, UserUncheckedCreateWithoutProductReviewRepliesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutProductReviewRepliesInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type ReviewVoteCreateNestedManyWithoutReviewInput = {
     create?: XOR<ReviewVoteCreateWithoutReviewInput, ReviewVoteUncheckedCreateWithoutReviewInput> | ReviewVoteCreateWithoutReviewInput[] | ReviewVoteUncheckedCreateWithoutReviewInput[]
     connectOrCreate?: ReviewVoteCreateOrConnectWithoutReviewInput | ReviewVoteCreateOrConnectWithoutReviewInput[]
@@ -124779,6 +124987,16 @@ export namespace Prisma {
     delete?: OrderWhereInput | boolean
     connect?: OrderWhereUniqueInput
     update?: XOR<XOR<OrderUpdateToOneWithWhereWithoutReviewsInput, OrderUpdateWithoutReviewsInput>, OrderUncheckedUpdateWithoutReviewsInput>
+  }
+
+  export type UserUpdateOneWithoutProductReviewRepliesNestedInput = {
+    create?: XOR<UserCreateWithoutProductReviewRepliesInput, UserUncheckedCreateWithoutProductReviewRepliesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutProductReviewRepliesInput
+    upsert?: UserUpsertWithoutProductReviewRepliesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProductReviewRepliesInput, UserUpdateWithoutProductReviewRepliesInput>, UserUncheckedUpdateWithoutProductReviewRepliesInput>
   }
 
   export type ReviewVoteUpdateManyWithoutReviewNestedInput = {
@@ -126692,6 +126910,70 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProductReviewCreateWithoutOwnerReplyByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    source?: string
+    rating: number
+    title?: string | null
+    comment: string
+    images?: ProductReviewCreateimagesInput | string[]
+    videoUrl?: string | null
+    verifiedPurchase?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
+    customerName: string
+    customerEmail?: string | null
+    customerTitle?: string | null
+    reviewDate?: Date | string
+    helpfulCount?: number
+    notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
+    product: ProductCreateNestedOneWithoutReviewsInput
+    customer?: CustomerCreateNestedOneWithoutReviewsInput
+    order?: OrderCreateNestedOneWithoutReviewsInput
+    votes?: ReviewVoteCreateNestedManyWithoutReviewInput
+  }
+
+  export type ProductReviewUncheckedCreateWithoutOwnerReplyByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    source?: string
+    rating: number
+    title?: string | null
+    comment: string
+    images?: ProductReviewCreateimagesInput | string[]
+    videoUrl?: string | null
+    verifiedPurchase?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
+    customerName: string
+    customerEmail?: string | null
+    customerTitle?: string | null
+    reviewDate?: Date | string
+    helpfulCount?: number
+    notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
+    productId: string
+    customerId?: string | null
+    orderId?: string | null
+    votes?: ReviewVoteUncheckedCreateNestedManyWithoutReviewInput
+  }
+
+  export type ProductReviewCreateOrConnectWithoutOwnerReplyByInput = {
+    where: ProductReviewWhereUniqueInput
+    create: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput>
+  }
+
+  export type ProductReviewCreateManyOwnerReplyByInputEnvelope = {
+    data: ProductReviewCreateManyOwnerReplyByInput | ProductReviewCreateManyOwnerReplyByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SessionUpsertWithWhereUniqueWithoutUserInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
@@ -127021,6 +127303,52 @@ export namespace Prisma {
     lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
   }
 
+  export type ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput = {
+    where: ProductReviewWhereUniqueInput
+    update: XOR<ProductReviewUpdateWithoutOwnerReplyByInput, ProductReviewUncheckedUpdateWithoutOwnerReplyByInput>
+    create: XOR<ProductReviewCreateWithoutOwnerReplyByInput, ProductReviewUncheckedCreateWithoutOwnerReplyByInput>
+  }
+
+  export type ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput = {
+    where: ProductReviewWhereUniqueInput
+    data: XOR<ProductReviewUpdateWithoutOwnerReplyByInput, ProductReviewUncheckedUpdateWithoutOwnerReplyByInput>
+  }
+
+  export type ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput = {
+    where: ProductReviewScalarWhereInput
+    data: XOR<ProductReviewUpdateManyMutationInput, ProductReviewUncheckedUpdateManyWithoutOwnerReplyByInput>
+  }
+
+  export type ProductReviewScalarWhereInput = {
+    AND?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
+    OR?: ProductReviewScalarWhereInput[]
+    NOT?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
+    id?: StringFilter<"ProductReview"> | string
+    createdAt?: DateTimeFilter<"ProductReview"> | Date | string
+    updatedAt?: DateTimeFilter<"ProductReview"> | Date | string
+    source?: StringFilter<"ProductReview"> | string
+    rating?: IntFilter<"ProductReview"> | number
+    title?: StringNullableFilter<"ProductReview"> | string | null
+    comment?: StringFilter<"ProductReview"> | string
+    images?: StringNullableListFilter<"ProductReview">
+    videoUrl?: StringNullableFilter<"ProductReview"> | string | null
+    verifiedPurchase?: BoolFilter<"ProductReview"> | boolean
+    isApproved?: BoolFilter<"ProductReview"> | boolean
+    isHidden?: BoolFilter<"ProductReview"> | boolean
+    customerName?: StringFilter<"ProductReview"> | string
+    customerEmail?: StringNullableFilter<"ProductReview"> | string | null
+    customerTitle?: StringNullableFilter<"ProductReview"> | string | null
+    reviewDate?: DateTimeFilter<"ProductReview"> | Date | string
+    helpfulCount?: IntFilter<"ProductReview"> | number
+    notHelpfulCount?: IntFilter<"ProductReview"> | number
+    ownerReply?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyAt?: DateTimeNullableFilter<"ProductReview"> | Date | string | null
+    productId?: StringFilter<"ProductReview"> | string
+    customerId?: StringNullableFilter<"ProductReview"> | string | null
+    orderId?: StringNullableFilter<"ProductReview"> | string | null
+    ownerReplyById?: StringNullableFilter<"ProductReview"> | string | null
+  }
+
   export type UserCreateWithoutMembershipsInput = {
     id?: string
     name: string
@@ -127040,6 +127368,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -127061,6 +127390,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -127355,6 +127685,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -127376,6 +127707,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type BusinessUpsertWithoutMembershipsInput = {
@@ -127660,6 +127992,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -127681,6 +128014,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -127718,6 +128052,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -127739,6 +128074,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -127760,6 +128096,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -127781,6 +128118,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -127818,6 +128156,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -127839,6 +128178,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type ProductCreateWithoutBusinessInput = {
@@ -133418,8 +133758,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     customer?: CustomerCreateNestedOneWithoutReviewsInput
     order?: OrderCreateNestedOneWithoutReviewsInput
+    ownerReplyBy?: UserCreateNestedOneWithoutProductReviewRepliesInput
     votes?: ReviewVoteCreateNestedManyWithoutReviewInput
   }
 
@@ -133442,8 +133785,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     customerId?: string | null
     orderId?: string | null
+    ownerReplyById?: string | null
     votes?: ReviewVoteUncheckedCreateNestedManyWithoutReviewInput
   }
 
@@ -134009,33 +134355,6 @@ export namespace Prisma {
   export type ProductReviewUpdateManyWithWhereWithoutProductInput = {
     where: ProductReviewScalarWhereInput
     data: XOR<ProductReviewUpdateManyMutationInput, ProductReviewUncheckedUpdateManyWithoutProductInput>
-  }
-
-  export type ProductReviewScalarWhereInput = {
-    AND?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
-    OR?: ProductReviewScalarWhereInput[]
-    NOT?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
-    id?: StringFilter<"ProductReview"> | string
-    createdAt?: DateTimeFilter<"ProductReview"> | Date | string
-    updatedAt?: DateTimeFilter<"ProductReview"> | Date | string
-    source?: StringFilter<"ProductReview"> | string
-    rating?: IntFilter<"ProductReview"> | number
-    title?: StringNullableFilter<"ProductReview"> | string | null
-    comment?: StringFilter<"ProductReview"> | string
-    images?: StringNullableListFilter<"ProductReview">
-    videoUrl?: StringNullableFilter<"ProductReview"> | string | null
-    verifiedPurchase?: BoolFilter<"ProductReview"> | boolean
-    isApproved?: BoolFilter<"ProductReview"> | boolean
-    isHidden?: BoolFilter<"ProductReview"> | boolean
-    customerName?: StringFilter<"ProductReview"> | string
-    customerEmail?: StringNullableFilter<"ProductReview"> | string | null
-    customerTitle?: StringNullableFilter<"ProductReview"> | string | null
-    reviewDate?: DateTimeFilter<"ProductReview"> | Date | string
-    helpfulCount?: IntFilter<"ProductReview"> | number
-    notHelpfulCount?: IntFilter<"ProductReview"> | number
-    productId?: StringFilter<"ProductReview"> | string
-    customerId?: StringNullableFilter<"ProductReview"> | string | null
-    orderId?: StringNullableFilter<"ProductReview"> | string | null
   }
 
   export type ProductCreateWithoutVariantsInput = {
@@ -139896,6 +140215,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutCustomersInput = {
@@ -139917,6 +140237,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutCustomersInput = {
@@ -140420,8 +140741,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     product: ProductCreateNestedOneWithoutReviewsInput
     order?: OrderCreateNestedOneWithoutReviewsInput
+    ownerReplyBy?: UserCreateNestedOneWithoutProductReviewRepliesInput
     votes?: ReviewVoteCreateNestedManyWithoutReviewInput
   }
 
@@ -140444,8 +140768,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     orderId?: string | null
+    ownerReplyById?: string | null
     votes?: ReviewVoteUncheckedCreateNestedManyWithoutReviewInput
   }
 
@@ -140819,6 +141146,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -140840,6 +141168,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type BusinessUpsertWithoutCustomersInput = {
@@ -142334,8 +142663,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     product: ProductCreateNestedOneWithoutReviewsInput
     customer?: CustomerCreateNestedOneWithoutReviewsInput
+    ownerReplyBy?: UserCreateNestedOneWithoutProductReviewRepliesInput
     votes?: ReviewVoteCreateNestedManyWithoutReviewInput
   }
 
@@ -142358,8 +142690,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     customerId?: string | null
+    ownerReplyById?: string | null
     votes?: ReviewVoteUncheckedCreateNestedManyWithoutReviewInput
   }
 
@@ -145065,6 +145400,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryHistoryInput = {
@@ -145086,6 +145422,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryHistoryInput = {
@@ -145737,6 +146074,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -145758,6 +146096,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type BusinessCreateWithoutBaseInventoryUnitsInput = {
@@ -146792,6 +147131,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput = {
@@ -146813,6 +147153,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput = {
@@ -147191,6 +147532,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput = {
@@ -147212,6 +147554,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput = {
@@ -149266,6 +149609,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutEditorNotesInput = {
@@ -149287,6 +149631,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutEditorNotesInput = {
@@ -149587,6 +149932,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEditorNotesInput = {
@@ -149608,6 +149954,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -152436,6 +152783,55 @@ export namespace Prisma {
     create: XOR<OrderCreateWithoutReviewsInput, OrderUncheckedCreateWithoutReviewsInput>
   }
 
+  export type UserCreateWithoutProductReviewRepliesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutProductReviewRepliesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutProductReviewRepliesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutProductReviewRepliesInput, UserUncheckedCreateWithoutProductReviewRepliesInput>
+  }
+
   export type ReviewVoteCreateWithoutReviewInput = {
     id?: string
     createdAt?: Date | string
@@ -152751,6 +153147,61 @@ export namespace Prisma {
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutOrderNestedInput
   }
 
+  export type UserUpsertWithoutProductReviewRepliesInput = {
+    update: XOR<UserUpdateWithoutProductReviewRepliesInput, UserUncheckedUpdateWithoutProductReviewRepliesInput>
+    create: XOR<UserCreateWithoutProductReviewRepliesInput, UserUncheckedCreateWithoutProductReviewRepliesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutProductReviewRepliesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutProductReviewRepliesInput, UserUncheckedUpdateWithoutProductReviewRepliesInput>
+  }
+
+  export type UserUpdateWithoutProductReviewRepliesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutProductReviewRepliesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
   export type ReviewVoteUpsertWithWhereUniqueWithoutReviewInput = {
     where: ReviewVoteWhereUniqueInput
     update: XOR<ReviewVoteUpdateWithoutReviewInput, ReviewVoteUncheckedUpdateWithoutReviewInput>
@@ -152798,9 +153249,12 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     product: ProductCreateNestedOneWithoutReviewsInput
     customer?: CustomerCreateNestedOneWithoutReviewsInput
     order?: OrderCreateNestedOneWithoutReviewsInput
+    ownerReplyBy?: UserCreateNestedOneWithoutProductReviewRepliesInput
   }
 
   export type ProductReviewUncheckedCreateWithoutVotesInput = {
@@ -152822,9 +153276,12 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     customerId?: string | null
     orderId?: string | null
+    ownerReplyById?: string | null
   }
 
   export type ProductReviewCreateOrConnectWithoutVotesInput = {
@@ -152862,9 +153319,12 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product?: ProductUpdateOneRequiredWithoutReviewsNestedInput
     customer?: CustomerUpdateOneWithoutReviewsNestedInput
     order?: OrderUpdateOneWithoutReviewsNestedInput
+    ownerReplyBy?: UserUpdateOneWithoutProductReviewRepliesNestedInput
   }
 
   export type ProductReviewUncheckedUpdateWithoutVotesInput = {
@@ -152886,9 +153346,12 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessCreateWithoutPlatformInvitesInput = {
@@ -153167,6 +153630,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInvitesInput = {
@@ -153188,6 +153652,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInvitesInput = {
@@ -153488,6 +153953,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
@@ -153509,6 +153975,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type BusinessCreateWithoutTeamInvitesInput = {
@@ -158053,6 +158520,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserUncheckedCreateWithoutMarketingCampaignsCreatedInput = {
@@ -158074,6 +158542,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
   }
 
   export type UserCreateOrConnectWithoutMarketingCampaignsCreatedInput = {
@@ -158494,6 +158963,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput = {
@@ -158515,6 +158985,7 @@ export namespace Prisma {
     inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
   }
 
   export type MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput = {
@@ -167190,6 +167661,32 @@ export namespace Prisma {
     lastError?: string | null
   }
 
+  export type ProductReviewCreateManyOwnerReplyByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    source?: string
+    rating: number
+    title?: string | null
+    comment: string
+    images?: ProductReviewCreateimagesInput | string[]
+    videoUrl?: string | null
+    verifiedPurchase?: boolean
+    isApproved?: boolean
+    isHidden?: boolean
+    customerName: string
+    customerEmail?: string | null
+    customerTitle?: string | null
+    reviewDate?: Date | string
+    helpfulCount?: number
+    notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
+    productId: string
+    customerId?: string | null
+    orderId?: string | null
+  }
+
   export type SessionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -167665,6 +168162,86 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ProductReviewUpdateWithoutOwnerReplyByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: StringFieldUpdateOperationsInput | string
+    images?: ProductReviewUpdateimagesInput | string[]
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    verifiedPurchase?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    helpfulCount?: IntFieldUpdateOperationsInput | number
+    notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product?: ProductUpdateOneRequiredWithoutReviewsNestedInput
+    customer?: CustomerUpdateOneWithoutReviewsNestedInput
+    order?: OrderUpdateOneWithoutReviewsNestedInput
+    votes?: ReviewVoteUpdateManyWithoutReviewNestedInput
+  }
+
+  export type ProductReviewUncheckedUpdateWithoutOwnerReplyByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: StringFieldUpdateOperationsInput | string
+    images?: ProductReviewUpdateimagesInput | string[]
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    verifiedPurchase?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    helpfulCount?: IntFieldUpdateOperationsInput | number
+    notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    productId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    votes?: ReviewVoteUncheckedUpdateManyWithoutReviewNestedInput
+  }
+
+  export type ProductReviewUncheckedUpdateManyWithoutOwnerReplyByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: StringFieldUpdateOperationsInput | string
+    images?: ProductReviewUpdateimagesInput | string[]
+    videoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    verifiedPurchase?: BoolFieldUpdateOperationsInput | boolean
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    isHidden?: BoolFieldUpdateOperationsInput | boolean
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    helpfulCount?: IntFieldUpdateOperationsInput | number
+    notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    productId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductCreateManyBusinessInput = {
@@ -170835,8 +171412,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     customerId?: string | null
     orderId?: string | null
+    ownerReplyById?: string | null
   }
 
   export type ImageUpdateWithoutProductInput = {
@@ -171291,8 +171871,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customer?: CustomerUpdateOneWithoutReviewsNestedInput
     order?: OrderUpdateOneWithoutReviewsNestedInput
+    ownerReplyBy?: UserUpdateOneWithoutProductReviewRepliesNestedInput
     votes?: ReviewVoteUpdateManyWithoutReviewNestedInput
   }
 
@@ -171315,8 +171898,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: ReviewVoteUncheckedUpdateManyWithoutReviewNestedInput
   }
 
@@ -171339,8 +171925,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type InventoryHistoryCreateManyVariantInput = {
@@ -172091,8 +172680,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     orderId?: string | null
+    ownerReplyById?: string | null
   }
 
   export type SubscriptionCreateManyCustomerInput = {
@@ -172514,8 +173106,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product?: ProductUpdateOneRequiredWithoutReviewsNestedInput
     order?: OrderUpdateOneWithoutReviewsNestedInput
+    ownerReplyBy?: UserUpdateOneWithoutProductReviewRepliesNestedInput
     votes?: ReviewVoteUpdateManyWithoutReviewNestedInput
   }
 
@@ -172538,8 +173133,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: ReviewVoteUncheckedUpdateManyWithoutReviewNestedInput
   }
 
@@ -172562,8 +173160,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SubscriptionUpdateWithoutCustomerInput = {
@@ -173384,8 +173985,11 @@ export namespace Prisma {
     reviewDate?: Date | string
     helpfulCount?: number
     notHelpfulCount?: number
+    ownerReply?: string | null
+    ownerReplyAt?: Date | string | null
     productId: string
     customerId?: string | null
+    ownerReplyById?: string | null
   }
 
   export type OrderShipmentCreateManyOrderInput = {
@@ -173522,8 +174126,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product?: ProductUpdateOneRequiredWithoutReviewsNestedInput
     customer?: CustomerUpdateOneWithoutReviewsNestedInput
+    ownerReplyBy?: UserUpdateOneWithoutProductReviewRepliesNestedInput
     votes?: ReviewVoteUpdateManyWithoutReviewNestedInput
   }
 
@@ -173546,8 +174153,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: ReviewVoteUncheckedUpdateManyWithoutReviewNestedInput
   }
 
@@ -173570,8 +174180,11 @@ export namespace Prisma {
     reviewDate?: DateTimeFieldUpdateOperationsInput | Date | string
     helpfulCount?: IntFieldUpdateOperationsInput | number
     notHelpfulCount?: IntFieldUpdateOperationsInput | number
+    ownerReply?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    ownerReplyById?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderShipmentUpdateWithoutOrderInput = {

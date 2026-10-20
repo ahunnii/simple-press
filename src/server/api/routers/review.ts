@@ -2,7 +2,7 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient, TxClient } from "~/server/db";
+import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { sendNewReviewNotification } from "~/lib/email/templates";
@@ -12,7 +12,10 @@ import {
   reviewBulkApproveSchema,
   reviewBulkDeleteSchema,
   reviewBulkHideSchema,
+  reviewDeleteReplySchema,
+  reviewSetReplySchema,
 } from "~/lib/validators/reviews";
+import { updateProductStats } from "~/server/reviews/product-stats";
 
 import {
   createTRPCRouter,
@@ -33,8 +36,11 @@ import {
 // though nothing rendered them). Every field below is either read by
 // `src/components/product-reviews.tsx`'s `ReviewCard`, or by
 // `buildProductSchema`'s `ReviewForSchema` (JSON-LD) in
-// `src/app/(storefront)/shop/[slug]/page.tsx`. Exported so the shape can be
-// pinned by a unit test without touching the DB.
+// `src/app/(storefront)/shop/[slug]/page.tsx`. `ownerReply`/`ownerReplyAt`
+// are folded into a single `reply` object by `toPublicReview` below (read by
+// the reply block in `product-reviews.tsx` / `umsc-review-list.tsx`);
+// `ownerReplyById` (which staff member replied) stays admin-only. Exported so
+// the shape can be pinned by a unit test without touching the DB.
 export const PUBLIC_REVIEW_SELECT = {
   id: true,
   rating: true,
@@ -48,7 +54,33 @@ export const PUBLIC_REVIEW_SELECT = {
   createdAt: true,
   helpfulCount: true,
   notHelpfulCount: true,
+  ownerReply: true,
+  ownerReplyAt: true,
 } as const satisfies Prisma.ProductReviewSelect;
+
+type PublicReviewRow = Prisma.ProductReviewGetPayload<{
+  select: typeof PUBLIC_REVIEW_SELECT;
+}>;
+
+/**
+ * Storefront shape of a review: the raw `ownerReply`/`ownerReplyAt` columns
+ * are replaced by a `reply` object (or null), attributed to the business name.
+ * `repliedAt` falls back to the review date for rows whose reply predates
+ * `ownerReplyAt`. Pure so it can be unit-tested without the DB.
+ */
+export function toPublicReview(row: PublicReviewRow, businessName: string) {
+  const { ownerReply, ownerReplyAt, ...rest } = row;
+  return {
+    ...rest,
+    reply: ownerReply
+      ? {
+          text: ownerReply,
+          repliedAt: ownerReplyAt ?? row.reviewDate,
+          from: businessName,
+        }
+      : null,
+  };
+}
 
 async function assertBusinessOwner(
   db: DbClient,
@@ -87,26 +119,6 @@ async function getReviewAndAssertOwner(
   }
   await assertBusinessOwner(db, userId, review.product.businessId);
   return review;
-}
-
-// Takes `TxClient`, not `DbClient`, so it can run either standalone or inside a
-// `$transaction` callback (the bulk mutations recompute stats in-transaction).
-// `DbClient` is structurally assignable to `TxClient`, so plain `ctx.db` callers
-// still work unchanged.
-async function updateProductStats(db: TxClient, productId: string) {
-  const reviews = await db.productReview.findMany({
-    where: { productId, isApproved: true, isHidden: false },
-    select: { rating: true },
-  });
-  const reviewCount = reviews.length;
-  const averageRating =
-    reviewCount > 0
-      ? reviews.reduce((sum: number, r) => sum + r.rating, 0) / reviewCount
-      : null;
-  await db.product.update({
-    where: { id: productId },
-    data: { reviewCount, averageRating },
-  });
 }
 
 async function updateVoteCounts(db: DbClient, reviewId: string) {
@@ -154,7 +166,7 @@ export const reviewRouter = createTRPCRouter({
         rating_low: { rating: "asc" },
       };
 
-      return ctx.db.productReview.findMany({
+      const rows = await ctx.db.productReview.findMany({
         where: {
           productId: input.productId,
           product: { businessId: business.id },
@@ -170,6 +182,8 @@ export const reviewRouter = createTRPCRouter({
         // customerId/orderId to every storefront visitor.
         select: PUBLIC_REVIEW_SELECT,
       });
+
+      return rows.map((r) => toPublicReview(r, business.name));
     }),
 
   getProductStats: publicProcedure
@@ -565,8 +579,8 @@ export const reviewRouter = createTRPCRouter({
   // ── Admin (both types) ───────────────────────────────────────────────────
   //
   // NOTE: every moderation procedure below — listAll, approve, toggleHidden,
-  // delete, bulkSetApproved, bulkSetHidden, bulkDelete — is intentionally left
-  // ungated by featureGate("reviews"). Owners must still be able to
+  // delete, setReply, deleteReply, bulkSetApproved, bulkSetHidden, bulkDelete —
+  // is intentionally left ungated by featureGate("reviews"). Owners must still be able to
   // moderate/hide/delete pre-existing reviews after disabling the reviews
   // feature — otherwise turning the flag off would trap stale or reported
   // reviews with no way to clean them up. This is a deliberate divergence from
@@ -614,6 +628,9 @@ export const reviewRouter = createTRPCRouter({
         createdAt: true,
         helpfulCount: true,
         productId: true,
+        ownerReply: true,
+        ownerReplyAt: true,
+        ownerReplyBy: { select: { name: true } },
         product: { select: { id: true, name: true, slug: true } },
       },
     });
@@ -682,6 +699,54 @@ export const reviewRouter = createTRPCRouter({
       await ctx.db.productReview.delete({ where: { id: input.id } });
       await updateProductStats(ctx.db, review.productId);
       return { success: true };
+    }),
+
+  // Owner's public reply (one per review). Allowed on any source/status — a
+  // reply on a pending or hidden review simply isn't visible until the review
+  // is. Replies never affect ratings, so no updateProductStats. `ownerReplyAt`
+  // is the first-posted date; edits keep it.
+  setReply: ownerAdminProcedure
+    .input(reviewSetReplySchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const existing = await ctx.db.productReview.findFirst({
+        where: { id: input.id, product: { businessId } },
+        select: { ownerReplyAt: true },
+      });
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      }
+
+      return ctx.db.productReview.update({
+        where: { id: input.id },
+        data: {
+          ownerReply: input.reply,
+          ownerReplyById: ctx.session.user.id,
+          ownerReplyAt: existing.ownerReplyAt ?? new Date(),
+        },
+        select: { id: true, ownerReply: true, ownerReplyAt: true },
+      });
+    }),
+
+  deleteReply: ownerAdminProcedure
+    .input(reviewDeleteReplySchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const existing = await ctx.db.productReview.findFirst({
+        where: { id: input.id, product: { businessId } },
+        select: { id: true },
+      });
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      }
+
+      return ctx.db.productReview.update({
+        where: { id: input.id },
+        data: { ownerReply: null, ownerReplyAt: null, ownerReplyById: null },
+        select: { id: true, ownerReply: true, ownerReplyAt: true },
+      });
     }),
 
   // ─── BULK MUTATIONS ───────────────────────────────────────────────────────

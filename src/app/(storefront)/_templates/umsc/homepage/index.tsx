@@ -362,17 +362,6 @@ const homepageReviewsData: TemplateField[] = [
     defaultValue: "Reviews are on their way.",
   },
   {
-    key: "umsc.homepage.reviews-owner-source",
-    label: "Owner label",
-    description:
-      "Small label on a review card whose testimonial was submitted by you, the business owner.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.reviews",
-    gridColumn: "col-span-1",
-    defaultValue: "From Monique",
-  },
-  {
     key: "umsc.homepage.reviews-verified-source",
     label: "Customer label",
     description:

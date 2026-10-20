@@ -1,16 +1,15 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useState } from "react";
 
 import { api } from "~/trpc/react";
-import { ProductReviews } from "~/components/product-reviews";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { UmscGoogleReviewLink } from "../shared/umsc-google-review-link";
 import { UmscHeading } from "../shared/umsc-heading";
 import { UmscSection } from "../shared/umsc-section";
+import { UmscReviewList } from "./umsc-review-list";
 
 type Props = {
   productId: string;
@@ -20,35 +19,12 @@ type Props = {
 };
 
 /**
- * UmscProductReviews — design.md "products.reviews". Shared `ProductReviews`
- * (shadcn primitives, bridged onto umsc tokens the same way
- * `.umsc-account`/`.umsc-embed` bridge the account layout and generic-page
- * embeds) + `WriteReviewDialog`. `ProductReviews` already renders its own
- * "No reviews yet" card when the count is zero; this adds the Google-review
- * link underneath that case, per design.md.
+ * UmscProductReviews — design.md "products.reviews". Heading + flag gate, the
+ * umsc-native `UmscReviewList` (summary, filter, sort, cards, load more),
+ * `WriteReviewDialog`, and — when there are no reviews — the Google-review
+ * link underneath the list's own empty state, per design.md. The dialog is
+ * portaled, so it never depended on the old shadcn var bridge.
  */
-const UMSC_SHADCN_VARS: CSSProperties = {
-  ["--background" as string]: "var(--umsc-paper)",
-  ["--foreground" as string]: "var(--umsc-ink)",
-  ["--card" as string]: "var(--umsc-white)",
-  ["--card-foreground" as string]: "var(--umsc-ink)",
-  ["--popover" as string]: "var(--umsc-white)",
-  ["--popover-foreground" as string]: "var(--umsc-ink)",
-  ["--primary" as string]: "var(--umsc-black)",
-  ["--primary-foreground" as string]: "var(--umsc-paper)",
-  ["--secondary" as string]: "var(--umsc-cream)",
-  ["--secondary-foreground" as string]: "var(--umsc-ink)",
-  ["--muted" as string]: "var(--umsc-cream)",
-  ["--muted-foreground" as string]: "var(--umsc-muted)",
-  ["--accent" as string]: "var(--umsc-cream)",
-  ["--accent-foreground" as string]: "var(--umsc-ink)",
-  ["--destructive" as string]: "var(--umsc-error)",
-  ["--border" as string]: "var(--umsc-line)",
-  ["--input" as string]: "var(--umsc-line)",
-  ["--ring" as string]: "var(--umsc-purple)",
-  ["--radius" as string]: "0.2rem",
-};
-
 export function UmscProductReviews({
   productId,
   productName,
@@ -75,16 +51,13 @@ export function UmscProductReviews({
         {heading}
       </UmscHeading>
 
-      <div style={UMSC_SHADCN_VARS}>
-        <ProductReviews
-          productId={productId}
-          sortSelectContentClassName="umsc rounded-none"
-          onWriteReviewClick={() => setDialogOpen(true)}
-        />
-      </div>
+      <UmscReviewList
+        productId={productId}
+        onWriteReviewClick={() => setDialogOpen(true)}
+      />
 
       {stats?.totalReviews === 0 && (
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-6 flex flex-col items-center gap-3">
           <UmscGoogleReviewLink
             href={googleReviewUrl}
             className="text-[var(--umsc-ink)]"

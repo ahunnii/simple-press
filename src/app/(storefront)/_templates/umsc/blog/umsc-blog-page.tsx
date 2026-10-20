@@ -91,7 +91,6 @@ export async function UmscBlogPage({ pages, customFields, business }: Props) {
   // Reviewer labels and the Google review link live on the homepage / global
   // groups; the umsc-wide resolver applies their defaults.
   const u = resolveFields(fields, [
-    "umsc.homepage.reviews-owner-source",
     "umsc.homepage.reviews-verified-source",
     "umsc.global.google-review-url",
   ]);
@@ -121,7 +120,6 @@ export async function UmscBlogPage({ pages, customFields, business }: Props) {
   const reviewCards = toUmscReviewCards(
     testimonials,
     {
-      ownerSource: u["umsc.homepage.reviews-owner-source"] ?? "",
       verifiedSource: u["umsc.homepage.reviews-verified-source"] ?? "",
     },
     3,

@@ -140,9 +140,11 @@ function useUmscHeroVideo(enabled: boolean) {
 /**
  * UmscHeroSection — the FIRST VIEWPORT and the template's one authored
  * motion moment (design.md "Motion → Hero"). Full-bleed video-with-image-
- * fallback (24s film drift on the image path), static scrim, bottom-anchored
- * content stack with a staggered entrance, and a gold hairline that draws
- * across the bottom edge to hand off to the section below.
+ * fallback (24s film drift on the image path), one bottom-left scrim pool,
+ * a left-aligned caption block in the bottom-left corner (vii-style, 520px
+ * max) with a staggered entrance, and a gold hairline that draws across the
+ * bottom edge to hand off to the section below. The caption stays small so
+ * the footage is the star; the top ~2/3 of the frame is untinted.
  */
 export function UmscHeroSection({
   video,
@@ -182,7 +184,7 @@ export function UmscHeroSection({
             playsInline
             preload="metadata"
             poster={hasImage ? image : undefined}
-            className="absolute inset-0 size-full object-cover"
+            className="umsc-hero-media absolute inset-0 size-full object-cover"
           >
             <source src={video} type="video/mp4" />
           </video>
@@ -192,7 +194,7 @@ export function UmscHeroSection({
             alt=""
             fill
             priority
-            className="umsc-hero-film absolute inset-0 size-full object-cover"
+            className="umsc-hero-film umsc-hero-media absolute inset-0 size-full object-cover"
             sizes="100vw"
           />
         ) : (
@@ -228,62 +230,67 @@ export function UmscHeroSection({
       <div aria-hidden="true" className="umsc-hero-scrim absolute inset-0" />
 
       {/* ── Content ── */}
-      <div className="relative z-[2] mx-auto w-full max-w-[1280px] px-6 pt-[96px] pb-[clamp(44px,8vh,84px)] text-center sm:px-8">
-        {headline && (
-          <h1
-            {...fieldAttr("umsc.homepage.hero-headline")}
-            className="umsc-hero-rise umsc-serif text-[clamp(32px,4.6vw,64px)] leading-[1.08] tracking-[0.035em] text-balance text-[var(--umsc-cream-on-black)] uppercase"
-            style={{ transitionDelay: "0ms" }}
-            data-visible={shown || undefined}
-          >
-            {headline}
-          </h1>
-        )}
+      <div
+        className="relative z-[2] w-full px-[clamp(24px,6vw,96px)] pt-[96px] pb-[72px] text-left md:pb-[clamp(56px,8vh,96px)]"
+      >
+        <div className="max-w-[520px]">
+          {headline && (
+            <h1
+              {...fieldAttr("umsc.homepage.hero-headline")}
+              className="umsc-hero-rise umsc-serif text-[clamp(26px,2.8vw,40px)] leading-[1.1] tracking-[0.035em] text-balance text-[var(--umsc-cream-on-black)] uppercase"
+              style={{ transitionDelay: "0ms" }}
+              data-visible={shown || undefined}
+            >
+              {headline}
+            </h1>
+          )}
 
-        {lede && (
-          <p
-            {...fieldAttr("umsc.homepage.hero-lede")}
-            className="umsc-hero-rise umsc-sans mx-auto mt-6 max-w-[560px] text-[18px] leading-[1.6] text-[var(--umsc-cream-on-black)]"
-            style={{ transitionDelay: "100ms" }}
-            data-visible={shown || undefined}
-          >
-            {lede}
-          </p>
-        )}
+          {lede && (
+            <p
+              {...fieldAttr("umsc.homepage.hero-lede")}
+              className="umsc-hero-rise umsc-sans mt-[18px] max-w-[460px] text-[16px] leading-[1.6] text-[var(--umsc-cream-on-black)]"
+              style={{ transitionDelay: "100ms" }}
+              data-visible={shown || undefined}
+            >
+              {lede}
+            </p>
+          )}
 
-        {/* PF10 (B2.5): each button is hidden individually when its own
+          {/* PF10 (B2.5): each button is hidden individually when its own
             href's flag is off (hero.tsx-props already resolve `primaryUrl`/
             `secondaryUrl` through `navHrefFlag`, blanking a gated href) —
             never swap in another destination. */}
-        {((primaryLabel && primaryUrl) || (secondaryLabel && secondaryUrl)) && (
-          <div
-            className="umsc-hero-rise mt-9 flex flex-wrap items-center justify-center gap-4"
-            style={{ transitionDelay: "200ms" }}
-            data-visible={shown || undefined}
-          >
-            {primaryLabel && primaryUrl && (
-              <UmscButton
-                variant="gold"
-                href={primaryUrl}
-                fieldKey="umsc.homepage.hero-primary-label"
-                showArrow={false}
-              >
-                {primaryLabel}
-              </UmscButton>
-            )}
-            {secondaryLabel && secondaryUrl && (
-              <UmscButton
-                variant="ghost"
-                href={secondaryUrl}
-                fieldKey="umsc.homepage.hero-secondary-label"
-                showArrow={false}
-                className="umsc-btn-ghost-onblack"
-              >
-                {secondaryLabel}
-              </UmscButton>
-            )}
-          </div>
-        )}
+          {((primaryLabel && primaryUrl) ||
+            (secondaryLabel && secondaryUrl)) && (
+            <div
+              className="umsc-hero-rise umsc-hero-ctas mt-7 flex flex-wrap items-center gap-3"
+              style={{ transitionDelay: "200ms" }}
+              data-visible={shown || undefined}
+            >
+              {primaryLabel && primaryUrl && (
+                <UmscButton
+                  variant="gold"
+                  href={primaryUrl}
+                  fieldKey="umsc.homepage.hero-primary-label"
+                  showArrow={false}
+                >
+                  {primaryLabel}
+                </UmscButton>
+              )}
+              {secondaryLabel && secondaryUrl && (
+                <UmscButton
+                  variant="ghost"
+                  href={secondaryUrl}
+                  fieldKey="umsc.homepage.hero-secondary-label"
+                  showArrow={false}
+                  className="umsc-btn-ghost-onblack"
+                >
+                  {secondaryLabel}
+                </UmscButton>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Gold hairline hand-off to the shelf below ── */}

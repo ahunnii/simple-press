@@ -22645,18 +22645,42 @@ details.sp-details > summary.sp-details__summary > * {
   ); /* rules on black, logo ring, image frames */
   /* Derived — compute, don't hardcode */
   --umsc-hairline: color-mix(in srgb, var(--umsc-ink) 12%, transparent);
-  /* Hero readability scrim — two static layers (never purple). Consumers set
-     `background-image: var(--umsc-scrim), var(--umsc-scrim-bottom);` */
-  --umsc-scrim: linear-gradient(
-    90deg,
-    rgba(5, 5, 5, 0.7),
-    rgba(5, 5, 5, 0.42) 50%,
-    rgba(5, 5, 5, 0.22)
-  );
-  --umsc-scrim-bottom: linear-gradient(
+  /* Hero readability scrim (never purple) — ONE pool under the bottom-left
+     caption, so the top ~2/3 of the frame is nearly untinted. Contrast
+     measured on real frames incl. the white end card: headline >= 4.8:1,
+     lede >= 5.9:1 (concept A, docs/templates/umsc/checkpoint/hero-concepts).
+     Hero-only: `.umsc-hero-scrim` picks one of these per width. The faint
+     bottom band only seats the pause button and the hairline. */
+  --umsc-scrim:
+    radial-gradient(
+      ellipse 880px 560px at 22% 86%,
+      rgba(5, 5, 5, 0.76) 0%,
+      rgba(5, 5, 5, 0.68) 38%,
+      rgba(5, 5, 5, 0.36) 66%,
+      rgba(5, 5, 5, 0.1) 86%,
+      rgba(5, 5, 5, 0) 100%
+    ),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.3), transparent 16%);
+  /* Narrow-desktop / zoomed-in variant: same stops, ellipse re-centred on the
+     caption (left inset + half the 520px block) instead of a % of the width. */
+  --umsc-scrim-mid:
+    radial-gradient(
+      ellipse 760px 560px at calc(clamp(24px, 6vw, 96px) + 260px) 86%,
+      rgba(5, 5, 5, 0.76) 0%,
+      rgba(5, 5, 5, 0.68) 38%,
+      rgba(5, 5, 5, 0.36) 66%,
+      rgba(5, 5, 5, 0.1) 86%,
+      rgba(5, 5, 5, 0) 100%
+    ),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.3), transparent 16%);
+  /* Phone: one bottom fade under the text. Stops are max(% of the hero, px)
+     so a short (zoomed / landscape) hero still covers its whole caption. */
+  --umsc-scrim-phone: linear-gradient(
     0deg,
-    rgba(5, 5, 5, 0.7),
-    transparent 45%
+    rgba(5, 5, 5, 0.84) 0%,
+    rgba(5, 5, 5, 0.74) max(30%, 230px),
+    rgba(5, 5, 5, 0.52) max(46%, 350px),
+    rgba(5, 5, 5, 0) max(64%, 490px)
   );
   /* Semantic state colors — constant across the palette */
   --umsc-error: #a8322f;
@@ -22784,8 +22808,33 @@ details.sp-details > summary.sp-details__summary > * {
 
 /* ── Hero — the one authored moment (design.md "Motion → Hero") ── */
 .umsc .umsc-hero-scrim {
-  background-image: var(--umsc-scrim), var(--umsc-scrim-bottom);
+  background-image: var(--umsc-scrim-phone);
   pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .umsc .umsc-hero-scrim {
+    background-image: var(--umsc-scrim-mid);
+  }
+}
+
+@media (min-width: 1280px) {
+  .umsc .umsc-hero-scrim {
+    background-image: var(--umsc-scrim);
+  }
+}
+
+/* Keeps her face in frame as the crop changes (poster face sits at
+   x 47-64%, head top at y 8%). */
+.umsc .umsc-hero-media {
+  object-position: 55% 25%;
+}
+
+/* Phones: 22px pill padding (default 28px) so both CTAs share one row at 390. */
+@media (max-width: 639px) {
+  .umsc .umsc-hero-ctas .umsc-btn {
+    padding-inline: 22px;
+  }
 }
 
 @keyframes umsc-film {
@@ -24373,6 +24422,27 @@ details.sp-details > summary.sp-details__summary > * {
   animation: glove-swing 700ms ease-in-out 1;
 }
 
+/* Option photos (chip + preview). The owner's product photos are centred on
+   wide white backdrops, so a plain contain-fit leaves the charm tiny. The
+   <img> is zoomed toward the centre inside its overflow-hidden frame. The
+   transform sits on the image, never on .glove-swing (that span animates). */
+.glove .glove-option-photo {
+  transform: scale(1.4);
+}
+
+@keyframes glove-option-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.glove .glove-option-fade {
+  animation: glove-option-fade 150ms ease-out 1;
+}
+
 /* Cards */
 /* The photo multiplies into the circle's mist fill, so a white photo
    background (charms) reads as mist inside its ring instead of vanishing. */
@@ -24882,6 +24952,10 @@ body:has(.glove) [data-slot="dialog-content"] .text-gray-500 {
   .glove .glove-charm-card:hover .glove-swing,
   .glove .glove-charm-card:focus-within .glove-swing,
   .glove .glove-swing.is-swinging {
+    animation: none;
+  }
+
+  .glove .glove-option-fade {
     animation: none;
   }
 

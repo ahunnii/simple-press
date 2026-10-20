@@ -31,6 +31,19 @@ export type ChipItem = {
 };
 
 /**
+ * The one status line of a choice ("Sold out", "Included" or its price, ""
+ * when it is free and not waived). Shared by the chip and the preview panel
+ * so the two never disagree.
+ */
+export function chipStatus(
+  item: Pick<ChipItem, "available" | "included" | "price">,
+): string {
+  if (!item.available) return "Sold out";
+  if (item.included) return "Included";
+  return item.price !== null ? formatPrice(item.price) : "";
+}
+
+/**
  * One labelled row of chips (a choice row of the product options panel,
  * `GloveCustomizer`): a horizontal track of 104px chips (56px image, name, price). A
  * chosen chip gets the purple ring, a check and (signature 2) swings once
@@ -52,6 +65,7 @@ export function ChipRow({
   onPick,
   swingId,
   onSwingEnd,
+  onPreview,
 }: {
   mode: "single" | "multi";
   label: string;
@@ -70,6 +84,11 @@ export function ChipRow({
   onPick: (id: string) => void;
   swingId: string | null;
   onSwingEnd: () => void;
+  /**
+   * A chip was hovered (mouse only) or focused: the options panel shows it
+   * up close. Leaving the rows is handled by the panel.
+   */
+  onPreview?: (id: string) => void;
 }) {
   const labelId = useId();
   const helpId = useId();
@@ -155,13 +174,7 @@ export function ChipRow({
         {items.map((item, index) => {
           const selected = isSelected(item.id);
           const disabled = !item.available || (item.blocked ?? false);
-          const status = !item.available
-            ? "Sold out"
-            : item.included
-              ? "Included"
-              : item.price !== null
-                ? formatPrice(item.price)
-                : "";
+          const status = chipStatus(item);
           return (
             <button
               key={item.id}
@@ -171,6 +184,14 @@ export function ChipRow({
               aria-disabled={disabled || undefined}
               tabIndex={single ? (index === activeIndex ? 0 : -1) : undefined}
               onClick={disabled ? undefined : () => onPick(item.id)}
+              onPointerEnter={
+                onPreview
+                  ? (event) => {
+                      if (event.pointerType === "mouse") onPreview(item.id);
+                    }
+                  : undefined
+              }
+              onFocus={onPreview ? () => onPreview(item.id) : undefined}
               className={cn(
                 "relative flex w-[104px] flex-none snap-start flex-col items-center gap-1.5 rounded-[var(--glove-radius-card)] border bg-[var(--glove-paper)] px-2 pt-3 pb-2.5 text-center transition-[border-color,box-shadow] duration-150",
                 selected
@@ -207,7 +228,10 @@ export function ChipRow({
                     fill
                     sizes="56px"
                     unoptimized={item.unoptimized}
-                    className="object-contain"
+                    // Zoomed on the <img>, not the swinging span: the owner's
+                    // photos are centred on wide white backdrops, so a plain
+                    // contain-fit leaves the charm tiny. See .glove-option-photo.
+                    className="glove-option-photo object-contain"
                   />
                 ) : item.swatchColor ? (
                   <span

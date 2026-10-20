@@ -223,6 +223,8 @@ function mapReview(
     customerEmail: r.customerEmail,
     customerTitle: r.customerTitle,
     reviewDate: r.reviewDate.toISOString(),
+    ownerReply: r.ownerReply ?? null,
+    ownerReplyAt: r.ownerReplyAt?.toISOString() ?? null,
   };
 }
 
@@ -841,6 +843,8 @@ async function fetchProducts(businessId: string) {
           customerEmail: true,
           customerTitle: true,
           reviewDate: true,
+          ownerReply: true,
+          ownerReplyAt: true,
         },
         orderBy: { reviewDate: "asc" },
       },

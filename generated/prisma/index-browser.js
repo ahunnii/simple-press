@@ -904,9 +904,12 @@ exports.Prisma.ProductReviewScalarFieldEnum = {
   reviewDate: 'reviewDate',
   helpfulCount: 'helpfulCount',
   notHelpfulCount: 'notHelpfulCount',
+  ownerReply: 'ownerReply',
+  ownerReplyAt: 'ownerReplyAt',
   productId: 'productId',
   customerId: 'customerId',
-  orderId: 'orderId'
+  orderId: 'orderId',
+  ownerReplyById: 'ownerReplyById'
 };
 
 exports.Prisma.ReviewVoteScalarFieldEnum = {

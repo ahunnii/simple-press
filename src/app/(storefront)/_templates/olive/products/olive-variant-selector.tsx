@@ -6,6 +6,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ProductCustomizerController } from "~/components/customizer/use-product-customizer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import {
+  readColorSwatches,
+  swatchOverrideFor,
+} from "~/lib/products/color-swatches";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
 import { applyCustomizerToCartItem } from "~/components/customizer/apply-to-cart-item";
 import { useCart } from "~/providers/cart-context";
@@ -87,6 +91,10 @@ export function OliveVariantSelector({
   const cartEnabled = useCartEnabled();
   const { setVariantImageUrl } = useVariantImage();
   const [quantity, setQuantity] = useState(1);
+  const swatchOverrides = useMemo(
+    () => readColorSwatches(product.additionalFields),
+    [product.additionalFields],
+  );
 
   useEffect(() => {
     onQuantityChange?.(quantity);
@@ -223,7 +231,9 @@ export function OliveVariantSelector({
                     const out = valueSoldOut(group.key, option);
                     return {
                       value: option,
-                      color: option,
+                      // Owner-pinned hex first, then the name lookup.
+                      color:
+                        swatchOverrideFor(swatchOverrides, option) ?? option,
                       label: out ? `${option} — sold out` : option,
                       state: out ? ("sold-out" as const) : undefined,
                       disabled: out,

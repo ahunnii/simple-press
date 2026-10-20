@@ -29,6 +29,10 @@ import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { isFilenameAltText } from "~/lib/images/alt-text";
+import {
+  pruneColorSwatches,
+  readColorSwatches,
+} from "~/lib/products/color-swatches";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseProductIntervals } from "~/lib/subscriptions/intervals";
@@ -167,6 +171,8 @@ const SEO_TAB_FIELDS = new Set<string>([
 function tabForField(name: string): ProductFormTab {
   const root = name.split(".")[0] ?? name;
   if (SEO_TAB_FIELDS.has(root)) return "seo";
+  // Swatch colors are edited beside the variants on Basics.
+  if (name.startsWith("additionalFields.colorSwatches")) return "basics";
   if (root === "additionalFields") return "additional";
   return "basics";
 }
@@ -201,6 +207,7 @@ function parseStoredAdditionalFields(raw: unknown) {
     productFeatures?: Array<{ icon: string; text: string }>;
     comingSoon?: boolean;
     productTagline?: string;
+    colorSwatches?: unknown;
   };
 }
 
@@ -237,6 +244,7 @@ function getNewProductDefaults(): ProductFormSchema {
       productFeatures: [],
       comingSoon: false,
       productTagline: "",
+      colorSwatches: {},
     },
     metaTitle: "",
     metaDescription: "",
@@ -394,6 +402,7 @@ export function ProductForm({
         productFeatures: storedAdditional?.productFeatures ?? [],
         comingSoon: storedAdditional?.comingSoon ?? false,
         productTagline: storedAdditional?.productTagline ?? "",
+        colorSwatches: readColorSwatches(product?.additionalFields),
       },
       metaTitle: product?.metaTitle ?? "",
       metaDescription: product?.metaDescription ?? "",
@@ -651,6 +660,14 @@ export function ProductForm({
     }
     setVariantErrors({});
 
+    // Overrides for colors no variant uses any more are dropped on save (the
+    // map is a whole object in form state; never per-key paths — color names
+    // can contain "." and spaces).
+    const colorSwatches = pruneColorSwatches(
+      data.additionalFields?.colorSwatches ?? {},
+      variants,
+    );
+
     // Objects freshly uploaded to S3 during THIS submit — if the save
     // mutation below fails, these have nothing referencing them in the DB
     // yet, so they're discarded via `upload.discardUploads` to avoid
@@ -772,6 +789,7 @@ export function ProductForm({
             productFeatures: data.additionalFields?.productFeatures ?? [],
             comingSoon: data.additionalFields?.comingSoon ?? false,
             productTagline: data.additionalFields?.productTagline ?? undefined,
+            colorSwatches,
           },
           metaTitle: data.metaTitle ?? null,
           metaDescription: data.metaDescription ?? null,
@@ -793,7 +811,11 @@ export function ProductForm({
       }
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
-      form.reset(data);
+      // Baseline the swatches as saved (pruned), not as submitted.
+      form.reset({
+        ...data,
+        additionalFields: { ...data.additionalFields, colorSwatches },
+      });
       setOgImageFile(null);
       setOgImageRemoved(false);
       requestAnimationFrame(() => {
@@ -865,6 +887,7 @@ export function ProductForm({
             productFeatures: data.additionalFields?.productFeatures ?? [],
             comingSoon: data.additionalFields?.comingSoon ?? false,
             productTagline: data.additionalFields?.productTagline ?? "",
+            colorSwatches,
           },
           metaTitle: data.metaTitle ?? null,
           metaDescription: data.metaDescription ?? null,
@@ -1833,6 +1856,14 @@ export function ProductForm({
                   )}
                   images={images}
                   errors={variantErrors}
+                  colorSwatches={
+                    form.watch("additionalFields.colorSwatches") ?? {}
+                  }
+                  onColorSwatchesChange={(next) =>
+                    form.setValue("additionalFields.colorSwatches", next, {
+                      shouldDirty: true,
+                    })
+                  }
                 />
               </TabsContent>
 

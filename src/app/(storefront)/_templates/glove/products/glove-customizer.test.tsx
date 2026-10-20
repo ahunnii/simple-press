@@ -85,14 +85,27 @@ const GLOVE_PRICE = 16000;
  * included, and an optional $5 engraving of up to 12 characters.
  */
 function buildDefinition(
-  overrides: { chainRequired?: boolean; charmsIncluded?: number } = {},
+  overrides: {
+    chainRequired?: boolean;
+    chainIncluded?: number;
+    charmsIncluded?: number;
+    /** Give the chain and charm values photos (the preview needs media). */
+    images?: boolean;
+  } = {},
 ): PublicCustomizerDefinition {
+  const img = (id: string) =>
+    overrides.images ? { imageUrl: `/photos/${id}.png` } : {};
   const def: CustomizerDefinition = definition([
     choiceGroup(
       "chain",
       [
-        value("silver", { label: "Silver Chain", priceDelta: 2500 }),
+        value("silver", {
+          ...img("silver"),
+          label: "Silver Chain",
+          priceDelta: 2500,
+        }),
         value("gold", {
+          ...img("gold"),
           label: "Gold Chain",
           priceDelta: 2500,
           available: false,
@@ -103,15 +116,32 @@ function buildDefinition(
         maxSelections: 1,
         required: overrides.chainRequired ?? false,
         minSelections: overrides.chainRequired ? 1 : 0,
+        includedCount: overrides.chainIncluded ?? 0,
       },
     ),
     choiceGroup(
       "charms",
       [
-        value("star", { label: "Star Charm", priceDelta: 3500 }),
-        value("heart", { label: "Heart Charm", priceDelta: 3500 }),
-        value("moon", { label: "Moon Charm", priceDelta: 4000 }),
-        value("sun", { label: "Sun Charm", priceDelta: 4500 }),
+        value("star", {
+          ...img("star"),
+          label: "Star Charm",
+          priceDelta: 3500,
+        }),
+        value("heart", {
+          ...img("heart"),
+          label: "Heart Charm",
+          priceDelta: 3500,
+        }),
+        value("moon", {
+          ...img("moon"),
+          label: "Moon Charm",
+          priceDelta: 4000,
+        }),
+        value("sun", {
+          ...img("sun"),
+          label: "Sun Charm",
+          priceDelta: 4500,
+        }),
       ],
       {
         name: "Charms",
@@ -282,12 +312,144 @@ describe("GloveCustomizer - included picks and the running total", () => {
     expect(totalRegion()).toHaveTextContent("Total $200.00");
   });
 
+  it("shows 'Included' on unpicked chips while the next pick is free", () => {
+    render(
+      <Harness
+        def={buildDefinition({ chainIncluded: 1, charmsIncluded: 1 })}
+      />,
+    );
+    // Nothing picked yet: every chain and charm would be free.
+    expect(chip(/silver chain/i)).toHaveTextContent("Included");
+    expect(chip(/star charm/i)).toHaveTextContent("Included");
+    expect(chip(/sun charm/i)).toHaveTextContent("Included");
+
+    // The free charm is used: the other charms show their price again. A
+    // single-pick chain stays free whichever one is swapped in.
+    fireEvent.click(chip(/silver chain/i));
+    fireEvent.click(chip(/moon charm/i));
+    expect(chip(/silver chain/i)).toHaveTextContent("Included");
+    expect(chip(/moon charm/i)).toHaveTextContent("Included");
+    expect(chip(/star charm/i)).toHaveTextContent("$35.00");
+    expect(chip(/sun charm/i)).toHaveTextContent("$45.00");
+    expect(totalRegion()).toHaveTextContent("Total $160.00");
+  });
+
+  it("shows prices on unpicked chips when nothing is included", () => {
+    render(<Harness def={buildDefinition()} />);
+    expect(chip(/silver chain/i)).toHaveTextContent("$25.00");
+    expect(chip(/star charm/i)).toHaveTextContent("$35.00");
+  });
+
   it("multiplies add-ons by quantity", () => {
     render(<Harness quantity={2} />);
     fireEvent.click(chip(/silver chain/i));
     expect(totalRegion()).toHaveTextContent("Glove $320.00");
     expect(totalRegion()).toHaveTextContent("Chain $50.00");
     expect(totalRegion()).toHaveTextContent("Total $370.00");
+  });
+});
+
+describe("GloveCustomizer - option preview", () => {
+  const preview = () => screen.getByTestId("glove-option-preview");
+  const rows = () =>
+    screen.getByRole("group", { name: /charms/i }).parentElement!
+      .parentElement!;
+  const hover = (el: HTMLElement) =>
+    fireEvent.pointerEnter(el, { pointerType: "mouse" });
+
+  it("is aria-hidden and shows the hint before any interaction", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    expect(preview()).toHaveAttribute("aria-hidden", "true");
+    expect(preview()).toHaveTextContent("Choose an option to see it up close.");
+    expect(preview().querySelector("img")).toBeNull();
+  });
+
+  it("shows a picked charm's group, name, status and photo", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    fireEvent.click(chip(/star charm/i));
+    expect(preview()).toHaveTextContent("Charms");
+    expect(preview()).toHaveTextContent("Star Charm");
+    expect(preview()).toHaveTextContent("$35.00");
+    expect(preview()).not.toHaveTextContent("see it up close");
+    expect(preview().querySelector("img")).toHaveAttribute(
+      "src",
+      "/photos/star.png",
+    );
+  });
+
+  it("uses the same status as the chip (Included, Sold out)", () => {
+    render(
+      <Harness def={buildDefinition({ images: true, charmsIncluded: 1 })} />,
+    );
+    fireEvent.click(chip(/moon charm/i));
+    expect(preview()).toHaveTextContent("Included");
+    hover(screen.getByRole("radio", { name: /gold chain/i }));
+    expect(preview()).toHaveTextContent("Gold Chain");
+    expect(preview()).toHaveTextContent("Sold out");
+  });
+
+  it("previews a mouse hover without selecting, and ignores touch", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    hover(chip(/heart charm/i));
+    expect(preview()).toHaveTextContent("Heart Charm");
+    expect(chip(/heart charm/i)).toHaveAttribute("aria-checked", "false");
+    expect(totalRegion()).toBeEmptyDOMElement();
+
+    fireEvent.pointerEnter(chip(/moon charm/i), { pointerType: "touch" });
+    expect(preview()).toHaveTextContent("Heart Charm");
+  });
+
+  it("reverts to the last picked value when the pointer leaves the rows", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    fireEvent.click(chip(/star charm/i));
+    hover(chip(/heart charm/i));
+    expect(preview()).toHaveTextContent("Heart Charm");
+    fireEvent.pointerLeave(rows());
+    expect(preview()).toHaveTextContent("Star Charm");
+  });
+
+  it("falls back to the previous pick when the shown value is deselected", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    fireEvent.click(chip(/star charm/i));
+    fireEvent.click(chip(/moon charm/i));
+    expect(preview()).toHaveTextContent("Moon Charm");
+    fireEvent.click(chip(/moon charm/i)); // deselect the shown one
+    expect(preview()).toHaveTextContent("Star Charm");
+    fireEvent.click(chip(/star charm/i));
+    expect(preview()).toHaveTextContent("see it up close");
+  });
+
+  it("falls back across groups when a single-pick value is swapped out", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    fireEvent.click(chip(/star charm/i));
+    fireEvent.click(chip(/silver chain/i));
+    expect(preview()).toHaveTextContent("Silver Chain");
+    fireEvent.click(chip(/no chain/i));
+    expect(preview()).toHaveTextContent("Star Charm");
+  });
+
+  it("previews on keyboard focus and reverts on blur", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    fireEvent.click(chip(/star charm/i));
+    fireEvent.focus(chip(/sun charm/i));
+    expect(preview()).toHaveTextContent("Sun Charm");
+    fireEvent.blur(chip(/sun charm/i));
+    expect(preview()).toHaveTextContent("Star Charm");
+  });
+
+  it("never previews the 'No chain' chip", () => {
+    render(<Harness def={buildDefinition({ images: true })} />);
+    hover(chip(/no chain/i));
+    expect(preview()).toHaveTextContent("see it up close");
+    fireEvent.focus(chip(/no chain/i));
+    expect(preview()).toHaveTextContent("see it up close");
+    fireEvent.click(chip(/no chain/i));
+    expect(preview()).toHaveTextContent("see it up close");
+  });
+
+  it("is hidden when no value has a photo or swatch", () => {
+    render(<Harness />);
+    expect(screen.queryByTestId("glove-option-preview")).toBeNull();
   });
 });
 

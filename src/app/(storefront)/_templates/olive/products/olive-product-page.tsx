@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -13,6 +13,10 @@ import {
   listItemAttr,
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
+import {
+  readColorSwatches,
+  swatchOverrideFor,
+} from "~/lib/products/color-swatches";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
@@ -201,8 +205,15 @@ export function OliveProductPage({
   // (see `shared/olive-color.ts`). Honour that here: an unknown name passes
   // NO accent, and the turn runs as a plain uncoloured wipe rather than
   // sweeping a fabricated colour across the photograph.
+  const swatchOverrides = useMemo(
+    () => readColorSwatches(product.additionalFields),
+    [product.additionalFields],
+  );
   const resolvedAccent = selectedColorValue
-    ? resolveChipColor(selectedColorValue)
+    ? resolveChipColor(
+        swatchOverrideFor(swatchOverrides, selectedColorValue) ??
+          selectedColorValue,
+      )
     : null;
   const turnAccent =
     resolvedAccent && !resolvedAccent.unknown
