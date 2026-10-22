@@ -294,6 +294,7 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   primaryColor: 'primaryColor',
   secondaryColor: 'secondaryColor',
   accentColor: 'accentColor',
+  emailStyle: 'emailStyle',
   navigationItems: 'navigationItems',
   footerNavigationItems: 'footerNavigationItems',
   customFields: 'customFields',
@@ -955,6 +956,22 @@ exports.Prisma.PlatformConfigScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PolicyAcceptanceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  businessId: 'businessId',
+  bundle: 'bundle',
+  version: 'version',
+  method: 'method',
+  acceptedAt: 'acceptedAt'
+};
+
+exports.Prisma.PolicyNoticeScalarFieldEnum = {
+  updateId: 'updateId',
+  sentAt: 'sentAt',
+  recipientCount: 'recipientCount'
+};
+
 exports.Prisma.ShippingZoneScalarFieldEnum = {
   id: 'id',
   businessId: 'businessId',
@@ -1058,7 +1075,9 @@ exports.Prisma.MarketingCampaignScalarFieldEnum = {
   startedAt: 'startedAt',
   completedAt: 'completedAt',
   canceledAt: 'canceledAt',
-  lastError: 'lastError'
+  lastError: 'lastError',
+  audience: 'audience',
+  scheduledAt: 'scheduledAt'
 };
 
 exports.Prisma.MarketingCampaignBatchScalarFieldEnum = {
@@ -1465,6 +1484,8 @@ exports.Prisma.ModelName = {
   PlatformInvite: 'PlatformInvite',
   TeamInvite: 'TeamInvite',
   PlatformConfig: 'PlatformConfig',
+  PolicyAcceptance: 'PolicyAcceptance',
+  PolicyNotice: 'PolicyNotice',
   ShippingZone: 'ShippingZone',
   ShippingRate: 'ShippingRate',
   BackInStockRequest: 'BackInStockRequest',

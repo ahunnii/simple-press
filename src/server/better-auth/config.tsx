@@ -12,9 +12,13 @@ import { getBusinessUrl } from "~/lib/business-url";
 import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { sendResendEmail } from "~/lib/email/resend";
 import { EMAIL_FROM, formatFromAddress } from "~/lib/email/send";
+import { recordPolicyAcceptance } from "~/lib/legal/policy-acceptance.server";
 import { createRedisSecondaryStorage } from "~/lib/redis";
 import { recaptcha } from "~/server/better-auth/plugins/recaptcha";
-import { resolvePlatformTermsAcceptance } from "~/server/better-auth/terms-acceptance";
+import {
+  resolvePlatformTermsAcceptance,
+  resolveSignupClickwrapLogEntry,
+} from "~/server/better-auth/terms-acceptance";
 import { db } from "~/server/db";
 
 async function linkGuestOrdersToUser(user: {
@@ -262,7 +266,13 @@ export const auth = betterAuth({
 
           return { data: { ...user, ...acceptance } };
         },
-        after: async (user) => {
+        after: async (user, context) => {
+          // Append the clickwrap to the PolicyAcceptance log. Best-effort and
+          // never throws (fails open if the table isn't there yet) — the
+          // column stamp written in `before` is the evidence that matters.
+          const logEntry = resolveSignupClickwrapLogEntry(user, context);
+          if (logEntry) await recordPolicyAcceptance(logEntry);
+
           await linkGuestOrdersToUser(user);
         },
       },

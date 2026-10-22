@@ -63,6 +63,7 @@ model User {
   editorNotes               EditorNote[]
   marketingCampaignsCreated MarketingCampaign[]
   productReviewReplies      ProductReview[]      @relation("ProductReviewOwnerReply")
+  policyAcceptances         PolicyAcceptance[]
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -347,6 +348,7 @@ model Business {
   loyaltyProgram         LoyaltyProgram?
   loyaltyLedger          LoyaltyLedger[]
   productOptionGroups    ProductOptionGroup[]
+  policyAcceptances      PolicyAcceptance[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -409,6 +411,7 @@ model SiteContent {
   primaryColor   String? @default("#000000")
   secondaryColor String? @default("#ffffff")
   accentColor    String? @default("#3b82f6")
+  emailStyle     Json? // Marketing email style (accent, background, font, header). Null = template default. Validated by src/lib/marketing/email-style.ts
 
   // Navigation (custom menu items)
   navigationItems       Json? // [{ label, href, external?, children?: [{ label, href, external? }] }]
@@ -1865,6 +1868,47 @@ model PlatformConfig {
 }
 
 // ============================================
+// POLICY ACCEPTANCE LOG
+// ============================================
+
+/// Append-only evidence log of policy acceptances. Written alongside — never
+/// instead of — the first-acceptance columns (`User.termsAcceptedAt`,
+/// `BusinessMembership.merchantTermsAcceptedAt`), which stay the FIRST
+/// acceptance and are never overwritten. This log is what records everything
+/// after that: acknowledgements of material updates (src/lib/legal/material-updates.ts).
+/// Never update or delete rows from app code. See src/lib/legal/policy-acceptance.server.ts.
+model PolicyAcceptance {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Set for merchant-bundle rows (the Seller & Merchant Agreement is accepted
+  // per store) and for notice-acks given from a store's admin. Null for
+  // account-level platform clickwrap at signup.
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  bundle  String // "merchant" | "platform"
+  // clickwrap → the *_TERMS_VERSION in force; notice-ack → MaterialPolicyUpdate.id
+  version String
+  method  String // "clickwrap" | "notice-ack"
+
+  acceptedAt DateTime @default(now()) // server clock only
+
+  @@index([userId, bundle, version])
+  @@index([businessId])
+}
+
+/// One row per material update whose notice email has gone out — makes the
+/// platform-hub send idempotent. `updateId` = MaterialPolicyUpdate.id.
+model PolicyNotice {
+  updateId       String   @id
+  sentAt         DateTime
+  recipientCount Int
+}
+
+// ============================================
 // ZONE + WEIGHT SHIPPING
 // ============================================
 
@@ -2083,7 +2127,7 @@ model MarketingCampaign {
   bodyText      String? @db.Text
   bodyJson      Json?
 
-  status String @default("DRAFT") // DRAFT | QUEUED | SENDING | SENT | FAILED | CANCELED
+  status String @default("DRAFT") // DRAFT | SCHEDULED | QUEUED | SENDING | SENT | FAILED | CANCELED
 
   // Frozen at queue time so every retry sends byte-identical payloads (Resend idempotency)
   renderedHtml String? @db.Text // contains __SP_UNSUBSCRIBE_URL__ placeholder
@@ -2099,12 +2143,16 @@ model MarketingCampaign {
   canceledAt     DateTime?
   lastError      String?
 
+  audience    Json? // Segment definition (src/lib/marketing/segments.ts). Null = all opted-in customers.
+  scheduledAt DateTime? // Set while status = SCHEDULED; the cron sweep queues it when due.
+
   batches       MarketingCampaignBatch[]
   recipients    MarketingCampaignRecipient[]
   consentEvents MarketingConsentEvent[]
 
   @@index([businessId, createdAt])
   @@index([status])
+  @@index([status, scheduledAt])
 }
 
 /// One Resend batch of a campaign (leased by the sender cron, retried safely).

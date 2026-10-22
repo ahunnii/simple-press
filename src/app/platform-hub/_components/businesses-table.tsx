@@ -16,12 +16,22 @@ type Props = {
   businesses: RouterOutputs["platform"]["listBusinesses"]["businesses"];
 };
 
+type BusinessRow =
+  RouterOutputs["platform"]["listBusinesses"]["businesses"][number];
+
 function MerchantTermsBadge({
   memberships,
+  merchantPolicyLog,
 }: {
-  memberships: RouterOutputs["platform"]["listBusinesses"]["businesses"][number]["memberships"];
+  memberships: BusinessRow["memberships"];
+  merchantPolicyLog: BusinessRow["merchantPolicyLog"];
 }) {
-  const status = getMerchantTermsStatus(memberships);
+  // `merchantPolicyLog` is null when the log wasn't consulted or couldn't be
+  // read — column-only status then, same as before the log existed.
+  const status = getMerchantTermsStatus(
+    memberships,
+    merchantPolicyLog ?? undefined,
+  );
 
   if (status.state === "none") {
     return <Badge variant="destructive">No acceptance on record</Badge>;
@@ -30,7 +40,9 @@ function MerchantTermsBadge({
   if (status.state === "current") {
     return (
       <div className="flex flex-col gap-0.5">
-        <Badge variant="success">Accepted</Badge>
+        <Badge variant="success">
+          {status.via === "log" ? "Update acknowledged" : "Accepted"}
+        </Badge>
         <span className="text-muted-foreground text-xs">
           {formatDate(status.acceptedAt)}
         </span>
@@ -180,7 +192,10 @@ export function BusinessesTable({ businesses }: Props) {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <MerchantTermsBadge memberships={business.memberships} />
+                  <MerchantTermsBadge
+                    memberships={business.memberships}
+                    merchantPolicyLog={business.merchantPolicyLog}
+                  />
                 </td>
                 <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                   {business.ownerEmail}

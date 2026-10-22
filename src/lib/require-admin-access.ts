@@ -30,6 +30,13 @@ export type RequireAdminAccessResult = {
    * testing it directly — `undefined` must never be treated as "not accepted".
    */
   merchantTermsAcceptedAt?: Date | null;
+  /**
+   * `BusinessMembership.merchantTermsVersion` for THIS membership, same
+   * three-state semantics as `merchantTermsAcceptedAt` (`undefined` = not
+   * determined). Feeds the non-blocking policy-update notice, which must treat
+   * `undefined` as "show nothing".
+   */
+  merchantTermsVersion?: string | null;
 };
 
 type Options = {
@@ -84,6 +91,7 @@ export async function requireAdminAccess(
   // Stays `undefined` for PLATFORM_ADMIN — no membership is looked up, so there
   // is nothing to report, and "unknown" is the honest value.
   let merchantTermsAcceptedAt: Date | null | undefined;
+  let merchantTermsVersion: string | null | undefined;
   if (!platformAdmin) {
     // For everyone else, check BusinessMembership
     const membership = await checkBusinessMembership(
@@ -95,6 +103,7 @@ export async function requireAdminAccess(
     }
     membershipRole = membership.role as AdminRole;
     merchantTermsAcceptedAt = membership.merchantTermsAcceptedAt;
+    merchantTermsVersion = membership.merchantTermsVersion;
 
     // STAFF is fulfillment-only: orders + customers. Middleware exposes the
     // requested path via x-pathname; anything outside the allowed pages sends
@@ -111,5 +120,11 @@ export async function requireAdminAccess(
     }
   }
 
-  return { session, business, membershipRole, merchantTermsAcceptedAt };
+  return {
+    session,
+    business,
+    membershipRole,
+    merchantTermsAcceptedAt,
+    merchantTermsVersion,
+  };
 }

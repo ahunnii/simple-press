@@ -2,6 +2,8 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { MerchantPolicyLog } from "~/lib/legal/terms-status";
+import { env } from "~/env";
 import {
   BUSINESS_TYPE_IDS,
   FEATURE_PRESETS,
@@ -14,6 +16,18 @@ import {
   getDefaultFlags,
   getDisabledDueToDependency,
 } from "~/lib/features/registry";
+import {
+  findMaterialUpdate,
+  isPending,
+  latestMaterialUpdate,
+  MATERIAL_POLICY_UPDATES,
+  policyToday,
+} from "~/lib/legal/material-updates";
+import {
+  listPolicyNoticeRecipients,
+  sendPolicyUpdateNoticeBatches,
+} from "~/lib/legal/policy-update-notice-send.server";
+import { MERCHANT_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { buildBusinessBrief } from "~/lib/platform/business-brief";
 import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
@@ -187,6 +201,7 @@ export const platformRouter = createTRPCRouter({
             memberships: {
               where: { role: "OWNER" },
               select: {
+                userId: true,
                 merchantTermsAcceptedAt: true,
                 merchantTermsVersion: true,
               },
@@ -199,8 +214,71 @@ export const platformRouter = createTRPCRouter({
         ctx.db.business.count({ where }),
       ]);
 
+      // PolicyAcceptance log rows that can make an owner with an older column
+      // version "current": a notice-ack of the latest material merchant
+      // update, or a clickwrap at the current version. One query for the whole
+      // page. Skipped until a material merchant update exists (until then
+      // every log row duplicates a column stamp). `merchantPolicyLog` is null
+      // only when no material merchant update is announced → exact-version
+      // column status. If the log table is unreadable (not applied yet) the
+      // rows are simply empty, but the announcement date still lets owners who
+      // clickwrapped after the update count as current.
+      const latestMerchantUpdate = latestMaterialUpdate(
+        MATERIAL_POLICY_UPDATES,
+        new Date(),
+        "merchant",
+      );
+      let logRows:
+        | {
+            businessId: string | null;
+            userId: string;
+            version: string;
+            acceptedAt: Date;
+          }[]
+        | null = null;
+      if (latestMerchantUpdate && businesses.length > 0) {
+        try {
+          logRows = await ctx.db.policyAcceptance.findMany({
+            where: {
+              businessId: { in: businesses.map((b) => b.id) },
+              bundle: "merchant",
+              version: {
+                in: [MERCHANT_TERMS_VERSION, latestMerchantUpdate.id],
+              },
+            },
+            select: {
+              businessId: true,
+              userId: true,
+              version: true,
+              acceptedAt: true,
+            },
+          });
+        } catch (error) {
+          Sentry.captureException(error, {
+            tags: { legal: "policy-acceptance-log" },
+          });
+          logRows = null;
+        }
+      }
+
       return {
-        businesses,
+        businesses: businesses.map((business) => {
+          const merchantPolicyLog: MerchantPolicyLog | null =
+            latestMerchantUpdate
+              ? {
+                  latestUpdateId: latestMerchantUpdate.id,
+                  latestUpdateAnnouncedOn: latestMerchantUpdate.announcedOn,
+                  rows: (logRows ?? [])
+                    .filter((row) => row.businessId === business.id)
+                    .map(({ userId, version, acceptedAt }) => ({
+                      userId,
+                      version,
+                      acceptedAt,
+                    })),
+                }
+              : null;
+          return { ...business, merchantPolicyLog };
+        }),
         total,
         hasMore: offset + businesses.length < total,
       };
@@ -783,6 +861,188 @@ export const platformRouter = createTRPCRouter({
         },
       });
       return { success: true };
+    }),
+
+  // ─── Policy update notices ────────────────────────────────────────────────
+  //
+  // The registry of MATERIAL policy updates lives in code
+  // (`~/lib/legal/material-updates`); `PolicyNotice` is only the send ledger
+  // that makes the email send once. See that file for the ritual.
+
+  /**
+   * Every registry entry with its send status, for the platform-hub panel.
+   * `notice` is `"unknown"` when the ledger table cannot be read (not applied
+   * yet) — the panel then says so instead of claiming "not sent".
+   */
+  listPolicyUpdates: platformAdminProcedure.query(async ({ ctx }) => {
+    const now = new Date();
+    const today = policyToday(now);
+
+    let ledger: Map<string, { sentAt: Date; recipientCount: number }> | null =
+      null;
+    try {
+      const rows = await ctx.db.policyNotice.findMany({
+        select: { updateId: true, sentAt: true, recipientCount: true },
+      });
+      ledger = new Map(
+        rows.map((row) => [
+          row.updateId,
+          { sentAt: row.sentAt, recipientCount: row.recipientCount },
+        ]),
+      );
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { legal: "policy-notice-ledger" },
+      });
+    }
+
+    return MATERIAL_POLICY_UPDATES.map((update) => ({
+      id: update.id,
+      documents: [...update.documents],
+      announcedOn: update.announcedOn,
+      effectiveOn: update.effectiveOn,
+      summary: update.summary,
+      announced: update.announcedOn <= today,
+      pending: isPending(update, now),
+      notice: ledger
+        ? (():
+            | { state: "sent"; sentAt: Date; recipientCount: number }
+            | { state: "not-sent" } => {
+            const row = ledger.get(update.id);
+            return row ? { state: "sent", ...row } : { state: "not-sent" };
+          })()
+        : ({ state: "unknown" } as const),
+    })).sort((a, b) => b.announcedOn.localeCompare(a.announcedOn));
+  }),
+
+  /** How many owners a send would email — for the confirm dialog. */
+  previewPolicyUpdateNotice: platformAdminProcedure
+    .input(z.object({ updateId: z.string().min(1).max(200) }))
+    .query(async ({ ctx, input }) => {
+      if (!findMaterialUpdate(MATERIAL_POLICY_UPDATES, input.updateId)) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No such policy update in the registry.",
+        });
+      }
+      const recipients = await listPolicyNoticeRecipients(ctx.db);
+      return { recipientCount: recipients.length };
+    }),
+
+  /**
+   * Email the "Updates to SimplePress policies" notice to every store owner,
+   * once per registry entry.
+   *
+   * - The update must exist in `MATERIAL_POLICY_UPDATES` and be announced.
+   * - Idempotent: if a `PolicyNotice` row exists the call is a no-op returning
+   *   `{ alreadySent: true }`. If the ledger cannot be read the send is
+   *   REFUSED — we cannot prove it has not gone out.
+   * - Transactional legal notice: ignores marketing opt-outs on purpose.
+   * - The ledger row is written only after every batch was accepted. If a
+   *   batch fails, nothing is recorded and the error says so; re-running
+   *   within Resend's 24h idempotency window re-sends only what failed.
+   * - On the preview env (`IS_PREVIEW_ENV`) mail is suppressed/redirected by
+   *   the Resend wrapper, so no ledger row is written there.
+   */
+  sendPolicyUpdateNotice: platformAdminProcedure
+    .input(z.object({ updateId: z.string().min(1).max(200) }))
+    .mutation(async ({ ctx, input }) => {
+      const update = findMaterialUpdate(
+        MATERIAL_POLICY_UPDATES,
+        input.updateId,
+      );
+      if (!update) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No such policy update in the registry.",
+        });
+      }
+      if (update.announcedOn > policyToday(new Date())) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `This update is not announced until ${update.announcedOn}.`,
+        });
+      }
+
+      let existing: { sentAt: Date; recipientCount: number } | null;
+      try {
+        existing = await ctx.db.policyNotice.findUnique({
+          where: { updateId: update.id },
+          select: { sentAt: true, recipientCount: true },
+        });
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { legal: "policy-notice-ledger" },
+        });
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "Can't read the PolicyNotice table, so a duplicate send can't be ruled out. Apply prisma/manual/2026-10-21-policy-acceptance-log.sql first.",
+        });
+      }
+      if (existing) {
+        return {
+          alreadySent: true as const,
+          sentAt: existing.sentAt,
+          recipientCount: existing.recipientCount,
+        };
+      }
+
+      const recipients = await listPolicyNoticeRecipients(ctx.db);
+      if (recipients.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "There are no store owners to notify.",
+        });
+      }
+
+      const result = await sendPolicyUpdateNoticeBatches({
+        update,
+        recipients,
+      });
+      if (result.failedRecipients > 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `The email provider refused ${result.failedRecipients} of ${recipients.length} recipients (${result.firstError ?? "unknown error"}). Nothing was recorded as sent. Running it again re-sends only the failed batches if you do it within 24 hours.`,
+        });
+      }
+
+      const sentAt = new Date();
+      let recorded = false;
+      if (!env.IS_PREVIEW_ENV) {
+        try {
+          await ctx.db.policyNotice.create({
+            data: {
+              updateId: update.id,
+              sentAt,
+              recipientCount: result.accepted,
+            },
+          });
+          recorded = true;
+        } catch (error) {
+          // The emails are out. A unique-violation means a concurrent send won;
+          // anything else is reported and surfaced via `recorded: false`.
+          if (
+            !(
+              error instanceof Error &&
+              "code" in error &&
+              (error as { code?: unknown }).code === "P2002"
+            )
+          ) {
+            Sentry.captureException(error, {
+              tags: { legal: "policy-notice-ledger" },
+            });
+          }
+        }
+      }
+
+      return {
+        alreadySent: false as const,
+        sentAt,
+        recipientCount: result.accepted,
+        rejected: result.rejected,
+        recorded,
+      };
     }),
 
   getDashboardStats: platformAdminProcedure.query(async ({ ctx }) => {

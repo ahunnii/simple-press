@@ -2,12 +2,14 @@ import { env } from "~/env";
 import { loadSetupGate } from "~/lib/admin/setup-status.server";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
+import { resolvePolicyUpdateNotice } from "~/lib/legal/policy-update-notice.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { OwnerTermsGateScreen } from "~/components/legal/owner-terms-gate-screen";
+import { PolicyUpdateBanner } from "~/components/legal/policy-update-banner";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { NavigationGuardProvider } from "~/providers/navigation-guard-context";
 import { AdminCommandPalette } from "~/app/admin/_components/admin-command-palette";
@@ -20,8 +22,13 @@ type Props = {
 };
 
 export default async function AdminLayout({ children }: Props) {
-  const { session, business, membershipRole, merchantTermsAcceptedAt } =
-    await requireAdminAccess();
+  const {
+    session,
+    business,
+    membershipRole,
+    merchantTermsAcceptedAt,
+    merchantTermsVersion,
+  } = await requireAdminAccess();
 
   const platformMaintenance = await getPlatformMaintenance();
   if (platformMaintenance.active && !(await isPlatformAdmin(session.user.id))) {
@@ -76,7 +83,7 @@ export default async function AdminLayout({ children }: Props) {
   // Runs alongside the pending-review count below — both are single cheap
   // reads needed on every admin page load, so they fire in parallel rather
   // than adding a sequential round trip each.
-  const [gate, pendingReviewCount] = await Promise.all([
+  const [gate, pendingReviewCount, policyUpdateNotice] = await Promise.all([
     loadSetupGate(business.id),
     // ProductReview has no businessId column — scoped through the product
     // relation, same tenancy rule as review.ts. Counts customer-submitted AND
@@ -91,6 +98,16 @@ export default async function AdminLayout({ children }: Props) {
         isHidden: false,
         product: { businessId: business.id },
       },
+    }),
+    // Non-blocking "policies are changing" banner for store OWNERS. Only
+    // reached when the hard gate above is NOT showing. Resolves to null for
+    // every other role, when no material update is announced, when the owner
+    // is already covered, and on ANY failure — see `resolvePolicyUpdateNotice`.
+    resolvePolicyUpdateNotice({
+      membershipRole,
+      userId: session.user.id,
+      businessId: business.id,
+      merchantTermsVersion,
     }),
   ]);
 
@@ -134,6 +151,13 @@ export default async function AdminLayout({ children }: Props) {
                     // Rides along on the gate query — no extra round trip.
                     stripeChargesEnabled: gate.stripeChargesEnabled,
                   }}
+                />
+              )}
+              {policyUpdateNotice && (
+                <PolicyUpdateBanner
+                  update={policyUpdateNotice.update}
+                  pending={policyUpdateNotice.pending}
+                  platformDomain={env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                 />
               )}
               {children}

@@ -286,6 +286,22 @@ export type TeamInvite = $Result.DefaultSelection<Prisma.$TeamInvitePayload>
  */
 export type PlatformConfig = $Result.DefaultSelection<Prisma.$PlatformConfigPayload>
 /**
+ * Model PolicyAcceptance
+ * Append-only evidence log of policy acceptances. Written alongside — never
+ * instead of — the first-acceptance columns (`User.termsAcceptedAt`,
+ * `BusinessMembership.merchantTermsAcceptedAt`), which stay the FIRST
+ * acceptance and are never overwritten. This log is what records everything
+ * after that: acknowledgements of material updates (src/lib/legal/material-updates.ts).
+ * Never update or delete rows from app code. See src/lib/legal/policy-acceptance.server.ts.
+ */
+export type PolicyAcceptance = $Result.DefaultSelection<Prisma.$PolicyAcceptancePayload>
+/**
+ * Model PolicyNotice
+ * One row per material update whose notice email has gone out — makes the
+ * platform-hub send idempotent. `updateId` = MaterialPolicyUpdate.id.
+ */
+export type PolicyNotice = $Result.DefaultSelection<Prisma.$PolicyNoticePayload>
+/**
  * Model ShippingZone
  * 
  */
@@ -1078,6 +1094,26 @@ export class PrismaClient<
   get platformConfig(): Prisma.PlatformConfigDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.policyAcceptance`: Exposes CRUD operations for the **PolicyAcceptance** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PolicyAcceptances
+    * const policyAcceptances = await prisma.policyAcceptance.findMany()
+    * ```
+    */
+  get policyAcceptance(): Prisma.PolicyAcceptanceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.policyNotice`: Exposes CRUD operations for the **PolicyNotice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PolicyNotices
+    * const policyNotices = await prisma.policyNotice.findMany()
+    * ```
+    */
+  get policyNotice(): Prisma.PolicyNoticeDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.shippingZone`: Exposes CRUD operations for the **ShippingZone** model.
     * Example usage:
     * ```ts
@@ -1792,6 +1828,8 @@ export namespace Prisma {
     PlatformInvite: 'PlatformInvite',
     TeamInvite: 'TeamInvite',
     PlatformConfig: 'PlatformConfig',
+    PolicyAcceptance: 'PolicyAcceptance',
+    PolicyNotice: 'PolicyNotice',
     ShippingZone: 'ShippingZone',
     ShippingRate: 'ShippingRate',
     BackInStockRequest: 'BackInStockRequest',
@@ -1833,7 +1871,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "marketingCampaign" | "marketingCampaignBatch" | "marketingCampaignRecipient" | "marketingConsentEvent" | "marketingDoNotEmail" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "policyAcceptance" | "policyNotice" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "marketingCampaign" | "marketingCampaignBatch" | "marketingCampaignRecipient" | "marketingConsentEvent" | "marketingDoNotEmail" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5167,6 +5205,154 @@ export namespace Prisma {
           }
         }
       }
+      PolicyAcceptance: {
+        payload: Prisma.$PolicyAcceptancePayload<ExtArgs>
+        fields: Prisma.PolicyAcceptanceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PolicyAcceptanceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PolicyAcceptanceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          findFirst: {
+            args: Prisma.PolicyAcceptanceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PolicyAcceptanceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          findMany: {
+            args: Prisma.PolicyAcceptanceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>[]
+          }
+          create: {
+            args: Prisma.PolicyAcceptanceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          createMany: {
+            args: Prisma.PolicyAcceptanceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PolicyAcceptanceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>[]
+          }
+          delete: {
+            args: Prisma.PolicyAcceptanceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          update: {
+            args: Prisma.PolicyAcceptanceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          deleteMany: {
+            args: Prisma.PolicyAcceptanceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PolicyAcceptanceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PolicyAcceptanceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>[]
+          }
+          upsert: {
+            args: Prisma.PolicyAcceptanceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyAcceptancePayload>
+          }
+          aggregate: {
+            args: Prisma.PolicyAcceptanceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePolicyAcceptance>
+          }
+          groupBy: {
+            args: Prisma.PolicyAcceptanceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PolicyAcceptanceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PolicyAcceptanceCountArgs<ExtArgs>
+            result: $Utils.Optional<PolicyAcceptanceCountAggregateOutputType> | number
+          }
+        }
+      }
+      PolicyNotice: {
+        payload: Prisma.$PolicyNoticePayload<ExtArgs>
+        fields: Prisma.PolicyNoticeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PolicyNoticeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PolicyNoticeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          findFirst: {
+            args: Prisma.PolicyNoticeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PolicyNoticeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          findMany: {
+            args: Prisma.PolicyNoticeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>[]
+          }
+          create: {
+            args: Prisma.PolicyNoticeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          createMany: {
+            args: Prisma.PolicyNoticeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PolicyNoticeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>[]
+          }
+          delete: {
+            args: Prisma.PolicyNoticeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          update: {
+            args: Prisma.PolicyNoticeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          deleteMany: {
+            args: Prisma.PolicyNoticeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PolicyNoticeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PolicyNoticeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>[]
+          }
+          upsert: {
+            args: Prisma.PolicyNoticeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PolicyNoticePayload>
+          }
+          aggregate: {
+            args: Prisma.PolicyNoticeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePolicyNotice>
+          }
+          groupBy: {
+            args: Prisma.PolicyNoticeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PolicyNoticeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PolicyNoticeCountArgs<ExtArgs>
+            result: $Utils.Optional<PolicyNoticeCountAggregateOutputType> | number
+          }
+        }
+      }
       ShippingZone: {
         payload: Prisma.$ShippingZonePayload<ExtArgs>
         fields: Prisma.ShippingZoneFieldRefs
@@ -7010,6 +7196,8 @@ export namespace Prisma {
     platformInvite?: PlatformInviteOmit
     teamInvite?: TeamInviteOmit
     platformConfig?: PlatformConfigOmit
+    policyAcceptance?: PolicyAcceptanceOmit
+    policyNotice?: PolicyNoticeOmit
     shippingZone?: ShippingZoneOmit
     shippingRate?: ShippingRateOmit
     backInStockRequest?: BackInStockRequestOmit
@@ -7123,6 +7311,7 @@ export namespace Prisma {
     editorNotes: number
     marketingCampaignsCreated: number
     productReviewReplies: number
+    policyAcceptances: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7136,6 +7325,7 @@ export namespace Prisma {
     editorNotes?: boolean | UserCountOutputTypeCountEditorNotesArgs
     marketingCampaignsCreated?: boolean | UserCountOutputTypeCountMarketingCampaignsCreatedArgs
     productReviewReplies?: boolean | UserCountOutputTypeCountProductReviewRepliesArgs
+    policyAcceptances?: boolean | UserCountOutputTypeCountPolicyAcceptancesArgs
   }
 
   // Custom InputTypes
@@ -7219,6 +7409,13 @@ export namespace Prisma {
     where?: ProductReviewWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPolicyAcceptancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PolicyAcceptanceWhereInput
+  }
+
 
   /**
    * Count Type BusinessCountOutputType
@@ -7266,6 +7463,7 @@ export namespace Prisma {
     donations: number
     loyaltyLedger: number
     productOptionGroups: number
+    policyAcceptances: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7310,6 +7508,7 @@ export namespace Prisma {
     donations?: boolean | BusinessCountOutputTypeCountDonationsArgs
     loyaltyLedger?: boolean | BusinessCountOutputTypeCountLoyaltyLedgerArgs
     productOptionGroups?: boolean | BusinessCountOutputTypeCountProductOptionGroupsArgs
+    policyAcceptances?: boolean | BusinessCountOutputTypeCountPolicyAcceptancesArgs
   }
 
   // Custom InputTypes
@@ -7608,6 +7807,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountProductOptionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProductOptionGroupWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountPolicyAcceptancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PolicyAcceptanceWhereInput
   }
 
 
@@ -8808,6 +9014,7 @@ export namespace Prisma {
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
     productReviewReplies?: boolean | User$productReviewRepliesArgs<ExtArgs>
+    policyAcceptances?: boolean | User$policyAcceptancesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -8862,6 +9069,7 @@ export namespace Prisma {
     editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     marketingCampaignsCreated?: boolean | User$marketingCampaignsCreatedArgs<ExtArgs>
     productReviewReplies?: boolean | User$productReviewRepliesArgs<ExtArgs>
+    policyAcceptances?: boolean | User$policyAcceptancesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8880,6 +9088,7 @@ export namespace Prisma {
       editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
       marketingCampaignsCreated: Prisma.$MarketingCampaignPayload<ExtArgs>[]
       productReviewReplies: Prisma.$ProductReviewPayload<ExtArgs>[]
+      policyAcceptances: Prisma.$PolicyAcceptancePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9296,6 +9505,7 @@ export namespace Prisma {
     editorNotes<T extends User$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     marketingCampaignsCreated<T extends User$marketingCampaignsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$marketingCampaignsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     productReviewReplies<T extends User$productReviewRepliesArgs<ExtArgs> = {}>(args?: Subset<T, User$productReviewRepliesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    policyAcceptances<T extends User$policyAcceptancesArgs<ExtArgs> = {}>(args?: Subset<T, User$policyAcceptancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9960,6 +10170,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ProductReviewScalarFieldEnum | ProductReviewScalarFieldEnum[]
+  }
+
+  /**
+   * User.policyAcceptances
+   */
+  export type User$policyAcceptancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    where?: PolicyAcceptanceWhereInput
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PolicyAcceptanceScalarFieldEnum | PolicyAcceptanceScalarFieldEnum[]
   }
 
   /**
@@ -15240,6 +15474,7 @@ export namespace Prisma {
     loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
     loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
     productOptionGroups?: boolean | Business$productOptionGroupsArgs<ExtArgs>
+    policyAcceptances?: boolean | Business$policyAcceptancesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -15536,6 +15771,7 @@ export namespace Prisma {
     loyaltyProgram?: boolean | Business$loyaltyProgramArgs<ExtArgs>
     loyaltyLedger?: boolean | Business$loyaltyLedgerArgs<ExtArgs>
     productOptionGroups?: boolean | Business$productOptionGroupsArgs<ExtArgs>
+    policyAcceptances?: boolean | Business$policyAcceptancesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -15589,6 +15825,7 @@ export namespace Prisma {
       loyaltyProgram: Prisma.$LoyaltyProgramPayload<ExtArgs> | null
       loyaltyLedger: Prisma.$LoyaltyLedgerPayload<ExtArgs>[]
       productOptionGroups: Prisma.$ProductOptionGroupPayload<ExtArgs>[]
+      policyAcceptances: Prisma.$PolicyAcceptancePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -16109,6 +16346,7 @@ export namespace Prisma {
     loyaltyProgram<T extends Business$loyaltyProgramArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyProgramArgs<ExtArgs>>): Prisma__LoyaltyProgramClient<$Result.GetResult<Prisma.$LoyaltyProgramPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     loyaltyLedger<T extends Business$loyaltyLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Business$loyaltyLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     productOptionGroups<T extends Business$productOptionGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productOptionGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductOptionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    policyAcceptances<T extends Business$policyAcceptancesArgs<ExtArgs> = {}>(args?: Subset<T, Business$policyAcceptancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17665,6 +17903,30 @@ export namespace Prisma {
   }
 
   /**
+   * Business.policyAcceptances
+   */
+  export type Business$policyAcceptancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    where?: PolicyAcceptanceWhereInput
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PolicyAcceptanceScalarFieldEnum | PolicyAcceptanceScalarFieldEnum[]
+  }
+
+  /**
    * Business without action
    */
   export type BusinessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17774,6 +18036,7 @@ export namespace Prisma {
     primaryColor: number
     secondaryColor: number
     accentColor: number
+    emailStyle: number
     navigationItems: number
     footerNavigationItems: number
     customFields: number
@@ -17868,6 +18131,7 @@ export namespace Prisma {
     primaryColor?: true
     secondaryColor?: true
     accentColor?: true
+    emailStyle?: true
     navigationItems?: true
     footerNavigationItems?: true
     customFields?: true
@@ -17979,6 +18243,7 @@ export namespace Prisma {
     primaryColor: string | null
     secondaryColor: string | null
     accentColor: string | null
+    emailStyle: JsonValue | null
     navigationItems: JsonValue | null
     footerNavigationItems: JsonValue | null
     customFields: JsonValue | null
@@ -18034,6 +18299,7 @@ export namespace Prisma {
     primaryColor?: boolean
     secondaryColor?: boolean
     accentColor?: boolean
+    emailStyle?: boolean
     navigationItems?: boolean
     footerNavigationItems?: boolean
     customFields?: boolean
@@ -18073,6 +18339,7 @@ export namespace Prisma {
     primaryColor?: boolean
     secondaryColor?: boolean
     accentColor?: boolean
+    emailStyle?: boolean
     navigationItems?: boolean
     footerNavigationItems?: boolean
     customFields?: boolean
@@ -18112,6 +18379,7 @@ export namespace Prisma {
     primaryColor?: boolean
     secondaryColor?: boolean
     accentColor?: boolean
+    emailStyle?: boolean
     navigationItems?: boolean
     footerNavigationItems?: boolean
     customFields?: boolean
@@ -18151,6 +18419,7 @@ export namespace Prisma {
     primaryColor?: boolean
     secondaryColor?: boolean
     accentColor?: boolean
+    emailStyle?: boolean
     navigationItems?: boolean
     footerNavigationItems?: boolean
     customFields?: boolean
@@ -18162,7 +18431,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "footerNavigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "seoBrandName" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "emailStyle" | "navigationItems" | "footerNavigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -18205,6 +18474,7 @@ export namespace Prisma {
       primaryColor: string | null
       secondaryColor: string | null
       accentColor: string | null
+      emailStyle: Prisma.JsonValue | null
       navigationItems: Prisma.JsonValue | null
       footerNavigationItems: Prisma.JsonValue | null
       customFields: Prisma.JsonValue | null
@@ -18664,6 +18934,7 @@ export namespace Prisma {
     readonly primaryColor: FieldRef<"SiteContent", 'String'>
     readonly secondaryColor: FieldRef<"SiteContent", 'String'>
     readonly accentColor: FieldRef<"SiteContent", 'String'>
+    readonly emailStyle: FieldRef<"SiteContent", 'Json'>
     readonly navigationItems: FieldRef<"SiteContent", 'Json'>
     readonly footerNavigationItems: FieldRef<"SiteContent", 'Json'>
     readonly customFields: FieldRef<"SiteContent", 'Json'>
@@ -66853,6 +67124,2120 @@ export namespace Prisma {
 
 
   /**
+   * Model PolicyAcceptance
+   */
+
+  export type AggregatePolicyAcceptance = {
+    _count: PolicyAcceptanceCountAggregateOutputType | null
+    _min: PolicyAcceptanceMinAggregateOutputType | null
+    _max: PolicyAcceptanceMaxAggregateOutputType | null
+  }
+
+  export type PolicyAcceptanceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    businessId: string | null
+    bundle: string | null
+    version: string | null
+    method: string | null
+    acceptedAt: Date | null
+  }
+
+  export type PolicyAcceptanceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    businessId: string | null
+    bundle: string | null
+    version: string | null
+    method: string | null
+    acceptedAt: Date | null
+  }
+
+  export type PolicyAcceptanceCountAggregateOutputType = {
+    id: number
+    userId: number
+    businessId: number
+    bundle: number
+    version: number
+    method: number
+    acceptedAt: number
+    _all: number
+  }
+
+
+  export type PolicyAcceptanceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    businessId?: true
+    bundle?: true
+    version?: true
+    method?: true
+    acceptedAt?: true
+  }
+
+  export type PolicyAcceptanceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    businessId?: true
+    bundle?: true
+    version?: true
+    method?: true
+    acceptedAt?: true
+  }
+
+  export type PolicyAcceptanceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    businessId?: true
+    bundle?: true
+    version?: true
+    method?: true
+    acceptedAt?: true
+    _all?: true
+  }
+
+  export type PolicyAcceptanceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PolicyAcceptance to aggregate.
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyAcceptances to fetch.
+     */
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyAcceptances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyAcceptances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PolicyAcceptances
+    **/
+    _count?: true | PolicyAcceptanceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PolicyAcceptanceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PolicyAcceptanceMaxAggregateInputType
+  }
+
+  export type GetPolicyAcceptanceAggregateType<T extends PolicyAcceptanceAggregateArgs> = {
+        [P in keyof T & keyof AggregatePolicyAcceptance]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePolicyAcceptance[P]>
+      : GetScalarType<T[P], AggregatePolicyAcceptance[P]>
+  }
+
+
+
+
+  export type PolicyAcceptanceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PolicyAcceptanceWhereInput
+    orderBy?: PolicyAcceptanceOrderByWithAggregationInput | PolicyAcceptanceOrderByWithAggregationInput[]
+    by: PolicyAcceptanceScalarFieldEnum[] | PolicyAcceptanceScalarFieldEnum
+    having?: PolicyAcceptanceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PolicyAcceptanceCountAggregateInputType | true
+    _min?: PolicyAcceptanceMinAggregateInputType
+    _max?: PolicyAcceptanceMaxAggregateInputType
+  }
+
+  export type PolicyAcceptanceGroupByOutputType = {
+    id: string
+    userId: string
+    businessId: string | null
+    bundle: string
+    version: string
+    method: string
+    acceptedAt: Date
+    _count: PolicyAcceptanceCountAggregateOutputType | null
+    _min: PolicyAcceptanceMinAggregateOutputType | null
+    _max: PolicyAcceptanceMaxAggregateOutputType | null
+  }
+
+  type GetPolicyAcceptanceGroupByPayload<T extends PolicyAcceptanceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PolicyAcceptanceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PolicyAcceptanceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PolicyAcceptanceGroupByOutputType[P]>
+            : GetScalarType<T[P], PolicyAcceptanceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PolicyAcceptanceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    businessId?: boolean
+    bundle?: boolean
+    version?: boolean
+    method?: boolean
+    acceptedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }, ExtArgs["result"]["policyAcceptance"]>
+
+  export type PolicyAcceptanceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    businessId?: boolean
+    bundle?: boolean
+    version?: boolean
+    method?: boolean
+    acceptedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }, ExtArgs["result"]["policyAcceptance"]>
+
+  export type PolicyAcceptanceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    businessId?: boolean
+    bundle?: boolean
+    version?: boolean
+    method?: boolean
+    acceptedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }, ExtArgs["result"]["policyAcceptance"]>
+
+  export type PolicyAcceptanceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    businessId?: boolean
+    bundle?: boolean
+    version?: boolean
+    method?: boolean
+    acceptedAt?: boolean
+  }
+
+  export type PolicyAcceptanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "businessId" | "bundle" | "version" | "method" | "acceptedAt", ExtArgs["result"]["policyAcceptance"]>
+  export type PolicyAcceptanceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }
+  export type PolicyAcceptanceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }
+  export type PolicyAcceptanceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    business?: boolean | PolicyAcceptance$businessArgs<ExtArgs>
+  }
+
+  export type $PolicyAcceptancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PolicyAcceptance"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      businessId: string | null
+      bundle: string
+      version: string
+      method: string
+      acceptedAt: Date
+    }, ExtArgs["result"]["policyAcceptance"]>
+    composites: {}
+  }
+
+  type PolicyAcceptanceGetPayload<S extends boolean | null | undefined | PolicyAcceptanceDefaultArgs> = $Result.GetResult<Prisma.$PolicyAcceptancePayload, S>
+
+  type PolicyAcceptanceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PolicyAcceptanceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PolicyAcceptanceCountAggregateInputType | true
+    }
+
+  export interface PolicyAcceptanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PolicyAcceptance'], meta: { name: 'PolicyAcceptance' } }
+    /**
+     * Find zero or one PolicyAcceptance that matches the filter.
+     * @param {PolicyAcceptanceFindUniqueArgs} args - Arguments to find a PolicyAcceptance
+     * @example
+     * // Get one PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PolicyAcceptanceFindUniqueArgs>(args: SelectSubset<T, PolicyAcceptanceFindUniqueArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PolicyAcceptance that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PolicyAcceptanceFindUniqueOrThrowArgs} args - Arguments to find a PolicyAcceptance
+     * @example
+     * // Get one PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PolicyAcceptanceFindUniqueOrThrowArgs>(args: SelectSubset<T, PolicyAcceptanceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PolicyAcceptance that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceFindFirstArgs} args - Arguments to find a PolicyAcceptance
+     * @example
+     * // Get one PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PolicyAcceptanceFindFirstArgs>(args?: SelectSubset<T, PolicyAcceptanceFindFirstArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PolicyAcceptance that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceFindFirstOrThrowArgs} args - Arguments to find a PolicyAcceptance
+     * @example
+     * // Get one PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PolicyAcceptanceFindFirstOrThrowArgs>(args?: SelectSubset<T, PolicyAcceptanceFindFirstOrThrowArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PolicyAcceptances that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PolicyAcceptances
+     * const policyAcceptances = await prisma.policyAcceptance.findMany()
+     * 
+     * // Get first 10 PolicyAcceptances
+     * const policyAcceptances = await prisma.policyAcceptance.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const policyAcceptanceWithIdOnly = await prisma.policyAcceptance.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PolicyAcceptanceFindManyArgs>(args?: SelectSubset<T, PolicyAcceptanceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PolicyAcceptance.
+     * @param {PolicyAcceptanceCreateArgs} args - Arguments to create a PolicyAcceptance.
+     * @example
+     * // Create one PolicyAcceptance
+     * const PolicyAcceptance = await prisma.policyAcceptance.create({
+     *   data: {
+     *     // ... data to create a PolicyAcceptance
+     *   }
+     * })
+     * 
+     */
+    create<T extends PolicyAcceptanceCreateArgs>(args: SelectSubset<T, PolicyAcceptanceCreateArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PolicyAcceptances.
+     * @param {PolicyAcceptanceCreateManyArgs} args - Arguments to create many PolicyAcceptances.
+     * @example
+     * // Create many PolicyAcceptances
+     * const policyAcceptance = await prisma.policyAcceptance.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PolicyAcceptanceCreateManyArgs>(args?: SelectSubset<T, PolicyAcceptanceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PolicyAcceptances and returns the data saved in the database.
+     * @param {PolicyAcceptanceCreateManyAndReturnArgs} args - Arguments to create many PolicyAcceptances.
+     * @example
+     * // Create many PolicyAcceptances
+     * const policyAcceptance = await prisma.policyAcceptance.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PolicyAcceptances and only return the `id`
+     * const policyAcceptanceWithIdOnly = await prisma.policyAcceptance.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PolicyAcceptanceCreateManyAndReturnArgs>(args?: SelectSubset<T, PolicyAcceptanceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PolicyAcceptance.
+     * @param {PolicyAcceptanceDeleteArgs} args - Arguments to delete one PolicyAcceptance.
+     * @example
+     * // Delete one PolicyAcceptance
+     * const PolicyAcceptance = await prisma.policyAcceptance.delete({
+     *   where: {
+     *     // ... filter to delete one PolicyAcceptance
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PolicyAcceptanceDeleteArgs>(args: SelectSubset<T, PolicyAcceptanceDeleteArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PolicyAcceptance.
+     * @param {PolicyAcceptanceUpdateArgs} args - Arguments to update one PolicyAcceptance.
+     * @example
+     * // Update one PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PolicyAcceptanceUpdateArgs>(args: SelectSubset<T, PolicyAcceptanceUpdateArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PolicyAcceptances.
+     * @param {PolicyAcceptanceDeleteManyArgs} args - Arguments to filter PolicyAcceptances to delete.
+     * @example
+     * // Delete a few PolicyAcceptances
+     * const { count } = await prisma.policyAcceptance.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PolicyAcceptanceDeleteManyArgs>(args?: SelectSubset<T, PolicyAcceptanceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PolicyAcceptances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PolicyAcceptances
+     * const policyAcceptance = await prisma.policyAcceptance.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PolicyAcceptanceUpdateManyArgs>(args: SelectSubset<T, PolicyAcceptanceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PolicyAcceptances and returns the data updated in the database.
+     * @param {PolicyAcceptanceUpdateManyAndReturnArgs} args - Arguments to update many PolicyAcceptances.
+     * @example
+     * // Update many PolicyAcceptances
+     * const policyAcceptance = await prisma.policyAcceptance.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PolicyAcceptances and only return the `id`
+     * const policyAcceptanceWithIdOnly = await prisma.policyAcceptance.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PolicyAcceptanceUpdateManyAndReturnArgs>(args: SelectSubset<T, PolicyAcceptanceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PolicyAcceptance.
+     * @param {PolicyAcceptanceUpsertArgs} args - Arguments to update or create a PolicyAcceptance.
+     * @example
+     * // Update or create a PolicyAcceptance
+     * const policyAcceptance = await prisma.policyAcceptance.upsert({
+     *   create: {
+     *     // ... data to create a PolicyAcceptance
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PolicyAcceptance we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PolicyAcceptanceUpsertArgs>(args: SelectSubset<T, PolicyAcceptanceUpsertArgs<ExtArgs>>): Prisma__PolicyAcceptanceClient<$Result.GetResult<Prisma.$PolicyAcceptancePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PolicyAcceptances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceCountArgs} args - Arguments to filter PolicyAcceptances to count.
+     * @example
+     * // Count the number of PolicyAcceptances
+     * const count = await prisma.policyAcceptance.count({
+     *   where: {
+     *     // ... the filter for the PolicyAcceptances we want to count
+     *   }
+     * })
+    **/
+    count<T extends PolicyAcceptanceCountArgs>(
+      args?: Subset<T, PolicyAcceptanceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PolicyAcceptanceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PolicyAcceptance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PolicyAcceptanceAggregateArgs>(args: Subset<T, PolicyAcceptanceAggregateArgs>): Prisma.PrismaPromise<GetPolicyAcceptanceAggregateType<T>>
+
+    /**
+     * Group by PolicyAcceptance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyAcceptanceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PolicyAcceptanceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PolicyAcceptanceGroupByArgs['orderBy'] }
+        : { orderBy?: PolicyAcceptanceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PolicyAcceptanceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPolicyAcceptanceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PolicyAcceptance model
+   */
+  readonly fields: PolicyAcceptanceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PolicyAcceptance.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PolicyAcceptanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends PolicyAcceptance$businessArgs<ExtArgs> = {}>(args?: Subset<T, PolicyAcceptance$businessArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PolicyAcceptance model
+   */
+  interface PolicyAcceptanceFieldRefs {
+    readonly id: FieldRef<"PolicyAcceptance", 'String'>
+    readonly userId: FieldRef<"PolicyAcceptance", 'String'>
+    readonly businessId: FieldRef<"PolicyAcceptance", 'String'>
+    readonly bundle: FieldRef<"PolicyAcceptance", 'String'>
+    readonly version: FieldRef<"PolicyAcceptance", 'String'>
+    readonly method: FieldRef<"PolicyAcceptance", 'String'>
+    readonly acceptedAt: FieldRef<"PolicyAcceptance", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PolicyAcceptance findUnique
+   */
+  export type PolicyAcceptanceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter, which PolicyAcceptance to fetch.
+     */
+    where: PolicyAcceptanceWhereUniqueInput
+  }
+
+  /**
+   * PolicyAcceptance findUniqueOrThrow
+   */
+  export type PolicyAcceptanceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter, which PolicyAcceptance to fetch.
+     */
+    where: PolicyAcceptanceWhereUniqueInput
+  }
+
+  /**
+   * PolicyAcceptance findFirst
+   */
+  export type PolicyAcceptanceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter, which PolicyAcceptance to fetch.
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyAcceptances to fetch.
+     */
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PolicyAcceptances.
+     */
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyAcceptances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyAcceptances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PolicyAcceptances.
+     */
+    distinct?: PolicyAcceptanceScalarFieldEnum | PolicyAcceptanceScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyAcceptance findFirstOrThrow
+   */
+  export type PolicyAcceptanceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter, which PolicyAcceptance to fetch.
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyAcceptances to fetch.
+     */
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PolicyAcceptances.
+     */
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyAcceptances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyAcceptances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PolicyAcceptances.
+     */
+    distinct?: PolicyAcceptanceScalarFieldEnum | PolicyAcceptanceScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyAcceptance findMany
+   */
+  export type PolicyAcceptanceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter, which PolicyAcceptances to fetch.
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyAcceptances to fetch.
+     */
+    orderBy?: PolicyAcceptanceOrderByWithRelationInput | PolicyAcceptanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PolicyAcceptances.
+     */
+    cursor?: PolicyAcceptanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyAcceptances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyAcceptances.
+     */
+    skip?: number
+    distinct?: PolicyAcceptanceScalarFieldEnum | PolicyAcceptanceScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyAcceptance create
+   */
+  export type PolicyAcceptanceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PolicyAcceptance.
+     */
+    data: XOR<PolicyAcceptanceCreateInput, PolicyAcceptanceUncheckedCreateInput>
+  }
+
+  /**
+   * PolicyAcceptance createMany
+   */
+  export type PolicyAcceptanceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PolicyAcceptances.
+     */
+    data: PolicyAcceptanceCreateManyInput | PolicyAcceptanceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PolicyAcceptance createManyAndReturn
+   */
+  export type PolicyAcceptanceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * The data used to create many PolicyAcceptances.
+     */
+    data: PolicyAcceptanceCreateManyInput | PolicyAcceptanceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PolicyAcceptance update
+   */
+  export type PolicyAcceptanceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PolicyAcceptance.
+     */
+    data: XOR<PolicyAcceptanceUpdateInput, PolicyAcceptanceUncheckedUpdateInput>
+    /**
+     * Choose, which PolicyAcceptance to update.
+     */
+    where: PolicyAcceptanceWhereUniqueInput
+  }
+
+  /**
+   * PolicyAcceptance updateMany
+   */
+  export type PolicyAcceptanceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PolicyAcceptances.
+     */
+    data: XOR<PolicyAcceptanceUpdateManyMutationInput, PolicyAcceptanceUncheckedUpdateManyInput>
+    /**
+     * Filter which PolicyAcceptances to update
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * Limit how many PolicyAcceptances to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PolicyAcceptance updateManyAndReturn
+   */
+  export type PolicyAcceptanceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * The data used to update PolicyAcceptances.
+     */
+    data: XOR<PolicyAcceptanceUpdateManyMutationInput, PolicyAcceptanceUncheckedUpdateManyInput>
+    /**
+     * Filter which PolicyAcceptances to update
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * Limit how many PolicyAcceptances to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PolicyAcceptance upsert
+   */
+  export type PolicyAcceptanceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PolicyAcceptance to update in case it exists.
+     */
+    where: PolicyAcceptanceWhereUniqueInput
+    /**
+     * In case the PolicyAcceptance found by the `where` argument doesn't exist, create a new PolicyAcceptance with this data.
+     */
+    create: XOR<PolicyAcceptanceCreateInput, PolicyAcceptanceUncheckedCreateInput>
+    /**
+     * In case the PolicyAcceptance was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PolicyAcceptanceUpdateInput, PolicyAcceptanceUncheckedUpdateInput>
+  }
+
+  /**
+   * PolicyAcceptance delete
+   */
+  export type PolicyAcceptanceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+    /**
+     * Filter which PolicyAcceptance to delete.
+     */
+    where: PolicyAcceptanceWhereUniqueInput
+  }
+
+  /**
+   * PolicyAcceptance deleteMany
+   */
+  export type PolicyAcceptanceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PolicyAcceptances to delete
+     */
+    where?: PolicyAcceptanceWhereInput
+    /**
+     * Limit how many PolicyAcceptances to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PolicyAcceptance.business
+   */
+  export type PolicyAcceptance$businessArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Business
+     */
+    select?: BusinessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Business
+     */
+    omit?: BusinessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessInclude<ExtArgs> | null
+    where?: BusinessWhereInput
+  }
+
+  /**
+   * PolicyAcceptance without action
+   */
+  export type PolicyAcceptanceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyAcceptance
+     */
+    select?: PolicyAcceptanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyAcceptance
+     */
+    omit?: PolicyAcceptanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PolicyAcceptanceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PolicyNotice
+   */
+
+  export type AggregatePolicyNotice = {
+    _count: PolicyNoticeCountAggregateOutputType | null
+    _avg: PolicyNoticeAvgAggregateOutputType | null
+    _sum: PolicyNoticeSumAggregateOutputType | null
+    _min: PolicyNoticeMinAggregateOutputType | null
+    _max: PolicyNoticeMaxAggregateOutputType | null
+  }
+
+  export type PolicyNoticeAvgAggregateOutputType = {
+    recipientCount: number | null
+  }
+
+  export type PolicyNoticeSumAggregateOutputType = {
+    recipientCount: number | null
+  }
+
+  export type PolicyNoticeMinAggregateOutputType = {
+    updateId: string | null
+    sentAt: Date | null
+    recipientCount: number | null
+  }
+
+  export type PolicyNoticeMaxAggregateOutputType = {
+    updateId: string | null
+    sentAt: Date | null
+    recipientCount: number | null
+  }
+
+  export type PolicyNoticeCountAggregateOutputType = {
+    updateId: number
+    sentAt: number
+    recipientCount: number
+    _all: number
+  }
+
+
+  export type PolicyNoticeAvgAggregateInputType = {
+    recipientCount?: true
+  }
+
+  export type PolicyNoticeSumAggregateInputType = {
+    recipientCount?: true
+  }
+
+  export type PolicyNoticeMinAggregateInputType = {
+    updateId?: true
+    sentAt?: true
+    recipientCount?: true
+  }
+
+  export type PolicyNoticeMaxAggregateInputType = {
+    updateId?: true
+    sentAt?: true
+    recipientCount?: true
+  }
+
+  export type PolicyNoticeCountAggregateInputType = {
+    updateId?: true
+    sentAt?: true
+    recipientCount?: true
+    _all?: true
+  }
+
+  export type PolicyNoticeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PolicyNotice to aggregate.
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyNotices to fetch.
+     */
+    orderBy?: PolicyNoticeOrderByWithRelationInput | PolicyNoticeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PolicyNoticeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyNotices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyNotices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PolicyNotices
+    **/
+    _count?: true | PolicyNoticeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PolicyNoticeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PolicyNoticeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PolicyNoticeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PolicyNoticeMaxAggregateInputType
+  }
+
+  export type GetPolicyNoticeAggregateType<T extends PolicyNoticeAggregateArgs> = {
+        [P in keyof T & keyof AggregatePolicyNotice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePolicyNotice[P]>
+      : GetScalarType<T[P], AggregatePolicyNotice[P]>
+  }
+
+
+
+
+  export type PolicyNoticeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PolicyNoticeWhereInput
+    orderBy?: PolicyNoticeOrderByWithAggregationInput | PolicyNoticeOrderByWithAggregationInput[]
+    by: PolicyNoticeScalarFieldEnum[] | PolicyNoticeScalarFieldEnum
+    having?: PolicyNoticeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PolicyNoticeCountAggregateInputType | true
+    _avg?: PolicyNoticeAvgAggregateInputType
+    _sum?: PolicyNoticeSumAggregateInputType
+    _min?: PolicyNoticeMinAggregateInputType
+    _max?: PolicyNoticeMaxAggregateInputType
+  }
+
+  export type PolicyNoticeGroupByOutputType = {
+    updateId: string
+    sentAt: Date
+    recipientCount: number
+    _count: PolicyNoticeCountAggregateOutputType | null
+    _avg: PolicyNoticeAvgAggregateOutputType | null
+    _sum: PolicyNoticeSumAggregateOutputType | null
+    _min: PolicyNoticeMinAggregateOutputType | null
+    _max: PolicyNoticeMaxAggregateOutputType | null
+  }
+
+  type GetPolicyNoticeGroupByPayload<T extends PolicyNoticeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PolicyNoticeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PolicyNoticeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PolicyNoticeGroupByOutputType[P]>
+            : GetScalarType<T[P], PolicyNoticeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PolicyNoticeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    updateId?: boolean
+    sentAt?: boolean
+    recipientCount?: boolean
+  }, ExtArgs["result"]["policyNotice"]>
+
+  export type PolicyNoticeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    updateId?: boolean
+    sentAt?: boolean
+    recipientCount?: boolean
+  }, ExtArgs["result"]["policyNotice"]>
+
+  export type PolicyNoticeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    updateId?: boolean
+    sentAt?: boolean
+    recipientCount?: boolean
+  }, ExtArgs["result"]["policyNotice"]>
+
+  export type PolicyNoticeSelectScalar = {
+    updateId?: boolean
+    sentAt?: boolean
+    recipientCount?: boolean
+  }
+
+  export type PolicyNoticeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"updateId" | "sentAt" | "recipientCount", ExtArgs["result"]["policyNotice"]>
+
+  export type $PolicyNoticePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PolicyNotice"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      updateId: string
+      sentAt: Date
+      recipientCount: number
+    }, ExtArgs["result"]["policyNotice"]>
+    composites: {}
+  }
+
+  type PolicyNoticeGetPayload<S extends boolean | null | undefined | PolicyNoticeDefaultArgs> = $Result.GetResult<Prisma.$PolicyNoticePayload, S>
+
+  type PolicyNoticeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PolicyNoticeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PolicyNoticeCountAggregateInputType | true
+    }
+
+  export interface PolicyNoticeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PolicyNotice'], meta: { name: 'PolicyNotice' } }
+    /**
+     * Find zero or one PolicyNotice that matches the filter.
+     * @param {PolicyNoticeFindUniqueArgs} args - Arguments to find a PolicyNotice
+     * @example
+     * // Get one PolicyNotice
+     * const policyNotice = await prisma.policyNotice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PolicyNoticeFindUniqueArgs>(args: SelectSubset<T, PolicyNoticeFindUniqueArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PolicyNotice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PolicyNoticeFindUniqueOrThrowArgs} args - Arguments to find a PolicyNotice
+     * @example
+     * // Get one PolicyNotice
+     * const policyNotice = await prisma.policyNotice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PolicyNoticeFindUniqueOrThrowArgs>(args: SelectSubset<T, PolicyNoticeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PolicyNotice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeFindFirstArgs} args - Arguments to find a PolicyNotice
+     * @example
+     * // Get one PolicyNotice
+     * const policyNotice = await prisma.policyNotice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PolicyNoticeFindFirstArgs>(args?: SelectSubset<T, PolicyNoticeFindFirstArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PolicyNotice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeFindFirstOrThrowArgs} args - Arguments to find a PolicyNotice
+     * @example
+     * // Get one PolicyNotice
+     * const policyNotice = await prisma.policyNotice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PolicyNoticeFindFirstOrThrowArgs>(args?: SelectSubset<T, PolicyNoticeFindFirstOrThrowArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PolicyNotices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PolicyNotices
+     * const policyNotices = await prisma.policyNotice.findMany()
+     * 
+     * // Get first 10 PolicyNotices
+     * const policyNotices = await prisma.policyNotice.findMany({ take: 10 })
+     * 
+     * // Only select the `updateId`
+     * const policyNoticeWithUpdateIdOnly = await prisma.policyNotice.findMany({ select: { updateId: true } })
+     * 
+     */
+    findMany<T extends PolicyNoticeFindManyArgs>(args?: SelectSubset<T, PolicyNoticeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PolicyNotice.
+     * @param {PolicyNoticeCreateArgs} args - Arguments to create a PolicyNotice.
+     * @example
+     * // Create one PolicyNotice
+     * const PolicyNotice = await prisma.policyNotice.create({
+     *   data: {
+     *     // ... data to create a PolicyNotice
+     *   }
+     * })
+     * 
+     */
+    create<T extends PolicyNoticeCreateArgs>(args: SelectSubset<T, PolicyNoticeCreateArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PolicyNotices.
+     * @param {PolicyNoticeCreateManyArgs} args - Arguments to create many PolicyNotices.
+     * @example
+     * // Create many PolicyNotices
+     * const policyNotice = await prisma.policyNotice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PolicyNoticeCreateManyArgs>(args?: SelectSubset<T, PolicyNoticeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PolicyNotices and returns the data saved in the database.
+     * @param {PolicyNoticeCreateManyAndReturnArgs} args - Arguments to create many PolicyNotices.
+     * @example
+     * // Create many PolicyNotices
+     * const policyNotice = await prisma.policyNotice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PolicyNotices and only return the `updateId`
+     * const policyNoticeWithUpdateIdOnly = await prisma.policyNotice.createManyAndReturn({
+     *   select: { updateId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PolicyNoticeCreateManyAndReturnArgs>(args?: SelectSubset<T, PolicyNoticeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PolicyNotice.
+     * @param {PolicyNoticeDeleteArgs} args - Arguments to delete one PolicyNotice.
+     * @example
+     * // Delete one PolicyNotice
+     * const PolicyNotice = await prisma.policyNotice.delete({
+     *   where: {
+     *     // ... filter to delete one PolicyNotice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PolicyNoticeDeleteArgs>(args: SelectSubset<T, PolicyNoticeDeleteArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PolicyNotice.
+     * @param {PolicyNoticeUpdateArgs} args - Arguments to update one PolicyNotice.
+     * @example
+     * // Update one PolicyNotice
+     * const policyNotice = await prisma.policyNotice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PolicyNoticeUpdateArgs>(args: SelectSubset<T, PolicyNoticeUpdateArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PolicyNotices.
+     * @param {PolicyNoticeDeleteManyArgs} args - Arguments to filter PolicyNotices to delete.
+     * @example
+     * // Delete a few PolicyNotices
+     * const { count } = await prisma.policyNotice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PolicyNoticeDeleteManyArgs>(args?: SelectSubset<T, PolicyNoticeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PolicyNotices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PolicyNotices
+     * const policyNotice = await prisma.policyNotice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PolicyNoticeUpdateManyArgs>(args: SelectSubset<T, PolicyNoticeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PolicyNotices and returns the data updated in the database.
+     * @param {PolicyNoticeUpdateManyAndReturnArgs} args - Arguments to update many PolicyNotices.
+     * @example
+     * // Update many PolicyNotices
+     * const policyNotice = await prisma.policyNotice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PolicyNotices and only return the `updateId`
+     * const policyNoticeWithUpdateIdOnly = await prisma.policyNotice.updateManyAndReturn({
+     *   select: { updateId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PolicyNoticeUpdateManyAndReturnArgs>(args: SelectSubset<T, PolicyNoticeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PolicyNotice.
+     * @param {PolicyNoticeUpsertArgs} args - Arguments to update or create a PolicyNotice.
+     * @example
+     * // Update or create a PolicyNotice
+     * const policyNotice = await prisma.policyNotice.upsert({
+     *   create: {
+     *     // ... data to create a PolicyNotice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PolicyNotice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PolicyNoticeUpsertArgs>(args: SelectSubset<T, PolicyNoticeUpsertArgs<ExtArgs>>): Prisma__PolicyNoticeClient<$Result.GetResult<Prisma.$PolicyNoticePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PolicyNotices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeCountArgs} args - Arguments to filter PolicyNotices to count.
+     * @example
+     * // Count the number of PolicyNotices
+     * const count = await prisma.policyNotice.count({
+     *   where: {
+     *     // ... the filter for the PolicyNotices we want to count
+     *   }
+     * })
+    **/
+    count<T extends PolicyNoticeCountArgs>(
+      args?: Subset<T, PolicyNoticeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PolicyNoticeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PolicyNotice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PolicyNoticeAggregateArgs>(args: Subset<T, PolicyNoticeAggregateArgs>): Prisma.PrismaPromise<GetPolicyNoticeAggregateType<T>>
+
+    /**
+     * Group by PolicyNotice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PolicyNoticeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PolicyNoticeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PolicyNoticeGroupByArgs['orderBy'] }
+        : { orderBy?: PolicyNoticeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PolicyNoticeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPolicyNoticeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PolicyNotice model
+   */
+  readonly fields: PolicyNoticeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PolicyNotice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PolicyNoticeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PolicyNotice model
+   */
+  interface PolicyNoticeFieldRefs {
+    readonly updateId: FieldRef<"PolicyNotice", 'String'>
+    readonly sentAt: FieldRef<"PolicyNotice", 'DateTime'>
+    readonly recipientCount: FieldRef<"PolicyNotice", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PolicyNotice findUnique
+   */
+  export type PolicyNoticeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter, which PolicyNotice to fetch.
+     */
+    where: PolicyNoticeWhereUniqueInput
+  }
+
+  /**
+   * PolicyNotice findUniqueOrThrow
+   */
+  export type PolicyNoticeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter, which PolicyNotice to fetch.
+     */
+    where: PolicyNoticeWhereUniqueInput
+  }
+
+  /**
+   * PolicyNotice findFirst
+   */
+  export type PolicyNoticeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter, which PolicyNotice to fetch.
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyNotices to fetch.
+     */
+    orderBy?: PolicyNoticeOrderByWithRelationInput | PolicyNoticeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PolicyNotices.
+     */
+    cursor?: PolicyNoticeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyNotices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyNotices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PolicyNotices.
+     */
+    distinct?: PolicyNoticeScalarFieldEnum | PolicyNoticeScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyNotice findFirstOrThrow
+   */
+  export type PolicyNoticeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter, which PolicyNotice to fetch.
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyNotices to fetch.
+     */
+    orderBy?: PolicyNoticeOrderByWithRelationInput | PolicyNoticeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PolicyNotices.
+     */
+    cursor?: PolicyNoticeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyNotices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyNotices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PolicyNotices.
+     */
+    distinct?: PolicyNoticeScalarFieldEnum | PolicyNoticeScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyNotice findMany
+   */
+  export type PolicyNoticeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter, which PolicyNotices to fetch.
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PolicyNotices to fetch.
+     */
+    orderBy?: PolicyNoticeOrderByWithRelationInput | PolicyNoticeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PolicyNotices.
+     */
+    cursor?: PolicyNoticeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PolicyNotices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PolicyNotices.
+     */
+    skip?: number
+    distinct?: PolicyNoticeScalarFieldEnum | PolicyNoticeScalarFieldEnum[]
+  }
+
+  /**
+   * PolicyNotice create
+   */
+  export type PolicyNoticeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * The data needed to create a PolicyNotice.
+     */
+    data: XOR<PolicyNoticeCreateInput, PolicyNoticeUncheckedCreateInput>
+  }
+
+  /**
+   * PolicyNotice createMany
+   */
+  export type PolicyNoticeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PolicyNotices.
+     */
+    data: PolicyNoticeCreateManyInput | PolicyNoticeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PolicyNotice createManyAndReturn
+   */
+  export type PolicyNoticeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * The data used to create many PolicyNotices.
+     */
+    data: PolicyNoticeCreateManyInput | PolicyNoticeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PolicyNotice update
+   */
+  export type PolicyNoticeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * The data needed to update a PolicyNotice.
+     */
+    data: XOR<PolicyNoticeUpdateInput, PolicyNoticeUncheckedUpdateInput>
+    /**
+     * Choose, which PolicyNotice to update.
+     */
+    where: PolicyNoticeWhereUniqueInput
+  }
+
+  /**
+   * PolicyNotice updateMany
+   */
+  export type PolicyNoticeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PolicyNotices.
+     */
+    data: XOR<PolicyNoticeUpdateManyMutationInput, PolicyNoticeUncheckedUpdateManyInput>
+    /**
+     * Filter which PolicyNotices to update
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * Limit how many PolicyNotices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PolicyNotice updateManyAndReturn
+   */
+  export type PolicyNoticeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * The data used to update PolicyNotices.
+     */
+    data: XOR<PolicyNoticeUpdateManyMutationInput, PolicyNoticeUncheckedUpdateManyInput>
+    /**
+     * Filter which PolicyNotices to update
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * Limit how many PolicyNotices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PolicyNotice upsert
+   */
+  export type PolicyNoticeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * The filter to search for the PolicyNotice to update in case it exists.
+     */
+    where: PolicyNoticeWhereUniqueInput
+    /**
+     * In case the PolicyNotice found by the `where` argument doesn't exist, create a new PolicyNotice with this data.
+     */
+    create: XOR<PolicyNoticeCreateInput, PolicyNoticeUncheckedCreateInput>
+    /**
+     * In case the PolicyNotice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PolicyNoticeUpdateInput, PolicyNoticeUncheckedUpdateInput>
+  }
+
+  /**
+   * PolicyNotice delete
+   */
+  export type PolicyNoticeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+    /**
+     * Filter which PolicyNotice to delete.
+     */
+    where: PolicyNoticeWhereUniqueInput
+  }
+
+  /**
+   * PolicyNotice deleteMany
+   */
+  export type PolicyNoticeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PolicyNotices to delete
+     */
+    where?: PolicyNoticeWhereInput
+    /**
+     * Limit how many PolicyNotices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PolicyNotice without action
+   */
+  export type PolicyNoticeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PolicyNotice
+     */
+    select?: PolicyNoticeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PolicyNotice
+     */
+    omit?: PolicyNoticeOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model ShippingZone
    */
 
@@ -74911,6 +77296,7 @@ export namespace Prisma {
     completedAt: Date | null
     canceledAt: Date | null
     lastError: string | null
+    scheduledAt: Date | null
   }
 
   export type MarketingCampaignMaxAggregateOutputType = {
@@ -74935,6 +77321,7 @@ export namespace Prisma {
     completedAt: Date | null
     canceledAt: Date | null
     lastError: string | null
+    scheduledAt: Date | null
   }
 
   export type MarketingCampaignCountAggregateOutputType = {
@@ -74960,6 +77347,8 @@ export namespace Prisma {
     completedAt: number
     canceledAt: number
     lastError: number
+    audience: number
+    scheduledAt: number
     _all: number
   }
 
@@ -74994,6 +77383,7 @@ export namespace Prisma {
     completedAt?: true
     canceledAt?: true
     lastError?: true
+    scheduledAt?: true
   }
 
   export type MarketingCampaignMaxAggregateInputType = {
@@ -75018,6 +77408,7 @@ export namespace Prisma {
     completedAt?: true
     canceledAt?: true
     lastError?: true
+    scheduledAt?: true
   }
 
   export type MarketingCampaignCountAggregateInputType = {
@@ -75043,6 +77434,8 @@ export namespace Prisma {
     completedAt?: true
     canceledAt?: true
     lastError?: true
+    audience?: true
+    scheduledAt?: true
     _all?: true
   }
 
@@ -75155,6 +77548,8 @@ export namespace Prisma {
     completedAt: Date | null
     canceledAt: Date | null
     lastError: string | null
+    audience: JsonValue | null
+    scheduledAt: Date | null
     _count: MarketingCampaignCountAggregateOutputType | null
     _avg: MarketingCampaignAvgAggregateOutputType | null
     _sum: MarketingCampaignSumAggregateOutputType | null
@@ -75199,6 +77594,8 @@ export namespace Prisma {
     completedAt?: boolean
     canceledAt?: boolean
     lastError?: boolean
+    audience?: boolean
+    scheduledAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
     batches?: boolean | MarketingCampaign$batchesArgs<ExtArgs>
@@ -75230,6 +77627,8 @@ export namespace Prisma {
     completedAt?: boolean
     canceledAt?: boolean
     lastError?: boolean
+    audience?: boolean
+    scheduledAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
   }, ExtArgs["result"]["marketingCampaign"]>
@@ -75257,6 +77656,8 @@ export namespace Prisma {
     completedAt?: boolean
     canceledAt?: boolean
     lastError?: boolean
+    audience?: boolean
+    scheduledAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
   }, ExtArgs["result"]["marketingCampaign"]>
@@ -75284,9 +77685,11 @@ export namespace Prisma {
     completedAt?: boolean
     canceledAt?: boolean
     lastError?: boolean
+    audience?: boolean
+    scheduledAt?: boolean
   }
 
-  export type MarketingCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "createdById" | "subject" | "previewText" | "contentFormat" | "bodyText" | "bodyJson" | "status" | "renderedHtml" | "renderedText" | "fromAddress" | "replyTo" | "baseUrl" | "recipientCount" | "queuedAt" | "startedAt" | "completedAt" | "canceledAt" | "lastError", ExtArgs["result"]["marketingCampaign"]>
+  export type MarketingCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "createdById" | "subject" | "previewText" | "contentFormat" | "bodyText" | "bodyJson" | "status" | "renderedHtml" | "renderedText" | "fromAddress" | "replyTo" | "baseUrl" | "recipientCount" | "queuedAt" | "startedAt" | "completedAt" | "canceledAt" | "lastError" | "audience" | "scheduledAt", ExtArgs["result"]["marketingCampaign"]>
   export type MarketingCampaignInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     createdBy?: boolean | MarketingCampaign$createdByArgs<ExtArgs>
@@ -75336,6 +77739,8 @@ export namespace Prisma {
       completedAt: Date | null
       canceledAt: Date | null
       lastError: string | null
+      audience: Prisma.JsonValue | null
+      scheduledAt: Date | null
     }, ExtArgs["result"]["marketingCampaign"]>
     composites: {}
   }
@@ -75786,6 +78191,8 @@ export namespace Prisma {
     readonly completedAt: FieldRef<"MarketingCampaign", 'DateTime'>
     readonly canceledAt: FieldRef<"MarketingCampaign", 'DateTime'>
     readonly lastError: FieldRef<"MarketingCampaign", 'String'>
+    readonly audience: FieldRef<"MarketingCampaign", 'Json'>
+    readonly scheduledAt: FieldRef<"MarketingCampaign", 'DateTime'>
   }
     
 
@@ -95893,6 +98300,7 @@ export namespace Prisma {
     primaryColor: 'primaryColor',
     secondaryColor: 'secondaryColor',
     accentColor: 'accentColor',
+    emailStyle: 'emailStyle',
     navigationItems: 'navigationItems',
     footerNavigationItems: 'footerNavigationItems',
     customFields: 'customFields',
@@ -96671,6 +99079,28 @@ export namespace Prisma {
   export type PlatformConfigScalarFieldEnum = (typeof PlatformConfigScalarFieldEnum)[keyof typeof PlatformConfigScalarFieldEnum]
 
 
+  export const PolicyAcceptanceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    businessId: 'businessId',
+    bundle: 'bundle',
+    version: 'version',
+    method: 'method',
+    acceptedAt: 'acceptedAt'
+  };
+
+  export type PolicyAcceptanceScalarFieldEnum = (typeof PolicyAcceptanceScalarFieldEnum)[keyof typeof PolicyAcceptanceScalarFieldEnum]
+
+
+  export const PolicyNoticeScalarFieldEnum: {
+    updateId: 'updateId',
+    sentAt: 'sentAt',
+    recipientCount: 'recipientCount'
+  };
+
+  export type PolicyNoticeScalarFieldEnum = (typeof PolicyNoticeScalarFieldEnum)[keyof typeof PolicyNoticeScalarFieldEnum]
+
+
   export const ShippingZoneScalarFieldEnum: {
     id: 'id',
     businessId: 'businessId',
@@ -96795,7 +99225,9 @@ export namespace Prisma {
     startedAt: 'startedAt',
     completedAt: 'completedAt',
     canceledAt: 'canceledAt',
-    lastError: 'lastError'
+    lastError: 'lastError',
+    audience: 'audience',
+    scheduledAt: 'scheduledAt'
   };
 
   export type MarketingCampaignScalarFieldEnum = (typeof MarketingCampaignScalarFieldEnum)[keyof typeof MarketingCampaignScalarFieldEnum]
@@ -97357,6 +99789,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteListRelationFilter
     marketingCampaignsCreated?: MarketingCampaignListRelationFilter
     productReviewReplies?: ProductReviewListRelationFilter
+    policyAcceptances?: PolicyAcceptanceListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -97380,6 +99813,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteOrderByRelationAggregateInput
     marketingCampaignsCreated?: MarketingCampaignOrderByRelationAggregateInput
     productReviewReplies?: ProductReviewOrderByRelationAggregateInput
+    policyAcceptances?: PolicyAcceptanceOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -97406,6 +99840,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteListRelationFilter
     marketingCampaignsCreated?: MarketingCampaignListRelationFilter
     productReviewReplies?: ProductReviewListRelationFilter
+    policyAcceptances?: PolicyAcceptanceListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -97884,6 +100319,7 @@ export namespace Prisma {
     loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
     productOptionGroups?: ProductOptionGroupListRelationFilter
+    policyAcceptances?: PolicyAcceptanceListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -98011,6 +100447,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramOrderByWithRelationInput
     loyaltyLedger?: LoyaltyLedgerOrderByRelationAggregateInput
     productOptionGroups?: ProductOptionGroupOrderByRelationAggregateInput
+    policyAcceptances?: PolicyAcceptanceOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -98141,6 +100578,7 @@ export namespace Prisma {
     loyaltyProgram?: XOR<LoyaltyProgramNullableScalarRelationFilter, LoyaltyProgramWhereInput> | null
     loyaltyLedger?: LoyaltyLedgerListRelationFilter
     productOptionGroups?: ProductOptionGroupListRelationFilter
+    policyAcceptances?: PolicyAcceptanceListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -98345,6 +100783,7 @@ export namespace Prisma {
     primaryColor?: StringNullableFilter<"SiteContent"> | string | null
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
+    emailStyle?: JsonNullableFilter<"SiteContent">
     navigationItems?: JsonNullableFilter<"SiteContent">
     footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
@@ -98384,6 +100823,7 @@ export namespace Prisma {
     primaryColor?: SortOrderInput | SortOrder
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
+    emailStyle?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
     footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
@@ -98427,6 +100867,7 @@ export namespace Prisma {
     primaryColor?: StringNullableFilter<"SiteContent"> | string | null
     secondaryColor?: StringNullableFilter<"SiteContent"> | string | null
     accentColor?: StringNullableFilter<"SiteContent"> | string | null
+    emailStyle?: JsonNullableFilter<"SiteContent">
     navigationItems?: JsonNullableFilter<"SiteContent">
     footerNavigationItems?: JsonNullableFilter<"SiteContent">
     customFields?: JsonNullableFilter<"SiteContent">
@@ -98465,6 +100906,7 @@ export namespace Prisma {
     primaryColor?: SortOrderInput | SortOrder
     secondaryColor?: SortOrderInput | SortOrder
     accentColor?: SortOrderInput | SortOrder
+    emailStyle?: SortOrderInput | SortOrder
     navigationItems?: SortOrderInput | SortOrder
     footerNavigationItems?: SortOrderInput | SortOrder
     customFields?: SortOrderInput | SortOrder
@@ -98509,6 +100951,7 @@ export namespace Prisma {
     primaryColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     secondaryColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     accentColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
+    emailStyle?: JsonNullableWithAggregatesFilter<"SiteContent">
     navigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
     footerNavigationItems?: JsonNullableWithAggregatesFilter<"SiteContent">
     customFields?: JsonNullableWithAggregatesFilter<"SiteContent">
@@ -102628,6 +105071,118 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PlatformConfig"> | Date | string
   }
 
+  export type PolicyAcceptanceWhereInput = {
+    AND?: PolicyAcceptanceWhereInput | PolicyAcceptanceWhereInput[]
+    OR?: PolicyAcceptanceWhereInput[]
+    NOT?: PolicyAcceptanceWhereInput | PolicyAcceptanceWhereInput[]
+    id?: StringFilter<"PolicyAcceptance"> | string
+    userId?: StringFilter<"PolicyAcceptance"> | string
+    businessId?: StringNullableFilter<"PolicyAcceptance"> | string | null
+    bundle?: StringFilter<"PolicyAcceptance"> | string
+    version?: StringFilter<"PolicyAcceptance"> | string
+    method?: StringFilter<"PolicyAcceptance"> | string
+    acceptedAt?: DateTimeFilter<"PolicyAcceptance"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
+  }
+
+  export type PolicyAcceptanceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    businessId?: SortOrderInput | SortOrder
+    bundle?: SortOrder
+    version?: SortOrder
+    method?: SortOrder
+    acceptedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type PolicyAcceptanceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PolicyAcceptanceWhereInput | PolicyAcceptanceWhereInput[]
+    OR?: PolicyAcceptanceWhereInput[]
+    NOT?: PolicyAcceptanceWhereInput | PolicyAcceptanceWhereInput[]
+    userId?: StringFilter<"PolicyAcceptance"> | string
+    businessId?: StringNullableFilter<"PolicyAcceptance"> | string | null
+    bundle?: StringFilter<"PolicyAcceptance"> | string
+    version?: StringFilter<"PolicyAcceptance"> | string
+    method?: StringFilter<"PolicyAcceptance"> | string
+    acceptedAt?: DateTimeFilter<"PolicyAcceptance"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
+  }, "id">
+
+  export type PolicyAcceptanceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    businessId?: SortOrderInput | SortOrder
+    bundle?: SortOrder
+    version?: SortOrder
+    method?: SortOrder
+    acceptedAt?: SortOrder
+    _count?: PolicyAcceptanceCountOrderByAggregateInput
+    _max?: PolicyAcceptanceMaxOrderByAggregateInput
+    _min?: PolicyAcceptanceMinOrderByAggregateInput
+  }
+
+  export type PolicyAcceptanceScalarWhereWithAggregatesInput = {
+    AND?: PolicyAcceptanceScalarWhereWithAggregatesInput | PolicyAcceptanceScalarWhereWithAggregatesInput[]
+    OR?: PolicyAcceptanceScalarWhereWithAggregatesInput[]
+    NOT?: PolicyAcceptanceScalarWhereWithAggregatesInput | PolicyAcceptanceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PolicyAcceptance"> | string
+    userId?: StringWithAggregatesFilter<"PolicyAcceptance"> | string
+    businessId?: StringNullableWithAggregatesFilter<"PolicyAcceptance"> | string | null
+    bundle?: StringWithAggregatesFilter<"PolicyAcceptance"> | string
+    version?: StringWithAggregatesFilter<"PolicyAcceptance"> | string
+    method?: StringWithAggregatesFilter<"PolicyAcceptance"> | string
+    acceptedAt?: DateTimeWithAggregatesFilter<"PolicyAcceptance"> | Date | string
+  }
+
+  export type PolicyNoticeWhereInput = {
+    AND?: PolicyNoticeWhereInput | PolicyNoticeWhereInput[]
+    OR?: PolicyNoticeWhereInput[]
+    NOT?: PolicyNoticeWhereInput | PolicyNoticeWhereInput[]
+    updateId?: StringFilter<"PolicyNotice"> | string
+    sentAt?: DateTimeFilter<"PolicyNotice"> | Date | string
+    recipientCount?: IntFilter<"PolicyNotice"> | number
+  }
+
+  export type PolicyNoticeOrderByWithRelationInput = {
+    updateId?: SortOrder
+    sentAt?: SortOrder
+    recipientCount?: SortOrder
+  }
+
+  export type PolicyNoticeWhereUniqueInput = Prisma.AtLeast<{
+    updateId?: string
+    AND?: PolicyNoticeWhereInput | PolicyNoticeWhereInput[]
+    OR?: PolicyNoticeWhereInput[]
+    NOT?: PolicyNoticeWhereInput | PolicyNoticeWhereInput[]
+    sentAt?: DateTimeFilter<"PolicyNotice"> | Date | string
+    recipientCount?: IntFilter<"PolicyNotice"> | number
+  }, "updateId">
+
+  export type PolicyNoticeOrderByWithAggregationInput = {
+    updateId?: SortOrder
+    sentAt?: SortOrder
+    recipientCount?: SortOrder
+    _count?: PolicyNoticeCountOrderByAggregateInput
+    _avg?: PolicyNoticeAvgOrderByAggregateInput
+    _max?: PolicyNoticeMaxOrderByAggregateInput
+    _min?: PolicyNoticeMinOrderByAggregateInput
+    _sum?: PolicyNoticeSumOrderByAggregateInput
+  }
+
+  export type PolicyNoticeScalarWhereWithAggregatesInput = {
+    AND?: PolicyNoticeScalarWhereWithAggregatesInput | PolicyNoticeScalarWhereWithAggregatesInput[]
+    OR?: PolicyNoticeScalarWhereWithAggregatesInput[]
+    NOT?: PolicyNoticeScalarWhereWithAggregatesInput | PolicyNoticeScalarWhereWithAggregatesInput[]
+    updateId?: StringWithAggregatesFilter<"PolicyNotice"> | string
+    sentAt?: DateTimeWithAggregatesFilter<"PolicyNotice"> | Date | string
+    recipientCount?: IntWithAggregatesFilter<"PolicyNotice"> | number
+  }
+
   export type ShippingZoneWhereInput = {
     AND?: ShippingZoneWhereInput | ShippingZoneWhereInput[]
     OR?: ShippingZoneWhereInput[]
@@ -103193,6 +105748,8 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+    audience?: JsonNullableFilter<"MarketingCampaign">
+    scheduledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     batches?: MarketingCampaignBatchListRelationFilter
@@ -103223,6 +105780,8 @@ export namespace Prisma {
     completedAt?: SortOrderInput | SortOrder
     canceledAt?: SortOrderInput | SortOrder
     lastError?: SortOrderInput | SortOrder
+    audience?: SortOrderInput | SortOrder
+    scheduledAt?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
     batches?: MarketingCampaignBatchOrderByRelationAggregateInput
@@ -103256,6 +105815,8 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+    audience?: JsonNullableFilter<"MarketingCampaign">
+    scheduledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     batches?: MarketingCampaignBatchListRelationFilter
@@ -103286,6 +105847,8 @@ export namespace Prisma {
     completedAt?: SortOrderInput | SortOrder
     canceledAt?: SortOrderInput | SortOrder
     lastError?: SortOrderInput | SortOrder
+    audience?: SortOrderInput | SortOrder
+    scheduledAt?: SortOrderInput | SortOrder
     _count?: MarketingCampaignCountOrderByAggregateInput
     _avg?: MarketingCampaignAvgOrderByAggregateInput
     _max?: MarketingCampaignMaxOrderByAggregateInput
@@ -103319,6 +105882,8 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
     canceledAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
     lastError?: StringNullableWithAggregatesFilter<"MarketingCampaign"> | string | null
+    audience?: JsonNullableWithAggregatesFilter<"MarketingCampaign">
+    scheduledAt?: DateTimeNullableWithAggregatesFilter<"MarketingCampaign"> | Date | string | null
   }
 
   export type MarketingCampaignBatchWhereInput = {
@@ -105208,6 +107773,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -105231,6 +107797,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -105254,6 +107821,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -105277,6 +107845,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -105796,6 +108365,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -105923,6 +108493,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -106050,6 +108621,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -106177,6 +108749,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -106452,6 +109025,7 @@ export namespace Prisma {
     primaryColor?: string | null
     secondaryColor?: string | null
     accentColor?: string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106490,6 +109064,7 @@ export namespace Prisma {
     primaryColor?: string | null
     secondaryColor?: string | null
     accentColor?: string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106528,6 +109103,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106566,6 +109142,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106604,6 +109181,7 @@ export namespace Prisma {
     primaryColor?: string | null
     secondaryColor?: string | null
     accentColor?: string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106642,6 +109220,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -106679,6 +109258,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -111354,6 +113934,116 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PolicyAcceptanceCreateInput = {
+    id?: string
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+    user: UserCreateNestedOneWithoutPolicyAcceptancesInput
+    business?: BusinessCreateNestedOneWithoutPolicyAcceptancesInput
+  }
+
+  export type PolicyAcceptanceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    businessId?: string | null
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+  }
+
+  export type PolicyAcceptanceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPolicyAcceptancesNestedInput
+    business?: BusinessUpdateOneWithoutPolicyAcceptancesNestedInput
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PolicyAcceptanceCreateManyInput = {
+    id?: string
+    userId: string
+    businessId?: string | null
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+  }
+
+  export type PolicyAcceptanceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PolicyNoticeCreateInput = {
+    updateId: string
+    sentAt: Date | string
+    recipientCount: number
+  }
+
+  export type PolicyNoticeUncheckedCreateInput = {
+    updateId: string
+    sentAt: Date | string
+    recipientCount: number
+  }
+
+  export type PolicyNoticeUpdateInput = {
+    updateId?: StringFieldUpdateOperationsInput | string
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PolicyNoticeUncheckedUpdateInput = {
+    updateId?: StringFieldUpdateOperationsInput | string
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PolicyNoticeCreateManyInput = {
+    updateId: string
+    sentAt: Date | string
+    recipientCount: number
+  }
+
+  export type PolicyNoticeUpdateManyMutationInput = {
+    updateId?: StringFieldUpdateOperationsInput | string
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PolicyNoticeUncheckedUpdateManyInput = {
+    updateId?: StringFieldUpdateOperationsInput | string
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+  }
+
   export type ShippingZoneCreateInput = {
     id?: string
     name: string
@@ -111948,6 +114638,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
     createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
     batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
@@ -111978,6 +114670,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
     consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
@@ -112004,6 +114698,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
     createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
     batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
@@ -112034,6 +114730,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
     consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
@@ -112062,6 +114760,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
   }
 
   export type MarketingCampaignUpdateManyMutationInput = {
@@ -112085,6 +114785,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MarketingCampaignUncheckedUpdateManyInput = {
@@ -112110,6 +114812,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MarketingCampaignBatchCreateInput = {
@@ -114408,6 +117112,12 @@ export namespace Prisma {
     none?: ProductReviewWhereInput
   }
 
+  export type PolicyAcceptanceListRelationFilter = {
+    every?: PolicyAcceptanceWhereInput
+    some?: PolicyAcceptanceWhereInput
+    none?: PolicyAcceptanceWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -114450,6 +117160,10 @@ export namespace Prisma {
   }
 
   export type ProductReviewOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PolicyAcceptanceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -115577,6 +118291,7 @@ export namespace Prisma {
     primaryColor?: SortOrder
     secondaryColor?: SortOrder
     accentColor?: SortOrder
+    emailStyle?: SortOrder
     navigationItems?: SortOrder
     footerNavigationItems?: SortOrder
     customFields?: SortOrder
@@ -118234,6 +120949,62 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type PolicyAcceptanceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    businessId?: SortOrder
+    bundle?: SortOrder
+    version?: SortOrder
+    method?: SortOrder
+    acceptedAt?: SortOrder
+  }
+
+  export type PolicyAcceptanceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    businessId?: SortOrder
+    bundle?: SortOrder
+    version?: SortOrder
+    method?: SortOrder
+    acceptedAt?: SortOrder
+  }
+
+  export type PolicyAcceptanceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    businessId?: SortOrder
+    bundle?: SortOrder
+    version?: SortOrder
+    method?: SortOrder
+    acceptedAt?: SortOrder
+  }
+
+  export type PolicyNoticeCountOrderByAggregateInput = {
+    updateId?: SortOrder
+    sentAt?: SortOrder
+    recipientCount?: SortOrder
+  }
+
+  export type PolicyNoticeAvgOrderByAggregateInput = {
+    recipientCount?: SortOrder
+  }
+
+  export type PolicyNoticeMaxOrderByAggregateInput = {
+    updateId?: SortOrder
+    sentAt?: SortOrder
+    recipientCount?: SortOrder
+  }
+
+  export type PolicyNoticeMinOrderByAggregateInput = {
+    updateId?: SortOrder
+    sentAt?: SortOrder
+    recipientCount?: SortOrder
+  }
+
+  export type PolicyNoticeSumOrderByAggregateInput = {
+    recipientCount?: SortOrder
+  }
+
   export type ShippingRateListRelationFilter = {
     every?: ShippingRateWhereInput
     some?: ShippingRateWhereInput
@@ -118563,6 +121334,8 @@ export namespace Prisma {
     completedAt?: SortOrder
     canceledAt?: SortOrder
     lastError?: SortOrder
+    audience?: SortOrder
+    scheduledAt?: SortOrder
   }
 
   export type MarketingCampaignAvgOrderByAggregateInput = {
@@ -118591,6 +121364,7 @@ export namespace Prisma {
     completedAt?: SortOrder
     canceledAt?: SortOrder
     lastError?: SortOrder
+    scheduledAt?: SortOrder
   }
 
   export type MarketingCampaignMinOrderByAggregateInput = {
@@ -118615,6 +121389,7 @@ export namespace Prisma {
     completedAt?: SortOrder
     canceledAt?: SortOrder
     lastError?: SortOrder
+    scheduledAt?: SortOrder
   }
 
   export type MarketingCampaignSumOrderByAggregateInput = {
@@ -119846,6 +122621,13 @@ export namespace Prisma {
     connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
   }
 
+  export type PolicyAcceptanceCreateNestedManyWithoutUserInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput> | PolicyAcceptanceCreateWithoutUserInput[] | PolicyAcceptanceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutUserInput | PolicyAcceptanceCreateOrConnectWithoutUserInput[]
+    createMany?: PolicyAcceptanceCreateManyUserInputEnvelope
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -119914,6 +122696,13 @@ export namespace Prisma {
     connectOrCreate?: ProductReviewCreateOrConnectWithoutOwnerReplyByInput | ProductReviewCreateOrConnectWithoutOwnerReplyByInput[]
     createMany?: ProductReviewCreateManyOwnerReplyByInputEnvelope
     connect?: ProductReviewWhereUniqueInput | ProductReviewWhereUniqueInput[]
+  }
+
+  export type PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput> | PolicyAcceptanceCreateWithoutUserInput[] | PolicyAcceptanceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutUserInput | PolicyAcceptanceCreateOrConnectWithoutUserInput[]
+    createMany?: PolicyAcceptanceCreateManyUserInputEnvelope
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -120080,6 +122869,20 @@ export namespace Prisma {
     deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
   }
 
+  export type PolicyAcceptanceUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput> | PolicyAcceptanceCreateWithoutUserInput[] | PolicyAcceptanceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutUserInput | PolicyAcceptanceCreateOrConnectWithoutUserInput[]
+    upsert?: PolicyAcceptanceUpsertWithWhereUniqueWithoutUserInput | PolicyAcceptanceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PolicyAcceptanceCreateManyUserInputEnvelope
+    set?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    disconnect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    delete?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    update?: PolicyAcceptanceUpdateWithWhereUniqueWithoutUserInput | PolicyAcceptanceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PolicyAcceptanceUpdateManyWithWhereWithoutUserInput | PolicyAcceptanceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -120218,6 +123021,20 @@ export namespace Prisma {
     update?: ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput | ProductReviewUpdateWithWhereUniqueWithoutOwnerReplyByInput[]
     updateMany?: ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput | ProductReviewUpdateManyWithWhereWithoutOwnerReplyByInput[]
     deleteMany?: ProductReviewScalarWhereInput | ProductReviewScalarWhereInput[]
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput> | PolicyAcceptanceCreateWithoutUserInput[] | PolicyAcceptanceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutUserInput | PolicyAcceptanceCreateOrConnectWithoutUserInput[]
+    upsert?: PolicyAcceptanceUpsertWithWhereUniqueWithoutUserInput | PolicyAcceptanceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PolicyAcceptanceCreateManyUserInputEnvelope
+    set?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    disconnect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    delete?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    update?: PolicyAcceptanceUpdateWithWhereUniqueWithoutUserInput | PolicyAcceptanceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PolicyAcceptanceUpdateManyWithWhereWithoutUserInput | PolicyAcceptanceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -120599,6 +123416,13 @@ export namespace Prisma {
     connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
   }
 
+  export type PolicyAcceptanceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput> | PolicyAcceptanceCreateWithoutBusinessInput[] | PolicyAcceptanceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutBusinessInput | PolicyAcceptanceCreateOrConnectWithoutBusinessInput[]
+    createMany?: PolicyAcceptanceCreateManyBusinessInputEnvelope
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -120908,6 +123732,13 @@ export namespace Prisma {
     connectOrCreate?: ProductOptionGroupCreateOrConnectWithoutBusinessInput | ProductOptionGroupCreateOrConnectWithoutBusinessInput[]
     createMany?: ProductOptionGroupCreateManyBusinessInputEnvelope
     connect?: ProductOptionGroupWhereUniqueInput | ProductOptionGroupWhereUniqueInput[]
+  }
+
+  export type PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput> | PolicyAcceptanceCreateWithoutBusinessInput[] | PolicyAcceptanceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutBusinessInput | PolicyAcceptanceCreateOrConnectWithoutBusinessInput[]
+    createMany?: PolicyAcceptanceCreateManyBusinessInputEnvelope
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -121554,6 +124385,20 @@ export namespace Prisma {
     deleteMany?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
   }
 
+  export type PolicyAcceptanceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput> | PolicyAcceptanceCreateWithoutBusinessInput[] | PolicyAcceptanceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutBusinessInput | PolicyAcceptanceCreateOrConnectWithoutBusinessInput[]
+    upsert?: PolicyAcceptanceUpsertWithWhereUniqueWithoutBusinessInput | PolicyAcceptanceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: PolicyAcceptanceCreateManyBusinessInputEnvelope
+    set?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    disconnect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    delete?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    update?: PolicyAcceptanceUpdateWithWhereUniqueWithoutBusinessInput | PolicyAcceptanceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: PolicyAcceptanceUpdateManyWithWhereWithoutBusinessInput | PolicyAcceptanceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -122166,6 +125011,20 @@ export namespace Prisma {
     update?: ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput | ProductOptionGroupUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput | ProductOptionGroupUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: ProductOptionGroupScalarWhereInput | ProductOptionGroupScalarWhereInput[]
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput> | PolicyAcceptanceCreateWithoutBusinessInput[] | PolicyAcceptanceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: PolicyAcceptanceCreateOrConnectWithoutBusinessInput | PolicyAcceptanceCreateOrConnectWithoutBusinessInput[]
+    upsert?: PolicyAcceptanceUpsertWithWhereUniqueWithoutBusinessInput | PolicyAcceptanceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: PolicyAcceptanceCreateManyBusinessInputEnvelope
+    set?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    disconnect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    delete?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    connect?: PolicyAcceptanceWhereUniqueInput | PolicyAcceptanceWhereUniqueInput[]
+    update?: PolicyAcceptanceUpdateWithWhereUniqueWithoutBusinessInput | PolicyAcceptanceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: PolicyAcceptanceUpdateManyWithWhereWithoutBusinessInput | PolicyAcceptanceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -125087,6 +127946,36 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutTeamInvitesInput, BusinessUpdateWithoutTeamInvitesInput>, BusinessUncheckedUpdateWithoutTeamInvitesInput>
   }
 
+  export type UserCreateNestedOneWithoutPolicyAcceptancesInput = {
+    create?: XOR<UserCreateWithoutPolicyAcceptancesInput, UserUncheckedCreateWithoutPolicyAcceptancesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPolicyAcceptancesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutPolicyAcceptancesInput = {
+    create?: XOR<BusinessCreateWithoutPolicyAcceptancesInput, BusinessUncheckedCreateWithoutPolicyAcceptancesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutPolicyAcceptancesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutPolicyAcceptancesNestedInput = {
+    create?: XOR<UserCreateWithoutPolicyAcceptancesInput, UserUncheckedCreateWithoutPolicyAcceptancesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPolicyAcceptancesInput
+    upsert?: UserUpsertWithoutPolicyAcceptancesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPolicyAcceptancesInput, UserUpdateWithoutPolicyAcceptancesInput>, UserUncheckedUpdateWithoutPolicyAcceptancesInput>
+  }
+
+  export type BusinessUpdateOneWithoutPolicyAcceptancesNestedInput = {
+    create?: XOR<BusinessCreateWithoutPolicyAcceptancesInput, BusinessUncheckedCreateWithoutPolicyAcceptancesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutPolicyAcceptancesInput
+    upsert?: BusinessUpsertWithoutPolicyAcceptancesInput
+    disconnect?: BusinessWhereInput | boolean
+    delete?: BusinessWhereInput | boolean
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutPolicyAcceptancesInput, BusinessUpdateWithoutPolicyAcceptancesInput>, BusinessUncheckedUpdateWithoutPolicyAcceptancesInput>
+  }
+
   export type ShippingZoneCreatestatesInput = {
     set: string[]
   }
@@ -126867,6 +129756,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
     batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
@@ -126895,6 +129786,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
     consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
@@ -126971,6 +129864,34 @@ export namespace Prisma {
 
   export type ProductReviewCreateManyOwnerReplyByInputEnvelope = {
     data: ProductReviewCreateManyOwnerReplyByInput | ProductReviewCreateManyOwnerReplyByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PolicyAcceptanceCreateWithoutUserInput = {
+    id?: string
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+    business?: BusinessCreateNestedOneWithoutPolicyAcceptancesInput
+  }
+
+  export type PolicyAcceptanceUncheckedCreateWithoutUserInput = {
+    id?: string
+    businessId?: string | null
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+  }
+
+  export type PolicyAcceptanceCreateOrConnectWithoutUserInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    create: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput>
+  }
+
+  export type PolicyAcceptanceCreateManyUserInputEnvelope = {
+    data: PolicyAcceptanceCreateManyUserInput | PolicyAcceptanceCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -127301,6 +130222,8 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     canceledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
     lastError?: StringNullableFilter<"MarketingCampaign"> | string | null
+    audience?: JsonNullableFilter<"MarketingCampaign">
+    scheduledAt?: DateTimeNullableFilter<"MarketingCampaign"> | Date | string | null
   }
 
   export type ProductReviewUpsertWithWhereUniqueWithoutOwnerReplyByInput = {
@@ -127349,6 +130272,35 @@ export namespace Prisma {
     ownerReplyById?: StringNullableFilter<"ProductReview"> | string | null
   }
 
+  export type PolicyAcceptanceUpsertWithWhereUniqueWithoutUserInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    update: XOR<PolicyAcceptanceUpdateWithoutUserInput, PolicyAcceptanceUncheckedUpdateWithoutUserInput>
+    create: XOR<PolicyAcceptanceCreateWithoutUserInput, PolicyAcceptanceUncheckedCreateWithoutUserInput>
+  }
+
+  export type PolicyAcceptanceUpdateWithWhereUniqueWithoutUserInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    data: XOR<PolicyAcceptanceUpdateWithoutUserInput, PolicyAcceptanceUncheckedUpdateWithoutUserInput>
+  }
+
+  export type PolicyAcceptanceUpdateManyWithWhereWithoutUserInput = {
+    where: PolicyAcceptanceScalarWhereInput
+    data: XOR<PolicyAcceptanceUpdateManyMutationInput, PolicyAcceptanceUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type PolicyAcceptanceScalarWhereInput = {
+    AND?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
+    OR?: PolicyAcceptanceScalarWhereInput[]
+    NOT?: PolicyAcceptanceScalarWhereInput | PolicyAcceptanceScalarWhereInput[]
+    id?: StringFilter<"PolicyAcceptance"> | string
+    userId?: StringFilter<"PolicyAcceptance"> | string
+    businessId?: StringNullableFilter<"PolicyAcceptance"> | string | null
+    bundle?: StringFilter<"PolicyAcceptance"> | string
+    version?: StringFilter<"PolicyAcceptance"> | string
+    method?: StringFilter<"PolicyAcceptance"> | string
+    acceptedAt?: DateTimeFilter<"PolicyAcceptance"> | Date | string
+  }
+
   export type UserCreateWithoutMembershipsInput = {
     id?: string
     name: string
@@ -127369,6 +130321,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -127391,6 +130344,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -127522,6 +130476,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -127648,6 +130603,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -127686,6 +130642,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -127708,6 +130665,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessUpsertWithoutMembershipsInput = {
@@ -127845,6 +130803,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -127971,6 +130930,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -127993,6 +130953,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -128015,6 +130976,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -128053,6 +131015,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -128075,6 +131038,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -128097,6 +131061,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -128119,6 +131084,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -128157,6 +131123,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -128179,6 +131146,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductCreateWithoutBusinessInput = {
@@ -128586,6 +131554,7 @@ export namespace Prisma {
     primaryColor?: string | null
     secondaryColor?: string | null
     accentColor?: string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -128623,6 +131592,7 @@ export namespace Prisma {
     primaryColor?: string | null
     secondaryColor?: string | null
     accentColor?: string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -129687,6 +132657,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
     batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
@@ -129715,6 +132687,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
     consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
@@ -130365,6 +133339,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PolicyAcceptanceCreateWithoutBusinessInput = {
+    id?: string
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+    user: UserCreateNestedOneWithoutPolicyAcceptancesInput
+  }
+
+  export type PolicyAcceptanceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    userId: string
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
+  }
+
+  export type PolicyAcceptanceCreateOrConnectWithoutBusinessInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    create: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type PolicyAcceptanceCreateManyBusinessInputEnvelope = {
+    data: PolicyAcceptanceCreateManyBusinessInput | PolicyAcceptanceCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -130609,6 +133611,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -130646,6 +133649,7 @@ export namespace Prisma {
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     secondaryColor?: NullableStringFieldUpdateOperationsInput | string | null
     accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    emailStyle?: NullableJsonNullValueInput | InputJsonValue
     navigationItems?: NullableJsonNullValueInput | InputJsonValue
     footerNavigationItems?: NullableJsonNullValueInput | InputJsonValue
     customFields?: NullableJsonNullValueInput | InputJsonValue
@@ -132011,6 +135015,22 @@ export namespace Prisma {
     textPriceCents?: IntFilter<"ProductOptionGroup"> | number
   }
 
+  export type PolicyAcceptanceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    update: XOR<PolicyAcceptanceUpdateWithoutBusinessInput, PolicyAcceptanceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<PolicyAcceptanceCreateWithoutBusinessInput, PolicyAcceptanceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type PolicyAcceptanceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: PolicyAcceptanceWhereUniqueInput
+    data: XOR<PolicyAcceptanceUpdateWithoutBusinessInput, PolicyAcceptanceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type PolicyAcceptanceUpdateManyWithWhereWithoutBusinessInput = {
+    where: PolicyAcceptanceScalarWhereInput
+    data: XOR<PolicyAcceptanceUpdateManyMutationInput, PolicyAcceptanceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -132135,6 +135155,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -132261,6 +135282,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -132403,6 +135425,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -132529,6 +135552,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -132655,6 +135679,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -132781,6 +135806,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -132923,6 +135949,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -133049,6 +136076,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -133224,6 +136252,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -133350,6 +136379,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -133993,6 +137023,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -134119,6 +137150,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -134991,6 +138023,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductOptionGroupsInput = {
@@ -135117,6 +138150,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductOptionGroupsInput = {
@@ -135321,6 +138355,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductOptionGroupsInput = {
@@ -135447,6 +138482,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductOptionValueUpsertWithWhereUniqueWithoutGroupInput = {
@@ -136321,6 +139357,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -136447,6 +139484,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -136611,6 +139649,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -136737,6 +139776,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -137179,6 +140219,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -137305,6 +140346,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -137499,6 +140541,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -137625,6 +140668,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -137884,6 +140928,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -138010,6 +141055,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -138152,6 +141198,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -138278,6 +141325,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -138404,6 +141452,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -138530,6 +141579,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -138720,6 +141770,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -138846,6 +141897,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -139023,6 +142075,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -139149,6 +142202,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -139332,6 +142386,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -139458,6 +142513,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -139689,6 +142745,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -139815,6 +142872,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -140068,6 +143126,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -140194,6 +143253,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -140216,6 +143276,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCustomersInput = {
@@ -140238,6 +143299,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCustomersInput = {
@@ -140369,6 +143431,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -140495,6 +143558,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -141147,6 +144211,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -141169,6 +144234,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessUpsertWithoutCustomersInput = {
@@ -141306,6 +144372,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -141432,6 +144499,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -142264,6 +145332,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -142390,6 +145459,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -143024,6 +146094,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -143150,6 +146221,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -144223,6 +147295,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -144349,6 +147422,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -144618,6 +147692,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -144744,6 +147819,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -145124,6 +148200,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -145250,6 +148327,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -145401,6 +148479,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryHistoryInput = {
@@ -145423,6 +148502,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryHistoryInput = {
@@ -145780,6 +148860,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -145906,6 +148987,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -146075,6 +149157,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -146097,6 +149180,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessCreateWithoutBaseInventoryUnitsInput = {
@@ -146223,6 +149307,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -146349,6 +149434,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -146679,6 +149765,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -146805,6 +149892,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -146979,6 +150067,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryCheckoutsInput = {
@@ -147105,6 +150194,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryCheckoutsInput = {
@@ -147132,6 +150222,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryCheckoutsCreatedInput = {
@@ -147154,6 +150245,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryCheckoutsCreatedInput = {
@@ -147374,6 +150466,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryCheckoutsInput = {
@@ -147500,6 +150593,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutInventoryCheckoutsCreatedInput = {
@@ -147533,6 +150627,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryCheckoutsCreatedInput = {
@@ -147555,6 +150650,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type InventoryCheckoutLineUpsertWithWhereUniqueWithoutCheckoutInput = {
@@ -147750,6 +150846,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryCheckoutLinesInput = {
@@ -147876,6 +150973,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryCheckoutLinesInput = {
@@ -148110,6 +151208,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryCheckoutLinesInput = {
@@ -148236,6 +151335,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitUpsertWithoutCheckoutLinesInput = {
@@ -148417,6 +151517,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -148543,6 +151644,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -148685,6 +151787,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -148811,6 +151914,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -148937,6 +152041,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -149063,6 +152168,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -149205,6 +152311,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -149331,6 +152438,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -149457,6 +152565,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -149583,6 +152692,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -149610,6 +152720,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEditorNotesInput = {
@@ -149632,6 +152743,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEditorNotesInput = {
@@ -149774,6 +152886,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -149900,6 +153013,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -149933,6 +153047,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEditorNotesInput = {
@@ -149955,6 +153070,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -150081,6 +153197,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -150207,6 +153324,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -150349,6 +153467,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -150475,6 +153594,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -150601,6 +153721,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -150727,6 +153848,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -150901,6 +154023,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -151027,6 +154150,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -151268,6 +154392,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -151394,6 +154519,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -151615,6 +154741,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -151741,6 +154868,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -151952,6 +155080,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -152078,6 +155207,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -152299,6 +155429,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -152425,6 +155556,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -152803,6 +155935,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProductReviewRepliesInput = {
@@ -152825,6 +155958,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProductReviewRepliesInput = {
@@ -153178,6 +156312,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProductReviewRepliesInput = {
@@ -153200,6 +156335,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ReviewVoteUpsertWithWhereUniqueWithoutReviewInput = {
@@ -153478,6 +156614,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -153604,6 +156741,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -153631,6 +156769,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInvitesInput = {
@@ -153653,6 +156792,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInvitesInput = {
@@ -153795,6 +156935,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -153921,6 +157062,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -153954,6 +157096,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
@@ -153976,6 +157119,7 @@ export namespace Prisma {
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BusinessCreateWithoutTeamInvitesInput = {
@@ -154102,6 +157246,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -154228,6 +157373,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -154370,6 +157516,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -154472,6 +157619,639 @@ export namespace Prisma {
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type UserCreateWithoutPolicyAcceptancesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+  }
+
+  export type UserUncheckedCreateWithoutPolicyAcceptancesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedCreateNestedManyWithoutCreatedByInput
+    createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedCreateNestedManyWithoutCreatedByInput
+    productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+  }
+
+  export type UserCreateOrConnectWithoutPolicyAcceptancesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPolicyAcceptancesInput, UserUncheckedCreateWithoutPolicyAcceptancesInput>
+  }
+
+  export type BusinessCreateWithoutPolicyAcceptancesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutPolicyAcceptancesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutPolicyAcceptancesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutPolicyAcceptancesInput, BusinessUncheckedCreateWithoutPolicyAcceptancesInput>
+  }
+
+  export type UserUpsertWithoutPolicyAcceptancesInput = {
+    update: XOR<UserUpdateWithoutPolicyAcceptancesInput, UserUncheckedUpdateWithoutPolicyAcceptancesInput>
+    create: XOR<UserCreateWithoutPolicyAcceptancesInput, UserUncheckedCreateWithoutPolicyAcceptancesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPolicyAcceptancesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPolicyAcceptancesInput, UserUncheckedUpdateWithoutPolicyAcceptancesInput>
+  }
+
+  export type UserUpdateWithoutPolicyAcceptancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPolicyAcceptancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    inventoryCheckoutsCreated?: InventoryCheckoutUncheckedUpdateManyWithoutCreatedByNestedInput
+    createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    marketingCampaignsCreated?: MarketingCampaignUncheckedUpdateManyWithoutCreatedByNestedInput
+    productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+  }
+
+  export type BusinessUpsertWithoutPolicyAcceptancesInput = {
+    update: XOR<BusinessUpdateWithoutPolicyAcceptancesInput, BusinessUncheckedUpdateWithoutPolicyAcceptancesInput>
+    create: XOR<BusinessCreateWithoutPolicyAcceptancesInput, BusinessUncheckedCreateWithoutPolicyAcceptancesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutPolicyAcceptancesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutPolicyAcceptancesInput, BusinessUncheckedUpdateWithoutPolicyAcceptancesInput>
+  }
+
+  export type BusinessUpdateWithoutPolicyAcceptancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutPolicyAcceptancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
@@ -154622,6 +158402,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -154748,6 +158529,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -154912,6 +158694,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -155038,6 +158821,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -155343,6 +159127,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -155469,6 +159254,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -155722,6 +159508,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -155848,6 +159635,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuoteCalculatorsInput = {
@@ -155974,6 +159762,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
@@ -156100,6 +159889,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
@@ -156294,6 +160084,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
@@ -156420,6 +160211,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
@@ -156651,6 +160443,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
@@ -156777,6 +160570,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
@@ -156966,6 +160760,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
@@ -157092,6 +160887,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFormsInput = {
@@ -157218,6 +161014,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFormsInput = {
@@ -157344,6 +161141,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFormsInput = {
@@ -157524,6 +161322,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFormsInput = {
@@ -157650,6 +161449,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type FormSubmissionUpsertWithWhereUniqueWithoutFormInput = {
@@ -157817,6 +161617,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFormSubmissionsInput = {
@@ -157943,6 +161744,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFormSubmissionsInput = {
@@ -158116,6 +161918,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFormSubmissionsInput = {
@@ -158242,6 +162045,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutMarketingCampaignsInput = {
@@ -158368,6 +162172,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMarketingCampaignsInput = {
@@ -158494,6 +162299,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMarketingCampaignsInput = {
@@ -158521,6 +162327,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMarketingCampaignsCreatedInput = {
@@ -158543,6 +162350,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
     editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
     productReviewReplies?: ProductReviewUncheckedCreateNestedManyWithoutOwnerReplyByInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMarketingCampaignsCreatedInput = {
@@ -158805,6 +162613,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMarketingCampaignsInput = {
@@ -158931,6 +162740,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutMarketingCampaignsCreatedInput = {
@@ -158964,6 +162774,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMarketingCampaignsCreatedInput = {
@@ -158986,6 +162797,7 @@ export namespace Prisma {
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
     editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
     productReviewReplies?: ProductReviewUncheckedUpdateManyWithoutOwnerReplyByNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type MarketingCampaignBatchUpsertWithWhereUniqueWithoutCampaignInput = {
@@ -159076,6 +162888,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
     createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
     recipients?: MarketingCampaignRecipientCreateNestedManyWithoutCampaignInput
@@ -159105,6 +162919,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
     consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
   }
@@ -159146,6 +162962,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
     createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
     recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
@@ -159175,6 +162993,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
     consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
   }
@@ -159200,6 +163020,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
     createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
     batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
@@ -159229,6 +163051,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
     consentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutCampaignInput
   }
@@ -159349,6 +163173,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
     createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
     batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
@@ -159378,6 +163204,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
     consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
   }
@@ -159591,6 +163419,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMarketingConsentEventsInput = {
@@ -159717,6 +163546,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMarketingConsentEventsInput = {
@@ -159824,6 +163654,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutMarketingCampaignsInput
     createdBy?: UserCreateNestedOneWithoutMarketingCampaignsCreatedInput
     batches?: MarketingCampaignBatchCreateNestedManyWithoutCampaignInput
@@ -159853,6 +163685,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
     batches?: MarketingCampaignBatchUncheckedCreateNestedManyWithoutCampaignInput
     recipients?: MarketingCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
   }
@@ -159997,6 +163831,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMarketingConsentEventsInput = {
@@ -160123,6 +163958,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutConsentEventsInput = {
@@ -160242,6 +164078,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
     createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
     batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
@@ -160271,6 +164109,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
   }
@@ -160399,6 +164239,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMarketingDoNotEmailInput = {
@@ -160525,6 +164366,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMarketingDoNotEmailInput = {
@@ -160667,6 +164509,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMarketingDoNotEmailInput = {
@@ -160793,6 +164636,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksConnectionInput = {
@@ -160919,6 +164763,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksConnectionInput = {
@@ -161045,6 +164890,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksConnectionInput = {
@@ -161187,6 +165033,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksConnectionInput = {
@@ -161313,6 +165160,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutQuickBooksInvoicesInput = {
@@ -161439,6 +165287,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuickBooksInvoicesInput = {
@@ -161565,6 +165414,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuickBooksInvoicesInput = {
@@ -161754,6 +165604,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuickBooksInvoicesInput = {
@@ -161880,6 +165731,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type QuoteSubmissionUpsertWithoutQuickBooksInvoicesInput = {
@@ -162059,6 +165911,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoiceSettingsInput = {
@@ -162185,6 +166038,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoiceSettingsInput = {
@@ -162327,6 +166181,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoiceSettingsInput = {
@@ -162453,6 +166308,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutInvoicesInput = {
@@ -162579,6 +166435,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicesInput = {
@@ -162705,6 +166562,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicesInput = {
@@ -162990,6 +166848,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicesInput = {
@@ -163116,6 +166975,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutInvoicesInput = {
@@ -163467,6 +167327,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicePaymentsInput = {
@@ -163593,6 +167454,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicePaymentsInput = {
@@ -163836,6 +167698,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicePaymentsInput = {
@@ -163962,6 +167825,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type InvoiceCreateWithoutEventsInput = {
@@ -164284,6 +168148,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSubscriptionsInput = {
@@ -164410,6 +168275,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSubscriptionsInput = {
@@ -164914,6 +168780,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSubscriptionsInput = {
@@ -165040,6 +168907,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutSubscriptionsInput = {
@@ -165476,6 +169344,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDonationsInput = {
@@ -165602,6 +169471,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDonationsInput = {
@@ -165744,6 +169614,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDonationsInput = {
@@ -165870,6 +169741,7 @@ export namespace Prisma {
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutLoyaltyProgramInput = {
@@ -165996,6 +169868,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutLoyaltyProgramInput = {
@@ -166122,6 +169995,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutLoyaltyProgramInput = {
@@ -166302,6 +170176,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutLoyaltyProgramInput = {
@@ -166428,6 +170303,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type LoyaltyRewardTierUpsertWithWhereUniqueWithoutProgramInput = {
@@ -166676,6 +170552,7 @@ export namespace Prisma {
     donations?: DonationCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutLoyaltyLedgerInput = {
@@ -166802,6 +170679,7 @@ export namespace Prisma {
     donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
     loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
     productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutLoyaltyLedgerInput = {
@@ -167155,6 +171033,7 @@ export namespace Prisma {
     donations?: DonationUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutLoyaltyLedgerInput = {
@@ -167281,6 +171160,7 @@ export namespace Prisma {
     donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
     loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
     productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutLoyaltyLedgerInput = {
@@ -167659,6 +171539,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
   }
 
   export type ProductReviewCreateManyOwnerReplyByInput = {
@@ -167685,6 +171567,15 @@ export namespace Prisma {
     productId: string
     customerId?: string | null
     orderId?: string | null
+  }
+
+  export type PolicyAcceptanceCreateManyUserInput = {
+    id?: string
+    businessId?: string | null
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
   }
 
   export type SessionUpdateWithoutUserInput = {
@@ -168107,6 +171998,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutMarketingCampaignsNestedInput
     batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
@@ -168135,6 +172028,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
     consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
@@ -168162,6 +172057,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ProductReviewUpdateWithoutOwnerReplyByInput = {
@@ -168242,6 +172139,33 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type PolicyAcceptanceUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneWithoutPolicyAcceptancesNestedInput
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: NullableStringFieldUpdateOperationsInput | string | null
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProductCreateManyBusinessInput = {
@@ -168774,6 +172698,8 @@ export namespace Prisma {
     completedAt?: Date | string | null
     canceledAt?: Date | string | null
     lastError?: string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: Date | string | null
   }
 
   export type MarketingConsentEventCreateManyBusinessInput = {
@@ -168970,6 +172896,15 @@ export namespace Prisma {
     maxLength?: number | null
     placeholder?: string | null
     textPriceCents?: number
+  }
+
+  export type PolicyAcceptanceCreateManyBusinessInput = {
+    id?: string
+    userId: string
+    bundle: string
+    version: string
+    method: string
+    acceptedAt?: Date | string
   }
 
   export type ProductUpdateWithoutBusinessInput = {
@@ -170597,6 +174532,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdBy?: UserUpdateOneWithoutMarketingCampaignsCreatedNestedInput
     batches?: MarketingCampaignBatchUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUpdateManyWithoutCampaignNestedInput
@@ -170625,6 +174562,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     batches?: MarketingCampaignBatchUncheckedUpdateManyWithoutCampaignNestedInput
     recipients?: MarketingCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
     consentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutCampaignNestedInput
@@ -170652,6 +174591,8 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastError?: NullableStringFieldUpdateOperationsInput | string | null
+    audience?: NullableJsonNullValueInput | InputJsonValue
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MarketingConsentEventUpdateWithoutBusinessInput = {
@@ -171250,6 +175191,33 @@ export namespace Prisma {
     maxLength?: NullableIntFieldUpdateOperationsInput | number | null
     placeholder?: NullableStringFieldUpdateOperationsInput | string | null
     textPriceCents?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PolicyAcceptanceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPolicyAcceptancesNestedInput
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PolicyAcceptanceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    bundle?: StringFieldUpdateOperationsInput | string
+    version?: StringFieldUpdateOperationsInput | string
+    method?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ImageCreateManyProductInput = {
