@@ -2,9 +2,14 @@ import type { JSONContent } from "@tiptap/core";
 import { render } from "@react-email/components";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 
+import type { ResolvedEmailStyle } from "./email-style";
+import type { EmailBodyTheme } from "./tiptap-to-email";
+import type { EmailLayoutTheme } from "~/emails/components/layout";
 import { formatBusinessAddress } from "~/lib/address/format";
 import { renderEmail } from "~/lib/email/render";
+import { resolveSocialLinks } from "~/lib/social-links";
 
+import { emailBodyThemeFromStyle, resolveEmailStyle } from "./email-style";
 import { tiptapToEmailHtml } from "./tiptap-to-email";
 
 /**
@@ -29,6 +34,15 @@ export type CampaignBusiness = {
   addressPostalCode?: string | null;
   /** Free-form display address; used only when no structured parts are set. */
   businessAddress?: string | null;
+  /**
+   * Storefront template; picks the email style's defaults. Missing/unknown
+   * ids fall back to the Default template's.
+   */
+  templateId?: string | null;
+  /** Raw `SiteContent.emailStyle` JSON (validated by `resolveEmailStyle`). */
+  emailStyle?: unknown;
+  /** Raw `SiteContent.socialLinks` JSON (`{ instagram, facebook, ... }`). */
+  socialLinks?: unknown;
 };
 
 /**
@@ -81,7 +95,57 @@ export type RenderCampaignInput = {
    * `bodyJson` when given. The caller is responsible for sanitizing it.
    */
   bodyHtml?: string | null;
+  /**
+   * Replaces the stored `business.emailStyle` when given (the admin style
+   * page previews unsaved settings with it).
+   */
+  styleOverride?: unknown;
 };
+
+/** Short labels for the footer's social row ("Instagram · Facebook · X"). */
+const SOCIAL_LABELS: Record<string, string> = { twitter: "X" };
+
+/**
+ * The store's marketing email style for a campaign, as the walker's body
+ * theme plus the layout theme. Resolved once per render.
+ */
+export function campaignEmailThemes(
+  business: CampaignBusiness,
+  styleOverride?: unknown,
+): {
+  style: ResolvedEmailStyle;
+  body: EmailBodyTheme;
+  layout: EmailLayoutTheme;
+} {
+  const style = resolveEmailStyle({
+    emailStyle:
+      styleOverride !== undefined ? styleOverride : business.emailStyle,
+    templateId: business.templateId,
+  });
+  const socialLinks = style.showSocial
+    ? resolveSocialLinks(business.socialLinks)
+        // resolveSocialLinks also admits mailto:/tel:/relative values; an
+        // email footer only gets absolute web links.
+        .filter((link) => /^https?:\/\//i.test(link.url))
+        .map((link) => ({
+          label: SOCIAL_LABELS[link.key] ?? link.label,
+          url: link.url,
+        }))
+    : [];
+  return {
+    style,
+    body: emailBodyThemeFromStyle(style),
+    layout: {
+      pageBackground: style.pageBackground,
+      fontStack: style.fontStack,
+      header: style.header,
+      logoHeight: style.logoHeight,
+      socialLinks,
+      footerNote: style.footerNote,
+      linkColor: style.linkColor,
+    },
+  };
+}
 
 /** Stands in for the walker's plain text while the email's text is rendered. */
 const BODY_TEXT_PLACEHOLDER = "__SP_BODY_TEXT__";
@@ -138,6 +202,7 @@ export function campaignEmailElement(
   unsubscribeUrl: string,
 ) {
   const { business } = input;
+  const themes = campaignEmailThemes(business, input.styleOverride);
   const preview = input.previewText?.trim();
   let bodyHtml: string | undefined;
   if (input.contentFormat === "tiptap") {
@@ -145,7 +210,10 @@ export function campaignEmailElement(
     bodyHtml = explicit
       ? input.bodyHtml!
       : input.bodyJson
-        ? tiptapToEmailHtml(input.bodyJson, { baseUrl: business.baseUrl }).html
+        ? tiptapToEmailHtml(input.bodyJson, {
+            baseUrl: business.baseUrl,
+            theme: themes.body,
+          }).html
         : "";
   }
   return MarketingBroadcastEmail({
@@ -156,6 +224,7 @@ export function campaignEmailElement(
     unsubscribeUrl,
     previewText: preview === "" ? undefined : preview,
     postalAddress: getBusinessPostalAddress(business),
+    theme: themes.layout,
   });
 }
 

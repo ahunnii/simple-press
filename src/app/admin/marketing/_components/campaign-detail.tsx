@@ -1,10 +1,19 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowLeft, Ban, Loader2, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Ban,
+  CalendarClock,
+  CalendarX2,
+  Copy,
+  Loader2,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -13,6 +22,7 @@ import {
   CAMPAIGN_RECIPIENT_STATUS_LABELS,
   CAMPAIGN_RECIPIENT_STATUSES,
 } from "~/lib/marketing/campaign-status";
+import { describeAudience } from "~/lib/marketing/segments";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
@@ -57,6 +67,7 @@ import {
   RecipientStatusBadge,
 } from "./campaign-status-badge";
 import { EmailBodyPreview } from "./email-body-preview";
+import { EmailPreviewFrame, useCampaignPreview } from "./email-preview-frame";
 
 type Campaign = RouterOutputs["marketing"]["getCampaign"];
 type RecipientStatus = (typeof CAMPAIGN_RECIPIENT_STATUSES)[number];
@@ -82,6 +93,10 @@ function dateLine(campaign: Campaign, timeZone: string): string | null {
       const at = campaign.completedAt ?? campaign.queuedAt;
       return at ? `Failed ${fmt(at)}` : null;
     }
+    case "SCHEDULED":
+      return campaign.scheduledAt
+        ? `Scheduled for ${fmt(campaign.scheduledAt)}`
+        : null;
     case "CANCELED":
       return campaign.canceledAt
         ? `Canceled ${fmt(campaign.canceledAt)}`
@@ -94,9 +109,18 @@ function dateLine(campaign: Campaign, timeZone: string): string | null {
 type Props = {
   initialCampaign: Campaign;
   timeZone: string;
+  /** False when the emailMarketing flag is off: Duplicate / Edit are hidden. */
+  emailMarketingEnabled?: boolean;
 };
 
-export function CampaignDetail({ initialCampaign, timeZone }: Props) {
+/** How long before a scheduled time the page starts watching for the send. */
+const SCHEDULE_WATCH_MS = 30 * 60_000;
+
+export function CampaignDetail({
+  initialCampaign,
+  timeZone,
+  emailMarketingEnabled = true,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const id = initialCampaign.id;
@@ -106,9 +130,22 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
     {
       initialData: initialCampaign,
       // Poll only while the sender still has work; the cron/worker moves the
-      // status on, and a finished campaign never changes by itself.
-      refetchInterval: (query) =>
-        query.state.data && isActive(query.state.data.status) ? 3000 : false,
+      // status on, and a finished campaign never changes by itself. A
+      // scheduled one is watched (slowly) once it is nearly due.
+      refetchInterval: (query) => {
+        const current = query.state.data;
+        if (!current) return false;
+        if (isActive(current.status)) return 3000;
+        if (
+          current.status === "SCHEDULED" &&
+          current.scheduledAt &&
+          new Date(current.scheduledAt).getTime() - Date.now() <
+            SCHEDULE_WATCH_MS
+        ) {
+          return 15_000;
+        }
+        return false;
+      },
     },
   );
   const campaign = data;
@@ -149,6 +186,42 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
     },
   });
 
+  const [editOpen, setEditOpen] = useState(false);
+  // Unscheduling returns the campaign to a draft, which the server page opens
+  // in the composer, so a refresh is all the "edit" navigation needed. The
+  // refresh runs in a transition: until the composer arrives, `returning`
+  // keeps the scheduled view on screen (buttons disabled) instead of letting
+  // the page flash the sent-campaign layout for a draft.
+  const [refreshing, startRefresh] = useTransition();
+  const unschedule = api.marketing.unscheduleCampaign.useMutation({
+    onSuccess: () => {
+      toast.success("Unscheduled. It's back in your drafts.");
+      setEditOpen(false);
+      void utils.marketing.listCampaigns.invalidate();
+      startRefresh(() => router.refresh());
+    },
+    onError: async (error) => {
+      setEditOpen(false);
+      toast.error(error.message || "Couldn't unschedule the campaign");
+      // Most likely it already started sending: show where it really is.
+      await utils.marketing.getCampaign.invalidate({ id });
+      router.refresh();
+    },
+  });
+  const returning =
+    unschedule.isPending || refreshing || campaign.status === "DRAFT";
+  const scheduled = campaign.status === "SCHEDULED" || returning;
+  const duplicate = api.marketing.duplicateCampaign.useMutation({
+    onSuccess: ({ id: newId }) => {
+      toast.success("Copied to a new draft");
+      void utils.marketing.listCampaigns.invalidate();
+      router.push(`${LIST_PATH}/campaigns/${newId}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Couldn't duplicate the campaign");
+    },
+  });
+
   const delivered = counts.byStatus.DELIVERED + counts.byStatus.COMPLAINED;
   const waiting = counts.byStatus.PENDING + counts.byStatus.SENDING;
 
@@ -172,6 +245,10 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
   const percent =
     batches.total > 0 ? Math.round((batchesDone / batches.total) * 100) : 0;
   const date = dateLine(campaign, timeZone);
+  const audienceLabel = describeAudience(
+    campaign.audience,
+    campaign.audienceProductNames,
+  );
 
   return (
     <>
@@ -199,8 +276,47 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
             )}
           </div>
         </div>
-        {active && (
-          <div className="toolbar-actions">
+        <div className="toolbar-actions">
+          {emailMarketingEnabled && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => duplicate.mutate({ id })}
+              disabled={duplicate.isPending}
+            >
+              {duplicate.isPending ? (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Copy className="mr-2 h-4 w-4" aria-hidden="true" />
+              )}
+              Duplicate
+            </Button>
+          )}
+          {scheduled && (
+            // One action: unscheduling is what makes a scheduled campaign
+            // editable, and it stays available with email marketing off
+            // (unschedule is ungated).
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditOpen(true)}
+              disabled={returning}
+            >
+              {returning ? (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <CalendarX2 className="mr-2 h-4 w-4" aria-hidden="true" />
+              )}
+              Unschedule to edit
+            </Button>
+          )}
+          {active && (
             <Button
               variant="outline"
               size="sm"
@@ -210,8 +326,8 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
               <Ban className="mr-2 h-4 w-4" aria-hidden="true" />
               Cancel campaign
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="admin-container space-y-6">
@@ -222,13 +338,21 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
           </p>
         )}
 
-        {campaign.lastError && (
-          <Alert variant="destructive">
-            <AlertTriangle aria-hidden="true" />
-            <AlertTitle>Something went wrong while sending</AlertTitle>
-            <AlertDescription>{campaign.lastError}</AlertDescription>
-          </Alert>
-        )}
+        {campaign.lastError &&
+          (scheduled ? (
+            // Still scheduled: the sweep hit a hiccup and will try again.
+            <Alert variant="warning">
+              <AlertTriangle aria-hidden="true" />
+              <AlertTitle>We hit a problem sending this</AlertTitle>
+              <AlertDescription>{campaign.lastError}</AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant="destructive">
+              <AlertTriangle aria-hidden="true" />
+              <AlertTitle>Something went wrong while sending</AlertTitle>
+              <AlertDescription>{campaign.lastError}</AlertDescription>
+            </Alert>
+          ))}
 
         {active && (
           <Card>
@@ -255,22 +379,59 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
           </Card>
         )}
 
-        <section aria-label="Results">
-          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {[...tiles, ...optionalTiles].map((tile) => (
-              <Card key={tile.label} className="gap-1 py-4">
-                <CardContent className="px-4">
-                  <dt className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                    {tile.label}
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold tabular-nums">
-                    {tile.value.toLocaleString()}
-                  </dd>
-                </CardContent>
-              </Card>
-            ))}
-          </dl>
-        </section>
+        {scheduled && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
+                <CalendarClock
+                  className="text-muted-foreground h-4 w-4"
+                  aria-hidden="true"
+                />
+                Scheduled
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              {campaign.scheduledAt && (
+                <p>
+                  Goes out within about 15 minutes of{" "}
+                  <span className="font-medium">
+                    {formatCampaignInstant(campaign.scheduledAt, timeZone)}
+                  </span>
+                  .
+                </p>
+              )}
+              <p className="text-muted-foreground">
+                Audience: {audienceLabel}. Who is included is worked out when it
+                sends, so the number of recipients can change before then.
+                It&apos;s locked while scheduled; unschedule it to make changes.
+              </p>
+              {returning && (
+                <p className="text-muted-foreground" aria-live="polite">
+                  Moving it back to your drafts…
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {!scheduled && (
+          <section aria-label="Results">
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {[...tiles, ...optionalTiles].map((tile) => (
+                <Card key={tile.label} className="gap-1 py-4">
+                  <CardContent className="px-4">
+                    <dt className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                      {tile.label}
+                    </dt>
+                    <dd className="mt-1 text-2xl font-semibold tabular-nums">
+                      {tile.value.toLocaleString()}
+                    </dd>
+                  </CardContent>
+                </Card>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <Card>
           <CardHeader className="pb-3">
@@ -295,14 +456,32 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
             )}
             <div>
               <div className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                Audience
+              </div>
+              <p className="mt-1">{audienceLabel}</p>
+            </div>
+            <div>
+              <div className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                 Message
               </div>
               {campaign.contentFormat === "tiptap" && storedDoc ? (
                 <div className="mt-2">
-                  <EmailBodyPreview
-                    doc={storedDoc}
-                    baseUrl={campaign.baseUrl}
-                  />
+                  {scheduled && emailMarketingEnabled ? (
+                    // It sends with the style and products as they are at the
+                    // scheduled time, so show the full email as it'd go out
+                    // now, not just the stored body.
+                    <ScheduledEmailPreview
+                      doc={storedDoc}
+                      previewText={campaign.previewText}
+                    />
+                  ) : (
+                    // Frozen content; `baseUrl` resolves relative photos and
+                    // links (the frozen one, else the store's current URL).
+                    <EmailBodyPreview
+                      doc={storedDoc}
+                      baseUrl={campaign.baseUrl}
+                    />
+                  )}
                 </div>
               ) : campaign.bodyText ? (
                 <p className="mt-1 leading-relaxed whitespace-pre-wrap">
@@ -317,8 +496,39 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
           </CardContent>
         </Card>
 
-        <RecipientsSection campaignId={id} timeZone={timeZone} />
+        {!scheduled && (
+          <RecipientsSection campaignId={id} timeZone={timeZone} />
+        )}
       </div>
+
+      <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unschedule to edit?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This moves the campaign back to your drafts so you can change it.
+              Schedule it again when you&apos;re ready.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unschedule.isPending}>
+              Keep scheduled
+            </AlertDialogCancel>
+            <Button
+              onClick={() => unschedule.mutate({ id })}
+              disabled={unschedule.isPending}
+            >
+              {unschedule.isPending && (
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              Unschedule
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <AlertDialogContent>
@@ -351,6 +561,34 @@ export function CampaignDetail({ initialCampaign, timeZone }: Props) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+/**
+ * The full email (header, style, products, footer) as it would send right
+ * now, for a scheduled campaign: it is rendered at the scheduled time with
+ * the style and products current then, so the stored body alone would mislead.
+ */
+function ScheduledEmailPreview({
+  doc,
+  previewText,
+}: {
+  doc: JSONContent;
+  previewText: string | null;
+}) {
+  const preview = useCampaignPreview({
+    bodyJson: doc,
+    previewText: previewText ?? undefined,
+  });
+  return (
+    <div className="space-y-2">
+      <EmailPreviewFrame html={preview.html} loading={preview.loading} />
+      {preview.error && (
+        <p className="text-destructive text-xs" role="alert">
+          {preview.error}
+        </p>
+      )}
+    </div>
   );
 }
 

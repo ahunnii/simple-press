@@ -25,6 +25,7 @@ import {
   Color,
   ContainerTrailingParagraph,
   EditorColumns,
+  EditorEmailProducts,
   EditorSpacer,
   Embed,
   FileHandler,
@@ -73,11 +74,13 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   formsEnabled?: boolean;
   /**
    * Restricts the editor to what an email can show: no code, galleries,
-   * embeds, forms, quote calculators, tables, columns, collapsible sections,
-   * spacers or videos (none of those nodes are registered, so pasted content
-   * flattens to text). Headings, lists, quotes, dividers, links, images,
-   * alignment and colors stay. Used by the marketing campaign composer; the
-   * content is rendered by `~/lib/marketing/tiptap-to-email`.
+   * embeds, forms, quote calculators, tables, columns, collapsible sections
+   * or videos (none of those nodes are registered, so pasted content
+   * flattens to text). Headings, lists, quotes, dividers, spacers, links
+   * (and button links), images, alignment and colors stay, and the
+   * email-only `emailProducts` block is added. Used by the marketing
+   * campaign composer; the content is rendered by
+   * `~/lib/marketing/tiptap-to-email`.
    */
   emailMode?: boolean;
   /**
@@ -479,8 +482,10 @@ export const createExtensions = ({
     // "/" insert menu trigger; the menu is rendered by MainMinimalTiptapEditor.
     SlashCommand,
     Placeholder.configure({ placeholder: () => placeholder }),
+    // Shared with the storefront renderer's schema; offered in emails too.
+    EditorSpacer,
     ...(emailMode
-      ? []
+      ? [EditorEmailProducts]
       : [
           CodeBlockLowlight,
           Gallery.configure({
@@ -499,7 +504,6 @@ export const createExtensions = ({
           EditorColumns,
           Column,
           ...DETAILS_EXTENSIONS,
-          EditorSpacer,
         ]),
   ];
 };

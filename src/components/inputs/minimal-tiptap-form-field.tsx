@@ -101,6 +101,11 @@ type Props<CurrentForm extends FieldValues> = {
   galleriesEnabled?: boolean;
   /** Enables the layout blocks (columns/details) in the editor. Off by default. */
   layoutBlocksEnabled?: boolean;
+  /**
+   * Offers the email "Products" block (with `emailMode`). Only pass `true`
+   * when the `products` feature flag is on — its picker's search is gated.
+   */
+  productsEnabled?: boolean;
   embedsEnabled?: boolean;
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
@@ -144,6 +149,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   businessId,
   galleriesEnabled,
   layoutBlocksEnabled = false,
+  productsEnabled,
   embedsEnabled,
   quotesEnabled,
   formsEnabled,
@@ -188,6 +194,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 businessId={businessId}
                 galleriesEnabled={galleriesEnabled}
                 layoutBlocksEnabled={layoutBlocksEnabled}
+                productsEnabled={productsEnabled}
                 embedsEnabled={embedsEnabled}
                 quotesEnabled={quotesEnabled}
                 formsEnabled={formsEnabled}

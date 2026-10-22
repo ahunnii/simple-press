@@ -16,13 +16,18 @@ import {
   buildUnsubscribeUrl,
   oneClickUnsubscribeHeaders,
 } from "~/lib/email/unsubscribe-token";
-import { resolveFlags } from "~/lib/features/resolve-flags";
 
 import { marketingAudienceWhere } from "./audience";
+import {
+  BATCH_SIZE,
+  isBusinessSendable,
+  SENDABLE_BUSINESS_WHERE,
+} from "./campaign-business";
 import {
   ACCEPTED_RECIPIENT_STATUSES,
   ACTIVE_CAMPAIGN_STATUSES,
 } from "./campaign-status";
+import { queueDueScheduledCampaigns } from "./queue-campaign";
 import { applyUnsubscribeUrl } from "./render-campaign";
 import { marketingSendThrottle } from "./send-throttle";
 
@@ -50,7 +55,7 @@ import { marketingSendThrottle } from "./send-throttle";
  * mid-send cannot clobber the worker that reclaimed it.
  */
 
-export const BATCH_SIZE = 100;
+export { BATCH_SIZE };
 export const LEASE_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 6;
 export const SEND_TIMEOUT_MS = 60_000;
@@ -127,9 +132,6 @@ type ClaimedBatch = {
 /** Failure message for a batch whose earlier attempt never reported back. */
 const UNKNOWN_OUTCOME_ON_CANCEL =
   "Canceled after a send attempt that never reported back; some of these emails may have gone out.";
-
-/** Only an active store sends; `checkBusiness` resolves the same value. */
-const ACTIVE_BUSINESS_STATUS = "active";
 
 type Ctx = {
   db: DbClient;
@@ -236,10 +238,7 @@ export async function drainCampaign(
     // Checked before every batch so switching the feature off, or a
     // platform admin suspending the store, stops a send within one batch.
     // The campaign stays QUEUED/SENDING; the cron resumes it once both clear.
-    if (
-      state.business.status !== ACTIVE_BUSINESS_STATUS ||
-      !resolveFlags(state.business.featureFlags).isEnabled("emailMarketing")
-    ) {
+    if (!isBusinessSendable(state.business)) {
       return { batchesSent, stopped: "paused" };
     }
     if (state.status === "QUEUED") {
@@ -487,6 +486,12 @@ async function processBatch(ctx: Ctx, batch: ClaimedBatch): Promise<boolean> {
  * every retry); the rest — unsubscribed, suppressed, anonymized or deleted
  * since queue time — become SKIPPED. On a retry no rows are PENDING, so this
  * is a no-op and the payload stays identical.
+ *
+ * Deliberately the base consent filter only, never the campaign's segment
+ * (`MarketingCampaign.audience`): the segment is applied once, when
+ * `sendCampaign` snapshots recipients at queue time. A customer who, say,
+ * orders mid-send stays in a "never ordered" campaign — but consent and
+ * suppression are re-checked here for every batch.
  */
 async function freezeMembership(
   db: DbClient,
@@ -824,8 +829,10 @@ export async function cancelPendingWork(
 // ─── Cron entry point ────────────────────────────────────────────────────────
 
 /**
- * Cron: resumes every QUEUED / SENDING campaign, oldest first, within one
- * shared time budget. Covers drains cut short by a crash, deploy, deadline,
+ * Cron: first queues every SCHEDULED campaign that is due
+ * (`queueDueScheduledCampaigns`), then resumes every QUEUED / SENDING
+ * campaign, oldest first, within one
+ * shared time budget (the sweep's time counts against it). Covers drains cut short by a crash, deploy, deadline,
  * expired lease, or a flag that was off. Per-campaign failures are isolated.
  * Returns the number of batches sent.
  *
@@ -833,20 +840,34 @@ export async function cancelPendingWork(
  * out of the query (drainCampaign would only pause them), so they can't fill
  * the `take` window and starve sendable campaigns. `emailMarketing` has no
  * registry dependencies and defaults off, so a stored `true` is exactly
- * "enabled"; drainCampaign re-checks through `resolveFlags` anyway.
+ * "enabled"; drainCampaign re-checks through `isBusinessSendable` anyway.
  */
 export async function resumeMarketingCampaigns(
   db: DbClient,
   opts: { budgetMs: number } & Omit<DrainOptions, "deadlineMs">,
 ): Promise<number> {
   const startedAt = Date.now();
+
+  // Scheduled campaigns that are due become QUEUED first, so they drain in
+  // this same run. The sweep shares the run's budget (its time is counted
+  // below) and stops starting campaigns once it is spent. A sweep failure
+  // must not stop the resume below.
+  try {
+    await queueDueScheduledCampaigns(db, {
+      now: opts.now?.(),
+      budgetMs: opts.budgetMs,
+    });
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { "cron.job": "marketing-campaigns" },
+      extra: { step: "queue_scheduled" },
+    });
+  }
+
   const campaigns = await db.marketingCampaign.findMany({
     where: {
       status: { in: [...ACTIVE_CAMPAIGN_STATUSES] },
-      business: {
-        status: ACTIVE_BUSINESS_STATUS,
-        featureFlags: { path: ["emailMarketing"], equals: true },
-      },
+      business: SENDABLE_BUSINESS_WHERE,
     },
     select: { id: true },
     orderBy: [{ queuedAt: "asc" }, { id: "asc" }],

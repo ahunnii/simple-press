@@ -75,11 +75,44 @@ describe("getInsertItems: toolbar", () => {
     ).not.toContain("form");
   });
 
-  it("offers only blockquote and divider in email, whatever the flags", () => {
+  it("offers only email-safe blocks in email, whatever the page flags", () => {
     expect(values("toolbar", { ...ALL_FLAGS, emailMode: true })).toEqual([
       "blockquote",
       "horizontalRule",
+      "button",
+      "spacer",
     ]);
+  });
+
+  it("adds Products in email only with productsEnabled", () => {
+    expect(
+      values("toolbar", { emailMode: true, productsEnabled: true }),
+    ).toEqual([
+      "blockquote",
+      "horizontalRule",
+      "button",
+      "emailProducts",
+      "spacer",
+    ]);
+    expect(values("toolbar", { emailMode: true })).not.toContain(
+      "emailProducts",
+    );
+    // Never on a page editor, flag or not.
+    expect(
+      values("toolbar", { ...ALL_FLAGS, productsEnabled: true }),
+    ).not.toContain("emailProducts");
+  });
+
+  it("offers space in email without layoutBlocksEnabled, but no columns", () => {
+    const email = values("toolbar", { emailMode: true });
+    expect(email).toContain("spacer");
+    expect(email).not.toContain("columns");
+    expect(email).not.toContain("details");
+  });
+
+  it("keeps the email-only Button off page editors", () => {
+    expect(values("toolbar", ALL_FLAGS)).not.toContain("button");
+    expect(values("slash", ALL_FLAGS)).not.toContain("button");
   });
 
   it("never lists text styles, lists or media (they have own buttons)", () => {
@@ -97,9 +130,11 @@ describe("getInsertItems: toolbar", () => {
 });
 
 describe("getInsertItems: slash", () => {
-  it("offers everything, in registry order, with every flag on", () => {
+  it("offers every page block, in registry order, with every flag on", () => {
     expect(values("slash", ALL_FLAGS)).toEqual(
-      INSERT_ITEMS.map((item) => item.value),
+      INSERT_ITEMS.map((item) => item.value).filter(
+        (value) => value !== "button" && value !== "emailProducts",
+      ),
     );
   });
 
@@ -128,7 +163,17 @@ describe("getInsertItems: slash", () => {
       "blockquote",
       "horizontalRule",
       "image",
+      "button",
+      "spacer",
     ]);
+  });
+
+  it("adds Products to the email slash menu with productsEnabled", () => {
+    const email = values("slash", { emailMode: true, productsEnabled: true });
+    expect(email).toContain("emailProducts");
+    expect(email).toContain("spacer");
+    expect(email).toContain("button");
+    expect(values("slash", { emailMode: true })).not.toContain("emailProducts");
   });
 
   it("derives video from the registered extension when not given", () => {
@@ -150,6 +195,7 @@ describe("getInsertItems: slash", () => {
       { galleriesEnabled: true, layoutBlocksEnabled: true },
       { embedsEnabled: true, formsEnabled: true },
       { ...ALL_FLAGS, emailMode: true },
+      { emailMode: true, productsEnabled: true },
     ];
     for (const gates of combos) {
       const slash = new Set(values("slash", gates));
@@ -159,10 +205,16 @@ describe("getInsertItems: slash", () => {
     }
   });
 
-  it("gives image and video a dialog and everything else a command", () => {
+  it("gives image, video and products a dialog and everything else a command", () => {
+    const dialogs: Partial<Record<string, string>> = {
+      image: "image",
+      video: "video",
+      emailProducts: "product",
+    };
     for (const item of INSERT_ITEMS) {
-      if (item.value === "image" || item.value === "video") {
-        expect(item.dialog).toBe(item.value);
+      const dialog = dialogs[item.value];
+      if (dialog) {
+        expect(item.dialog).toBe(dialog);
         expect(item.run).toBeUndefined();
       } else {
         expect(item.dialog).toBeUndefined();

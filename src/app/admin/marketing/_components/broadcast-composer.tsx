@@ -1,13 +1,14 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/core";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertTriangle,
   ArrowLeft,
+  CalendarClock,
   Loader2,
   Mail,
   Save,
@@ -19,12 +20,21 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { AudienceProduct } from "./audience-product-picker-dialog";
 import type { TrpcFormError } from "~/lib/forms/apply-trpc-error";
+import type { Audience } from "~/lib/marketing/segments";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { findPlaceholders } from "~/lib/marketing/placeholders";
+import {
+  audienceSchema,
+  DEFAULT_AUDIENCE,
+  describeAudience,
+} from "~/lib/marketing/segments";
 import {
   plainTextToTiptapDoc,
   tiptapHasContent,
 } from "~/lib/marketing/tiptap-to-email";
+import { countEmptyProductBlocks } from "~/lib/tiptap/email-products-node";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -46,11 +56,14 @@ import { Form } from "~/components/ui/form";
 import { useUploadingState } from "~/components/ui/minimal-tiptap/hooks/use-uploading-state";
 import { InputFormField } from "~/components/inputs/input-form-field";
 
-import { pluralize } from "../_lib/format";
+import { formatCampaignInstant, pluralize } from "../_lib/format";
+import { AudienceSelector, useAudienceCount } from "./audience-selector";
 import {
   CAMPAIGN_BODY_MAX_JSON_LENGTH,
   CampaignBodyField,
 } from "./campaign-body-field";
+import { PlaceholderNote } from "./placeholder-note";
+import { ScheduleDialog } from "./schedule-dialog";
 
 const LIST_PATH = "/admin/marketing";
 const campaignPath = (id: string) => `${LIST_PATH}/campaigns/${id}`;
@@ -80,6 +93,7 @@ const composerSchema = z.object({
       (doc) => JSON.stringify(doc).length <= CAMPAIGN_BODY_MAX_JSON_LENGTH,
       "The message is too large. Remove some content and try again.",
     ),
+  audience: audienceSchema,
 });
 
 type ComposerValues = z.infer<typeof composerSchema>;
@@ -93,12 +107,27 @@ type Props = {
     contentFormat: string;
     bodyText: string | null;
     bodyJson: unknown;
+    /** The saved segment; omitted = everyone opted in. */
+    audience?: Audience;
+    /** Product names for a "bought" segment's ids. */
+    audienceProductNames?: Record<string, string>;
   };
+  /** A starter layout to open a NEW campaign with (nothing is saved yet). */
+  starter?: {
+    subject: string;
+    previewText: string;
+    doc: JSONContent;
+  };
+  /** Everyone opted in (the unsegmented audience), for the first paint. */
   recipientCount: number;
+  /** The store's IANA time zone, for scheduling. */
+  timeZone: string;
   /** False when the business has no postal address (blocks Send). */
   hasPostalAddress: boolean;
   /** Offer the media library in the editor's image dialog. */
   mediaEnabled?: boolean;
+  /** Offer the "Products" block in the editor (needs the products flag). */
+  productsEnabled?: boolean;
   /** The store's public URL, for resolving page links in the preview. */
   baseUrl?: string | null;
 };
@@ -122,22 +151,27 @@ function initialBody(campaign: Props["campaign"]): JSONContent {
 
 export function BroadcastComposer({
   campaign,
+  starter,
   recipientCount,
+  timeZone,
   hasPostalAddress,
   mediaEnabled,
+  productsEnabled,
   baseUrl,
 }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
+  const productBlockHintId = useId();
 
   const form = useForm<ComposerValues>({
     resolver: zodResolver(composerSchema),
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
-      subject: campaign?.subject ?? "",
-      previewText: campaign?.previewText ?? "",
-      body: initialBody(campaign),
+      subject: campaign?.subject ?? starter?.subject ?? "",
+      previewText: campaign?.previewText ?? starter?.previewText ?? "",
+      body: campaign || !starter ? initialBody(campaign) : starter.doc,
+      audience: campaign?.audience ?? DEFAULT_AUDIENCE,
     },
   });
 
@@ -151,39 +185,85 @@ export function BroadcastComposer({
   // save, which creates it.
   const [draftId, setDraftId] = useState<string | undefined>(campaign?.id);
   const [sendOpen, setSendOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  // Names for the products in a "bought" segment (chips + the audience label).
+  const [productNames, setProductNames] = useState<Record<string, string>>(
+    campaign?.audienceProductNames ?? {},
+  );
 
   const saveDraft = api.marketing.saveDraft.useMutation();
   const sendTest = api.marketing.sendTest.useMutation();
   const sendCampaign = api.marketing.sendCampaign.useMutation();
+  const scheduleCampaign = api.marketing.scheduleCampaign.useMutation();
   const deleteDraft = api.marketing.deleteDraft.useMutation();
 
   const isBusy =
     saveDraft.isPending ||
     sendTest.isPending ||
     sendCampaign.isPending ||
+    scheduleCampaign.isPending ||
     deleteDraft.isPending;
 
   const subject = form.watch("subject") ?? "";
   const previewText = form.watch("previewText") ?? "";
   const body = form.watch("body");
+  const audience = form.watch("audience");
   const bodyHasContent = useMemo(() => tiptapHasContent(body), [body]);
+  // A product block with nothing chosen renders nothing and blocks the send
+  // (server-side too), so say so before the owner hits a disabled button.
+  const hasEmptyProductBlock = useMemo(
+    () => countEmptyProductBlocks(body) > 0,
+    [body],
+  );
+  // Starter "[placeholders]" left in: a heads-up, never a block.
+  const placeholders = useMemo(
+    () => findPlaceholders({ subject, previewText, bodyJson: body }),
+    [subject, previewText, body],
+  );
+
+  const {
+    count: audienceCount,
+    loading: audienceLoading,
+    isError: audienceCountFailed,
+  } = useAudienceCount(audience, recipientCount);
+  const audienceLabel = describeAudience(audience, productNames);
+  const audienceError = (
+    form.formState.errors.audience as unknown as
+      | { productIds?: { message?: string } }
+      | undefined
+  )?.productIds?.message;
 
   const hasContent = subject.trim() !== "" && bodyHasContent;
   const canSend =
     form.formState.isValid &&
     hasContent &&
     hasPostalAddress &&
-    recipientCount > 0 &&
+    audienceCount !== null &&
+    audienceCount > 0 &&
+    !audienceLoading &&
+    !hasEmptyProductBlock &&
     !isUploading &&
     !isBusy;
-  const customers = pluralize(recipientCount, "customer");
+  const people = pluralize(audienceCount ?? 0, "person", "people");
 
+  const changeAudience = (next: Audience) =>
+    form.setValue("audience", next, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  const rememberProducts = (products: AudienceProduct[]) =>
+    setProductNames((current) => ({
+      ...current,
+      ...Object.fromEntries(products.map((p) => [p.id, p.name])),
+    }));
   /** Saves the draft (creating it on first save) and re-baselines the form. */
   const persist = async (values: ComposerValues) => {
     const trimmed = {
       subject: values.subject.trim(),
       previewText: values.previewText.trim(),
       body: values.body,
+      audience: values.audience,
     };
     const { id } = await saveDraft.mutateAsync({
       id: draftId,
@@ -191,6 +271,7 @@ export function BroadcastComposer({
       previewText: trimmed.previewText,
       contentFormat: "tiptap",
       bodyJson: trimmed.body as Record<string, unknown>,
+      audience: trimmed.audience,
     });
     setDraftId(id);
     form.reset(trimmed);
@@ -236,7 +317,7 @@ export function BroadcastComposer({
       const { id } = await persist(values);
       const result = await sendCampaign.mutateAsync({ id });
       toast.success(
-        `Campaign queued for ${result.recipientCount.toLocaleString()} ${pluralize(result.recipientCount, "customer")}. It will finish sending in the background.`,
+        `Campaign queued for ${result.recipientCount.toLocaleString()} ${pluralize(result.recipientCount, "person", "people")}. It will finish sending in the background.`,
       );
       setSendOpen(false);
       void utils.marketing.invalidate();
@@ -247,6 +328,48 @@ export function BroadcastComposer({
       applyTrpcErrorToForm(form, error as TrpcFormError);
     }
   });
+
+  /**
+   * Saves pending changes, then schedules the draft. Returns nothing: on
+   * failure the message lands in `scheduleError` for the dialog to show.
+   */
+  const handleSchedule = async (scheduledAt: Date) => {
+    setScheduleError(null);
+    let reached = false;
+    await form.handleSubmit(async (values) => {
+      reached = true;
+      try {
+        const { id } = await persist(values);
+        await scheduleCampaign.mutateAsync({ id, scheduledAt });
+        toast.success(
+          `Scheduled for ${formatCampaignInstant(scheduledAt, timeZone)}.`,
+        );
+        setScheduleOpen(false);
+        void utils.marketing.invalidate();
+        router.replace(campaignPath(id));
+        router.refresh();
+      } catch (error) {
+        setScheduleError(
+          error instanceof Error && error.message
+            ? error.message
+            : "Couldn't schedule the campaign. Please try again.",
+        );
+      }
+    })();
+    if (!reached) {
+      setScheduleError("Fix the highlighted fields first, then try again.");
+    }
+  };
+
+  const handleScheduleOpenChange = (open: boolean) => {
+    setScheduleOpen(open);
+    if (open) {
+      setScheduleError(null);
+    } else if (draftId && !campaign) {
+      // A failed attempt may have created the draft: move off /campaigns/new.
+      adoptDraftUrl(draftId);
+    }
+  };
 
   const handleDelete = async () => {
     if (!draftId) return;
@@ -341,17 +464,20 @@ export function BroadcastComposer({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">
-                <span className="font-medium tabular-nums">
-                  {recipientCount.toLocaleString()}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  {customers} opted in to marketing emails will receive this
-                  campaign.
-                </span>
-              </p>
+              <AudienceSelector
+                value={audience}
+                onChange={changeAudience}
+                productNames={productNames}
+                onProductsPicked={rememberProducts}
+                productsEnabled={productsEnabled}
+                count={audienceCount}
+                loading={audienceLoading}
+                countFailed={audienceCountFailed}
+                error={audienceError}
+                disabled={isBusy}
+              />
               {recipientCount === 0 && (
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p className="text-muted-foreground mt-3 text-sm">
                   No customers have opted in yet, so this can be saved as a
                   draft but not sent.
                 </p>
@@ -395,11 +521,14 @@ export function BroadcastComposer({
                 form={form}
                 disabled={saveDraft.isPending || sendCampaign.isPending}
                 mediaEnabled={mediaEnabled}
+                productsEnabled={productsEnabled}
                 baseUrl={baseUrl}
                 onUploadingChange={onUploadingChange}
               />
             </CardContent>
           </Card>
+
+          <PlaceholderNote placeholders={placeholders} />
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
@@ -463,52 +592,104 @@ export function BroadcastComposer({
               )}
             </div>
 
-            <AlertDialog open={sendOpen} onOpenChange={setSendOpen}>
-              <AlertDialogTrigger asChild>
-                <Button type="button" disabled={!canSend}>
-                  <Send className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Send to {recipientCount.toLocaleString()} {customers}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Send to {recipientCount.toLocaleString()} {customers}?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    &ldquo;{subject.trim() || "Your email"}&rdquo; will be
-                    queued now and go out over the next few minutes to every
-                    customer who opted in to marketing emails. You can follow
-                    its progress from the campaign page. Emails already
-                    delivered can&apos;t be taken back.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={sendCampaign.isPending}>
-                    Cancel
-                  </AlertDialogCancel>
-                  {/* A plain Button, not AlertDialogAction: the dialog stays
-                      open (and busy) until the campaign is actually queued. */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!canSend}
+                aria-describedby={
+                  hasEmptyProductBlock ? productBlockHintId : undefined
+                }
+                onClick={() => handleScheduleOpenChange(true)}
+              >
+                <CalendarClock className="mr-2 h-4 w-4" aria-hidden="true" />
+                Schedule…
+              </Button>
+
+              <AlertDialog open={sendOpen} onOpenChange={setSendOpen}>
+                <AlertDialogTrigger asChild>
                   <Button
                     type="button"
-                    onClick={() => void handleSend()}
-                    disabled={sendCampaign.isPending || saveDraft.isPending}
+                    disabled={!canSend}
+                    aria-describedby={
+                      hasEmptyProductBlock ? productBlockHintId : undefined
+                    }
                   >
-                    {sendCampaign.isPending || saveDraft.isPending ? (
-                      <Loader2
-                        className="mr-2 h-4 w-4 animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" aria-hidden="true" />
-                    )}
-                    Send campaign
+                    <Send className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Send now
                   </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Send to {(audienceCount ?? 0).toLocaleString()} {people}?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-2">
+                        <p>
+                          &ldquo;{subject.trim() || "Your email"}&rdquo; will be
+                          queued now and go out over the next few minutes. You
+                          can follow its progress from the campaign page. Emails
+                          already delivered can&apos;t be taken back.
+                        </p>
+                        <p>
+                          <span className="text-foreground font-medium">
+                            Audience:
+                          </span>{" "}
+                          {audienceLabel} (opted in to marketing emails).
+                        </p>
+                        <PlaceholderNote placeholders={placeholders} />
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={sendCampaign.isPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    {/* A plain Button, not AlertDialogAction: the dialog stays
+                        open (and busy) until the campaign is actually queued. */}
+                    <Button
+                      type="button"
+                      onClick={() => void handleSend()}
+                      disabled={sendCampaign.isPending || saveDraft.isPending}
+                    >
+                      {sendCampaign.isPending || saveDraft.isPending ? (
+                        <Loader2
+                          className="mr-2 h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <Send className="mr-2 h-4 w-4" aria-hidden="true" />
+                      )}
+                      Send campaign
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+
+            {hasEmptyProductBlock && (
+              <p
+                id={productBlockHintId}
+                className="text-muted-foreground w-full text-right text-sm"
+              >
+                Choose products for the product block, or remove it.
+              </p>
+            )}
           </div>
         </div>
+
+        <ScheduleDialog
+          open={scheduleOpen}
+          onOpenChange={handleScheduleOpenChange}
+          timeZone={timeZone}
+          audienceLabel={audienceLabel}
+          count={audienceCount}
+          placeholders={placeholders}
+          pending={saveDraft.isPending || scheduleCampaign.isPending}
+          error={scheduleError}
+          onConfirm={(at) => void handleSchedule(at)}
+        />
       </form>
     </Form>
   );

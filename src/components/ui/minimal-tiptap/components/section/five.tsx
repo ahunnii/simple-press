@@ -6,10 +6,12 @@ import { CaretDownIcon, PlusIcon } from "@radix-ui/react-icons";
 import type { FormatAction } from "../../types";
 import type { toggleVariants } from "~/components/ui/toggle";
 
+import { EmailProductsInsertDialog } from "../email-products/email-products-insert-dialog";
 import { EmbedInsertDialog } from "../embed/embed-insert-dialog";
 import { FormInsertDialog } from "../form/form-insert-dialog";
 import { GalleryInsertDialog } from "../gallery/gallery-insert-dialog";
 import { ImageEditDialog } from "../image/image-edit-dialog";
+import { useOpenInsertDialog } from "../insert-dialog-context";
 import { getInsertItems, hasExtension } from "../insert-items";
 import { LinkEditPopover } from "../link/link-edit-popover";
 import { QuoteCalculatorInsertDialog } from "../quote-calculator/quote-calculator-insert-dialog";
@@ -25,6 +27,8 @@ interface SectionFiveProps extends VariantProps<typeof toggleVariants> {
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   layoutBlocksEnabled?: boolean;
+  /** Email "Products" block (the `products` feature); email mode only. */
+  productsEnabled?: boolean;
 }
 
 export const SectionFive: React.FC<SectionFiveProps> = ({
@@ -38,10 +42,13 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
   quotesEnabled = false,
   formsEnabled = false,
   layoutBlocksEnabled = false,
+  productsEnabled = false,
 }) => {
   // The video extension is only registered when the editor was given a
   // `videoUploader`, so its presence doubles as the "videos enabled" flag.
   const videosEnabled = hasExtension(editor, "video");
+
+  const openDialog = useOpenInsertDialog();
 
   // Same registry and gates as the "/" menu (see `insert-items.tsx`).
   const insertActions = React.useMemo<FormatAction[]>(
@@ -53,12 +60,22 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
         quotesEnabled,
         formsEnabled,
         layoutBlocksEnabled,
+        productsEnabled,
         videosEnabled,
       }).map((item) => ({
         value: item.value,
         label: item.label,
         icon: item.icon,
-        action: (ed) => item.run?.(ed),
+        action: (ed) => {
+          const { dialog } = item;
+          if (dialog) {
+            // After the dropdown has closed, so the two never fight over
+            // focus (and the menu's pointer-events lock is gone).
+            window.setTimeout(() => openDialog?.(dialog), 0);
+            return;
+          }
+          item.run?.(ed);
+        },
         isActive: item.isActive ?? (() => false),
         canExecute: item.canExecute,
         shortcuts: item.shortcuts,
@@ -70,7 +87,9 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
       quotesEnabled,
       formsEnabled,
       layoutBlocksEnabled,
+      productsEnabled,
       videosEnabled,
+      openDialog,
     ],
   );
 
@@ -101,6 +120,9 @@ export const SectionFive: React.FC<SectionFiveProps> = ({
           size={size ?? "default"}
           variant={variant ?? "default"}
         />
+      )}
+      {emailMode && productsEnabled && (
+        <EmailProductsInsertDialog editor={editor} />
       )}
       {formsEnabled && (
         <FormInsertDialog

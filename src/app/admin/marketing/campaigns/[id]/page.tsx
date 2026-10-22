@@ -56,8 +56,12 @@ export default async function CampaignPage({ params }: Props) {
             contentFormat: campaign.contentFormat,
             bodyText: campaign.bodyText,
             bodyJson: campaign.bodyJson,
+            audience: campaign.audience,
+            audienceProductNames: campaign.audienceProductNames,
           }}
+          timeZone={business?.timeZone ?? "UTC"}
           mediaEnabled={flags.isEnabled("media")}
+          productsEnabled={flags.isEnabled("products")}
           baseUrl={audience.baseUrl}
           recipientCount={audience.count}
           hasPostalAddress={
@@ -68,7 +72,12 @@ export default async function CampaignPage({ params }: Props) {
     );
   }
 
-  const business = await api.business.simplifiedGet();
+  // Scheduled, queued, sending and finished campaigns all get the detail view
+  // (a scheduled one is frozen until it is unscheduled back to a draft).
+  const [business, flags] = await Promise.all([
+    api.business.simplifiedGet(),
+    getBusinessFlags(),
+  ]);
   return (
     <>
       <TrailHeader breadcrumbs={breadcrumbs} />
@@ -77,6 +86,7 @@ export default async function CampaignPage({ params }: Props) {
         key={campaign.id}
         initialCampaign={campaign}
         timeZone={business?.timeZone ?? "UTC"}
+        emailMarketingEnabled={flags.isEnabled("emailMarketing")}
       />
     </>
   );

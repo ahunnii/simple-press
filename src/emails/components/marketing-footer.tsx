@@ -8,6 +8,8 @@ type MarketingFooterProps = {
   unsubscribeUrl: string;
   /** Why the recipient got this email, e.g. "You received this email because ...". */
   reason: string;
+  /** Marketing email style: the unsubscribe link takes its link color. */
+  linkColor?: string;
 };
 
 /**
@@ -20,12 +22,20 @@ export function MarketingFooter({
   postalAddress,
   unsubscribeUrl,
   reason,
+  linkColor,
 }: MarketingFooterProps) {
   return (
     <Section style={unsubscribeSection}>
       <Text style={unsubscribeText}>
         {reason}{" "}
-        <Link href={unsubscribeUrl} style={unsubscribeLink}>
+        <Link
+          href={unsubscribeUrl}
+          style={
+            linkColor
+              ? { ...unsubscribeLink, color: linkColor }
+              : unsubscribeLink
+          }
+        >
           Unsubscribe
         </Link>
       </Text>

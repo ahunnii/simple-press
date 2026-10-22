@@ -18,10 +18,14 @@ import {
   Heading3,
   Images,
   ListOrdered,
+  MousePointerClick,
   MoveVertical,
+  ShoppingBag,
   Table,
   Video,
 } from "lucide-react";
+
+import { insertButtonLink } from "./link/insert-button-link";
 
 /**
  * The one list of things the editor can insert, shared by the toolbar's
@@ -48,10 +52,12 @@ export type InsertItemValue =
   | "table"
   | "columns"
   | "details"
-  | "spacer";
+  | "spacer"
+  | "button"
+  | "emailProducts";
 
 /** Inserts that need a dialog first (see `insert-dialog-context.tsx`). */
-export type InsertDialogKind = "image" | "video";
+export type InsertDialogKind = "image" | "video" | "product";
 
 export type InsertItemGroup = "Text" | "Media" | "Blocks" | "Layout";
 
@@ -277,7 +283,40 @@ export const INSERT_ITEMS: readonly InsertItem[] = [
     canExecute: (editor) => editor.can().insertSpacer({ size: "md" }),
     shortcuts: [],
   },
+  // Email only (see `EMAIL_ONLY_VALUES`).
+  {
+    value: "button",
+    label: "Button",
+    icon: <MousePointerClick className="size-5" />,
+    keywords: ["cta", "call to action", "link", "shop now"],
+    group: "Blocks",
+    run: (editor) => {
+      insertButtonLink(editor);
+    },
+    canExecute: (editor) => !editor.isActive("codeBlock"),
+    shortcuts: [],
+  },
+  {
+    value: "emailProducts",
+    label: "Products",
+    icon: <ShoppingBag className="size-5" />,
+    keywords: ["product", "shop", "store", "catalog", "featured"],
+    group: "Blocks",
+    dialog: "product",
+    canExecute: () => true,
+    isActive: (editor) => editor.isActive("emailProducts"),
+    shortcuts: [],
+  },
 ];
+
+/**
+ * Items only an email offers: a storefront page has its own product blocks
+ * and button links come from the link dialog there.
+ */
+const EMAIL_ONLY_VALUES: ReadonlySet<InsertItemValue> = new Set([
+  "button",
+  "emailProducts",
+]);
 
 /** What each surface offers, in display order, before the flag gates. */
 const SURFACE_VALUES: Record<
@@ -300,12 +339,21 @@ const SURFACE_VALUES: Record<
       "details",
       "spacer",
     ],
-    email: ["blockquote", "horizontalRule"],
+    email: [
+      "blockquote",
+      "horizontalRule",
+      "button",
+      "emailProducts",
+      "spacer",
+    ],
   },
   slash: {
-    default: INSERT_ITEMS.map((item) => item.value),
+    default: INSERT_ITEMS.map((item) => item.value).filter(
+      (value) => !EMAIL_ONLY_VALUES.has(value),
+    ),
     // Only what `createExtensions` registers in email mode (and what
-    // `tiptap-to-email` renders): no code, video or rich blocks.
+    // `tiptap-to-email` renders): no code, video, columns, collapsibles or
+    // storefront blocks.
     email: [
       "heading1",
       "heading2",
@@ -315,6 +363,9 @@ const SURFACE_VALUES: Record<
       "blockquote",
       "horizontalRule",
       "image",
+      "button",
+      "emailProducts",
+      "spacer",
     ],
   },
 };
@@ -328,6 +379,11 @@ export interface InsertItemGates {
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   layoutBlocksEnabled?: boolean;
+  /**
+   * The `products` feature is on: offers the email "Products" block. Only
+   * meaningful with `emailMode`.
+   */
+  productsEnabled?: boolean;
   /**
    * Whether the video extension is registered (it only is when the editor
    * has a `videoUploader`). Derived from `editor` when left out.
@@ -353,8 +409,14 @@ function isGatedIn(value: InsertItemValue, gates: InsertItemGates) {
       return !!gates.formsEnabled;
     case "columns":
     case "details":
-    case "spacer":
       return !!gates.layoutBlocksEnabled;
+    case "spacer":
+      // Emails always get spacing; pages only with the layout blocks.
+      return !!gates.emailMode || !!gates.layoutBlocksEnabled;
+    case "button":
+      return !!gates.emailMode;
+    case "emailProducts":
+      return !!gates.emailMode && !!gates.productsEnabled;
     case "video":
       return (
         !gates.emailMode &&

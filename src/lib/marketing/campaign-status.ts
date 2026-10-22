@@ -8,6 +8,8 @@
 /** `MarketingCampaign.status` */
 export const CAMPAIGN_STATUSES = [
   "DRAFT",
+  /** Waiting for `scheduledAt`; the cron sweep queues it when due. */
+  "SCHEDULED",
   "QUEUED",
   "SENDING",
   "SENT",
@@ -16,7 +18,10 @@ export const CAMPAIGN_STATUSES = [
 ] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
-/** Campaigns the sender still has work for (the cron resumes these). */
+/**
+ * Campaigns the sender still has work for (the cron resumes these).
+ * SCHEDULED is deliberately not here: it has no recipients or batches yet.
+ */
 export const ACTIVE_CAMPAIGN_STATUSES = [
   "QUEUED",
   "SENDING",
@@ -69,6 +74,7 @@ export const ACCEPTED_RECIPIENT_STATUSES = [
 
 export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
   DRAFT: "Draft",
+  SCHEDULED: "Scheduled",
   QUEUED: "Queued",
   SENDING: "Sending",
   SENT: "Sent",

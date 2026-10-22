@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { resolveEmailStyle } from "./email-style";
 import {
   applyUnsubscribeUrl,
+  campaignEmailThemes,
   getBusinessPostalAddress,
   renderCampaign,
   UNSUBSCRIBE_PLACEHOLDER,
@@ -281,5 +283,122 @@ describe("getBusinessPostalAddress", () => {
 
   it("rejects a short free-form value with no digit or comma", () => {
     expect(getBusinessPostalAddress({ businessAddress: "Detroit" })).toBeNull();
+  });
+});
+
+describe("campaign email style", () => {
+  const styledDoc = {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "Shop",
+            marks: [
+              {
+                type: "link",
+                attrs: { href: "https://acme.test/shop", variant: "solid" },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const styled = {
+    ...base,
+    contentFormat: "tiptap" as const,
+    bodyText: null,
+    bodyJson: styledDoc,
+    business: {
+      ...business,
+      logoUrl: "https://cdn.test/logo.png",
+      templateId: "olive",
+      emailStyle: {
+        accent: "#123456",
+        pageBackground: "#faf5ee",
+        header: "logo-left",
+        footerNote: "See you soon.",
+      },
+      socialLinks: {
+        instagram: "https://instagram.com/acme",
+        twitter: "https://x.com/acme",
+        facebook: "mailto:hi@acme.test",
+        youtube: "javascript:alert(1)",
+        tiktok: "/tiktok",
+      },
+    },
+  };
+
+  it("uses the template's defaults when nothing is stored", async () => {
+    const defaults = resolveEmailStyle({
+      emailStyle: null,
+      templateId: "olive",
+    });
+    const { html } = await renderCampaign({
+      ...styled,
+      business: { ...business, templateId: "olive" },
+    });
+    expect(html).toContain(`background-color:${defaults.pageBackground}`);
+    expect(html).toContain(
+      `background-color:${defaults.accent};color:${defaults.buttonText}`,
+    );
+  });
+
+  it("applies the stored style to the body, header and footer", async () => {
+    const { html, text } = await renderCampaign(styled);
+    expect(html).toContain("background-color:#faf5ee");
+    expect(html).toContain(
+      "border:1px solid #123456;background-color:#123456;color:#ffffff",
+    );
+    expect(html).toMatch(/style="padding:32px 24px;text-align:left"/);
+    expect(html).toContain("See you soon.");
+    expect(text).toContain("See you soon.");
+    expect(count(html, UNSUBSCRIBE_PLACEHOLDER)).toBe(1);
+    expect(count(text, UNSUBSCRIBE_PLACEHOLDER)).toBe(1);
+  });
+
+  it("lists only http(s) social links, with short labels", async () => {
+    const { html } = await renderCampaign(styled);
+    expect(html).toContain('href="https://instagram.com/acme"');
+    expect(html).toMatch(/href="https:\/\/x\.com\/acme"[^>]*>X<\/a>/);
+    expect(html).not.toContain("mailto:hi@acme.test");
+    expect(html).not.toContain("javascript:");
+    expect(html).not.toContain("/tiktok");
+  });
+
+  it("hides social links when showSocial is off", async () => {
+    const { html } = await renderCampaign({
+      ...styled,
+      business: {
+        ...styled.business,
+        emailStyle: { ...styled.business.emailStyle, showSocial: false },
+      },
+    });
+    expect(html).not.toContain("instagram.com");
+  });
+
+  it("lets styleOverride replace the stored style", async () => {
+    const { html } = await renderCampaign({
+      ...styled,
+      styleOverride: { accent: "#abcdef", header: "name" },
+    });
+    expect(html).toContain("background-color:#abcdef");
+    expect(html).not.toContain("#123456");
+    expect(html).not.toContain("See you soon.");
+    expect(html).not.toContain("https://cdn.test/logo.png");
+  });
+
+  it("ignores an invalid stored style", () => {
+    const themes = campaignEmailThemes({
+      ...business,
+      templateId: "olive",
+      emailStyle: { accent: "red" },
+    });
+    expect(themes.style).toEqual(
+      resolveEmailStyle({ emailStyle: null, templateId: "olive" }),
+    );
   });
 });

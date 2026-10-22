@@ -28,6 +28,11 @@ export const TEMPLATES = [
     description:
       "Simple, versatile storefront that works for any kind of shop — a solid starting point you can customize as you grow",
     previewImage: "/templates/default-preview.png",
+    emailDefaults: {
+      accent: "#111827",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.MODERN,
@@ -35,6 +40,11 @@ export const TEMPLATES = [
     description:
       "Clean and contemporary design perfect for fashion, tech, or lifestyle brands",
     previewImage: "/templates/modern-preview.png",
+    emailDefaults: {
+      accent: "#111827",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.BAMBOO,
@@ -42,6 +52,11 @@ export const TEMPLATES = [
     description:
       "Luxe editorial storefront for eco brands — deep forest green and antique gold on warm cream, serif display type, and an emblem-first navigation that puts the brand's logo center stage",
     previewImage: "/templates/bamboo-preview.png",
+    emailDefaults: {
+      accent: "#1b412a",
+      pageBackground: "#f4f0e1",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.ANIMATED_BAMBOO,
@@ -49,6 +64,11 @@ export const TEMPLATES = [
     description:
       "Illustrated, animation-forward take on the Bamboo storefront — living scenes, scroll reveals, and hand-drawn artwork throughout.",
     previewImage: "/templates/animated-bamboo-preview.png",
+    emailDefaults: {
+      accent: "#2c5234",
+      pageBackground: "#fbf9f2",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.HAPPY_BAMBOO,
@@ -56,6 +76,11 @@ export const TEMPLATES = [
     description:
       "Lush nature-focused shop with coming-soon product support, botanical imagery, and rich per-product feature highlights",
     previewImage: "/templates/happy-bamboo-preview.png",
+    emailDefaults: {
+      accent: "#4c6d00",
+      pageBackground: "#f6f9fc",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.DARK_TREND,
@@ -63,6 +88,11 @@ export const TEMPLATES = [
     description:
       "Dark and bold design perfect for tech, gaming, or lifestyle brands",
     previewImage: "/templates/dark-trend-preview.png",
+    emailDefaults: {
+      accent: "#7f22fe",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.ELEGANT,
@@ -70,6 +100,11 @@ export const TEMPLATES = [
     description:
       "Clean botanical beauty and wellness storefront with organic certification badges and soft, nature-derived styling",
     previewImage: "/templates/elegant-preview.png",
+    emailDefaults: {
+      accent: "#0b0907",
+      pageBackground: "#f9f2e6",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.POLLEN,
@@ -77,6 +112,11 @@ export const TEMPLATES = [
     description:
       "Bright and colorful design oriented toward environmental brands and causes; products and shop are supported but not the focus",
     previewImage: "/templates/pollen-preview.png",
+    emailDefaults: {
+      accent: "#215935",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.NOISE,
@@ -84,6 +124,11 @@ export const TEMPLATES = [
     description:
       "Editorial luxury fashion (Visual Noise Detroit) — Cormorant Garamond serif headings, steel blue–champagne palette, split-hero layout",
     previewImage: "/templates/noise-preview.png",
+    emailDefaults: {
+      accent: "#1a1a1a",
+      pageBackground: "#fbfaf7",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.SLEDGE,
@@ -91,6 +136,11 @@ export const TEMPLATES = [
     description:
       "Bold cream-and-green streetwear / lifestyle storefront with a mosaic hero, wave dividers, and testimonials carousel",
     previewImage: "/templates/sledge-preview.png",
+    emailDefaults: {
+      accent: "#c2410c",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.VII,
@@ -98,6 +148,11 @@ export const TEMPLATES = [
     description:
       "Full-featured boutique with a services section, rich branding fields, announcement bar, and shop — ideal for luxury or creative studios",
     previewImage: "/templates/vii-preview.png",
+    emailDefaults: {
+      accent: "#1e3540",
+      pageBackground: "#ede3ce",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.BUILDERS,
@@ -105,6 +160,11 @@ export const TEMPLATES = [
     description:
       "Industrial Solidarity service/portfolio template for trades and construction businesses — no shop or checkout; highlights services, about, and contact",
     previewImage: "/templates/builders-preview.png",
+    emailDefaults: {
+      accent: "#ffc5b6",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.COOP,
@@ -112,6 +172,11 @@ export const TEMPLATES = [
     description:
       "Pixel-exact replica of buildingcooperatively.com — minimal 4-page service site with a parallax hero and project photo gallery (no shop or checkout)",
     previewImage: "/templates/coop-preview.png",
+    emailDefaults: {
+      accent: "#262626",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.PINK,
@@ -119,6 +184,11 @@ export const TEMPLATES = [
     description:
       "Editorial gallery storefront for makers — near-black chrome against warm paper, square edges and hairline grids; full commerce plus workshops, journal and keeper stories",
     previewImage: "/templates/pink-preview.png",
+    emailDefaults: {
+      accent: "#d81b60",
+      pageBackground: "#f6f9fc",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.RELOCATION,
@@ -126,6 +196,11 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of handyrelocations.com — terracotta wave heroes, quote form, reviews, and FAQ for a Detroit moving company (no shop or checkout)",
     previewImage: "/templates/relocation-preview.png",
+    emailDefaults: {
+      accent: "#a5513a",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.WEALTH,
@@ -133,6 +208,11 @@ export const TEMPLATES = [
     description:
       "1:1 recreation of detroitcommunitywealth.org — quiet sage-and-paper nonprofit site with overlap heroes, programs, donate, and co-op directory (no shop or checkout)",
     previewImage: "/templates/wealth-preview.png",
+    emailDefaults: {
+      accent: "#376d39",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
   {
     id: TEMPLATE_IDS.DREAM,
@@ -140,6 +220,11 @@ export const TEMPLATES = [
     description:
       "Dreamy event-decor site — logo hero with drifting clouds, alternating service rows, masonry gallery, and an Estimate Quote request (no shop or checkout)",
     previewImage: "/templates/dream-preview.png",
+    emailDefaults: {
+      accent: "#2b211d",
+      pageBackground: "#fffaf4",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.UMSC,
@@ -147,6 +232,11 @@ export const TEMPLATES = [
     description:
       "Calm candle-bar storefront — black/gold header, full-height video-or-photo hero with a thin serif headline, cream product shop (candles, soaps, body care, home care), custom-order request",
     previewImage: "/templates/umsc-preview.png",
+    emailDefaults: {
+      accent: "#050505",
+      pageBackground: "#fffaf2",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.OLIVE,
@@ -154,6 +244,11 @@ export const TEMPLATES = [
     description:
       "Detroit women's boutique (Olive Mode) — white swatch-book cards, photo-led grids, sage-green cover footer, Josefin Sans + Figtree",
     previewImage: "/templates/olive-preview.png",
+    emailDefaults: {
+      accent: "#1f1b17",
+      pageBackground: "#f7f4ed",
+      font: "serif",
+    },
   },
   {
     id: TEMPLATE_IDS.GLOVE,
@@ -161,6 +256,11 @@ export const TEMPLATES = [
     description:
       "Royal-purple luxury glove boutique (The LuvGluv) — search-first Woo-style header, lavender story band, 6-step customization guide, charm add-on picker on the product page, Poppins + Lato",
     previewImage: "/templates/glove-preview.png",
+    emailDefaults: {
+      accent: "#601b76",
+      pageBackground: "#f6f9fc",
+      font: "sans",
+    },
   },
 ] as const;
 

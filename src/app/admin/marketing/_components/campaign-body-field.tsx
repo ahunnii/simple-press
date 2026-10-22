@@ -5,11 +5,12 @@ import type { UseFormReturn } from "react-hook-form";
 import { useMemo, useState } from "react";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 
+import type { Audience } from "~/lib/marketing/segments";
 import { tiptapToEmailHtml } from "~/lib/marketing/tiptap-to-email";
 import { Button } from "~/components/ui/button";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 
-import { EmailBodyPreview } from "./email-body-preview";
+import { EmailPreviewFrame, useCampaignPreview } from "./email-preview-frame";
 
 /** Largest serialized message the server accepts (`saveDraft`). */
 export const CAMPAIGN_BODY_MAX_JSON_LENGTH = 200_000;
@@ -19,19 +20,22 @@ export type CampaignBodyFormValues = {
   previewText: string;
   /** Tiptap document; plain-text drafts are converted on load. */
   body: JSONContent;
+  /** Not used by the body field; part of the composer's form. */
+  audience: Audience;
 };
 
 /**
  * The campaign's message field, kept on its own so the composer around it
  * doesn't care how the body is edited. It reads and writes the `body` key of
  * the composer form as a tiptap document, in an editor limited to what an
- * email can show, with a live preview of the rendered email and a warning for
+ * email can show, with a live preview of the full email and a warning for
  * anything pasted in that the email will leave out.
  */
 export function CampaignBodyField({
   form,
   disabled,
   mediaEnabled,
+  productsEnabled,
   baseUrl,
   onUploadingChange,
 }: {
@@ -39,15 +43,29 @@ export function CampaignBodyField({
   disabled?: boolean;
   /** Offer "Choose from library" in the image dialog (needs the media flag). */
   mediaEnabled?: boolean;
+  /** Offer the "Products" block (needs the products flag). */
+  productsEnabled?: boolean;
   /** The store's public URL; page links in the message resolve against it. */
   baseUrl?: string | null;
   onUploadingChange?: (uploading: boolean) => void;
 }) {
   const body = form.watch("body");
+  const previewText = form.watch("previewText");
   const [showPreview, setShowPreview] = useState(false);
-  const warnings = useMemo(
+  // The full email as it will arrive (header, footer, saved style), rendered
+  // by the server; only fetched while the preview is open.
+  const preview = useCampaignPreview({
+    bodyJson: body,
+    previewText,
+    enabled: showPreview,
+  });
+  const walkerWarnings = useMemo(
     () => tiptapToEmailHtml(body, { baseUrl }).warnings,
     [body, baseUrl],
+  );
+  const warnings = useMemo(
+    () => [...new Set([...walkerWarnings, ...preview.warnings])],
+    [walkerWarnings, preview.warnings],
   );
 
   return (
@@ -61,10 +79,11 @@ export function CampaignBodyField({
         emailMode
         disabled={disabled}
         mediaEnabled={mediaEnabled}
+        productsEnabled={productsEnabled}
         onUploadingChange={onUploadingChange}
         placeholder="Hi there, here's what's new this month…"
         editorContentClassName="min-h-[320px] p-4"
-        description="Headings, lists, links, images and colors are supported. Your business address and an unsubscribe link are added at the bottom automatically."
+        description="Add headings, lists, links, pictures, buttons, products and space from the toolbar or by typing /. Your business address and an unsubscribe link are added at the bottom automatically."
       />
 
       {warnings.length > 0 && (
@@ -102,8 +121,17 @@ export function CampaignBodyField({
           {showPreview ? "Hide preview" : "Preview email"}
         </Button>
         {showPreview && (
-          <div className="mt-3">
-            <EmailBodyPreview doc={body} baseUrl={baseUrl} />
+          <div className="mt-3 space-y-2">
+            <EmailPreviewFrame html={preview.html} loading={preview.loading} />
+            {preview.error && (
+              <p role="alert" className="text-destructive text-sm">
+                {preview.error}
+              </p>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Shown with your email style, business address and unsubscribe
+              footer.
+            </p>
           </div>
         )}
       </div>

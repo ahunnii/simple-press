@@ -280,6 +280,14 @@ export const marketingTestSendLimiter = makeLazy({
   keyPrefix: "rl:marketing-test-send",
 });
 
+// 120 live email previews per minute per business+user (the composer and the
+// email style page re-render on a 500ms debounce while typing; nothing is sent)
+export const marketingPreviewLimiter = makeLazy({
+  points: 120,
+  duration: 60,
+  keyPrefix: "rl:marketing-preview",
+});
+
 /**
  * Extract a best-effort client IP from request headers.
  *

@@ -521,12 +521,15 @@ export const productRouter = createTRPCRouter({
       z.object({
         query: z.string().trim().max(100).default(""),
         limit: z.number().int().min(1).max(25).default(10),
+        /** Only products shoppers can see (the email product picker). */
+        publishedOnly: z.boolean().default(false),
       }),
     )
     .query(({ ctx, input }) =>
       ctx.db.product.findMany({
         where: {
           businessId: ctx.businessId,
+          ...(input.publishedOnly && { published: true }),
           ...(input.query && {
             OR: [
               { name: { contains: input.query, mode: "insensitive" } },
@@ -538,9 +541,11 @@ export const productRouter = createTRPCRouter({
         select: {
           id: true,
           name: true,
+          slug: true,
           price: true,
+          compareAtPrice: true,
           variants: {
-            select: { id: true, name: true, price: true },
+            select: { id: true, name: true, price: true, compareAtPrice: true },
             orderBy: { createdAt: "asc" },
           },
           published: true,

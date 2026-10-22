@@ -17,11 +17,12 @@ type Variant = "success" | "secondary" | "warning" | "destructive" | "outline";
 /**
  * Same vocabulary the Invoices / Forms badges use: `success` is the terminal
  * good state (Sent), `secondary` is quiet/unfinished (Draft), `outline` is
- * parked or neutral (Queued, Canceled), `warning` is in-flight work that is
+ * parked or neutral (Scheduled, Queued, Canceled), `warning` is in-flight work that is
  * still moving (Sending), `destructive` is what an owner scans for (Failed).
  */
 const CAMPAIGN_VARIANT: Record<CampaignStatus, Variant> = {
   DRAFT: "secondary",
+  SCHEDULED: "outline",
   QUEUED: "outline",
   SENDING: "warning",
   SENT: "success",
