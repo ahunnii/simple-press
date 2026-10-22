@@ -9,14 +9,13 @@ import { OliveSection } from "../shared";
  *
  * A non-bleed `OliveSection` caps its whole box (padding included) at
  * `--olive-container`, so its content starts `--olive-section-pad-x` inside
- * a 1280px column: 120px from the viewport edge at 1440, 16px at 390. A
+ * a 1320px column: 108px from the viewport edge at 1440, 16px at 390. A
  * bleed section pads the full viewport instead, so its inner container has
- * to be narrower by the same two paddings to land on that same line —
- * otherwise a toned band's text would sit 40px left of the white sections
- * around it (baseline B1.7).
+ * to be narrower by the same two paddings (`--olive-content-max`, which
+ * `OliveSection` bleed now applies itself) to land on that same line
+ * (baseline B1.7).
  */
-export const OLIVE_PAGE_EDGE_MAX =
-  "calc(var(--olive-container) - 2 * var(--olive-section-pad-x))";
+export const OLIVE_PAGE_EDGE_MAX = "var(--olive-content-max)";
 
 type Props = {
   children: ReactNode;
@@ -54,7 +53,7 @@ type Props = {
  */
 export function OlivePageSection({
   children,
-  tone = "white",
+  tone = "ivory",
   flush = false,
   as = "section",
   sectionAttrs,

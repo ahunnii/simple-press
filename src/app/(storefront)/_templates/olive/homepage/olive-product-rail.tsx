@@ -17,15 +17,19 @@ type Props = {
   sectionAttrs?: Record<string, string>;
   headingFieldKey?: string;
   linkLabelFieldKey?: string;
+  emptyHeadingFieldKey?: string;
+  emptyBodyFieldKey?: string;
 };
 
 /**
- * New arrivals in the swatch grid — the page's commerce core, and the reason
- * the rest of it exists. Eight cards at four columns, two-up on a phone, each
- * with its real variant colours as chips and a quick-add pill.
+ * New arrivals — the page's commerce core, read like a lookbook row. Spaced
+ * Bodoni capitals with a "SHOP ALL →" link on the title's baseline, then the
+ * editorial product cards (no frame; colour dots under the price; quick-add
+ * bar on hover) four across, two-up on a phone.
  *
- * Never hidden: a store with nothing to show gets the ghost card with its own
- * copy instead of a gap where the shop should be.
+ * Never hidden: a store with nothing to show gets the drawn empty state with
+ * its own copy instead of a gap where the shop
+ * should be.
  */
 export function OliveProductRail({
   heading,
@@ -37,10 +41,12 @@ export function OliveProductRail({
   sectionAttrs,
   headingFieldKey,
   linkLabelFieldKey,
+  emptyHeadingFieldKey,
+  emptyBodyFieldKey,
 }: Props) {
   return (
     <OliveSection
-      tone="white"
+      tone="ivory"
       aria-labelledby="olive-rail-heading"
       {...sectionAttrs}
     >
@@ -48,6 +54,7 @@ export function OliveProductRail({
         <OliveSectionHeading
           heading={heading}
           id="olive-rail-heading"
+          caps
           link={
             linkLabel && linkHref
               ? { label: linkLabel, href: linkHref }
@@ -55,7 +62,7 @@ export function OliveProductRail({
           }
           headingFieldKey={headingFieldKey}
           linkFieldKey={linkLabelFieldKey}
-          className="mb-8"
+          className="mb-8 md:mb-10"
         />
       </OliveReveal>
 
@@ -67,6 +74,8 @@ export function OliveProductRail({
         priorityCount={0}
         emptyHeading={emptyHeading}
         emptyBody={emptyBody}
+        emptyHeadingFieldKey={emptyHeadingFieldKey}
+        emptyBodyFieldKey={emptyBodyFieldKey}
       />
     </OliveSection>
   );

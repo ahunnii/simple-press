@@ -125,6 +125,13 @@ export const reviewVoteLimiter = makeLazy({
   keyPrefix: "rl:review-vote",
 });
 
+// 5 review submissions per 15 minutes per signed-in user, keyed userId:host
+export const reviewSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:review-submit",
+});
+
 // 5 contact form submissions per 10 minutes per IP
 export const contactLimiter = makeLazy({
   points: 5,

@@ -4,12 +4,12 @@ import { cloneElement } from "react";
 import { cn } from "~/lib/utils";
 
 /**
- * OliveInput — the paper-faced text control.
+ * OliveInput — the bone-faced, square text control.
  *
- * Composes the chrome's `olive-input` (paper ground, hairline-strong border
- * that clears 3:1, warms to white on hover, sage-bright border plus a
- * sage-tint ring on keyboard focus, error border and tint on `aria-invalid`).
- * Everything a native input accepts passes straight through, `ref` included.
+ * Composes the chrome's `olive-input` (bone face, a `--olive-control-border`
+ * boundary that clears 3:1, espresso border on hover, a 2px espresso edge on
+ * keyboard focus, warm error border and tint on `aria-invalid`). Everything a
+ * native input accepts passes straight through, `ref` included.
  */
 export function OliveInput({
   className,
@@ -31,6 +31,25 @@ export function OliveSelect({
     <select className={cn("olive-select", className)} {...rest}>
       {children}
     </select>
+  );
+}
+
+/**
+ * OliveCheckbox — a square native checkbox (`olive-checkbox`): bone face,
+ * control border, espresso fill with an ivory tick when checked. Pair it
+ * with a visible `<label htmlFor>`; everything a native input accepts passes
+ * through.
+ */
+export function OliveCheckbox({
+  className,
+  ...rest
+}: Omit<ComponentPropsWithRef<"input">, "type">) {
+  return (
+    <input
+      type="checkbox"
+      className={cn("olive-checkbox", className)}
+      {...rest}
+    />
   );
 }
 
@@ -100,7 +119,10 @@ export function OliveField({
         {label}
         {required ? (
           <>
-            <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
+            <span
+              aria-hidden="true"
+              style={{ color: "var(--olive-moss-deep)" }}
+            >
               {" *"}
             </span>
             <span className="sr-only"> (required)</span>

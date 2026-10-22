@@ -66,13 +66,13 @@ export type OliveResolvedChipColor = {
  */
 export function resolveChipColor(value: string): OliveResolvedChipColor {
   const trimmed = value.trim();
-  if (!trimmed) return { color: "var(--olive-paper)", unknown: true };
+  if (!trimmed) return { color: "var(--olive-sand)", unknown: true };
   if (isCssColorValue(trimmed)) return { color: trimmed, unknown: false };
 
   const named = colorFromName(trimmed);
   if (named) return { color: named, unknown: false };
 
-  return { color: "var(--olive-paper)", unknown: true };
+  return { color: "var(--olive-sand)", unknown: true };
 }
 
 /**
@@ -90,10 +90,10 @@ export function isColorOptionName(key: string): boolean {
  * and never sit above a heading.
  */
 const CHIP_TOKENS = [
-  "--olive-sage-bright",
-  "--olive-slate",
-  "--olive-leaf",
-  "--olive-paper",
+  "--olive-moss",
+  "--olive-stone",
+  "--olive-moss-deep",
+  "--olive-sand",
 ] as const;
 
 export function oliveChipToken(index: number): string {

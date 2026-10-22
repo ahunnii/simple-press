@@ -53,7 +53,7 @@ export async function OliveCartPage({
         </h1>
         {intro ? (
           <p
-            className="max-w-[58ch] text-[0.9375rem] leading-relaxed"
+            className="max-w-[58ch] text-[0.9375rem] leading-[1.7]"
             style={{ color: "var(--olive-ink-soft)" }}
             {...fieldAttr("olive.cart.intro")}
           >

@@ -31,9 +31,9 @@ type Props = {
 };
 
 /**
- * The journal teaser — three white cards, each a photograph, a date in the
- * quiet slate ink, a title and one line. The whole card is the link, so the
- * hit target is the card and not a five-word phrase at the bottom of it.
+ * The journal teaser — three unframed entries, each a photograph, a date in
+ * taupe ink, a Bodoni title and one line. The whole entry is the link, so the
+ * hit target is the entry and not a five-word phrase at the bottom of it.
  *
  * Nothing here is owner-authored except the heading and the link: the posts
  * are real, and with no published posts (or the blog turned off) the section
@@ -53,13 +53,14 @@ export function OliveBlogSection({
 
   return (
     <OliveSection
-      tone="white"
+      tone="ivory"
       aria-labelledby="olive-blog-heading"
       {...sectionAttrs}
     >
       <OliveSectionHeading
         heading={heading}
         id="olive-blog-heading"
+        caps
         link={
           linkLabel && linkHref
             ? { label: linkLabel, href: linkHref }
@@ -67,20 +68,23 @@ export function OliveBlogSection({
         }
         headingFieldKey={headingFieldKey}
         linkFieldKey={linkLabelFieldKey}
-        className="mb-8"
+        className="mb-8 md:mb-10"
       />
 
-      <OliveRevealGroup fan className="grid gap-3 md:grid-cols-3">
+      <OliveRevealGroup className="grid gap-10 md:grid-cols-3 md:gap-6">
         {shown.map((post, index) => (
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
-            className="olive-card olive-card-lift olive-reveal-item flex flex-col overflow-hidden"
+            className="olive-blog-teaser group olive-reveal-item flex flex-col"
             style={{ "--i": index } as CSSProperties}
           >
             <div
               className="relative w-full overflow-hidden"
-              style={{ aspectRatio: "4 / 3" }}
+              style={{
+                aspectRatio: "4 / 3",
+                backgroundColor: "var(--olive-sand)",
+              }}
             >
               {hasOliveImage(post.image) ? (
                 <Image
@@ -88,24 +92,24 @@ export function OliveBlogSection({
                   alt=""
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover"
+                  className="olive-photo-push object-cover"
                 />
               ) : (
                 <OliveImageFallback className="absolute inset-0" />
               )}
             </div>
 
-            <div className="flex flex-col gap-2 px-4 py-4">
+            <div className="flex flex-col gap-2 pt-4">
               {post.dateLabel ? (
                 <span
                   className="olive-caption"
-                  style={{ color: "var(--olive-slate-deep)" }}
+                  style={{ color: "var(--olive-taupe-ink)" }}
                 >
                   {post.dateLabel}
                 </span>
               ) : null}
 
-              <h3 className="olive-h3">{post.title}</h3>
+              <h3 className="olive-h3 olive-blog-teaser-title">{post.title}</h3>
 
               {post.excerpt ? (
                 <span

@@ -10,7 +10,10 @@ import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import { OliveImageTile, OliveRevealGroup, OliveSection } from "../shared";
-import { DEFAULT_OLIVE_ABOUT_CTA_TILES, DEFAULT_OLIVE_ABOUT_STORY } from "./index";
+import {
+  DEFAULT_OLIVE_ABOUT_CTA_TILES,
+  DEFAULT_OLIVE_ABOUT_STORY,
+} from "./index";
 import { OliveAboutHero } from "./olive-about-hero";
 import { OliveAboutStory } from "./olive-about-story";
 
@@ -75,19 +78,19 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <OliveSection
           as="section"
           aria-label="Our approach"
-          tone="paper"
+          tone="sand"
           {...sectionGroupAttr("about", "manifesto")}
           className="mx-auto flex max-w-[52rem] flex-col items-center gap-4 text-center"
         >
           <h2
-            className="olive-display"
+            className="olive-h1"
             {...fieldAttr("olive.about.manifesto-heading")}
           >
             {f["olive.about.manifesto-heading"] ?? ""}
           </h2>
           {f["olive.about.manifesto-body"] ? (
             <p
-              className="max-w-[62ch] text-[0.9375rem] leading-relaxed"
+              className="max-w-[62ch] text-[0.9375rem] leading-[1.7]"
               style={{ color: "var(--olive-ink-soft)" }}
               {...fieldAttr("olive.about.manifesto-body")}
             >
@@ -106,7 +109,7 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
           <OliveSection
             as="section"
             aria-label="Since"
-            tone="white"
+            tone="ivory"
             {...sectionGroupAttr("about", "founding")}
             className="mx-auto flex max-w-[520px] flex-col items-center border-y border-[var(--olive-hairline)] py-8 text-center"
           >
@@ -123,11 +126,11 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
         <OliveSection
           as="section"
           aria-label="Where to next"
-          tone="paper"
+          tone="sand"
           {...sectionGroupAttr("about", "cta")}
         >
           {/* Grid sizes adapt to tile count: 1 tile centers at 640px, 2 tiles split 50/50, 3+ tiles split into thirds */}
-          <OliveRevealGroup fan className={ctaGridClass(ctaTiles.length)}>
+          <OliveRevealGroup className={ctaGridClass(ctaTiles.length)}>
             {ctaTiles.map(({ row, index }, i) => {
               const image = readString(row, "image");
               const label = readString(row, "label");
@@ -144,7 +147,7 @@ export function OliveAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 >
                   <OliveImageTile
                     image={image || "/placeholder.svg"}
-                    alt={label}
+                    alt=""
                     label={label}
                     href={link}
                     sizes={ctaSizes(ctaTiles.length)}

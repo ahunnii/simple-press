@@ -79,7 +79,7 @@ export function OliveSubscriptionsPage({
           cta={{ label: "Shop new", href: "/shop" }}
         />
       ) : (
-        <OliveRevealGroup className="flex flex-col gap-4" fan>
+        <OliveRevealGroup className="flex flex-col gap-4">
           {subscriptions.map((subscription, i) => {
             const nextDate = nextDateLabel(subscription);
             const statusLabel =
@@ -126,7 +126,11 @@ export function OliveSubscriptionsPage({
                   className="mt-4 pt-4"
                   style={{ borderTop: "1px solid var(--olive-hairline)" }}
                 >
-                  <OliveButton variant="ghost" href={subscription.manageUrl}>
+                  <OliveButton
+                    variant="link"
+                    arrow
+                    href={subscription.manageUrl}
+                  >
                     Manage
                   </OliveButton>
                 </div>

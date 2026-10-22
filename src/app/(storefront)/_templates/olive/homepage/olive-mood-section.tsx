@@ -17,10 +17,9 @@ type Props = {
 };
 
 /**
- * Two big tiles — the page's one moment of scale between the dense category
- * row and the dense product grid. Each photograph carries its label on a
- * white card in the bottom corner, so the print sits on the picture rather
- * than beside it.
+ * Two big tiles — a moment of pure photography after the About split. Each
+ * photograph carries its label printed straight onto it in Bodoni over a
+ * bottom-up espresso scrim (`OliveImageTile`), square-cornered, no frame.
  *
  * There is no heading here on purpose: the pair is a visual break, and
  * design.md's heading rule (a heading plus at most one line) would make it
@@ -36,8 +35,8 @@ export function OliveMoodSection({ first, second, sectionAttrs }: Props) {
   if (tiles.length === 0) return null;
 
   return (
-    <OliveSection bleed tone="paper" aria-label="Featured" {...sectionAttrs}>
-      <OliveRevealGroup fan className="grid gap-3 md:grid-cols-2">
+    <OliveSection bleed tone="ivory" aria-label="Featured" {...sectionAttrs}>
+      <OliveRevealGroup className="grid gap-3 md:grid-cols-2 md:gap-5">
         {tiles.map((tile, index) => (
           <OliveImageTile
             key={tile.labelFieldKey ?? tile.label}

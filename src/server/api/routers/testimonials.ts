@@ -249,7 +249,7 @@ export const testimonialRouter = createTRPCRouter({
       z.object({
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
-        captchaToken: z.string(),
+        captchaToken: z.string().max(4096),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -295,10 +295,13 @@ export const testimonialRouter = createTRPCRouter({
           message: "User not found",
         });
 
+      // Rows are stored normalized, so the dedupe query must normalize too.
+      const normalizedUserEmail = normalizeEmail(user.email);
+
       const existing = await ctx.db.testimonial.findFirst({
         where: {
           businessId: business.id,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           source: "customer",
         },
       });
@@ -310,7 +313,6 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
-      const normalizedUserEmail = normalizeEmail(user.email);
       const customer = await ctx.db.customer.upsert({
         where: {
           businessId_email: {
@@ -355,10 +357,10 @@ export const testimonialRouter = createTRPCRouter({
     .input(
       z.object({
         code: z.string(),
-        name: z.string().min(1),
+        name: z.string().min(1).max(100),
         text: z.string().min(10).max(1000),
         photoUrls: z.array(z.string().url()).max(5).default([]),
-        captchaToken: z.string(),
+        captchaToken: z.string().max(4096),
       }),
     )
     .mutation(async ({ ctx, input }) => {

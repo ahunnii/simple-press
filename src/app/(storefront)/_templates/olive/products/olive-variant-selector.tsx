@@ -70,10 +70,11 @@ function optionLabel(key: string): string {
  * OliveVariantSelector — choosing a shade and a size, in the template's own
  * language.
  *
- * Colours are the one place the swatch book is literal: a row of real colour
- * chips, the chosen one ringed in leaf green. Everything else — size, length,
- * scent — is a row of cut tabs, because those are words, not colours, and a
- * chip for them would be ornament (see the chip discipline in design.md).
+ * Colours are the one place a round swatch is allowed: a row of real colour
+ * chips (28px, stone ring), the chosen one ringed in espresso with an ivory
+ * gap. Everything else — size, length, scent — is a row of square option
+ * boxes, because those are words, not colours, and a chip for them would be
+ * ornament (see design.md).
  *
  * A sold-out option stays in the row, reachable and marked, rather than
  * vanishing: a shopper who cannot find the colour she wants assumes the shop
@@ -211,20 +212,10 @@ export function OliveVariantSelector({
           if (isColorOptionName(group.key)) {
             return (
               <div key={group.key} className="flex flex-col gap-2">
-                <p className="flex flex-wrap items-baseline gap-2">
-                  <span className="olive-label">{label}</span>
-                  {value ? (
-                    <span
-                      className="text-[0.875rem]"
-                      style={{ color: "var(--olive-ink)" }}
-                    >
-                      {value}
-                    </span>
-                  ) : null}
-                </p>
+                <OliveOptionLabel label={label} value={value} />
                 <OliveChipRow
                   aria-label={label}
-                  size={26}
+                  size={28}
                   value={value}
                   onChange={(next) => chooseValue(group.key, next)}
                   items={group.values.map((option) => {
@@ -272,7 +263,7 @@ export function OliveVariantSelector({
             message="Tell us where to write when this one is back."
             messageClassName="text-[0.8125rem] text-[var(--olive-ink-soft)]"
             inputClassName="olive-input"
-            buttonClassName="olive-btn olive-btn-secondary olive-btn-sm"
+            buttonClassName="olive-btn olive-btn-outline olive-btn-sm"
           />
         </div>
       ) : cartEnabled || product.trackInventory ? (
@@ -298,7 +289,7 @@ export function OliveVariantSelector({
   );
 }
 
-/** The stock line for the chosen variant — a chip only when the state earns one. */
+/** The stock line for the chosen variant — a badge only when the state earns one. */
 function OliveVariantStock({
   trackInventory,
   allowBackorders,
@@ -334,8 +325,31 @@ function OliveVariantStock({
 
 type OliveOptionItem = { value: string; label: string; soldOut: boolean };
 
+/** "COLOR: Olive" — the label in tracked caps, the chosen name in espresso. */
+function OliveOptionLabel({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null;
+}) {
+  return (
+    <p className="flex flex-wrap items-baseline gap-2">
+      <span className="olive-label">{label}:</span>
+      {value ? (
+        <span
+          className="olive-label"
+          style={{ color: "var(--olive-espresso)" }}
+        >
+          {value}
+        </span>
+      ) : null}
+    </p>
+  );
+}
+
 /**
- * A row of cut tabs — the non-colour options.
+ * A row of square option boxes — the non-colour options.
  *
  * A radio group with one tab stop: Arrow keys move and select, Home and End
  * jump to the ends. A sold-out tab keeps its place in the row and says so in
@@ -406,17 +420,7 @@ function OliveOptionRow({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="flex flex-wrap items-baseline gap-2">
-        <span className="olive-label">{label}</span>
-        {selectedLabel ? (
-          <span
-            className="text-[0.875rem]"
-            style={{ color: "var(--olive-ink)" }}
-          >
-            {selectedLabel}
-          </span>
-        ) : null}
-      </p>
+      <OliveOptionLabel label={label} value={selectedLabel || null} />
 
       <div
         ref={rowRef}
@@ -437,28 +441,7 @@ function OliveOptionRow({
               aria-label={item.soldOut ? `${item.label} — sold out` : undefined}
               tabIndex={index === activeIndex ? 0 : -1}
               onClick={item.soldOut ? undefined : () => onChange(item.value)}
-              className="olive-label inline-flex items-center justify-center"
-              style={{
-                minWidth: "3rem",
-                height: "2.75rem",
-                paddingInline: "0.875rem",
-                borderRadius: "var(--olive-card-radius)",
-                border: `1px solid ${
-                  isSelected
-                    ? "var(--olive-leaf)"
-                    : "var(--olive-hairline-strong)"
-                }`,
-                boxShadow: isSelected
-                  ? "inset 0 0 0 1px var(--olive-leaf)"
-                  : undefined,
-                backgroundColor: isSelected
-                  ? "var(--olive-sage-tint)"
-                  : "var(--olive-white)",
-                color: isSelected ? "var(--olive-leaf)" : "var(--olive-ink)",
-                opacity: item.soldOut ? 0.45 : 1,
-                textDecoration: item.soldOut ? "line-through" : undefined,
-                cursor: item.soldOut ? "not-allowed" : "pointer",
-              }}
+              className="olive-label olive-option-box"
             >
               {item.label}
             </button>

@@ -38,10 +38,11 @@ type OliveBuyRowProps = {
 };
 
 /**
- * OliveBuyRow — the stepper and the one button that does the thing.
+ * OliveBuyRow — the square stepper and the one full-width button that does
+ * the thing.
  *
  * Shared by both purchase paths (a plain product and a chosen variant) so the
- * gesture is identical either way: pick a number, press the sage pill. The
+ * gesture is identical either way: pick a number, press the espresso button. The
  * confirmation is the toast and the badge, not a button that changes its mind
  * about what it says.
  */
@@ -80,21 +81,22 @@ export function OliveBuyRow({
   };
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-3", className)}>
+    <div className={cn("flex flex-col items-stretch gap-3", className)}>
       <OliveQuantityStepper
         value={quantity}
         onChange={onQuantityChange}
         max={max}
         itemLabel={itemLabel}
         disabled={disabled}
+        className="self-start"
       />
       <OliveButton
-        variant="primary"
+        variant="solid"
         size="lg"
         onClick={handleAdd}
         disabled={disabled}
         committed={committed}
-        className="min-w-[11rem] flex-1"
+        className="w-full"
       >
         Add to bag
       </OliveButton>

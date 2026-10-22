@@ -29,13 +29,13 @@ export { useOliveFigureChange } from "./olive-figure-change";
 export { hasOliveImage, OliveImageFallback } from "./olive-image-fallback";
 export { OliveImageTile } from "./olive-image-tile";
 export {
+  OliveCheckbox,
   OliveField,
   OliveFieldRow,
   OliveInput,
   OliveSelect,
   OliveTextarea,
 } from "./olive-input";
-export { OliveLeafMark } from "./olive-leaf-mark";
 export { OliveMarquee } from "./olive-marquee";
 export { OlivePrice } from "./olive-price";
 export {
@@ -47,6 +47,16 @@ export { OliveProductGrid, type OliveGridColumns } from "./olive-product-grid";
 export { OlivePromoSection, type OlivePromoTone } from "./olive-promo-section";
 export { OliveQuantityStepper } from "./olive-quantity-stepper";
 export { OliveReveal, OliveRevealGroup } from "./olive-reveal";
-export { OliveSection, type OliveSectionTone } from "./olive-section";
-export { OliveSectionHeading } from "./olive-section-heading";
+export {
+  isOliveDarkTone,
+  normalizeOliveTone,
+  OliveSection,
+  type OliveLegacySectionTone,
+  type OliveSectionTone,
+  type OliveSectionToneName,
+} from "./olive-section";
+export {
+  OliveSectionHeading,
+  type OliveSectionHeadingTone,
+} from "./olive-section-heading";
 export { OliveStatusBadge, type OliveStatus } from "./olive-status-badge";

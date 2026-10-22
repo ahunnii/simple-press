@@ -4,8 +4,6 @@ import { cn } from "~/lib/utils";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
 import { EventFlierVideo } from "~/app/(storefront)/_components/events/event-flier-video";
 
-import { OliveLeafMark } from "../shared";
-
 type Props = {
   name: string;
   coverImage: string | null;
@@ -22,12 +20,12 @@ type Props = {
 /**
  * OliveEventFlier — one media slot per event, Default's precedence carried
  * over: video first, then image. Both letterbox (object-contain) inside a
- * 3:4 paper frame, so no poster is ever cropped, and the shared lightbox
+ * 3:4 sand frame, so no poster is ever cropped, and the shared lightbox
  * opens them full size.
  *
  * An event with no media gets olive's designed stand-in instead of an empty
- * box: a paper date tile (month in the tracked label face, the day as one
- * big Josefin numeral, the leaf rivet) — the same "draw the absence" idea as
+ * box: a sand date tile (month in the tracked label face, the day as one
+ * big Bodoni numeral) — the same "draw the absence" idea as
  * `OliveEmptyState`. It is decorative (`aria-hidden`); the `<time>` beside it
  * carries the date for assistive tech.
  */
@@ -50,30 +48,26 @@ export function OliveEventFlier({
           className,
         )}
         style={{
-          backgroundColor: "var(--olive-paper)",
+          backgroundColor: "var(--olive-sand)",
           border: "1px solid var(--olive-hairline)",
-          borderRadius: "var(--olive-card-radius)",
         }}
       >
-        <span className="olive-label" style={{ color: "var(--olive-leaf)" }}>
+        <span
+          className="olive-label"
+          style={{ color: "var(--olive-moss-deep)" }}
+        >
           {month}
         </span>
         <span
           className="text-[2.5rem] sm:text-[4.5rem]"
           style={{
             fontFamily: "var(--olive-font-display)",
-            fontWeight: 300,
+            fontWeight: 400,
             lineHeight: 0.95,
-            color: "var(--olive-ink)",
+            color: "var(--olive-espresso)",
           }}
         >
           {day}
-        </span>
-        <span
-          className="hidden sm:flex"
-          style={{ color: "var(--olive-sage-bright)", marginTop: "0.5rem" }}
-        >
-          <OliveLeafMark size={18} />
         </span>
       </div>
     );
@@ -83,9 +77,8 @@ export function OliveEventFlier({
     <div
       className={cn("relative aspect-[3/4] w-full overflow-hidden", className)}
       style={{
-        backgroundColor: "var(--olive-paper)",
+        backgroundColor: "var(--olive-sand)",
         border: "1px solid var(--olive-hairline)",
-        borderRadius: "var(--olive-card-radius)",
       }}
     >
       {coverVideo ? (

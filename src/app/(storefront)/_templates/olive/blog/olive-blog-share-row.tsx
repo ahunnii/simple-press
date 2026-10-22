@@ -70,7 +70,7 @@ export function OliveBlogShareRow({ title, path }: Props) {
         {copied ? "Link copied to clipboard" : ""}
       </span>
 
-      <OliveButton variant="secondary" size="sm" onClick={handleCopy}>
+      <OliveButton variant="outline" size="sm" onClick={handleCopy}>
         {copied ? (
           <Check aria-hidden="true" className="h-4 w-4" />
         ) : (
@@ -80,7 +80,7 @@ export function OliveBlogShareRow({ title, path }: Props) {
       </OliveButton>
 
       <OliveButton
-        variant="secondary"
+        variant="outline"
         size="sm"
         onClick={() => {
           openIntent(
@@ -94,7 +94,7 @@ export function OliveBlogShareRow({ title, path }: Props) {
       </OliveButton>
 
       <OliveButton
-        variant="secondary"
+        variant="outline"
         size="sm"
         onClick={() => {
           openIntent(
@@ -108,7 +108,7 @@ export function OliveBlogShareRow({ title, path }: Props) {
       </OliveButton>
 
       <OliveButton
-        variant="secondary"
+        variant="outline"
         size="sm"
         onClick={() => {
           openIntent(
@@ -121,7 +121,7 @@ export function OliveBlogShareRow({ title, path }: Props) {
         Share on Pinterest
       </OliveButton>
 
-      <OliveButton variant="secondary" size="sm" onClick={handleEmail}>
+      <OliveButton variant="outline" size="sm" onClick={handleEmail}>
         <EmailIcon className="h-4 w-4" />
         Email
       </OliveButton>

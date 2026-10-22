@@ -1,5 +1,4 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import {
   googleMapsUrls,
   resolveMapCoordinates,
@@ -12,6 +11,7 @@ import {
   getRawCustomFieldString,
   resolveFaqPickerItems,
 } from "~/lib/template-fields";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import {
@@ -103,12 +103,13 @@ export async function OliveContactPage({
       <OliveSection
         as="section"
         aria-label="Say hello"
-        tone="slate"
+        tone="espresso"
+        bleed
         {...sectionGroupAttr("contact", "hero")}
       >
         <OliveReveal>
           <OliveSectionHeading
-            tone="slate"
+            tone="invert"
             as="h1"
             heading={f["olive.contact.hero-heading"] ?? "Say hello"}
             body={f["olive.contact.hero-body"] ?? undefined}
@@ -124,7 +125,9 @@ export async function OliveContactPage({
         formHeadingFieldKey="olive.contact.form-heading"
         formBody={f["olive.contact.form-body"] ?? ""}
         formBodyFieldKey="olive.contact.form-body"
-        successHeading={f["olive.contact.form-success-heading"] ?? "Message sent"}
+        successHeading={
+          f["olive.contact.form-success-heading"] ?? "Message sent"
+        }
         successHeadingFieldKey="olive.contact.form-success-heading"
         successBody={
           f["olive.contact.form-success-body"] ??
@@ -149,7 +152,7 @@ export async function OliveContactPage({
           <OliveSection
             as="section"
             aria-label="Frequently asked questions"
-            tone="paper"
+            tone="sand"
             {...sectionGroupAttr("contact", "faq")}
           >
             <OliveReveal>
@@ -183,7 +186,7 @@ export async function OliveContactPage({
           body={f["olive.contact.promo-body"] ?? ""}
           buttonLabel={f["olive.contact.promo-button-label"] ?? ""}
           buttonLink={promoButtonHref}
-          tone="sage-tint"
+          tone="ivory"
           id="olive-promo-contact"
           sectionAttrs={sectionGroupAttr("contact", "promo")}
           headingFieldKey="olive.contact.promo-heading"

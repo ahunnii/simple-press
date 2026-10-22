@@ -15,15 +15,16 @@ type OliveAnnouncementBarProps = {
 };
 
 /**
- * The thin strip above the header: white ground, one hairline below, ink-soft
- * uppercase text at 0.6875rem. Deliberately the quietest thing on the page —
- * the photographs do the talking, so the bar reads as printed card stock
- * rather than a coloured ribbon.
+ * The espresso strip above the header (design.md § First viewport): centred
+ * ivory tracked caps, at least 36px tall. The message and its optional link
+ * sit together in the centre column; the dismiss control balances an empty
+ * column of the same width on the left so the copy stays truly centred.
  *
  * Wired to the shared banner system (`resolveBanner` in the layout +
  * `DismissibleBanner` here); the caller renders this only when a banner
- * actually resolved, so "no banner configured" renders nothing at all.
- * An owner who sets explicit banner colours overrides the ground and ink.
+ * actually resolved, so "no banner configured" renders nothing at all. An
+ * owner who sets explicit banner colours overrides the ground and the ink —
+ * the link follows the ink (owner's text colour, else on-dark), underlined.
  */
 export function OliveAnnouncementBar({ banner }: OliveAnnouncementBarProps) {
   const isExternal = banner.linkUrl
@@ -31,24 +32,13 @@ export function OliveAnnouncementBar({ banner }: OliveAnnouncementBarProps) {
     : false;
 
   const barStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "1fr auto auto",
-    alignItems: "center",
-    gap: "12px",
-    minHeight: "36px",
-    padding: "9px 12px 9px 16px",
     ...(banner.bgColor ? { background: banner.bgColor } : {}),
     ...(banner.textColor ? { color: banner.textColor } : {}),
   };
 
-  const linkStyle: React.CSSProperties = {
-    color: banner.textColor ?? "var(--olive-leaf)",
-    textDecoration: "underline",
-    textUnderlineOffset: "4px",
-    letterSpacing: "0.14em",
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-  };
+  const linkStyle: React.CSSProperties | undefined = banner.textColor
+    ? { color: banner.textColor }
+    : undefined;
 
   return (
     <DismissibleBanner version={banner.version}>
@@ -58,38 +48,43 @@ export function OliveAnnouncementBar({ banner }: OliveAnnouncementBarProps) {
           data-announcement-bar
           style={barStyle}
         >
-          <div className="text-center">
+          <span aria-hidden="true" />
+
+          <div className="olive-announcement-copy">
             {banner.content !== null && (
               <TiptapRenderer
                 content={banner.content as TiptapJSON}
                 className="[&_p]:m-0"
               />
             )}
-          </div>
 
-          {banner.linkUrl ? (
-            isExternal ? (
-              <a
-                href={banner.linkUrl}
-                style={linkStyle}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {banner.linkLabel ?? "Learn more"}
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-            ) : (
-              <Link href={banner.linkUrl} style={linkStyle}>
-                {banner.linkLabel ?? "Learn more"}
-              </Link>
-            )
-          ) : (
-            <span />
-          )}
+            {banner.linkUrl ? (
+              isExternal ? (
+                <a
+                  href={banner.linkUrl}
+                  className="olive-announcement-link"
+                  style={linkStyle}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {banner.linkLabel ?? "Learn more"}
+                  <span className="sr-only"> (opens in new tab)</span>
+                </a>
+              ) : (
+                <Link
+                  href={banner.linkUrl}
+                  className="olive-announcement-link"
+                  style={linkStyle}
+                >
+                  {banner.linkLabel ?? "Learn more"}
+                </Link>
+              )
+            ) : null}
+          </div>
 
           <BannerDismissButton
             dismiss={dismiss}
-            className="flex items-center justify-center rounded-full p-1.5 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none"
+            className="olive-announcement-dismiss"
           />
         </div>
       )}

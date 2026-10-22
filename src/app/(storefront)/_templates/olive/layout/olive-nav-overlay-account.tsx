@@ -21,11 +21,13 @@ type OliveNavOverlayAccountProps = {
 
 /** Leading icons, keyed by `getAccountNavLinks` key. */
 const ACCOUNT_LINK_ICONS: Record<string, ReactNode> = {
-  orders: <IconPackage className="h-4 w-4" aria-hidden="true" />,
+  orders: <IconPackage className="h-4 w-4" stroke={1.5} aria-hidden="true" />,
   settings: (
     <Settings className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
   ),
-  admin: <IconLayoutDashboard className="h-4 w-4" aria-hidden="true" />,
+  admin: (
+    <IconLayoutDashboard className="h-4 w-4" stroke={1.5} aria-hidden="true" />
+  ),
 };
 
 /**

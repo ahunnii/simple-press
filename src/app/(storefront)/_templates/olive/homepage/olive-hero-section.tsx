@@ -3,22 +3,17 @@
 import type { CSSProperties, FocusEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 
 import { fieldAttr, listItemAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
-import {
-  hasOliveImage,
-  OliveButton,
-  OliveLeafMark,
-  OliveRevealGroup,
-} from "../shared";
+import { hasOliveImage, OliveButton, OliveRevealGroup } from "../shared";
 
 /** One hero photograph, paired with its original (pre-filter) row index in
  *  the owner's `olive.homepage.hero-images` list, so the currently shown
- *  leaf can carry `listItemAttr` back to the right row. */
+ *  frame can carry `listItemAttr` back to the right row. */
 export type OliveHeroImage = {
   src: string;
   /** Position in the saved list before blank/placeholder rows were dropped. */
@@ -28,81 +23,79 @@ export type OliveHeroImage = {
 type Props = {
   images: OliveHeroImage[];
   video: string;
+  /** The `hero-show-card` switch: print the eyebrow, h1, line and button. */
   showCard: boolean;
+  eyebrow: string;
   heading: string;
   body: string;
   ctaLabel: string;
   ctaHref: string;
   sectionAttrs?: Record<string, string>;
+  eyebrowFieldKey?: string;
   headingFieldKey?: string;
   bodyFieldKey?: string;
   ctaLabelFieldKey?: string;
 };
 
 /** Autoplay dwell per photograph. Long enough to be looked at, not read. */
-const AUTOPLAY_MS = 6000;
-/** Must stay in step with the `olive-swatch-turn` keyframes in globals.css. */
-const SWATCH_TURN_MS = 520;
+const AUTOPLAY_MS = 6500;
+/**
+ * How long the outgoing frame stays mounted under the incoming one. Must be
+ * at least the `olive-hero-fade` cross-fade in globals.css (900ms), or the
+ * new frame would finish fading in over the bare section ground.
+ */
+const HERO_FADE_MS = 900;
+
+/** "01", "02" … — the board's numbered slide controls. */
+const pad = (value: number) => String(value).padStart(2, "0");
 
 /**
- * The hero — the template's signature moment.
+ * The hero — a magazine cover.
  *
- * A full-width photograph (or a silent looping video) under a scrim, with the
- * white swatch card pinned into the bottom-left corner: the rivet, the page's
- * one h1, a single line, and the sage button.
+ * A full-bleed photograph (or a silent looping video) under the left-weighted
+ * espresso scrim, with the copy printed straight onto it on the left: a small
+ * tracked-caps line, the page's one h1 in Bodoni display, one line of body
+ * and an ivory-filled button. No card. With no media at all the ground is
+ * espresso and the same ivory type sits on it — a designed state, not a hole.
  *
- * The load moment is the cover opening. The photograph settles from 1.04 to
- * 1.0 over 1400ms; on that same first painted frame a sage-tinted leaf edge
- * sweeps across the scrim left to right over 600ms — the swatch turn's band,
- * borrowed — and the white card is dealt in its wake. Inside the card the
- * print then arrives one piece at a time on a hero-only 110ms cadence: leaf
- * mark, headline, line, button. All of it rides the shared reveal system, so
- * reduced motion and a JS-less first paint are handled in one place; the
- * sweep itself is mounted off `settled`, so it is never server-painted.
+ * Load moment: the photograph settles from 1.04 to 1 over ~1.6s (scoped
+ * `.olive-hero-media` rules, gated on `.olive-js` and reduced motion), and the
+ * copy staggers in on a hero-only cadence through the shared reveal system.
  *
- * With two or more photographs the hero turns between them on its own. The
- * transition is olive's swatch turn — the same wipe and the same travelling
- * leaf edge the product gallery uses for a colour change — rather than a
- * crossfade or a slide: olive's world is the swatch book, so the one gesture
- * for "the next picture" is a leaf being turned, and reusing it keeps the
- * carousel reading as the template's own hand instead of added chrome. The
- * mechanics are the gallery's, kept deliberately identical:
+ * With two or more photographs the hero cross-fades between them (900ms).
+ * The mechanics:
  *
  * - `turns` starts at 0 and is only ever raised by a real change of index, so
- *   the first render — server and client alike — is one plain, unclipped
- *   image. The leading photograph carries `priority` and is the page's LCP
- *   element; a clip-path animation with `both` fill would paint it clipped.
+ *   the first render — server and client alike — is one plain image with no
+ *   animation class. Slide 0 carries `priority` + `fetchPriority="high"` and
+ *   is the page's LCP element; a `both`-filled fade would paint it at 0.
  * - The stage is raised *during render* (React's "adjust state when something
- *   changes" pattern), never in an effect, so the incoming leaf carries its
- *   wipe class on its very first mounted frame instead of flashing unclipped.
- * - The covered leaf stays mounted and opaque underneath for the length of
- *   the wipe, because a swatch book never shows the counter between leaves.
+ *   changes" pattern), never in an effect, so the incoming frame carries its
+ *   fade class on its very first mounted frame instead of flashing in.
+ * - The outgoing frame stays mounted, opaque, underneath for HERO_FADE_MS.
  *
- * One `userPaused` flag carries every deliberate stop — the disc and a dot
- * pick both set it — and the disc's icon reflects only that. The transient
- * suspensions (mouse hover, focus inside the hero) are separate flags that
- * never touch the icon, because a control that changed under the pointer on
- * its way to being pressed would be lying about what it does.
+ * Controls sit bottom-left, as on the board: previous, the numbered slides
+ * ("01 02 03"), next, and a pause/play square (WCAG 2.2.2 — content that
+ * moves by itself for more than five seconds must be stoppable). One
+ * `userPaused` flag carries every deliberate stop — pause, a numeral, an
+ * arrow — and the pause icon reflects only that. Hover and focus inside the
+ * hero are separate, transient suspensions that never touch the icon.
  *
- * With one photograph `turning` is never true and nothing but the plain image
- * mounts. With a video the photographs stand down entirely — the video wins,
- * and the first photograph becomes its poster frame. With none, the ground is
- * the sage cover itself, which is a designed state rather than an empty
- * rectangle: the white card reads beautifully on it and nothing shifts.
- *
- * The card can be switched off in the editor. The h1 survives as an sr-only
- * heading when it is: the page still needs exactly one h1, and the section's
- * `aria-labelledby` still needs something to point at.
+ * The copy can be switched off in the editor (`hero-show-card`). The h1
+ * survives as an sr-only heading: the page still needs exactly one h1, and
+ * the section's `aria-labelledby` still needs something to point at.
  */
 export function OliveHeroSection({
   images,
   video,
   showCard,
+  eyebrow,
   heading,
   body,
   ctaLabel,
   ctaHref,
   sectionAttrs,
+  eyebrowFieldKey,
   headingFieldKey,
   bodyFieldKey,
   ctaLabelFieldKey,
@@ -122,7 +115,7 @@ export function OliveHeroSection({
 
   /** The requested slide. */
   const [index, setIndex] = useState(0);
-  /** Set by the disc and by a dot pick alike — the one deliberate stop. */
+  /** Set by pause, a numeral and the arrows alike — the one deliberate stop. */
   const [userPaused, setUserPaused] = useState(false);
   /** Mouse hover only: a touch tap must not wedge the carousel shut. */
   const [hovered, setHovered] = useState(false);
@@ -131,19 +124,19 @@ export function OliveHeroSection({
 
   const [stage, setStage] = useState({
     index: 0,
-    /** How many turns have happened. Also keys the leaf edge. */
+    /** How many changes have happened. 0 = the untouched first render. */
     turns: 0,
-    /** The leaf being covered, kept visible for the length of the wipe. */
+    /** The frame being faded over, kept visible for the length of the fade. */
     under: null as number | null,
   });
   if (stage.index !== index) {
     setStage({ index, turns: stage.turns + 1, under: stage.index });
   }
   const { turns, under } = stage;
-  const turning = turns > 0;
+  const fading = turns > 0;
 
-  // The photograph settles into place on the first painted frame. Skipped
-  // entirely under reduced motion, where it is already at rest.
+  // The photograph settles into place on the first painted frame. Reduced
+  // motion is handled in CSS, where it is already at rest.
   useEffect(() => {
     const frame = requestAnimationFrame(() => setSettled(true));
     return () => cancelAnimationFrame(frame);
@@ -166,21 +159,21 @@ export function OliveHeroSection({
       .catch(() => setPlaying(false));
   }, [hasVideo, reduced]);
 
-  // Drop the covered leaf once the wipe is over. A timer rather than
+  // Drop the covered frame once the fade is over. A timer rather than
   // `onAnimationEnd`, because under reduced motion there is no animation to
   // end and the underlay would sit there for the rest of the session.
   useEffect(() => {
     if (under === null) return;
     const timer = setTimeout(
       () => setStage((current) => ({ ...current, under: null })),
-      SWATCH_TURN_MS + 80,
+      HERO_FADE_MS + 80,
     );
     return () => clearTimeout(timer);
   }, [under, turns]);
 
-  // The leaves turn on their own until someone stops them, looks closely
-  // (hover), or reaches in with the keyboard (focus). Reduced motion never
-  // starts the timer at all — the carousel then only moves when asked.
+  // The photographs change on their own until someone stops them, looks
+  // closely (hover), or reaches in with the keyboard (focus). Reduced motion
+  // never starts the timer — the carousel then only moves when asked.
   const autoplay = carousel && !reduced && !userPaused && !hovered && !focused;
   useEffect(() => {
     if (!autoplay) return;
@@ -194,7 +187,7 @@ export function OliveHeroSection({
   /** Picking a photograph is also a request to stop being moved along. */
   const pick = (next: number) => {
     setUserPaused(true);
-    setIndex(next);
+    setIndex(((next % count) + count) % count);
   };
 
   const togglePlayback = () => setUserPaused((current) => !current);
@@ -226,8 +219,8 @@ export function OliveHeroSection({
     }
   };
 
-  /** One leaf. `priority` stays pinned to slide 0 — the LCP frame — and the
-   *  rest are eager so a turn never waits on a lazy loader. `fetchPriority`
+  /** One frame. `priority` stays pinned to slide 0 — the LCP frame — and the
+   *  rest are eager so a change never waits on a lazy loader. `fetchPriority`
    *  is set by hand: Next 15 does not derive it from `priority`. */
   const photo = (position: number) => {
     const src = photos[position]?.src;
@@ -246,20 +239,20 @@ export function OliveHeroSection({
     );
   };
 
+  const showEyebrow = eyebrow.trim().length > 0;
+  const showBody = body.trim().length > 0;
+  const showButton = ctaLabel.trim().length > 0 && ctaHref.trim().length > 0;
+
   return (
     <section
       {...sectionAttrs}
       aria-labelledby="olive-hero-heading"
       data-controls={carousel ? "true" : undefined}
-      className="olive-hero relative isolate flex w-full flex-col justify-end overflow-hidden"
-      style={{
-        backgroundColor: "var(--olive-sage)",
-        paddingInline: "var(--olive-section-pad-x)",
-      }}
+      className="olive-hero"
       {...(carousel ? suspensionHandlers : {})}
     >
-      {/* The photographs and their controls. The role is only claimed when
-          there is actually more than one leaf to turn. */}
+      {/* The photographs and their controls. The carousel role is only
+          claimed when there is actually more than one photograph. */}
       <div
         className="absolute inset-0"
         {...(carousel
@@ -270,11 +263,11 @@ export function OliveHeroSection({
             }
           : {})}
       >
-        {/* Ground: video, photographs, or the sage cover itself. */}
+        {/* Ground: video, photographs, or the espresso field itself. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-          {/* The settle (1.04 → 1.0) and its reduced-motion guard both live in
+          {/* The settle (1.04 → 1) and its reduced-motion guard both live in
               the scoped `.olive-hero-media` rules; this only flips the flag.
-              Every leaf is inside it, so they scale together. */}
+              Every frame is inside it, so they scale together. */}
           <div
             className="olive-hero-media relative h-full w-full"
             data-settled={settled ? "true" : undefined}
@@ -293,8 +286,8 @@ export function OliveHeroSection({
               </video>
             ) : count > 0 ? (
               <>
-                {/* The next leaf, fetched but not drawn, so the wipe never
-                    reveals a frame that is still decoding. */}
+                {/* The next frame, fetched but not drawn, so the fade never
+                    reveals a picture that is still decoding. */}
                 {carousel ? (
                   <div
                     key={`warm-${(index + 1) % count}`}
@@ -309,7 +302,7 @@ export function OliveHeroSection({
                   </div>
                 ) : null}
                 <div
-                  key={`leaf-${index}`}
+                  key={`frame-${index}`}
                   {...(photos[index]
                     ? listItemAttr(
                         "olive.homepage.hero-images",
@@ -318,26 +311,25 @@ export function OliveHeroSection({
                     : {})}
                   className={cn(
                     "absolute inset-0",
-                    turning && "olive-swatch-turn",
+                    fading && "olive-hero-fade",
                   )}
                 >
                   {photo(index)}
                 </div>
-                {turning ? (
-                  <span
-                    key={`edge-${turns}`}
-                    className="olive-swatch-edge"
-                    aria-hidden="true"
-                  />
-                ) : null}
               </>
             ) : null}
           </div>
         </div>
 
+        {/* Scrim — only over real media. Left-weighted on wide screens;
+            bottom-weighted under the copy on a phone (globals.css). */}
+        {hasMedia ? (
+          <div aria-hidden="true" className="olive-hero-scrim" />
+        ) : null}
+
         {carousel ? (
           <>
-            {/* Silent while the leaves are turning on their own — an
+            {/* Silent while the photographs change on their own — an
                 unattended rotation is not an announcement (WCAG 2.2.2). */}
             <p
               className="sr-only"
@@ -348,17 +340,38 @@ export function OliveHeroSection({
             </p>
 
             <div className="olive-hero-controls">
+              <button
+                type="button"
+                onClick={() => pick(index - 1)}
+                aria-label="Previous photo"
+                className="olive-icon-btn olive-icon-btn-invert olive-hero-arrow"
+              >
+                <ArrowLeft aria-hidden="true" size={18} strokeWidth={1.5} />
+              </button>
+
               {photos.map((_, position) => (
                 <button
                   key={position}
                   type="button"
                   onClick={() => pick(position)}
-                  aria-label={`Show photo ${position + 1}`}
+                  aria-label={`Show photo ${position + 1} of ${count}`}
                   aria-current={position === index ? "true" : undefined}
-                  className="olive-icon-btn olive-icon-btn-invert olive-hero-dot"
-                />
+                  className="olive-hero-dot"
+                >
+                  <span aria-hidden="true">{pad(position + 1)}</span>
+                </button>
               ))}
-              {/* No disc under reduced motion: nothing is moving to stop. */}
+
+              <button
+                type="button"
+                onClick={() => pick(index + 1)}
+                aria-label="Next photo"
+                className="olive-icon-btn olive-icon-btn-invert olive-hero-arrow"
+              >
+                <ArrowRight aria-hidden="true" size={18} strokeWidth={1.5} />
+              </button>
+
+              {/* No pause under reduced motion: nothing is moving to stop. */}
               {!reduced ? (
                 <button
                   type="button"
@@ -368,12 +381,12 @@ export function OliveHeroSection({
                       ? "Play the photo carousel"
                       : "Pause the photo carousel"
                   }
-                  className="olive-icon-btn olive-icon-btn-invert olive-icon-btn-on-photo"
+                  className="olive-icon-btn olive-icon-btn-invert olive-hero-pause"
                 >
                   {userPaused ? (
-                    <Play aria-hidden="true" className="h-4 w-4" />
+                    <Play aria-hidden="true" size={12} strokeWidth={1.75} />
                   ) : (
-                    <Pause aria-hidden="true" className="h-4 w-4" />
+                    <Pause aria-hidden="true" size={12} strokeWidth={1.75} />
                   )}
                 </button>
               ) : null}
@@ -382,102 +395,69 @@ export function OliveHeroSection({
         ) : null}
       </div>
 
-      {/* Scrim — only over real media, and only ever the measured value. */}
-      {hasMedia ? (
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{ backgroundColor: "var(--olive-scrim)" }}
-        />
-      ) : null}
-
-      {/* The leaf edge that opens the cover. Mounted only once `settled` has
-          flipped on the client, so it never appears in the server-rendered
-          markup and needs no `.olive-js` gate of its own. */}
-      {settled ? <div aria-hidden="true" className="olive-hero-sweep" /> : null}
-
       {hasVideo ? (
         <button
           type="button"
           onClick={toggleVideo}
           aria-label={playing ? "Pause the hero video" : "Play the hero video"}
-          className="olive-icon-btn olive-icon-btn-invert olive-icon-btn-on-photo absolute right-4 bottom-4 z-20"
+          className="olive-icon-btn olive-icon-btn-invert olive-hero-pause olive-hero-video-toggle"
         >
           {playing ? (
-            <Pause aria-hidden="true" className="h-4 w-4" />
+            <Pause aria-hidden="true" size={12} strokeWidth={1.75} />
           ) : (
-            <Play aria-hidden="true" className="h-4 w-4" />
+            <Play aria-hidden="true" size={12} strokeWidth={1.75} />
           )}
         </button>
       ) : null}
 
-      {/* The swatch card — or, when it is switched off, the h1 alone. */}
-      <div
-        className="relative z-10 mx-auto w-full"
-        style={{ maxWidth: "var(--olive-container)" }}
-      >
+      {/* The copy — or, when it is switched off, the h1 alone. */}
+      <div className="olive-hero-inner">
         {showCard ? (
-          <OliveRevealGroup>
-            <div
-              className="olive-reveal-item olive-card flex w-full flex-col items-start gap-4"
-              style={
-                {
-                  "--i": 0,
-                  maxWidth: "480px",
-                  padding: "clamp(1.5rem, 4vw, 2.25rem)",
-                  boxShadow: "var(--olive-shadow)",
-                } as CSSProperties
-              }
+          <OliveRevealGroup className="olive-hero-copy olive-on-photo">
+            {showEyebrow ? (
+              <p
+                className="olive-eyebrow olive-reveal-item"
+                style={{ "--i": 0 } as CSSProperties}
+                {...(eyebrowFieldKey ? fieldAttr(eyebrowFieldKey) : {})}
+              >
+                {eyebrow}
+              </p>
+            ) : null}
+
+            <h1
+              id="olive-hero-heading"
+              className="olive-display olive-reveal-item"
+              style={{ "--i": 1 } as CSSProperties}
+              {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
             >
-              <span
-                className="olive-reveal-item flex items-center"
-                style={
-                  { "--i": 1, color: "var(--olive-leaf)" } as CSSProperties
-                }
-              >
-                <OliveLeafMark size={20} />
-              </span>
+              {heading}
+            </h1>
 
-              <h1
-                id="olive-hero-heading"
-                className="olive-h1 olive-reveal-item"
+            {showBody ? (
+              <p
+                className="olive-hero-body olive-reveal-item"
                 style={{ "--i": 2 } as CSSProperties}
-                {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
+                {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
               >
-                {heading}
-              </h1>
+                {body}
+              </p>
+            ) : null}
 
-              {body ? (
-                <p
-                  className="olive-reveal-item text-[0.9375rem] leading-relaxed"
-                  style={
-                    {
-                      "--i": 3,
-                      color: "var(--olive-ink-soft)",
-                    } as CSSProperties
-                  }
-                  {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
+            {showButton ? (
+              <div
+                className="olive-hero-cta olive-reveal-item"
+                style={{ "--i": 3 } as CSSProperties}
+              >
+                <OliveButton
+                  variant="ivory"
+                  arrow
+                  href={ctaHref}
+                  data-sp-field={ctaLabelFieldKey}
                 >
-                  {body}
-                </p>
-              ) : null}
-
-              {ctaLabel && ctaHref ? (
-                <div
-                  className="olive-reveal-item"
-                  style={{ "--i": 4 } as CSSProperties}
-                >
-                  <OliveButton
-                    variant="primary"
-                    size="lg"
-                    href={ctaHref}
-                    data-sp-field={ctaLabelFieldKey}
-                  >
-                    {ctaLabel}
-                  </OliveButton>
-                </div>
-              ) : null}
-            </div>
+                  {ctaLabel}
+                </OliveButton>
+              </div>
+            ) : null}
           </OliveRevealGroup>
         ) : (
           /* No `fieldAttr` here: there is no hotspot to patch in place, so

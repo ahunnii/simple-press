@@ -17,8 +17,8 @@ type Props = {
   introFieldKey?: string;
   /**
    * Cover photo. When it is a real image (not blank, not `/placeholder.svg`)
-   * the band becomes the photo variant: full-bleed photo, title on a white
-   * card that sits on the page edge.
+   * the band becomes the photo variant: full-bleed photo, title on a square
+   * ivory panel that sits on the page edge.
    */
   image?: string | null;
   /** Cover video (MP4). Wins over `image`; same card layout. */
@@ -39,11 +39,11 @@ type Props = {
  * FAQ, services index, service detail).
  *
  * Two variants, the same two the generic page has always had:
- * - **Plain** (no cover): a white band, the h1 in `olive-h1` (Josefin Sans
- *   300) with an optional `olive-caption` intro, on the page edge. The body
- *   below usually continues it with `<OlivePageSection flush>`.
+ * - **Plain** (no cover): an ivory band, the h1 in Bodoni (`olive-h1`) with
+ *   an optional Montserrat intro, on the page edge. The body below usually
+ *   continues it with `<OlivePageSection flush>`.
  * - **Cover**: a full-bleed photo (or muted loop video) with the title printed
- *   on a white `olive-card`. The card sits on the page edge — 120px at 1440,
+ *   on a square ivory panel. The panel sits on the page edge — 120px at 1440,
  *   16px at 390 — not in the photo's padded corner, so it lines up with the
  *   body text below it (PF12 / baseline B1.7). The band grows with its card
  *   (flow layout, not absolute), so a long title never clips.
@@ -81,8 +81,13 @@ export function OlivePageBand({
 
   const introNode = introText ? (
     <p
-      className="olive-caption"
-      style={{ marginTop: "0.75rem", maxWidth: "60ch", whiteSpace: "pre-line" }}
+      className="text-[0.9375rem] leading-[1.7]"
+      style={{
+        marginTop: "1rem",
+        maxWidth: "60ch",
+        whiteSpace: "pre-line",
+        color: "var(--olive-ink-soft)",
+      }}
       {...(introFieldKey ? fieldAttr(introFieldKey) : {})}
     >
       {introText}
@@ -119,7 +124,7 @@ export function OlivePageBand({
         paddingTop: "clamp(120px, 18vw, 220px)",
         paddingBottom: "clamp(16px, 3vw, 32px)",
         paddingInline: "var(--olive-section-pad-x)",
-        backgroundColor: "var(--olive-paper)",
+        backgroundColor: "var(--olive-sand)",
       }}
     >
       {hasVideo ? (
@@ -141,7 +146,10 @@ export function OlivePageBand({
         className="relative mx-auto w-full"
         style={{ maxWidth: OLIVE_PAGE_EDGE_MAX }}
       >
-        <OliveReveal className="olive-card flex w-full max-w-[34rem] flex-col p-6">
+        <OliveReveal
+          className="olive-page-title-panel flex w-full max-w-[34rem] flex-col p-6 sm:p-10"
+          style={{ backgroundColor: "var(--olive-ivory)" }}
+        >
           {leadingNode}
           {heading}
           {introNode}

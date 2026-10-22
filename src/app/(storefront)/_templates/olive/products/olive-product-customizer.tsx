@@ -10,8 +10,8 @@ import type {
 import { ProductCustomizer } from "~/components/customizer";
 
 /**
- * Product options (the shared customizer) in olive's language: cut tabs with
- * a leaf ring and a sage-tint face when chosen, `olive-label` legends,
+ * Product options (the shared customizer) in olive's language: square
+ * choices with an espresso ring and a sand face when chosen, `olive-label` legends,
  * `olive-caption` helper lines, and the template's own `olive-input` for the
  * engraving field.
  *
@@ -25,16 +25,16 @@ import { ProductCustomizer } from "~/components/customizer";
  * (a transform on an ancestor can swallow a click mid-animation).
  */
 const OLIVE_CUSTOMIZER_TOKENS = {
-  "--primary": "var(--olive-leaf)",
-  "--primary-foreground": "var(--olive-white)",
-  "--input": "color-mix(in srgb, var(--olive-ink) 45%, transparent)",
+  "--primary": "var(--olive-espresso)",
+  "--primary-foreground": "var(--olive-on-dark)",
+  "--input": "var(--olive-control-border)",
   "--border": "var(--olive-hairline)",
-  "--background": "var(--olive-white)",
-  "--foreground": "var(--olive-ink)",
-  "--muted": "var(--olive-paper)",
+  "--background": "var(--olive-ivory)",
+  "--foreground": "var(--olive-espresso)",
+  "--muted": "var(--olive-sand)",
   "--muted-foreground": "var(--olive-ink-soft)",
   "--destructive": "var(--olive-error)",
-  "--ring": "var(--olive-sage-bright)",
+  "--ring": "var(--olive-espresso)",
   "--radius": "var(--olive-card-radius)",
 } as CSSProperties;
 
@@ -44,12 +44,12 @@ const OLIVE_CUSTOMIZER_CLASSNAMES: ProductCustomizerClassNames = {
   help: "olive-caption",
   count: "olive-caption",
   value:
-    "rounded-[var(--olive-card-radius)] hover:bg-[var(--olive-paper)] data-[selected=true]:bg-[var(--olive-sage-tint)] data-[selected=true]:text-[var(--olive-leaf)] has-[:focus-visible]:outline-[var(--olive-sage-bright)]",
-  valueImage: "rounded-[calc(var(--olive-card-radius)-0.125rem)]",
-  valueLabel: "text-[0.875rem]",
+    "rounded-none hover:bg-[var(--olive-sand)] data-[selected=true]:bg-[var(--olive-sand)] data-[selected=true]:text-[var(--olive-espresso)] has-[:focus-visible]:outline-[var(--olive-espresso)]",
+  valueImage: "rounded-none",
+  valueLabel: "olive-caption",
   valuePrice: "olive-caption",
   clear:
-    "olive-caption self-start underline underline-offset-2 hover:text-[var(--olive-ink)]",
+    "olive-caption self-start underline underline-offset-2 hover:text-[var(--olive-espresso)]",
   textInput: "olive-input h-auto",
   textCounter: "olive-caption",
   limit: "olive-caption",
@@ -57,7 +57,7 @@ const OLIVE_CUSTOMIZER_CLASSNAMES: ProductCustomizerClassNames = {
 };
 
 const OLIVE_CUSTOMIZER_TRAY: ProductCustomizerTrayClassNames = {
-  item: "olive-caption border-[var(--olive-hairline)] bg-[var(--olive-paper)] text-[var(--olive-ink)]",
+  item: "olive-caption border-[var(--olive-hairline)] bg-[var(--olive-sand)] text-[var(--olive-espresso)]",
 };
 
 export function OliveProductCustomizer({

@@ -13,6 +13,8 @@ type Props = {
   /** Full field key whose value is exactly `label` (live text in the editor). */
   labelFieldKey?: string;
   variant?: OliveButtonVariant;
+  /** Trailing arrow. Defaults on — these are navigating calls to action. */
+  arrow?: boolean;
   size?: OliveButtonSize;
   className?: string;
 };
@@ -31,7 +33,8 @@ export function OliveGatedButton({
   href,
   label,
   labelFieldKey,
-  variant = "primary",
+  variant = "solid",
+  arrow = true,
   size,
   className,
 }: Props) {
@@ -47,6 +50,7 @@ export function OliveGatedButton({
   return (
     <OliveButton
       variant={variant}
+      arrow={arrow}
       size={size}
       href={target}
       className={className}

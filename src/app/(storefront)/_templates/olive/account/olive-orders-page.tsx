@@ -27,7 +27,7 @@ function toOrderStatus(status: string): OliveStatus {
   return (ORDER_STATUSES.has(status) ? status : "open") as OliveStatus;
 }
 
-/** White order cards with a status chip, date, item chips and a total. */
+/** Hairline order cards with a status badge, date, item tags and a total. */
 export function OliveOrdersPage({ orders }: OrdersPageTemplateProps) {
   return (
     <OliveAccountLayout
@@ -45,7 +45,7 @@ export function OliveOrdersPage({ orders }: OrdersPageTemplateProps) {
           cta={{ label: "Shop now", href: "/shop" }}
         />
       ) : (
-        <OliveRevealGroup className="flex flex-col gap-4" fan>
+        <OliveRevealGroup className="flex flex-col gap-4">
           {orders.map((order, i) => {
             const visibleItems = order.items.slice(0, 3);
             const extra = order.items.length - visibleItems.length;
@@ -75,8 +75,7 @@ export function OliveOrdersPage({ orders }: OrdersPageTemplateProps) {
                       key={item.id}
                       className="olive-caption"
                       style={{
-                        backgroundColor: "var(--olive-paper)",
-                        borderRadius: "999px",
+                        backgroundColor: "var(--olive-sand)",
                         padding: "0.1875rem 0.625rem",
                       }}
                     >
@@ -89,8 +88,7 @@ export function OliveOrdersPage({ orders }: OrdersPageTemplateProps) {
                     <span
                       className="olive-caption"
                       style={{
-                        backgroundColor: "var(--olive-paper)",
-                        borderRadius: "999px",
+                        backgroundColor: "var(--olive-sand)",
                         padding: "0.1875rem 0.625rem",
                       }}
                     >
@@ -107,7 +105,8 @@ export function OliveOrdersPage({ orders }: OrdersPageTemplateProps) {
                     {formatPrice(order.total)}
                   </span>
                   <OliveButton
-                    variant="ghost"
+                    variant="link"
+                    arrow
                     href={`/account/orders/${order.id}`}
                   >
                     View details

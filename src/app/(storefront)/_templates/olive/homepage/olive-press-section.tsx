@@ -44,7 +44,7 @@ export function OlivePressSection({
 
   return (
     <OliveSection
-      tone="white"
+      tone="ivory"
       aria-labelledby="olive-press-heading"
       {...sectionAttrs}
     >
@@ -52,6 +52,7 @@ export function OlivePressSection({
         <OliveSectionHeading
           heading={heading}
           id="olive-press-heading"
+          caps
           align="center"
           headingFieldKey={headingFieldKey}
           className="mb-8"

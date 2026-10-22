@@ -10,14 +10,13 @@ import { OlivePromoSection } from "../shared";
 import { OliveShopClient } from "./olive-shop-client";
 
 /**
- * OliveShopPage — the swatch grid, and the page the whole template is built
- * around.
+ * OliveShopPage — the lookbook grid: title, sticky toolbar, four-up cards.
  *
  * Server half: resolve the owner's copy and decide which sections render. The
  * filtering, sorting and pagination all live in the client half, which owns
  * the sticky toolbar and the grid; `useShopFilters` reads the collections
- * straight off each product's `collectionProducts`, so the chip tabs cost no
- * second query.
+ * straight off each product's `collectionProducts`, so the collection tabs cost
+ * no second query.
  */
 export async function OliveShopPage({
   business,
@@ -75,7 +74,7 @@ export async function OliveShopPage({
           body={f["olive.shop.promo-body"] ?? ""}
           buttonLabel={f["olive.shop.promo-button-label"] ?? ""}
           buttonLink={promoButtonHref}
-          tone="sage-tint"
+          tone="sand"
           id="olive-shop-promo-heading"
           sectionAttrs={sectionGroupAttr("shop", "promo")}
           headingFieldKey="olive.shop.promo-heading"

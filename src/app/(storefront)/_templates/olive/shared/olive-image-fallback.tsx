@@ -2,12 +2,15 @@ import type { CSSProperties } from "react";
 
 import { cn } from "~/lib/utils";
 
-import { OliveLeafMark } from "./olive-leaf-mark";
-
 type OliveImageFallbackProps = {
   /** CSS `aspect-ratio`, e.g. `"3 / 4"`. Omit when the parent already sizes the box. */
   aspect?: string;
-  /** Rendered size of the leaf mark in px. */
+  /**
+   * Override the initials drawn in the middle (default: the business's own,
+   * from `--olive-initials` on the `.olive` root, set by olive-layout.tsx).
+   */
+  initials?: string;
+  /** @deprecated The leaf mark is retired; accepted and ignored. */
   size?: number;
   className?: string;
   style?: CSSProperties;
@@ -16,10 +19,10 @@ type OliveImageFallbackProps = {
 /**
  * OliveImageFallback — a designed stand-in for a picture that does not exist.
  *
- * A fresh store has blank image fields and records without covers; both used
- * to surface as an unexplained grey rectangle. This draws the absence instead:
- * the paper card face with the leaf rivet at 30% in the middle, so a missing
- * photo reads as "nothing here yet", not "broken".
+ * A fresh store has blank image fields and records without covers. This draws
+ * the absence on purpose: a sand field with the business initials set in
+ * Bodoni (stone, `.olive-image-fallback::before` in globals.css), so a
+ * missing photo reads as "nothing here yet", not "broken". No icon.
  *
  * Decorative by construction — the alt text belongs to whatever the consuming
  * component would have rendered, so nothing here reaches the accessibility
@@ -27,26 +30,23 @@ type OliveImageFallbackProps = {
  */
 export function OliveImageFallback({
   aspect,
-  size = 32,
+  initials,
   className,
   style,
 }: OliveImageFallbackProps) {
+  const override = initials?.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 3);
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "flex h-full w-full items-center justify-center overflow-hidden",
-        className,
-      )}
-      style={{
-        backgroundColor: "var(--olive-paper)",
-        color: "var(--olive-leaf)",
-        ...(aspect ? { aspectRatio: aspect } : {}),
-        ...style,
-      }}
-    >
-      <OliveLeafMark size={size} className="opacity-30" />
-    </div>
+      className={cn("olive-image-fallback h-full w-full", className)}
+      style={
+        {
+          ...(aspect ? { aspectRatio: aspect } : {}),
+          ...(override ? { "--olive-initials": `"${override}"` } : {}),
+          ...style,
+        } as CSSProperties
+      }
+    />
   );
 }
 

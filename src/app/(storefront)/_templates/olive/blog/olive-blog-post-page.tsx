@@ -3,12 +3,12 @@ import Image from "next/image";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { deriveExcerpt } from "~/lib/blog-search";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { formatDate } from "~/lib/utils";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { hasOliveImage, OliveReveal } from "../shared";
@@ -31,10 +31,9 @@ const FIELD_KEYS = [
 
 /**
  * OliveBlogPostPage — one post, narrow reading column (max 68ch). The cover
- * image (when set) renders as a bounded card inside that same column — this
- * template never grows a post's photo into a full-bleed band; "the swatch
- * book" treats everything, hero photos included, as a card on the page. With
- * no cover, the post's excerpt is inlined once as the typographic masthead's
+ * image (when set) renders as a square, unframed photograph inside that same
+ * column — this template never grows a post's photo into a full-bleed band.
+ * With no cover, the post's excerpt is inlined once as the typographic masthead's
  * lede instead (never shown twice).
  */
 export async function OliveBlogPostPage({
@@ -78,10 +77,10 @@ export async function OliveBlogPostPage({
       >
         <OliveReveal>
           <p
-            className="olive-caption"
+            className="olive-label"
             style={{
-              color: "var(--olive-slate-deep)",
-              marginBottom: "0.75rem",
+              color: "var(--olive-taupe-ink)",
+              marginBottom: "1rem",
             }}
           >
             <time dateTime={new Date(displayDate).toISOString()}>
@@ -92,15 +91,15 @@ export async function OliveBlogPostPage({
           </p>
 
           <h1
-            className="olive-display"
-            style={{ marginBottom: hasCover ? "1.75rem" : "1rem" }}
+            className="olive-h1"
+            style={{ marginBottom: hasCover ? "2rem" : "1.25rem" }}
           >
             {page.title}
           </h1>
         </OliveReveal>
 
         {hasCover ? (
-          <figure className="olive-card relative mb-10 aspect-[3/2] overflow-hidden">
+          <figure className="relative mb-10 aspect-[3/2] overflow-hidden">
             <Image
               src={page.image!}
               alt=""

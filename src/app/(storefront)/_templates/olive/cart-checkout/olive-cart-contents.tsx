@@ -29,7 +29,7 @@ import {
 
 /**
  * How long the leaving row spends on each half of its exit: the arrival
- * reversed (opacity/translate/rotate) first, then the `1fr → 0fr` collapse —
+ * reversed (opacity/translate) first, then the `1fr → 0fr` collapse —
  * run in series, never together, so the row visibly leaves before the gap it
  * leaves behind closes.
  */
@@ -53,8 +53,8 @@ type Props = {
 
 /**
  * The chip discipline in one function: a variant only earns a swatch when one
- * of its option segments is a colour the template actually knows. "Sage / M"
- * gets a sage chip; "Small / Left-handed" gets none, because inventing a
+ * of its option segments is a colour the template actually knows. "Olive / M"
+ * gets an olive swatch; "Small / Left-handed" gets none, because inventing a
  * colour for a word that is not a colour is exactly the decorative chip the
  * design forbids.
  */
@@ -169,7 +169,7 @@ export function OliveCartContents({
             {itemCount === 1 ? "1 item" : `${itemCount} items`}
           </p>
           <OliveButton
-            variant="ghost"
+            variant="link"
             href="/shop"
             data-sp-field={continueShoppingFieldKey}
           >
@@ -177,8 +177,8 @@ export function OliveCartContents({
           </OliveButton>
         </div>
 
-        <OliveRevealGroup fan>
-          <ul className="flex flex-col gap-4">
+        <OliveRevealGroup>
+          <ul className="flex flex-col">
             {items.map((item, i) => {
               const lineId = cartItemId(item);
               return (
@@ -250,7 +250,8 @@ export function OliveCartContents({
 
           {checkoutEnabled ? (
             <OliveButton
-              variant="primary"
+              variant="solid"
+              arrow
               href="/checkout"
               className="w-full"
               data-sp-field={checkoutLabelFieldKey}
@@ -279,7 +280,7 @@ type OliveCartLineProps = {
  * variable number of times inside a loop — each row's total also changes
  * independently of every other row's.
  *
- * The remove exit is the arrival reversed — opacity/translate/rotate first,
+ * The remove exit is the arrival reversed — opacity/translate first,
  * then a `1fr → 0fr` collapse — timed in CSS via `transition-delay` on
  * `.olive-cart-line[data-leaving="true"]` so the two phases run in series off
  * one attribute, no second JS timer needed here. The parent defers the actual
@@ -310,14 +311,13 @@ function OliveCartLine({
       >
         <div className="olive-cart-line-inner">
           <div className="olive-cart-line-body">
-            <div className="olive-card olive-card-paper olive-card-lift flex gap-4 p-3 sm:p-4">
+            <div
+              className="flex gap-4 py-5"
+              style={{ borderBottom: "1px solid var(--olive-hairline)" }}
+            >
               <div
                 className="relative w-[76px] shrink-0 overflow-hidden sm:w-[92px]"
-                style={{
-                  aspectRatio: "4 / 5",
-                  borderRadius: "var(--radius)",
-                  border: "1px solid var(--olive-hairline)",
-                }}
+                style={{ aspectRatio: "4 / 5" }}
               >
                 {hasOliveImage(item.imageUrl) ? (
                   <Image

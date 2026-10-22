@@ -52,7 +52,7 @@ describe("resolveChipColor", () => {
       unknown: false,
     });
     expect(resolveChipColor("Mystery Shimmer")).toEqual({
-      color: "var(--olive-paper)",
+      color: "var(--olive-sand)",
       unknown: true,
     });
   });

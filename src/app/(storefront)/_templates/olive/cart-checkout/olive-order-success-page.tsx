@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { getSession } from "~/server/better-auth/server";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getSession } from "~/server/better-auth/server";
 
 import { resolveFields } from "..";
-import { OliveLeafMark, OliveSection } from "../shared";
+import { OliveSection } from "../shared";
 import { OliveOrderConfirmation } from "./olive-order-confirmation";
 
 // No shared interface for this slot — `order/success/page.tsx` passes only
@@ -23,17 +23,15 @@ function OliveOrderLoading({ loadingText }: { loadingText: string }) {
   return (
     <OliveSection
       bleed
-      tone="paper"
+      tone="ivory"
       {...sectionGroupAttr("checkout", "success")}
     >
       <div className="mx-auto flex w-full max-w-[36rem] flex-col items-center gap-4 text-center">
-        <span
-          className="flex animate-pulse items-center motion-reduce:animate-none"
-          style={{ color: "var(--olive-leaf)" }}
+        <p
+          role="status"
+          aria-live="polite"
+          className="olive-h3 animate-pulse motion-reduce:animate-none"
         >
-          <OliveLeafMark size={24} />
-        </span>
-        <p role="status" aria-live="polite" className="olive-h3">
           {loadingText}
         </p>
       </div>

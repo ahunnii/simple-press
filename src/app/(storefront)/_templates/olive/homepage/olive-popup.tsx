@@ -8,23 +8,24 @@ import type { PopupConfig } from "~/lib/validators/site-banner";
 import { PopupModal } from "~/components/site-banner/popup-modal";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { OliveButton, OliveLeafMark } from "../shared";
+import { OliveButton } from "../shared";
 
 type Props = {
   popup: PopupConfig;
 };
 
 /**
- * The owner's popup, printed on the same stock as everything else: a white
- * card with the leaf rivet, the hairline edge and the sage pill. The platform
- * owns the behaviour (once per session, focus trap, Escape, reduced motion);
- * this file owns only the print.
+ * The owner's popup, printed on the house stock: a square ivory sheet with a
+ * hairline edge, an optional photograph, a Bodoni heading and the espresso
+ * `solid` button with its drawn arrow. It is floating UI, so it may take the
+ * template's one soft shadow. The platform owns the behaviour (once per
+ * session, focus trap, Escape, reduced motion); this file owns only the print.
  *
  * Every string here belongs to the owner's popup configuration, so there is
  * nothing to field. The one exception is the button's fallback label: the
  * popup schema leaves `ctaLabel` optional with no default, so the template
- * supplies one rather than render a pill with no accessible name (the Default
- * template does the same).
+ * supplies one rather than render a button with no accessible name (the
+ * Default template does the same).
  */
 export function OlivePopup({ popup }: Props) {
   const heading = (popup.heading ?? "").trim();
@@ -41,21 +42,29 @@ export function OlivePopup({ popup }: Props) {
     >
       {(close) => (
         <div
-          className="olive-card relative w-[min(92vw,32rem)] overflow-hidden"
-          style={{ boxShadow: "var(--olive-shadow)" }}
+          className="relative w-[min(92vw,32rem)] overflow-hidden"
+          style={{
+            backgroundColor: "var(--olive-ivory)",
+            border: "1px solid var(--olive-hairline)",
+            boxShadow: "var(--olive-shadow)",
+            color: "var(--olive-espresso)",
+          }}
         >
           <button
             type="button"
             onClick={close}
             aria-label="Close"
-            className="olive-icon-btn absolute top-2 right-2 z-10"
-            style={{ backgroundColor: "var(--olive-white)" }}
+            className="olive-icon-btn absolute top-1 right-1 z-10"
+            style={{ backgroundColor: "var(--olive-ivory)" }}
           >
-            <X aria-hidden="true" className="h-4 w-4" />
+            <X aria-hidden="true" size={18} strokeWidth={1.5} />
           </button>
 
           {popup.mode === "image" && popup.imagePath ? (
-            <div className="relative aspect-[4/3] w-full">
+            <div
+              className="relative aspect-[4/3] w-full"
+              style={{ backgroundColor: "var(--olive-sand)" }}
+            >
               <Image
                 src={popup.imagePath}
                 alt={popup.imageAlt ?? ""}
@@ -68,23 +77,17 @@ export function OlivePopup({ popup }: Props) {
 
           {hasBody ? (
             <div
-              className="flex flex-col items-start gap-4"
-              style={{ padding: "clamp(1.5rem, 4vw, 2rem)" }}
+              className="flex flex-col items-start gap-5"
+              style={{ padding: "clamp(1.75rem, 5vw, 2.5rem)" }}
             >
-              <span
-                className="flex items-center"
-                style={{ color: "var(--olive-leaf)" }}
-              >
-                <OliveLeafMark size={20} />
-              </span>
-
-              {heading ? <p className="olive-h3">{heading}</p> : null}
+              {heading ? (
+                <p className="olive-h3 pr-8" style={{ fontSize: "1.75rem" }}>
+                  {heading}
+                </p>
+              ) : null}
 
               {hasText && popup.content ? (
-                <div
-                  className="text-[0.9375rem] leading-relaxed"
-                  style={{ color: "var(--olive-ink-soft)" }}
-                >
+                <div className="olive-body">
                   <TiptapRenderer content={popup.content as TiptapJSON} />
                 </div>
               ) : null}
@@ -96,8 +99,10 @@ export function OlivePopup({ popup }: Props) {
                 // same click event, so this covers both.
                 <span className="contents" onClick={close}>
                   <OliveButton
-                    variant="primary"
+                    variant="solid"
+                    arrow
                     href={ctaUrl}
+                    className="mt-1"
                     target={external ? "_blank" : undefined}
                     rel={external ? "noopener noreferrer" : undefined}
                   >

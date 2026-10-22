@@ -18,7 +18,6 @@ import {
 
 import {
   OliveButton,
-  OliveLeafMark,
   OliveReveal,
   OliveSection,
   OliveStatusBadge,
@@ -204,17 +203,15 @@ export function OliveOrderConfirmation({
     return (
       <OliveSection
         bleed
-        tone="paper"
+        tone="ivory"
         {...sectionGroupAttr("checkout", "success")}
       >
         <div className="mx-auto flex w-full max-w-[36rem] flex-col items-center gap-4 text-center">
-          <span
-            className="flex animate-pulse items-center motion-reduce:animate-none"
-            style={{ color: "var(--olive-leaf)" }}
+          <p
+            role="status"
+            aria-live="polite"
+            className="olive-h3 animate-pulse motion-reduce:animate-none"
           >
-            <OliveLeafMark size={24} />
-          </span>
-          <p role="status" aria-live="polite" className="olive-h3">
             {loadingText}
           </p>
         </div>
@@ -227,18 +224,12 @@ export function OliveOrderConfirmation({
     return (
       <OliveSection
         bleed
-        tone="paper"
+        tone="ivory"
         aria-labelledby="olive-order-heading"
         {...sectionGroupAttr("checkout", "success")}
       >
         <OliveReveal className="mx-auto w-full max-w-[36rem]">
           <div className="olive-ghost-card">
-            <span
-              className="flex items-center"
-              style={{ color: "var(--olive-leaf)" }}
-            >
-              <OliveLeafMark size={22} />
-            </span>
             <h1
               id="olive-order-heading"
               className="olive-h1"
@@ -248,7 +239,7 @@ export function OliveOrderConfirmation({
             </h1>
             {noOrderBody ? (
               <p
-                className="max-w-[46ch] text-[0.9375rem] leading-relaxed"
+                className="max-w-[46ch] text-[0.9375rem] leading-[1.7]"
                 style={{ color: "var(--olive-ink-soft)" }}
                 {...fieldAttr("olive.checkout.success-no-order-body")}
               >
@@ -256,7 +247,8 @@ export function OliveOrderConfirmation({
               </p>
             ) : null}
             <OliveButton
-              variant="secondary"
+              variant="outline"
+              arrow
               href="/shop"
               className="mt-1"
               data-sp-field="olive.checkout.success-continue-label"
@@ -293,7 +285,7 @@ export function OliveOrderConfirmation({
   return (
     <OliveSection
       bleed
-      tone="paper"
+      tone="ivory"
       aria-labelledby="olive-order-heading"
       {...sectionGroupAttr("checkout", "success")}
     >
@@ -307,16 +299,9 @@ export function OliveOrderConfirmation({
       <OliveReveal className="mx-auto w-full max-w-[40rem]">
         <div className="olive-card flex flex-col gap-7 p-6 sm:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span
-              className="flex items-center"
-              style={{ color: "var(--olive-leaf)" }}
-            >
-              <OliveLeafMark size={24} />
-            </span>
             {orderDetails?.payment_status === "paid" ? (
-              // `active` is the sage-bright chip in the badge's colour map —
-              // design.md asks for a sage chip here, and `label` carries the
-              // word the shopper actually needs to read.
+              // `active` is the moss chip in the badge's colour map, and
+              // `label` carries the word the shopper actually needs to read.
               <OliveStatusBadge status="active" label="Paid" />
             ) : processing ? (
               <OliveStatusBadge
@@ -329,7 +314,7 @@ export function OliveOrderConfirmation({
           <div className="flex flex-col gap-3">
             <h1
               id="olive-order-heading"
-              className="olive-display"
+              className="olive-h1"
               {...fieldAttr("olive.checkout.success-heading")}
             >
               {processing ? PAYMENT_PROCESSING_HEADING : heading}
@@ -337,14 +322,14 @@ export function OliveOrderConfirmation({
             {processing ? (
               <p
                 role="status"
-                className="max-w-[52ch] text-[1rem] leading-relaxed"
+                className="max-w-[52ch] text-[1rem] leading-[1.7]"
                 style={{ color: "var(--olive-ink-soft)" }}
               >
                 {PAYMENT_PROCESSING_MESSAGE}
               </p>
             ) : body ? (
               <p
-                className="max-w-[52ch] text-[1rem] leading-relaxed"
+                className="max-w-[52ch] text-[1rem] leading-[1.7]"
                 style={{ color: "var(--olive-ink-soft)" }}
                 {...fieldAttr("olive.checkout.success-body")}
               >
@@ -396,7 +381,7 @@ export function OliveOrderConfirmation({
                 {steps.map((step, i) => (
                   <li
                     key={step}
-                    className="py-3 text-[0.9375rem] leading-relaxed"
+                    className="py-3 text-[0.9375rem] leading-[1.7]"
                     style={
                       i === 0
                         ? undefined
@@ -414,7 +399,7 @@ export function OliveOrderConfirmation({
                   above are not fields. */}
               {showPickupLocation ? (
                 <div
-                  className="pt-1 text-[0.9375rem] leading-relaxed"
+                  className="pt-1 text-[0.9375rem] leading-[1.7]"
                   style={{ borderTop: "1px solid var(--olive-hairline)" }}
                 >
                   <p className="olive-label pt-2">Pickup location</p>
@@ -439,18 +424,19 @@ export function OliveOrderConfirmation({
 
           <div className="flex flex-wrap items-center gap-4">
             <OliveButton
-              variant="primary"
+              variant="solid"
+              arrow
               href="/shop"
               data-sp-field="olive.checkout.success-continue-label"
             >
               {continueLabel}
             </OliveButton>
-            <OliveButton variant="ghost" href="/">
+            <OliveButton variant="link" href="/">
               Back to home
             </OliveButton>
             {/* PF18 — account next step (View my orders / Create an account) */}
             {accountCta ? (
-              <OliveButton variant="ghost" href={accountCta.href}>
+              <OliveButton variant="link" href={accountCta.href}>
                 {accountCta.label}
               </OliveButton>
             ) : null}

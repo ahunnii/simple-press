@@ -1,88 +1,104 @@
 import Image from "next/image";
 
+import { cn } from "~/lib/utils";
+
 import {
   hasOliveImage,
   OliveButton,
-  OliveImageFallback,
   OliveReveal,
-  OliveSection,
   OliveSectionHeading,
 } from "../shared";
 
 type Props = {
+  eyebrow: string;
   heading: string;
   body: string;
   ctaLabel: string;
   ctaHref: string;
   image: string;
   sectionAttrs?: Record<string, string>;
+  eyebrowFieldKey?: string;
   headingFieldKey?: string;
   bodyFieldKey?: string;
   ctaLabelFieldKey?: string;
 };
 
 /**
- * The cover band — the one place the sage field runs edge to edge across the
- * page, the same green as the footer and the bag. White type on the left, one
- * photograph framed as a white card on the right.
+ * The Edit — the one place the olive accent runs as a field.
  *
- * `olive-invert` is what makes the scoped type classes follow the section's
- * white foreground; it is deliberately scoped to the text column so the photo
- * card keeps its own ink-on-white pairing.
+ * A full-bleed split: a moss panel (≈ a third) carrying the eyebrow, a Bodoni
+ * heading, an optional line and an ivory-filled button, beside one tall
+ * photograph that bleeds to the right edge of the viewport. The panel's copy
+ * starts on the page container's left edge, so it lines up with every
+ * section above and below it.
+ *
+ * Phone and tablet: the photograph first, then the panel. With no photograph
+ * the panel simply spans the width — the pitch still stands on its own.
+ * `data-olive-tone="moss"` flips the scoped type, buttons and focus ring to
+ * their on-dark values (ivory on moss 6.09:1).
  */
 export function OliveBandSection({
+  eyebrow,
   heading,
   body,
   ctaLabel,
   ctaHref,
   image,
   sectionAttrs,
+  eyebrowFieldKey,
   headingFieldKey,
   bodyFieldKey,
   ctaLabelFieldKey,
 }: Props) {
+  if (!heading.trim() && !body.trim()) return null;
+
+  const hasImage = hasOliveImage(image);
+  const showButton = ctaLabel.trim().length > 0 && ctaHref.trim().length > 0;
+
   return (
-    <OliveSection
-      bleed
-      tone="sage"
+    <section
+      data-olive-tone="moss"
       aria-labelledby="olive-band-heading"
-      innerClassName="grid items-center gap-8 md:grid-cols-2 md:gap-12"
+      className={cn("olive-band", hasImage && "olive-band-split")}
       {...sectionAttrs}
     >
-      <OliveReveal className="olive-invert flex flex-col items-start gap-6">
-        <OliveSectionHeading
-          heading={heading}
-          id="olive-band-heading"
-          body={body}
-          tone="invert"
-          headingFieldKey={headingFieldKey}
-          bodyFieldKey={bodyFieldKey}
-        />
-
-        {ctaLabel && ctaHref ? (
-          <OliveButton
-            variant="secondary"
-            href={ctaHref}
-            data-sp-field={ctaLabelFieldKey}
-          >
-            {ctaLabel}
-          </OliveButton>
-        ) : null}
-      </OliveReveal>
-
-      <OliveReveal className="olive-card relative aspect-[4/3] overflow-hidden md:aspect-[4/5]">
-        {hasOliveImage(image) ? (
+      {hasImage ? (
+        <div className="olive-band-media">
           <Image
             src={image}
             alt=""
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 1023px) 100vw, 68vw"
             className="object-cover"
           />
-        ) : (
-          <OliveImageFallback className="absolute inset-0" size={44} />
-        )}
-      </OliveReveal>
-    </OliveSection>
+        </div>
+      ) : null}
+
+      <div className="olive-band-panel">
+        <OliveReveal className="flex flex-col items-start gap-8">
+          <OliveSectionHeading
+            heading={heading}
+            id="olive-band-heading"
+            eyebrow={eyebrow}
+            eyebrowField={eyebrowFieldKey}
+            body={body.trim() ? body : undefined}
+            tone="invert"
+            headingFieldKey={headingFieldKey}
+            bodyFieldKey={bodyFieldKey}
+          />
+
+          {showButton ? (
+            <OliveButton
+              variant="ivory"
+              arrow
+              href={ctaHref}
+              data-sp-field={ctaLabelFieldKey}
+            >
+              {ctaLabel}
+            </OliveButton>
+          ) : null}
+        </OliveReveal>
+      </div>
+    </section>
   );
 }

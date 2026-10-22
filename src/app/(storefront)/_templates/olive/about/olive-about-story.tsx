@@ -7,7 +7,6 @@ import { cn } from "~/lib/utils";
 import {
   hasOliveImage,
   OliveImageFallback,
-  OliveLeafMark,
   OliveReveal,
   OliveSection,
 } from "../shared";
@@ -29,8 +28,8 @@ function readString(row: TemplateListRow, key: string): string {
 }
 
 /**
- * about.story — up to 4 rows, alternating photo card / text band. The leaf
- * mark and heading render only when a heading is provided. Never hidden by
+ * about.story — up to 4 rows, alternating photo card / text band. The
+ * heading renders only when one is provided. Never hidden by
  * the owner (not in `hideable` set); an empty list falls back to the page's
  * own built-in example rows so the section is never blank.
  */
@@ -54,7 +53,7 @@ export function OliveAboutStory({ rows, isOwnerData = false }: Props) {
     <OliveSection
       as="section"
       aria-label="Our story"
-      tone="white"
+      tone="ivory"
       {...sectionGroupAttr("about", "story")}
       className="flex flex-col gap-10 sm:gap-16"
     >
@@ -68,9 +67,7 @@ export function OliveAboutStory({ rows, isOwnerData = false }: Props) {
         return (
           <OliveReveal key={row._id ?? index}>
             <div
-              {...(isOwnerData
-                ? listItemAttr("olive.about.story", index)
-                : {})}
+              {...(isOwnerData ? listItemAttr("olive.about.story", index) : {})}
               className={cn(
                 "flex flex-col gap-6 sm:items-center sm:gap-10",
                 reversed ? "sm:flex-row-reverse" : "sm:flex-row",
@@ -78,10 +75,7 @@ export function OliveAboutStory({ rows, isOwnerData = false }: Props) {
             >
               <div
                 className="relative w-full overflow-hidden sm:w-1/2"
-                style={{
-                  aspectRatio: "4 / 3",
-                  borderRadius: "var(--olive-card-radius)",
-                }}
+                style={{ aspectRatio: "4 / 3" }}
               >
                 {hasOliveImage(image) ? (
                   <Image
@@ -96,20 +90,18 @@ export function OliveAboutStory({ rows, isOwnerData = false }: Props) {
                 )}
               </div>
 
-              <div className="olive-card olive-card-paper flex w-full flex-col gap-3 p-6 sm:w-1/2 sm:p-8">
-                {hasHeading && (
-                  <>
-                    <span
-                      aria-hidden="true"
-                      style={{ color: "var(--olive-leaf)" }}
-                    >
-                      <OliveLeafMark size={20} />
-                    </span>
-                    <h3 className="olive-h3">{heading}</h3>
-                  </>
-                )}
+              <div
+                className="flex w-full flex-col gap-4 p-6 sm:w-1/2 sm:p-10"
+                style={{ backgroundColor: "var(--olive-sand)" }}
+              >
+                {hasHeading && <h3 className="olive-h3">{heading}</h3>}
                 {body ? (
-                  <p className="olive-caption max-w-[46ch]">{body}</p>
+                  <p
+                    className="max-w-[46ch] text-[0.9375rem] leading-[1.7]"
+                    style={{ color: "var(--olive-ink-soft)" }}
+                  >
+                    {body}
+                  </p>
                 ) : null}
               </div>
             </div>

@@ -17,7 +17,6 @@ import {
   resolveVariantPrice,
 } from "~/lib/variant-price";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
@@ -90,11 +89,11 @@ type OliveProductCardProps = {
 
 /** A product created inside this window earns the "New" tab. */
 const NEW_WINDOW_DAYS = 30;
-/** Colour chips on a card before the row collapses to "+N". */
+/** Colour dots on a card before the row collapses to "+N". */
 const MAX_CARD_SWATCHES = 6;
 /** How long the sr-only confirmation stays in the live region. */
 const ANNOUNCE_MS = 2400;
-/** Matches `.olive-btn[data-commit="true"]`'s animation-duration in globals.css. */
+/** How long the bar holds its espresso "committed" face (`.olive-quick-add-bar[data-commit]`). */
 const COMMIT_MS = 460;
 
 function isRecent(createdAt: Date | string | null | undefined): boolean {
@@ -221,20 +220,21 @@ function singleDimensionChoices(
 }
 
 /**
- * OliveProductCard — the swatch card, and the template's thesis.
+ * OliveProductCard — the lookbook card (design.md § Components).
  *
- * A photograph on card stock, the product's real colours as chips beneath it,
- * the price, and one pill that puts it in the bag. It refuses the flat white
- * grid with a black button: the card rests on paper and warms to white as you
- * approach it (`olive-card-lift`), the second photograph cross-fades in on
- * hover, and a corner tab states stock in words rather than in colour alone.
+ * Frameless: a 3:4 photograph on a sand bed, then the name (Montserrat,
+ * sentence case), the price and the product's real colours as 14px dots. No
+ * frame, shadow or lift; the second photograph cross-fades in on hover, and a
+ * small ivory tag top-left states stock or newness in words.
  *
- * Quick-add is honest about what it can do. No variants: it adds. One option
- * dimension: a small sheet opens inside the card and adding the chosen row is
- * still one gesture. Two dimensions (size AND colour): it sends you to the
- * product page, because guessing which combination you meant is worse than
- * asking. Coming-soon and sold-out disable it outright — the same rule the
- * checkout enforces server-side.
+ * Quick-add is a full-width bar pinned to the bottom of the photograph,
+ * revealed on hover / focus-within for fine pointers (`.olive-quick-add` in
+ * globals.css). On touch it is never drawn — the card links to the product
+ * page — but it stays in the tab order and appears the moment it takes
+ * keyboard focus. It is honest about what it can do: no variants → it adds;
+ * one option dimension → a small sheet of choices opens over the bar; two
+ * dimensions or option groups → it links to the product page. Coming-soon
+ * and sold-out disable it outright — the same rule checkout enforces.
  */
 export function OliveProductCard({
   product,
@@ -248,12 +248,11 @@ export function OliveProductCard({
   const { addItem } = useCart();
   const cartEnabled = useCartEnabled();
   const { isEnabled } = useStorefrontFlags();
-  const reducedMotion = useReducedMotion();
 
   const [hovered, setHovered] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
-  // The quick-add pill's press-commit — connects the click to the toast and
+  // The quick-add bar's press-commit — connects the click to the toast and
   // badge that follow, same idiom as `olive-buy-row.tsx`'s `onAdd`.
   const [committed, setCommitted] = useState(false);
 
@@ -313,14 +312,10 @@ export function OliveProductCard({
 
   const primaryImage = product.images[0];
   const secondImage = product.images[1];
-  const showSecond = hovered && hasOliveImage(secondImage?.url);
-  const fadeStyle = (visible: boolean): CSSProperties => ({
-    opacity: visible ? 1 : 0,
-    transition: reducedMotion ? undefined : "opacity 300ms var(--olive-ease)",
-  });
+  const hasSecond = hasOliveImage(secondImage?.url);
 
   // Escape and clicks outside put the sheet away; Escape hands focus back to
-  // the pill that opened it.
+  // the bar that opened it.
   useEffect(() => {
     if (!sheetOpen) return;
 
@@ -436,10 +431,8 @@ export function OliveProductCard({
     >
       <article
         ref={cardRef}
-        className={cn(
-          "olive-card olive-card-paper olive-card-lift relative flex h-full flex-col overflow-hidden",
-          className,
-        )}
+        className={cn("olive-product-card", className)}
+        data-hovered={hovered && hasSecond ? "true" : undefined}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onFocus={() => setHovered(true)}
@@ -452,11 +445,8 @@ export function OliveProductCard({
           }
         }}
       >
-        {/* Photograph — 3:4, the shape of a garment shot */}
-        <div
-          className="relative w-full overflow-hidden"
-          style={{ aspectRatio: "3 / 4" }}
-        >
+        {/* Photograph — 3:4 on a sand bed, the shape of a garment shot */}
+        <div className="olive-product-card-media">
           {hasOliveImage(primaryImage?.url) ? (
             <>
               <Image
@@ -464,28 +454,18 @@ export function OliveProductCard({
                 alt=""
                 fill
                 priority={priority}
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover"
-                style={fadeStyle(!showSecond)}
               />
-              {/* The back of the leaf. It does not merely dissolve in: the
-                  same clip wipe the product page's swatch turn uses runs
-                  alongside the existing opacity fade, so the card and the
-                  specimen page speak one language — a leaf turned to see
-                  what is on its other side. The wipe rides `.olive-leaf-turn`
-                  in globals.css, keyed off `data-olive-turned`, so reduced
-                  motion can retire it declaratively next to every other
-                  olive rule; the fade keeps the component's own
-                  `reducedMotion` guard. */}
-              {hasOliveImage(secondImage?.url) ? (
+              {/* Second photograph: a plain cross-fade on hover
+                  (`.olive-product-card-alt`, reduced-motion safe in CSS). */}
+              {hasSecond ? (
                 <Image
                   src={secondImage?.url ?? ""}
                   alt=""
                   fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
-                  className="olive-leaf-turn object-cover"
-                  data-olive-turned={showSecond ? "true" : "false"}
-                  style={fadeStyle(showSecond)}
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="olive-product-card-alt object-cover"
                 />
               ) : null}
             </>
@@ -499,42 +479,61 @@ export function OliveProductCard({
             href={href}
             aria-hidden="true"
             tabIndex={-1}
-            className="absolute inset-0"
+            className="absolute inset-0 z-[2]"
           />
 
           {cornerTab ? (
-            <span
-              className="olive-label pointer-events-none absolute top-2.5 left-2.5 px-2 py-1"
-              style={{
-                backgroundColor: "var(--olive-white)",
-                border: "1px solid var(--olive-hairline)",
-                borderRadius: "var(--olive-card-radius)",
-                color: "var(--olive-ink)",
-              }}
+            <span className="olive-product-card-tag">{cornerTab}</span>
+          ) : null}
+
+          {/* Catalog mode (B6.11): no quick-add when `cart` is off */}
+          {showQuickAdd && cartEnabled ? (
+            <div
+              className="olive-quick-add"
+              data-open={sheetOpen ? "true" : undefined}
             >
-              {cornerTab}
-            </span>
+              <QuickAdd
+                blockedLabel={
+                  status.comingSoon
+                    ? "Coming soon"
+                    : status.isOutOfStock
+                      ? "Sold out"
+                      : null
+                }
+                choices={choices}
+                href={href}
+                productName={product.name}
+                sheetId={sheetId}
+                sheetOpen={sheetOpen}
+                sheetRef={sheetRef}
+                trackStock={trackStock}
+                triggerRef={triggerRef}
+                committed={committed}
+                onAddSimple={addSimple}
+                onAddVariant={addVariant}
+                onToggleSheet={() => setSheetOpen((open) => !open)}
+                hasVariants={variants.length > 0 || hasOptions}
+              />
+            </div>
           ) : null}
         </div>
 
-        {/* Specimen line: name, real colours, price, one pill */}
-        <div className="flex flex-1 flex-col gap-2 p-3">
-          <NameHeading
-            style={{
-              fontFamily: "var(--olive-font-display)",
-              fontWeight: 400,
-              fontSize: "0.9375rem",
-              lineHeight: 1.3,
-              color: "var(--olive-ink)",
-            }}
-          >
-            <Link href={href} className="hover:underline">
-              {product.name}
-            </Link>
+        {/* Name, price, real colours */}
+        <div className="flex flex-1 flex-col gap-1.5 pt-3.5">
+          <NameHeading className="olive-card-title olive-product-card-name">
+            <Link href={href}>{product.name}</Link>
           </NameHeading>
 
+          <OlivePrice
+            price={status.displayPrice}
+            compareAtPrice={
+              status.isOnSale ? status.displayCompareAtPrice : null
+            }
+            from={status.variablePricing}
+          />
+
           {visibleSwatches.length > 0 ? (
-            <span className="flex flex-wrap items-center gap-1.5">
+            <span className="mt-1 flex flex-wrap items-center gap-1.5">
               <span className="sr-only">Colours:</span>
               {visibleSwatches.map((swatch) => (
                 <OliveChip
@@ -552,41 +551,6 @@ export function OliveProductCard({
                 <span className="olive-caption">+{hiddenSwatches}</span>
               ) : null}
             </span>
-          ) : null}
-
-          <OlivePrice
-            price={status.displayPrice}
-            compareAtPrice={
-              status.isOnSale ? status.displayCompareAtPrice : null
-            }
-            from={status.variablePricing}
-            className="mt-auto"
-          />
-
-          {/* Catalog mode (B6.11): no quick-add pill when `cart` is off */}
-          {showQuickAdd && cartEnabled ? (
-            <QuickAdd
-              blockedLabel={
-                status.comingSoon
-                  ? "Coming soon"
-                  : status.isOutOfStock
-                    ? "Sold out"
-                    : null
-              }
-              choices={choices}
-              href={href}
-              productName={product.name}
-              sheetId={sheetId}
-              sheetOpen={sheetOpen}
-              sheetRef={sheetRef}
-              trackStock={trackStock}
-              triggerRef={triggerRef}
-              committed={committed}
-              onAddSimple={addSimple}
-              onAddVariant={addVariant}
-              onToggleSheet={() => setSheetOpen((open) => !open)}
-              hasVariants={variants.length > 0 || hasOptions}
-            />
           ) : null}
         </div>
 
@@ -617,7 +581,7 @@ type QuickAddProps = {
 };
 
 /**
- * The pill, and the sheet it can open. Split out so the card body reads as a
+ * The bar, and the sheet it can open. Split out so the card body reads as a
  * layout and this reads as the one decision it makes.
  */
 function QuickAdd({
@@ -638,11 +602,7 @@ function QuickAdd({
 }: QuickAddProps) {
   if (blockedLabel) {
     return (
-      <button
-        type="button"
-        disabled
-        className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
-      >
+      <button type="button" disabled className="olive-quick-add-bar">
         {blockedLabel}
       </button>
     );
@@ -655,7 +615,7 @@ function QuickAdd({
         onClick={onAddSimple}
         aria-label={`Add ${productName} to bag`}
         data-commit={committed ? "true" : undefined}
-        className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
+        className="olive-quick-add-bar"
       >
         Add to bag
       </button>
@@ -668,7 +628,7 @@ function QuickAdd({
       <Link
         href={href}
         aria-label={`Choose options for ${productName}`}
-        className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
+        className="olive-quick-add-bar"
       >
         Choose options
       </Link>
@@ -677,32 +637,13 @@ function QuickAdd({
 
   return (
     <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={onToggleSheet}
-        aria-expanded={sheetOpen}
-        aria-controls={sheetId}
-        aria-label={`Choose options for ${productName}`}
-        data-commit={committed ? "true" : undefined}
-        className="olive-btn olive-btn-secondary olive-btn-sm mt-1 w-full"
-      >
-        Choose options
-      </button>
-
       {sheetOpen ? (
         <div
           ref={sheetRef}
           id={sheetId}
           role="group"
           aria-label={`Options for ${productName}`}
-          className="absolute inset-x-2 bottom-2 z-20 flex max-h-[70%] flex-wrap gap-2 overflow-y-auto p-3"
-          style={{
-            backgroundColor: "var(--olive-white)",
-            border: "1px solid var(--olive-hairline-strong)",
-            borderRadius: "var(--olive-card-radius)",
-            boxShadow: "var(--olive-shadow)",
-          }}
+          className="olive-quick-add-sheet"
         >
           {choices.map((choice) => {
             const soldOut = trackStock && choice.variant.inventoryQty <= 0;
@@ -712,7 +653,7 @@ function QuickAdd({
                 type="button"
                 disabled={soldOut}
                 onClick={() => onAddVariant(choice)}
-                className="olive-btn olive-btn-secondary olive-btn-sm"
+                className="olive-quick-add-option"
               >
                 {choice.value}
                 {soldOut ? <span className="sr-only"> — sold out</span> : null}
@@ -721,6 +662,19 @@ function QuickAdd({
           })}
         </div>
       ) : null}
+
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={onToggleSheet}
+        aria-expanded={sheetOpen}
+        aria-controls={sheetId}
+        aria-label={`Choose options for ${productName}`}
+        data-commit={committed ? "true" : undefined}
+        className="olive-quick-add-bar"
+      >
+        Choose options
+      </button>
     </>
   );
 }

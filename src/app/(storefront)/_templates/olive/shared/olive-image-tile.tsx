@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
@@ -15,7 +16,7 @@ type OliveImageTileProps = {
   /** Template field key whose value is exactly `label`; enables editor live text. */
   labelFieldKey?: string;
   href: string;
-  /** Optional second line, styled as the ghost link. Not itself interactive. */
+  /** Optional tracked-caps line with an arrow. Not itself interactive. */
   cta?: string;
   priority?: boolean;
   /** Passed to next/image. Defaults to a two-up row. */
@@ -25,13 +26,13 @@ type OliveImageTileProps = {
 };
 
 /**
- * OliveImageTile — the big 2-up photograph, with its label on a card pinned
- * into the bottom-left corner.
+ * OliveImageTile — the big 2-up photograph with its label printed straight
+ * on it (mood tiles).
  *
- * Portrait on a phone (4:5) and landscape on a laptop (3:2), so the pair
- * stacks without either one becoming a letterbox. The white label card is the
- * same stock as everything else on the page — the photograph is the surface,
- * the card is the print on it.
+ * Portrait on a phone (4:5) and landscape on a laptop (3:2). A bottom-up
+ * espresso scrim (`.olive-image-tile-scrim`) carries an ivory Bodoni label and
+ * an optional tracked-caps line with a drawn arrow; the photograph pushes in
+ * to 1.03 on hover / focus. Square, no frame.
  */
 export function OliveImageTile({
   image,
@@ -49,7 +50,7 @@ export function OliveImageTile({
     <Link
       href={href}
       className={cn(
-        "olive-card olive-card-lift group relative block aspect-[4/5] overflow-hidden md:aspect-[3/2]",
+        "olive-image-tile group aspect-[4/5] md:aspect-[3/2]",
         className,
       )}
       style={style}
@@ -64,17 +65,12 @@ export function OliveImageTile({
           className="olive-photo-push object-cover"
         />
       ) : (
-        <OliveImageFallback className="absolute inset-0" size={44} />
+        <OliveImageFallback className="absolute inset-0" />
       )}
 
-      <span
-        className="pointer-events-none absolute bottom-3 left-3 flex max-w-[min(20rem,80%)] flex-col gap-1 px-4 py-3"
-        style={{
-          backgroundColor: "var(--olive-white)",
-          border: "1px solid var(--olive-hairline)",
-          borderRadius: "var(--olive-card-radius)",
-        }}
-      >
+      <span aria-hidden="true" className="olive-image-tile-scrim" />
+
+      <span className="olive-on-photo pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex flex-col items-start gap-2 p-5 sm:p-7">
         <span
           className="olive-h3"
           {...(labelFieldKey ? fieldAttr(labelFieldKey) : {})}
@@ -82,7 +78,15 @@ export function OliveImageTile({
           {label}
         </span>
         {cta ? (
-          <span className="olive-btn olive-btn-ghost self-start">{cta}</span>
+          <span className="olive-label inline-flex items-center gap-2">
+            {cta}
+            <ArrowRight
+              aria-hidden="true"
+              className="olive-btn-arrow"
+              size={14}
+              strokeWidth={1.5}
+            />
+          </span>
         ) : null}
       </span>
     </Link>

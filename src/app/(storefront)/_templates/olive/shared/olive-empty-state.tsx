@@ -4,15 +4,14 @@ import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 import { OliveButton } from "./olive-button";
-import { OliveLeafMark } from "./olive-leaf-mark";
 
 type OliveEmptyStateProps = {
   heading: string;
   body?: string;
-  /** Rendered as the secondary (white pill) button. */
+  /** Rendered as the `outline` button with an arrow. */
   cta?: { label: string; href: string };
   /**
-   * A single big numeral drawn above the mark — the cart's "0", a filtered
+   * A single big Bodoni numeral drawn above the heading — the cart's "0", a filtered
    * grid's count. Absence gets drawn deliberately rather than left blank.
    */
   numeral?: string;
@@ -28,10 +27,10 @@ type OliveEmptyStateProps = {
 };
 
 /**
- * OliveEmptyState — the ghost card.
+ * OliveEmptyState — absence, drawn on purpose.
  *
- * Dashed hairline on the paper face, the leaf rivet, one heading, one line,
- * one button. Every "there is nothing here" surface in the template uses this
+ * A square frame between two strong hairlines (`olive-ghost-card`), an
+ * optional Bodoni numeral, one heading, one line, one button. Every "there is nothing here" surface in the template uses this
  * one card so an empty shop, an empty bag and an empty order list are
  * recognisably the same event rather than three different blanks.
  *
@@ -57,25 +56,18 @@ export function OliveEmptyState({
       {numeral ? (
         <span
           aria-hidden="true"
+          className="olive-serif"
           style={{
-            fontFamily: "var(--olive-font-display)",
-            fontWeight: 300,
-            fontSize: "6rem",
+            fontWeight: 400,
+            fontSize: "5.5rem",
             lineHeight: 0.9,
             letterSpacing: "-0.02em",
-            color: "var(--olive-slate)",
+            color: "var(--olive-taupe)",
           }}
         >
           {numeral}
         </span>
       ) : null}
-
-      <span
-        className="flex items-center"
-        style={{ color: "var(--olive-leaf)" }}
-      >
-        <OliveLeafMark size={22} />
-      </span>
 
       <Heading
         className="olive-h3"
@@ -94,7 +86,7 @@ export function OliveEmptyState({
       ) : null}
 
       {cta ? (
-        <OliveButton variant="secondary" href={cta.href} className="mt-1">
+        <OliveButton variant="outline" arrow href={cta.href} className="mt-2">
           {cta.label}
         </OliveButton>
       ) : null}

@@ -15,7 +15,8 @@ type OliveCartButtonProps = {
 };
 
 /**
- * Cart link with the leaf-green count badge. The badge pulses once whenever
+ * Cart link (lucide bag, 18px) with the round espresso count badge — one of
+ * the template's only two round things. The badge pulses once whenever
  * the count goes up, which is the header's half of the add-to-bag
  * confirmation (`OliveToast` is the other half).
  *
@@ -55,7 +56,7 @@ export function OliveCartButton({
     >
       <ShoppingBag
         className="h-[18px] w-[18px]"
-        strokeWidth={1.5}
+        strokeWidth={1.25}
         aria-hidden="true"
       />
       {itemCount > 0 ? (

@@ -21,7 +21,7 @@ import {
 /**
  * `/faq` — olive's FAQ page on the generic base. The heading sits in the
  * white `OlivePageBand` (the page's only h1); the questions sit on the page
- * edge at a readable measure as olive's own accordion — one `olive-card` per
+ * edge at a readable measure as olive's own accordion — hairline rows, one per
  * question, `type="multiple"` so a reader can keep answers open to compare
  * them, each trigger a real button inside an `h2` (they sit directly under
  * the page h1).

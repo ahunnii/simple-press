@@ -51,7 +51,7 @@ export function OliveBlogPage({ pages, business, customFields }: Props) {
         subtitleFieldKey="olive.blog.hero-subtitle"
       />
 
-      <OliveSection tone="white">
+      <OliveSection tone="ivory">
         {pages.length === 0 ? (
           <OliveReveal>
             <OliveEmptyState

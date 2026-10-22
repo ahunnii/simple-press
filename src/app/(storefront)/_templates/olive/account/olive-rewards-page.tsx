@@ -35,11 +35,11 @@ import {
 } from "../shared";
 import { OliveAccountLayout } from "./olive-account-layout";
 
-/** Colour per reward-code status — the leaf-bright field is reserved for "Active". */
+/** Colour per reward-code status — the moss field is reserved for "Active". */
 const CODE_STATUS_COLOR: Record<RewardCodeStatus, string> = {
-  active: "var(--olive-sage-bright)",
-  pending: "var(--olive-slate)",
-  used: "var(--olive-slate)",
+  active: "var(--olive-moss)",
+  pending: "var(--olive-stone)",
+  used: "var(--olive-stone)",
   expired: "var(--olive-error)",
   inactive: "var(--olive-ink-soft)",
 };
@@ -50,16 +50,15 @@ function StatusPill({ label, color }: { label: string; color: string }) {
     <span
       className="inline-flex items-center gap-2"
       style={{
-        backgroundColor: "var(--olive-paper)",
+        backgroundColor: "var(--olive-sand)",
         border: "1px solid var(--olive-hairline)",
-        borderRadius: "999px",
         padding: "0.1875rem 0.5rem",
       }}
     >
       <OliveChip color={color} label={label} size={12} srOnlyLabel={false} />
       <span
         className="olive-label"
-        style={{ color: "var(--olive-ink)", fontSize: "0.6875rem" }}
+        style={{ color: "var(--olive-espresso)", fontSize: "0.6875rem" }}
       >
         {label}
       </span>
@@ -112,21 +111,21 @@ function OliveRedeemTierCard({
               Confirm: spend {tier.pointsCost} points?
             </span>
             <OliveButton
-              variant="primary"
+              variant="solid"
               size="sm"
               disabled={isPending}
               onClick={() => actions.redeem(tier.id)}
             >
               {isPending ? "Redeeming…" : "Confirm"}
             </OliveButton>
-            <OliveButton variant="ghost" size="sm" onClick={onCancelConfirm}>
+            <OliveButton variant="link" size="sm" onClick={onCancelConfirm}>
               Cancel
             </OliveButton>
           </div>
         ) : (
           <>
             <OliveButton
-              variant="primary"
+              variant="solid"
               size="sm"
               disabled={!!disabledReason || isPending}
               onClick={() => onRequestConfirm(tier.id)}
@@ -226,7 +225,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                   {!joined && (
                     <div style={{ marginTop: "1rem" }}>
                       <OliveButton
-                        variant="primary"
+                        variant="solid"
                         size="sm"
                         disabled={readOnly || actions.pending.join}
                         onClick={() => actions.join()}
@@ -306,11 +305,11 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                           {s.claimed ? (
                             <StatusPill
                               label="Claimed"
-                              color="var(--olive-leaf)"
+                              color="var(--olive-moss-deep)"
                             />
                           ) : (
                             <OliveButton
-                              variant="secondary"
+                              variant="outline"
                               size="sm"
                               disabled={
                                 !joined ||
@@ -368,9 +367,8 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                           <code
                             style={{
                               fontFamily: "monospace",
-                              backgroundColor: "var(--olive-white)",
+                              backgroundColor: "var(--olive-ivory)",
                               border: "1px solid var(--olive-hairline)",
-                              borderRadius: "0.25rem",
                               padding: "0.25rem 0.5rem",
                               fontSize: "0.875rem",
                             }}
@@ -378,7 +376,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                             {actions.lastRedeemed.code}
                           </code>
                           <OliveButton
-                            variant="secondary"
+                            variant="outline"
                             size="sm"
                             onClick={() =>
                               void actions.copyCode(actions.lastRedeemed!.code)
@@ -442,8 +440,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                               <code
                                 style={{
                                   fontFamily: "monospace",
-                                  backgroundColor: "var(--olive-paper)",
-                                  borderRadius: "0.25rem",
+                                  backgroundColor: "var(--olive-sand)",
                                   padding: "0.25rem 0.5rem",
                                   fontSize: "0.875rem",
                                 }}
@@ -466,7 +463,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                                 color={CODE_STATUS_COLOR[status]}
                               />
                               <OliveButton
-                                variant="ghost"
+                                variant="link"
                                 size="sm"
                                 aria-label={`Copy code ${code.code}`}
                                 onClick={() => void actions.copyCode(code.code)}
@@ -553,7 +550,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                         </select>
                       </label>
                       <OliveButton
-                        variant="primary"
+                        variant="solid"
                         size="sm"
                         disabled={
                           !joined || readOnly || actions.pending.birthday
@@ -619,7 +616,7 @@ export function OliveRewardsPage({ rewards }: RewardsPageTemplateProps) {
                                 margin: 0,
                                 color:
                                   entry.points >= 0
-                                    ? "var(--olive-ink)"
+                                    ? "var(--olive-espresso)"
                                     : "var(--olive-error)",
                               }}
                             >

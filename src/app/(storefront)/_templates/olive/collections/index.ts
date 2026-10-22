@@ -2,8 +2,8 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 // ─── CollectionsPage: Hero ─────────────────────────────────────────────────
-// The index page has exactly one field group: the heading block plus the
-// ghost-card copy shown when no collections are published yet. The grid of
+// The index page has exactly one field group: the heading block, the eyebrow
+// on the featured-collection band, plus the empty-state copy shown when no collections are published yet. The grid of
 // published collections itself is data-driven and carries no fields of its
 // own.
 
@@ -29,10 +29,21 @@ const collectionsHeroData: TemplateField[] = [
     defaultValue: "The whole shop, sorted by mood.",
   },
   {
+    key: "olive.collections.featured-eyebrow",
+    label: "Small line above the title",
+    description:
+      "Small line of spaced capitals above the collection name on the full-width feature band (the first collection with a cover photo) and on a collection page that has a cover photo. Leave blank to hide it.",
+    type: "text",
+    page: "collections",
+    group: "collections.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "The collection",
+  },
+  {
     key: "olive.collections.empty-heading",
     label: "Empty state heading",
     description:
-      "Shown on the ghost card when the shop has no published collections yet.",
+      "Shown in the empty-state panel when the shop has no published collections yet.",
     type: "text",
     page: "collections",
     group: "collections.hero",
@@ -103,7 +114,7 @@ export const oliveCollectionsFieldGroups: TemplateFieldGroup[] = [
     id: "collections.hero",
     title: "Page header",
     description:
-      "Page heading and body line above the grid of published collections, plus the empty-shelf message",
+      "Page heading and body line, the eyebrow on the featured-collection band (the first collection with a cover photo), plus the empty-shelf message",
     icon: "🗂️",
     columns: 1,
   },

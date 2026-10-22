@@ -22,7 +22,7 @@ type OliveProductGridProps = {
   priorityCount?: number;
   /** Heading level for each card's product name (2 when the grid sits directly under the page h1). */
   headingLevel?: 2 | 3;
-  /** Turn off the per-card quick-add pill (a related-products strip, say). */
+  /** Turn off the per-card quick-add bar (a related-products strip, say). */
   showQuickAdd?: boolean;
   /** Empty-state copy. Required — a blank grid is never an acceptable answer. */
   emptyHeading: string;
@@ -38,7 +38,7 @@ type OliveProductGridProps = {
    * group: `useOliveReveal`'s IntersectionObserver disconnects after firing
    * once, so filtered results otherwise teleport in with no motion. Changing
    * this key remounts the group; the observer reconnects against a grid
-   * already on screen and fires immediately, so the existing dealt-card
+   * already on screen and fires immediately, so the existing reveal
    * stagger replays as an answer to the interaction, not a page load.
    *
    * Build it from filter/sort/page state only — never a field value, or every
@@ -49,14 +49,13 @@ type OliveProductGridProps = {
 };
 
 /**
- * OliveProductGrid — the swatch grid.
+ * OliveProductGrid — the lookbook grid.
  *
- * Four columns of cards at 12px gutters, dealt in on reveal: `OliveRevealGroup`
- * with `fan` leans alternate cards the other way so a row arrives like a hand
- * of swatches rather than a spreadsheet. Two columns on phones at every
- * setting — the density is the point.
+ * Frameless cards on open gutters (12px → 24px across, 40px between rows so
+ * each name/price/dots block reads with its own photograph), revealed with
+ * the shared fade + rise stagger. Two columns on phones at every setting.
  *
- * An empty result renders the ghost card instead of nothing, so a filtered
+ * An empty result renders the empty state instead of nothing, so a filtered
  * shop, an empty collection and a store with no products all explain
  * themselves.
  */
@@ -90,9 +89,12 @@ export function OliveProductGrid({
   return (
     <OliveRevealGroup
       key={dealKey}
-      fan
       data-redeal={dealKey}
-      className={cn("grid gap-3", COLUMN_CLASS[columns], className)}
+      className={cn(
+        "grid gap-x-3 gap-y-10 sm:gap-x-5 lg:gap-x-6",
+        COLUMN_CLASS[columns],
+        className,
+      )}
     >
       {products.map((product, i) => (
         <OliveProductCard

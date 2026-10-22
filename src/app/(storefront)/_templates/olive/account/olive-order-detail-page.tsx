@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import type { OrderDetailPageTemplateProps } from "../../types";
 import type { OliveStatus } from "../shared";
@@ -27,7 +27,7 @@ function toOrderStatus(status: string): OliveStatus {
   return (ORDER_STATUSES.has(status) ? status : "open") as OliveStatus;
 }
 
-/** Thin reusable card shell — white face, hairline border, the template's one container. */
+/** Thin reusable card shell — bone face, hairline border, the template's one container. */
 function OliveDetailCard({ children }: { children: ReactNode }) {
   return (
     <div className="olive-card" style={{ padding: "1.5rem" }}>
@@ -56,7 +56,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
 
   return (
     <>
-      <OliveSection tone="slate" bleed>
+      <OliveSection tone="espresso" bleed>
         <div>
           <h1 className="olive-h1" style={{ margin: "0 0 0.75rem" }}>
             Order #{order.orderNumber}
@@ -71,7 +71,14 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             style={{ marginBottom: "1rem" }}
           />
           <div className="flex flex-wrap items-center gap-3">
-            <OliveStatusBadge status={toOrderStatus(order.status)} />
+            {/* The badge's label is espresso, so it sits on its own ivory
+                face when printed on the dark hero band. */}
+            <span
+              className="inline-flex"
+              style={{ backgroundColor: "var(--olive-ivory)" }}
+            >
+              <OliveStatusBadge status={toOrderStatus(order.status)} />
+            </span>
             <span className="olive-caption">{formatDate(order.createdAt)}</span>
           </div>
         </div>
@@ -108,7 +115,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               margin: "0 0 0.125rem",
                               fontFamily: "var(--olive-font-body)",
                               fontWeight: 500,
-                              color: "var(--olive-ink)",
+                              color: "var(--olive-espresso)",
                             }}
                           >
                             {item.productName}
@@ -154,7 +161,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   {order.discount > 0 ? (
                     <div
                       className="olive-caption flex justify-between"
-                      style={{ color: "var(--olive-leaf)" }}
+                      style={{ color: "var(--olive-moss-deep)" }}
                     >
                       <span>Discount</span>
                       <span className="olive-price">
@@ -208,7 +215,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                             style={{
                               margin: "0 0 0.25rem",
                               fontWeight: 500,
-                              color: "var(--olive-ink)",
+                              color: "var(--olive-espresso)",
                             }}
                           >
                             {shipment.carrier}
@@ -224,7 +231,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                         ) : null}
                         {shipment.trackingUrl ? (
                           <OliveButton
-                            variant="ghost"
+                            variant="link"
                             href={shipment.trackingUrl}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -268,7 +275,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                         style={{
                           margin: "0 0 0.125rem",
                           fontWeight: 500,
-                          color: "var(--olive-ink)",
+                          color: "var(--olive-espresso)",
                         }}
                       >
                         {addr.firstName} {addr.lastName}
@@ -303,7 +310,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     </dt>
                     <dd
                       className="olive-caption"
-                      style={{ margin: 0, color: "var(--olive-ink)" }}
+                      style={{ margin: 0, color: "var(--olive-espresso)" }}
                     >
                       {order.customerEmail}
                     </dd>
@@ -318,7 +325,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                       </dt>
                       <dd
                         className="olive-caption"
-                        style={{ margin: 0, color: "var(--olive-ink)" }}
+                        style={{ margin: 0, color: "var(--olive-espresso)" }}
                       >
                         {order.customerPhone}
                       </dd>
@@ -335,7 +342,7 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                       className="olive-caption"
                       style={{
                         margin: 0,
-                        color: "var(--olive-ink)",
+                        color: "var(--olive-espresso)",
                         textTransform: "capitalize",
                       }}
                     >
@@ -346,8 +353,9 @@ export function OliveOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
               </OliveDetailCard>
             </div>
 
-            <OliveButton variant="ghost" href="/account/orders">
-              ← Back to orders
+            <OliveButton variant="link" href="/account/orders">
+              <ArrowLeft aria-hidden size={14} strokeWidth={1.5} />
+              Back to orders
             </OliveButton>
           </OliveRevealGroup>
         </div>

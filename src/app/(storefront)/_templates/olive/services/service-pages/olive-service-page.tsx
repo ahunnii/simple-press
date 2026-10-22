@@ -38,20 +38,20 @@ type ServiceItem = ServiceTemplateProps["items"][number];
 /**
  * The shared booking trigger (`ServiceBookingDialog`) is a shadcn `Button`
  * reading shadcn variables. `.olive-shadcn-bridge` maps the neutral ones; the
- * primary fill, hover wash and pill radius are mapped here so the trigger
- * prints as olive's sage pill. The dialog itself portals outside `.olive`
+ * primary fill, hover wash and radius are mapped here so the trigger
+ * prints as olive's square espresso button. The dialog itself portals outside `.olive`
  * (known backlog — not styled here).
  */
 const OLIVE_BOOKING_TRIGGER_VARS = {
-  "--primary": "var(--olive-sage)",
-  "--primary-foreground": "var(--olive-white)",
-  "--accent": "var(--olive-sage-tint)",
-  "--accent-foreground": "var(--olive-ink)",
-  "--radius": "999px",
+  "--primary": "var(--olive-espresso)",
+  "--primary-foreground": "var(--olive-on-dark)",
+  "--accent": "var(--olive-sand)",
+  "--accent-foreground": "var(--olive-espresso)",
+  "--radius": "0px",
 } as CSSProperties;
 
-/** Olive's pill, laid over the shared embed triggers' shadcn button. */
-const OLIVE_EMBED_TRIGGER_CLASS = "olive-btn olive-btn-primary";
+/** Olive's solid button, laid over the shared embed triggers' shadcn button. */
+const OLIVE_EMBED_TRIGGER_CLASS = "olive-btn olive-btn-solid";
 
 /**
  * olive-template service detail page — `OliveServicePage` (parity finding
@@ -60,10 +60,10 @@ const OLIVE_EMBED_TRIGGER_CLASS = "olive-btn olive-btn-primary";
  * 1. `OlivePageBand`: breadcrumb (Services → this service), the service
  *    name as the page's only h1, its description as the intro. With a
  *    header photo/video (or the service's own image) it is the cover
- *    variant, title card on the page edge; otherwise the plain white band.
+ *    variant, title panel on the page edge; otherwise the plain ivory band.
  * 2. Intro (`OlivePageSection`): heading + rich text, optional photo/video
  *    beside it. Only when there is real text or media.
- * 3. Appointments (paper `OlivePageSection`): one `olive-card` per service
+ * 3. Appointments (sand `OlivePageSection`): one `olive-card` per service
  *    item — photo, name, category, price/compare-at/duration, price tiers,
  *    add-ons, and the booking trigger.
  * 4. Closing (`OliveClosingBand`): button and/or booking embed. The embed
@@ -202,7 +202,7 @@ export function OliveServicePage({
 
       {hasItems ? (
         <OlivePageSection
-          tone={hasIntro ? "paper" : "white"}
+          tone={hasIntro ? "sand" : "ivory"}
           flush={!hasIntro && !hasCover}
           aria-label={itemsHeading || "Appointments"}
         >
@@ -286,7 +286,7 @@ export function OliveServicePage({
               )
             ) : (
               <OliveButton
-                variant="secondary"
+                variant="outline"
                 size="lg"
                 href={closingEmbed.src}
                 target="_blank"
@@ -347,9 +347,8 @@ function OliveServiceItemCard({
               className="olive-label"
               style={{
                 padding: "0.25rem 0.625rem",
-                backgroundColor: "var(--olive-sage-tint)",
-                borderRadius: "999px",
-                color: "var(--olive-leaf)",
+                backgroundColor: "var(--olive-sand)",
+                color: "var(--olive-moss-deep)",
               }}
             >
               Signature
@@ -363,7 +362,7 @@ function OliveServiceItemCard({
 
         {item.description ? (
           <p
-            className="flex-1 text-[0.9375rem] leading-relaxed"
+            className="flex-1 text-[0.9375rem] leading-[1.7]"
             style={{ color: "var(--olive-ink-soft)" }}
           >
             {item.description}
@@ -394,8 +393,7 @@ function OliveServiceItemCard({
             className="flex flex-col gap-1.5 text-[0.875rem]"
             style={{
               padding: "0.625rem 0.75rem",
-              backgroundColor: "var(--olive-paper)",
-              borderRadius: "var(--olive-card-radius)",
+              backgroundColor: "var(--olive-sand)",
             }}
           >
             {tiers.map((tier: ServicePriceTier, i: number) => (
@@ -420,7 +418,7 @@ function OliveServiceItemCard({
             <ul className="flex flex-col gap-1.5 text-[0.875rem]">
               {addOns.map((addOn: ServiceAddOn, i: number) => (
                 <li key={i}>
-                  <span style={{ color: "var(--olive-ink)" }}>
+                  <span style={{ color: "var(--olive-espresso)" }}>
                     {addOn.name}
                   </span>
                   {addOn.priceLabel ? (

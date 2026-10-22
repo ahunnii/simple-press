@@ -5,9 +5,9 @@ import { cn } from "~/lib/utils";
 import { resolveChipColor } from "./olive-color";
 
 /**
- * Stock and order states a chip may carry. The chrome CSS draws `low` (a leaf
- * dot), `sold-out` (a 45° hatch at half opacity) and `pre-order` (a dashed
- * slate ring); `in-stock` and `coming-soon` are plain swatches whose meaning
+ * Stock and order states a chip may carry. The chrome CSS draws `low` (a
+ * moss-deep dot), `sold-out` (a 45° hatch at half opacity) and `pre-order` (a
+ * dashed taupe-ink ring); `in-stock` and `coming-soon` are plain swatches whose meaning
  * comes from the label beside them.
  */
 export type OliveChipState =
@@ -19,10 +19,10 @@ export type OliveChipState =
 
 type OliveChipProps = {
   /**
-   * Any CSS colour (`#8b1e3f`, `rgb(...)`, `var(--olive-leaf)`) or a plain
+   * Any CSS colour (`#8b1e3f`, `rgb(...)`, `var(--olive-moss)`) or a plain
    * colour NAME ("Sage", "Deep Navy") which is mapped through
    * `colorFromName()`. A name this template does not know renders as a
-   * hatched paper swatch rather than an invented colour.
+   * hatched sand swatch rather than an invented colour.
    */
   color: string;
   /** The colour, category or state this chip stands for. sr-only + tooltip. */
@@ -50,10 +50,12 @@ type OliveChipProps = {
 };
 
 /**
- * OliveChip — the template's one piece of ornament that is never ornament.
+ * OliveChip — the colour swatch, and (with the cart badge) the template's
+ * only round element. A stone ring; selected adds an ivory gap and an
+ * espresso ring.
  *
- * A chip appears where a colour is a real choice (a variant colour, a
- * category tab) or where a state needs a mark (stock, order status). It is
+ * A chip appears where a colour is a real choice (a variant colour) or where
+ * a state needs a mark (stock, order status). It is
  * never a kicker, never a bullet and never sits above a heading. Styling is
  * the chrome's `olive-chip` class plus its `data-selected` / `data-state`
  * attributes; this component only resolves the swatch and the semantics.

@@ -78,10 +78,7 @@ export function OliveBlogClient({ posts, searchEmptyMessage }: Props) {
           {searchEmptyMessage}
         </p>
       ) : (
-        <OliveRevealGroup
-          fan
-          className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2"
-        >
+        <OliveRevealGroup className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
           {leadPost ? (
             <OliveBlogCard
               post={leadPost}
