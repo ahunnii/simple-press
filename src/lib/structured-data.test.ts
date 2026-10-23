@@ -1055,3 +1055,81 @@ describe("buildWebSiteSchema — SearchAction", () => {
     });
   });
 });
+
+describe("entity ids and alternateName", () => {
+  // Derive the base URL from the builder's own `url`, so the test does not
+  // hard-code the platform root domain.
+  const baseUrl = buildWebSiteSchema(business).url as string;
+  const orgId = `${baseUrl}/#organization`;
+
+  it("gives Organization and LocalBusiness the same @id (one merged entity)", () => {
+    const org = buildOrganizationSchema(business);
+    const local = buildLocalBusinessSchema({
+      ...business,
+      localPresence: "storefront",
+    });
+    expect(org["@id"]).toBe(orgId);
+    expect(local["@id"]).toBe(orgId);
+  });
+
+  it("gives WebSite its own @id and points publisher at the Organization", () => {
+    const site = buildWebSiteSchema(business);
+    expect(site["@id"]).toBe(`${baseUrl}/#website`);
+    expect(site.publisher).toEqual({ "@id": orgId });
+  });
+
+  it("orders keys readably: @context, @type, @id, name, alternateName, url", () => {
+    const schema = buildOrganizationSchema({
+      ...business,
+      siteContent: { seoBrandName: "Shop" },
+    });
+    expect(Object.keys(schema).slice(0, 5)).toEqual([
+      "@context",
+      "@type",
+      "@id",
+      "name",
+      "alternateName",
+    ]);
+  });
+
+  it("emits alternateName on Organization and WebSite when seoBrandName differs", () => {
+    const withBrand = { ...business, siteContent: { seoBrandName: " TS " } };
+    expect(buildOrganizationSchema(withBrand).alternateName).toBe("TS");
+    expect(buildWebSiteSchema(withBrand).alternateName).toBe("TS");
+  });
+
+  it.each([
+    ["blank", "   "],
+    ["null", null],
+    ["equal to the name", "Test Shop"],
+    ["equal ignoring case and padding", "  TEST shop "],
+  ])("omits alternateName when seoBrandName is %s", (_label, seoBrandName) => {
+    const b = { ...business, siteContent: { seoBrandName } };
+    expect(buildOrganizationSchema(b)).not.toHaveProperty("alternateName");
+    expect(buildWebSiteSchema(b)).not.toHaveProperty("alternateName");
+  });
+
+  it("omits alternateName when there is no siteContent", () => {
+    expect(buildWebSiteSchema(business)).not.toHaveProperty("alternateName");
+  });
+});
+
+describe("buildLocalBusinessSchema — service_area full address", () => {
+  it("includes region and postal code when given, never the street", () => {
+    const schema = buildLocalBusinessSchema({
+      ...business,
+      localPresence: "service_area",
+      addressStreet: "123 Main St",
+      addressCity: "Detroit",
+      addressState: "MI",
+      addressPostalCode: "48201",
+    });
+    expect(schema.address).toEqual({
+      "@type": "PostalAddress",
+      addressLocality: "Detroit",
+      addressRegion: "MI",
+      postalCode: "48201",
+      addressCountry: "US",
+    });
+  });
+});

@@ -210,9 +210,16 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         featureFlags: true,
         businessAddress: true,
-        // City only (public, like `businessAddress`) — vii's wordmark
-        // location tag. See `_templates/vii/shared/vii-location-tag.ts`.
+        // Structured address parts. Public by design — they render in the
+        // LocalBusiness / Organization JSON-LD `PostalAddress` alongside the
+        // already-public `businessAddress` display string (the homepage emits
+        // the same schema as /contact, so it needs the same parts). `city`
+        // also feeds vii's wordmark location tag. See
+        // `_templates/vii/shared/vii-location-tag.ts`.
+        addressStreet: true,
         addressCity: true,
+        addressState: true,
+        addressPostalCode: true,
         // Map pin. Public by design — see `~/lib/address/coordinates`.
         latitude: true,
         longitude: true,
@@ -283,6 +290,8 @@ export const businessRouter = createTRPCRouter({
             navigationItems: true,
             footerNavigationItems: true,
             socialLinks: true,
+            // Short brand form — the Organization/WebSite `alternateName`.
+            seoBrandName: true,
             customFields: true,
             previewCustomFields: true,
             bannerConfig: true,

@@ -63,7 +63,13 @@ interface BusinessForOrganization extends CanonicalBusiness {
   siteContent?: {
     logoUrl?: string | null;
     socialLinks?: unknown;
+    seoBrandName?: string | null;
   } | null;
+}
+
+interface BusinessForWebSite extends CanonicalBusiness {
+  name: string;
+  siteContent?: { seoBrandName?: string | null } | null;
 }
 
 interface ProductImage {
@@ -204,6 +210,35 @@ function parseSameAs(socialLinks: unknown): string[] | undefined {
     (v): v is string => typeof v === "string" && v.startsWith("http"),
   );
   return urls.length > 0 ? urls : undefined;
+}
+
+/**
+ * The store's short brand form (`SiteContent.seoBrandName`) as schema.org
+ * `alternateName`, so Google's site-name logic can pair "Detroit Pollinator
+ * Company" with "Detroit Pollinator Co.". Returns undefined when it is blank
+ * or just restates `business.name` (case-insensitive) — an alternate name that
+ * equals the name adds nothing.
+ */
+function resolveAlternateName(business: {
+  name: string;
+  siteContent?: { seoBrandName?: string | null } | null;
+}): string | undefined {
+  const brand = business.siteContent?.seoBrandName?.trim();
+  if (!brand) return undefined;
+  return brand.toLowerCase() === business.name.trim().toLowerCase()
+    ? undefined
+    : brand;
+}
+
+/**
+ * Shared `@id` of the store's one Organization entity. The homepage emits an
+ * Organization and (for local businesses) a LocalBusiness; both carry this id
+ * so Google merges them into a single entity instead of two competing ones,
+ * and /contact's LocalBusiness merges into the same node. WebSite's
+ * `publisher` points here too.
+ */
+function organizationId(baseUrl: string): string {
+  return `${baseUrl}/#organization`;
 }
 
 // ---------------------------------------------------------------------------
@@ -405,11 +440,14 @@ export function buildOrganizationSchema(
   options: { returnPolicy?: Record<string, unknown> } = {},
 ): Record<string, unknown> {
   const baseUrl = getCanonicalBaseUrl(business);
+  const alternateName = resolveAlternateName(business);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": organizationId(baseUrl),
     name: business.name,
+    ...(alternateName ? { alternateName } : {}),
     url: baseUrl,
   };
 
@@ -451,15 +489,19 @@ export function buildOrganizationSchema(
  * Defaults to off, so callers that don't pass the flag are unchanged.
  */
 export function buildWebSiteSchema(
-  business: CanonicalBusiness & { name: string },
+  business: BusinessForWebSite,
   options: { siteSearch?: boolean } = {},
 ): Record<string, unknown> {
   const baseUrl = getCanonicalBaseUrl(business);
+  const alternateName = resolveAlternateName(business);
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${baseUrl}/#website`,
     name: business.name,
+    ...(alternateName ? { alternateName } : {}),
     url: baseUrl,
+    publisher: { "@id": organizationId(baseUrl) },
   };
   if (options.siteSearch) {
     schema.potentialAction = {
@@ -674,6 +716,8 @@ export function buildLocalBusinessSchema(
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": mode === "storefront" ? "Store" : "LocalBusiness",
+    // Same id as the homepage Organization — see `organizationId`.
+    "@id": organizationId(baseUrl),
     name: business.name,
     url: baseUrl,
   };

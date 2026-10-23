@@ -1,15 +1,19 @@
 "use client";
 
+import type { ReactNode } from "react";
+import type { UseFormReturn } from "react-hook-form";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { SocialLinkKey } from "~/lib/social-links";
 import type { BrandingFormSchema } from "~/lib/validators/homepage";
+import { socialHostMismatch } from "~/lib/social-links";
 import { getAvailableTemplates } from "~/lib/template-ownership";
 import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
@@ -74,29 +78,97 @@ const colorInputValue = (value: string | null | undefined) =>
     ? DEFAULT_PRIMARY_COLOR
     : value;
 
+/**
+ * The stored `SiteContent.socialLinks` JSON — one optional URL per
+ * `SocialLinkKey`. `googleBusinessProfile` is SEO-only (never an icon).
+ */
+type StoredSocialLinks = Partial<Record<SocialLinkKey, string | null>>;
+
+const SOCIAL_LINK_KEYS: SocialLinkKey[] = [
+  "instagram",
+  "threads",
+  "facebook",
+  "twitter",
+  "linkedin",
+  "tiktok",
+  "pinterest",
+  "youtube",
+  "googleBusinessProfile",
+];
+
+/**
+ * Normalizes the stored JSON (null, legacy rows with fewer keys) to a value
+ * for every key, so each input is controlled from the first render and the
+ * dirty check compares like with like.
+ */
+const toSocialLinkValues = (raw: unknown): Record<SocialLinkKey, string> => {
+  const stored = (
+    raw && typeof raw === "object" ? raw : {}
+  ) as StoredSocialLinks;
+  return Object.fromEntries(
+    SOCIAL_LINK_KEYS.map((key) => [key, stored[key] ?? ""]),
+  ) as Record<SocialLinkKey, string>;
+};
+
+/**
+ * A social URL input with a soft "wrong network?" hint under it. The hint is
+ * advisory only — it never blocks saving (a store can have a vanity domain).
+ */
+function SocialLinkField({
+  form,
+  linkKey,
+  label,
+  placeholder,
+  description,
+  disabled,
+}: {
+  form: UseFormReturn<BrandingFormSchema>;
+  linkKey: SocialLinkKey;
+  label: string;
+  placeholder: string;
+  description?: ReactNode;
+  disabled: boolean;
+}) {
+  const name = `socialLinks.${linkKey}` as const;
+  const value = useWatch({ control: form.control, name });
+  const mismatch = socialHostMismatch(linkKey, value);
+
+  return (
+    <InputFormField
+      form={form}
+      name={name}
+      label={label}
+      placeholder={placeholder}
+      type="url"
+      disabled={disabled}
+      className="col-span-1"
+      description={
+        description || mismatch ? (
+          <>
+            {description}
+            {mismatch ? (
+              <span
+                role="status"
+                className={cn(
+                  "block font-medium text-amber-700 dark:text-amber-400",
+                  description ? "mt-1" : undefined,
+                )}
+              >
+                {mismatch} You can still save it.
+              </span>
+            ) : null}
+          </>
+        ) : undefined
+      }
+    />
+  );
+}
+
 export function BrandingEditor({ business, siteContent }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const mediaLibraryEnabled = useMediaLibraryEnabled();
-  const socialLinks = (siteContent.socialLinks as
-    | {
-        instagram?: string;
-        facebook?: string;
-        twitter?: string;
-        linkedin?: string;
-        tiktok?: string;
-        pinterest?: string;
-        youtube?: string;
-      }
-    | undefined) ?? {
-    instagram: "",
-    facebook: "",
-    twitter: "",
-    linkedin: "",
-    pinterest: "",
-    tiktok: "",
-    youtube: "",
-  };
+  const socialLinks = toSocialLinkValues(siteContent.socialLinks);
 
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
@@ -112,15 +184,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
     reValidateMode: "onChange",
     defaultValues: {
       footerText: siteContent.footerText ?? "",
-      socialLinks: {
-        instagram: socialLinks.instagram ?? "",
-        facebook: socialLinks.facebook ?? "",
-        twitter: socialLinks.twitter ?? "",
-        linkedin: socialLinks.linkedin ?? "",
-        tiktok: socialLinks.tiktok ?? "",
-        pinterest: socialLinks.pinterest ?? "",
-        youtube: socialLinks.youtube ?? "",
-      },
+      socialLinks,
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
       logoAltText: siteContent.logoAltText ?? "",
@@ -272,25 +336,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         faviconUrl,
       });
 
-      const newSocialLinks = (saved.socialLinks as
-        | {
-            instagram?: string;
-            facebook?: string;
-            twitter?: string;
-            linkedin?: string;
-            tiktok?: string;
-            pinterest?: string;
-            youtube?: string;
-          }
-        | undefined) ?? {
-        instagram: "",
-        facebook: "",
-        twitter: "",
-        linkedin: "",
-        pinterest: "",
-        tiktok: "",
-        youtube: "",
-      };
+      const newSocialLinks = toSocialLinkValues(saved.socialLinks);
 
       form.reset({
         footerText: saved.footerText ?? "",
@@ -528,68 +574,83 @@ export function BrandingEditor({ business, siteContent }: Props) {
                     </p>
                   </div>
                   <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.instagram"
+                      linkKey="instagram"
                       label="Instagram"
                       placeholder="https://instagram.com/yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.facebook"
+                      linkKey="threads"
+                      label="Threads"
+                      placeholder="https://threads.net/@yourstore"
+                      disabled={isSubmitting}
+                    />
+                    <SocialLinkField
+                      form={form}
+                      linkKey="facebook"
                       label="Facebook"
                       placeholder="https://facebook.com/yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.twitter"
+                      linkKey="twitter"
                       label="Twitter / X"
                       placeholder="https://twitter.com/yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.linkedin"
+                      linkKey="linkedin"
                       label="LinkedIn"
                       placeholder="https://linkedin.com/company/yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.tiktok"
+                      linkKey="tiktok"
                       label="TikTok"
                       placeholder="https://tiktok.com/@yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.pinterest"
+                      linkKey="pinterest"
                       label="Pinterest"
                       placeholder="https://pinterest.com/yourstore"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
                     />
-                    <InputFormField
+                    <SocialLinkField
                       form={form}
-                      name="socialLinks.youtube"
+                      linkKey="youtube"
                       label="YouTube"
                       placeholder="https://youtube.com/@yourchannel"
-                      type="url"
                       disabled={isSubmitting}
-                      className="col-span-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <div className="space-y-2 pb-4">
+                    <Label className="block">Google Business Profile</Label>
+                    <p className="text-muted-foreground text-sm">
+                      Have a Google Business Profile (the listing that shows on
+                      Google Maps)? The most important step happens there: set
+                      the profile&apos;s website to this site&apos;s address,
+                      and use the same business name on both.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
+                    <SocialLinkField
+                      form={form}
+                      linkKey="googleBusinessProfile"
+                      label="Google Business Profile link"
+                      placeholder="https://maps.google.com/?cid=…"
+                      description="Optional. Paste your listing's link from Google Maps (the Share button works). It gives Google one more hint that this site and your profile belong together. It isn't shown on your site."
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>

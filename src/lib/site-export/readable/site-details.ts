@@ -18,12 +18,14 @@ import type { RenderCtx, SiteDetailsInput } from "./types";
 
 const SOCIAL_LABELS: Record<string, string> = {
   instagram: "Instagram",
+  threads: "Threads",
   facebook: "Facebook",
   twitter: "X / Twitter",
   linkedin: "LinkedIn",
   tiktok: "TikTok",
   pinterest: "Pinterest",
   youtube: "YouTube",
+  googleBusinessProfile: "Google Business Profile",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
