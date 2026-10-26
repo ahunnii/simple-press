@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
@@ -59,7 +60,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
       errors.email = "Enter a valid email address";
     if (!f.name.trim()) errors.name = "Full name is required";
     if (!f.phone.trim()) errors.phone = "Phone number is required";
-    if (f.deliveryMethod === "ship") {
+    if (f.needsAddress) {
       if (!f.addressLine1.trim())
         errors["address-line1"] = "Street address is required";
       if (!f.city.trim()) errors.city = "City is required";
@@ -82,9 +83,9 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
 
   const handleDeliveryKeyDown = (
     e: React.KeyboardEvent,
-    current: "ship" | "pickup",
+    current: DeliveryMethod,
   ) => {
-    const methods = ["ship", "pickup"] as const;
+    const methods = f.deliveryOptions.map((o) => o.id);
     const idx = methods.indexOf(current);
     let next: number | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -334,7 +335,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
         )}
 
         {/* Delivery method */}
-        {f.shippingConfig.offersInStorePickup && (
+        {f.deliveryOptions.length > 1 && (
           <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Delivery")}
             <div
@@ -342,18 +343,18 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
               aria-label="Delivery method"
               style={{ display: "flex", gap: 10, flexWrap: "wrap" }}
             >
-              {(["ship", "pickup"] as const).map((method) => (
+              {f.deliveryOptions.map((option) => (
                 <button
-                  key={method}
+                  key={option.id}
                   type="button"
                   role="radio"
-                  aria-checked={f.deliveryMethod === method}
-                  tabIndex={f.deliveryMethod === method ? 0 : -1}
-                  onClick={() => f.setDeliveryMethod(method)}
-                  onKeyDown={(e) => handleDeliveryKeyDown(e, method)}
+                  aria-checked={f.deliveryMethod === option.id}
+                  tabIndex={f.deliveryMethod === option.id ? 0 : -1}
+                  onClick={() => f.setDeliveryMethod(option.id)}
+                  onKeyDown={(e) => handleDeliveryKeyDown(e, option.id)}
                   className="el-delivery-btn"
                 >
-                  {method === "ship" ? "Ship to address" : "In-store pickup"}
+                  {option.label}
                 </button>
               ))}
             </div>
@@ -367,7 +368,10 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
             >
               {f.deliveryMethod === "pickup"
                 ? "No shipping charge. Pick up at the store."
-                : "Shipping calculated at checkout."}
+                : f.deliveryMethod === "delivery"
+                  ? (f.deliveryOptions.find((o) => o.id === "delivery")
+                      ?.description ?? "")
+                  : "Shipping calculated at checkout."}
             </p>
             {f.deliveryMethod === "pickup" && (
               <div
@@ -421,13 +425,109 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                 ) : null}
               </div>
             )}
+            {f.deliveryMethod === "delivery" && (
+              <>
+                <div aria-live="polite" aria-atomic="true">
+                  {f.localDelivery.status === "checking" ? (
+                    <p
+                      style={{
+                        marginTop: 12,
+                        fontSize: 13,
+                        color: "var(--el-ink-soft, #6b6659)",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                      }}
+                    >
+                      Checking your ZIP…
+                    </p>
+                  ) : f.localDelivery.status === "ineligible" &&
+                    f.localDelivery.message ? (
+                    <p
+                      style={{
+                        marginTop: 12,
+                        fontSize: 13,
+                        color: "#c0392b",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                      }}
+                    >
+                      {f.localDelivery.message}
+                    </p>
+                  ) : f.localDelivery.status === "eligible" ? (
+                    <p
+                      style={{
+                        marginTop: 12,
+                        fontSize: 13,
+                        color: "var(--el-sage, #4a5240)",
+                        fontFamily: "var(--font-sans, sans-serif)",
+                      }}
+                    >
+                      Great — we deliver to you.
+                    </p>
+                  ) : null}
+                </div>
+                {f.localDelivery.instructions ? (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: "12px 14px",
+                      border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                      borderRadius: 6,
+                      background: "var(--el-cream-2, #ebe6dc)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: "var(--font-mono, ui-monospace)",
+                        fontSize: 11,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--el-ink, #1c1a17)",
+                        margin: 0,
+                      }}
+                    >
+                      Delivery details
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans, sans-serif)",
+                        fontSize: 13,
+                        color: "var(--el-ink-soft, #6b6659)",
+                        whiteSpace: "pre-line",
+                        margin: 0,
+                      }}
+                    >
+                      {f.localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </fieldset>
         )}
 
-        {/* Shipping address */}
-        {f.deliveryMethod === "ship" && (
+        {/* Shipping / delivery address */}
+        {f.needsAddress && (
           <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-            {eyebrow("Shipping address")}
+            {eyebrow(
+              f.deliveryMethod === "delivery"
+                ? "Delivery address"
+                : "Shipping address",
+            )}
+            {f.deliveryMethod === "delivery" && f.addressLocked && (
+              <p
+                style={{
+                  margin: "0 0 16px",
+                  fontSize: 13,
+                  color: "var(--el-ink-soft, #6b6659)",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                }}
+              >
+                We check delivery from this address. Make changes here before
+                continuing to payment.
+              </p>
+            )}
             <SavedAddressPicker
               className="mb-5"
               onSelect={(address) => applySavedAddressToForm(f, address)}
@@ -452,7 +552,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                       }));
                   }}
                   placeholder="Street address, P.O. box"
-                  required={f.deliveryMethod === "ship"}
+                  required={f.needsAddress}
                   className="el-co-input"
                   aria-required="true"
                   aria-invalid={fieldErrors["address-line1"] ? true : undefined}
@@ -496,7 +596,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                       if (fieldErrors.city)
                         setFieldErrors((prev) => ({ ...prev, city: "" }));
                     }}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     className="el-co-input"
                     aria-required="true"
                     aria-invalid={fieldErrors.city ? true : undefined}
@@ -561,7 +661,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                       if (fieldErrors.postal)
                         setFieldErrors((prev) => ({ ...prev, postal: "" }));
                     }}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     className="el-co-input"
                     aria-required="true"
                     aria-invalid={fieldErrors.postal ? true : undefined}
@@ -786,7 +886,7 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                   color: "var(--el-ink-soft, #6b6659)",
                 }}
               >
-                Shipping
+                {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
               </span>
               <span
                 style={{
@@ -809,6 +909,15 @@ export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
                     />
                     Calculating…
                   </span>
+                ) : f.deliveryMethod === "delivery" && f.shippingPending ? (
+                  f.localDelivery.status === "checking" ? (
+                    "Calculating…"
+                  ) : (
+                    "Enter your ZIP"
+                  )
+                ) : f.deliveryMethod === "delivery" &&
+                  f.localDelivery.status === "ineligible" ? (
+                  "Not available"
                 ) : f.shippingPending ? (
                   "Calculated at checkout"
                 ) : f.shipping === 0 ? (

@@ -50,6 +50,7 @@ import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import type { InvoiceSummaryLineItem } from "~/emails/components/invoice-summary";
 import type { OverdueInvoiceRow } from "~/emails/invoice-overdue-owner";
 import type { DigestInvoiceRow } from "~/emails/invoice-weekly-digest";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { DonationLabel } from "~/lib/donations/label";
 import type { MaterialPolicyUpdate } from "~/lib/legal/material-updates";
 import { getBusinessUrl } from "~/lib/business-url";
@@ -101,9 +102,11 @@ export async function sendOrderConfirmation(params: {
   discount: number;
   total: number;
   shippingAddress?: any;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
   pickupLocation?: string;
   pickupInstructions?: string;
+  /** Local delivery only: the owner's "Delivery days & instructions". */
+  deliveryInstructions?: string | null;
   business: {
     name: string;
     ownerEmail: string;
@@ -157,6 +160,7 @@ export async function sendOrderConfirmation(params: {
       deliveryMethod: params.deliveryMethod,
       pickupLocation: params.pickupLocation,
       pickupInstructions: params.pickupInstructions,
+      deliveryInstructions: params.deliveryInstructions,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -194,7 +198,19 @@ export async function sendNewOrderNotification(params: {
   tax: number;
   discount: number;
   total: number;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
+  /** Local delivery only: where to drive the order. */
+  shippingAddress?: {
+    name: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  /** Local delivery only: the owner's "Delivery days & instructions". */
+  deliveryInstructions?: string | null;
   /** Present when this order was created from a paid subscription invoice — lets the owner tell a renewal from a one-off. */
   subscription?: { intervalLabel: string; adminUrl: string };
   business: {
@@ -230,6 +246,8 @@ export async function sendNewOrderNotification(params: {
       discount: params.discount,
       total: params.total,
       deliveryMethod: params.deliveryMethod,
+      shippingAddress: params.shippingAddress,
+      deliveryInstructions: params.deliveryInstructions,
       subscription: params.subscription,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,

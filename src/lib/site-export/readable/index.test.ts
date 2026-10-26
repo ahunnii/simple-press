@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { business, ctx, mediaMap, page, product } from "./fixtures";
 import type { ReadableData } from "./fetch";
-import { assembleReadableDocuments } from "./index";
 import type { SiteDetailsInput } from "./types";
+
+import { business, ctx, mediaMap, page, product } from "./fixtures";
+import { assembleReadableDocuments } from "./index";
 
 const details: SiteDetailsInput = {
   name: "Mug & Co",
@@ -20,26 +21,76 @@ const details: SiteDetailsInput = {
   latitude: null,
   longitude: null,
   areaServed: [],
-  businessHours: [{ days: ["mon", "tue"], closed: false, open: "09:00", close: "17:00" }],
+  businessHours: [
+    { days: ["mon", "tue"], closed: false, open: "09:00", close: "17:00" },
+  ],
   offersInStorePickup: false,
   pickupLocation: null,
   pickupInstructions: null,
+  offersLocalDelivery: true,
+  localDeliveryOriginZip: null,
+  localDeliveryRadiusMiles: 12,
+  localDeliveryFeeCents: 0,
+  localDeliveryBands: [
+    { upToMiles: 5, feeCents: 0 },
+    { upToMiles: 8, feeCents: 300 },
+  ],
+  localDeliveryMinOrderCents: 2500,
+  localDeliveryInstructions: "Tuesday and Thursday evenings",
+  addressPostalCode: "48104",
   siteContent: {
-    heroTitle: null, heroSubtitle: null, heroImageUrl: null, heroButtonText: null, heroButtonLink: null,
-    aboutTitle: null, aboutText: null, aboutImageUrl: null, features: null, footerText: null,
-    socialLinks: { instagram: "https://instagram.com/mug", facebook: "javascript:alert(1)" },
-    metaTitle: "Mugs", metaDescription: null, metaKeywords: null, ogImage: null, faviconUrl: null,
-    seoBrandName: null, pageMeta: { about: { title: "About us" } },
-    logoUrl: "https://cdn.example.com/b/hero.jpg", logoAltText: null,
-    primaryColor: "#112233", secondaryColor: null, accentColor: null,
-    navigationItems: [{ label: "Shop", href: "/shop", children: [{ label: "Mugs", href: "/collections/mugs" }] }],
-    footerNavigationItems: null, bannerConfig: null, popupConfig: null, customFields: null,
+    heroTitle: null,
+    heroSubtitle: null,
+    heroImageUrl: null,
+    heroButtonText: null,
+    heroButtonLink: null,
+    aboutTitle: null,
+    aboutText: null,
+    aboutImageUrl: null,
+    features: null,
+    footerText: null,
+    socialLinks: {
+      instagram: "https://instagram.com/mug",
+      facebook: "javascript:alert(1)",
+    },
+    metaTitle: "Mugs",
+    metaDescription: null,
+    metaKeywords: null,
+    ogImage: null,
+    faviconUrl: null,
+    seoBrandName: null,
+    pageMeta: { about: { title: "About us" } },
+    logoUrl: "https://cdn.example.com/b/hero.jpg",
+    logoAltText: null,
+    primaryColor: "#112233",
+    secondaryColor: null,
+    accentColor: null,
+    navigationItems: [
+      {
+        label: "Shop",
+        href: "/shop",
+        children: [{ label: "Mugs", href: "/collections/mugs" }],
+      },
+    ],
+    footerNavigationItems: null,
+    bannerConfig: null,
+    popupConfig: null,
+    customFields: null,
   },
-  theme: { paletteLabel: null, paletteColors: [], fontsLabel: null, fontVars: {} },
+  theme: {
+    paletteLabel: null,
+    paletteColors: [],
+    fontsLabel: null,
+    fontVars: {},
+  },
 };
 
 const data: ReadableData = {
-  pages: [page({ id: "1", title: "About" }), page({ id: "2", title: "About", slug: "about-2" }), page({ id: "3", title: "Index", slug: "index" })],
+  pages: [
+    page({ id: "1", title: "About" }),
+    page({ id: "2", title: "About", slug: "about-2" }),
+    page({ id: "3", title: "Index", slug: "index" }),
+  ],
   posts: [page({ id: "4", title: "News", slug: "news", type: "blog" })],
   products: [product(), product({ slug: "blue-mug-2" })],
   collections: [],
@@ -50,7 +101,12 @@ const data: ReadableData = {
   testimonials: [],
   details,
   registry: {
-    templateId: "dream", templateLabel: "Dream", resolved: true, fields: [], groupTitles: {}, pageTitles: {},
+    templateId: "dream",
+    templateLabel: "Dream",
+    resolved: true,
+    fields: [],
+    groupTitles: {},
+    pageTitles: {},
   },
   customFields: null,
   timeZone: "America/Detroit",
@@ -59,7 +115,10 @@ const data: ReadableData = {
 };
 
 describe("assembleReadableDocuments", () => {
-  const out = assembleReadableDocuments(data, { business, media: { byUrl: mediaMap } });
+  const out = assembleReadableDocuments(data, {
+    business,
+    media: { byUrl: mediaMap },
+  });
   const paths = out.files.map((f) => f.path);
 
   it("dedupes same-titled pages and reserves index.html", () => {
@@ -82,11 +141,18 @@ describe("assembleReadableDocuments", () => {
   });
 
   it("reports counts", () => {
-    expect(out.counts).toMatchObject({ pages: 3, posts: 1, products: 2, faqs: 1, services: 0 });
+    expect(out.counts).toMatchObject({
+      pages: 3,
+      posts: 1,
+      products: 2,
+      faqs: 1,
+      services: 0,
+    });
   });
 
   it("renders site details: hours, safe social links, nested menu, domain note", () => {
-    const html = out.files.find((f) => f.path === "Site details.html")!.contents as string;
+    const html = out.files.find((f) => f.path === "Site details.html")!
+      .contents as string;
     expect(html).toContain("Mon–Tue");
     expect(html).toContain("9:00 AM – 5:00 PM");
     expect(html).toContain("https://instagram.com/mug");
@@ -94,6 +160,14 @@ describe("assembleReadableDocuments", () => {
     expect(html).toContain("Mugs");
     expect(html).toContain("mugs.com");
     expect(html).toContain("point it at your new host");
+    // Local delivery settings, in plain language.
+    expect(html).toContain("Local delivery");
+    expect(html).toContain("48104");
+    expect(html).toContain("12 miles");
+    expect(html).toContain("$25.00");
+    expect(html).toContain("Closer prices");
+    expect(html).toContain("Free within 5 miles; $3.00 within 8 miles");
+    expect(html).toContain("Tuesday and Thursday evenings");
     expect(html).toContain('src="Photos/Pages/hero.jpg"');
     // javascript: social link must not become an href
     expect(html).not.toContain('href="javascript');

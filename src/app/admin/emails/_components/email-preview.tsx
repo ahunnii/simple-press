@@ -327,6 +327,50 @@ export function EmailPreview({
           }),
       },
       {
+        key: "order-confirmation-delivery",
+        label: "Order Confirmation (local delivery)",
+        overrideId: "order-confirmation",
+        defaultSubject: orderConfirmationDefaultSubject({
+          orderNumber: sampleOrder?.orderNumber ?? 1001,
+          isPickup: false,
+        }),
+        build: (introText) =>
+          OrderConfirmationEmail({
+            orderNumber: sampleOrder?.orderNumber ?? 1001,
+            customerName: "Jane Smith",
+            introText,
+            items: sampleOrder?.items ?? [
+              {
+                productName: "Sample Product",
+                variantName: "Medium / Blue",
+                quantity: 1,
+                price: 4500,
+                total: 4500,
+              },
+            ],
+            subtotal: 4500,
+            shipping: 0,
+            tax: 405,
+            discount: 0,
+            total: 4905,
+            shippingAddress: {
+              name: "Jane Smith",
+              line1: "123 Main St",
+              line2: null,
+              city: "Ann Arbor",
+              state: "MI",
+              postalCode: "48104",
+              country: "US",
+            },
+            deliveryMethod: "delivery",
+            deliveryInstructions:
+              "I deliver Tuesday and Thursday evenings. I'll text you when I'm on my way.",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            businessUrl,
+          }),
+      },
+      {
         key: "order-ready-for-pickup",
         label: "Ready for Pickup",
         overrideId: "order-ready-for-pickup",

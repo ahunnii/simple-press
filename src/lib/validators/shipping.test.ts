@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { DeliveryReturnsFormValues } from "./shipping";
 
 import {
+  createLocalDeliveryFormSchema,
   deliveryReturnsFormDefaults,
   deliveryReturnsFormSchema,
   deliveryReturnsFormToInput,
   deliveryReturnsInputSchema,
+  localDeliveryFormDefaults,
+  localDeliveryFormToInput,
+  localDeliveryInputSchema,
 } from "./shipping";
 
 const blankForm: DeliveryReturnsFormValues = {
@@ -378,6 +382,233 @@ describe("deliveryReturnsFormToInput", () => {
       ...original,
       handlingDaysMin: "",
       handlingDaysMax: "",
+    });
+  });
+});
+
+describe("local delivery validators", () => {
+  const on = {
+    offersLocalDelivery: true,
+    originZip: "",
+    radiusMiles: "15",
+    feeDollars: "0.00",
+    bands: [] as { upToMiles: string; feeDollars: string }[],
+    minOrderDollars: "",
+    instructions: "",
+  };
+  const messages = (
+    values: typeof on,
+    fallbackZip: string | null = "48104",
+  ) => {
+    const r = createLocalDeliveryFormSchema(fallbackZip).safeParse(values);
+    return r.success ? [] : r.error.issues.map((i) => i.message);
+  };
+
+  it("accepts a complete form that falls back to the business ZIP", () => {
+    expect(messages(on)).toEqual([]);
+  });
+
+  it("requires a radius only when delivery is on", () => {
+    expect(messages({ ...on, radiusMiles: "" })).toHaveLength(1);
+    expect(
+      messages({ ...on, offersLocalDelivery: false, radiusMiles: "" }),
+    ).toEqual([]);
+  });
+
+  it("rejects a radius outside 1-100 or non-integer", () => {
+    for (const radiusMiles of ["0", "101", "2.5", "abc"]) {
+      expect(messages({ ...on, radiusMiles })).toHaveLength(1);
+    }
+  });
+
+  it("needs an origin from the form or the business address", () => {
+    expect(messages(on, null)).toHaveLength(1);
+    expect(messages({ ...on, originZip: "48104" }, null)).toEqual([]);
+  });
+
+  it("rejects a malformed ZIP and bad money", () => {
+    expect(messages({ ...on, originZip: "4810" })).toHaveLength(1);
+    expect(messages({ ...on, feeDollars: "-1" })).toHaveLength(1);
+    expect(messages({ ...on, minOrderDollars: "abc" })).toHaveLength(1);
+  });
+
+  it("converts to the wire shape in cents ($0 = free)", () => {
+    const input = localDeliveryFormToInput({
+      ...on,
+      minOrderDollars: "$30",
+      instructions: "  Tue/Thu  ",
+    });
+    expect(input).toEqual({
+      offersLocalDelivery: true,
+      originZip: null,
+      radiusMiles: 15,
+      feeCents: 0,
+      bands: [],
+      minOrderCents: 3000,
+      instructions: "Tue/Thu",
+    });
+    expect(localDeliveryInputSchema.safeParse(input).success).toBe(true);
+  });
+
+  it("requires a radius on the wire when on", () => {
+    expect(
+      localDeliveryInputSchema.safeParse({
+        offersLocalDelivery: true,
+        originZip: null,
+        radiusMiles: null,
+        feeCents: 0,
+        minOrderCents: null,
+        instructions: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("hydrates defaults from the row", () => {
+    expect(
+      localDeliveryFormDefaults({
+        offersLocalDelivery: true,
+        localDeliveryOriginZip: "48104",
+        localDeliveryRadiusMiles: 12,
+        localDeliveryFeeCents: 500,
+        localDeliveryMinOrderCents: null,
+        localDeliveryInstructions: "Evenings",
+      }),
+    ).toEqual({
+      offersLocalDelivery: true,
+      originZip: "48104",
+      radiusMiles: "12",
+      feeDollars: "5.00",
+      bands: [],
+      minOrderDollars: "",
+      instructions: "Evenings",
+    });
+  });
+
+  describe("closer prices (bands)", () => {
+    const withBands = (bands: { upToMiles: string; feeDollars: string }[]) => ({
+      ...on,
+      feeDollars: "5.00",
+      bands,
+    });
+
+    it("accepts valid rows in any order and sorts them on the wire", () => {
+      const values = withBands([
+        { upToMiles: "10", feeDollars: "3.00" },
+        { upToMiles: "5", feeDollars: "0" },
+      ]);
+      expect(messages(values)).toEqual([]);
+      const input = localDeliveryFormToInput(values);
+      expect(input.bands).toEqual([
+        { upToMiles: 5, feeCents: 0 },
+        { upToMiles: 10, feeCents: 300 },
+      ]);
+      expect(localDeliveryInputSchema.safeParse(input).success).toBe(true);
+    });
+
+    it("rejects a distance at or beyond the radius", () => {
+      expect(
+        messages(withBands([{ upToMiles: "15", feeDollars: "1" }])),
+      ).toEqual(["Must be less than your 15-mile radius."]);
+      expect(
+        messages(withBands([{ upToMiles: "20", feeDollars: "1" }])),
+      ).toEqual(["Must be less than your 15-mile radius."]);
+    });
+
+    it("rejects duplicates, bad miles and missing or negative prices", () => {
+      expect(
+        messages(
+          withBands([
+            { upToMiles: "5", feeDollars: "1" },
+            { upToMiles: "5", feeDollars: "2" },
+          ]),
+        ),
+      ).toEqual(["Each distance can only be used once."]);
+      for (const upToMiles of ["", "0", "2.5", "abc"]) {
+        expect(
+          messages(withBands([{ upToMiles, feeDollars: "1" }])),
+        ).toHaveLength(1);
+      }
+      for (const feeDollars of ["", "-1", "abc"]) {
+        expect(
+          messages(withBands([{ upToMiles: "5", feeDollars }])),
+        ).toHaveLength(1);
+      }
+    });
+
+    it("allows at most 3 rows", () => {
+      const rows = [2, 4, 6, 8].map((m) => ({
+        upToMiles: String(m),
+        feeDollars: "1",
+      }));
+      expect(messages(withBands(rows.slice(0, 3)))).toEqual([]);
+      expect(messages(withBands(rows))).toHaveLength(1);
+    });
+
+    it("needs a radius before a row can be checked", () => {
+      expect(
+        messages({
+          ...withBands([{ upToMiles: "5", feeDollars: "1" }]),
+          offersLocalDelivery: false,
+          radiusMiles: "",
+        }),
+      ).toEqual(["Enter your delivery radius first."]);
+    });
+
+    it("enforces the same rules on the wire and defaults to no bands", () => {
+      const wire = {
+        offersLocalDelivery: true,
+        originZip: null,
+        radiusMiles: 15,
+        feeCents: 500,
+        minOrderCents: null,
+        instructions: null,
+      };
+      const parsed = localDeliveryInputSchema.parse(wire);
+      expect(parsed.bands).toEqual([]);
+
+      const bad = (bands: unknown) =>
+        localDeliveryInputSchema.safeParse({ ...wire, bands }).success;
+      expect(bad([{ upToMiles: 15, feeCents: 0 }])).toBe(false);
+      expect(
+        bad([
+          { upToMiles: 5, feeCents: 0 },
+          { upToMiles: 5, feeCents: 100 },
+        ]),
+      ).toBe(false);
+      expect(bad([{ upToMiles: 5, feeCents: -1 }])).toBe(false);
+      expect(
+        bad([2, 4, 6, 8].map((m) => ({ upToMiles: m, feeCents: 0 }))),
+      ).toBe(false);
+
+      const sorted = localDeliveryInputSchema.parse({
+        ...wire,
+        bands: [
+          { upToMiles: 10, feeCents: 300 },
+          { upToMiles: 5, feeCents: 0 },
+        ],
+      });
+      expect(sorted.bands.map((b) => b.upToMiles)).toEqual([5, 10]);
+    });
+
+    it("hydrates defaults through the shared parser (drops bad rows)", () => {
+      const defaults = localDeliveryFormDefaults({
+        offersLocalDelivery: true,
+        localDeliveryRadiusMiles: 15,
+        localDeliveryFeeCents: 500,
+        localDeliveryBands: [
+          { upToMiles: 10, feeCents: 300 },
+          { upToMiles: 5, feeCents: 0 },
+          { upToMiles: 30, feeCents: 0 },
+          "junk",
+        ],
+      });
+      expect(defaults.bands).toEqual([
+        { upToMiles: "5", feeDollars: "0.00" },
+        { upToMiles: "10", feeDollars: "3.00" },
+      ]);
+      expect(
+        localDeliveryFormDefaults({ localDeliveryBands: null }).bands,
+      ).toEqual([]);
     });
   });
 });

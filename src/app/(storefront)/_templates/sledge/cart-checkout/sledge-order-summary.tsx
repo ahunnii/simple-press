@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import { formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
-  deliveryMethod: "ship" | "pickup";
+  deliveryMethod: DeliveryMethod;
   discountAmount: number;
   // Authoritative shipping cost from the checkout hook (a live zone+weight
   // quote when applicable). The summary must not recompute it.
@@ -18,6 +19,8 @@ type OrderSummaryProps = {
   shippingPending?: boolean;
   // True while a live rate is actively loading for a known destination.
   shippingCalculating?: boolean;
+  // True when local delivery is selected but the customer is ineligible.
+  deliveryUnavailable?: boolean;
 };
 
 export function SledgeOrderSummary({
@@ -26,6 +29,7 @@ export function SledgeOrderSummary({
   shipping,
   shippingPending,
   shippingCalculating,
+  deliveryUnavailable,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
 
@@ -113,7 +117,7 @@ export function SledgeOrderSummary({
 
         <div className="flex items-baseline justify-between gap-4">
           <span className="font-sans text-xs tracking-[0.14em] text-[var(--sl-ink-soft)] uppercase">
-            Shipping
+            {deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
           </span>
           <span
             className={cn(
@@ -121,7 +125,8 @@ export function SledgeOrderSummary({
               deliveryMethod === "pickup" ||
                 shipping === 0 ||
                 shippingPending ||
-                shippingCalculating
+                shippingCalculating ||
+                deliveryUnavailable
                 ? "text-[var(--sl-ink-soft)]"
                 : "text-[var(--sl-ink)]",
             )}
@@ -137,7 +142,13 @@ export function SledgeOrderSummary({
                 Calculating…
               </span>
             ) : shippingPending ? (
-              "Calculated at checkout"
+              deliveryMethod === "delivery" ? (
+                "Enter your ZIP"
+              ) : (
+                "Calculated at checkout"
+              )
+            ) : deliveryUnavailable ? (
+              "Not available"
             ) : shipping === 0 ? (
               "Free"
             ) : (

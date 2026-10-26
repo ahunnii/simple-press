@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  Car,
   Mail,
   MapPin,
   Package,
@@ -23,6 +24,7 @@ import type { PickableProduct } from "./product-picker";
 import type { PublicCustomizerDefinition } from "~/lib/customizer";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ManualOrderFormValues } from "~/lib/validators/order";
+import { deliveryMethodNeedsAddress } from "~/lib/delivery-method";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { dollarsToCents, formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
@@ -284,7 +286,7 @@ export function ManualOrderForm({
     }
 
     const captureAddress =
-      data.includeAddress && data.deliveryMethod === "ship";
+      data.includeAddress && deliveryMethodNeedsAddress(data.deliveryMethod);
     const trimmedShippingName = data.shippingName?.trim() ?? "";
     const recipientName =
       trimmedShippingName === "" ? data.customerName : trimmedShippingName;
@@ -503,6 +505,12 @@ export function ManualOrderForm({
                                 Ship to customer
                               </span>
                             </SelectItem>
+                            <SelectItem value="delivery">
+                              <span className="flex items-center gap-2">
+                                <Car className="h-3.5 w-3.5" />
+                                Local delivery
+                              </span>
+                            </SelectItem>
                             <SelectItem value="pickup">
                               <span className="flex items-center gap-2">
                                 <Store className="h-3.5 w-3.5" />
@@ -514,7 +522,9 @@ export function ManualOrderForm({
                         <FormDescription>
                           {isPickup
                             ? "No shipping address is recorded for pickup orders."
-                            : "Shipping orders can carry a delivery address."}
+                            : deliveryMethod === "delivery"
+                              ? "Local delivery orders should carry the address you'll drive to."
+                              : "Shipping orders can carry a delivery address."}
                         </FormDescription>
                       </FormItem>
                     )}
@@ -544,13 +554,17 @@ export function ManualOrderForm({
                 </CardContent>
               </Card>
 
-              {/* Shipping Address (optional, ship-only) */}
+              {/* Shipping Address (optional; not for pickup) */}
               {!isPickup && (
                 <Card>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <CardTitle>Shipping Address</CardTitle>
+                        <CardTitle>
+                          {deliveryMethod === "delivery"
+                            ? "Delivery Address"
+                            : "Shipping Address"}
+                        </CardTitle>
                         <CardDescription>
                           Optional — add a delivery address for the order
                         </CardDescription>

@@ -28,6 +28,7 @@ import {
   isProductOptionsEnabled,
   loadCustomizerDefinitions,
 } from "~/lib/customizer/load";
+import { deliveryMethodNeedsAddress } from "~/lib/delivery-method";
 import {
   sendOrderCancelled,
   sendOrderConfirmation,
@@ -2039,8 +2040,12 @@ export const orderRouter = createTRPCRouter({
 
       let shippingAddressId: string | undefined;
       // A pickup order has nothing to ship, so no address is recorded even if
-      // one came along in the payload.
-      if (input.shippingAddress && input.deliveryMethod !== "pickup") {
+      // one came along in the payload. Shipping and local-delivery orders both
+      // go somewhere, so both keep it.
+      if (
+        input.shippingAddress &&
+        deliveryMethodNeedsAddress(input.deliveryMethod)
+      ) {
         // Emptiness-checked, not `??`: an empty-string shippingName is not
         // nullish, so `??` let it through and produced an address with a blank
         // first name.

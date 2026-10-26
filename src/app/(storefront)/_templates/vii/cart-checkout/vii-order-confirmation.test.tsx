@@ -138,6 +138,28 @@ describe("ViiOrderConfirmation", () => {
       expect(clearCart).toHaveBeenCalledTimes(1);
     });
 
+    it("local delivery: names the method, never says shipping or pickup", async () => {
+      searchParams = new URLSearchParams({ session_id: "cs_test_delivery" });
+      mockFetchResponse({
+        customer_email: "shopper@example.com",
+        amount_total: 4599,
+        currency: "usd",
+        payment_status: "paid",
+        delivery_method: "delivery",
+      });
+
+      render(<ViiOrderConfirmation {...BASE_PROPS} business={BUSINESS} />);
+
+      await waitFor(() =>
+        expect(screen.getByText("Local delivery")).toBeInTheDocument(),
+      );
+      expect(
+        screen.getByText("We'll be in touch about your delivery."),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/ships/)).not.toBeInTheDocument();
+      expect(screen.queryByText("Pickup location")).not.toBeInTheDocument();
+    });
+
     it("ship: shows the ship copy and no pickup location", async () => {
       searchParams = new URLSearchParams({ session_id: "cs_test_2" });
       mockFetchResponse({
@@ -177,9 +199,7 @@ describe("ViiOrderConfirmation", () => {
 
       await waitFor(() =>
         expect(
-          screen.getByText(
-            "We'll notify you as soon as your order ships.",
-          ),
+          screen.getByText("We'll notify you as soon as your order ships."),
         ).toBeInTheDocument(),
       );
     });

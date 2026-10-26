@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatCurrency } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
@@ -15,7 +17,7 @@ import {
   PAYMENT_PROCESSING_MESSAGE,
 } from "~/app/(storefront)/_components/checkout/payment-status";
 
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
 
 type Business = {
   id: string;
@@ -41,11 +43,17 @@ type Props = {
 // state — mirrors `bamboo-order-confirmation.tsx`.
 const DETAILS_FETCH_TIMEOUT_MS = 10_000;
 
-function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
+function nextStepsBullets(deliveryMethod: OrderDeliveryMethod): string[] {
   if (deliveryMethod === "pickup") {
     return [
       "You'll receive an email confirmation shortly",
       "We'll let you know when your order is ready for pickup",
+    ];
+  }
+  if (deliveryMethod === "delivery") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll let you know when your order is out for local delivery",
     ];
   }
   if (deliveryMethod === "ship") {
@@ -76,7 +84,7 @@ export function ElegantOrderConfirmation({
     amount_total: number;
     currency: string;
     payment_status: string;
-    delivery_method: DeliveryMethod;
+    delivery_method: OrderDeliveryMethod;
   } | null>(null);
   // Gates only the order-details card (email/amount), never the
   // confirmation heading itself.
@@ -112,7 +120,7 @@ export function ElegantOrderConfirmation({
             amount_total: number;
             currency: string;
             payment_status: string;
-            delivery_method: DeliveryMethod;
+            delivery_method: OrderDeliveryMethod;
           };
           setOrderDetails(data);
         }
@@ -461,6 +469,19 @@ export function ElegantOrderConfirmation({
                           orderDetails.amount_total,
                           (orderDetails.currency || "usd").toUpperCase(),
                         )}
+                      </span>
+                    </p>
+                  )}
+                  {orderDetails.delivery_method === "delivery" && (
+                    <p style={{ margin: 0 }}>
+                      Delivery method:{" "}
+                      <span
+                        style={{
+                          color: "var(--el-ink, #1c1a17)",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {deliveryMethodLabel("delivery")}
                       </span>
                     </p>
                   )}

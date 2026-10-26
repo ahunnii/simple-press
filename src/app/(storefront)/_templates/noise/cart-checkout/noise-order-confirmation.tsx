@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { DeliveryMethod as SharedDeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
-import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
@@ -16,9 +16,10 @@ import {
   isPaymentProcessing,
   PAYMENT_PROCESSING_MESSAGE,
 } from "~/app/(storefront)/_components/checkout/payment-status";
+import { navHrefFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
-type DeliveryMethod = "ship" | "pickup" | null;
+type DeliveryMethod = SharedDeliveryMethod | null;
 
 type OrderDetails = {
   customer_email: string;
@@ -51,6 +52,15 @@ function confirmationCopy(deliveryMethod: DeliveryMethod): {
           icon: "↗",
           text: "We'll let you know when your order is ready for pickup.",
         },
+      ],
+    };
+  }
+  if (deliveryMethod === "delivery") {
+    return {
+      lead: "Your order is queued for preparation. We'll email you when it's on its way.",
+      steps: [
+        email,
+        { icon: "↗", text: "We'll email you when your order is on its way." },
       ],
     };
   }

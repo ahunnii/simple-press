@@ -9,7 +9,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -111,6 +110,10 @@ export function CheckoutForm({
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
@@ -311,32 +314,26 @@ export function CheckoutForm({
           </div>
         )}
 
-        {shippingConfig.offersInStorePickup && (
+        {deliveryOptions.length > 1 && (
           <div className="bamboo-torn-card">
             <fieldset className="flex flex-col gap-3">
               <legend className={cn(LEGEND_CLASS, "pb-2")}>Delivery</legend>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className={cn("bamboo-chip", "min-h-11")}
-                  aria-pressed={deliveryMethod === "ship"}
-                  onClick={() => setDeliveryMethod("ship")}
-                >
-                  Ship to address
-                </button>
-                <button
-                  type="button"
-                  className={cn("bamboo-chip", "min-h-11")}
-                  aria-pressed={deliveryMethod === "pickup"}
-                  onClick={() => setDeliveryMethod("pickup")}
-                >
-                  In-store pickup
-                </button>
+                {deliveryOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={cn("bamboo-chip", "min-h-11")}
+                    aria-pressed={deliveryMethod === option.id}
+                    onClick={() => setDeliveryMethod(option.id)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
               <p className={HELP_CLASS}>
-                {deliveryMethod === "pickup"
-                  ? "No shipping charge. You'll pick up your order at the store."
-                  : "Shipping cost is based on your store's shipping settings."}
+                {deliveryOptions.find((o) => o.id === deliveryMethod)
+                  ?.description ?? ""}
               </p>
               {deliveryMethod === "pickup" && (
                 <div className="rounded-2xl bg-[var(--bamboo-sage)] p-4 text-sm">
@@ -355,17 +352,51 @@ export function CheckoutForm({
                   ) : null}
                 </div>
               )}
+              {deliveryMethod === "delivery" && (
+                <>
+                  <div aria-live="polite">
+                    {localDelivery.status === "checking" ? (
+                      <p className={HELP_CLASS}>Checking your ZIP…</p>
+                    ) : localDelivery.status === "ineligible" &&
+                      localDelivery.message ? (
+                      <p className="text-destructive text-sm">
+                        {localDelivery.message}
+                      </p>
+                    ) : localDelivery.status === "eligible" ? (
+                      <p className="text-sm text-[var(--bamboo-pine)]">
+                        Great — we deliver to you.
+                      </p>
+                    ) : null}
+                  </div>
+                  {localDelivery.instructions ? (
+                    <div className="rounded-2xl bg-[var(--bamboo-sage)] p-4 text-sm">
+                      <p className="font-medium text-[var(--bamboo-pine)]">
+                        Delivery details
+                      </p>
+                      <p className="mt-1 whitespace-pre-line text-[var(--bamboo-ink-soft)]">
+                        {localDelivery.instructions}
+                      </p>
+                    </div>
+                  ) : null}
+                </>
+              )}
             </fieldset>
           </div>
         )}
 
-        {deliveryMethod === "ship" && (
+        {needsAddress && (
           <div className="bamboo-torn-card">
             <fieldset className="flex flex-col gap-4">
-              <legend className={LEGEND_CLASS}>Shipping Address</legend>
+              <legend className={LEGEND_CLASS}>
+                {deliveryMethod === "delivery"
+                  ? "Delivery address"
+                  : "Shipping Address"}
+              </legend>
               <p className={HELP_CLASS}>
-                {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                  ? "We price shipping from this address. Make changes here before continuing to payment."
+                {addressLocked
+                  ? deliveryMethod === "delivery"
+                    ? "We check delivery from this address. Make changes here before continuing to payment."
+                    : "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
               </p>
               <SavedAddressPicker
@@ -401,7 +432,7 @@ export function CheckoutForm({
                     value={addressLine1}
                     onChange={(e) => setAddressLine1(e.target.value)}
                     placeholder="Street address, P.O. box"
-                    required={deliveryMethod === "ship"}
+                    required={needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !addressLine1.trim() ? true : undefined
@@ -434,7 +465,7 @@ export function CheckoutForm({
                       className={FIELD_CLASS}
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      required={deliveryMethod === "ship"}
+                      required={needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !city.trim() ? true : undefined
@@ -487,7 +518,7 @@ export function CheckoutForm({
                       className={FIELD_CLASS}
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      required={deliveryMethod === "ship"}
+                      required={needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !postalCode.trim() ? true : undefined
@@ -605,7 +636,9 @@ export function CheckoutForm({
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-[var(--bamboo-ink-soft)]">Shipping</span>
+                <span className="text-[var(--bamboo-ink-soft)]">
+                  {deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                </span>
                 <span className="text-[var(--bamboo-ink)]">
                   {deliveryMethod === "pickup" ? (
                     "In-store pickup (free)"
@@ -620,6 +653,15 @@ export function CheckoutForm({
                       />
                       Calculating…
                     </span>
+                  ) : deliveryMethod === "delivery" && shippingPending ? (
+                    localDelivery.status === "checking" ? (
+                      "Calculating…"
+                    ) : (
+                      "Enter your ZIP"
+                    )
+                  ) : deliveryMethod === "delivery" &&
+                    localDelivery.status === "ineligible" ? (
+                    "Not available"
                   ) : shippingPending ? (
                     "Calculated at checkout"
                   ) : shipping === 0 ? (

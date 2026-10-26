@@ -1,6 +1,10 @@
 import type { Prisma } from "generated/prisma";
 import { z } from "zod";
 
+import {
+  DELIVERY_METHODS,
+  deliveryMethodNeedsAddress,
+} from "~/lib/delivery-method";
 import { isSafeHref, SAFE_HREF_MESSAGE } from "~/lib/safe-href";
 import { customizerSelectionSchema } from "~/lib/validators/product-options";
 
@@ -81,7 +85,7 @@ export const ORDER_PAYMENT_VALUES = [
 export const ORDER_PAYMENT_DEFAULT = "all";
 
 /** `Order.deliveryMethod` — see prisma/schema.prisma. */
-export const ORDER_DELIVERY_METHOD_VALUES = ["ship", "pickup"] as const;
+export const ORDER_DELIVERY_METHOD_VALUES = DELIVERY_METHODS;
 
 export const ORDER_SORT_VALUES = [
   "newest",
@@ -412,7 +416,9 @@ export const manualOrderFormSchema = z
     }
 
     // A pickup order has nothing to ship, so no address is collected.
-    if (!v.includeAddress || v.deliveryMethod === "pickup") return;
+    if (!v.includeAddress || !deliveryMethodNeedsAddress(v.deliveryMethod)) {
+      return;
+    }
 
     const required = [
       ["line1", "Street address is required"],

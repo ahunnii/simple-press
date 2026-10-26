@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Package, PackageSearch } from "lucide-react";
 
+import type { DeliveryMethod as SharedDeliveryMethod } from "~/lib/delivery-method";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -18,7 +19,7 @@ import {
 } from "~/app/(storefront)/_components/checkout/payment-status";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
-type DeliveryMethod = "ship" | "pickup" | null;
+type DeliveryMethod = SharedDeliveryMethod | null;
 
 type Props = {
   business: {
@@ -34,7 +35,7 @@ type Props = {
 
 /**
  * "What happens next?" bullets, keyed by the Stripe session's delivery method
- * (`session.metadata.deliveryMethod`, "ship" | "pickup" | unset). Mirrors
+ * (`session.metadata.deliveryMethod`, "ship" | "pickup" | "delivery" | unset). Mirrors
  * bamboo's order confirmation wording (PF14 / B9.3): pickup orders are never
  * told "we'll notify you when your order ships".
  */
@@ -43,6 +44,12 @@ function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
     return [
       "You'll receive an email confirmation shortly",
       "We'll let you know when your order is ready for pickup",
+    ];
+  }
+  if (deliveryMethod === "delivery") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll let you know when your order is on its way",
     ];
   }
   if (deliveryMethod === "ship") {

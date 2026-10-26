@@ -515,6 +515,11 @@ export const ORDER_COLUMNS = [
   "Stripe payment ID",
 ] as const;
 
+/** "Local delivery" for the owner-driven method; the rest read as before. */
+function orderDeliveryMethodLabel(method: string): string {
+  return method === "delivery" ? "Local delivery" : humanize(method);
+}
+
 export function ordersSheet(
   orders: OrderSheetOrder[],
   ctx: SheetContext,
@@ -530,7 +535,7 @@ export function ordersSheet(
       "Order status": humanize(o.status),
       "Payment status": humanize(o.paymentStatus),
       "Fulfillment status": humanize(o.fulfillmentStatus),
-      "Delivery method": humanize(o.deliveryMethod),
+      "Delivery method": orderDeliveryMethodLabel(o.deliveryMethod),
       "Payment method": humanize(o.paymentMethod),
       "Items subtotal": centsToMoney(o.subtotal),
       Shipping: centsToMoney(o.shipping),

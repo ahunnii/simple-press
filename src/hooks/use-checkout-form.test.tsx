@@ -22,7 +22,16 @@ vi.mock("~/lib/umami/track", () => ({
   track: vi.fn(),
 }));
 
-// tRPC react client: inert hook results (quote query, discount mutation).
+// tRPC react client: inert hook results (quote query, discount mutation),
+// except `shipping.checkLocalDelivery`, whose result each test can set.
+const trpc = vi.hoisted(() => ({
+  delivery: {
+    data: undefined as unknown,
+    isFetching: false,
+    isError: false,
+  },
+  deliveryInputs: [] as unknown[],
+}));
 vi.mock("~/trpc/react", () => {
   const hookResult = {
     data: undefined,
@@ -32,12 +41,26 @@ vi.mock("~/trpc/react", () => {
     error: null,
     mutate: () => undefined,
   };
-  const proxy: unknown = new Proxy(() => undefined, {
-    get: (_t, prop) =>
-      prop === "useQuery" || prop === "useMutation" ? () => hookResult : proxy,
-    apply: () => hookResult,
-  });
-  return { api: proxy };
+  const make = (path: string[]): unknown =>
+    new Proxy(() => undefined, {
+      get: (_t, prop) => {
+        if (prop === "useQuery") {
+          return (input: unknown, opts?: { enabled?: boolean }) => {
+            if (path.includes("checkLocalDelivery")) {
+              if (opts?.enabled) trpc.deliveryInputs.push(input);
+              return opts?.enabled
+                ? trpc.delivery
+                : { data: undefined, isFetching: false, isError: false };
+            }
+            return hookResult;
+          };
+        }
+        if (prop === "useMutation") return () => hookResult;
+        return make([...path, String(prop)]);
+      },
+      apply: () => hookResult,
+    });
+  return { api: make([]) };
 });
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -387,5 +410,301 @@ describe("linesToRemoveForRejection", () => {
         ],
       ),
     ).toEqual([cartItemId(long)]);
+  });
+});
+
+describe("useCheckoutForm delivery options + local delivery", () => {
+  const fetchMock = vi.fn();
+  const deliveryBusiness = (overrides: Record<string, unknown> = {}) =>
+    ({
+      ...(business as unknown as Record<string, unknown>),
+      offersLocalDelivery: true,
+      localDeliveryRadiusMiles: 15,
+      localDeliveryFeeCents: 500,
+      localDeliveryMinOrderCents: null,
+      localDeliveryInstructions: "We deliver Tue-Sat.",
+      ...overrides,
+    }) as unknown as Business;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+    trpc.delivery = { data: undefined, isFetching: false, isError: false };
+    trpc.deliveryInputs = [];
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  function render(b: Business) {
+    return renderHook(() =>
+      useCheckoutForm(
+        b,
+        merchantPolicies as Parameters<typeof useCheckoutForm>[1],
+      ),
+    );
+  }
+
+  function fillDeliveryForm(
+    hook: ReturnType<typeof render>,
+    zip = "48601-1234",
+  ) {
+    act(() => {
+      const r = hook.result.current;
+      r.setEmail("jane@shopper.test");
+      r.setName("Jane Doe");
+      r.setPhone("5551234567");
+      r.setAddressLine1("1 Main St");
+      r.setCity("Saginaw");
+      r.setState("MI");
+      r.setPostalCode(zip);
+      r.setDeliveryMethod("delivery");
+    });
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+  }
+
+  it("lists ship + pickup only when local delivery is off", () => {
+    const { result } = render(business);
+    expect(result.current.deliveryOptions.map((o) => o.id)).toEqual([
+      "ship",
+      "pickup",
+    ]);
+    expect(result.current.deliveryOptions[0]).toEqual({
+      id: "ship",
+      label: "Ship to address",
+      description: "Shipping cost is based on your store's shipping settings.",
+    });
+    expect(result.current.deliveryOptions[1]?.description).toBe(
+      "No shipping charge. You'll pick up your order at the store.",
+    );
+  });
+
+  it("describes the delivery option from the fee, radius and minimum", () => {
+    expect(
+      render(deliveryBusiness()).result.current.deliveryOptions[2],
+    ).toEqual({
+      id: "delivery",
+      label: "Local delivery",
+      description: "$5.00 delivery within 15 miles.",
+    });
+    expect(
+      render(
+        deliveryBusiness({
+          localDeliveryFeeCents: 0,
+          localDeliveryMinOrderCents: 5000,
+        }),
+      ).result.current.deliveryOptions[2]?.description,
+    ).toBe("Free delivery within 15 miles. Orders over $50.00.");
+  });
+
+  it("describes banded delivery as a 'from' range", () => {
+    const describe = (overrides: Record<string, unknown>) =>
+      render(deliveryBusiness(overrides)).result.current.deliveryOptions[2]
+        ?.description;
+    expect(
+      describe({ localDeliveryBands: [{ upToMiles: 5, feeCents: 0 }] }),
+    ).toBe("Delivery within 15 miles, from Free.");
+    expect(
+      describe({
+        localDeliveryFeeCents: 800,
+        localDeliveryBands: [{ upToMiles: 5, feeCents: 300 }],
+        localDeliveryMinOrderCents: 2500,
+      }),
+    ).toBe("Delivery within 15 miles, from $3.00. Orders over $25.00.");
+    // Same price everywhere reads like a single fee.
+    expect(
+      describe({ localDeliveryBands: [{ upToMiles: 5, feeCents: 500 }] }),
+    ).toBe("$5.00 delivery within 15 miles.");
+    // Over-radius / malformed bands are ignored.
+    expect(
+      describe({
+        localDeliveryBands: [
+          { upToMiles: 15, feeCents: 0 },
+          { upToMiles: "3", feeCents: 0 },
+        ],
+      }),
+    ).toBe("$5.00 delivery within 15 miles.");
+  });
+
+  it("falls back to ship when delivery is chosen but not offered", () => {
+    const { result } = render(business);
+    act(() => result.current.setDeliveryMethod("delivery"));
+    expect(result.current.deliveryMethod).toBe("ship");
+    expect(result.current.needsAddress).toBe(true);
+  });
+
+  it("pickup needs no address and nothing is locked", () => {
+    const { result } = render(deliveryBusiness());
+    act(() => result.current.setDeliveryMethod("pickup"));
+    expect(result.current.needsAddress).toBe(false);
+    expect(result.current.addressLocked).toBe(false);
+    expect(result.current.localDelivery.status).toBe("idle");
+  });
+
+  it("stays idle and pending until a ZIP is entered", () => {
+    const { result } = render(deliveryBusiness());
+    act(() => result.current.setDeliveryMethod("delivery"));
+    expect(result.current.needsAddress).toBe(true);
+    expect(result.current.addressLocked).toBe(true);
+    expect(result.current.localDelivery).toEqual({
+      status: "idle",
+      message: null,
+      feeCents: 500,
+      instructions: "We deliver Tue-Sat.",
+      radiusMiles: 15,
+    });
+    expect(result.current.shippingPending).toBe(true);
+  });
+
+  it("checks the normalized ZIP after the debounce and charges the fee", () => {
+    trpc.delivery = {
+      data: { eligible: true, feeCents: 500 },
+      isFetching: false,
+      isError: false,
+    };
+    const hook = render(deliveryBusiness());
+    fillDeliveryForm(hook);
+    expect(trpc.deliveryInputs.at(-1)).toEqual({
+      items: [{ productId: "p1", variantId: null, quantity: 1 }],
+      postalCode: "48601",
+      country: "US",
+    });
+    const r = hook.result.current;
+    expect(r.localDelivery.status).toBe("eligible");
+    expect(r.shipping).toBe(500);
+    expect(r.shippingPending).toBe(false);
+    expect(r.finalTotal).toBe(2000);
+  });
+
+  it("reports checking while the server call is in flight", () => {
+    trpc.delivery = { data: undefined, isFetching: true, isError: false };
+    const hook = render(deliveryBusiness());
+    fillDeliveryForm(hook);
+    expect(hook.result.current.localDelivery.status).toBe("checking");
+    expect(hook.result.current.shippingPending).toBe(true);
+  });
+
+  it.each([
+    [
+      { eligible: false, reason: "out_of_range" },
+      "We only deliver within 15 miles. Choose another option.",
+    ],
+    [
+      { eligible: false, reason: "below_minimum", minOrderCents: 5000 },
+      "Local delivery starts at $50.00.",
+    ],
+    [
+      { eligible: false, reason: "unknown_zip" },
+      "We couldn't find that ZIP code.",
+    ],
+    [
+      { eligible: false, reason: "no_origin" },
+      "Local delivery isn't available right now.",
+    ],
+  ])("ineligible %o → %s, and blocks submit", async (data, message) => {
+    trpc.delivery = { data, isFetching: false, isError: false };
+    const hook = render(deliveryBusiness());
+    fillDeliveryForm(hook);
+    expect(hook.result.current.localDelivery).toMatchObject({
+      status: "ineligible",
+      message,
+    });
+    await act(async () => {
+      await hook.result.current.handleSubmit(submitEvent());
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(hook.result.current.error).toBe(message);
+  });
+
+  it("is ineligible outside the US without calling the server", () => {
+    const hook = render(deliveryBusiness());
+    fillDeliveryForm(hook);
+    act(() => hook.result.current.setCountry("CA"));
+    expect(hook.result.current.localDelivery).toMatchObject({
+      status: "ineligible",
+      message: "Local delivery is only available in the US.",
+    });
+  });
+
+  it("trusts the cart subtotal over a base-price below_minimum", () => {
+    // Cart subtotal is 1500 (customizer add-ons included client-side).
+    trpc.delivery = {
+      data: { eligible: false, reason: "below_minimum", minOrderCents: 1200 },
+      isFetching: false,
+      isError: false,
+    };
+    const hook = render(deliveryBusiness({ localDeliveryMinOrderCents: 1200 }));
+    fillDeliveryForm(hook);
+    expect(hook.result.current.localDelivery.status).toBe("eligible");
+    expect(hook.result.current.shipping).toBe(500);
+  });
+
+  it("charges the server's band fee, not the base fee", () => {
+    trpc.delivery = {
+      data: { eligible: true, feeCents: 0 },
+      isFetching: false,
+      isError: false,
+    };
+    const hook = render(
+      deliveryBusiness({ localDeliveryBands: [{ upToMiles: 5, feeCents: 0 }] }),
+    );
+    fillDeliveryForm(hook);
+    expect(hook.result.current.localDelivery).toMatchObject({
+      status: "eligible",
+      feeCents: 0,
+    });
+    expect(hook.result.current.shipping).toBe(0);
+  });
+
+  it("keeps the band fee when trusting the cart subtotal over below_minimum", () => {
+    trpc.delivery = {
+      data: {
+        eligible: false,
+        reason: "below_minimum",
+        minOrderCents: 1200,
+        feeCents: 200,
+      },
+      isFetching: false,
+      isError: false,
+    };
+    const hook = render(
+      deliveryBusiness({
+        localDeliveryMinOrderCents: 1200,
+        localDeliveryBands: [{ upToMiles: 5, feeCents: 200 }],
+      }),
+    );
+    fillDeliveryForm(hook);
+    expect(hook.result.current.localDelivery.status).toBe("eligible");
+    expect(hook.result.current.shipping).toBe(200);
+  });
+
+  it("posts deliveryMethod delivery with the address when eligible", async () => {
+    trpc.delivery = {
+      data: { eligible: true, feeCents: 0 },
+      isFetching: false,
+      isError: false,
+    };
+    fetchMock.mockResolvedValueOnce(jsonResponse(400, { error: "stop" }));
+    const hook = render(deliveryBusiness({ localDeliveryFeeCents: 0 }));
+    fillDeliveryForm(hook);
+    await act(async () => {
+      await hook.result.current.handleSubmit(submitEvent());
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const body = JSON.parse(init.body as string) as {
+      deliveryMethod: string;
+      customerInfo: { shippingAddress: Record<string, unknown> | null };
+    };
+    expect(body.deliveryMethod).toBe("delivery");
+    expect(body.customerInfo.shippingAddress).toMatchObject({
+      line1: "1 Main St",
+      postalCode: "48601-1234",
+      country: "US",
+    });
   });
 });

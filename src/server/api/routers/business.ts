@@ -15,6 +15,11 @@ import { emailOverridesSchema } from "~/lib/email/customization";
 import { parseZonedDateTime } from "~/lib/events/normalize";
 import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import {
+  lookupOriginPlace,
+  normalizeUsZip,
+  resolveDeliveryOriginZip,
+} from "~/lib/local-delivery";
+import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
   maintenanceHeadlineSchema,
@@ -40,6 +45,7 @@ import { stripeClient } from "~/lib/stripe/client";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import {
   deliveryReturnsInputSchema,
+  localDeliveryInputSchema,
   zoneWeightFormSchema,
 } from "~/lib/validators/shipping";
 import {
@@ -118,6 +124,18 @@ export const businessRouter = createTRPCRouter({
         offersInStorePickup: true,
         pickupLocation: true,
         pickupInstructions: true,
+        // Local delivery: what the checkout needs to offer and describe the
+        // option. `localDeliveryOriginZip` is deliberately NOT here — the
+        // owner may deliver from a home ZIP that isn't public; eligibility is
+        // decided server-side by `shipping.checkLocalDelivery`.
+        offersLocalDelivery: true,
+        localDeliveryRadiusMiles: true,
+        localDeliveryFeeCents: true,
+        // Distance-band prices are public (they're shown at checkout); only
+        // the origin ZIP is private.
+        localDeliveryBands: true,
+        localDeliveryMinOrderCents: true,
+        localDeliveryInstructions: true,
         originState: true,
         shippingWeightTiers: true,
         shippingFallbackRate: true,
@@ -1353,6 +1371,105 @@ export const businessRouter = createTRPCRouter({
       return {
         message: "Delivery and returns settings updated successfully",
         business: updatedBusiness,
+      };
+    }),
+
+  /**
+   * City/state of the ZIP local delivery is measured from — the saved "Deliver
+   * from ZIP", else the business address ZIP. Feeds the "Measuring from Ann
+   * Arbor, MI" line on the shipping settings page. `null` when neither is set
+   * or the ZIP isn't in the dataset.
+   */
+  getLocalDeliveryOrigin: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await ctx.db.business.findFirst({
+      where: { id: ctx.businessId },
+      select: { localDeliveryOriginZip: true, addressPostalCode: true },
+    });
+    const zip = business ? resolveDeliveryOriginZip(business) : null;
+    return { originPlace: zip ? await lookupOriginPlace(zip) : null };
+  }),
+
+  /**
+   * Local delivery (the owner drives orders to customers within N miles of a
+   * ZIP). Separate from `updateShipping` for the same reason as
+   * `updateDeliveryAndReturns`: it is independent of the shipping mode, so a
+   * zone+weight store can save it too, and it touches no shipping field.
+   *
+   * A blank "Deliver from ZIP" means "use the business address ZIP". Any ZIP
+   * that is saved (or relied on) must exist in the ZIP dataset, since distance
+   * is measured between ZIP centroids.
+   */
+  updateLocalDelivery: ownerAdminProcedure
+    .input(localDeliveryInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const enteredZip = input.originZip
+        ? normalizeUsZip(input.originZip)
+        : null;
+      if (input.originZip && !enteredZip) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find that ZIP code.",
+        });
+      }
+
+      let originZip = enteredZip;
+      if (!originZip && input.offersLocalDelivery) {
+        const existing = await ctx.db.business.findFirst({
+          where: { id: businessId },
+          select: { addressPostalCode: true },
+        });
+        originZip = normalizeUsZip(existing?.addressPostalCode);
+        if (!originZip) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Enter the ZIP code you deliver from — your business address doesn't have a valid ZIP yet.",
+          });
+        }
+      }
+
+      const originPlace = originZip ? await lookupOriginPlace(originZip) : null;
+      if (originZip && !originPlace) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find that ZIP code.",
+        });
+      }
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          offersLocalDelivery: input.offersLocalDelivery,
+          // Only the owner's own entry is stored; a blank keeps following the
+          // business address.
+          localDeliveryOriginZip: enteredZip,
+          localDeliveryRadiusMiles: input.radiusMiles,
+          localDeliveryFeeCents: input.feeCents,
+          // Closer prices inside the radius; none = one price, stored as
+          // SQL NULL (the input schema already sorted them nearest first).
+          localDeliveryBands:
+            input.bands.length > 0
+              ? (input.bands as Prisma.InputJsonValue)
+              : Prisma.DbNull,
+          localDeliveryMinOrderCents: input.minOrderCents,
+          localDeliveryInstructions: input.instructions,
+        },
+        select: {
+          offersLocalDelivery: true,
+          localDeliveryOriginZip: true,
+          localDeliveryRadiusMiles: true,
+          localDeliveryFeeCents: true,
+          localDeliveryBands: true,
+          localDeliveryMinOrderCents: true,
+          localDeliveryInstructions: true,
+        },
+      });
+      return {
+        message: "Local delivery settings updated successfully",
+        business: updatedBusiness,
+        originPlace,
       };
     }),
 

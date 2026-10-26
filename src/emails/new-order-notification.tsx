@@ -7,6 +7,8 @@ import {
   Text,
 } from "@react-email/components";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
+
 import { EmailLayout } from "./components/layout";
 import { OrderItemOptions } from "./components/order-item-options";
 
@@ -32,7 +34,19 @@ type NewOrderNotificationEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   adminOrderUrl: string;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
+  /** Local delivery only: where to drive the order. */
+  shippingAddress?: {
+    name: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  /** Local delivery only: the owner's "Delivery days & instructions". */
+  deliveryInstructions?: string | null;
   /** Present when this order was created from a paid subscription invoice. */
   subscription?: { intervalLabel: string; adminUrl: string };
 };
@@ -51,8 +65,11 @@ export default function NewOrderNotificationEmail({
   businessLogoUrl,
   adminOrderUrl,
   deliveryMethod,
+  shippingAddress,
+  deliveryInstructions,
   subscription,
 }: NewOrderNotificationEmailProps) {
+  const isLocalDelivery = deliveryMethod === "delivery";
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -92,6 +109,9 @@ export default function NewOrderNotificationEmail({
         </Text>
         {deliveryMethod === "pickup" && (
           <Text style={fulfillmentBadge}>Fulfillment: In-store pickup</Text>
+        )}
+        {isLocalDelivery && (
+          <Text style={fulfillmentBadge}>Fulfillment: Local delivery</Text>
         )}
       </Section>
 
@@ -134,10 +154,16 @@ export default function NewOrderNotificationEmail({
         )}
         <Row style={totalRow}>
           <Column>
-            <Text style={totalLabel}>Shipping</Text>
+            <Text style={totalLabel}>
+              {isLocalDelivery ? "Local delivery" : "Shipping"}
+            </Text>
           </Column>
           <Column style={totalValue}>
-            <Text style={totalLabel}>{formatPrice(shipping)}</Text>
+            <Text style={totalLabel}>
+              {isLocalDelivery && shipping === 0
+                ? "Free"
+                : formatPrice(shipping)}
+            </Text>
           </Column>
         </Row>
         <Row style={totalRow}>
@@ -163,6 +189,41 @@ export default function NewOrderNotificationEmail({
           </Column>
         </Row>
       </Section>
+
+      {isLocalDelivery && (shippingAddress ?? deliveryInstructions) && (
+        <Section style={deliverySection}>
+          <Text style={deliveryHeading}>Deliver to</Text>
+          {shippingAddress && (
+            <Text style={deliveryText}>
+              {shippingAddress.name}
+              <br />
+              {shippingAddress.line1}
+              <br />
+              {shippingAddress.line2 && (
+                <>
+                  {shippingAddress.line2}
+                  <br />
+                </>
+              )}
+              {shippingAddress.city}, {shippingAddress.state}{" "}
+              {shippingAddress.postalCode}
+              <br />
+              {shippingAddress.country}
+            </Text>
+          )}
+          {deliveryInstructions && (
+            <Text
+              style={{
+                ...deliveryText,
+                whiteSpace: "pre-line",
+                marginTop: "12px",
+              }}
+            >
+              {deliveryInstructions}
+            </Text>
+          )}
+        </Section>
+      )}
 
       <Section style={buttonSection}>
         <Button href={adminOrderUrl} style={button}>
@@ -304,6 +365,24 @@ const note = {
   lineHeight: "20px",
   color: "#6b7280",
   textAlign: "center" as const,
+};
+
+const deliverySection = {
+  marginBottom: "24px",
+};
+
+const deliveryHeading = {
+  fontSize: "16px",
+  fontWeight: "600" as const,
+  color: "#1f2937",
+  marginBottom: "8px",
+};
+
+const deliveryText = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#6b7280",
+  margin: "0",
 };
 
 const fulfillmentBadge = {

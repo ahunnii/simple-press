@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Package, ReceiptText } from "lucide-react";
 
 import { resolvePickupLocation } from "~/lib/address/pickup";
+import { parseDeliveryMethod } from "~/lib/delivery-method";
 import { formatDate } from "~/lib/format-date";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
@@ -49,6 +50,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const isStaffViewer = membershipRole === "STAFF";
   const pickupLocation = resolvePickupLocation(business);
+  const isLocalDelivery = order.deliveryMethod === "delivery";
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -161,6 +163,10 @@ export default async function OrderDetailPage({ params }: Props) {
 
             {order.deliveryMethod === "pickup" && (
               <Badge variant="warning">Pickup</Badge>
+            )}
+
+            {order.deliveryMethod === "delivery" && (
+              <Badge variant="warning">Local delivery</Badge>
             )}
 
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
@@ -285,7 +291,9 @@ export default async function OrderDetailPage({ params }: Props) {
                   )}
 
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">
+                      {isLocalDelivery ? "Local delivery" : "Shipping"}
+                    </span>
                     <span className="text-foreground">
                       {formatPrice(order.shipping)}
                     </span>
@@ -374,6 +382,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     customization: item.customization,
                   }))}
                   shippingAddress={order.shippingAddress ?? null}
+                  deliveryMethod={parseDeliveryMethod(order.deliveryMethod)}
                 />
               )
             )}
@@ -409,7 +418,15 @@ export default async function OrderDetailPage({ params }: Props) {
                     </p>
                   )}
 
+                {order.fulfillmentStatus === "fulfilled" && isLocalDelivery && (
+                  <p className="text-muted-foreground mt-4 text-sm">
+                    Delivered — customer notified.
+                  </p>
+                )}
+
+                {/* Local deliveries have no carrier, so no tracking panel. */}
                 {order.deliveryMethod !== "pickup" &&
+                  !isLocalDelivery &&
                   (order.fulfillmentStatus === "fulfilled" ||
                     order.shipments.length > 0) && (
                     <ShipmentsPanel
@@ -478,7 +495,9 @@ export default async function OrderDetailPage({ params }: Props) {
             ) : (
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle>Shipping Address</CardTitle>
+                  <CardTitle>
+                    {isLocalDelivery ? "Delivery Address" : "Shipping Address"}
+                  </CardTitle>
                   <div className="flex items-center gap-2">
                     {order.shippingAddress && (
                       <CopyAddressButton address={order.shippingAddress} />
@@ -520,6 +539,16 @@ export default async function OrderDetailPage({ params }: Props) {
                     <p className="text-muted-foreground text-sm">
                       No shipping address on file.
                     </p>
+                  )}
+                  {isLocalDelivery && business?.localDeliveryInstructions && (
+                    <div className="mt-3 border-t pt-3">
+                      <p className="text-muted-foreground text-xs">
+                        Delivery days &amp; instructions (shown to customer)
+                      </p>
+                      <p className="text-muted-foreground mt-1 text-sm whitespace-pre-line">
+                        {business.localDeliveryInstructions}
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>

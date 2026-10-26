@@ -429,6 +429,15 @@ describe("orders", () => {
     });
   });
 
+  it("labels local delivery orders", () => {
+    const { rows } = ordersSheet(
+      [{ ...order, deliveryMethod: "delivery" }, order],
+      ctx,
+    );
+    expect(rows[0]).toMatchObject({ "Delivery method": "Local delivery" });
+    expect(rows[1]).toMatchObject({ "Delivery method": "Ship" });
+  });
+
   it("flattens line items", () => {
     const { rows } = orderItemsSheet(
       [order, { ...order, orderNumber: 1002, items: [] }],
@@ -586,10 +595,7 @@ describe("moderation + testimonials", () => {
       ownerReplyAt: null,
     };
     const { columns, rows } = reviewsSheet(
-      [
-        review,
-        { ...review, ownerReply: "Thanks!", ownerReplyAt: at },
-      ],
+      [review, { ...review, ownerReply: "Thanks!", ownerReplyAt: at }],
       ctx,
     );
     const replyIdx = columns.indexOf("Owner reply");

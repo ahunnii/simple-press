@@ -89,6 +89,8 @@ export type SetupFacts = {
   /** Schema default is "free" — anything else means the owner set shipping up. */
   shippingType: string;
   offersInStorePickup: boolean;
+  /** Owner-driven local delivery counts as shipping set up, like pickup. */
+  offersLocalDelivery?: boolean;
   venmoHandle: string | null;
   cashAppHandle: string | null;
   phoneNumber: string | null;
@@ -177,7 +179,11 @@ function isStepDone(key: SetupStepKey, facts: SetupFacts): boolean {
     case "salesTax":
       return facts.stripeAutoTaxEnabled;
     case "shippingPickup":
-      return facts.shippingType !== "free" || facts.offersInStorePickup;
+      return (
+        facts.shippingType !== "free" ||
+        facts.offersInStorePickup ||
+        facts.offersLocalDelivery === true
+      );
     case "firstServiceAdded":
       return facts.serviceCount > 0;
     case "donationsSetup":

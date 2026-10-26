@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { DELIVERY_METHODS } from "~/lib/delivery-method";
 import { customizerSelectionSchema } from "~/lib/validators/product-options";
 
 const checkoutShippingAddressSchema = z.object({
@@ -49,7 +50,7 @@ export const checkoutSessionSchema = z.object({
   items: z.array(checkoutItemSchema).min(1).max(200),
   customerInfo: checkoutCustomerInfoSchema,
   discountCodeId: z.string().max(64).optional().nullable(),
-  deliveryMethod: z.enum(["ship", "pickup"]).optional(),
+  deliveryMethod: z.enum(DELIVERY_METHODS).optional(),
 });
 
 export type CheckoutSessionInput = z.infer<typeof checkoutSessionSchema>;

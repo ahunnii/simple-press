@@ -8,7 +8,6 @@ import type { SledgeTextRow } from "./text-list";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { listItemAttr } from "~/lib/preview/section-attrs";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -90,6 +89,10 @@ export function SledgeCheckoutForm({
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
@@ -266,32 +269,31 @@ export function SledgeCheckoutForm({
           </fieldset>
         )}
 
-        {shippingConfig.offersInStorePickup ? (
+        {deliveryOptions.length > 1 ? (
           <fieldset className="flex flex-col gap-4">
             <SectionHead>Delivery</SectionHead>
             <div className="flex flex-wrap gap-2">
               {/* S-7: aria-pressed communicates toggle state to AT */}
-              {(["ship", "pickup"] as const).map((method) => (
+              {deliveryOptions.map((option) => (
                 <button
-                  key={method}
+                  key={option.id}
                   type="button"
-                  onClick={() => setDeliveryMethod(method)}
-                  aria-pressed={deliveryMethod === method}
+                  onClick={() => setDeliveryMethod(option.id)}
+                  aria-pressed={deliveryMethod === option.id}
                   className={cn(
                     "cursor-pointer px-4 py-2 font-sans text-xs tracking-[0.16em] uppercase transition-all",
-                    deliveryMethod === method
+                    deliveryMethod === option.id
                       ? "sl-btn"
                       : "sl-account-tab-inactive",
                   )}
                 >
-                  {method === "ship" ? "Ship to address" : "Studio pickup"}
+                  {option.id === "pickup" ? "Studio pickup" : option.label}
                 </button>
               ))}
             </div>
             <p className="font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
-              {deliveryMethod === "pickup"
-                ? "No shipping charge — contact us for pick-up details."
-                : "Shipping cost based on your store's settings."}
+              {deliveryOptions.find((o) => o.id === deliveryMethod)
+                ?.description ?? ""}
             </p>
             {deliveryMethod === "pickup" && (
               <div className="flex flex-col gap-1 border border-[var(--sl-border)] bg-[var(--sl-cream)] p-3">
@@ -310,15 +312,53 @@ export function SledgeCheckoutForm({
                 ) : null}
               </div>
             )}
+            {deliveryMethod === "delivery" && (
+              <>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "font-sans text-xs tracking-[0.12em] uppercase",
+                    localDelivery.status === "ineligible"
+                      ? "text-destructive"
+                      : "text-[var(--sl-ink-soft)]",
+                  )}
+                >
+                  {localDelivery.status === "checking"
+                    ? "Checking your ZIP…"
+                    : localDelivery.status === "ineligible"
+                      ? localDelivery.message
+                      : localDelivery.status === "eligible"
+                        ? "Great — we deliver to you."
+                        : null}
+                </p>
+                {localDelivery.instructions ? (
+                  <div className="flex flex-col gap-1 border border-[var(--sl-border)] bg-[var(--sl-cream)] p-3">
+                    <p className="font-sans text-xs font-medium tracking-[0.16em] text-[var(--sl-ink)] uppercase">
+                      Delivery details
+                    </p>
+                    <p className="font-sans text-sm whitespace-pre-line text-[var(--sl-ink-soft)]">
+                      {localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </fieldset>
         ) : null}
 
-        {deliveryMethod === "ship" ? (
+        {needsAddress ? (
           <fieldset className="flex flex-col gap-5">
-            <SectionHead>Shipping Address</SectionHead>
+            <SectionHead>
+              {deliveryMethod === "delivery"
+                ? "Delivery Address"
+                : "Shipping Address"}
+            </SectionHead>
             <p className="-mt-2 font-sans text-xs tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase">
-              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {addressLocked
+                ? deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
@@ -356,7 +396,7 @@ export function SledgeCheckoutForm({
                 value={addressLine1}
                 onChange={(e) => setAddressLine1(e.target.value)}
                 placeholder="Street address, P.O. box"
-                required={deliveryMethod === "ship"}
+                required={needsAddress}
                 aria-required="true"
                 aria-invalid={
                   submitAttempted && !addressLine1.trim() ? true : undefined
@@ -391,7 +431,7 @@ export function SledgeCheckoutForm({
                   autoComplete="shipping address-level2"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   placeholder="e.g. Detroit"
                   aria-required="true"
                   aria-invalid={
@@ -441,7 +481,7 @@ export function SledgeCheckoutForm({
                   placeholder="e.g. 48207"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !postalCode.trim() ? true : undefined
@@ -487,6 +527,10 @@ export function SledgeCheckoutForm({
             shipping={shipping}
             shippingPending={shippingPending}
             shippingCalculating={shippingCalculating}
+            deliveryUnavailable={
+              deliveryMethod === "delivery" &&
+              localDelivery.status === "ineligible"
+            }
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">

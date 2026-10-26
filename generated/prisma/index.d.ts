@@ -14664,6 +14664,9 @@ export namespace Prisma {
     longitude: number | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
+    localDeliveryRadiusMiles: number | null
+    localDeliveryFeeCents: number | null
+    localDeliveryMinOrderCents: number | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
     handlingDaysMin: number | null
@@ -14679,6 +14682,9 @@ export namespace Prisma {
     longitude: number | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
+    localDeliveryRadiusMiles: number | null
+    localDeliveryFeeCents: number | null
+    localDeliveryMinOrderCents: number | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
     handlingDaysMin: number | null
@@ -14741,6 +14747,12 @@ export namespace Prisma {
     offersInStorePickup: boolean | null
     pickupLocation: string | null
     pickupInstructions: string | null
+    offersLocalDelivery: boolean | null
+    localDeliveryOriginZip: string | null
+    localDeliveryRadiusMiles: number | null
+    localDeliveryFeeCents: number | null
+    localDeliveryMinOrderCents: number | null
+    localDeliveryInstructions: string | null
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
@@ -14813,6 +14825,12 @@ export namespace Prisma {
     offersInStorePickup: boolean | null
     pickupLocation: string | null
     pickupInstructions: string | null
+    offersLocalDelivery: boolean | null
+    localDeliveryOriginZip: string | null
+    localDeliveryRadiusMiles: number | null
+    localDeliveryFeeCents: number | null
+    localDeliveryMinOrderCents: number | null
+    localDeliveryInstructions: string | null
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
@@ -14891,6 +14909,13 @@ export namespace Prisma {
     offersInStorePickup: number
     pickupLocation: number
     pickupInstructions: number
+    offersLocalDelivery: number
+    localDeliveryOriginZip: number
+    localDeliveryRadiusMiles: number
+    localDeliveryFeeCents: number
+    localDeliveryBands: number
+    localDeliveryMinOrderCents: number
+    localDeliveryInstructions: number
     originState: number
     shippingWeightTiers: number
     businessHours: number
@@ -14922,6 +14947,9 @@ export namespace Prisma {
     longitude?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
+    localDeliveryRadiusMiles?: true
+    localDeliveryFeeCents?: true
+    localDeliveryMinOrderCents?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
     handlingDaysMin?: true
@@ -14937,6 +14965,9 @@ export namespace Prisma {
     longitude?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
+    localDeliveryRadiusMiles?: true
+    localDeliveryFeeCents?: true
+    localDeliveryMinOrderCents?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
     handlingDaysMin?: true
@@ -14999,6 +15030,12 @@ export namespace Prisma {
     offersInStorePickup?: true
     pickupLocation?: true
     pickupInstructions?: true
+    offersLocalDelivery?: true
+    localDeliveryOriginZip?: true
+    localDeliveryRadiusMiles?: true
+    localDeliveryFeeCents?: true
+    localDeliveryMinOrderCents?: true
+    localDeliveryInstructions?: true
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
@@ -15071,6 +15108,12 @@ export namespace Prisma {
     offersInStorePickup?: true
     pickupLocation?: true
     pickupInstructions?: true
+    offersLocalDelivery?: true
+    localDeliveryOriginZip?: true
+    localDeliveryRadiusMiles?: true
+    localDeliveryFeeCents?: true
+    localDeliveryMinOrderCents?: true
+    localDeliveryInstructions?: true
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
@@ -15149,6 +15192,13 @@ export namespace Prisma {
     offersInStorePickup?: true
     pickupLocation?: true
     pickupInstructions?: true
+    offersLocalDelivery?: true
+    localDeliveryOriginZip?: true
+    localDeliveryRadiusMiles?: true
+    localDeliveryFeeCents?: true
+    localDeliveryBands?: true
+    localDeliveryMinOrderCents?: true
+    localDeliveryInstructions?: true
     originState?: true
     shippingWeightTiers?: true
     businessHours?: true
@@ -15318,6 +15368,13 @@ export namespace Prisma {
     offersInStorePickup: boolean
     pickupLocation: string | null
     pickupInstructions: string | null
+    offersLocalDelivery: boolean
+    localDeliveryOriginZip: string | null
+    localDeliveryRadiusMiles: number | null
+    localDeliveryFeeCents: number
+    localDeliveryBands: JsonValue | null
+    localDeliveryMinOrderCents: number | null
+    localDeliveryInstructions: string | null
     originState: string | null
     shippingWeightTiers: JsonValue | null
     businessHours: JsonValue | null
@@ -15419,6 +15476,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: boolean
     pickupInstructions?: boolean
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: boolean
+    localDeliveryRadiusMiles?: boolean
+    localDeliveryFeeCents?: boolean
+    localDeliveryBands?: boolean
+    localDeliveryMinOrderCents?: boolean
+    localDeliveryInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     businessHours?: boolean
@@ -15548,6 +15612,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: boolean
     pickupInstructions?: boolean
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: boolean
+    localDeliveryRadiusMiles?: boolean
+    localDeliveryFeeCents?: boolean
+    localDeliveryBands?: boolean
+    localDeliveryMinOrderCents?: boolean
+    localDeliveryInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     businessHours?: boolean
@@ -15630,6 +15701,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: boolean
     pickupInstructions?: boolean
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: boolean
+    localDeliveryRadiusMiles?: boolean
+    localDeliveryFeeCents?: boolean
+    localDeliveryBands?: boolean
+    localDeliveryMinOrderCents?: boolean
+    localDeliveryInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     businessHours?: boolean
@@ -15712,6 +15790,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: boolean
     pickupInstructions?: boolean
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: boolean
+    localDeliveryRadiusMiles?: boolean
+    localDeliveryFeeCents?: boolean
+    localDeliveryBands?: boolean
+    localDeliveryMinOrderCents?: boolean
+    localDeliveryInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     businessHours?: boolean
@@ -15736,7 +15821,7 @@ export namespace Prisma {
     donationShowInFooter?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "businessType" | "setupSteps" | "setupConfirmations" | "setupCompletedAt" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "addressStreet" | "addressCity" | "addressState" | "addressPostalCode" | "latitude" | "longitude" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "stripePortalConfigurationId" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "maintenanceCta" | "maintenanceOverline" | "maintenanceHeadline" | "maintenanceImage" | "maintenanceLaunchAt" | "maintenanceLaunchEndAt" | "maintenanceLocation" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "businessType" | "setupSteps" | "setupConfirmations" | "setupCompletedAt" | "localBusinessEnabled" | "localPresence" | "areaServed" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "offersLocalDelivery" | "localDeliveryOriginZip" | "localDeliveryRadiusMiles" | "localDeliveryFeeCents" | "localDeliveryBands" | "localDeliveryMinOrderCents" | "localDeliveryInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries" | "handlingDaysMin" | "handlingDaysMax" | "transitDaysMin" | "transitDaysMax" | "returnWindowDays" | "returnFees" | "returnShippingFeeCents" | "returnMethod" | "indexNowSubmittedAt" | "indexNowHost" | "donationLabel" | "donationPresetAmounts" | "venmoHandle" | "cashAppHandle" | "donationShowInHeader" | "donationShowInFooter", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -15897,6 +15982,13 @@ export namespace Prisma {
       offersInStorePickup: boolean
       pickupLocation: string | null
       pickupInstructions: string | null
+      offersLocalDelivery: boolean
+      localDeliveryOriginZip: string | null
+      localDeliveryRadiusMiles: number | null
+      localDeliveryFeeCents: number
+      localDeliveryBands: Prisma.JsonValue | null
+      localDeliveryMinOrderCents: number | null
+      localDeliveryInstructions: string | null
       originState: string | null
       shippingWeightTiers: Prisma.JsonValue | null
       businessHours: Prisma.JsonValue | null
@@ -16445,6 +16537,13 @@ export namespace Prisma {
     readonly offersInStorePickup: FieldRef<"Business", 'Boolean'>
     readonly pickupLocation: FieldRef<"Business", 'String'>
     readonly pickupInstructions: FieldRef<"Business", 'String'>
+    readonly offersLocalDelivery: FieldRef<"Business", 'Boolean'>
+    readonly localDeliveryOriginZip: FieldRef<"Business", 'String'>
+    readonly localDeliveryRadiusMiles: FieldRef<"Business", 'Int'>
+    readonly localDeliveryFeeCents: FieldRef<"Business", 'Int'>
+    readonly localDeliveryBands: FieldRef<"Business", 'Json'>
+    readonly localDeliveryMinOrderCents: FieldRef<"Business", 'Int'>
+    readonly localDeliveryInstructions: FieldRef<"Business", 'String'>
     readonly originState: FieldRef<"Business", 'String'>
     readonly shippingWeightTiers: FieldRef<"Business", 'Json'>
     readonly businessHours: FieldRef<"Business", 'Json'>
@@ -98284,6 +98383,13 @@ export namespace Prisma {
     offersInStorePickup: 'offersInStorePickup',
     pickupLocation: 'pickupLocation',
     pickupInstructions: 'pickupInstructions',
+    offersLocalDelivery: 'offersLocalDelivery',
+    localDeliveryOriginZip: 'localDeliveryOriginZip',
+    localDeliveryRadiusMiles: 'localDeliveryRadiusMiles',
+    localDeliveryFeeCents: 'localDeliveryFeeCents',
+    localDeliveryBands: 'localDeliveryBands',
+    localDeliveryMinOrderCents: 'localDeliveryMinOrderCents',
+    localDeliveryInstructions: 'localDeliveryInstructions',
     originState: 'originState',
     shippingWeightTiers: 'shippingWeightTiers',
     businessHours: 'businessHours',
@@ -100306,6 +100412,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFilter<"Business"> | boolean
     pickupLocation?: StringNullableFilter<"Business"> | string | null
     pickupInstructions?: StringNullableFilter<"Business"> | string | null
+    offersLocalDelivery?: BoolFilter<"Business"> | boolean
+    localDeliveryOriginZip?: StringNullableFilter<"Business"> | string | null
+    localDeliveryRadiusMiles?: IntNullableFilter<"Business"> | number | null
+    localDeliveryFeeCents?: IntFilter<"Business"> | number
+    localDeliveryBands?: JsonNullableFilter<"Business">
+    localDeliveryMinOrderCents?: IntNullableFilter<"Business"> | number | null
+    localDeliveryInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
     businessHours?: JsonNullableFilter<"Business">
@@ -100434,6 +100547,13 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     pickupLocation?: SortOrderInput | SortOrder
     pickupInstructions?: SortOrderInput | SortOrder
+    offersLocalDelivery?: SortOrder
+    localDeliveryOriginZip?: SortOrderInput | SortOrder
+    localDeliveryRadiusMiles?: SortOrderInput | SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryBands?: SortOrderInput | SortOrder
+    localDeliveryMinOrderCents?: SortOrderInput | SortOrder
+    localDeliveryInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
     businessHours?: SortOrderInput | SortOrder
@@ -100565,6 +100685,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFilter<"Business"> | boolean
     pickupLocation?: StringNullableFilter<"Business"> | string | null
     pickupInstructions?: StringNullableFilter<"Business"> | string | null
+    offersLocalDelivery?: BoolFilter<"Business"> | boolean
+    localDeliveryOriginZip?: StringNullableFilter<"Business"> | string | null
+    localDeliveryRadiusMiles?: IntNullableFilter<"Business"> | number | null
+    localDeliveryFeeCents?: IntFilter<"Business"> | number
+    localDeliveryBands?: JsonNullableFilter<"Business">
+    localDeliveryMinOrderCents?: IntNullableFilter<"Business"> | number | null
+    localDeliveryInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
     businessHours?: JsonNullableFilter<"Business">
@@ -100693,6 +100820,13 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     pickupLocation?: SortOrderInput | SortOrder
     pickupInstructions?: SortOrderInput | SortOrder
+    offersLocalDelivery?: SortOrder
+    localDeliveryOriginZip?: SortOrderInput | SortOrder
+    localDeliveryRadiusMiles?: SortOrderInput | SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryBands?: SortOrderInput | SortOrder
+    localDeliveryMinOrderCents?: SortOrderInput | SortOrder
+    localDeliveryInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
     businessHours?: SortOrderInput | SortOrder
@@ -100783,6 +100917,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolWithAggregatesFilter<"Business"> | boolean
     pickupLocation?: StringNullableWithAggregatesFilter<"Business"> | string | null
     pickupInstructions?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    offersLocalDelivery?: BoolWithAggregatesFilter<"Business"> | boolean
+    localDeliveryOriginZip?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    localDeliveryRadiusMiles?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    localDeliveryFeeCents?: IntWithAggregatesFilter<"Business"> | number
+    localDeliveryBands?: JsonNullableWithAggregatesFilter<"Business">
+    localDeliveryMinOrderCents?: IntNullableWithAggregatesFilter<"Business"> | number | null
+    localDeliveryInstructions?: StringNullableWithAggregatesFilter<"Business"> | string | null
     originState?: StringNullableWithAggregatesFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableWithAggregatesFilter<"Business">
     businessHours?: JsonNullableWithAggregatesFilter<"Business">
@@ -108362,6 +108503,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -108490,6 +108638,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -108618,6 +108773,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -108746,6 +108908,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -108874,6 +109043,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -108956,6 +109132,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -109038,6 +109221,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -117658,6 +117848,17 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type ProductListRelationFilter = {
     every?: ProductWhereInput
     some?: ProductWhereInput
@@ -118076,6 +118277,13 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     pickupLocation?: SortOrder
     pickupInstructions?: SortOrder
+    offersLocalDelivery?: SortOrder
+    localDeliveryOriginZip?: SortOrder
+    localDeliveryRadiusMiles?: SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryBands?: SortOrder
+    localDeliveryMinOrderCents?: SortOrder
+    localDeliveryInstructions?: SortOrder
     originState?: SortOrder
     shippingWeightTiers?: SortOrder
     businessHours?: SortOrder
@@ -118105,6 +118313,9 @@ export namespace Prisma {
     longitude?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
+    localDeliveryRadiusMiles?: SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryMinOrderCents?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
     handlingDaysMin?: SortOrder
@@ -118167,6 +118378,12 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     pickupLocation?: SortOrder
     pickupInstructions?: SortOrder
+    offersLocalDelivery?: SortOrder
+    localDeliveryOriginZip?: SortOrder
+    localDeliveryRadiusMiles?: SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryMinOrderCents?: SortOrder
+    localDeliveryInstructions?: SortOrder
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
@@ -118239,6 +118456,12 @@ export namespace Prisma {
     offersInStorePickup?: SortOrder
     pickupLocation?: SortOrder
     pickupInstructions?: SortOrder
+    offersLocalDelivery?: SortOrder
+    localDeliveryOriginZip?: SortOrder
+    localDeliveryRadiusMiles?: SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryMinOrderCents?: SortOrder
+    localDeliveryInstructions?: SortOrder
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
@@ -118264,6 +118487,9 @@ export namespace Prisma {
     longitude?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
+    localDeliveryRadiusMiles?: SortOrder
+    localDeliveryFeeCents?: SortOrder
+    localDeliveryMinOrderCents?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
     handlingDaysMin?: SortOrder
@@ -118340,6 +118566,22 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type SiteContentCountOrderByAggregateInput = {
@@ -118435,17 +118677,6 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type FaqItemCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -118485,22 +118716,6 @@ export namespace Prisma {
 
   export type FaqItemSumOrderByAggregateInput = {
     sortOrder?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -123867,6 +124082,14 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type BusinessUpdatesalesCountriesInput = {
     set?: string[]
     push?: string | string[]
@@ -125146,14 +125369,6 @@ export namespace Prisma {
     create?: XOR<BusinessCreateWithoutFaqItemsInput, BusinessUncheckedCreateWithoutFaqItemsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutFaqItemsInput
     connect?: BusinessWhereUniqueInput
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type BusinessUpdateOneRequiredWithoutFaqItemsNestedInput = {
@@ -130532,6 +130747,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -130659,6 +130881,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -130859,6 +131088,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -130986,6 +131222,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135217,6 +135460,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135344,6 +135594,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135487,6 +135744,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135614,6 +135878,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135741,6 +136012,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -135868,6 +136146,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -136011,6 +136296,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -136138,6 +136430,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -136314,6 +136613,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -136441,6 +136747,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -137089,6 +137402,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -137216,6 +137536,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -138089,6 +138416,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -138216,6 +138550,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -138421,6 +138762,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -138548,6 +138896,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -139423,6 +139778,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -139550,6 +139912,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -139715,6 +140084,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -139842,6 +140218,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -140285,6 +140668,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -140412,6 +140802,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -140607,6 +141004,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -140734,6 +141138,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -140994,6 +141405,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141121,6 +141539,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141264,6 +141689,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141391,6 +141823,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141518,6 +141957,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141645,6 +142091,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141836,6 +142289,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -141963,6 +142423,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142141,6 +142608,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142268,6 +142742,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142452,6 +142933,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142579,6 +143067,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142811,6 +143306,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -142938,6 +143440,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -143192,6 +143701,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -143319,6 +143835,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -143497,6 +144020,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -143624,6 +144154,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -144438,6 +144975,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -144565,6 +145109,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -145398,6 +145949,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -145525,6 +146083,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -146160,6 +146725,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -146287,6 +146859,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -147361,6 +147940,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -147488,6 +148074,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -147758,6 +148351,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -147885,6 +148485,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -148266,6 +148873,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -148393,6 +149007,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -148926,6 +149547,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -149053,6 +149681,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -149373,6 +150008,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -149500,6 +150142,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -149831,6 +150480,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -149958,6 +150614,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -150133,6 +150796,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -150260,6 +150930,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -150532,6 +151209,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -150659,6 +151343,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -150912,6 +151603,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151039,6 +151737,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151274,6 +151979,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151401,6 +152113,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151583,6 +152302,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151710,6 +152436,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151853,6 +152586,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -151980,6 +152720,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152107,6 +152854,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152234,6 +152988,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152377,6 +153138,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152504,6 +153272,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152631,6 +153406,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152758,6 +153540,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -152952,6 +153741,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153079,6 +153875,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153263,6 +154066,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153390,6 +154200,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153533,6 +154350,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153660,6 +154484,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153787,6 +154618,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -153914,6 +154752,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154089,6 +154934,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154216,6 +155068,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154458,6 +155317,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154585,6 +155451,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154807,6 +155680,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -154934,6 +155814,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -155146,6 +156033,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -155273,6 +156167,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -155495,6 +156396,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -155622,6 +156530,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -156680,6 +157595,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -156807,6 +157729,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157001,6 +157930,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157128,6 +158064,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157312,6 +158255,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157439,6 +158389,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157582,6 +158539,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157709,6 +158673,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -157887,6 +158858,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158014,6 +158992,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158214,6 +159199,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158341,6 +159333,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158468,6 +159467,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158595,6 +159601,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158760,6 +159773,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -158887,6 +159907,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159193,6 +160220,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159320,6 +160354,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159574,6 +160615,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159701,6 +160749,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159828,6 +160883,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -159955,6 +161017,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160150,6 +161219,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160277,6 +161353,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160509,6 +161592,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160636,6 +161726,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160826,6 +161923,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -160953,6 +162057,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161080,6 +162191,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161207,6 +162325,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161388,6 +162513,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161515,6 +162647,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161683,6 +162822,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161810,6 +162956,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -161984,6 +163137,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -162111,6 +163271,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -162238,6 +163405,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -162365,6 +163539,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -162679,6 +163860,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -162806,6 +163994,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -163485,6 +164680,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -163612,6 +164814,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -163897,6 +165106,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164024,6 +165240,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164305,6 +165528,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164432,6 +165662,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164575,6 +165812,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164702,6 +165946,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164829,6 +166080,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -164956,6 +166214,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165099,6 +166364,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165226,6 +166498,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165353,6 +166632,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165480,6 +166766,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165670,6 +166963,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165797,6 +167097,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -165977,6 +167284,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166104,6 +167418,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166247,6 +167568,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166374,6 +167702,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166501,6 +167836,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166628,6 +167970,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -166914,6 +168263,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -167041,6 +168397,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -167393,6 +168756,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -167520,6 +168890,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -167764,6 +169141,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -167891,6 +169275,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -168214,6 +169605,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -168341,6 +169739,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -168846,6 +170251,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -168973,6 +170385,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -169410,6 +170829,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -169537,6 +170963,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -169680,6 +171113,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -169807,6 +171247,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -169934,6 +171381,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -170061,6 +171515,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -170242,6 +171703,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -170369,6 +171837,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -170618,6 +172093,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -170745,6 +172227,13 @@ export namespace Prisma {
     offersInStorePickup?: boolean
     pickupLocation?: string | null
     pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -171099,6 +172588,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue
@@ -171226,6 +172722,13 @@ export namespace Prisma {
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
     pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     businessHours?: NullableJsonNullValueInput | InputJsonValue

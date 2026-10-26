@@ -1,5 +1,7 @@
 import { Button, Column, Row, Section, Text } from "@react-email/components";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
+
 import { EmailLayout } from "./components/layout";
 import { OrderItemOptions } from "./components/order-item-options";
 
@@ -31,9 +33,11 @@ type OrderConfirmationEmailProps = {
     postalCode: string;
     country: string;
   };
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
   pickupLocation?: string;
   pickupInstructions?: string;
+  /** The owner's "Delivery days & instructions", shown for local delivery. */
+  deliveryInstructions?: string | null;
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
@@ -61,6 +65,7 @@ export default function OrderConfirmationEmail({
   deliveryMethod,
   pickupLocation,
   pickupInstructions,
+  deliveryInstructions,
   businessName,
   businessLogoUrl,
   businessUrl,
@@ -70,6 +75,7 @@ export default function OrderConfirmationEmail({
   loyalty,
 }: OrderConfirmationEmailProps) {
   const isPickup = deliveryMethod === "pickup";
+  const isLocalDelivery = deliveryMethod === "delivery";
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -144,10 +150,16 @@ export default function OrderConfirmationEmail({
 
         <Row style={totalRow}>
           <Column>
-            <Text style={totalLabel}>Shipping</Text>
+            <Text style={totalLabel}>
+              {isLocalDelivery ? "Local delivery" : "Shipping"}
+            </Text>
           </Column>
           <Column style={totalValue}>
-            <Text style={totalLabel}>{formatPrice(shipping)}</Text>
+            <Text style={totalLabel}>
+              {isLocalDelivery && shipping === 0
+                ? "Free"
+                : formatPrice(shipping)}
+            </Text>
           </Column>
         </Row>
 
@@ -189,7 +201,7 @@ export default function OrderConfirmationEmail({
         </Section>
       )}
 
-      {/* Delivery Section — branches on pickup vs. ship */}
+      {/* Delivery Section — branches on pickup vs. local delivery vs. ship */}
       {isPickup ? (
         <Section style={addressSection}>
           <Text style={sectionHeading}>Pickup Details</Text>
@@ -203,7 +215,9 @@ export default function OrderConfirmationEmail({
       ) : (
         shippingAddress && (
           <Section style={addressSection}>
-            <Text style={sectionHeading}>Shipping Address</Text>
+            <Text style={sectionHeading}>
+              {isLocalDelivery ? "Delivery Address" : "Shipping Address"}
+            </Text>
             <Text style={addressText}>
               {shippingAddress.name}
               <br />
@@ -220,8 +234,30 @@ export default function OrderConfirmationEmail({
               <br />
               {shippingAddress.country}
             </Text>
+            {isLocalDelivery && deliveryInstructions && (
+              <Text
+                style={{
+                  ...addressText,
+                  whiteSpace: "pre-line",
+                  marginTop: "12px",
+                }}
+              >
+                {deliveryInstructions}
+              </Text>
+            )}
           </Section>
         )
+      )}
+
+      {/* A local delivery with no address on file (e.g. a manual order) still
+          gets the owner's delivery days/instructions. */}
+      {isLocalDelivery && !shippingAddress && deliveryInstructions && (
+        <Section style={addressSection}>
+          <Text style={sectionHeading}>Delivery Details</Text>
+          <Text style={{ ...addressText, whiteSpace: "pre-line" }}>
+            {deliveryInstructions}
+          </Text>
+        </Section>
       )}
 
       {/* CTA Button */}
@@ -266,7 +302,9 @@ export default function OrderConfirmationEmail({
       <Text style={note}>
         {isPickup
           ? "We'll send you another email when your order is ready for pickup. If you have any questions, please reply to this email."
-          : "You'll receive another email when your order ships. If you have any questions, please reply to this email."}
+          : isLocalDelivery
+            ? "We'll be in touch when your order is on its way. If you have any questions, please reply to this email."
+            : "You'll receive another email when your order ships. If you have any questions, please reply to this email."}
       </Text>
     </EmailLayout>
   );

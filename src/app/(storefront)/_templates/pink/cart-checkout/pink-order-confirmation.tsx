@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { CartItem } from "~/providers/cart-context";
 import type { Session } from "~/server/better-auth/config";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
@@ -23,13 +25,16 @@ import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkFactRows } from "../shared/pink-fact-rows";
 
+const LOCAL_DELIVERY_STEPS =
+  "A confirmation email is on its way.\nWe'll be in touch about your delivery.\nQuestions? Just reply to that email.";
+
 type OrderDetails = {
   customer_email: string | null;
   amount_total: number | null;
   currency: string;
   payment_status: string;
   /** Checkout metadata — `null` on older sessions or stores without pickup. */
-  delivery_method?: "ship" | "pickup" | null;
+  delivery_method?: DeliveryMethod | null;
 };
 
 type Props = {
@@ -247,7 +252,16 @@ export function PinkOrderConfirmation({
     : isPickup
       ? "pink.order.pickup-body"
       : "pink.order.body";
-  const nextStepsLines = (isPickup ? nextStepsPickup : nextSteps)
+  const isLocalDelivery = orderDetails?.delivery_method === "delivery";
+  // The general list promises the order "ships" — a driven local delivery has
+  // no carrier, so those orders get their own plain steps.
+  const nextStepsLines = (
+    isLocalDelivery
+      ? LOCAL_DELIVERY_STEPS
+      : isPickup
+        ? nextStepsPickup
+        : nextSteps
+  )
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
@@ -280,6 +294,9 @@ export function PinkOrderConfirmation({
       : []),
     ...(paymentStatus
       ? [{ label: "Payment status", value: paymentStatus }]
+      : []),
+    ...(isLocalDelivery
+      ? [{ label: "Delivery", value: deliveryMethodLabel("delivery") }]
       : []),
   ];
 

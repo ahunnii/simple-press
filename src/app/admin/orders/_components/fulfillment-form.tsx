@@ -19,6 +19,7 @@ import {
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { ShippingAddress } from "~/lib/orders/shipping-address";
 import type { FulfillmentFormValues } from "~/lib/validators/order";
 import { fulfillmentToast } from "~/lib/orders/fulfillment-email";
@@ -58,6 +59,12 @@ type Props = {
   items: OrderItemInfo[];
   /** Enables "Copy address" beside the Pirate Ship link. */
   shippingAddress?: ShippingAddress | null;
+  /**
+   * `delivery` = the owner drives it over: no carrier/tracking, so the
+   * tracking toggle and Pirate Ship shortcut go away and the copy says
+   * "delivered". Defaults to `ship`.
+   */
+  deliveryMethod?: DeliveryMethod;
 };
 
 const remainingFor = (item: OrderItemInfo) =>
@@ -68,7 +75,9 @@ export function FulfillmentForm({
   customerEmail,
   items,
   shippingAddress,
+  deliveryMethod = "ship",
 }: Props) {
+  const isLocalDelivery = deliveryMethod === "delivery";
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -83,7 +92,7 @@ export function FulfillmentForm({
     mode: "onTouched",
     reValidateMode: "onChange",
     defaultValues: {
-      hasTracking: true,
+      hasTracking: !isLocalDelivery,
       shipAllRemaining: true,
       packages: [
         {
@@ -225,34 +234,54 @@ export function FulfillmentForm({
         <CardTitle>
           {isPartiallyFulfilled
             ? "Fulfill Remaining Items"
-            : "Mark as Fulfilled"}
+            : isLocalDelivery
+              ? "Mark as Delivered"
+              : "Mark as Fulfilled"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="border-border flex items-start gap-3 rounded-lg border p-4">
-            <Checkbox
-              id="hasTracking"
-              checked={hasTracking}
-              onCheckedChange={(checked) =>
-                form.setValue("hasTracking", checked === true, {
-                  shouldValidate: true,
-                })
-              }
-            />
-            <div className="grid gap-1">
-              <Label
-                htmlFor="hasTracking"
-                className="cursor-pointer font-medium"
-              >
-                Include tracking information
-              </Label>
+          {isLocalDelivery && shippingAddress && (
+            <div className="border-border flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
               <p className="text-muted-foreground text-sm">
-                Uncheck if you&apos;re marking the order fulfilled without a
-                tracking number. The customer will get a different email.
+                This is a local delivery order. Copy the address for your maps
+                app, then mark it delivered once it&apos;s dropped off.
               </p>
+              <CopyAddressButton
+                address={shippingAddress}
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 [&>span]:text-sm"
+                label="Copy address"
+              />
             </div>
-          </div>
+          )}
+
+          {!isLocalDelivery && (
+            <div className="border-border flex items-start gap-3 rounded-lg border p-4">
+              <Checkbox
+                id="hasTracking"
+                checked={hasTracking}
+                onCheckedChange={(checked) =>
+                  form.setValue("hasTracking", checked === true, {
+                    shouldValidate: true,
+                  })
+                }
+              />
+              <div className="grid gap-1">
+                <Label
+                  htmlFor="hasTracking"
+                  className="cursor-pointer font-medium"
+                >
+                  Include tracking information
+                </Label>
+                <p className="text-muted-foreground text-sm">
+                  Uncheck if you&apos;re marking the order fulfilled without a
+                  tracking number. The customer will get a different email.
+                </p>
+              </div>
+            </div>
+          )}
 
           {items.length > 0 && (
             <div className="border-border flex items-start gap-3 rounded-lg border p-4">
@@ -268,7 +297,9 @@ export function FulfillmentForm({
                   htmlFor="shipAllRemaining"
                   className="cursor-pointer font-medium"
                 >
-                  Ship all remaining items
+                  {isLocalDelivery
+                    ? "Deliver all remaining items"
+                    : "Ship all remaining items"}
                 </Label>
                 <p className="text-muted-foreground text-sm">
                   Uncheck to choose which items and quantities go in{" "}
@@ -359,7 +390,9 @@ export function FulfillmentForm({
                   ? ` with tracking information for ${fields.length} packages.`
                   : " with tracking information."
                 : shipAllRemaining || items.length === 0
-                  ? " letting them know the order was fulfilled."
+                  ? isLocalDelivery
+                    ? " letting them know the order was delivered."
+                    : " letting them know the order was fulfilled."
                   : " only if this fulfills the whole order."}
             </p>
           </div>
@@ -381,7 +414,9 @@ export function FulfillmentForm({
                   {/* A partial shipment without tracking only emails if it
                       completes the order — see the note above. */}
                   {shipAllRemaining || items.length === 0
-                    ? "Mark as Fulfilled & Send Email"
+                    ? isLocalDelivery
+                      ? "Mark as Delivered & Send Email"
+                      : "Mark as Fulfilled & Send Email"
                     : hasTracking
                       ? "Fulfill Selected Items & Send Email"
                       : "Fulfill Selected Items"}

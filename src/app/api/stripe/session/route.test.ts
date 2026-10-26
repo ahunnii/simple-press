@@ -17,7 +17,7 @@ import { GET } from "./route";
  * on top of the existing `customer_email` / `amount_total` / `currency` /
  * `payment_status` passthrough — sourced from
  * `session.metadata?.deliveryMethod`, which `create-session/route.ts` always
- * stamps ("ship" | "pickup").
+ * stamps ("ship" | "pickup" | "delivery").
  */
 
 const stripeMocks = vi.hoisted(() => ({ retrieve: vi.fn() }));
@@ -79,6 +79,22 @@ describe("GET /api/stripe/session", () => {
     expect(stripeMocks.retrieve).toHaveBeenCalledWith(SESSION_ID, {
       stripeAccount: BUSINESS.stripeAccountId,
     });
+  });
+
+  it("passes a local delivery method through unchanged", async () => {
+    stripeMocks.retrieve.mockResolvedValue({
+      customer_email: "shopper@example.com",
+      amount_total: 4599,
+      currency: "usd",
+      payment_status: "paid",
+      metadata: { deliveryMethod: "delivery" },
+    });
+
+    const response = await GET(makeRequest(SESSION_ID, SIGNED));
+    const body = (await response.json()) as { delivery_method: string | null };
+
+    expect(response.status).toBe(200);
+    expect(body.delivery_method).toBe("delivery");
   });
 
   it("returns null when the session has no deliveryMethod metadata", async () => {

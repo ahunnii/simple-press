@@ -10,7 +10,6 @@ import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -163,7 +162,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
           </Card>
 
           {/* Delivery Method */}
-          {f.shippingConfig.offersInStorePickup && (
+          {f.deliveryOptions.length > 1 && (
             <Card className="border-white/20 bg-zinc-900/30">
               <CardHeader>
                 <CardTitle className="text-white">Delivery</CardTitle>
@@ -171,35 +170,25 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
               <CardContent className="space-y-4">
                 {/* S-8: aria-pressed on delivery toggle buttons */}
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => f.setDeliveryMethod("ship")}
-                    aria-pressed={f.deliveryMethod === "ship"}
-                    className={
-                      f.deliveryMethod === "ship"
-                        ? "bg-violet-600 text-white hover:bg-violet-700"
-                        : "border border-white/20 bg-transparent text-white hover:bg-white/10"
-                    }
-                  >
-                    Ship to address
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => f.setDeliveryMethod("pickup")}
-                    aria-pressed={f.deliveryMethod === "pickup"}
-                    className={
-                      f.deliveryMethod === "pickup"
-                        ? "bg-violet-600 text-white hover:bg-violet-700"
-                        : "border border-white/20 bg-transparent text-white hover:bg-white/10"
-                    }
-                  >
-                    In-store pickup
-                  </Button>
+                  {f.deliveryOptions.map((option) => (
+                    <Button
+                      key={option.id}
+                      type="button"
+                      onClick={() => f.setDeliveryMethod(option.id)}
+                      aria-pressed={f.deliveryMethod === option.id}
+                      className={
+                        f.deliveryMethod === option.id
+                          ? "bg-violet-600 text-white hover:bg-violet-700"
+                          : "border border-white/20 bg-transparent text-white hover:bg-white/10"
+                      }
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
                 </div>
                 <p className="text-sm text-white/70">
-                  {f.deliveryMethod === "pickup"
-                    ? "No shipping charge. You'll pick up your order at the store."
-                    : "Shipping cost is based on your store's shipping settings."}
+                  {f.deliveryOptions.find((o) => o.id === f.deliveryMethod)
+                    ?.description ?? ""}
                 </p>
                 {f.deliveryMethod === "pickup" && (
                   <div className="rounded-md border border-white/20 bg-white/5 p-3 text-sm">
@@ -216,20 +205,56 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                     ) : null}
                   </div>
                 )}
+                {f.deliveryMethod === "delivery" && (
+                  <>
+                    <div aria-live="polite">
+                      {f.localDelivery.status === "checking" ? (
+                        <p className="text-sm text-white/70">
+                          Checking your ZIP…
+                        </p>
+                      ) : f.localDelivery.status === "ineligible" &&
+                        f.localDelivery.message ? (
+                        <p className="text-sm text-red-400">
+                          {f.localDelivery.message}
+                        </p>
+                      ) : f.localDelivery.status === "eligible" ? (
+                        <p className="text-sm text-green-400">
+                          Great — we deliver to you.
+                        </p>
+                      ) : null}
+                    </div>
+                    {f.localDelivery.instructions ? (
+                      <div className="rounded-md border border-white/20 bg-white/5 p-3 text-sm">
+                        <p className="font-medium text-white">
+                          Delivery details
+                        </p>
+                        <p className="mt-1 whitespace-pre-line text-white/70">
+                          {f.localDelivery.instructions}
+                        </p>
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
 
-          {/* Shipping Address */}
-          {f.deliveryMethod === "ship" && (
+          {/* Shipping / delivery address */}
+          {f.needsAddress && (
             <Card className="border-white/20 bg-zinc-900/30">
               <CardHeader>
-                <CardTitle className="text-white">Shipping Address</CardTitle>
+                <CardTitle className="text-white">
+                  {f.deliveryMethod === "delivery"
+                    ? "Delivery address"
+                    : "Shipping Address"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-white/70">
-                  {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                    ? "We price shipping from this address. Make changes here before continuing to payment."
+                  {f.addressLocked
+                    ? f.deliveryMethod === "delivery"
+                      ? "We check delivery from this address. Make changes here before continuing to payment."
+                      : "We price shipping from this address. Make changes here before continuing to payment."
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                 </p>
                 <SavedAddressPicker
@@ -249,7 +274,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                     onChange={(e) => f.setAddressLine1(e.target.value)}
                     placeholder="Street address, P.O. box"
                     className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.addressLine1.trim()
@@ -284,7 +309,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                       value={f.city}
                       onChange={(e) => f.setCity(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={f.deliveryMethod === "ship"}
+                      required={f.needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !f.city.trim() ? true : undefined
@@ -336,7 +361,7 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                       value={f.postalCode}
                       onChange={(e) => f.setPostalCode(e.target.value)}
                       className="border-white/20 bg-zinc-900/50 text-white placeholder:text-white/40"
-                      required={f.deliveryMethod === "ship"}
+                      required={f.needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !f.postalCode.trim()
@@ -558,7 +583,9 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/70">Shipping</span>
+                  <span className="text-white/70">
+                    {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                  </span>
                   <span className="text-white">
                     {f.deliveryMethod === "pickup" ? (
                       "In-store pickup (free)"
@@ -573,6 +600,15 @@ export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
                         />
                         Calculating…
                       </span>
+                    ) : f.deliveryMethod === "delivery" && f.shippingPending ? (
+                      f.localDelivery.status === "checking" ? (
+                        "Calculating…"
+                      ) : (
+                        "Enter your ZIP"
+                      )
+                    ) : f.deliveryMethod === "delivery" &&
+                      f.localDelivery.status === "ineligible" ? (
+                      "Not available"
                     ) : f.shippingPending ? (
                       "Calculated at checkout"
                     ) : f.shipping === 0 ? (

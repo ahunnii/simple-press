@@ -265,6 +265,16 @@ model Business {
   pickupLocation        String? // free-text pickup address; falls back to businessAddress when blank
   pickupInstructions    String? @db.Text // combined "pickup hours & instructions", shown verbatim at checkout + in emails
 
+  // Local delivery (owner drives it). Eligibility = ZIP-centroid distance from
+  // the origin ZIP (src/lib/local-delivery.ts); no geocoding.
+  offersLocalDelivery        Boolean @default(false)
+  localDeliveryOriginZip     String? // 5-digit US ZIP; falls back to addressPostalCode when blank
+  localDeliveryRadiusMiles   Int? // 1–100; required when offersLocalDelivery (app layer)
+  localDeliveryFeeCents      Int     @default(0) // 0 = free delivery
+  localDeliveryBands         Json? // [{ upToMiles, feeCents }] closer prices inside the radius; nearest matching band wins, else localDeliveryFeeCents
+  localDeliveryMinOrderCents Int? // null = no minimum; pre-discount subtotal
+  localDeliveryInstructions  String? @db.Text // shown at checkout + in emails, e.g. delivery days
+
   // Zone + weight shipping fields
   originState                 String? // 2-letter US state code for shipping origin
   shippingWeightTiers         Json? // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
@@ -411,7 +421,7 @@ model SiteContent {
   primaryColor   String? @default("#000000")
   secondaryColor String? @default("#ffffff")
   accentColor    String? @default("#3b82f6")
-  emailStyle Json? // Marketing email style (accent, background, font, header). Null = template default. Validated by src/lib/marketing/email-style.ts
+  emailStyle     Json? // Marketing email style (accent, background, font, header). Null = template default. Validated by src/lib/marketing/email-style.ts
 
   // Navigation (custom menu items)
   navigationItems       Json? // [{ label, href, external?, children?: [{ label, href, external? }] }]
@@ -1169,7 +1179,7 @@ model Order {
   paymentMethod String @default("card") // card | cash | check | manual
 
   // Fulfillment method chosen at checkout
-  deliveryMethod String @default("ship") // ship | pickup
+  deliveryMethod String @default("ship") // ship | pickup | delivery
 
   // Refund
   refundReason      String?
@@ -1764,8 +1774,8 @@ model ProductReview {
 
   // Owner's public reply (one per review). ownerReplyAt = first posted; edits
   // keep it. ownerReplyBy is admin-only (never in the public select).
-  ownerReply     String?   @db.Text
-  ownerReplyAt   DateTime?
+  ownerReply   String?   @db.Text
+  ownerReplyAt DateTime?
 
   // Relationships
   productId String

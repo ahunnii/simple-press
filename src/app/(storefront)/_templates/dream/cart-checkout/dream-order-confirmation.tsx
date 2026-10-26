@@ -7,7 +7,9 @@ import type {
   DreamOrderStepList,
   DreamOrderStepSets,
 } from "./dream-order-steps";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import {
   fieldAttr,
   listItemAttr,
@@ -29,14 +31,14 @@ import { nonBlank } from "../shared/dream-non-blank";
 import { DreamPageHero } from "../shared/dream-page-hero";
 import { DreamSection } from "../shared/dream-section";
 
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
 
 type OrderDetails = {
   customer_email: string;
   amount_total: number;
   currency: string;
   payment_status: string;
-  delivery_method?: DeliveryMethod;
+  delivery_method?: OrderDeliveryMethod;
 };
 
 /** Resolved `checkout.confirmation` / `checkout.no-order` copy. */
@@ -82,10 +84,12 @@ const DETAILS_FETCH_TIMEOUT_MS = 10_000;
 
 function stepsFor(
   steps: DreamOrderStepSets,
-  method: DeliveryMethod | undefined,
+  method: OrderDeliveryMethod | undefined,
 ): DreamOrderStepList {
   if (method === "pickup") return steps.pickup;
   if (method === "ship") return steps.ship;
+  // Local delivery has no step list of its own — the generic one is
+  // fulfilment-neutral ("we prepare your order"), so it never says "ships".
   return steps.unknown;
 }
 
@@ -361,6 +365,16 @@ export function DreamOrderConfirmation({
                       </dt>
                       <dd className="m-0 font-semibold break-words text-[var(--dream-ink)]">
                         {details.customer_email}
+                      </dd>
+                    </div>
+                  ) : null}
+                  {method === "delivery" ? (
+                    <div className="flex flex-col gap-1">
+                      <dt className="text-[var(--dream-soft)]">
+                        Delivery method
+                      </dt>
+                      <dd className="m-0 font-semibold text-[var(--dream-ink)]">
+                        {deliveryMethodLabel("delivery")}
                       </dd>
                     </div>
                   ) : null}

@@ -5,22 +5,24 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Package } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatCurrency } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { formatCurrency } from "~/lib/utils";
 import {
   isPaymentProcessing,
   PAYMENT_PROCESSING_HEADING,
   PAYMENT_PROCESSING_MESSAGE,
 } from "~/app/(storefront)/_components/checkout/payment-status";
 
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
 
 type Props = {
   business: {
@@ -85,15 +87,21 @@ const DETAILS_FETCH_TIMEOUT_MS = 10_000;
 
 /**
  * "What happens next?" bullets, keyed by the Stripe session's delivery
- * method (`session.metadata.deliveryMethod`, "ship" | "pickup" | unset).
+ * method (`session.metadata.deliveryMethod`, "ship" | "pickup" | "delivery" | unset).
  * Pickup adds an owner-authored location/instructions line beneath the
  * bullets instead of a third generic bullet — see the render below.
  */
-function nextStepsBullets(deliveryMethod: DeliveryMethod): string[] {
+function nextStepsBullets(deliveryMethod: OrderDeliveryMethod): string[] {
   if (deliveryMethod === "pickup") {
     return [
       "You'll receive an email confirmation shortly",
       "We'll let you know when your order is ready for pickup",
+    ];
+  }
+  if (deliveryMethod === "delivery") {
+    return [
+      "You'll receive an email confirmation shortly",
+      "We'll let you know when your order is out for local delivery",
     ];
   }
   if (deliveryMethod === "ship") {
@@ -122,7 +130,7 @@ export function BambooOrderConfirmation({
     amount_total: number;
     currency: string;
     payment_status: string;
-    delivery_method: DeliveryMethod;
+    delivery_method: OrderDeliveryMethod;
   } | null>(null);
   // Gates only the order-details card (email/amount), never the
   // confirmation heading itself.
@@ -159,7 +167,7 @@ export function BambooOrderConfirmation({
             amount_total: number;
             currency: string;
             payment_status: string;
-            delivery_method: DeliveryMethod;
+            delivery_method: OrderDeliveryMethod;
           };
 
           setOrderDetails(data);
@@ -192,12 +200,12 @@ export function BambooOrderConfirmation({
   if (!sessionId) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="font-serif text-foreground mb-3 text-3xl font-bold tracking-tight md:text-4xl">
+        <h1 className="text-foreground mb-3 font-serif text-3xl font-bold tracking-tight md:text-4xl">
           We couldn&apos;t find that order
         </h1>
         <p className="text-muted-foreground mb-6">
-          This page needs an order to show. If you just checked out, check
-          your email for a receipt.
+          This page needs an order to show. If you just checked out, check your
+          email for a receipt.
         </p>
         <Button
           asChild
@@ -242,7 +250,7 @@ export function BambooOrderConfirmation({
         <h1
           ref={confirmedHeadingRef}
           tabIndex={-1}
-          className="font-serif text-foreground text-3xl font-bold tracking-tight outline-none md:text-4xl lg:text-5xl"
+          className="text-foreground font-serif text-3xl font-bold tracking-tight outline-none md:text-4xl lg:text-5xl"
         >
           {processing ? PAYMENT_PROCESSING_HEADING : "Order Confirmed!"}
         </h1>
@@ -271,7 +279,7 @@ export function BambooOrderConfirmation({
               <Package className="text-primary size-5" />
             </div>
             <div className="flex-1">
-              <h2 className="font-serif text-foreground mb-3 text-2xl font-bold tracking-tight md:text-3xl">
+              <h2 className="text-foreground mb-3 font-serif text-2xl font-bold tracking-tight md:text-3xl">
                 What happens next?
               </h2>
               <ul className="text-muted-foreground space-y-2">
@@ -332,6 +340,14 @@ export function BambooOrderConfirmation({
                         orderDetails.amount_total,
                         (orderDetails.currency || "usd").toUpperCase(),
                       )}
+                    </span>
+                  </p>
+                )}
+                {orderDetails.delivery_method === "delivery" && (
+                  <p className="text-muted-foreground">
+                    Delivery method:{" "}
+                    <span className="text-foreground font-semibold">
+                      {deliveryMethodLabel("delivery")}
                     </span>
                   </p>
                 )}

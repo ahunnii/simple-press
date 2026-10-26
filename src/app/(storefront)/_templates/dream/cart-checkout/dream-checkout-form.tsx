@@ -125,6 +125,15 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
   const shippingValue =
     f.deliveryMethod === "pickup" ? (
       "Pickup (free)"
+    ) : f.deliveryMethod === "delivery" && f.shippingPending ? (
+      <span className="text-[var(--dream-soft)]">
+        {f.localDelivery.status === "checking"
+          ? "Calculating…"
+          : "Enter your ZIP"}
+      </span>
+    ) : f.deliveryMethod === "delivery" &&
+      f.localDelivery.status === "ineligible" ? (
+      <span className="text-[var(--dream-soft)]">Not available</span>
     ) : shippingCalculating ? (
       <span className="inline-flex items-center gap-1.5 text-[var(--dream-soft)]">
         <Loader2
@@ -215,8 +224,8 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
           </div>
         </fieldset>
 
-        {/* Delivery vs pickup — only when the store offers pickup */}
-        {f.shippingConfig.offersInStorePickup ? (
+        {/* Delivery method — only when the store offers more than shipping */}
+        {f.deliveryOptions.length > 1 ? (
           <fieldset className="m-0 min-w-0 border-0 border-t border-[var(--dream-line)] p-0 pt-10">
             <legend className="float-left mb-6 w-full p-0">
               <h2
@@ -228,28 +237,25 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
             </legend>
             <div className="clear-both flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
-                <label className="dream-radio-pill">
-                  <input
-                    type="radio"
-                    name="dream-delivery-method"
-                    value="ship"
-                    checked={f.deliveryMethod === "ship"}
-                    onChange={() => f.setDeliveryMethod("ship")}
-                    className="sr-only"
-                  />
-                  <span>Ship to my address</span>
-                </label>
-                <label className="dream-radio-pill">
-                  <input
-                    type="radio"
-                    name="dream-delivery-method"
-                    value="pickup"
-                    checked={f.deliveryMethod === "pickup"}
-                    onChange={() => f.setDeliveryMethod("pickup")}
-                    className="sr-only"
-                  />
-                  <span>Pick up in store</span>
-                </label>
+                {f.deliveryOptions.map((option) => (
+                  <label key={option.id} className="dream-radio-pill">
+                    <input
+                      type="radio"
+                      name="dream-delivery-method"
+                      value={option.id}
+                      checked={f.deliveryMethod === option.id}
+                      onChange={() => f.setDeliveryMethod(option.id)}
+                      className="sr-only"
+                    />
+                    <span>
+                      {option.id === "ship"
+                        ? "Ship to my address"
+                        : option.id === "pickup"
+                          ? "Pick up in store"
+                          : option.label}
+                    </span>
+                  </label>
+                ))}
               </div>
               {f.deliveryMethod === "pickup" ? (
                 <>
@@ -277,6 +283,37 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
                     </div>
                   ) : null}
                 </>
+              ) : f.deliveryMethod === "delivery" ? (
+                <>
+                  <p className={NOTE}>
+                    {f.deliveryOptions.find((o) => o.id === "delivery")
+                      ?.description ?? ""}
+                  </p>
+                  <div aria-live="polite">
+                    {f.localDelivery.status === "checking" ? (
+                      <p className={NOTE}>Checking your ZIP…</p>
+                    ) : f.localDelivery.status === "ineligible" &&
+                      f.localDelivery.message ? (
+                      <p className="text-[14px] leading-[1.6] text-[var(--dream-error)]">
+                        {f.localDelivery.message}
+                      </p>
+                    ) : f.localDelivery.status === "eligible" ? (
+                      <p className="text-[14px] leading-[1.6] text-[var(--dream-success)]">
+                        Great — we deliver to you.
+                      </p>
+                    ) : null}
+                  </div>
+                  {f.localDelivery.instructions ? (
+                    <div className="rounded-[var(--dream-radius-input)] border border-[var(--dream-line)] bg-[linear-gradient(180deg,var(--dream-sky)_0%,var(--dream-paper)_100%)] p-5 text-[15px] leading-[1.6]">
+                      <p className="font-semibold text-[var(--dream-ink)]">
+                        Delivery details
+                      </p>
+                      <p className="mt-1 whitespace-pre-line text-[var(--dream-soft)]">
+                        {f.localDelivery.instructions}
+                      </p>
+                    </div>
+                  ) : null}
+                </>
               ) : copy.shipBody ? (
                 <p className={NOTE} {...fieldAttr("dream.checkout.ship-body")}>
                   {copy.shipBody}
@@ -286,19 +323,28 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
           </fieldset>
         ) : null}
 
-        {/* Shipping address */}
-        {f.deliveryMethod === "ship" ? (
+        {/* Shipping / delivery address */}
+        {f.needsAddress ? (
           <fieldset className="m-0 min-w-0 border-0 border-t border-[var(--dream-line)] p-0 pt-10">
             <legend className="float-left mb-3 w-full p-0">
-              <h2
-                className={LEGEND_HEADING}
-                {...fieldAttr("dream.checkout.address-heading")}
-              >
-                {copy.addressHeading}
-              </h2>
+              {f.deliveryMethod === "delivery" ? (
+                <h2 className={LEGEND_HEADING}>Delivery address</h2>
+              ) : (
+                <h2
+                  className={LEGEND_HEADING}
+                  {...fieldAttr("dream.checkout.address-heading")}
+                >
+                  {copy.addressHeading}
+                </h2>
+              )}
             </legend>
             <div className="clear-both flex flex-col gap-5">
-              {copy.addressNote ? (
+              {f.deliveryMethod === "delivery" && f.addressLocked ? (
+                <p className={NOTE}>
+                  We check delivery from this address. Make changes here before
+                  continuing to payment.
+                </p>
+              ) : copy.addressNote ? (
                 <p
                   className={NOTE}
                   {...fieldAttr("dream.checkout.address-note")}
@@ -565,7 +611,9 @@ export function DreamCheckoutForm({ business, merchantPolicies }: Props) {
             </div>
           ) : null}
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-[var(--dream-soft)]">Shipping</dt>
+            <dt className="text-[var(--dream-soft)]">
+              {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+            </dt>
             <dd
               className="m-0 text-right text-[var(--dream-ink)] tabular-nums"
               aria-live="polite"

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+import {
+  localDeliveryBandSchema,
+  MAX_LOCAL_DELIVERY_BANDS,
+  parseLocalDeliveryBands,
+} from "~/lib/local-delivery-bands";
+
 export const shippingFormSchema = z
   .object({
     shippingType: z.enum([
@@ -593,5 +599,331 @@ export function deliveryReturnsFormToInput(
         : null,
     returnMethod:
       accepting && values.returnMethod !== "" ? values.returnMethod : null,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Local delivery (owner drives orders to customers within N miles of a ZIP)
+//
+// Like delivery times + returns, this is independent of the shipping mode, so it
+// has its own form schema (strings for the inputs, fee/minimum in dollars) and
+// its own wire schema for business.updateLocalDelivery (ints / cents / nulls).
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const LOCAL_DELIVERY_RADIUS_MIN = 1;
+export const LOCAL_DELIVERY_RADIUS_MAX = 100;
+export const LOCAL_DELIVERY_INSTRUCTIONS_MAX = 1000;
+const LOCAL_DELIVERY_FEE_MAX_CENTS = 1_000_000;
+
+/** What the local-delivery form holds. */
+export type LocalDeliveryFormValues = {
+  offersLocalDelivery: boolean;
+  /** "" = measure from the business address ZIP. */
+  originZip: string;
+  radiusMiles: string;
+  feeDollars: string;
+  /** Closer prices inside the radius, in the order the owner typed them. */
+  bands: LocalDeliveryBandFormRow[];
+  minOrderDollars: string;
+  instructions: string;
+};
+
+/** One "Within N miles → $X" row of the form. */
+export type LocalDeliveryBandFormRow = {
+  upToMiles: string;
+  feeDollars: string;
+};
+
+/** The Business columns the local-delivery form reads. */
+export type LocalDeliveryRow = {
+  offersLocalDelivery?: boolean | null;
+  localDeliveryOriginZip?: string | null;
+  localDeliveryRadiusMiles?: number | null;
+  localDeliveryFeeCents?: number | null;
+  /** Json column; read through `parseLocalDeliveryBands`. */
+  localDeliveryBands?: unknown;
+  localDeliveryMinOrderCents?: number | null;
+  localDeliveryInstructions?: string | null;
+};
+
+const ZIP_FIELD = /^\d{5}(?:-?\d{4})?$/;
+
+/** A non-negative dollar amount; blank is "not set". `undefined` = invalid. */
+function parseOptionalDollars(raw: string): number | null | undefined {
+  const t = raw.trim().replace(/^\$/, "");
+  if (t === "") return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return undefined;
+  return Math.round(Number.parseFloat(t) * 100);
+}
+
+/**
+ * Builds the form schema. `fallbackZip` is the business address ZIP the server
+ * measures from when the owner leaves "Deliver from ZIP" blank — turning
+ * delivery on needs one or the other.
+ */
+export function createLocalDeliveryFormSchema(fallbackZip: string | null) {
+  return z
+    .object({
+      offersLocalDelivery: z.boolean(),
+      originZip: z.string(),
+      radiusMiles: z.string(),
+      feeDollars: z.string(),
+      bands: z.array(
+        z.object({ upToMiles: z.string(), feeDollars: z.string() }),
+      ),
+      minOrderDollars: z.string(),
+      instructions: z
+        .string()
+        .max(
+          LOCAL_DELIVERY_INSTRUCTIONS_MAX,
+          `Keep this under ${LOCAL_DELIVERY_INSTRUCTIONS_MAX} characters`,
+        ),
+    })
+    .superRefine((data, ctx) => {
+      const issue = (
+        path: keyof LocalDeliveryFormValues | (string | number)[],
+        message: string,
+      ) =>
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message,
+          path: Array.isArray(path) ? path : [path],
+        });
+
+      const zip = data.originZip.trim();
+      if (zip !== "" && !ZIP_FIELD.test(zip)) {
+        issue("originZip", "Enter a 5-digit ZIP code");
+      }
+
+      if (parseOptionalDollars(data.feeDollars) === undefined) {
+        issue("feeDollars", "Enter a valid delivery fee (e.g. 5.00, or 0)");
+      }
+      if (parseOptionalDollars(data.minOrderDollars) === undefined) {
+        issue("minOrderDollars", "Enter a valid minimum order amount");
+      }
+
+      const radiusRaw = data.radiusMiles.trim();
+      if (radiusRaw !== "") {
+        const n = /^\d+$/.test(radiusRaw)
+          ? Number.parseInt(radiusRaw, 10)
+          : NaN;
+        if (
+          Number.isNaN(n) ||
+          n < LOCAL_DELIVERY_RADIUS_MIN ||
+          n > LOCAL_DELIVERY_RADIUS_MAX
+        ) {
+          issue(
+            "radiusMiles",
+            `Enter a whole number from ${LOCAL_DELIVERY_RADIUS_MIN} to ${LOCAL_DELIVERY_RADIUS_MAX} miles`,
+          );
+        }
+      }
+
+      // Closer prices: whole miles, strictly inside the radius, each used once.
+      const radiusN = /^\d+$/.test(radiusRaw)
+        ? Number.parseInt(radiusRaw, 10)
+        : NaN;
+      const radiusKnown =
+        !Number.isNaN(radiusN) &&
+        radiusN >= LOCAL_DELIVERY_RADIUS_MIN &&
+        radiusN <= LOCAL_DELIVERY_RADIUS_MAX;
+      if (data.bands.length > MAX_LOCAL_DELIVERY_BANDS) {
+        issue(
+          "bands",
+          `You can add up to ${MAX_LOCAL_DELIVERY_BANDS} closer prices.`,
+        );
+      }
+      const seenMiles = new Set<number>();
+      data.bands.forEach((band, i) => {
+        const milesRaw = band.upToMiles.trim();
+        const miles = /^\d+$/.test(milesRaw)
+          ? Number.parseInt(milesRaw, 10)
+          : NaN;
+        if (
+          Number.isNaN(miles) ||
+          miles < LOCAL_DELIVERY_RADIUS_MIN ||
+          miles > LOCAL_DELIVERY_RADIUS_MAX
+        ) {
+          issue(
+            ["bands", i, "upToMiles"],
+            `Enter a whole number from ${LOCAL_DELIVERY_RADIUS_MIN} to ${LOCAL_DELIVERY_RADIUS_MAX} miles`,
+          );
+        } else if (!radiusKnown) {
+          issue(["bands", i, "upToMiles"], "Enter your delivery radius first.");
+        } else if (miles >= radiusN) {
+          issue(
+            ["bands", i, "upToMiles"],
+            `Must be less than your ${radiusN}-mile radius.`,
+          );
+        } else if (seenMiles.has(miles)) {
+          issue(
+            ["bands", i, "upToMiles"],
+            "Each distance can only be used once.",
+          );
+        } else {
+          seenMiles.add(miles);
+        }
+
+        const fee = parseOptionalDollars(band.feeDollars);
+        if (fee === undefined || fee === null) {
+          issue(
+            ["bands", i, "feeDollars"],
+            "Enter a price (e.g. 3.00, or 0 for free)",
+          );
+        } else if (fee > LOCAL_DELIVERY_FEE_MAX_CENTS) {
+          issue(["bands", i, "feeDollars"], "That price is too high");
+        }
+      });
+
+      if (data.offersLocalDelivery) {
+        if (radiusRaw === "") {
+          issue(
+            "radiusMiles",
+            "Enter how far you deliver, from 1 to 100 miles",
+          );
+        }
+        if (zip === "" && !(fallbackZip ?? "").trim()) {
+          issue(
+            "originZip",
+            "Enter the ZIP code you deliver from (your business address has no ZIP yet)",
+          );
+        }
+      }
+    });
+}
+
+/** Wire format for business.updateLocalDelivery. */
+export const localDeliveryInputSchema = z
+  .object({
+    offersLocalDelivery: z.boolean(),
+    /** Blank/null = measure from the business address ZIP. */
+    originZip: z.string().trim().max(10).nullable(),
+    radiusMiles: z
+      .number()
+      .int()
+      .min(LOCAL_DELIVERY_RADIUS_MIN)
+      .max(LOCAL_DELIVERY_RADIUS_MAX)
+      .nullable(),
+    /** 0 = free delivery. */
+    feeCents: z.number().int().min(0).max(LOCAL_DELIVERY_FEE_MAX_CENTS),
+    /**
+     * Closer prices inside the radius (see `~/lib/local-delivery-bands`).
+     * Each distance is strictly less than the radius and used once; stored
+     * nearest first.
+     */
+    bands: z
+      .array(
+        localDeliveryBandSchema.extend({
+          feeCents: z.number().int().min(0).max(LOCAL_DELIVERY_FEE_MAX_CENTS),
+        }),
+      )
+      .max(
+        MAX_LOCAL_DELIVERY_BANDS,
+        `You can add up to ${MAX_LOCAL_DELIVERY_BANDS} closer prices.`,
+      )
+      .default([]),
+    minOrderCents: z.number().int().min(0).max(100_000_000).nullable(),
+    instructions: z
+      .string()
+      .trim()
+      .max(LOCAL_DELIVERY_INSTRUCTIONS_MAX)
+      .nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.offersLocalDelivery && data.radiusMiles === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter how far you deliver, from 1 to 100 miles",
+        path: ["radiusMiles"],
+      });
+    }
+    const seen = new Set<number>();
+    data.bands.forEach((band, i) => {
+      if (data.radiusMiles === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Enter your delivery radius first.",
+          path: ["bands", i, "upToMiles"],
+        });
+      } else if (band.upToMiles >= data.radiusMiles) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Must be less than your ${data.radiusMiles}-mile radius.`,
+          path: ["bands", i, "upToMiles"],
+        });
+      } else if (seen.has(band.upToMiles)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Each distance can only be used once.",
+          path: ["bands", i, "upToMiles"],
+        });
+      }
+      seen.add(band.upToMiles);
+    });
+  })
+  .transform((data) => ({
+    ...data,
+    bands: [...data.bands].sort((a, b) => a.upToMiles - b.upToMiles),
+  }));
+
+export type LocalDeliveryInput = z.infer<typeof localDeliveryInputSchema>;
+
+/** DB row → form defaults. */
+export function localDeliveryFormDefaults(
+  row: LocalDeliveryRow,
+): LocalDeliveryFormValues {
+  const cents = (c: number | null | undefined) =>
+    c === null || c === undefined ? "" : (c / 100).toFixed(2);
+  return {
+    offersLocalDelivery: row.offersLocalDelivery ?? false,
+    originZip: row.localDeliveryOriginZip ?? "",
+    radiusMiles:
+      row.localDeliveryRadiusMiles === null ||
+      row.localDeliveryRadiusMiles === undefined
+        ? ""
+        : String(row.localDeliveryRadiusMiles),
+    // A configured fee of 0 shows as "0.00" so "free" is a visible choice;
+    // nothing configured yet starts blank (read as free on save).
+    feeDollars:
+      row.localDeliveryFeeCents && row.localDeliveryFeeCents > 0
+        ? cents(row.localDeliveryFeeCents)
+        : row.offersLocalDelivery
+          ? "0.00"
+          : "",
+    bands: parseLocalDeliveryBands(
+      row.localDeliveryBands,
+      row.localDeliveryRadiusMiles ?? null,
+    ).map((b) => ({
+      upToMiles: String(b.upToMiles),
+      feeDollars: cents(b.feeCents),
+    })),
+    minOrderDollars: cents(row.localDeliveryMinOrderCents),
+    instructions: row.localDeliveryInstructions ?? "",
+  };
+}
+
+/**
+ * Validated form values → wire input. Only call with values that passed
+ * `createLocalDeliveryFormSchema`.
+ */
+export function localDeliveryFormToInput(
+  values: LocalDeliveryFormValues,
+): LocalDeliveryInput {
+  const radius = values.radiusMiles.trim();
+  const zip = values.originZip.trim();
+  const instructions = values.instructions.trim();
+  return {
+    offersLocalDelivery: values.offersLocalDelivery,
+    originZip: zip === "" ? null : zip,
+    radiusMiles: radius === "" ? null : Number.parseInt(radius, 10),
+    feeCents: parseOptionalDollars(values.feeDollars) ?? 0,
+    bands: values.bands
+      .map((b) => ({
+        upToMiles: Number.parseInt(b.upToMiles.trim(), 10),
+        feeCents: parseOptionalDollars(b.feeDollars) ?? 0,
+      }))
+      .sort((a, b) => a.upToMiles - b.upToMiles),
+    minOrderCents: parseOptionalDollars(values.minOrderDollars) ?? null,
+    instructions: instructions === "" ? null : instructions,
   };
 }

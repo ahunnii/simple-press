@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { cn } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
@@ -20,7 +22,14 @@ import { ViiOverline } from "../shared/vii-overline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
+
+/**
+ * The shipping and fallback lists promise the order "ships" — a driven local
+ * delivery has no carrier, so those orders get their own plain steps.
+ */
+const LOCAL_DELIVERY_STEPS =
+  "You'll receive an email confirmation shortly.\nWe'll be in touch about your delivery.";
 
 type Business = {
   id: string;
@@ -38,7 +47,7 @@ type OrderDetails = {
   amount_total: number;
   currency: string;
   payment_status: string;
-  delivery_method?: DeliveryMethod;
+  delivery_method?: OrderDeliveryMethod;
 };
 
 type Props = {
@@ -106,7 +115,7 @@ function useOrderAccountCta(
  * an order placed before this metadata existed).
  */
 function resolveNextSteps(
-  deliveryMethod: DeliveryMethod | undefined,
+  deliveryMethod: OrderDeliveryMethod | undefined,
   nextSteps: string,
   nextStepsShip: string,
   nextStepsPickup: string,
@@ -114,6 +123,7 @@ function resolveNextSteps(
   if (deliveryMethod === "pickup" && nextStepsPickup.trim()) {
     return nextStepsPickup;
   }
+  if (deliveryMethod === "delivery") return LOCAL_DELIVERY_STEPS;
   if (deliveryMethod === "ship" && nextStepsShip.trim()) {
     return nextStepsShip;
   }
@@ -396,7 +406,12 @@ export function ViiOrderConfirmation({
 
   // PF22 — split the delivery-method-specific next-steps copy into lines.
   const nextStepsLines = (
-    resolveNextSteps(deliveryMethod, nextSteps, nextStepsShip, nextStepsPickup) ||
+    resolveNextSteps(
+      deliveryMethod,
+      nextSteps,
+      nextStepsShip,
+      nextStepsPickup,
+    ) ||
     "You'll receive an email confirmation shortly.\nWe'll notify you as soon as your order ships.\nTrack your order status via your confirmation email."
   )
     .split("\n")
@@ -563,7 +578,9 @@ export function ViiOrderConfirmation({
           )}
 
           {/* Order details — email + total */}
-          {(orderDetails?.customer_email ?? formattedTotal) && (
+          {(orderDetails?.customer_email ??
+            formattedTotal ??
+            deliveryMethod === "delivery") && (
             <div
               className="vii-reveal-item"
               style={
@@ -612,6 +629,24 @@ export function ViiOrderConfirmation({
                   Order total:{" "}
                   <strong style={{ fontWeight: 500, opacity: 1 }}>
                     {formattedTotal}
+                  </strong>
+                </p>
+              )}
+              {deliveryMethod === "delivery" && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "var(--vii-paper)",
+                    opacity: 0.85,
+                    margin: 0,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Delivery:{" "}
+                  <strong style={{ fontWeight: 500, opacity: 1 }}>
+                    {deliveryMethodLabel("delivery")}
                   </strong>
                 </p>
               )}

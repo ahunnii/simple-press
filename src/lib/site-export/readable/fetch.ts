@@ -2,18 +2,6 @@
  * Read-only database queries for the readable documents. Maps Prisma rows
  * onto the plain input types in `./types` — nothing here renders HTML.
  */
-import type { GalleryMap } from "~/lib/wordpress/tiptap-to-html";
-import {
-  isPictureChoiceField,
-  parseStoredFormDefinition,
-} from "~/lib/validators/form";
-import { db } from "~/server/db";
-import {
-  getFieldRegistry,
-  getServiceFieldInfo,
-  resolveThemeLabels,
-  templateLabel,
-} from "./registry";
 import type {
   CollectionInput,
   EventInput,
@@ -27,6 +15,20 @@ import type {
   SiteDetailsInput,
   TestimonialInput,
 } from "./types";
+import type { GalleryMap } from "~/lib/wordpress/tiptap-to-html";
+import { parseLocalDeliveryBands } from "~/lib/local-delivery-bands";
+import {
+  isPictureChoiceField,
+  parseStoredFormDefinition,
+} from "~/lib/validators/form";
+import { db } from "~/server/db";
+
+import {
+  getFieldRegistry,
+  getServiceFieldInfo,
+  resolveThemeLabels,
+  templateLabel,
+} from "./registry";
 
 export interface ReadableData {
   pages: PageInput[];
@@ -88,6 +90,14 @@ export async function fetchReadableData(
         offersInStorePickup: true,
         pickupLocation: true,
         pickupInstructions: true,
+        offersLocalDelivery: true,
+        localDeliveryOriginZip: true,
+        localDeliveryRadiusMiles: true,
+        localDeliveryFeeCents: true,
+        localDeliveryBands: true,
+        localDeliveryMinOrderCents: true,
+        localDeliveryInstructions: true,
+        addressPostalCode: true,
       },
     }),
     db.siteContent.findUnique({ where: { businessId } }),
@@ -339,6 +349,17 @@ export async function fetchReadableData(
       offersInStorePickup: business.offersInStorePickup,
       pickupLocation: business.pickupLocation,
       pickupInstructions: business.pickupInstructions,
+      offersLocalDelivery: business.offersLocalDelivery,
+      localDeliveryOriginZip: business.localDeliveryOriginZip,
+      localDeliveryRadiusMiles: business.localDeliveryRadiusMiles,
+      localDeliveryFeeCents: business.localDeliveryFeeCents,
+      localDeliveryBands: parseLocalDeliveryBands(
+        business.localDeliveryBands,
+        business.localDeliveryRadiusMiles,
+      ),
+      localDeliveryMinOrderCents: business.localDeliveryMinOrderCents,
+      localDeliveryInstructions: business.localDeliveryInstructions,
+      addressPostalCode: business.addressPostalCode,
       siteContent: siteContent
         ? {
             heroTitle: siteContent.heroTitle,

@@ -108,6 +108,16 @@ const exportedBusinessSchema = z.object({
   offersInStorePickup: z.boolean(),
   pickupLocation: nullableString.optional(),
   pickupInstructions: nullableString.optional(),
+  // Local delivery. Added 2026-10-26 — absent in older manifests.
+  offersLocalDelivery: z.boolean().optional(),
+  localDeliveryOriginZip: nullableString.optional(),
+  localDeliveryRadiusMiles: nullableNumber.optional(),
+  localDeliveryFeeCents: z.number().int().min(0).optional(),
+  // Closer prices inside the radius. Added with distance bands — absent in
+  // older manifests; sanitized on import (parseLocalDeliveryBands).
+  localDeliveryBands: z.unknown().optional(),
+  localDeliveryMinOrderCents: nullableNumber.optional(),
+  localDeliveryInstructions: nullableString.optional(),
   originState: nullableString.optional(),
   shippingWeightTiers: z.unknown(),
   businessHours: z.unknown(),

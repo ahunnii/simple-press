@@ -12,7 +12,6 @@ import {
   listItemAttr,
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -90,6 +89,10 @@ export function NoiseCheckoutForm({
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
@@ -317,19 +320,19 @@ export function NoiseCheckoutForm({
         )}
 
         {/* Delivery method */}
-        {shippingConfig.offersInStorePickup && (
+        {deliveryOptions.length > 1 && (
           <fieldset className="flex flex-col gap-4">
             <SectionHead>Delivery</SectionHead>
             <div className="flex flex-wrap gap-2">
-              {(["ship", "pickup"] as const).map((method) => (
+              {deliveryOptions.map((option) => (
                 <button
-                  key={method}
+                  key={option.id}
                   type="button"
-                  aria-pressed={deliveryMethod === method}
-                  onClick={() => setDeliveryMethod(method)}
+                  aria-pressed={deliveryMethod === option.id}
+                  onClick={() => setDeliveryMethod(option.id)}
                   className="vn-stamp text-[10px] transition-all"
                   style={
-                    deliveryMethod === method
+                    deliveryMethod === option.id
                       ? {
                           background: "var(--vn-ink)",
                           color: "var(--vn-bone)",
@@ -338,7 +341,7 @@ export function NoiseCheckoutForm({
                       : {}
                   }
                 >
-                  {method === "ship" ? "Ship to address" : "Pickup"}
+                  {option.label}
                 </button>
               ))}
             </div>
@@ -346,9 +349,8 @@ export function NoiseCheckoutForm({
               className="font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              {deliveryMethod === "pickup"
-                ? "No shipping charge — contact us for pick-up details."
-                : "Shipping cost based on your store's settings."}
+              {deliveryOptions.find((o) => o.id === deliveryMethod)
+                ?.description ?? ""}
             </p>
             {deliveryMethod === "pickup" && (
               <div
@@ -379,19 +381,69 @@ export function NoiseCheckoutForm({
                 ) : null}
               </div>
             )}
+            {deliveryMethod === "delivery" && (
+              <>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "font-mono text-[9.5px] tracking-[0.14em] uppercase",
+                    localDelivery.status === "ineligible" && "text-destructive",
+                  )}
+                  style={
+                    localDelivery.status === "ineligible"
+                      ? undefined
+                      : { color: "var(--vn-steel-mist)" }
+                  }
+                >
+                  {localDelivery.status === "checking"
+                    ? "Checking your ZIP…"
+                    : localDelivery.status === "ineligible"
+                      ? localDelivery.message
+                      : localDelivery.status === "eligible"
+                        ? "Great — we deliver to you."
+                        : null}
+                </p>
+                {localDelivery.instructions ? (
+                  <div
+                    className="flex flex-col gap-1 border p-3"
+                    style={{ borderColor: "var(--vn-rule)" }}
+                  >
+                    <p
+                      className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
+                      style={{ color: "var(--vn-steel)" }}
+                    >
+                      Delivery details
+                    </p>
+                    <p
+                      className="font-sans text-sm whitespace-pre-line"
+                      style={{ color: "var(--vn-steel-mist)" }}
+                    >
+                      {localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </fieldset>
         )}
 
-        {/* Shipping address */}
-        {deliveryMethod === "ship" && (
+        {/* Shipping / delivery address */}
+        {needsAddress && (
           <fieldset className="flex flex-col gap-5">
-            <SectionHead>Shipping address</SectionHead>
+            <SectionHead>
+              {deliveryMethod === "delivery"
+                ? "Delivery address"
+                : "Shipping address"}
+            </SectionHead>
             <p
               className="-mt-2 font-mono text-[9.5px] tracking-[0.14em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
             >
-              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {addressLocked
+                ? deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
 
@@ -433,7 +485,7 @@ export function NoiseCheckoutForm({
                 value={addressLine1}
                 onChange={(e) => setAddressLine1(e.target.value)}
                 placeholder="Street address, P.O. box"
-                required={deliveryMethod === "ship"}
+                required={needsAddress}
                 aria-required="true"
                 aria-invalid={
                   submitAttempted && !addressLine1.trim() ? true : undefined
@@ -476,7 +528,7 @@ export function NoiseCheckoutForm({
                   autoComplete="shipping address-level2"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   placeholder="City"
                   aria-required="true"
                   aria-invalid={
@@ -535,7 +587,7 @@ export function NoiseCheckoutForm({
                   placeholder="ZIP / postal code"
                   value={postalCode}
                   onChange={(e) => setPostalCode(e.target.value)}
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !postalCode.trim() ? true : undefined
@@ -587,6 +639,10 @@ export function NoiseCheckoutForm({
             shipping={shipping}
             shippingPending={shippingPending}
             shippingCalculating={shippingCalculating}
+            deliveryUnavailable={
+              deliveryMethod === "delivery" &&
+              localDelivery.status === "ineligible"
+            }
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">

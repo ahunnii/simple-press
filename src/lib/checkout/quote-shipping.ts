@@ -51,6 +51,7 @@ export interface QuoteShippingCentsInput {
   items: readonly ShippingQuoteItem[];
   destinationState: string;
   destinationCountry: string;
+  /** Local delivery is priced by `~/lib/local-delivery`, never here. */
   deliveryMethod: "ship" | "pickup";
   /**
    * `route:` tag attached to any zone+weight fallback report, so a store whose
@@ -61,42 +62,20 @@ export interface QuoteShippingCentsInput {
   source: ZoneWeightFallbackSource;
 }
 
-export async function quoteShippingCents(
+/**
+ * Server prices (and weights) for a set of cart lines, plus the subtotal those
+ * prices add up to. Drafts and other stores' products contribute 0 — they are
+ * not purchasable (checkout rejects them in `validate-cart`).
+ *
+ * Base catalog prices only: product-customizer add-ons are priced by the
+ * checkout route (`priceConfiguration`), not here, so this can read LOW for a
+ * configured line. Callers that gate on it must treat it as a preview.
+ */
+async function loadCartPricing(
   db: DbClient,
-  input: QuoteShippingCentsInput,
-): Promise<number> {
-  const {
-    businessId,
-    items,
-    destinationState,
-    destinationCountry,
-    deliveryMethod,
-    source,
-  } = input;
-
-  // Pickup is always free.
-  if (deliveryMethod === "pickup") {
-    return 0;
-  }
-
-  // Fetch the full business row so we have shipping fields.
-  const businessData = await db.business.findUnique({
-    where: { id: businessId },
-    select: {
-      shippingType: true,
-      shippingFlatRate: true,
-      freeShippingThreshold: true,
-      offersInStorePickup: true,
-      shippingWeightTiers: true,
-      shippingFallbackRate: true,
-      shippingDefaultItemWeightLb: true,
-    },
-  });
-
-  if (!businessData) {
-    throw new ShippingQuoteBusinessNotFoundError(businessId);
-  }
-
+  businessId: string,
+  items: readonly ShippingQuoteItem[],
+) {
   // Collect product and variant ids.
   const variantIds = [
     ...new Set(
@@ -157,6 +136,65 @@ export async function quoteShippingCents(
       : (productMap.get(item.productId)?.price ?? 0);
     subtotalCents += price * item.quantity;
   }
+
+  return { variantMap, productMap, subtotalCents };
+}
+
+/**
+ * Pre-discount cart subtotal from server-side prices — the same figure
+ * `quoteShippingCents` prices free-shipping thresholds against. See
+ * `loadCartPricing` for the customizer caveat.
+ */
+export async function computeCartSubtotalCents(
+  db: DbClient,
+  businessId: string,
+  items: readonly ShippingQuoteItem[],
+): Promise<number> {
+  const { subtotalCents } = await loadCartPricing(db, businessId, items);
+  return subtotalCents;
+}
+
+export async function quoteShippingCents(
+  db: DbClient,
+  input: QuoteShippingCentsInput,
+): Promise<number> {
+  const {
+    businessId,
+    items,
+    destinationState,
+    destinationCountry,
+    deliveryMethod,
+    source,
+  } = input;
+
+  // Pickup is always free.
+  if (deliveryMethod === "pickup") {
+    return 0;
+  }
+
+  // Fetch the full business row so we have shipping fields.
+  const businessData = await db.business.findUnique({
+    where: { id: businessId },
+    select: {
+      shippingType: true,
+      shippingFlatRate: true,
+      freeShippingThreshold: true,
+      offersInStorePickup: true,
+      shippingWeightTiers: true,
+      shippingFallbackRate: true,
+      shippingDefaultItemWeightLb: true,
+    },
+  });
+
+  if (!businessData) {
+    throw new ShippingQuoteBusinessNotFoundError(businessId);
+  }
+
+  const { variantMap, productMap, subtotalCents } = await loadCartPricing(
+    db,
+    businessId,
+    items,
+  );
 
   // Compute total weight in pounds.
   const defaultItemWeightLb = businessData.shippingDefaultItemWeightLb ?? 0;

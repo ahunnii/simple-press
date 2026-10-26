@@ -153,6 +153,14 @@ export const quoteZipLookupLimiter = makeLazy({
   keyPrefix: "rl:quote-zip",
 });
 
+// 30 local-delivery eligibility checks per minute per IP (debounced on ZIP /
+// cart edits at checkout), keyed ip:host
+export const localDeliveryCheckLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:local-delivery",
+});
+
 // 30 live-estimate previews per minute per IP (keystroke-adjacent, no captcha), keyed ip:host
 export const quoteLivePreviewLimiter = makeLazy({
   points: 30,

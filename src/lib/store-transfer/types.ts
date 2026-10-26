@@ -133,6 +133,15 @@ export interface ExportedBusiness {
   offersInStorePickup: boolean;
   pickupLocation: string | null;
   pickupInstructions: string | null;
+  // Local delivery. Added 2026-10-26 — absent in older manifests.
+  offersLocalDelivery?: boolean;
+  localDeliveryOriginZip?: string | null;
+  localDeliveryRadiusMiles?: number | null;
+  localDeliveryFeeCents?: number;
+  /** Closer prices inside the radius: `{ upToMiles, feeCents }[]` or null. */
+  localDeliveryBands?: unknown;
+  localDeliveryMinOrderCents?: number | null;
+  localDeliveryInstructions?: string | null;
   originState: string | null;
   shippingWeightTiers: unknown; // WeightTier[]
   businessHours: unknown; // BusinessHoursRow[]

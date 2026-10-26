@@ -7,7 +7,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { fieldAttr } from "~/lib/preview/section-attrs";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
@@ -124,10 +123,9 @@ export function GloveCheckoutForm({
   // A live rate is loading once a destination is entered but unquoted.
   const shippingCalculating =
     deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
-  // Zone + weight stores lock the address into the payment step (it prices
-  // shipping), so the helper copy has to say so.
-  const isZoneWeightShipping =
-    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
+  // Zone + weight shipping and local delivery lock the address into the
+  // payment step (it prices / checks the order), so the helper copy says so.
+  const { addressLocked, localDelivery } = form;
 
   const invalid = (isEmpty: boolean) =>
     submitAttempted && isEmpty ? true : undefined;
@@ -206,8 +204,8 @@ export function GloveCheckoutForm({
           </div>
         </section>
 
-        {/* ── Delivery method (only when the store offers pickup) ───── */}
-        {shippingConfig.offersInStorePickup ? (
+        {/* ── Delivery method (only when the store offers more than shipping) ─ */}
+        {form.deliveryOptions.length > 1 ? (
           <section>
             <h2
               id="glove-co-delivery-heading"
@@ -219,19 +217,17 @@ export function GloveCheckoutForm({
             <div
               role="radiogroup"
               aria-labelledby="glove-co-delivery-heading"
-              className="mt-4 grid gap-3 sm:grid-cols-2"
+              className={cn(
+                "mt-4 grid gap-3 sm:grid-cols-2",
+                form.deliveryOptions.length > 2 && "lg:grid-cols-3",
+              )}
             >
-              {(
-                [
-                  { value: "ship", label: "Ship to address" },
-                  { value: "pickup", label: "In-store pickup" },
-                ] as const
-              ).map((option) => (
+              {form.deliveryOptions.map((option) => (
                 <label
-                  key={option.value}
+                  key={option.id}
                   className={cn(
                     "glove-body flex min-h-11 cursor-pointer items-center gap-3 rounded-[var(--glove-radius-card)] border px-4 py-3 text-[15px] font-bold text-[var(--glove-ink)] transition-colors",
-                    deliveryMethod === option.value
+                    deliveryMethod === option.id
                       ? "border-[var(--glove-primary)] bg-[var(--glove-mist)]"
                       : "border-[var(--glove-line)] hover:border-[var(--glove-muted)]",
                   )}
@@ -239,9 +235,9 @@ export function GloveCheckoutForm({
                   <input
                     type="radio"
                     name="glove-co-delivery"
-                    value={option.value}
-                    checked={deliveryMethod === option.value}
-                    onChange={() => form.setDeliveryMethod(option.value)}
+                    value={option.id}
+                    checked={deliveryMethod === option.id}
+                    onChange={() => form.setDeliveryMethod(option.id)}
                     className="size-4 accent-[var(--glove-primary)]"
                   />
                   {option.label}
@@ -249,9 +245,8 @@ export function GloveCheckoutForm({
               ))}
             </div>
             <p className="mt-3 text-[14px] text-[var(--glove-muted)]">
-              {deliveryMethod === "pickup"
-                ? "No shipping charge. You'll pick up your order at the store."
-                : "Shipping cost is based on the store's shipping settings."}
+              {form.deliveryOptions.find((o) => o.id === deliveryMethod)
+                ?.description ?? ""}
             </p>
             {deliveryMethod === "pickup" ? (
               <div className="mt-3 rounded-[var(--glove-radius-card)] border border-[var(--glove-mist-line)] bg-[var(--glove-mist)] p-4 text-[14px]">
@@ -270,22 +265,60 @@ export function GloveCheckoutForm({
                 ) : null}
               </div>
             ) : null}
+            {deliveryMethod === "delivery" ? (
+              <>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "mt-3 text-[14px]",
+                    localDelivery.status === "ineligible"
+                      ? "glove-error"
+                      : "text-[var(--glove-muted)]",
+                  )}
+                >
+                  {localDelivery.status === "checking"
+                    ? "Checking your ZIP…"
+                    : localDelivery.status === "ineligible"
+                      ? localDelivery.message
+                      : localDelivery.status === "eligible"
+                        ? "Great — we deliver to you."
+                        : null}
+                </p>
+                {localDelivery.instructions ? (
+                  <div className="mt-3 rounded-[var(--glove-radius-card)] border border-[var(--glove-mist-line)] bg-[var(--glove-mist)] p-4 text-[14px]">
+                    <p className="font-bold text-[var(--glove-ink)]">
+                      Delivery details
+                    </p>
+                    <p className="mt-1 whitespace-pre-line text-[var(--glove-text)]">
+                      {localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
           </section>
         ) : null}
 
         {/* ── Shipping address ──────────────────────────────────────── */}
-        {deliveryMethod === "ship" ? (
+        {form.needsAddress ? (
           <section aria-labelledby="glove-co-shipping-heading">
             <h2
               id="glove-co-shipping-heading"
               className={SECTION_HEADING}
-              {...fieldAttr("glove.checkout.shipping-heading")}
+              {...(deliveryMethod === "delivery"
+                ? {}
+                : fieldAttr("glove.checkout.shipping-heading"))}
             >
-              {shippingHeading}
+              {deliveryMethod === "delivery"
+                ? "Delivery address"
+                : shippingHeading}
             </h2>
             <p className="mt-2 text-[14px] text-[var(--glove-muted)]">
-              {isZoneWeightShipping
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {addressLocked
+                ? deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "You can confirm or edit your name, phone and address again on the payment page."}
             </p>
             <SavedAddressPicker
@@ -416,6 +449,10 @@ export function GloveCheckoutForm({
           shipping={form.shipping}
           shippingPending={shippingPending}
           shippingCalculating={shippingCalculating}
+          deliveryUnavailable={
+            deliveryMethod === "delivery" &&
+            localDelivery.status === "ineligible"
+          }
         />
 
         {/* Promo code: a collapsed disclosure under the totals, not a form section. */}
