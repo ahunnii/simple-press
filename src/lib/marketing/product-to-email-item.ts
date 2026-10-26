@@ -1,3 +1,4 @@
+import { primaryPhoto } from "~/lib/products/media";
 import type { EmailProductItem } from "~/lib/tiptap/email-products-node";
 import {
   resolveVariantCompareAtPrice,
@@ -18,7 +19,7 @@ export interface PickerProduct {
   price: number;
   compareAtPrice: number | null;
   variants: { price: number | null; compareAtPrice: number | null }[];
-  images: { url: string }[];
+  images: { url: string; mediaType?: "IMAGE" | "VIDEO" | null }[];
 }
 
 /**
@@ -58,7 +59,7 @@ export function productToEmailItem(product: PickerProduct): EmailProductItem {
   return {
     productId: product.id,
     name: product.name,
-    imageUrl: product.images[0]?.url ?? null,
+    imageUrl: primaryPhoto(product.images)?.url ?? null,
     priceCents: roundedPrice,
     compareAtCents:
       roundedCompareAt !== null && roundedCompareAt > roundedPrice

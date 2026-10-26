@@ -1139,6 +1139,11 @@ export async function importStoreBundle(args: {
               width: img.width ?? null,
               height: img.height ?? null,
               sortOrder: img.sortOrder,
+              // Older exports have neither field: photo, no poster.
+              mediaType: img.mediaType ?? "IMAGE",
+              posterUrl: img.posterUrl
+                ? rewriteUrl(img.posterUrl, urlMap)
+                : null,
             },
           });
         }

@@ -5,6 +5,7 @@ import {
   HEX_COLOR_RE,
   MAX_COLOR_SWATCHES,
 } from "~/lib/products/color-swatches";
+import { isVideoMedia, MAX_PRODUCT_VIDEOS } from "~/lib/products/media";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -56,7 +57,66 @@ export const productImageSchema = z.object({
   url: z.string().url("Enter a valid image URL"),
   altText: z.string().optional().nullable(),
   sortOrder: z.number().int("Sort order must be a whole number"),
+  // Photos and videos share one gallery; absent = photo (back-compat for
+  // callers that predate videos).
+  mediaType: z.enum(["IMAGE", "VIDEO"]).default("IMAGE"),
+  // Still frame for VIDEO rows (an uploaded image URL); unused for photos.
+  posterUrl: z.string().url("Enter a valid poster URL").nullish(),
 });
+
+/**
+ * List-level gallery rules, shared by the product form and `product.syncImages`.
+ * Photo-only lists only ever hit the total-count check, same as before videos.
+ */
+export function refineProductMedia(
+  items: readonly {
+    url: string;
+    sortOrder: number;
+    mediaType?: "IMAGE" | "VIDEO" | null;
+  }[],
+  ctx: z.RefinementCtx,
+): void {
+  if (items.length > MAX_PRODUCT_IMAGES) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `A product can have at most ${MAX_PRODUCT_IMAGES} images`,
+    });
+  }
+
+  const videoCount = items.filter(isVideoMedia).length;
+  if (videoCount === 0) return;
+
+  if (videoCount > MAX_PRODUCT_VIDEOS) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `A product can have at most ${MAX_PRODUCT_VIDEOS} videos`,
+    });
+  }
+  if (videoCount === items.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Add a photo before adding videos.",
+    });
+    return;
+  }
+
+  // Lowest sortOrder (first in array order on ties) is the card/checkout image.
+  const first = items.reduce((lowest, item) =>
+    item.sortOrder < lowest.sortOrder ? item : lowest,
+  );
+  if (isVideoMedia(first)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        "The first item must be a photo — it's what shows on product cards and at checkout.",
+    });
+  }
+}
+
+/** A product's whole gallery: photo/video list with the cross-item rules applied. */
+export const productImagesListSchema = z
+  .array(productImageSchema)
+  .superRefine(refineProductMedia);
 
 function hasValidComparePrice(data: {
   price: number;
@@ -167,7 +227,7 @@ const productFormObjectSchema = z.object({
     .nullable()
     .optional(),
   variants: z.array(variantSchema).optional(),
-  images: z.array(productImageSchema).optional(),
+  images: productImagesListSchema.optional(),
   additionalFields: additionalFieldsSchema,
   metaTitle: z
     .string()

@@ -29,6 +29,7 @@ import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { isValidGtin, normalizeGtin } from "~/lib/gtin";
 import { getEffectivePrice } from "~/lib/prices";
+import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { productDescriptionToPlainText } from "~/lib/product-description";
 import { firstNonBlank } from "~/lib/seo/blank";
 import {
@@ -75,6 +76,11 @@ interface BusinessForWebSite extends CanonicalBusiness {
 interface ProductImage {
   url: string;
   altText?: string | null;
+  /** "IMAGE" | "VIDEO"; absent means a photo. */
+  mediaType?: "IMAGE" | "VIDEO" | null;
+  /** Still frame for VIDEO rows. */
+  posterUrl?: string | null;
+  createdAt?: Date | string | null;
 }
 
 interface ProductVariant {
@@ -267,12 +273,57 @@ export type BuildProductSchemaOptions = {
   };
 };
 
+/** Truncate at a word boundary for a VideoObject description. */
+function truncateForVideoDescription(text: string, max = 300): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/**
+ * VideoObject entries for a product's gallery videos. A video is only listed
+ * when it has an absolute poster (thumbnailUrl), an absolute content URL and a
+ * real upload date — never invented.
+ */
+function buildProductVideoObjects(
+  product: ProductForSchema,
+  plainDescription: string | undefined,
+): Record<string, unknown>[] {
+  const videos = product.images.filter((i) => isVideoMedia(i));
+  const out: Record<string, unknown>[] = [];
+  videos.forEach((video, index) => {
+    const thumbnailUrl = toAbsoluteUrl(video.posterUrl);
+    const contentUrl = toAbsoluteUrl(video.url);
+    if (!thumbnailUrl || !contentUrl || !video.createdAt) return;
+    const uploaded = new Date(video.createdAt);
+    if (Number.isNaN(uploaded.getTime())) return;
+    const name =
+      videos.length > 1 ? `${product.name} video ${index + 1}` : product.name;
+    out.push({
+      "@type": "VideoObject",
+      name,
+      description:
+        nonBlank(video.altText) ??
+        (plainDescription
+          ? truncateForVideoDescription(plainDescription)
+          : name),
+      thumbnailUrl,
+      contentUrl,
+      uploadDate: uploaded.toISOString(),
+    });
+  });
+  return out;
+}
+
 /**
  * Build a schema.org Product object for a product detail page.
  *
  * Includes:
  * - name, description, sku, brand
- * - image (every product image, absolute URLs, as an array)
+ * - image (every product photo, absolute URLs, as an array; videos excluded)
+ * - subjectOf — a VideoObject per gallery video that has a poster frame and
+ *   an upload date (omitted otherwise: Google requires both)
  * - offers — a single Offer (price/priceCurrency/availability/url) for a
  *   product with 0-1 variants or with ≥2 variants all priced the same; an
  *   AggregateOffer (lowPrice/highPrice/offerCount) when ≥2 variants have
@@ -290,7 +341,7 @@ export function buildProductSchema(
 ): Record<string, unknown> {
   const includeReviews = options.includeReviews ?? true;
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
-  const images = product.images
+  const images = photosOnly(product.images)
     .map((i) => toAbsoluteUrl(i.url))
     .filter((url): url is string => Boolean(url));
 
@@ -386,6 +437,11 @@ export function buildProductSchema(
 
   if (images.length > 0) {
     schema.image = images;
+  }
+
+  const videoObjects = buildProductVideoObjects(product, description);
+  if (videoObjects.length > 0) {
+    schema.subjectOf = videoObjects;
   }
 
   // AggregateRating is only valid when reviewCount > 0
@@ -639,7 +695,7 @@ export function buildCollectionSchema(
           name: cp.product.name,
           url: getCanonicalUrl(business, `/shop/${cp.product.slug}`),
         };
-        const image = toAbsoluteUrl(cp.product.images[0]?.url);
+        const image = toAbsoluteUrl(primaryPhoto(cp.product.images)?.url);
         if (image) {
           item.image = image;
         }

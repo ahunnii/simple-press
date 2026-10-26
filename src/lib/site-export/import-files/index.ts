@@ -16,6 +16,7 @@ import type {
   ExportProductOption,
   ExportProductVariant,
 } from "./types";
+import { photosOnly, videosOnly } from "~/lib/products/media";
 import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,
@@ -112,10 +113,11 @@ async function loadProducts(
       allowBackorders: p.allowBackorders,
       weight: p.weight,
       weightUnit: p.weightUnit === "kg" ? "kg" : "lb",
-      images: p.images.map((img) => ({
+      images: photosOnly(p.images).map((img) => ({
         url: absoluteUrl(img.url, siteUrl),
         altText: img.altText,
       })),
+      videoCount: videosOnly(p.images).length,
       collections: p.collectionProducts.map((cp) => cp.collection.name),
       variants,
     };
@@ -150,11 +152,20 @@ export async function buildImportFiles(
   const square = buildSquareItemsCsv(products);
 
   const hidden = products.filter((p) => !p.published).length;
+  const withVideos = products.filter((p) => (p.videoCount ?? 0) > 0).length;
   const notes: SiteExportNote[] = [
     {
       level: "info",
       message: `Product import files list ${products.length} product(s)${hidden > 0 ? `, ${hidden} of them hidden or draft (imported hidden)` : ""}. Images in these files link to your live site's photos, so import before your old site goes offline.`,
     },
+    ...(withVideos > 0
+      ? [
+          {
+            level: "info" as const,
+            message: `${withVideos} product(s) have videos. These import files only carry photos; the product videos are in the Videos folder (inside Photos) and can be added by hand on the new platform.`,
+          },
+        ]
+      : []),
     ...shopify.notes.map((n) => ({ ...n, message: `Shopify: ${n.message}` })),
     ...wix.notes.map((n) => ({ ...n, message: `Wix: ${n.message}` })),
     ...squarespace.notes.map((n) => ({

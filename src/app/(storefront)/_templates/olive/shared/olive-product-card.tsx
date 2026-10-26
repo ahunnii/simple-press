@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import type { OliveCartAddedDetail } from "../layout/olive-toast";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { photosOnly } from "~/lib/products/media";
 import {
   readColorSwatches,
   swatchOverrideFor,
@@ -310,8 +311,10 @@ export function OliveProductCard({
           ? "New"
           : null;
 
-  const primaryImage = product.images[0];
-  const secondImage = product.images[1];
+  // Related rails can hand us the full PDP gallery, which includes videos.
+  const cardPhotos = photosOnly(product.images);
+  const primaryImage = cardPhotos[0];
+  const secondImage = cardPhotos[1];
   const hasSecond = hasOliveImage(secondImage?.url);
 
   // Escape and clicks outside put the sheet away; Escape hands focus back to

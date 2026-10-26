@@ -66,6 +66,7 @@ import {
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { consentRequestMeta } from "~/lib/marketing/consent-log";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
 import {
   buildZoneWeightConfig,
@@ -447,6 +448,7 @@ export async function POST(req: NextRequest) {
                     weightUnit: true,
                     images: {
                       select: { url: true },
+                      where: PHOTO_ONLY_WHERE,
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                     },
@@ -478,6 +480,7 @@ export async function POST(req: NextRequest) {
             _count: { select: { variants: true } },
             images: {
               select: { url: true },
+              where: PHOTO_ONLY_WHERE,
               orderBy: { sortOrder: "asc" },
               take: 1,
             },

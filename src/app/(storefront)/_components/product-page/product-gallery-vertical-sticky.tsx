@@ -7,7 +7,14 @@ import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { isVideoMedia } from "~/lib/products/media";
+import type { ProductMediaType } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 /**
@@ -27,7 +34,12 @@ type StyleProps = {
 };
 
 type Props = {
-  images: { url: string; altText?: string | null }[];
+  images: {
+    url: string;
+    altText?: string | null;
+    mediaType?: ProductMediaType | null;
+    posterUrl?: string | null;
+  }[];
   productName: string;
   styleProps?: StyleProps;
   enableLightbox?: boolean;
@@ -81,6 +93,7 @@ export function ProductGalleryVertical({
   }, [variantImageUrl]);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
+  const lightboxVideoRef = useRef<HTMLVideoElement>(null);
   const shouldReduce = useReducedMotion();
 
   // Move focus to close button when lightbox opens
@@ -157,17 +170,51 @@ export function ProductGalleryVertical({
       ? ({ "--olive-turn-tint": accentColor } as CSSProperties)
       : undefined;
 
-  /** The photograph. `priority` only ever on the one that is current. */
-  const photo = (index: number, isCurrent: boolean) => (
-    <Image
-      src={images[index]?.url ?? "/placeholder.svg"}
-      alt={meaningfulAltText(images[index]?.altText) ?? productName}
-      fill
-      className="object-cover"
-      priority={isCurrent}
-      sizes="(max-width: 1024px) 100vw, 50vw"
-    />
-  );
+  const current = images[selectedImage];
+  const currentIsVideo = isVideoMedia(current);
+
+  /**
+   * The photograph (or video). `priority` only ever on the one that is
+   * current. A video is only ever a live player while it is the current leaf:
+   * the covered "under" leaf of a swatch turn is a decorative, aria-hidden
+   * still (its poster, or nothing), so no controls end up inside it.
+   */
+  const photo = (index: number, isCurrent: boolean) => {
+    const item = images[index];
+    if (item && isVideoMedia(item)) {
+      if (!isCurrent) {
+        return item.posterUrl ? (
+          <Image
+            src={item.posterUrl}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        ) : null;
+      }
+      return (
+        <ProductGalleryVideo
+          item={item}
+          fill
+          active={!lightboxOpen}
+          fallbackLabel={`${productName} video`}
+          onExpand={enableLightbox ? () => setLightboxOpen(true) : undefined}
+          expandButtonRef={enableLightbox ? enlargeBtnRef : undefined}
+        />
+      );
+    }
+    return (
+      <Image
+        src={item?.url ?? "/placeholder.svg"}
+        alt={meaningfulAltText(item?.altText) ?? productName}
+        fill
+        className="object-cover"
+        priority={isCurrent}
+        sizes="(max-width: 1024px) 100vw, 50vw"
+      />
+    );
+  };
 
   /**
    * What sits inside the image frame. Identical markup in both container
@@ -226,10 +273,13 @@ export function ProductGalleryVertical({
         closeLightbox();
         return;
       }
-      // Focus trap — only the close button is interactive in the lightbox
+      // Focus trap — the close button, plus the player when the lightbox
+      // is showing a video (two stops, so Tab and Shift+Tab both just swap).
       if (e.key === "Tab") {
         e.preventDefault();
-        closeBtnRef.current?.focus();
+        const video = lightboxVideoRef.current;
+        if (video && document.activeElement !== video) video.focus();
+        else closeBtnRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -245,7 +295,7 @@ export function ProductGalleryVertical({
           styleProps?.containerClassName,
         )}
       >
-        {enableLightbox ? (
+        {enableLightbox && !currentIsVideo ? (
           <button
             ref={enlargeBtnRef}
             type="button"
@@ -317,19 +367,27 @@ export function ProductGalleryVertical({
                 style={
                   selectedImage === index ? { borderColor: primaryColor } : {}
                 }
-                aria-label={`View image ${index + 1}`}
+                aria-label={
+                  isVideoMedia(image)
+                    ? `View video ${index + 1}`
+                    : `View image ${index + 1}`
+                }
                 aria-pressed={selectedImage === index}
               >
-                <Image
-                  src={image.url}
-                  alt={
-                    meaningfulAltText(image.altText) ??
-                    `${productName} ${index + 1}`
-                  }
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                />
+                {isVideoMedia(image) ? (
+                  <ProductGalleryThumb item={image} />
+                ) : (
+                  <Image
+                    src={image.url}
+                    alt={
+                      meaningfulAltText(image.altText) ??
+                      `${productName} ${index + 1}`
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -350,7 +408,7 @@ export function ProductGalleryVertical({
             <motion.div
               role="dialog"
               aria-modal="true"
-              aria-label={`${productName} — enlarged image`}
+              aria-label={`${productName} — enlarged ${currentIsVideo ? "video" : "image"}`}
               initial={{ scale: shouldReduce ? 1 : 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: shouldReduce ? 1 : 0.92, opacity: 0 }}
@@ -358,16 +416,23 @@ export function ProductGalleryVertical({
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                alt={
-                  meaningfulAltText(images[selectedImage]?.altText) ??
-                  productName
-                }
-                width={1200}
-                height={1200}
-                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
-              />
+              {currentIsVideo && current ? (
+                <ProductLightboxVideo
+                  key={current.url}
+                  ref={lightboxVideoRef}
+                  item={current}
+                  className="rounded-2xl"
+                  fallbackLabel={`${productName} video`}
+                />
+              ) : (
+                <Image
+                  src={current?.url ?? "/placeholder.svg"}
+                  alt={meaningfulAltText(current?.altText) ?? productName}
+                  width={1200}
+                  height={1200}
+                  className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
+                />
+              )}
               <button
                 ref={closeBtnRef}
                 type="button"

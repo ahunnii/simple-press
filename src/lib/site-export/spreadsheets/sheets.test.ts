@@ -79,6 +79,28 @@ function product(over: Partial<ProductSheetProduct> = {}): ProductSheetProduct {
   };
 }
 
+describe("productsSheet videos", () => {
+  it("keeps videos out of Image URLs and lists them under Video URLs", () => {
+    const { rows } = productsSheet(
+      [
+        product({
+          images: [
+            { url: "https://img/a.jpg", sortOrder: 0, mediaType: "IMAGE" },
+            { url: "https://img/v.mp4", sortOrder: 1, mediaType: "VIDEO" },
+            { url: "https://img/b.jpg", sortOrder: 2, mediaType: "IMAGE" },
+            { url: "https://img/w.mp4", sortOrder: 3, mediaType: "VIDEO" },
+          ],
+        }),
+      ],
+      ctx,
+    );
+    expect(rows[0]).toMatchObject({
+      "Image URLs": "https://img/a.jpg | https://img/b.jpg",
+      "Video URLs": "https://img/v.mp4 | https://img/w.mp4",
+    });
+  });
+});
+
 describe("productsSheet", () => {
   it("emits one row for a product with no variants", () => {
     const { columns, rows } = productsSheet([product()], ctx);
@@ -94,6 +116,7 @@ describe("productsSheet", () => {
       Stock: 12,
       Description: "A nice mug",
       "Image URLs": "https://img/a.jpg | https://img/b.jpg",
+      "Video URLs": "",
       Collections: "Kitchen; Gifts",
       Featured: "No",
       Created: "2026-01-05 09:30",

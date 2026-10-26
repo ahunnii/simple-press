@@ -6,6 +6,7 @@ import type { ChecklistItem, ChecklistSummary } from "~/lib/admin/checklist";
 import { summarizeChecklist } from "~/lib/admin/checklist";
 import { parseBusinessHours } from "~/lib/business-hours";
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { preferNonBlank } from "~/lib/seo/blank";
 import { parseLocalPresence } from "~/lib/seo/local-presence";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
@@ -289,6 +290,7 @@ export async function computeSeoScorecard({
         where: { businessId, published: true, metaDescription: NON_BLANK },
       }),
     ),
+    // Photos only: videos never feed og:image or need alt-text coverage.
     // Catalog photo fills `og:image` when the dedicated column is blank —
     // same fallback `buildPageMetadata` uses on the storefront. Score the
     // tag that actually ships, not the override column.
@@ -297,7 +299,10 @@ export async function computeSeoScorecard({
         where: {
           businessId,
           published: true,
-          OR: [{ ogImage: NON_BLANK }, { images: { some: {} } }],
+          OR: [
+            { ogImage: NON_BLANK },
+            { images: { some: PHOTO_ONLY_WHERE } },
+          ],
         },
       }),
     ),
@@ -307,7 +312,12 @@ export async function computeSeoScorecard({
     // photo in the store. Traverse the relation instead; `Image.productId` is
     // indexed.
     countIf(productsEnabled, () =>
-      db.image.count({ where: { product: { businessId, published: true } } }),
+      db.image.count({
+        where: {
+          product: { businessId, published: true },
+          ...PHOTO_ONLY_WHERE,
+        },
+      }),
     ),
     // Counted in JS, not SQL: older uploads stored the FILE NAME as alt text
     // ("download-9.png"), which `NON_BLANK` accepts but is not a description.
@@ -318,6 +328,7 @@ export async function computeSeoScorecard({
         await db.image.findMany({
           where: {
             product: { businessId, published: true },
+            ...PHOTO_ONLY_WHERE,
             altText: NON_BLANK,
           },
           select: { altText: true },

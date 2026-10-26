@@ -184,3 +184,33 @@ describe("export → import round trip", () => {
     });
   });
 });
+
+describe("exportToWooCommerceCSV product videos", () => {
+  const image = (
+    id: string,
+    url: string,
+    sortOrder: number,
+    mediaType: "IMAGE" | "VIDEO",
+  ) => ({ id, url, sortOrder, mediaType, posterUrl: null }) as unknown as Image;
+
+  it("lists photos only in the Images column (simple and variable)", () => {
+    const simple = makeProduct();
+    simple.images = [
+      image("i2", "https://s.test/video-b.mp4", 1, "VIDEO"),
+      image("i1", "https://s.test/image-a.jpg", 0, "IMAGE"),
+      image("i3", "https://s.test/image-c.jpg", 2, "IMAGE"),
+    ];
+    const variable = makeProduct({ id: "prod_v", name: "Shirt" });
+    variable.images = [
+      image("i4", "https://s.test/image-d.jpg", 0, "IMAGE"),
+      image("i5", "https://s.test/video-e.mp4", 1, "VIDEO"),
+    ];
+    variable.variants = [makeVariant({ productId: "prod_v" })];
+
+    const rows = exportRows([simple, variable]);
+    expect(rows[0]!.Images).toBe(
+      "https://s.test/image-a.jpg, https://s.test/image-c.jpg",
+    );
+    expect(rows[1]!.Images).toBe("https://s.test/image-d.jpg");
+  });
+});

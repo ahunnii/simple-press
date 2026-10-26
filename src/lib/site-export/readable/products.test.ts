@@ -10,6 +10,42 @@ import {
 describe("renderProductDoc", () => {
   const path = "Products/Blue Mug.html";
 
+  it("shows photos in the grid and lists videos as links under Videos", () => {
+    const video = "https://cdn.example.com/b/video-1.mp4";
+    const withMedia = {
+      ...ctx,
+      media: {
+        byUrl: new Map([
+          ...ctx.media.byUrl,
+          [video, "Photos/Videos/Blue Mug - video 1.mp4"],
+        ]),
+      },
+    };
+    const html = renderProductDoc(
+      product({
+        images: [
+          { url: "https://cdn.example.com/b/img-1.jpg", alt: "Blue mug" },
+          { url: video, mediaType: "VIDEO" },
+        ],
+      }),
+      withMedia,
+      path,
+    );
+    expect(html).toContain("<h2>Photos</h2>");
+    expect(html).toContain("<h3>Videos</h3>");
+    expect(html).toContain(
+      '<a href="../Photos/Videos/Blue%20Mug%20-%20video%201.mp4">video-1.mp4</a>',
+    );
+    // The video must not be rendered as a broken <img> in the photo grid.
+    expect(html.match(/<figure>/g)).toHaveLength(1);
+  });
+
+  it("omits both sections when the gallery is empty", () => {
+    const html = renderProductDoc(product({ images: [] }), ctx, path);
+    expect(html).not.toContain("<h2>Photos</h2>");
+    expect(html).not.toContain("<h3>Videos</h3>");
+  });
+
   it("points photos at the local Photos folder with a relative, encoded path", () => {
     const html = renderProductDoc(product(), ctx, path);
     expect(html).toContain('src="../Photos/Products/Blue%20Mug/01.jpg"');

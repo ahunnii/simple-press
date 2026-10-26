@@ -511,6 +511,14 @@ export const BusinessDomainStatus: {
 
 export type BusinessDomainStatus = (typeof BusinessDomainStatus)[keyof typeof BusinessDomainStatus]
 
+
+export const ImageMediaType: {
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO'
+};
+
+export type ImageMediaType = (typeof ImageMediaType)[keyof typeof ImageMediaType]
+
 }
 
 export type PlatformRole = $Enums.PlatformRole
@@ -524,6 +532,10 @@ export const BusinessRole: typeof $Enums.BusinessRole
 export type BusinessDomainStatus = $Enums.BusinessDomainStatus
 
 export const BusinessDomainStatus: typeof $Enums.BusinessDomainStatus
+
+export type ImageMediaType = $Enums.ImageMediaType
+
+export const ImageMediaType: typeof $Enums.ImageMediaType
 
 /**
  * ##  Prisma Client ʲˢ
@@ -35953,6 +35965,8 @@ export namespace Prisma {
     width: number | null
     height: number | null
     sortOrder: number | null
+    mediaType: $Enums.ImageMediaType | null
+    posterUrl: string | null
     productId: string | null
     businessId: string | null
   }
@@ -35965,6 +35979,8 @@ export namespace Prisma {
     width: number | null
     height: number | null
     sortOrder: number | null
+    mediaType: $Enums.ImageMediaType | null
+    posterUrl: string | null
     productId: string | null
     businessId: string | null
   }
@@ -35977,6 +35993,8 @@ export namespace Prisma {
     width: number
     height: number
     sortOrder: number
+    mediaType: number
+    posterUrl: number
     productId: number
     businessId: number
     _all: number
@@ -36003,6 +36021,8 @@ export namespace Prisma {
     width?: true
     height?: true
     sortOrder?: true
+    mediaType?: true
+    posterUrl?: true
     productId?: true
     businessId?: true
   }
@@ -36015,6 +36035,8 @@ export namespace Prisma {
     width?: true
     height?: true
     sortOrder?: true
+    mediaType?: true
+    posterUrl?: true
     productId?: true
     businessId?: true
   }
@@ -36027,6 +36049,8 @@ export namespace Prisma {
     width?: true
     height?: true
     sortOrder?: true
+    mediaType?: true
+    posterUrl?: true
     productId?: true
     businessId?: true
     _all?: true
@@ -36126,6 +36150,8 @@ export namespace Prisma {
     width: number | null
     height: number | null
     sortOrder: number
+    mediaType: $Enums.ImageMediaType
+    posterUrl: string | null
     productId: string | null
     businessId: string | null
     _count: ImageCountAggregateOutputType | null
@@ -36157,6 +36183,8 @@ export namespace Prisma {
     width?: boolean
     height?: boolean
     sortOrder?: boolean
+    mediaType?: boolean
+    posterUrl?: boolean
     productId?: boolean
     businessId?: boolean
     product?: boolean | Image$productArgs<ExtArgs>
@@ -36171,6 +36199,8 @@ export namespace Prisma {
     width?: boolean
     height?: boolean
     sortOrder?: boolean
+    mediaType?: boolean
+    posterUrl?: boolean
     productId?: boolean
     businessId?: boolean
     product?: boolean | Image$productArgs<ExtArgs>
@@ -36185,6 +36215,8 @@ export namespace Prisma {
     width?: boolean
     height?: boolean
     sortOrder?: boolean
+    mediaType?: boolean
+    posterUrl?: boolean
     productId?: boolean
     businessId?: boolean
     product?: boolean | Image$productArgs<ExtArgs>
@@ -36199,11 +36231,13 @@ export namespace Prisma {
     width?: boolean
     height?: boolean
     sortOrder?: boolean
+    mediaType?: boolean
+    posterUrl?: boolean
     productId?: boolean
     businessId?: boolean
   }
 
-  export type ImageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "url" | "altText" | "width" | "height" | "sortOrder" | "productId" | "businessId", ExtArgs["result"]["image"]>
+  export type ImageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "url" | "altText" | "width" | "height" | "sortOrder" | "mediaType" | "posterUrl" | "productId" | "businessId", ExtArgs["result"]["image"]>
   export type ImageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | Image$productArgs<ExtArgs>
     business?: boolean | Image$businessArgs<ExtArgs>
@@ -36231,6 +36265,8 @@ export namespace Prisma {
       width: number | null
       height: number | null
       sortOrder: number
+      mediaType: $Enums.ImageMediaType
+      posterUrl: string | null
       productId: string | null
       businessId: string | null
     }, ExtArgs["result"]["image"]>
@@ -36665,6 +36701,8 @@ export namespace Prisma {
     readonly width: FieldRef<"Image", 'Int'>
     readonly height: FieldRef<"Image", 'Int'>
     readonly sortOrder: FieldRef<"Image", 'Int'>
+    readonly mediaType: FieldRef<"Image", 'ImageMediaType'>
+    readonly posterUrl: FieldRef<"Image", 'String'>
     readonly productId: FieldRef<"Image", 'String'>
     readonly businessId: FieldRef<"Image", 'String'>
   }
@@ -98595,6 +98633,8 @@ export namespace Prisma {
     width: 'width',
     height: 'height',
     sortOrder: 'sortOrder',
+    mediaType: 'mediaType',
+    posterUrl: 'posterUrl',
     productId: 'productId',
     businessId: 'businessId'
   };
@@ -99759,6 +99799,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ImageMediaType'
+   */
+  export type EnumImageMediaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImageMediaType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ImageMediaType[]'
+   */
+  export type ListEnumImageMediaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImageMediaType[]'>
     
   /**
    * Deep Input Types
@@ -102441,6 +102495,8 @@ export namespace Prisma {
     width?: IntNullableFilter<"Image"> | number | null
     height?: IntNullableFilter<"Image"> | number | null
     sortOrder?: IntFilter<"Image"> | number
+    mediaType?: EnumImageMediaTypeFilter<"Image"> | $Enums.ImageMediaType
+    posterUrl?: StringNullableFilter<"Image"> | string | null
     productId?: StringNullableFilter<"Image"> | string | null
     businessId?: StringNullableFilter<"Image"> | string | null
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
@@ -102455,6 +102511,8 @@ export namespace Prisma {
     width?: SortOrderInput | SortOrder
     height?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
+    mediaType?: SortOrder
+    posterUrl?: SortOrderInput | SortOrder
     productId?: SortOrderInput | SortOrder
     businessId?: SortOrderInput | SortOrder
     product?: ProductOrderByWithRelationInput
@@ -102472,6 +102530,8 @@ export namespace Prisma {
     width?: IntNullableFilter<"Image"> | number | null
     height?: IntNullableFilter<"Image"> | number | null
     sortOrder?: IntFilter<"Image"> | number
+    mediaType?: EnumImageMediaTypeFilter<"Image"> | $Enums.ImageMediaType
+    posterUrl?: StringNullableFilter<"Image"> | string | null
     productId?: StringNullableFilter<"Image"> | string | null
     businessId?: StringNullableFilter<"Image"> | string | null
     product?: XOR<ProductNullableScalarRelationFilter, ProductWhereInput> | null
@@ -102486,6 +102546,8 @@ export namespace Prisma {
     width?: SortOrderInput | SortOrder
     height?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
+    mediaType?: SortOrder
+    posterUrl?: SortOrderInput | SortOrder
     productId?: SortOrderInput | SortOrder
     businessId?: SortOrderInput | SortOrder
     _count?: ImageCountOrderByAggregateInput
@@ -102506,6 +102568,8 @@ export namespace Prisma {
     width?: IntNullableWithAggregatesFilter<"Image"> | number | null
     height?: IntNullableWithAggregatesFilter<"Image"> | number | null
     sortOrder?: IntWithAggregatesFilter<"Image"> | number
+    mediaType?: EnumImageMediaTypeWithAggregatesFilter<"Image"> | $Enums.ImageMediaType
+    posterUrl?: StringNullableWithAggregatesFilter<"Image"> | string | null
     productId?: StringNullableWithAggregatesFilter<"Image"> | string | null
     businessId?: StringNullableWithAggregatesFilter<"Image"> | string | null
   }
@@ -110966,6 +111030,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     product?: ProductCreateNestedOneWithoutImagesInput
     business?: BusinessCreateNestedOneWithoutImagesInput
   }
@@ -110978,6 +111044,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     productId?: string | null
     businessId?: string | null
   }
@@ -110990,6 +111058,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneWithoutImagesNestedInput
     business?: BusinessUpdateOneWithoutImagesNestedInput
   }
@@ -111002,6 +111072,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -111014,6 +111086,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     productId?: string | null
     businessId?: string | null
   }
@@ -111026,6 +111100,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageUncheckedUpdateManyInput = {
@@ -111036,6 +111112,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -119375,6 +119453,13 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type EnumImageMediaTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ImageMediaType | EnumImageMediaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumImageMediaTypeFilter<$PrismaModel> | $Enums.ImageMediaType
+  }
+
   export type BusinessNullableScalarRelationFilter = {
     is?: BusinessWhereInput | null
     isNot?: BusinessWhereInput | null
@@ -119388,6 +119473,8 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     sortOrder?: SortOrder
+    mediaType?: SortOrder
+    posterUrl?: SortOrder
     productId?: SortOrder
     businessId?: SortOrder
   }
@@ -119406,6 +119493,8 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     sortOrder?: SortOrder
+    mediaType?: SortOrder
+    posterUrl?: SortOrder
     productId?: SortOrder
     businessId?: SortOrder
   }
@@ -119418,6 +119507,8 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     sortOrder?: SortOrder
+    mediaType?: SortOrder
+    posterUrl?: SortOrder
     productId?: SortOrder
     businessId?: SortOrder
   }
@@ -119426,6 +119517,16 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     sortOrder?: SortOrder
+  }
+
+  export type EnumImageMediaTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ImageMediaType | EnumImageMediaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumImageMediaTypeWithAggregatesFilter<$PrismaModel> | $Enums.ImageMediaType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumImageMediaTypeFilter<$PrismaModel>
+    _max?: NestedEnumImageMediaTypeFilter<$PrismaModel>
   }
 
   export type UserNullableScalarRelationFilter = {
@@ -126141,6 +126242,10 @@ export namespace Prisma {
     connect?: BusinessWhereUniqueInput
   }
 
+  export type EnumImageMediaTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ImageMediaType
+  }
+
   export type ProductUpdateOneWithoutImagesNestedInput = {
     create?: XOR<ProductCreateWithoutImagesInput, ProductUncheckedCreateWithoutImagesInput>
     connectOrCreate?: ProductCreateOrConnectWithoutImagesInput
@@ -129381,6 +129486,23 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NestedEnumImageMediaTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ImageMediaType | EnumImageMediaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumImageMediaTypeFilter<$PrismaModel> | $Enums.ImageMediaType
+  }
+
+  export type NestedEnumImageMediaTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ImageMediaType | EnumImageMediaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ImageMediaType[] | ListEnumImageMediaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumImageMediaTypeWithAggregatesFilter<$PrismaModel> | $Enums.ImageMediaType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumImageMediaTypeFilter<$PrismaModel>
+    _max?: NestedEnumImageMediaTypeFilter<$PrismaModel>
+  }
+
   export type SessionCreateWithoutUserInput = {
     id?: string
     expiresAt: Date | string
@@ -131616,6 +131738,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     product?: ProductCreateNestedOneWithoutImagesInput
   }
 
@@ -131627,6 +131751,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     productId?: string | null
   }
 
@@ -133687,6 +133813,8 @@ export namespace Prisma {
     width?: IntNullableFilter<"Image"> | number | null
     height?: IntNullableFilter<"Image"> | number | null
     sortOrder?: IntFilter<"Image"> | number
+    mediaType?: EnumImageMediaTypeFilter<"Image"> | $Enums.ImageMediaType
+    posterUrl?: StringNullableFilter<"Image"> | string | null
     productId?: StringNullableFilter<"Image"> | string | null
     businessId?: StringNullableFilter<"Image"> | string | null
   }
@@ -136395,6 +136523,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     business?: BusinessCreateNestedOneWithoutImagesInput
   }
 
@@ -136406,6 +136536,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     businessId?: string | null
   }
 
@@ -172313,6 +172445,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     productId?: string | null
   }
 
@@ -173380,6 +173514,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     product?: ProductUpdateOneWithoutImagesNestedInput
   }
 
@@ -173391,6 +173527,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -173402,6 +173540,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     productId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -175228,6 +175368,8 @@ export namespace Prisma {
     width?: number | null
     height?: number | null
     sortOrder?: number
+    mediaType?: $Enums.ImageMediaType
+    posterUrl?: string | null
     businessId?: string | null
   }
 
@@ -175395,6 +175537,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneWithoutImagesNestedInput
   }
 
@@ -175406,6 +175550,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -175417,6 +175563,8 @@ export namespace Prisma {
     width?: NullableIntFieldUpdateOperationsInput | number | null
     height?: NullableIntFieldUpdateOperationsInput | number | null
     sortOrder?: IntFieldUpdateOperationsInput | number
+    mediaType?: EnumImageMediaTypeFieldUpdateOperationsInput | $Enums.ImageMediaType
+    posterUrl?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 

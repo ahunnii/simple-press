@@ -547,6 +547,8 @@ exports.Prisma.ImageScalarFieldEnum = {
   width: 'width',
   height: 'height',
   sortOrder: 'sortOrder',
+  mediaType: 'mediaType',
+  posterUrl: 'posterUrl',
   productId: 'productId',
   businessId: 'businessId'
 };
@@ -1436,6 +1438,11 @@ exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
   NONE: 'NONE',
   PENDING_DNS: 'PENDING_DNS',
   ACTIVE: 'ACTIVE'
+};
+
+exports.ImageMediaType = exports.$Enums.ImageMediaType = {
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO'
 };
 
 exports.Prisma.ModelName = {

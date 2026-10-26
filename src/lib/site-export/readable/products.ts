@@ -1,8 +1,10 @@
 /** Readable documents for products, the catalog index and collections. */
+import { primaryPhoto, photosOnly, videosOnly } from "~/lib/products/media";
 import { esc, fieldTable } from "../html";
 import { SITE_EXPORT_DIRS } from "../types";
 import {
   docLink,
+  fileNameOf,
   formatMoney,
   humanize,
   imgHtml,
@@ -10,6 +12,7 @@ import {
   inlineText,
   linkHtml,
   listHtml,
+  mediaHref,
   photosGridHtml,
   plainTextHtml,
   seoRows,
@@ -89,6 +92,25 @@ function extraFields(p: ProductInput): Array<[string, string]> {
     .map(([k, v]): [string, string] => [humanize(k), inlineText(String(v))]);
 }
 
+/** "Videos" sub-section: one link per product video (file sits in Photos/Videos/). */
+function productVideosHtml(
+  p: ProductInput,
+  ctx: RenderCtx,
+  docPath: string,
+): string {
+  const videos = videosOnly(p.images).filter((v) => Boolean(v.url));
+  if (videos.length === 0) return "";
+  const items = videos.map((v) => {
+    const name = fileNameOf(v.url);
+    const href = mediaHref(ctx, docPath, v.url);
+    // Not in the export (download failed): show the name only, not a dead link.
+    return href && !(href.startsWith("/") && !href.startsWith("//"))
+      ? `<a href="${esc(href)}">${esc(name)}</a>`
+      : esc(name);
+  });
+  return `<h3>Videos</h3><p class="muted">These files are in the Videos folder of your download.</p>${listHtml(items)}`;
+}
+
 export function renderProductDoc(
   p: ProductInput,
   ctx: RenderCtx,
@@ -121,9 +143,13 @@ export function renderProductDoc(
     p.variants.length > 0
       ? `<h2>Options and variants</h2>${variantsTable(p, ctx, docPath)}`
       : "",
-    p.images.length > 0
-      ? `<h2>Photos</h2>${photosGridHtml(ctx, docPath, p.images.map((i) => ({ ...i, alt: i.alt ?? p.name })))}`
-      : "",
+    (() => {
+      const photos = photosOnly(p.images);
+      return photos.length > 0
+        ? `<h2>Photos</h2>${photosGridHtml(ctx, docPath, photos.map((i) => ({ ...i, alt: i.alt ?? p.name })))}`
+        : "";
+    })(),
+    productVideosHtml(p, ctx, docPath),
     (() => {
       const seo = fieldTable([
         ...seoRows(p),
@@ -148,7 +174,7 @@ export function renderProductsIndex(
   hasCollections: boolean,
 ): string {
   const rows = entries.map(({ product: p, path }) => {
-    const first = p.images[0];
+    const first = primaryPhoto(p.images);
     const photo = first
       ? imgHtml(ctx, PRODUCTS_INDEX_PATH, first.url, p.name, 64)
       : "";

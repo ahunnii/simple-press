@@ -9,6 +9,7 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { isVideoMedia } from "~/lib/products/media";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
@@ -18,6 +19,10 @@ import { ProductReviews } from "~/components/product-reviews";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { resolveFields } from "..";
@@ -181,8 +186,8 @@ export function ElegantProductPage({
     }
   };
 
-  const currentImage =
-    product.images[selectedImageIndex]?.url ?? "/placeholder.svg";
+  const currentMedia = product.images[selectedImageIndex];
+  const currentImage = currentMedia?.url ?? "/placeholder.svg";
 
   return (
     <>
@@ -245,14 +250,23 @@ export function ElegantProductPage({
                   background: "var(--el-cream-2, #ebe6dc)",
                 }}
               >
-                <Image
-                  src={currentImage}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  style={{ transition: `transform 1.2s ${ease}` }}
-                />
+                {currentMedia && isVideoMedia(currentMedia) ? (
+                  <ProductGalleryVideo
+                    key={currentMedia.url}
+                    item={currentMedia}
+                    fill
+                    fallbackLabel={`${product.name} video`}
+                  />
+                ) : (
+                  <Image
+                    src={currentImage}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    priority
+                    style={{ transition: `transform 1.2s ${ease}` }}
+                  />
+                )}
               </div>
 
               {/* Thumbnails */}
@@ -287,14 +301,18 @@ export function ElegantProductPage({
                         padding: 0,
                       }}
                       aria-pressed={selectedImageIndex === index}
-                      aria-label={`View image ${index + 1} of ${product.images.length}`}
+                      aria-label={`View ${isVideoMedia(image) ? "video" : "image"} ${index + 1} of ${product.images.length}`}
                     >
-                      <Image
-                        src={image.url}
-                        alt={`${product.name} ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                      {isVideoMedia(image) ? (
+                        <ProductGalleryThumb item={image} sizes="120px" />
+                      ) : (
+                        <Image
+                          src={image.url}
+                          alt={`${product.name} ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
                     </button>
                   ))}
                 </div>

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { generateCollectionSlug } from "~/lib/slug";
 import {
   collectionBulkDeleteSchema,
@@ -79,6 +80,7 @@ export const collectionsRouter = createTRPCRouter({
                   variants: { select: { price: true } },
                   published: true,
                   images: {
+                    where: PHOTO_ONLY_WHERE,
                     take: 1,
                     orderBy: { sortOrder: "asc" },
                   },
@@ -149,7 +151,11 @@ export const collectionsRouter = createTRPCRouter({
             include: {
               product: {
                 include: {
-                  images: { orderBy: { sortOrder: "asc" }, take: 2 },
+                  images: {
+                    where: PHOTO_ONLY_WHERE,
+                    orderBy: { sortOrder: "asc" },
+                    take: 2,
+                  },
                   variants: true,
                   baseInventoryUnit: {
                     select: { inventoryQty: true, allowBackorders: true },
@@ -647,7 +653,11 @@ export const collectionsRouter = createTRPCRouter({
             include: {
               product: {
                 include: {
-                  images: { orderBy: { sortOrder: "asc" }, take: 2 },
+                  images: {
+                    where: PHOTO_ONLY_WHERE,
+                    orderBy: { sortOrder: "asc" },
+                    take: 2,
+                  },
                   variants: true,
                   baseInventoryUnit: {
                     select: { inventoryQty: true, allowBackorders: true },

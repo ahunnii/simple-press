@@ -58,8 +58,10 @@ export interface ExportProduct {
   allowBackorders: boolean;
   weight: number | null;
   weightUnit: "lb" | "kg";
-  /** Sorted by sortOrder. */
+  /** Photos only, sorted by sortOrder (these platforms' CSVs take no video). */
   images: ExportProductImage[];
+  /** Product videos left out of the files above (they are in the Videos folder). */
+  videoCount?: number;
   /** Collection names the product belongs to. */
   collections: string[];
   /** Empty = single-variant product. */

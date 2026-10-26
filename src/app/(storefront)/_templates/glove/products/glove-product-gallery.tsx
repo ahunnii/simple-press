@@ -1,16 +1,27 @@
 "use client";
 
 import type { KeyboardEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { isVideoMedia, type ProductMediaType } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
-type GalleryImage = { url: string; altText?: string | null };
+type GalleryImage = {
+  url: string;
+  altText?: string | null;
+  mediaType?: ProductMediaType | null;
+  posterUrl?: string | null;
+};
 
 type Props = {
   images: GalleryImage[];
@@ -32,6 +43,8 @@ export function GloveProductGallery({ images, productName }: Props) {
   const [open, setOpen] = useState(false);
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const { variantImageUrl } = useVariantImage();
+  const expandBtnRef = useRef<HTMLButtonElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setContainer(document.querySelector<HTMLElement>(".glove"));
@@ -47,6 +60,7 @@ export function GloveProductGallery({ images, productName }: Props) {
 
   const count = list.length;
   const current = list[Math.min(index, count - 1)] ?? list[0];
+  const currentIsVideo = isVideoMedia(current);
   const altFor = (img: GalleryImage | undefined, i: number) => {
     const own = meaningfulAltText(img?.altText) ?? "";
     if (own !== "") return own;
@@ -59,6 +73,8 @@ export function GloveProductGallery({ images, productName }: Props) {
 
   const onLightboxKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (count < 2) return;
+    // A focused <video> owns the arrow keys (native seek).
+    if (document.activeElement?.tagName === "VIDEO") return;
     if (e.key === "ArrowRight") {
       e.preventDefault();
       step(1);
@@ -72,23 +88,41 @@ export function GloveProductGallery({ images, productName }: Props) {
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <div className="flex flex-col gap-4">
         <div className="glove-mist-panel relative overflow-hidden p-3 md:p-4">
-          <DialogPrimitive.Trigger asChild>
-            <button
-              type="button"
-              className="relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-[var(--glove-radius-card)] bg-[var(--glove-paper)]"
-              aria-label={`Enlarge photo of ${productName}`}
-            >
-              <Image
-                key={current?.url}
-                src={current?.url ?? "/placeholder.svg"}
-                alt={altFor(current, index)}
+          {currentIsVideo && current ? (
+            // A <div> frame: the video's own controls can't nest in the
+            // trigger button, so it brings an expand button via `onExpand`.
+            <div className="relative block aspect-square w-full overflow-hidden rounded-[var(--glove-radius-card)] bg-[var(--glove-paper)]">
+              <ProductGalleryVideo
+                key={current.url}
+                item={current}
                 fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 560px"
-                className="object-contain motion-safe:animate-[glove-fade-in_300ms_ease-out]"
+                objectFit="contain"
+                active={!open}
+                fallbackLabel={`${productName} video`}
+                onExpand={() => setOpen(true)}
+                expandLabel={`Enlarge video of ${productName}`}
+                expandButtonRef={expandBtnRef}
               />
-            </button>
-          </DialogPrimitive.Trigger>
+            </div>
+          ) : (
+            <DialogPrimitive.Trigger asChild>
+              <button
+                type="button"
+                className="relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-[var(--glove-radius-card)] bg-[var(--glove-paper)]"
+                aria-label={`Enlarge photo of ${productName}`}
+              >
+                <Image
+                  key={current?.url}
+                  src={current?.url ?? "/placeholder.svg"}
+                  alt={altFor(current, index)}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  className="object-contain motion-safe:animate-[glove-fade-in_300ms_ease-out]"
+                />
+              </button>
+            </DialogPrimitive.Trigger>
+          )}
           <span
             aria-hidden="true"
             className="pointer-events-none absolute bottom-6 left-6 inline-flex size-10 items-center justify-center rounded-full bg-[var(--glove-paper)] text-[var(--glove-ink)] shadow-[var(--glove-shadow-sm)] md:bottom-7 md:left-7"
@@ -110,7 +144,7 @@ export function GloveProductGallery({ images, productName }: Props) {
                     type="button"
                     onClick={() => setIndex(i)}
                     aria-pressed={active}
-                    aria-label={`Show photo ${i + 1} of ${count}`}
+                    aria-label={`Show ${isVideoMedia(img) ? "video" : "photo"} ${i + 1} of ${count}`}
                     className={cn(
                       "relative block aspect-square w-full overflow-hidden rounded-[var(--glove-radius-card)] border bg-[var(--glove-mist)] transition-[box-shadow,border-color] duration-150",
                       active
@@ -118,13 +152,17 @@ export function GloveProductGallery({ images, productName }: Props) {
                         : "border-[var(--glove-mist-line)] hover:border-[var(--glove-primary-tint)]",
                     )}
                   >
-                    <Image
-                      src={img.url}
-                      alt=""
-                      fill
-                      sizes="120px"
-                      className="object-cover"
-                    />
+                    {isVideoMedia(img) ? (
+                      <ProductGalleryThumb item={img} sizes="120px" />
+                    ) : (
+                      <Image
+                        src={img.url}
+                        alt=""
+                        fill
+                        sizes="120px"
+                        className="object-cover"
+                      />
+                    )}
                   </button>
                 </li>
               );
@@ -137,6 +175,20 @@ export function GloveProductGallery({ images, productName }: Props) {
         <DialogPrimitive.Overlay className="fixed inset-0 z-[80] bg-[var(--glove-ink)]/90 motion-safe:animate-[glove-fade-in_200ms_ease-out]" />
         <DialogPrimitive.Content
           onKeyDown={onLightboxKey}
+          // Radix returns focus to its Trigger; a video main frame has no
+          // Trigger, so hand focus to the video's expand button instead. And
+          // open on the close button for a video, so Left/Right still step
+          // (a focused <video> keeps the arrows for seeking).
+          onOpenAutoFocus={(e) => {
+            if (!currentIsVideo) return;
+            e.preventDefault();
+            closeBtnRef.current?.focus();
+          }}
+          onCloseAutoFocus={(e) => {
+            if (!currentIsVideo) return;
+            e.preventDefault();
+            expandBtnRef.current?.focus();
+          }}
           // Content is full-viewport, so a click on the backdrop lands on it
           // directly; clicks on the photo or controls target their own nodes.
           onClick={(e) => {
@@ -149,13 +201,22 @@ export function GloveProductGallery({ images, productName }: Props) {
             {productName}
           </DialogPrimitive.Title>
           <div className="relative h-full max-h-[85vh] w-full max-w-5xl">
-            <Image
-              src={current?.url ?? "/placeholder.svg"}
-              alt={altFor(current, index)}
-              fill
-              sizes="100vw"
-              className="object-contain"
-            />
+            {currentIsVideo && current ? (
+              <ProductLightboxVideo
+                key={current.url}
+                item={current}
+                fill
+                fallbackLabel={`${productName} video`}
+              />
+            ) : (
+              <Image
+                src={current?.url ?? "/placeholder.svg"}
+                alt={altFor(current, index)}
+                fill
+                sizes="100vw"
+                className="object-contain"
+              />
+            )}
           </div>
           {count > 1 ? (
             <>
@@ -184,7 +245,8 @@ export function GloveProductGallery({ images, productName }: Props) {
             </>
           ) : null}
           <DialogPrimitive.Close
-            aria-label="Close enlarged photo"
+            ref={closeBtnRef}
+            aria-label={`Close enlarged ${currentIsVideo ? "video" : "photo"}`}
             className="absolute top-3 right-3 inline-flex size-12 items-center justify-center rounded-full bg-[var(--glove-paper)] text-[var(--glove-ink)] shadow-[var(--glove-shadow-md)] md:top-6 md:right-6"
           >
             <X className="size-6" aria-hidden="true" />

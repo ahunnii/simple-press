@@ -2,6 +2,7 @@ import type { Image, Product, ProductVariant } from "generated/prisma";
 import Papa from "papaparse";
 
 import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
+import { photosOnly } from "~/lib/products/media";
 
 type ProductWithRelations = Product & {
   images: Image[];
@@ -106,6 +107,14 @@ type WooCommerceExportRow = {
   "Attribute 3 global": string;
 };
 
+/** Comma-joined photo URLs in gallery order. WooCommerce's Images column takes no video. */
+function wooImages(product: ProductWithRelations): string {
+  return photosOnly(product.images)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((img) => img.url)
+    .join(", ");
+}
+
 export function exportToWooCommerceCSV(
   products: ProductWithRelations[],
 ): string {
@@ -146,10 +155,7 @@ function createSimpleProductRow(
   );
 
   // Join images with comma
-  const images = product.images
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((img) => img.url)
-    .join(", ");
+  const images = wooImages(product);
 
   return {
     ID: "", // WooCommerce will auto-generate
@@ -231,10 +237,7 @@ function createVariableProductRow(
   // Convert to WooCommerce attribute format
   const attributes = Array.from(allAttributes.entries()).slice(0, 3); // Max 3 attributes
 
-  const images = product.images
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((img) => img.url)
-    .join(", ");
+  const images = wooImages(product);
 
   return {
     ID: product.id, // Used as parent reference

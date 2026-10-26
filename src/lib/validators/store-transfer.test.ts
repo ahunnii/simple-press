@@ -335,3 +335,59 @@ describe("parseManifest back-compat", () => {
     }
   });
 });
+
+describe("parseManifest product gallery videos", () => {
+  const productWithImages = (images: unknown[]) => ({
+    exportId: "p1",
+    name: "Glove",
+    slug: "glove",
+    price: 5000,
+    trackInventory: false,
+    allowBackorders: false,
+    published: true,
+    featured: false,
+    sortOrder: 0,
+    additionalFields: null,
+    images,
+    variants: [],
+    ownerReviews: [],
+  });
+
+  it("accepts older image rows without mediaType/posterUrl", () => {
+    const parsed = parseManifest(
+      manifest({
+        ...minimalContent(),
+        products: [
+          productWithImages([{ exportId: "i1", url: "u/a.jpg", sortOrder: 0 }]),
+        ],
+      }),
+    );
+    const img = parsed.content.products[0]!.images[0]!;
+    expect(img.mediaType).toBeUndefined();
+    expect(img.posterUrl).toBeUndefined();
+  });
+
+  it("keeps mediaType and posterUrl on video rows", () => {
+    const parsed = parseManifest(
+      manifest({
+        ...minimalContent(),
+        products: [
+          productWithImages([
+            { exportId: "i1", url: "u/a.jpg", sortOrder: 0, mediaType: "IMAGE" },
+            {
+              exportId: "i2",
+              url: "u/video-b.mp4",
+              sortOrder: 1,
+              mediaType: "VIDEO",
+              posterUrl: "u/image-p.jpg",
+            },
+          ]),
+        ],
+      }),
+    );
+    expect(parsed.content.products[0]!.images[1]).toMatchObject({
+      mediaType: "VIDEO",
+      posterUrl: "u/image-p.jpg",
+    });
+  });
+});

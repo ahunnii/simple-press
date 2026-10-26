@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getBusinessUrl } from "~/lib/business-url";
 import { businessHostFilter } from "~/lib/domain-utils";
 import { formatPrice } from "~/lib/prices";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { db } from "~/server/db";
 
 /**
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
           description: true,
           excerpt: true,
           images: {
+            where: PHOTO_ONLY_WHERE,
             orderBy: { sortOrder: "asc" },
             take: 1,
             select: { url: true },

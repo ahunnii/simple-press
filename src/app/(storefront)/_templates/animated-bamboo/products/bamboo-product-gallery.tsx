@@ -4,13 +4,23 @@ import type { CSSProperties, KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
+import { isVideoMedia, type ProductMediaType } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { BambooGlyph } from "../shared/bamboo-glyph";
 import { BambooReveal } from "../shared/bamboo-reveal";
 
-type GalleryImage = { url: string };
+type GalleryImage = {
+  url: string;
+  altText?: string | null;
+  mediaType?: ProductMediaType | null;
+  posterUrl?: string | null;
+};
 
 type Props = {
   images: GalleryImage[];
@@ -90,6 +100,7 @@ export function BambooProductGallery({ images, productName }: Props) {
                 <div
                   key={`${img.url}-${i}`}
                   aria-hidden={i !== selected}
+                  inert={i !== selected}
                   className={cn(
                     "absolute inset-0 transition-opacity duration-300",
                     i === selected
@@ -97,14 +108,23 @@ export function BambooProductGallery({ images, productName }: Props) {
                       : "pointer-events-none opacity-0",
                   )}
                 >
-                  <Image
-                    src={img.url}
-                    alt={i === selected ? productName : ""}
-                    fill
-                    priority={i === 0}
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
+                  {isVideoMedia(img) ? (
+                    <ProductGalleryVideo
+                      item={img}
+                      fill
+                      active={i === selected}
+                      fallbackLabel={`${productName} video`}
+                    />
+                  ) : (
+                    <Image
+                      src={img.url}
+                      alt={i === selected ? productName : ""}
+                      fill
+                      priority={i === 0}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                  )}
                 </div>
               ))
             ) : (
@@ -140,7 +160,7 @@ export function BambooProductGallery({ images, productName }: Props) {
                 }}
                 type="button"
                 aria-pressed={i === selected}
-                aria-label={`Show product image ${i + 1} of ${images.length}`}
+                aria-label={`Show product ${isVideoMedia(img) ? "video" : "image"} ${i + 1} of ${images.length}`}
                 onClick={() => setSelected(i)}
                 onKeyDown={(e) => handleThumbKeyDown(e, i)}
                 className={cn(
@@ -151,13 +171,17 @@ export function BambooProductGallery({ images, productName }: Props) {
                 )}
               >
                 <span className="relative block aspect-square overflow-hidden rounded-lg bg-[var(--bamboo-cream)]">
-                  <Image
-                    src={img.url}
-                    alt=""
-                    fill
-                    sizes="96px"
-                    className="object-cover"
-                  />
+                  {isVideoMedia(img) ? (
+                    <ProductGalleryThumb item={img} sizes="96px" />
+                  ) : (
+                    <Image
+                      src={img.url}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                  )}
                 </span>
               </button>
             ))}

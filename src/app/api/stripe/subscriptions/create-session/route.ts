@@ -25,6 +25,7 @@ import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { consentRequestMeta } from "~/lib/marketing/consent-log";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { getClientIp, subscriptionCheckoutLimiter } from "~/lib/rate-limit";
 import { createSubscriptionCheckoutSession } from "~/lib/subscriptions/checkout-session";
 import {
@@ -274,6 +275,7 @@ export async function POST(req: Request) {
         },
         images: {
           select: { url: true },
+          where: PHOTO_ONLY_WHERE,
           orderBy: { sortOrder: "asc" },
           take: 1,
         },

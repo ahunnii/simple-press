@@ -5,6 +5,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { primaryPhoto } from "~/lib/products/media";
 import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,
@@ -180,7 +181,7 @@ export function useProduct(
           displayCompareAtPrice && displayCompareAtPrice > displayPrice
             ? displayCompareAtPrice
             : null,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
+        imageUrl: selectedVariant?.imageUrl ?? primaryPhoto(product.images)?.url ?? null,
         sku: selectedVariant?.sku ?? null,
         maxInventory, // Pass max for validation
       }),

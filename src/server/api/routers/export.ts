@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import z from "zod";
 
 import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import {
   buildOrderListWhere,
   ORDER_FULFILLMENT_DEFAULT,
@@ -52,6 +53,7 @@ export const exportRouter = createTRPCRouter({
           featured: true,
           inventoryQty: true,
           images: {
+            where: PHOTO_ONLY_WHERE,
             take: 1,
             orderBy: { sortOrder: "asc" },
           },

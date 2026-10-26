@@ -233,6 +233,13 @@ export interface ExportedImage {
   width: number | null;
   height: number | null;
   sortOrder: number;
+  /**
+   * Product gallery videos (added 2026-10-26) — absent in older manifests,
+   * which means a photo. Gallery (non-product) images never set this.
+   */
+  mediaType?: "IMAGE" | "VIDEO";
+  /** Still frame for a VIDEO row. Absent/null = none. Rewritten on import. */
+  posterUrl?: string | null;
 }
 
 export interface ExportedProductVariant {

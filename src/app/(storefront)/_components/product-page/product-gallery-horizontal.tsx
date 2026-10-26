@@ -6,7 +6,14 @@ import { X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { isVideoMedia } from "~/lib/products/media";
+import type { ProductMediaType } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 type StyleProps = {
@@ -19,7 +26,12 @@ type StyleProps = {
 };
 
 type Props = {
-  images: { url: string; altText?: string | null }[];
+  images: {
+    url: string;
+    altText?: string | null;
+    mediaType?: ProductMediaType | null;
+    posterUrl?: string | null;
+  }[];
   productName: string;
   styleProps?: StyleProps;
   enableLightbox?: boolean;
@@ -54,6 +66,7 @@ export function ProductGalleryHorizontal({
   }, [variantImageUrl]);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
+  const lightboxVideoRef = useRef<HTMLVideoElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
   // Move focus to close button when lightbox opens
@@ -75,10 +88,13 @@ export function ProductGalleryHorizontal({
         closeLightbox();
         return;
       }
-      // Focus trap — only the close button is interactive in the lightbox
+      // Focus trap — the close button, plus the player when the lightbox
+      // is showing a video (two stops, so Tab and Shift+Tab both just swap).
       if (e.key === "Tab") {
         e.preventDefault();
-        closeBtnRef.current?.focus();
+        const video = lightboxVideoRef.current;
+        if (video && document.activeElement !== video) video.focus();
+        else closeBtnRef.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -86,7 +102,11 @@ export function ProductGalleryHorizontal({
   }, [enableLightbox, lightboxOpen]);
 
   // Same source the foreground image uses — it follows useVariantImage() too.
-  const mainSrc = images[selectedImage]?.url ?? "/placeholder.svg";
+  const current = images[selectedImage];
+  const currentIsVideo = isVideoMedia(current);
+  const mainSrc = current?.url ?? "/placeholder.svg";
+  // A video has no still of its own: its poster (if any) feeds the backdrop.
+  const backdropSrc = currentIsVideo ? current?.posterUrl : mainSrc;
   const isContain = mainImageFit === "contain";
 
   // Shared by both the lightbox-button and plain-div wrappers below so the
@@ -103,7 +123,7 @@ export function ProductGalleryHorizontal({
         transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
         className="absolute inset-0"
       >
-        {isContain && (
+        {isContain && backdropSrc && (
           // Ambient backdrop: a tiny, heavily blurred, scaled-up copy of the
           // same image fills the letterbox/pillarbox so empty space reads as
           // a glow instead of a flat fill. sizes="128px" is deliberately
@@ -117,7 +137,7 @@ export function ProductGalleryHorizontal({
           // near-white and the boundary should disappear — a shadow would
           // re-draw it.
           <Image
-            src={mainSrc}
+            src={backdropSrc}
             alt=""
             aria-hidden="true"
             fill
@@ -125,14 +145,28 @@ export function ProductGalleryHorizontal({
             className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
           />
         )}
-        <Image
-          src={mainSrc}
-          alt={meaningfulAltText(images[selectedImage]?.altText) ?? productName}
-          fill
-          className={isContain ? "object-contain" : "object-cover"}
-          priority
-          sizes="(max-width: 1024px) 100vw, 50vw"
-        />
+        {currentIsVideo && current ? (
+          // The slide remounts per index (AnimatePresence), so `active` only
+          // needs to account for the lightbox covering it.
+          <ProductGalleryVideo
+            item={current}
+            fill
+            active={!lightboxOpen}
+            objectFit={isContain ? "contain" : "cover"}
+            fallbackLabel={`${productName} video`}
+            onExpand={enableLightbox ? () => setLightboxOpen(true) : undefined}
+            expandButtonRef={enableLightbox ? enlargeBtnRef : undefined}
+          />
+        ) : (
+          <Image
+            src={mainSrc}
+            alt={meaningfulAltText(current?.altText) ?? productName}
+            fill
+            className={isContain ? "object-contain" : "object-cover"}
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );
@@ -147,7 +181,7 @@ export function ProductGalleryHorizontal({
       >
         {/* Main Image */}
 
-        {enableLightbox ? (
+        {enableLightbox && !currentIsVideo ? (
           <button
             ref={enlargeBtnRef}
             type="button"
@@ -184,7 +218,9 @@ export function ProductGalleryHorizontal({
                 key={img.url}
                 type="button"
                 onClick={() => setSelectedImage(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={
+                  isVideoMedia(img) ? `View video ${i + 1}` : `View image ${i + 1}`
+                }
                 aria-pressed={selectedImage === i}
                 className={cn(
                   `relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-all duration-200 ${
@@ -194,13 +230,17 @@ export function ProductGalleryHorizontal({
                   }`,
                 )}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                />
+                {isVideoMedia(img) ? (
+                  <ProductGalleryThumb item={img} />
+                ) : (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -223,7 +263,7 @@ export function ProductGalleryHorizontal({
             <motion.div
               role="dialog"
               aria-modal="true"
-              aria-label={`${productName} — enlarged image`}
+              aria-label={`${productName} — enlarged ${currentIsVideo ? "video" : "image"}`}
               initial={shouldReduceMotion ? false : { scale: 0.92, opacity: 0 }}
               animate={
                 shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }
@@ -237,16 +277,23 @@ export function ProductGalleryHorizontal({
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                alt={
-                  meaningfulAltText(images[selectedImage]?.altText) ??
-                  productName
-                }
-                width={1200}
-                height={1200}
-                className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
-              />
+              {currentIsVideo && current ? (
+                <ProductLightboxVideo
+                  key={current.url}
+                  ref={lightboxVideoRef}
+                  item={current}
+                  className="rounded-2xl"
+                  fallbackLabel={`${productName} video`}
+                />
+              ) : (
+                <Image
+                  src={current?.url ?? "/placeholder.svg"}
+                  alt={meaningfulAltText(current?.altText) ?? productName}
+                  width={1200}
+                  height={1200}
+                  className="max-h-[90vh] max-w-[90vw] rounded-2xl object-contain"
+                />
+              )}
               <button
                 ref={closeBtnRef}
                 type="button"

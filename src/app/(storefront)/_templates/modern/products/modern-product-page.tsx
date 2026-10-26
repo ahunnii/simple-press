@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { isVideoMedia } from "~/lib/products/media";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
@@ -17,6 +18,10 @@ import { ProductReviews } from "~/components/product-reviews";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { resolveFields } from "..";
@@ -117,7 +122,14 @@ export function ModernProductPage({
           {/* Images */}
           <div>
             <div className="bg-muted relative aspect-square overflow-hidden rounded-sm">
-              {selectedImage ? (
+              {selectedImage && isVideoMedia(selectedImage) ? (
+                <ProductGalleryVideo
+                  key={selectedImage.url}
+                  item={selectedImage}
+                  fill
+                  fallbackLabel={`${product.name} video`}
+                />
+              ) : selectedImage ? (
                 <Image
                   src={selectedImage.url}
                   alt={meaningfulAltText(selectedImage.altText) ?? product.name}
@@ -149,18 +161,22 @@ export function ModernProductPage({
                         ? "ring-foreground ring-1 ring-offset-1"
                         : "opacity-60 hover:opacity-100"
                     }`}
-                    aria-label={`View image ${index + 1}`}
+                    aria-label={`View ${isVideoMedia(image) ? "video" : "image"} ${index + 1}`}
                   >
-                    <Image
-                      src={image.url}
-                      alt={
-                        meaningfulAltText(image.altText) ??
-                        `${product.name} ${index + 1}`
-                      }
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
+                    {isVideoMedia(image) ? (
+                      <ProductGalleryThumb item={image} />
+                    ) : (
+                      <Image
+                        src={image.url}
+                        alt={
+                          meaningfulAltText(image.altText) ??
+                          `${product.name} ${index + 1}`
+                        }
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    )}
                   </button>
                 ))}
               </div>

@@ -3,6 +3,7 @@ import type { JSONContent } from "@tiptap/core";
 import type { EmailProductItem } from "~/lib/tiptap/email-products-node";
 import type { DbClient, TxClient } from "~/server/db";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import {
   coerceEmailProductsButtonLabel,
   countEmptyProductBlocks,
@@ -169,6 +170,7 @@ export async function hydrateEmailProducts(
               orderBy: { createdAt: "asc" },
             },
             images: {
+              where: PHOTO_ONLY_WHERE,
               orderBy: { sortOrder: "asc" },
               take: 1,
               select: { url: true },

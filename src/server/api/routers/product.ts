@@ -29,6 +29,7 @@ import {
   isLibraryOwnedKey,
   normalizeUrl,
 } from "~/lib/media/usage";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { publicUrlToKey } from "~/lib/s3/url";
 import { stripEmptyPlaceholdersInFields } from "~/lib/tiptap/strip-empty-placeholders";
@@ -37,13 +38,13 @@ import {
   MAX_REQUESTED_PAGE,
 } from "~/lib/validators/admin-table";
 import {
-  MAX_PRODUCT_IMAGES,
   productBulkDeleteSchema,
   productBulkPublishSchema,
   productCreateSchema,
-  productImageSchema,
+  productImagesListSchema,
   productListFiltersSchema,
   productUpdateSchema,
+  refineProductMedia,
 } from "~/lib/validators/product";
 import { customizerSelectionSchema } from "~/lib/validators/product-options";
 import { resolveVariantPrice } from "~/lib/variant-price";
@@ -150,7 +151,11 @@ export const productRouter = createTRPCRouter({
       const products = await ctx.db.product.findMany({
         where: { businessId, published: true },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 2 },
+          images: {
+            where: PHOTO_ONLY_WHERE,
+            orderBy: { sortOrder: "asc" },
+            take: 2,
+          },
           variants: true,
           // Card data: lets a card link to the product page instead of
           // quick-adding (see `checkProductStatus` `hasOptions`).
@@ -185,7 +190,11 @@ export const productRouter = createTRPCRouter({
           ...(featuredOnly ? { featured: true } : {}),
         },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 2 },
+          images: {
+            where: PHOTO_ONLY_WHERE,
+            orderBy: { sortOrder: "asc" },
+            take: 2,
+          },
           variants: true,
           _count: { select: { optionGroups: true } },
         },
@@ -222,7 +231,11 @@ export const productRouter = createTRPCRouter({
       const products = await ctx.db.product.findMany({
         where: { businessId, published: true, id: { not: product.id } },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 4 },
+          images: {
+            where: PHOTO_ONLY_WHERE,
+            orderBy: { sortOrder: "asc" },
+            take: 4,
+          },
           variants: true,
           _count: { select: { optionGroups: true } },
         },
@@ -323,7 +336,11 @@ export const productRouter = createTRPCRouter({
       const products = await ctx.db.product.findMany({
         where: { businessId },
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          images: {
+            where: PHOTO_ONLY_WHERE,
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+          },
           variants: { select: { price: true, compareAtPrice: true } },
           _count: { select: { variants: true } },
         },
@@ -414,7 +431,11 @@ export const productRouter = createTRPCRouter({
       const skip = (page - 1) * pageSize;
 
       const include = {
-        images: { orderBy: { sortOrder: "asc" } as const, take: 1 },
+        images: {
+          where: PHOTO_ONLY_WHERE,
+          orderBy: { sortOrder: "asc" } as const,
+          take: 1,
+        },
         variants: { select: { price: true, compareAtPrice: true } },
         _count: { select: { variants: true } },
       };
@@ -508,7 +529,10 @@ export const productRouter = createTRPCRouter({
       const { businessId } = ctx;
       const products = await ctx.db.product.findMany({
         where: { businessId },
-        include: { variants: true, images: true },
+        include: {
+          variants: true,
+          images: { where: PHOTO_ONLY_WHERE },
+        },
         orderBy: { name: "asc" },
       });
 
@@ -550,6 +574,7 @@ export const productRouter = createTRPCRouter({
           },
           published: true,
           images: {
+            where: PHOTO_ONLY_WHERE,
             orderBy: { sortOrder: "asc" },
             take: 1,
             select: { url: true },
@@ -1008,7 +1033,7 @@ export const productRouter = createTRPCRouter({
         select: {
           id: true,
           ogImage: true,
-          images: { select: { url: true } },
+          images: { select: { url: true, posterUrl: true } },
         },
       });
 
@@ -1025,7 +1050,7 @@ export const productRouter = createTRPCRouter({
 
       // Clean up S3 objects — reference-counted, best-effort, after the DB delete
       const urlsToDelete = [
-        ...product.images.map((img) => img.url),
+        ...product.images.flatMap((img) => [img.url, img.posterUrl]),
         product.ogImage,
       ].filter((u): u is string => !!u);
 
@@ -1097,7 +1122,7 @@ export const productRouter = createTRPCRouter({
         select: {
           id: true,
           ogImage: true,
-          images: { select: { url: true } },
+          images: { select: { url: true, posterUrl: true } },
         },
       });
 
@@ -1110,7 +1135,10 @@ export const productRouter = createTRPCRouter({
       // usage index (a dozen queries across the tenant), so calling it per
       // product would multiply that by the selection size (up to 1,000).
       const urlsToDelete = products
-        .flatMap((p) => [...p.images.map((img) => img.url), p.ogImage])
+        .flatMap((p) => [
+          ...p.images.flatMap((img) => [img.url, img.posterUrl]),
+          p.ogImage,
+        ])
         .filter((u): u is string => !!u);
 
       await deleteUnreferencedImageObjects(businessId, urlsToDelete);
@@ -1127,12 +1155,7 @@ export const productRouter = createTRPCRouter({
     .input(
       z.object({
         productId: z.string(),
-        images: z
-          .array(productImageSchema)
-          .max(
-            MAX_PRODUCT_IMAGES,
-            `A product can have at most ${MAX_PRODUCT_IMAGES} images`,
-          ),
+        images: productImagesListSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -1147,6 +1170,46 @@ export const productRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Product not found",
+        });
+      }
+
+      // Re-run the gallery rules against what will actually be stored: rows
+      // that already exist keep their DB mediaType (it's fixed at creation,
+      // so a client can't relabel a video as a photo to dodge photo-first or
+      // the video cap), and ids that aren't this product's are no-ops below.
+      const storedTypeById = new Map(
+        product.images.map((img) => [img.id, img.mediaType]),
+      );
+      const effectiveMedia = input.images.flatMap((img) => {
+        if (!img.id) {
+          return [
+            {
+              url: img.url,
+              sortOrder: img.sortOrder,
+              mediaType: img.mediaType,
+            },
+          ];
+        }
+        const stored = storedTypeById.get(img.id);
+        return stored
+          ? [{ url: img.url, sortOrder: img.sortOrder, mediaType: stored }]
+          : [];
+      });
+      const mediaCheck = z
+        .array(
+          z.object({
+            url: z.string(),
+            sortOrder: z.number(),
+            mediaType: z.enum(["IMAGE", "VIDEO"]),
+          }),
+        )
+        .superRefine(refineProductMedia)
+        .safeParse(effectiveMedia);
+      if (!mediaCheck.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            mediaCheck.error.issues[0]?.message ?? "Invalid product gallery",
         });
       }
 
@@ -1165,10 +1228,13 @@ export const productRouter = createTRPCRouter({
       // call. The S3 cleanup below runs before those creates land, so a fresh
       // usage index would not yet see them and the object would be destroyed
       // out from under the row about to reference it.
-      const keptUrls = new Set(input.images.map((img) => img.url));
+      const keptUrls = new Set(
+        input.images.flatMap((img) => [img.url, img.posterUrl]),
+      );
       const removedUrls = product.images
-        .filter((img) => toDelete.includes(img.id) && !keptUrls.has(img.url))
-        .map((img) => img.url);
+        .filter((img) => toDelete.includes(img.id))
+        .flatMap((img) => [img.url, img.posterUrl])
+        .filter((u): u is string => !!u && !keptUrls.has(u));
 
       await ctx.db.image.deleteMany({
         where: {
@@ -1192,6 +1258,12 @@ export const productRouter = createTRPCRouter({
               data: {
                 altText: image.altText,
                 sortOrder: image.sortOrder,
+                // mediaType/url are fixed at creation; only the poster can
+                // be swapped (and only videos have one).
+                posterUrl:
+                  storedTypeById.get(image.id) === "VIDEO"
+                    ? (image.posterUrl ?? null)
+                    : null,
               },
             });
           } else {
@@ -1203,6 +1275,11 @@ export const productRouter = createTRPCRouter({
                 url: image.url,
                 altText: image.altText,
                 sortOrder: image.sortOrder,
+                mediaType: image.mediaType,
+                posterUrl:
+                  image.mediaType === "VIDEO"
+                    ? (image.posterUrl ?? null)
+                    : null,
               },
             });
           }
@@ -1334,6 +1411,8 @@ export const productRouter = createTRPCRouter({
                 url: img.url,
                 altText: img.altText,
                 sortOrder: img.sortOrder,
+                mediaType: img.mediaType,
+                posterUrl: img.posterUrl,
                 businessId: img.businessId,
               })),
             },

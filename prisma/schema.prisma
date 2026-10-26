@@ -981,6 +981,11 @@ model Video {
   @@index([businessId, sortOrder])
 }
 
+enum ImageMediaType {
+  IMAGE
+  VIDEO
+}
+
 model Image {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -990,6 +995,12 @@ model Image {
   width     Int?
   height    Int?
   sortOrder Int     @default(0)
+
+  // Product galleries mix photos and short videos. A product's first item
+  // (lowest sortOrder) is always IMAGE so images[0] stays a photo everywhere.
+  mediaType ImageMediaType @default(IMAGE)
+  // Still frame for VIDEO rows, captured client-side at upload.
+  posterUrl String?
 
   // What this image is for
   productId  String?

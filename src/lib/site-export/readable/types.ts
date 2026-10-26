@@ -34,6 +34,8 @@ export interface RenderCtx {
 
 export interface ImageRef {
   url: string;
+  /** Absent = photo. Product galleries may hold videos. */
+  mediaType?: "IMAGE" | "VIDEO" | null;
   alt?: string | null;
   caption?: string | null;
 }

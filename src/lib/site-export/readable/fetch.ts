@@ -226,7 +226,11 @@ export async function fetchReadableData(
       metaDescription: p.metaDescription,
       metaKeywords: p.metaKeywords,
       ogImage: p.ogImage,
-      images: p.images.map((i) => ({ url: i.url, alt: i.altText })),
+      images: p.images.map((i) => ({
+        url: i.url,
+        alt: i.altText,
+        mediaType: i.mediaType,
+      })),
       variants: p.variants.map((v) => ({
         name: v.name,
         sku: v.sku,

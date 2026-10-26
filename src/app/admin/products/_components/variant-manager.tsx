@@ -11,6 +11,7 @@ import type {
 } from "../_validators/schema";
 import type { ColorSwatches } from "~/lib/products/color-swatches";
 import { colorOptionValues } from "~/lib/products/color-swatches";
+import { photosOnly } from "~/lib/products/media";
 import { cn, formatCurrency } from "~/lib/utils";
 import {
   AlertDialog,
@@ -153,11 +154,13 @@ export function VariantManager({
   trackInventory = false,
   basePrice,
   existingVariantOptions,
-  images,
+  images: galleryItems,
   errors,
   colorSwatches,
   onColorSwatchesChange,
 }: Props) {
+  // Variant images are photos only — videos can't stand in for a variant.
+  const images = useMemo(() => photosOnly(galleryItems), [galleryItems]);
   // `getExistingVariantOptions` returns `[]` for a new product, never nullish,
   // so the old `??` fallback never fired and the editor opened with zero rows —
   // "Generate Variants" then errored until the owner clicked "Add Option".

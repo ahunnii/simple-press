@@ -9,11 +9,12 @@
  * FORBIDDEN when the flag is off.
  *
  * Single mode (default) picks one file and closes. Multi mode
- * (`multiple: true`, images only) toggles library tiles into an ordered
+ * (`multiple: true`, images by default) toggles library tiles into an ordered
  * selection confirmed via a sticky "Add N images" footer, and the Upload tab
  * accepts several files at once (batched through `useBatchedImageUpload` on
- * the `images` route). `maxSelect` caps the selection at pick time;
- * `excludeUrls` locks tiles that are already in use.
+ * the `images` route — uploads stay images-only even when `kinds` adds
+ * videos). `maxSelect` caps the selection at pick time; `excludeUrls` locks
+ * tiles that are already in use.
  */
 "use client";
 
@@ -58,8 +59,8 @@ function itemMatchesKind(item: MediaItem, kind: MediaKind): boolean {
     : IMAGE_ITEM_KINDS.has(item.kind);
 }
 
-function pluralizeImages(n: number): string {
-  return `${n} image${n === 1 ? "" : "s"}`;
+function pluralizeImages(n: number, noun = "image"): string {
+  return `${n} ${noun}${n === 1 ? "" : "s"}`;
 }
 
 // ─── MediaPickerDialog ────────────────────────────────────────────────────────
@@ -83,18 +84,31 @@ type MediaPickerSingleProps = MediaPickerBaseProps & {
   onSelect: (url: string) => void;
 };
 
+/** One multi-mode pick, so a mixed-kind caller knows what each URL is. */
+export type MediaPickerPick = { url: string; kind: MediaKind };
+
 /**
- * Opt-in multi-pick (images only). `onSelectMany` receives URLs in pick
- * order (library: click order; upload: file order). `maxSelect` caps how
- * many can be added in one go (omit for no cap); `excludeUrls` are shown
- * disabled as "Added".
+ * Opt-in multi-pick (images unless `kinds` says otherwise). `onSelectMany`
+ * receives URLs in pick order (library: click order; upload: file order),
+ * plus the same picks with their kind. `maxSelect` caps how many can be added
+ * in one go (omit for no cap); `excludeUrls` are shown disabled as "Added".
  */
 type MediaPickerMultiProps = MediaPickerBaseProps & {
   kind: "image";
   multiple: true;
-  onSelectMany: (urls: string[]) => void;
+  onSelectMany: (urls: string[], picks: MediaPickerPick[]) => void;
   maxSelect?: number;
   excludeUrls?: string[];
+  /**
+   * Library kinds to list. Defaults to `[kind]` (images). Pass
+   * `["image", "video"]` to mix videos into the grid; the Upload tab stays
+   * images-only.
+   */
+  kinds?: readonly MediaKind[];
+  /** Per-kind caps on top of `maxSelect` (e.g. `{ video: 2 }`). */
+  maxSelectByKind?: Partial<Record<MediaKind, number>>;
+  /** Extra library filter (e.g. only video formats the caller can use). */
+  acceptItem?: (item: MediaItem) => boolean;
 };
 
 export type MediaPickerDialogProps =
@@ -108,6 +122,17 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
   const onSelectMany = props.multiple ? props.onSelectMany : undefined;
   const maxSelect = props.multiple ? props.maxSelect : undefined;
   const excludeUrls = props.multiple ? props.excludeUrls : undefined;
+  const multiKinds = props.multiple ? props.kinds : undefined;
+  const maxSelectByKind = props.multiple ? props.maxSelectByKind : undefined;
+  const acceptItem = props.multiple ? props.acceptItem : undefined;
+  // Kinds the library grid lists. Single mode: exactly `kind`.
+  const listKinds = useMemo<readonly MediaKind[]>(
+    () => (multiKinds && multiKinds.length > 0 ? multiKinds : [kind]),
+    [multiKinds, kind],
+  );
+  const mixedKinds = listKinds.length > 1;
+  // Noun for multi-mode copy: "image" normally, "item" for a mixed grid.
+  const itemNoun = mixedKinds ? "item" : "image";
 
   const [tab, setTab] = useState<"library" | "upload">("library");
   const [q, setQ] = useState("");
@@ -129,14 +154,25 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
     const items = data?.items ?? [];
     const needle = q.trim().toLowerCase();
     return items.filter((item) => {
-      if (!itemMatchesKind(item, kind)) return false;
+      if (!listKinds.some((k) => itemMatchesKind(item, k))) return false;
+      if (acceptItem && !acceptItem(item)) return false;
       if (!needle) return true;
       const filename = getFilename(item.key).toLowerCase();
       return (
         filename.includes(needle) || item.key.toLowerCase().includes(needle)
       );
     });
-  }, [data, q, kind]);
+  }, [data, q, listKinds, acceptItem]);
+
+  // URL → kind for every listed item, so selections (stored as URLs) can be
+  // counted per kind and handed back with their kind.
+  const kindByUrl = useMemo(() => {
+    const map = new Map<string, MediaKind>();
+    for (const item of data?.items ?? []) {
+      map.set(item.url, item.kind === "video" ? "video" : "image");
+    }
+    return map;
+  }, [data]);
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
   const excludedSet = useMemo(() => new Set(excludeUrls ?? []), [excludeUrls]);
@@ -174,21 +210,39 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
       if (maxSelect !== undefined && selected.length >= maxSelect) {
         toast.error(
           maxSelect <= 0
-            ? "You can't add any more images"
-            : `You can add ${maxSelect} more image${maxSelect === 1 ? "" : "s"}`,
+            ? `You can't add any more ${itemNoun}s`
+            : `You can add ${maxSelect} more ${itemNoun}${maxSelect === 1 ? "" : "s"}`,
         );
         return;
       }
+      const itemKind: MediaKind = item.kind === "video" ? "video" : "image";
+      const kindCap = maxSelectByKind?.[itemKind];
+      if (kindCap !== undefined) {
+        const kindSelected = selected.filter(
+          (url) => (kindByUrl.get(url) ?? "image") === itemKind,
+        ).length;
+        if (kindSelected >= kindCap) {
+          toast.error(
+            kindCap <= 0
+              ? `You can't add any more ${itemKind}s`
+              : `You can add ${kindCap} more ${itemKind}${kindCap === 1 ? "" : "s"}`,
+          );
+          return;
+        }
+      }
       setSelected([...selected, item.url]);
     },
-    [excludedSet, maxSelect, selected],
+    [excludedSet, itemNoun, kindByUrl, maxSelect, maxSelectByKind, selected],
   );
 
   const handleAddSelected = useCallback(() => {
     if (selected.length === 0) return;
-    onSelectMany?.(selected);
+    onSelectMany?.(
+      selected,
+      selected.map((url) => ({ url, kind: kindByUrl.get(url) ?? "image" })),
+    );
     closeDialog();
-  }, [closeDialog, onSelectMany, selected]);
+  }, [closeDialog, kindByUrl, onSelectMany, selected]);
 
   // Both uploaders are always instantiated (hooks can't be conditional);
   // single mode uses `uploader`, multi mode uses `batchUploader`.
@@ -311,11 +365,23 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
           toast.success(`${pluralizeImages(urls.length)} uploaded`);
         }
         void utils.media.list.invalidate();
-        onSelectMany?.([...selected, ...urls]);
+        const all = [...selected, ...urls];
+        onSelectMany?.(
+          all,
+          all.map((url) => ({ url, kind: kindByUrl.get(url) ?? "image" })),
+        );
         closeDialog();
       })();
     },
-    [closeDialog, maxSelect, onSelectMany, selected, uploadImages, utils],
+    [
+      closeDialog,
+      kindByUrl,
+      maxSelect,
+      onSelectMany,
+      selected,
+      uploadImages,
+      utils,
+    ],
   );
 
   const selectedCount = selected.length;
@@ -332,11 +398,17 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
         <DialogHeader>
           {isMulti ? (
             <>
-              <DialogTitle>Choose images</DialogTitle>
+              <DialogTitle>
+                {mixedKinds ? "Choose photos or videos" : "Choose images"}
+              </DialogTitle>
               <DialogDescription>
-                {allowUpload
-                  ? "Select one or more images from your media library, or upload new ones."
-                  : "Select one or more images from your media library."}
+                {mixedKinds
+                  ? allowUpload
+                    ? "Select one or more photos or videos from your media library, or upload new photos."
+                    : "Select one or more photos or videos from your media library."
+                  : allowUpload
+                    ? "Select one or more images from your media library, or upload new ones."
+                    : "Select one or more images from your media library."}
               </DialogDescription>
             </>
           ) : (
@@ -403,8 +475,8 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
                   q
                     ? "No files match your search."
                     : allowUpload
-                      ? "No images in your media library yet. Upload some from the Upload tab."
-                      : "No images in your media library yet."
+                      ? `No ${mixedKinds ? "photos or videos" : "images"} in your media library yet. Upload some from the Upload tab.`
+                      : `No ${mixedKinds ? "photos or videos" : "images"} in your media library yet.`
                 }
               />
             ) : (
@@ -466,7 +538,7 @@ export function MediaPickerDialog(props: MediaPickerDialogProps) {
                 disabled={selectedCount === 0}
                 onClick={handleAddSelected}
               >
-                Add {pluralizeImages(selectedCount)}
+                Add {pluralizeImages(selectedCount, itemNoun)}
               </Button>
             </div>
           </div>

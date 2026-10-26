@@ -9,6 +9,7 @@ import {
   getCachedBusiness,
   loadSeoBusiness,
 } from "~/lib/seo";
+import { primaryPhoto } from "~/lib/products/media";
 import { toMetaDescription } from "~/lib/seo/meta-description";
 import {
   buildBreadcrumbSchema,
@@ -172,7 +173,7 @@ export async function generateMetadata({ params }: Props) {
     },
     // The product photo is the natural share image, ahead of the site-wide
     // OG image / logo the helper falls back to.
-    ogImage: product.images[0]?.url,
+    ogImage: primaryPhoto(product.images)?.url,
     ogImageAlt: product.name,
   });
 }

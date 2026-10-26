@@ -206,6 +206,9 @@ const exportedImageSchema = z.object({
   width: nullableNumber.optional(),
   height: nullableNumber.optional(),
   sortOrder: z.number(),
+  // Product gallery videos — absent in older manifests (= IMAGE / no poster).
+  mediaType: z.enum(["IMAGE", "VIDEO"]).optional(),
+  posterUrl: nullableString.optional(),
 });
 
 const exportedProductVariantSchema = z.object({

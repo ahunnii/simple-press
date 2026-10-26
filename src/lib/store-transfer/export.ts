@@ -187,6 +187,8 @@ function mapImage(
     width: img.width,
     height: img.height,
     sortOrder: img.sortOrder,
+    mediaType: img.mediaType,
+    posterUrl: img.posterUrl,
   };
 }
 
@@ -806,6 +808,8 @@ async function fetchProducts(businessId: string) {
           width: true,
           height: true,
           sortOrder: true,
+          mediaType: true,
+          posterUrl: true,
         },
         orderBy: { sortOrder: "asc" },
       },

@@ -31,6 +31,7 @@ import { getBusinessPostalAddress } from "~/lib/marketing/render-campaign";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import {
   LOCAL_PRESENCE_MODES,
   normalizeAreaServed,
@@ -277,7 +278,10 @@ export const businessRouter = createTRPCRouter({
         products: {
           where: { published: true },
           include: {
-            images: true,
+            images: {
+              where: PHOTO_ONLY_WHERE,
+              orderBy: { sortOrder: "asc" },
+            },
           },
           omit: { cost: true },
         },
@@ -442,6 +446,7 @@ export const businessRouter = createTRPCRouter({
             description: true,
             variants: true,
             images: {
+              where: PHOTO_ONLY_WHERE,
               take: 2,
               orderBy: { sortOrder: "asc" },
             },
@@ -620,6 +625,7 @@ export const businessRouter = createTRPCRouter({
                   where: { published: true },
                   include: {
                     images: {
+                      where: PHOTO_ONLY_WHERE,
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                     },
@@ -678,6 +684,7 @@ export const businessRouter = createTRPCRouter({
               additionalFields: true, // comingSoon / productTagline etc.
               images: {
                 select: { id: true, url: true, altText: true },
+                where: PHOTO_ONLY_WHERE,
                 orderBy: { sortOrder: "asc" },
                 take: 2,
               },

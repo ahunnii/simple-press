@@ -10,6 +10,7 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { isVideoMedia } from "~/lib/products/media";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
@@ -25,6 +26,11 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
@@ -135,6 +141,7 @@ export function NoiseProductPage({
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
   const lightboxPrevRef = useRef<HTMLButtonElement>(null);
   const lightboxNextRef = useRef<HTMLButtonElement>(null);
+  const lightboxVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const { variantImageUrl } = useVariantImage();
   // Jump to the variant's image when the selected variant changes.
@@ -164,21 +171,25 @@ export function NoiseProductPage({
       if (e.key === "Escape") {
         setLightboxOpen(false);
       } else if (e.key === "ArrowLeft" && images.length > 1) {
+        // Arrow keys scrub a focused video's native controls instead.
+        if (document.activeElement?.tagName === "VIDEO") return;
         goToPrevImage();
       } else if (e.key === "ArrowRight" && images.length > 1) {
+        if (document.activeElement?.tagName === "VIDEO") return;
         goToNextImage();
       } else if (e.key === "Tab") {
-        // Trap focus within the lightbox's own controls (close, and
-        // prev/next when there's more than one image).
+        // Trap focus within the lightbox's own controls (close, prev/next
+        // when there's more than one image, and the video when showing one).
         e.preventDefault();
         const focusables = [
+          lightboxVideoRef.current,
           lightboxPrevRef.current,
           lightboxNextRef.current,
           lightboxCloseRef.current,
-        ].filter((el): el is HTMLButtonElement => el !== null);
+        ].filter((el): el is HTMLButtonElement | HTMLVideoElement => el !== null);
         if (focusables.length === 0) return;
         const currentIndex = focusables.indexOf(
-          document.activeElement as HTMLButtonElement,
+          document.activeElement as HTMLButtonElement | HTMLVideoElement,
         );
         const nextIndex = e.shiftKey
           ? (currentIndex - 1 + focusables.length) % focusables.length
@@ -219,6 +230,7 @@ export function NoiseProductPage({
   const firstCollection = colProds?.[0]?.collection ?? null;
 
   const activeImage = images[activeImg];
+  const activeIsVideo = isVideoMedia(activeImage);
 
   return (
     <PageTransition>
@@ -316,7 +328,7 @@ export function NoiseProductPage({
               <button
                 key={img.id}
                 onClick={() => setActiveImg(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={`View ${isVideoMedia(img) ? "video" : "image"} ${i + 1}`}
                 aria-pressed={activeImg === i}
                 className="relative overflow-hidden transition-all"
                 style={{
@@ -331,13 +343,17 @@ export function NoiseProductPage({
                   outlineOffset: "-4px",
                 }}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
+                {isVideoMedia(img) ? (
+                  <ProductGalleryThumb item={img} sizes="80px" />
+                ) : (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
+                )}
                 <div
                   className="absolute top-1 left-1 px-1 font-mono text-[8px] tracking-[0.12em]"
                   style={{
@@ -374,7 +390,19 @@ export function NoiseProductPage({
             className="border-foreground relative overflow-hidden border"
             style={{ aspectRatio: "4 / 5", background: "var(--vn-steel)" }}
           >
-            {activeImage ? (
+            {activeImage && activeIsVideo ? (
+              // Not wrapped in the enlarge <button> (nested buttons) — the
+              // video renders its own expand button under its controls.
+              <ProductGalleryVideo
+                key={activeImage.url}
+                item={activeImage}
+                active={!lightboxOpen}
+                fill
+                fallbackLabel={`${product.name ?? "Product"} video`}
+                onExpand={() => setLightboxOpen(true)}
+                expandButtonRef={enlargeTriggerRef}
+              />
+            ) : activeImage ? (
               <button
                 ref={enlargeTriggerRef}
                 type="button"
@@ -426,7 +454,7 @@ export function NoiseProductPage({
                 <button
                   key={img.id}
                   onClick={() => setActiveImg(i)}
-                  aria-label={`View image ${i + 1}`}
+                  aria-label={`View ${isVideoMedia(img) ? "video" : "image"} ${i + 1}`}
                   aria-pressed={activeImg === i}
                   className="relative overflow-hidden transition-all"
                   style={{
@@ -441,13 +469,17 @@ export function NoiseProductPage({
                     outlineOffset: "-4px",
                   }}
                 >
-                  <Image
-                    src={img.url}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="25vw"
-                  />
+                  {isVideoMedia(img) ? (
+                    <ProductGalleryThumb item={img} sizes="25vw" />
+                  ) : (
+                    <Image
+                      src={img.url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="25vw"
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -693,7 +725,7 @@ export function NoiseProductPage({
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label={`${product.name ?? "Product"} image, enlarged view`}
+            aria-label={`${product.name ?? "Product"} ${activeIsVideo ? "video" : "image"}, enlarged view`}
             initial={{ opacity: reduce ? 1 : 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: reduce ? 1 : 0 }}
@@ -709,13 +741,22 @@ export function NoiseProductPage({
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                src={images[activeImg]?.url ?? "/placeholder.svg"}
-                alt={product.name ?? "Product image"}
-                width={1200}
-                height={1200}
-                className="max-h-[90vh] max-w-[90vw] rounded-none object-contain"
-              />
+              {activeImage && activeIsVideo ? (
+                <ProductLightboxVideo
+                  key={activeImage.url}
+                  ref={lightboxVideoRef}
+                  item={activeImage}
+                  fallbackLabel={`${product.name ?? "Product"} video`}
+                />
+              ) : (
+                <Image
+                  src={images[activeImg]?.url ?? "/placeholder.svg"}
+                  alt={product.name ?? "Product image"}
+                  width={1200}
+                  height={1200}
+                  className="max-h-[90vh] max-w-[90vw] rounded-none object-contain"
+                />
+              )}
               {images.length > 1 ? (
                 <>
                   <button
@@ -738,7 +779,11 @@ export function NoiseProductPage({
                   </button>
                   <span
                     aria-live="polite"
-                    className="bg-background/80 absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 font-mono text-[11px] tracking-[0.12em] backdrop-blur-sm"
+                    className={cn(
+                      "bg-background/80 absolute left-1/2 -translate-x-1/2 rounded-full px-3 py-1 font-mono text-[11px] tracking-[0.12em] backdrop-blur-sm",
+                      // Native video controls own the bottom edge.
+                      activeIsVideo ? "top-3" : "bottom-3",
+                    )}
                   >
                     {activeImg + 1} / {images.length}
                   </span>
