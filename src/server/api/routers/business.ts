@@ -37,6 +37,7 @@ import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
 import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
+import { toPublicProduct } from "~/lib/products/public-product";
 import {
   LOCAL_PRESENCE_MODES,
   normalizeAreaServed,
@@ -381,6 +382,7 @@ export const businessRouter = createTRPCRouter({
 
     return {
       ...restWithoutSiteContent,
+      products: restWithoutSiteContent.products.map(toPublicProduct),
       siteContent: sanitizedSiteContent,
       isStripeConnected: !!stripeAccountId,
       maintenance,
@@ -471,10 +473,15 @@ export const businessRouter = createTRPCRouter({
             additionalFields: true,
             trackInventory: true,
             inventoryQty: true,
+            reservedQty: true,
             allowBackorders: true,
             baseUnitsConsumed: true,
             baseInventoryUnit: {
-              select: { inventoryQty: true, allowBackorders: true },
+              select: {
+                inventoryQty: true,
+                reservedQty: true,
+                allowBackorders: true,
+              },
             },
           },
           // 8 so templates with two product rails (default, noise) can fill
@@ -499,7 +506,11 @@ export const businessRouter = createTRPCRouter({
     const sanitizedHomepageSc = homepageSc
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(homepageSc)
       : homepageSc;
-    return { ...homepageRest, siteContent: sanitizedHomepageSc };
+    return {
+      ...homepageRest,
+      products: homepageRest.products.map(toPublicProduct),
+      siteContent: sanitizedHomepageSc,
+    };
   }),
 
   getForEmailPreview: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -676,9 +687,64 @@ export const businessRouter = createTRPCRouter({
           id: businessId.id,
           status: "active",
         },
-        include: {
-          siteContent: true,
-          images: true,
+        // Explicit allowlist — this used to be a bare `include`, which shipped
+        // EVERY Business column (owner email, Stripe account id, private
+        // delivery origin ZIP, provisioning code, raw maintenance drafts...)
+        // into the /shop page payload. Same public set as `simplifiedGet`.
+        select: {
+          id: true,
+          name: true,
+          templateId: true,
+          featureFlags: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
+          supportEmail: true,
+          phoneNumber: true,
+          businessAddress: true,
+          addressStreet: true,
+          addressCity: true,
+          addressState: true,
+          addressPostalCode: true,
+          latitude: true,
+          longitude: true,
+          businessHours: true,
+          timeZone: true,
+          localPresence: true,
+          areaServed: true,
+          salesCountries: true,
+          // Read only to derive `isStripeConnected`; stripped below.
+          stripeAccountId: true,
+          stripeChargesEnabled: true,
+          donationLabel: true,
+          donationPresetAmounts: true,
+          venmoHandle: true,
+          cashAppHandle: true,
+          donationShowInHeader: true,
+          donationShowInFooter: true,
+          shippingType: true,
+          shippingFlatRate: true,
+          freeShippingThreshold: true,
+          offersInStorePickup: true,
+          pickupLocation: true,
+          returnWindowDays: true,
+          siteContent: {
+            select: {
+              logoUrl: true,
+              faviconUrl: true,
+              logoAltText: true,
+              footerText: true,
+              primaryColor: true,
+              navigationItems: true,
+              footerNavigationItems: true,
+              socialLinks: true,
+              seoBrandName: true,
+              customFields: true,
+              previewCustomFields: true,
+              bannerConfig: true,
+              popupConfig: true,
+            },
+          },
           products: {
             where: { published: true },
             // Explicit select keeps the shop-page payload lean: only fields
@@ -697,6 +763,7 @@ export const businessRouter = createTRPCRouter({
               compareAtPrice: true,
               trackInventory: true,
               inventoryQty: true,
+              reservedQty: true,
               allowBackorders: true,
               baseUnitsConsumed: true,
               additionalFields: true, // comingSoon / productTagline etc.
@@ -713,6 +780,7 @@ export const businessRouter = createTRPCRouter({
                   price: true,
                   compareAtPrice: true,
                   inventoryQty: true,
+                  reservedQty: true,
                 },
               },
               collectionProducts: {
@@ -723,7 +791,11 @@ export const businessRouter = createTRPCRouter({
                 },
               },
               baseInventoryUnit: {
-                select: { inventoryQty: true, allowBackorders: true },
+                select: {
+                  inventoryQty: true,
+                  reservedQty: true,
+                  allowBackorders: true,
+                },
               },
               // Product customizer: cards link to the product page instead
               // of quick-adding. Callers gate it on the `productOptions` flag.
@@ -743,7 +815,7 @@ export const businessRouter = createTRPCRouter({
       }),
     ]);
 
-    if (business && business.products && Array.isArray(business.products)) {
+    if (business?.products && Array.isArray(business.products)) {
       // Move products with additionalFields.comingSoon === true to the bottom
       business.products = [
         ...business.products.filter(
@@ -781,9 +853,12 @@ export const businessRouter = createTRPCRouter({
 
     // Total published products (the products array above is capped at 500),
     // so consumers can detect truncation without another query.
+    const { stripeAccountId, products, ...rest } = business;
     return {
-      ...business,
+      ...rest,
+      products: products.map(toPublicProduct),
       siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
       publishedProductCount,
     };
   }),

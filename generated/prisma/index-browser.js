@@ -1191,6 +1191,19 @@ exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   lastSyncError: 'lastSyncError'
 };
 
+exports.Prisma.BusinessApiTokenScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  name: 'name',
+  tokenHash: 'tokenHash',
+  prefix: 'prefix',
+  scopes: 'scopes',
+  createdById: 'createdById',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt'
+};
+
 exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1531,6 +1544,7 @@ exports.Prisma.ModelName = {
   MarketingDoNotEmail: 'MarketingDoNotEmail',
   CustomerImport: 'CustomerImport',
   QuickBooksConnection: 'QuickBooksConnection',
+  BusinessApiToken: 'BusinessApiToken',
   QuickBooksInvoice: 'QuickBooksInvoice',
   InvoiceSettings: 'InvoiceSettings',
   Invoice: 'Invoice',

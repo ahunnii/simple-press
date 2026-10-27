@@ -1,4 +1,5 @@
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { getPaymentsHealth } from "~/lib/stripe/payments-health";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
@@ -25,6 +26,17 @@ export default async function IntegrationsSettingsPage() {
     ? await api.quickbooks.getConnection()
     : null;
 
+  // API keys hand the store's catalog to an outside app, so they follow the
+  // same owner-or-platform-admin rule as "Download your site". `membershipRole`
+  // is null for PLATFORM_ADMIN (no membership row = full access). Managers and
+  // staff get `apiKeys: null` and never see the card; the `apiToken.*`
+  // procedures enforce the same rule server-side.
+  const { membershipRole } = await requireAdminAccess();
+  const apiKeys =
+    membershipRole === null || membershipRole === "OWNER"
+      ? await api.apiToken.list()
+      : null;
+
   return (
     <>
       <TrailHeader
@@ -39,6 +51,7 @@ export default async function IntegrationsSettingsPage() {
         business={business}
         paymentsHealth={paymentsHealth}
         quickbooks={quickbooks}
+        apiKeys={apiKeys}
       />
     </>
   );

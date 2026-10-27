@@ -393,6 +393,18 @@ export type CustomerImport = $Result.DefaultSelection<Prisma.$CustomerImportPayl
  */
 export type QuickBooksConnection = $Result.DefaultSelection<Prisma.$QuickBooksConnectionPayload>
 /**
+ * Model BusinessApiToken
+ * Read-only API token a business owner issues to an external integration
+ * (e.g. ProfitMax). Stored HASHED, not encrypted: auth looks the row up with
+ * `where: { tokenHash }`, and encrypted columns can never appear in a
+ * `where`. The raw token (`spk_...`) is shown to the owner exactly once at
+ * creation and is unrecoverable afterwards; `prefix` (its first 12 chars) is
+ * all the UI ever displays. Revoke = set `revokedAt`; rows are never deleted
+ * by the app. `createdById` is a plain User id (no relation), like other
+ * audit-only creator columns.
+ */
+export type BusinessApiToken = $Result.DefaultSelection<Prisma.$BusinessApiTokenPayload>
+/**
  * Model QuickBooksInvoice
  * One row per invoice SimplePress created in QuickBooks: audit trail, the
  * /admin/invoices list, and the cron sync target. Customer fields are a
@@ -1275,6 +1287,16 @@ export class PrismaClient<
   get quickBooksConnection(): Prisma.QuickBooksConnectionDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.businessApiToken`: Exposes CRUD operations for the **BusinessApiToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BusinessApiTokens
+    * const businessApiTokens = await prisma.businessApiToken.findMany()
+    * ```
+    */
+  get businessApiToken(): Prisma.BusinessApiTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.quickBooksInvoice`: Exposes CRUD operations for the **QuickBooksInvoice** model.
     * Example usage:
     * ```ts
@@ -1875,6 +1897,7 @@ export namespace Prisma {
     MarketingDoNotEmail: 'MarketingDoNotEmail',
     CustomerImport: 'CustomerImport',
     QuickBooksConnection: 'QuickBooksConnection',
+    BusinessApiToken: 'BusinessApiToken',
     QuickBooksInvoice: 'QuickBooksInvoice',
     InvoiceSettings: 'InvoiceSettings',
     Invoice: 'Invoice',
@@ -1903,7 +1926,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "policyAcceptance" | "policyNotice" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "marketingCampaign" | "marketingCampaignBatch" | "marketingCampaignRecipient" | "marketingConsentEvent" | "marketingDoNotEmail" | "customerImport" | "quickBooksConnection" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "productOptionGroup" | "productOptionGroupOnProduct" | "productOptionValue" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryCheckout" | "inventoryCheckoutLine" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "policyAcceptance" | "policyNotice" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission" | "form" | "formSubmission" | "marketingCampaign" | "marketingCampaignBatch" | "marketingCampaignRecipient" | "marketingConsentEvent" | "marketingDoNotEmail" | "customerImport" | "quickBooksConnection" | "businessApiToken" | "quickBooksInvoice" | "invoiceSettings" | "invoice" | "invoicePayment" | "invoiceEvent" | "subscription" | "donation" | "loyaltyProgram" | "loyaltyRewardTier" | "loyaltyLedger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -6421,6 +6444,80 @@ export namespace Prisma {
           }
         }
       }
+      BusinessApiToken: {
+        payload: Prisma.$BusinessApiTokenPayload<ExtArgs>
+        fields: Prisma.BusinessApiTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BusinessApiTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BusinessApiTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.BusinessApiTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BusinessApiTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          findMany: {
+            args: Prisma.BusinessApiTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>[]
+          }
+          create: {
+            args: Prisma.BusinessApiTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          createMany: {
+            args: Prisma.BusinessApiTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BusinessApiTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.BusinessApiTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          update: {
+            args: Prisma.BusinessApiTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.BusinessApiTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BusinessApiTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BusinessApiTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.BusinessApiTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BusinessApiTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.BusinessApiTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBusinessApiToken>
+          }
+          groupBy: {
+            args: Prisma.BusinessApiTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BusinessApiTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BusinessApiTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<BusinessApiTokenCountAggregateOutputType> | number
+          }
+        }
+      }
       QuickBooksInvoice: {
         payload: Prisma.$QuickBooksInvoicePayload<ExtArgs>
         fields: Prisma.QuickBooksInvoiceFieldRefs
@@ -7318,6 +7415,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailOmit
     customerImport?: CustomerImportOmit
     quickBooksConnection?: QuickBooksConnectionOmit
+    businessApiToken?: BusinessApiTokenOmit
     quickBooksInvoice?: QuickBooksInvoiceOmit
     invoiceSettings?: InvoiceSettingsOmit
     invoice?: InvoiceOmit
@@ -7573,6 +7671,7 @@ export namespace Prisma {
     marketingConsentEvents: number
     marketingDoNotEmail: number
     customerImports: number
+    apiTokens: number
     quickBooksInvoices: number
     invoices: number
     invoicePayments: number
@@ -7619,6 +7718,7 @@ export namespace Prisma {
     marketingConsentEvents?: boolean | BusinessCountOutputTypeCountMarketingConsentEventsArgs
     marketingDoNotEmail?: boolean | BusinessCountOutputTypeCountMarketingDoNotEmailArgs
     customerImports?: boolean | BusinessCountOutputTypeCountCustomerImportsArgs
+    apiTokens?: boolean | BusinessCountOutputTypeCountApiTokensArgs
     quickBooksInvoices?: boolean | BusinessCountOutputTypeCountQuickBooksInvoicesArgs
     invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
     invoicePayments?: boolean | BusinessCountOutputTypeCountInvoicePaymentsArgs
@@ -7883,6 +7983,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountCustomerImportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CustomerImportWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountApiTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BusinessApiTokenWhereInput
   }
 
   /**
@@ -15714,6 +15821,7 @@ export namespace Prisma {
     marketingDoNotEmail?: boolean | Business$marketingDoNotEmailArgs<ExtArgs>
     customerImports?: boolean | Business$customerImportsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
+    apiTokens?: boolean | Business$apiTokensArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     invoiceSettings?: boolean | Business$invoiceSettingsArgs<ExtArgs>
     invoices?: boolean | Business$invoicesArgs<ExtArgs>
@@ -16033,6 +16141,7 @@ export namespace Prisma {
     marketingDoNotEmail?: boolean | Business$marketingDoNotEmailArgs<ExtArgs>
     customerImports?: boolean | Business$customerImportsArgs<ExtArgs>
     quickBooksConnection?: boolean | Business$quickBooksConnectionArgs<ExtArgs>
+    apiTokens?: boolean | Business$apiTokensArgs<ExtArgs>
     quickBooksInvoices?: boolean | Business$quickBooksInvoicesArgs<ExtArgs>
     invoiceSettings?: boolean | Business$invoiceSettingsArgs<ExtArgs>
     invoices?: boolean | Business$invoicesArgs<ExtArgs>
@@ -16088,6 +16197,7 @@ export namespace Prisma {
       marketingDoNotEmail: Prisma.$MarketingDoNotEmailPayload<ExtArgs>[]
       customerImports: Prisma.$CustomerImportPayload<ExtArgs>[]
       quickBooksConnection: Prisma.$QuickBooksConnectionPayload<ExtArgs> | null
+      apiTokens: Prisma.$BusinessApiTokenPayload<ExtArgs>[]
       quickBooksInvoices: Prisma.$QuickBooksInvoicePayload<ExtArgs>[]
       invoiceSettings: Prisma.$InvoiceSettingsPayload<ExtArgs> | null
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
@@ -16617,6 +16727,7 @@ export namespace Prisma {
     marketingDoNotEmail<T extends Business$marketingDoNotEmailArgs<ExtArgs> = {}>(args?: Subset<T, Business$marketingDoNotEmailArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketingDoNotEmailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customerImports<T extends Business$customerImportsArgs<ExtArgs> = {}>(args?: Subset<T, Business$customerImportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quickBooksConnection<T extends Business$quickBooksConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksConnectionArgs<ExtArgs>>): Prisma__QuickBooksConnectionClient<$Result.GetResult<Prisma.$QuickBooksConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    apiTokens<T extends Business$apiTokensArgs<ExtArgs> = {}>(args?: Subset<T, Business$apiTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quickBooksInvoices<T extends Business$quickBooksInvoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quickBooksInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuickBooksInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoiceSettings<T extends Business$invoiceSettingsArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoiceSettingsArgs<ExtArgs>>): Prisma__InvoiceSettingsClient<$Result.GetResult<Prisma.$InvoiceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -18005,6 +18116,30 @@ export namespace Prisma {
      */
     include?: QuickBooksConnectionInclude<ExtArgs> | null
     where?: QuickBooksConnectionWhereInput
+  }
+
+  /**
+   * Business.apiTokens
+   */
+  export type Business$apiTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    where?: BusinessApiTokenWhereInput
+    orderBy?: BusinessApiTokenOrderByWithRelationInput | BusinessApiTokenOrderByWithRelationInput[]
+    cursor?: BusinessApiTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BusinessApiTokenScalarFieldEnum | BusinessApiTokenScalarFieldEnum[]
   }
 
   /**
@@ -86423,6 +86558,1125 @@ export namespace Prisma {
 
 
   /**
+   * Model BusinessApiToken
+   */
+
+  export type AggregateBusinessApiToken = {
+    _count: BusinessApiTokenCountAggregateOutputType | null
+    _min: BusinessApiTokenMinAggregateOutputType | null
+    _max: BusinessApiTokenMaxAggregateOutputType | null
+  }
+
+  export type BusinessApiTokenMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    name: string | null
+    tokenHash: string | null
+    prefix: string | null
+    createdById: string | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+  }
+
+  export type BusinessApiTokenMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    businessId: string | null
+    name: string | null
+    tokenHash: string | null
+    prefix: string | null
+    createdById: string | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+  }
+
+  export type BusinessApiTokenCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    businessId: number
+    name: number
+    tokenHash: number
+    prefix: number
+    scopes: number
+    createdById: number
+    lastUsedAt: number
+    revokedAt: number
+    _all: number
+  }
+
+
+  export type BusinessApiTokenMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    name?: true
+    tokenHash?: true
+    prefix?: true
+    createdById?: true
+    lastUsedAt?: true
+    revokedAt?: true
+  }
+
+  export type BusinessApiTokenMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    name?: true
+    tokenHash?: true
+    prefix?: true
+    createdById?: true
+    lastUsedAt?: true
+    revokedAt?: true
+  }
+
+  export type BusinessApiTokenCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    businessId?: true
+    name?: true
+    tokenHash?: true
+    prefix?: true
+    scopes?: true
+    createdById?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    _all?: true
+  }
+
+  export type BusinessApiTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BusinessApiToken to aggregate.
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BusinessApiTokens to fetch.
+     */
+    orderBy?: BusinessApiTokenOrderByWithRelationInput | BusinessApiTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BusinessApiTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BusinessApiTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BusinessApiTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BusinessApiTokens
+    **/
+    _count?: true | BusinessApiTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BusinessApiTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BusinessApiTokenMaxAggregateInputType
+  }
+
+  export type GetBusinessApiTokenAggregateType<T extends BusinessApiTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateBusinessApiToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBusinessApiToken[P]>
+      : GetScalarType<T[P], AggregateBusinessApiToken[P]>
+  }
+
+
+
+
+  export type BusinessApiTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BusinessApiTokenWhereInput
+    orderBy?: BusinessApiTokenOrderByWithAggregationInput | BusinessApiTokenOrderByWithAggregationInput[]
+    by: BusinessApiTokenScalarFieldEnum[] | BusinessApiTokenScalarFieldEnum
+    having?: BusinessApiTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BusinessApiTokenCountAggregateInputType | true
+    _min?: BusinessApiTokenMinAggregateInputType
+    _max?: BusinessApiTokenMaxAggregateInputType
+  }
+
+  export type BusinessApiTokenGroupByOutputType = {
+    id: string
+    createdAt: Date
+    businessId: string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes: string[]
+    createdById: string | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    _count: BusinessApiTokenCountAggregateOutputType | null
+    _min: BusinessApiTokenMinAggregateOutputType | null
+    _max: BusinessApiTokenMaxAggregateOutputType | null
+  }
+
+  type GetBusinessApiTokenGroupByPayload<T extends BusinessApiTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BusinessApiTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BusinessApiTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BusinessApiTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], BusinessApiTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BusinessApiTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    tokenHash?: boolean
+    prefix?: boolean
+    scopes?: boolean
+    createdById?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["businessApiToken"]>
+
+  export type BusinessApiTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    tokenHash?: boolean
+    prefix?: boolean
+    scopes?: boolean
+    createdById?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["businessApiToken"]>
+
+  export type BusinessApiTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    tokenHash?: boolean
+    prefix?: boolean
+    scopes?: boolean
+    createdById?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["businessApiToken"]>
+
+  export type BusinessApiTokenSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    businessId?: boolean
+    name?: boolean
+    tokenHash?: boolean
+    prefix?: boolean
+    scopes?: boolean
+    createdById?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+  }
+
+  export type BusinessApiTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "businessId" | "name" | "tokenHash" | "prefix" | "scopes" | "createdById" | "lastUsedAt" | "revokedAt", ExtArgs["result"]["businessApiToken"]>
+  export type BusinessApiTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type BusinessApiTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type BusinessApiTokenIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $BusinessApiTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BusinessApiToken"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      businessId: string
+      name: string
+      tokenHash: string
+      prefix: string
+      scopes: string[]
+      createdById: string | null
+      lastUsedAt: Date | null
+      revokedAt: Date | null
+    }, ExtArgs["result"]["businessApiToken"]>
+    composites: {}
+  }
+
+  type BusinessApiTokenGetPayload<S extends boolean | null | undefined | BusinessApiTokenDefaultArgs> = $Result.GetResult<Prisma.$BusinessApiTokenPayload, S>
+
+  type BusinessApiTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BusinessApiTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BusinessApiTokenCountAggregateInputType | true
+    }
+
+  export interface BusinessApiTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BusinessApiToken'], meta: { name: 'BusinessApiToken' } }
+    /**
+     * Find zero or one BusinessApiToken that matches the filter.
+     * @param {BusinessApiTokenFindUniqueArgs} args - Arguments to find a BusinessApiToken
+     * @example
+     * // Get one BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BusinessApiTokenFindUniqueArgs>(args: SelectSubset<T, BusinessApiTokenFindUniqueArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BusinessApiToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BusinessApiTokenFindUniqueOrThrowArgs} args - Arguments to find a BusinessApiToken
+     * @example
+     * // Get one BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BusinessApiTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, BusinessApiTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BusinessApiToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenFindFirstArgs} args - Arguments to find a BusinessApiToken
+     * @example
+     * // Get one BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BusinessApiTokenFindFirstArgs>(args?: SelectSubset<T, BusinessApiTokenFindFirstArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BusinessApiToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenFindFirstOrThrowArgs} args - Arguments to find a BusinessApiToken
+     * @example
+     * // Get one BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BusinessApiTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, BusinessApiTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BusinessApiTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BusinessApiTokens
+     * const businessApiTokens = await prisma.businessApiToken.findMany()
+     * 
+     * // Get first 10 BusinessApiTokens
+     * const businessApiTokens = await prisma.businessApiToken.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const businessApiTokenWithIdOnly = await prisma.businessApiToken.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BusinessApiTokenFindManyArgs>(args?: SelectSubset<T, BusinessApiTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BusinessApiToken.
+     * @param {BusinessApiTokenCreateArgs} args - Arguments to create a BusinessApiToken.
+     * @example
+     * // Create one BusinessApiToken
+     * const BusinessApiToken = await prisma.businessApiToken.create({
+     *   data: {
+     *     // ... data to create a BusinessApiToken
+     *   }
+     * })
+     * 
+     */
+    create<T extends BusinessApiTokenCreateArgs>(args: SelectSubset<T, BusinessApiTokenCreateArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BusinessApiTokens.
+     * @param {BusinessApiTokenCreateManyArgs} args - Arguments to create many BusinessApiTokens.
+     * @example
+     * // Create many BusinessApiTokens
+     * const businessApiToken = await prisma.businessApiToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BusinessApiTokenCreateManyArgs>(args?: SelectSubset<T, BusinessApiTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BusinessApiTokens and returns the data saved in the database.
+     * @param {BusinessApiTokenCreateManyAndReturnArgs} args - Arguments to create many BusinessApiTokens.
+     * @example
+     * // Create many BusinessApiTokens
+     * const businessApiToken = await prisma.businessApiToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BusinessApiTokens and only return the `id`
+     * const businessApiTokenWithIdOnly = await prisma.businessApiToken.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BusinessApiTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, BusinessApiTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BusinessApiToken.
+     * @param {BusinessApiTokenDeleteArgs} args - Arguments to delete one BusinessApiToken.
+     * @example
+     * // Delete one BusinessApiToken
+     * const BusinessApiToken = await prisma.businessApiToken.delete({
+     *   where: {
+     *     // ... filter to delete one BusinessApiToken
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BusinessApiTokenDeleteArgs>(args: SelectSubset<T, BusinessApiTokenDeleteArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BusinessApiToken.
+     * @param {BusinessApiTokenUpdateArgs} args - Arguments to update one BusinessApiToken.
+     * @example
+     * // Update one BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BusinessApiTokenUpdateArgs>(args: SelectSubset<T, BusinessApiTokenUpdateArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BusinessApiTokens.
+     * @param {BusinessApiTokenDeleteManyArgs} args - Arguments to filter BusinessApiTokens to delete.
+     * @example
+     * // Delete a few BusinessApiTokens
+     * const { count } = await prisma.businessApiToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BusinessApiTokenDeleteManyArgs>(args?: SelectSubset<T, BusinessApiTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BusinessApiTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BusinessApiTokens
+     * const businessApiToken = await prisma.businessApiToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BusinessApiTokenUpdateManyArgs>(args: SelectSubset<T, BusinessApiTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BusinessApiTokens and returns the data updated in the database.
+     * @param {BusinessApiTokenUpdateManyAndReturnArgs} args - Arguments to update many BusinessApiTokens.
+     * @example
+     * // Update many BusinessApiTokens
+     * const businessApiToken = await prisma.businessApiToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BusinessApiTokens and only return the `id`
+     * const businessApiTokenWithIdOnly = await prisma.businessApiToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BusinessApiTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, BusinessApiTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BusinessApiToken.
+     * @param {BusinessApiTokenUpsertArgs} args - Arguments to update or create a BusinessApiToken.
+     * @example
+     * // Update or create a BusinessApiToken
+     * const businessApiToken = await prisma.businessApiToken.upsert({
+     *   create: {
+     *     // ... data to create a BusinessApiToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BusinessApiToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BusinessApiTokenUpsertArgs>(args: SelectSubset<T, BusinessApiTokenUpsertArgs<ExtArgs>>): Prisma__BusinessApiTokenClient<$Result.GetResult<Prisma.$BusinessApiTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BusinessApiTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenCountArgs} args - Arguments to filter BusinessApiTokens to count.
+     * @example
+     * // Count the number of BusinessApiTokens
+     * const count = await prisma.businessApiToken.count({
+     *   where: {
+     *     // ... the filter for the BusinessApiTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends BusinessApiTokenCountArgs>(
+      args?: Subset<T, BusinessApiTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BusinessApiTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BusinessApiToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BusinessApiTokenAggregateArgs>(args: Subset<T, BusinessApiTokenAggregateArgs>): Prisma.PrismaPromise<GetBusinessApiTokenAggregateType<T>>
+
+    /**
+     * Group by BusinessApiToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BusinessApiTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BusinessApiTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BusinessApiTokenGroupByArgs['orderBy'] }
+        : { orderBy?: BusinessApiTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BusinessApiTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBusinessApiTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BusinessApiToken model
+   */
+  readonly fields: BusinessApiTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BusinessApiToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BusinessApiTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BusinessApiToken model
+   */
+  interface BusinessApiTokenFieldRefs {
+    readonly id: FieldRef<"BusinessApiToken", 'String'>
+    readonly createdAt: FieldRef<"BusinessApiToken", 'DateTime'>
+    readonly businessId: FieldRef<"BusinessApiToken", 'String'>
+    readonly name: FieldRef<"BusinessApiToken", 'String'>
+    readonly tokenHash: FieldRef<"BusinessApiToken", 'String'>
+    readonly prefix: FieldRef<"BusinessApiToken", 'String'>
+    readonly scopes: FieldRef<"BusinessApiToken", 'String[]'>
+    readonly createdById: FieldRef<"BusinessApiToken", 'String'>
+    readonly lastUsedAt: FieldRef<"BusinessApiToken", 'DateTime'>
+    readonly revokedAt: FieldRef<"BusinessApiToken", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BusinessApiToken findUnique
+   */
+  export type BusinessApiTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which BusinessApiToken to fetch.
+     */
+    where: BusinessApiTokenWhereUniqueInput
+  }
+
+  /**
+   * BusinessApiToken findUniqueOrThrow
+   */
+  export type BusinessApiTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which BusinessApiToken to fetch.
+     */
+    where: BusinessApiTokenWhereUniqueInput
+  }
+
+  /**
+   * BusinessApiToken findFirst
+   */
+  export type BusinessApiTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which BusinessApiToken to fetch.
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BusinessApiTokens to fetch.
+     */
+    orderBy?: BusinessApiTokenOrderByWithRelationInput | BusinessApiTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BusinessApiTokens.
+     */
+    cursor?: BusinessApiTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BusinessApiTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BusinessApiTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BusinessApiTokens.
+     */
+    distinct?: BusinessApiTokenScalarFieldEnum | BusinessApiTokenScalarFieldEnum[]
+  }
+
+  /**
+   * BusinessApiToken findFirstOrThrow
+   */
+  export type BusinessApiTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which BusinessApiToken to fetch.
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BusinessApiTokens to fetch.
+     */
+    orderBy?: BusinessApiTokenOrderByWithRelationInput | BusinessApiTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BusinessApiTokens.
+     */
+    cursor?: BusinessApiTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BusinessApiTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BusinessApiTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BusinessApiTokens.
+     */
+    distinct?: BusinessApiTokenScalarFieldEnum | BusinessApiTokenScalarFieldEnum[]
+  }
+
+  /**
+   * BusinessApiToken findMany
+   */
+  export type BusinessApiTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which BusinessApiTokens to fetch.
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BusinessApiTokens to fetch.
+     */
+    orderBy?: BusinessApiTokenOrderByWithRelationInput | BusinessApiTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BusinessApiTokens.
+     */
+    cursor?: BusinessApiTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BusinessApiTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BusinessApiTokens.
+     */
+    skip?: number
+    distinct?: BusinessApiTokenScalarFieldEnum | BusinessApiTokenScalarFieldEnum[]
+  }
+
+  /**
+   * BusinessApiToken create
+   */
+  export type BusinessApiTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BusinessApiToken.
+     */
+    data: XOR<BusinessApiTokenCreateInput, BusinessApiTokenUncheckedCreateInput>
+  }
+
+  /**
+   * BusinessApiToken createMany
+   */
+  export type BusinessApiTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BusinessApiTokens.
+     */
+    data: BusinessApiTokenCreateManyInput | BusinessApiTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BusinessApiToken createManyAndReturn
+   */
+  export type BusinessApiTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many BusinessApiTokens.
+     */
+    data: BusinessApiTokenCreateManyInput | BusinessApiTokenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BusinessApiToken update
+   */
+  export type BusinessApiTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BusinessApiToken.
+     */
+    data: XOR<BusinessApiTokenUpdateInput, BusinessApiTokenUncheckedUpdateInput>
+    /**
+     * Choose, which BusinessApiToken to update.
+     */
+    where: BusinessApiTokenWhereUniqueInput
+  }
+
+  /**
+   * BusinessApiToken updateMany
+   */
+  export type BusinessApiTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BusinessApiTokens.
+     */
+    data: XOR<BusinessApiTokenUpdateManyMutationInput, BusinessApiTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which BusinessApiTokens to update
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * Limit how many BusinessApiTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BusinessApiToken updateManyAndReturn
+   */
+  export type BusinessApiTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update BusinessApiTokens.
+     */
+    data: XOR<BusinessApiTokenUpdateManyMutationInput, BusinessApiTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which BusinessApiTokens to update
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * Limit how many BusinessApiTokens to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BusinessApiToken upsert
+   */
+  export type BusinessApiTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BusinessApiToken to update in case it exists.
+     */
+    where: BusinessApiTokenWhereUniqueInput
+    /**
+     * In case the BusinessApiToken found by the `where` argument doesn't exist, create a new BusinessApiToken with this data.
+     */
+    create: XOR<BusinessApiTokenCreateInput, BusinessApiTokenUncheckedCreateInput>
+    /**
+     * In case the BusinessApiToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BusinessApiTokenUpdateInput, BusinessApiTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * BusinessApiToken delete
+   */
+  export type BusinessApiTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+    /**
+     * Filter which BusinessApiToken to delete.
+     */
+    where: BusinessApiTokenWhereUniqueInput
+  }
+
+  /**
+   * BusinessApiToken deleteMany
+   */
+  export type BusinessApiTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BusinessApiTokens to delete
+     */
+    where?: BusinessApiTokenWhereInput
+    /**
+     * Limit how many BusinessApiTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BusinessApiToken without action
+   */
+  export type BusinessApiTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BusinessApiToken
+     */
+    select?: BusinessApiTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BusinessApiToken
+     */
+    omit?: BusinessApiTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessApiTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model QuickBooksInvoice
    */
 
@@ -101004,6 +102258,22 @@ export namespace Prisma {
   export type QuickBooksConnectionScalarFieldEnum = (typeof QuickBooksConnectionScalarFieldEnum)[keyof typeof QuickBooksConnectionScalarFieldEnum]
 
 
+  export const BusinessApiTokenScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    businessId: 'businessId',
+    name: 'name',
+    tokenHash: 'tokenHash',
+    prefix: 'prefix',
+    scopes: 'scopes',
+    createdById: 'createdById',
+    lastUsedAt: 'lastUsedAt',
+    revokedAt: 'revokedAt'
+  };
+
+  export type BusinessApiTokenScalarFieldEnum = (typeof BusinessApiTokenScalarFieldEnum)[keyof typeof BusinessApiTokenScalarFieldEnum]
+
+
   export const QuickBooksInvoiceScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -102006,6 +103276,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailListRelationFilter
     customerImports?: CustomerImportListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
+    apiTokens?: BusinessApiTokenListRelationFilter
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     invoiceSettings?: XOR<InvoiceSettingsNullableScalarRelationFilter, InvoiceSettingsWhereInput> | null
     invoices?: InvoiceListRelationFilter
@@ -102142,6 +103413,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailOrderByRelationAggregateInput
     customerImports?: CustomerImportOrderByRelationAggregateInput
     quickBooksConnection?: QuickBooksConnectionOrderByWithRelationInput
+    apiTokens?: BusinessApiTokenOrderByRelationAggregateInput
     quickBooksInvoices?: QuickBooksInvoiceOrderByRelationAggregateInput
     invoiceSettings?: InvoiceSettingsOrderByWithRelationInput
     invoices?: InvoiceOrderByRelationAggregateInput
@@ -102281,6 +103553,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailListRelationFilter
     customerImports?: CustomerImportListRelationFilter
     quickBooksConnection?: XOR<QuickBooksConnectionNullableScalarRelationFilter, QuickBooksConnectionWhereInput> | null
+    apiTokens?: BusinessApiTokenListRelationFilter
     quickBooksInvoices?: QuickBooksInvoiceListRelationFilter
     invoiceSettings?: XOR<InvoiceSettingsNullableScalarRelationFilter, InvoiceSettingsWhereInput> | null
     invoices?: InvoiceListRelationFilter
@@ -108255,6 +109528,86 @@ export namespace Prisma {
     lastSyncError?: StringNullableWithAggregatesFilter<"QuickBooksConnection"> | string | null
   }
 
+  export type BusinessApiTokenWhereInput = {
+    AND?: BusinessApiTokenWhereInput | BusinessApiTokenWhereInput[]
+    OR?: BusinessApiTokenWhereInput[]
+    NOT?: BusinessApiTokenWhereInput | BusinessApiTokenWhereInput[]
+    id?: StringFilter<"BusinessApiToken"> | string
+    createdAt?: DateTimeFilter<"BusinessApiToken"> | Date | string
+    businessId?: StringFilter<"BusinessApiToken"> | string
+    name?: StringFilter<"BusinessApiToken"> | string
+    tokenHash?: StringFilter<"BusinessApiToken"> | string
+    prefix?: StringFilter<"BusinessApiToken"> | string
+    scopes?: StringNullableListFilter<"BusinessApiToken">
+    createdById?: StringNullableFilter<"BusinessApiToken"> | string | null
+    lastUsedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type BusinessApiTokenOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    tokenHash?: SortOrder
+    prefix?: SortOrder
+    scopes?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type BusinessApiTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tokenHash?: string
+    AND?: BusinessApiTokenWhereInput | BusinessApiTokenWhereInput[]
+    OR?: BusinessApiTokenWhereInput[]
+    NOT?: BusinessApiTokenWhereInput | BusinessApiTokenWhereInput[]
+    createdAt?: DateTimeFilter<"BusinessApiToken"> | Date | string
+    businessId?: StringFilter<"BusinessApiToken"> | string
+    name?: StringFilter<"BusinessApiToken"> | string
+    prefix?: StringFilter<"BusinessApiToken"> | string
+    scopes?: StringNullableListFilter<"BusinessApiToken">
+    createdById?: StringNullableFilter<"BusinessApiToken"> | string | null
+    lastUsedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "tokenHash">
+
+  export type BusinessApiTokenOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    tokenHash?: SortOrder
+    prefix?: SortOrder
+    scopes?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    _count?: BusinessApiTokenCountOrderByAggregateInput
+    _max?: BusinessApiTokenMaxOrderByAggregateInput
+    _min?: BusinessApiTokenMinOrderByAggregateInput
+  }
+
+  export type BusinessApiTokenScalarWhereWithAggregatesInput = {
+    AND?: BusinessApiTokenScalarWhereWithAggregatesInput | BusinessApiTokenScalarWhereWithAggregatesInput[]
+    OR?: BusinessApiTokenScalarWhereWithAggregatesInput[]
+    NOT?: BusinessApiTokenScalarWhereWithAggregatesInput | BusinessApiTokenScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BusinessApiToken"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"BusinessApiToken"> | Date | string
+    businessId?: StringWithAggregatesFilter<"BusinessApiToken"> | string
+    name?: StringWithAggregatesFilter<"BusinessApiToken"> | string
+    tokenHash?: StringWithAggregatesFilter<"BusinessApiToken"> | string
+    prefix?: StringWithAggregatesFilter<"BusinessApiToken"> | string
+    scopes?: StringNullableListFilter<"BusinessApiToken">
+    createdById?: StringNullableWithAggregatesFilter<"BusinessApiToken"> | string | null
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"BusinessApiToken"> | Date | string | null
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"BusinessApiToken"> | Date | string | null
+  }
+
   export type QuickBooksInvoiceWhereInput = {
     AND?: QuickBooksInvoiceWhereInput | QuickBooksInvoiceWhereInput[]
     OR?: QuickBooksInvoiceWhereInput[]
@@ -110219,6 +111572,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -110355,6 +111709,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -110491,6 +111846,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -110627,6 +111983,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -117448,6 +118805,96 @@ export namespace Prisma {
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type BusinessApiTokenCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutApiTokensInput
+  }
+
+  export type BusinessApiTokenUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+  }
+
+  export type BusinessApiTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutApiTokensNestedInput
+  }
+
+  export type BusinessApiTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type BusinessApiTokenCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    businessId: string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+  }
+
+  export type BusinessApiTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type BusinessApiTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type QuickBooksInvoiceCreateInput = {
     id?: string
     createdAt?: Date | string
@@ -119818,6 +121265,12 @@ export namespace Prisma {
     isNot?: QuickBooksConnectionWhereInput | null
   }
 
+  export type BusinessApiTokenListRelationFilter = {
+    every?: BusinessApiTokenWhereInput
+    some?: BusinessApiTokenWhereInput
+    none?: BusinessApiTokenWhereInput
+  }
+
   export type QuickBooksInvoiceListRelationFilter = {
     every?: QuickBooksInvoiceWhereInput
     some?: QuickBooksInvoiceWhereInput
@@ -119975,6 +121428,10 @@ export namespace Prisma {
   }
 
   export type MarketingDoNotEmailOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BusinessApiTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -123863,6 +125320,43 @@ export namespace Prisma {
     defaultDueDays?: SortOrder
   }
 
+  export type BusinessApiTokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    tokenHash?: SortOrder
+    prefix?: SortOrder
+    scopes?: SortOrder
+    createdById?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+  }
+
+  export type BusinessApiTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    tokenHash?: SortOrder
+    prefix?: SortOrder
+    createdById?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+  }
+
+  export type BusinessApiTokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    businessId?: SortOrder
+    name?: SortOrder
+    tokenHash?: SortOrder
+    prefix?: SortOrder
+    createdById?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+  }
+
   export type QuoteSubmissionNullableScalarRelationFilter = {
     is?: QuoteSubmissionWhereInput | null
     isNot?: QuoteSubmissionWhereInput | null
@@ -125561,6 +127055,13 @@ export namespace Prisma {
     connect?: QuickBooksConnectionWhereUniqueInput
   }
 
+  export type BusinessApiTokenCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput> | BusinessApiTokenCreateWithoutBusinessInput[] | BusinessApiTokenUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BusinessApiTokenCreateOrConnectWithoutBusinessInput | BusinessApiTokenCreateOrConnectWithoutBusinessInput[]
+    createMany?: BusinessApiTokenCreateManyBusinessInputEnvelope
+    connect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+  }
+
   export type QuickBooksInvoiceCreateNestedManyWithoutBusinessInput = {
     create?: XOR<QuickBooksInvoiceCreateWithoutBusinessInput, QuickBooksInvoiceUncheckedCreateWithoutBusinessInput> | QuickBooksInvoiceCreateWithoutBusinessInput[] | QuickBooksInvoiceUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: QuickBooksInvoiceCreateOrConnectWithoutBusinessInput | QuickBooksInvoiceCreateOrConnectWithoutBusinessInput[]
@@ -125884,6 +127385,13 @@ export namespace Prisma {
     create?: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: QuickBooksConnectionCreateOrConnectWithoutBusinessInput
     connect?: QuickBooksConnectionWhereUniqueInput
+  }
+
+  export type BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput> | BusinessApiTokenCreateWithoutBusinessInput[] | BusinessApiTokenUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BusinessApiTokenCreateOrConnectWithoutBusinessInput | BusinessApiTokenCreateOrConnectWithoutBusinessInput[]
+    createMany?: BusinessApiTokenCreateManyBusinessInputEnvelope
+    connect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
   }
 
   export type QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -126500,6 +128008,20 @@ export namespace Prisma {
     delete?: QuickBooksConnectionWhereInput | boolean
     connect?: QuickBooksConnectionWhereUniqueInput
     update?: XOR<XOR<QuickBooksConnectionUpdateToOneWithWhereWithoutBusinessInput, QuickBooksConnectionUpdateWithoutBusinessInput>, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput> | BusinessApiTokenCreateWithoutBusinessInput[] | BusinessApiTokenUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BusinessApiTokenCreateOrConnectWithoutBusinessInput | BusinessApiTokenCreateOrConnectWithoutBusinessInput[]
+    upsert?: BusinessApiTokenUpsertWithWhereUniqueWithoutBusinessInput | BusinessApiTokenUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BusinessApiTokenCreateManyBusinessInputEnvelope
+    set?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    disconnect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    delete?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    connect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    update?: BusinessApiTokenUpdateWithWhereUniqueWithoutBusinessInput | BusinessApiTokenUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BusinessApiTokenUpdateManyWithWhereWithoutBusinessInput | BusinessApiTokenUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BusinessApiTokenScalarWhereInput | BusinessApiTokenScalarWhereInput[]
   }
 
   export type QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput = {
@@ -127142,6 +128664,20 @@ export namespace Prisma {
     delete?: QuickBooksConnectionWhereInput | boolean
     connect?: QuickBooksConnectionWhereUniqueInput
     update?: XOR<XOR<QuickBooksConnectionUpdateToOneWithWhereWithoutBusinessInput, QuickBooksConnectionUpdateWithoutBusinessInput>, QuickBooksConnectionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput> | BusinessApiTokenCreateWithoutBusinessInput[] | BusinessApiTokenUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BusinessApiTokenCreateOrConnectWithoutBusinessInput | BusinessApiTokenCreateOrConnectWithoutBusinessInput[]
+    upsert?: BusinessApiTokenUpsertWithWhereUniqueWithoutBusinessInput | BusinessApiTokenUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BusinessApiTokenCreateManyBusinessInputEnvelope
+    set?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    disconnect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    delete?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    connect?: BusinessApiTokenWhereUniqueInput | BusinessApiTokenWhereUniqueInput[]
+    update?: BusinessApiTokenUpdateWithWhereUniqueWithoutBusinessInput | BusinessApiTokenUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BusinessApiTokenUpdateManyWithWhereWithoutBusinessInput | BusinessApiTokenUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BusinessApiTokenScalarWhereInput | BusinessApiTokenScalarWhereInput[]
   }
 
   export type QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -130959,6 +132495,29 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuickBooksConnectionInput, BusinessUpdateWithoutQuickBooksConnectionInput>, BusinessUncheckedUpdateWithoutQuickBooksConnectionInput>
   }
 
+  export type BusinessApiTokenCreatescopesInput = {
+    set: string[]
+  }
+
+  export type BusinessCreateNestedOneWithoutApiTokensInput = {
+    create?: XOR<BusinessCreateWithoutApiTokensInput, BusinessUncheckedCreateWithoutApiTokensInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutApiTokensInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessApiTokenUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutApiTokensNestedInput = {
+    create?: XOR<BusinessCreateWithoutApiTokensInput, BusinessUncheckedCreateWithoutApiTokensInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutApiTokensInput
+    upsert?: BusinessUpsertWithoutApiTokensInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutApiTokensInput, BusinessUpdateWithoutApiTokensInput>, BusinessUncheckedUpdateWithoutApiTokensInput>
+  }
+
   export type BusinessCreateNestedOneWithoutQuickBooksInvoicesInput = {
     create?: XOR<BusinessCreateWithoutQuickBooksInvoicesInput, BusinessUncheckedCreateWithoutQuickBooksInvoicesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutQuickBooksInvoicesInput
@@ -132957,6 +134516,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -133092,6 +134652,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -133302,6 +134863,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -133437,6 +134999,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -135397,6 +136960,40 @@ export namespace Prisma {
     create: XOR<QuickBooksConnectionCreateWithoutBusinessInput, QuickBooksConnectionUncheckedCreateWithoutBusinessInput>
   }
 
+  export type BusinessApiTokenCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+  }
+
+  export type BusinessApiTokenUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+  }
+
+  export type BusinessApiTokenCreateOrConnectWithoutBusinessInput = {
+    where: BusinessApiTokenWhereUniqueInput
+    create: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenCreateManyBusinessInputEnvelope = {
+    data: BusinessApiTokenCreateManyBusinessInput | BusinessApiTokenCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type QuickBooksInvoiceCreateWithoutBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -137196,6 +138793,38 @@ export namespace Prisma {
     lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type BusinessApiTokenUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: BusinessApiTokenWhereUniqueInput
+    update: XOR<BusinessApiTokenUpdateWithoutBusinessInput, BusinessApiTokenUncheckedUpdateWithoutBusinessInput>
+    create: XOR<BusinessApiTokenCreateWithoutBusinessInput, BusinessApiTokenUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: BusinessApiTokenWhereUniqueInput
+    data: XOR<BusinessApiTokenUpdateWithoutBusinessInput, BusinessApiTokenUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenUpdateManyWithWhereWithoutBusinessInput = {
+    where: BusinessApiTokenScalarWhereInput
+    data: XOR<BusinessApiTokenUpdateManyMutationInput, BusinessApiTokenUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type BusinessApiTokenScalarWhereInput = {
+    AND?: BusinessApiTokenScalarWhereInput | BusinessApiTokenScalarWhereInput[]
+    OR?: BusinessApiTokenScalarWhereInput[]
+    NOT?: BusinessApiTokenScalarWhereInput | BusinessApiTokenScalarWhereInput[]
+    id?: StringFilter<"BusinessApiToken"> | string
+    createdAt?: DateTimeFilter<"BusinessApiToken"> | Date | string
+    businessId?: StringFilter<"BusinessApiToken"> | string
+    name?: StringFilter<"BusinessApiToken"> | string
+    tokenHash?: StringFilter<"BusinessApiToken"> | string
+    prefix?: StringFilter<"BusinessApiToken"> | string
+    scopes?: StringNullableListFilter<"BusinessApiToken">
+    createdById?: StringNullableFilter<"BusinessApiToken"> | string | null
+    lastUsedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"BusinessApiToken"> | Date | string | null
+  }
+
   export type QuickBooksInvoiceUpsertWithWhereUniqueWithoutBusinessInput = {
     where: QuickBooksInvoiceWhereUniqueInput
     update: XOR<QuickBooksInvoiceUpdateWithoutBusinessInput, QuickBooksInvoiceUncheckedUpdateWithoutBusinessInput>
@@ -137746,6 +139375,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -137881,6 +139511,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -138032,6 +139663,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -138167,6 +139799,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -138302,6 +139935,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -138437,6 +140071,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -138588,6 +140223,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -138723,6 +140359,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -138907,6 +140544,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -139042,6 +140680,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -139698,6 +141337,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -139833,6 +141473,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -140715,6 +142356,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -140850,6 +142492,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -141063,6 +142706,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -141198,6 +142842,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -142080,6 +143725,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -142215,6 +143861,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -142388,6 +144035,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -142523,6 +144171,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -142974,6 +144623,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -143109,6 +144759,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -143312,6 +144963,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -143447,6 +145099,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -143715,6 +145368,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -143850,6 +145504,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -144001,6 +145656,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -144136,6 +145792,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -144271,6 +145928,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -144406,6 +146064,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -144605,6 +146264,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -144740,6 +146400,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -144926,6 +146587,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -145061,6 +146723,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -145253,6 +146916,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -145388,6 +147052,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -145628,6 +147293,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -145763,6 +147429,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -146025,6 +147692,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -146160,6 +147828,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -146348,6 +148017,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -146483,6 +148153,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -147340,6 +149011,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -147475,6 +149147,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -148363,6 +150036,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -148498,6 +150172,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -149145,6 +150820,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -149280,6 +150956,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -150366,6 +152043,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -150501,6 +152179,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -150779,6 +152458,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -150914,6 +152594,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -151303,6 +152984,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -151438,6 +153120,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -151981,6 +153664,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -152116,6 +153800,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -152446,6 +154131,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -152581,6 +154267,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -152920,6 +154607,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -153055,6 +154743,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -153238,6 +154927,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -153373,6 +155063,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -153655,6 +155346,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -153790,6 +155482,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -154053,6 +155746,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -154188,6 +155882,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -154431,6 +156126,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -154566,6 +156262,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -154756,6 +156453,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -154891,6 +156589,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -155042,6 +156741,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -155177,6 +156877,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -155312,6 +157013,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -155447,6 +157149,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -155598,6 +157301,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -155733,6 +157437,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -155868,6 +157573,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -156003,6 +157709,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -156207,6 +157914,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -156342,6 +158050,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -156536,6 +158245,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -156671,6 +158381,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -156822,6 +158533,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -156957,6 +158669,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -157092,6 +158805,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -157227,6 +158941,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -157410,6 +159125,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -157545,6 +159261,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -157795,6 +159512,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -157930,6 +159648,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -158164,6 +159883,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -158299,6 +160019,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -158523,6 +160244,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -158658,6 +160380,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -158892,6 +160615,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -159027,6 +160751,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -160109,6 +161834,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -160244,6 +161970,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -160448,6 +162175,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -160583,6 +162311,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -160777,6 +162506,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -160912,6 +162642,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -161063,6 +162794,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -161198,6 +162930,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -161387,6 +163120,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -161522,6 +163256,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -161732,6 +163467,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -161867,6 +163603,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -162001,6 +163738,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -162136,6 +163874,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -162309,6 +164048,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -162444,6 +164184,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -162758,6 +164499,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -162893,6 +164635,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -163155,6 +164898,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -163290,6 +165034,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -163425,6 +165170,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -163560,6 +165306,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -163763,6 +165510,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -163898,6 +165646,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -164138,6 +165887,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -164273,6 +166023,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -164471,6 +166222,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -164606,6 +166358,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -164741,6 +166494,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -164876,6 +166630,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -165065,6 +166820,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -165200,6 +166956,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -165376,6 +167133,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -165511,6 +167269,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -165693,6 +167452,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -165828,6 +167588,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -165963,6 +167724,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -166098,6 +167860,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -166455,6 +168218,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -166590,6 +168354,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -167342,6 +169107,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -167477,6 +169243,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -167778,6 +169545,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -167913,6 +169681,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -168210,6 +169979,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -168345,6 +170115,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -168496,6 +170267,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -168631,6 +170403,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -168766,6 +170539,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -168901,6 +170675,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -169260,6 +171035,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -169395,6 +171171,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -169678,6 +171455,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -169813,6 +171591,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -169964,6 +171743,7 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -170099,6 +171879,567 @@ export namespace Prisma {
     marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUncheckedUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUncheckedUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUncheckedUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUncheckedUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutApiTokensInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+    forms?: FormCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
+    customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionCreateNestedManyWithoutBusinessInput
+    donations?: DonationCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutApiTokensInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    addressStreet?: string | null
+    addressCity?: string | null
+    addressState?: string | null
+    addressPostalCode?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    stripePortalConfigurationId?: string | null
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: string | null
+    maintenanceHeadline?: string | null
+    maintenanceImage?: string | null
+    maintenanceLaunchAt?: Date | string | null
+    maintenanceLaunchEndAt?: Date | string | null
+    maintenanceLocation?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    businessType?: string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: Date | string | null
+    localBusinessEnabled?: boolean
+    localPresence?: string
+    areaServed?: BusinessCreateareaServedInput | string[]
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    offersLocalDelivery?: boolean
+    localDeliveryOriginZip?: string | null
+    localDeliveryRadiusMiles?: number | null
+    localDeliveryFeeCents?: number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: number | null
+    localDeliveryInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    handlingDaysMin?: number | null
+    handlingDaysMax?: number | null
+    transitDaysMin?: number | null
+    transitDaysMax?: number | null
+    returnWindowDays?: number | null
+    returnFees?: string | null
+    returnShippingFeeCents?: number | null
+    returnMethod?: string | null
+    indexNowSubmittedAt?: Date | string | null
+    indexNowHost?: string | null
+    donationLabel?: string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: string | null
+    cashAppHandle?: string | null
+    donationShowInHeader?: boolean
+    donationShowInFooter?: boolean
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    forms?: FormUncheckedCreateNestedManyWithoutBusinessInput
+    formSubmissions?: FormSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+    marketingCampaigns?: MarketingCampaignUncheckedCreateNestedManyWithoutBusinessInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedCreateNestedManyWithoutBusinessInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
+    customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
+    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutBusinessInput
+    donations?: DonationUncheckedCreateNestedManyWithoutBusinessInput
+    loyaltyProgram?: LoyaltyProgramUncheckedCreateNestedOneWithoutBusinessInput
+    loyaltyLedger?: LoyaltyLedgerUncheckedCreateNestedManyWithoutBusinessInput
+    productOptionGroups?: ProductOptionGroupUncheckedCreateNestedManyWithoutBusinessInput
+    policyAcceptances?: PolicyAcceptanceUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutApiTokensInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutApiTokensInput, BusinessUncheckedCreateWithoutApiTokensInput>
+  }
+
+  export type BusinessUpsertWithoutApiTokensInput = {
+    update: XOR<BusinessUpdateWithoutApiTokensInput, BusinessUncheckedUpdateWithoutApiTokensInput>
+    create: XOR<BusinessCreateWithoutApiTokensInput, BusinessUncheckedCreateWithoutApiTokensInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutApiTokensInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutApiTokensInput, BusinessUncheckedUpdateWithoutApiTokensInput>
+  }
+
+  export type BusinessUpdateWithoutApiTokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+    forms?: FormUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
+    customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
+    invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
+    subscriptions?: SubscriptionUpdateManyWithoutBusinessNestedInput
+    donations?: DonationUpdateManyWithoutBusinessNestedInput
+    loyaltyProgram?: LoyaltyProgramUpdateOneWithoutBusinessNestedInput
+    loyaltyLedger?: LoyaltyLedgerUpdateManyWithoutBusinessNestedInput
+    productOptionGroups?: ProductOptionGroupUpdateManyWithoutBusinessNestedInput
+    policyAcceptances?: PolicyAcceptanceUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutApiTokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    addressStreet?: NullableStringFieldUpdateOperationsInput | string | null
+    addressCity?: NullableStringFieldUpdateOperationsInput | string | null
+    addressState?: NullableStringFieldUpdateOperationsInput | string | null
+    addressPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePortalConfigurationId?: NullableStringFieldUpdateOperationsInput | string | null
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceCta?: NullableJsonNullValueInput | InputJsonValue
+    maintenanceOverline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceHeadline?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceImage?: NullableStringFieldUpdateOperationsInput | string | null
+    maintenanceLaunchAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLaunchEndAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maintenanceLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    setupSteps?: NullableJsonNullValueInput | InputJsonValue
+    setupConfirmations?: JsonNullValueInput | InputJsonValue
+    setupCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    localPresence?: StringFieldUpdateOperationsInput | string
+    areaServed?: BusinessUpdateareaServedInput | string[]
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    offersLocalDelivery?: BoolFieldUpdateOperationsInput | boolean
+    localDeliveryOriginZip?: NullableStringFieldUpdateOperationsInput | string | null
+    localDeliveryRadiusMiles?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryFeeCents?: IntFieldUpdateOperationsInput | number
+    localDeliveryBands?: NullableJsonNullValueInput | InputJsonValue
+    localDeliveryMinOrderCents?: NullableIntFieldUpdateOperationsInput | number | null
+    localDeliveryInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    handlingDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    handlingDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMin?: NullableIntFieldUpdateOperationsInput | number | null
+    transitDaysMax?: NullableIntFieldUpdateOperationsInput | number | null
+    returnWindowDays?: NullableIntFieldUpdateOperationsInput | number | null
+    returnFees?: NullableStringFieldUpdateOperationsInput | string | null
+    returnShippingFeeCents?: NullableIntFieldUpdateOperationsInput | number | null
+    returnMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    indexNowSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    indexNowHost?: NullableStringFieldUpdateOperationsInput | string | null
+    donationLabel?: StringFieldUpdateOperationsInput | string
+    donationPresetAmounts?: NullableJsonNullValueInput | InputJsonValue
+    venmoHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    cashAppHandle?: NullableStringFieldUpdateOperationsInput | string | null
+    donationShowInHeader?: BoolFieldUpdateOperationsInput | boolean
+    donationShowInFooter?: BoolFieldUpdateOperationsInput | boolean
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckouts?: InventoryCheckoutUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryCheckoutLines?: InventoryCheckoutLineUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    forms?: FormUncheckedUpdateManyWithoutBusinessNestedInput
+    formSubmissions?: FormSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingCampaigns?: MarketingCampaignUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingConsentEvents?: MarketingConsentEventUncheckedUpdateManyWithoutBusinessNestedInput
+    marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
+    customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
+    quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -170235,6 +172576,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
@@ -170370,6 +172712,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -170568,6 +172911,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
@@ -170703,6 +173047,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -170891,6 +173236,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
@@ -171026,6 +173372,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -171177,6 +173524,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
@@ -171312,6 +173660,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -171447,6 +173796,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoicePayments?: InvoicePaymentCreateNestedManyWithoutBusinessInput
@@ -171582,6 +173932,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoicePayments?: InvoicePaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -171880,6 +174231,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUpdateManyWithoutBusinessNestedInput
@@ -172015,6 +174367,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoicePayments?: InvoicePaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -172379,6 +174732,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -172514,6 +174868,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -172766,6 +175121,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -172901,6 +175257,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -173232,6 +175589,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -173367,6 +175725,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -173884,6 +176243,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -174019,6 +176379,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -174468,6 +176829,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -174603,6 +176965,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -174754,6 +177117,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -174889,6 +177253,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -175024,6 +177389,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -175159,6 +177525,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -175348,6 +177715,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -175483,6 +177851,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -175740,6 +178109,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
@@ -175875,6 +178245,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedCreateNestedManyWithoutBusinessInput
     customerImports?: CustomerImportUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksConnection?: QuickBooksConnectionUncheckedCreateNestedOneWithoutBusinessInput
+    apiTokens?: BusinessApiTokenUncheckedCreateNestedManyWithoutBusinessInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedCreateNestedManyWithoutBusinessInput
     invoiceSettings?: InvoiceSettingsUncheckedCreateNestedOneWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -176241,6 +178612,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
@@ -176376,6 +178748,7 @@ export namespace Prisma {
     marketingDoNotEmail?: MarketingDoNotEmailUncheckedUpdateManyWithoutBusinessNestedInput
     customerImports?: CustomerImportUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksConnection?: QuickBooksConnectionUncheckedUpdateOneWithoutBusinessNestedInput
+    apiTokens?: BusinessApiTokenUncheckedUpdateManyWithoutBusinessNestedInput
     quickBooksInvoices?: QuickBooksInvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     invoiceSettings?: InvoiceSettingsUncheckedUpdateOneWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -178033,6 +180406,18 @@ export namespace Prisma {
     attestationWording?: string | null
     attestedAt?: Date | string | null
     attestedById?: string | null
+  }
+
+  export type BusinessApiTokenCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    name: string
+    tokenHash: string
+    prefix: string
+    scopes?: BusinessApiTokenCreatescopesInput | string[]
+    createdById?: string | null
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
   }
 
   export type QuickBooksInvoiceCreateManyBusinessInput = {
@@ -180022,6 +182407,42 @@ export namespace Prisma {
     attestationWording?: NullableStringFieldUpdateOperationsInput | string | null
     attestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     attestedById?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BusinessApiTokenUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type BusinessApiTokenUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type BusinessApiTokenUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    scopes?: BusinessApiTokenUpdatescopesInput | string[]
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type QuickBooksInvoiceUpdateWithoutBusinessInput = {

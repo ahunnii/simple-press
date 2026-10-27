@@ -296,6 +296,15 @@ export const marketingPreviewLimiter = makeLazy({
   keyPrefix: "rl:marketing-preview",
 });
 
+// 30 requests per minute per API token — owner-issued read tokens for the
+// Business Profile API (`/api/v1/*`), keyed by token id (not IP: the caller is
+// a server, e.g. ProfitMax, and one token = one connected app).
+export const apiTokenLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:api-token",
+});
+
 /**
  * Extract a best-effort client IP from request headers.
  *

@@ -30,6 +30,7 @@ import {
   normalizeUrl,
 } from "~/lib/media/usage";
 import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
+import { toPublicProduct } from "~/lib/products/public-product";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { publicUrlToKey } from "~/lib/s3/url";
 import { stripEmptyPlaceholdersInFields } from "~/lib/tiptap/strip-empty-placeholders";
@@ -165,7 +166,7 @@ export const productRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
         take: 4,
       });
-      return products;
+      return products.map(toPublicProduct);
     }),
 
   getRailProducts: publicProcedure
@@ -183,7 +184,7 @@ export const productRouter = createTRPCRouter({
       const { businessId } = ctx;
       const featuredOnly = input?.featuredOnly ?? false;
       const limit = input?.limit ?? 4;
-      return ctx.db.product.findMany({
+      const products = await ctx.db.product.findMany({
         where: {
           businessId,
           published: true,
@@ -204,6 +205,7 @@ export const productRouter = createTRPCRouter({
           : { createdAt: "desc" },
         take: limit,
       });
+      return products.map(toPublicProduct);
     }),
 
   getRelated: publicProcedure
@@ -243,7 +245,7 @@ export const productRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
         take: 4,
       });
-      return products;
+      return products.map(toPublicProduct);
     }),
 
   get: publicProcedure
@@ -270,7 +272,11 @@ export const productRouter = createTRPCRouter({
             },
           },
           baseInventoryUnit: {
-            select: { inventoryQty: true, allowBackorders: true },
+            select: {
+              inventoryQty: true,
+              reservedQty: true,
+              allowBackorders: true,
+            },
           },
           _count: { select: { optionGroups: true } },
         },
@@ -294,7 +300,7 @@ export const productRouter = createTRPCRouter({
         );
         customizer = def ? toPublicCustomizerDefinition(def) : null;
       }
-      return { ...rest, customizer };
+      return { ...toPublicProduct(rest), customizer };
     }),
 
   secureGet: ownerAdminProcedure

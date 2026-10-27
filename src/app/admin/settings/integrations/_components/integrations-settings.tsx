@@ -8,6 +8,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 
+import { ApiKeysSettings } from "./api-keys-settings";
 import { QuickBooksSettings } from "./quickbooks-settings";
 import { StripeSettings } from "./stripe-settings";
 import { UmamiSettings } from "./umami-settings";
@@ -22,12 +23,18 @@ type Props = {
    * case) — the card is omitted entirely rather than shown disabled.
    */
   quickbooks?: RouterOutputs["quickbooks"]["getConnection"] | null;
+  /**
+   * `null` for anyone who isn't the owner or a platform admin — the card is
+   * omitted entirely for them.
+   */
+  apiKeys?: RouterOutputs["apiToken"]["list"] | null;
 };
 
 export function IntegrationsSettings({
   business,
   paymentsHealth,
   quickbooks,
+  apiKeys,
 }: Props) {
   // This page has no single form-wide save state to report: Stripe's
   // auto-tax toggle saves itself immediately on change, and Umami has its
@@ -71,6 +78,9 @@ export function IntegrationsSettings({
           {quickbooks ? (
             <QuickBooksSettings businessId={business.id} data={quickbooks} />
           ) : null}
+
+          {/* API keys (owner / platform admin only) */}
+          {apiKeys ? <ApiKeysSettings initialKeys={apiKeys} /> : null}
         </div>
       </div>
     </>

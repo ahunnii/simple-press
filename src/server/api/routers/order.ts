@@ -52,6 +52,7 @@ import {
   shouldRestockOnRefund,
   statusAfterRefund,
 } from "~/lib/orders/order-transitions";
+import { redactOrderForStaff } from "~/lib/orders/staff-redaction";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
@@ -103,41 +104,6 @@ const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   duplicate: "Duplicate order",
   fraudulent: "Fraudulent order",
 };
-
-/**
- * D2 — what a STAFF (fulfillment-only) caller may not see on an order row.
- *
- * `staffProcedure`'s own docblock (`~/server/api/trpc`) draws the line at
- * "anything touching money, prices, refunds, products, or settings must stay on
- * ownerAdminProcedure". Money TOTALS are the deliberate exception (user
- * decision): subtotal/tax/shipping/discount/total stay visible to STAFF because
- * a fulfillment worker needs them for packing slips and order context. Two
- * fields do not survive:
- *
- * - `internalNote` — owner-to-owner notes, may contain anything.
- * - `stripePaymentIntentId` — a raw Stripe identifier, not fulfillment-relevant.
- *
- * OWNER/MANAGER keep full rows, and so does PLATFORM_ADMIN — they have no
- * membership row, so `ctx.membershipRole` reads null and `isStaff` is false.
- *
- * Applied at every staff-reachable site that returns a full Order row:
- * `getAll`, `getById`, `markAsFulfilled`, `markReadyForPickup`,
- * `updateFulfillment`. `addShipment`/`updateShipment` return `OrderShipment`
- * rows (no order columns) and need no redaction; every other order mutation is
- * `ownerAdminProcedure` and therefore unreachable by STAFF. `updateNote` — the
- * write half of `internalNote` — is `ownerAdminProcedure` for the same reason.
- *
- * Both columns are nullable, so the router's output types are unchanged.
- */
-function redactOrderForStaff<
-  T extends {
-    internalNote: string | null;
-    stripePaymentIntentId: string | null;
-  },
->(order: T, isStaff: boolean): T {
-  if (!isStaff) return order;
-  return { ...order, internalNote: null, stripePaymentIntentId: null };
-}
 
 type ShipmentItemRequest = { orderItemId: string; quantity: number };
 
@@ -956,10 +922,17 @@ export const orderRouter = createTRPCRouter({
       const order = await ctx.db.order.findFirst({
         where: { id, businessId },
         include: {
-          discountCode: true,
+          // The code only — it's printed on the order's totals line and on
+          // the invoice / packing slip. The rest of the DiscountCode row
+          // (limits, usage, expiry, min purchase) is discount configuration,
+          // which STAFF must not see, and nothing here renders it.
+          discountCode: { select: { code: true } },
           items: true,
           shippingAddress: true,
-          customer: true,
+          // No `customer` relation: nothing renders it (the page uses the
+          // order's own customerName/Email/Phone), and a bare `customer: true`
+          // shipped the owner's private CRM `notes` to STAFF — the field
+          // `customer.getById` / `customer.list` deliberately null for them.
           shipments: { orderBy: { shippedAt: "asc" } },
           inventoryHistory: {
             where: { reason: "oversell" },

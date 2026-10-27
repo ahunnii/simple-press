@@ -351,6 +351,7 @@ model Business {
   marketingDoNotEmail    MarketingDoNotEmail[]
   customerImports        CustomerImport[]
   quickBooksConnection   QuickBooksConnection?
+  apiTokens              BusinessApiToken[]
   quickBooksInvoices     QuickBooksInvoice[]
   invoiceSettings        InvoiceSettings?
   invoices               Invoice[]
@@ -2382,6 +2383,32 @@ model QuickBooksConnection {
   lastSyncError String?   @db.Text
 
   @@index([status, lastSyncAt]) // cron: active connections, stalest first
+}
+
+/// Read-only API token a business owner issues to an external integration
+/// (e.g. ProfitMax). Stored HASHED, not encrypted: auth looks the row up with
+/// `where: { tokenHash }`, and encrypted columns can never appear in a
+/// `where`. The raw token (`spk_...`) is shown to the owner exactly once at
+/// creation and is unrecoverable afterwards; `prefix` (its first 12 chars) is
+/// all the UI ever displays. Revoke = set `revokedAt`; rows are never deleted
+/// by the app. `createdById` is a plain User id (no relation), like other
+/// audit-only creator columns.
+model BusinessApiToken {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name        String // owner label, e.g. "ProfitMax"
+  tokenHash   String    @unique // sha256 hex of the raw token
+  prefix      String // first 12 chars of the raw token (incl. "spk_")
+  scopes      String[]  @default([]) // ApiTokenScope values, e.g. "profile:read"
+  createdById String?
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+
+  @@index([businessId])
 }
 
 /// One row per invoice SimplePress created in QuickBooks: audit trail, the

@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
+import { toPublicProduct } from "~/lib/products/public-product";
 import { generateCollectionSlug } from "~/lib/slug";
 import {
   collectionBulkDeleteSchema,
@@ -158,7 +159,11 @@ export const collectionsRouter = createTRPCRouter({
                   },
                   variants: true,
                   baseInventoryUnit: {
-                    select: { inventoryQty: true, allowBackorders: true },
+                    select: {
+                      inventoryQty: true,
+                      reservedQty: true,
+                      allowBackorders: true,
+                    },
                   },
                 },
                 omit: { cost: true },
@@ -181,7 +186,13 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      return collection;
+      return {
+        ...collection,
+        collectionProducts: collection.collectionProducts.map((cp) => ({
+          ...cp,
+          product: toPublicProduct(cp.product),
+        })),
+      };
     }),
 
   create: ownerAdminProcedure
@@ -660,7 +671,11 @@ export const collectionsRouter = createTRPCRouter({
                   },
                   variants: true,
                   baseInventoryUnit: {
-                    select: { inventoryQty: true, allowBackorders: true },
+                    select: {
+                      inventoryQty: true,
+                      reservedQty: true,
+                      allowBackorders: true,
+                    },
                   },
                 },
                 omit: { cost: true },
@@ -679,7 +694,9 @@ export const collectionsRouter = createTRPCRouter({
           slug: collection.slug,
           description: collection.description,
         },
-        products: collection.collectionProducts.map((cp) => cp.product),
+        products: collection.collectionProducts.map((cp) =>
+          toPublicProduct(cp.product),
+        ),
       };
     }),
 });
