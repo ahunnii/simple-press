@@ -27,6 +27,16 @@ export const ACTIVE_CAMPAIGN_STATUSES = [
   "SENDING",
 ] as const satisfies readonly CampaignStatus[];
 
+/**
+ * `MarketingCampaign.kind`. STANDARD = an owner-composed campaign to opted-in
+ * customers (the composer's only kind). REPERMISSION = a contact import's
+ * one-time "still want to hear from us?" invite (`./repermission-invite.ts`):
+ * fixed content, its own audience (`repermissionAudienceWhere`), and never
+ * edited, duplicated, scheduled or re-sent through the composer.
+ */
+export const CAMPAIGN_KINDS = ["STANDARD", "REPERMISSION"] as const;
+export type CampaignKind = (typeof CAMPAIGN_KINDS)[number];
+
 /** `MarketingCampaignBatch.status` */
 export const CAMPAIGN_BATCH_STATUSES = [
   "PENDING",

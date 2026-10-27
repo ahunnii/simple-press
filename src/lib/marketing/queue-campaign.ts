@@ -2,10 +2,15 @@ import type { JSONContent } from "@tiptap/core";
 import * as Sentry from "@sentry/nextjs";
 
 import type { LoadedCampaignBusiness } from "./campaign-business";
+import type { CampaignKind } from "./campaign-status";
 import type { Audience } from "./segments";
 import type { DbClient } from "~/server/db";
 
-import { marketingAudienceWhere } from "./audience";
+import {
+  marketingAudienceWhere,
+  repermissionAudienceWhere,
+  withoutDoNotEmail,
+} from "./audience";
 import {
   BATCH_SIZE,
   isBusinessActive,
@@ -16,7 +21,11 @@ import {
   storedBodyJson,
 } from "./campaign-business";
 import { hydrateEmailProducts } from "./email-products";
-import { getBusinessPostalAddress, renderCampaign } from "./render-campaign";
+import {
+  CONFIRM_TOKEN_PLACEHOLDER,
+  getBusinessPostalAddress,
+  renderCampaign,
+} from "./render-campaign";
 import { parseStoredAudience } from "./segments";
 import { tiptapHasContent } from "./tiptap-to-email";
 
@@ -50,6 +59,8 @@ export type QueueCampaignFailureReason =
   | "not_found"
   | "business_not_found"
   | "status_changed"
+  /** The campaign's `kind` isn't the one the caller queues (see `kind`). */
+  | "wrong_kind"
   | SendBlocker;
 
 export type QueueCampaignResult =
@@ -112,6 +123,8 @@ const QUEUE_CAMPAIGN_SELECT = {
   bodyText: true,
   bodyJson: true,
   audience: true,
+  kind: true,
+  importId: true,
 } as const;
 
 type SendableCampaign = {
@@ -181,6 +194,14 @@ export async function checkCampaignSendable(
   return { ok: true, isTiptap, prepared, audience: audience.audience };
 }
 
+/**
+ * Footer line of a re-permission invite: its recipients have NOT opted in
+ * here, so the standard "you opted in" line would be false.
+ */
+export function repermissionFooterReason(businessName: string): string {
+  return `You received this one-time email because you were on ${businessName}'s email list before it moved to a new website.`;
+}
+
 /** Thrown inside the queue transaction to roll it back when the CAS loses. */
 class StatusChangedError extends Error {}
 
@@ -193,6 +214,13 @@ class StatusChangedError extends Error {}
  * caller does.
  *
  * Tenant-scoped: a campaign of another business is `not_found`.
+ *
+ * `kind` (default STANDARD) must match the campaign's, else `wrong_kind`: the
+ * composer's send and the scheduled sweep can never queue a re-permission
+ * invite, and `queueRepermissionInvite` can never queue a standard campaign.
+ * A REPERMISSION campaign snapshots `repermissionAudienceWhere` for its import
+ * minus the do-not-email list (its stored segment is ignored), and its render
+ * must carry the per-recipient confirm-token placeholder.
  */
 export async function queueCampaign(
   db: DbClient,
@@ -200,6 +228,7 @@ export async function queueCampaign(
     campaignId: string;
     businessId: string;
     expectStatus: QueueableStatus;
+    kind?: CampaignKind;
     now?: Date;
   },
 ): Promise<QueueCampaignResult> {
@@ -211,6 +240,14 @@ export async function queueCampaign(
   if (!campaign) return { ok: false, reason: "not_found" };
   if (campaign.status !== expectStatus) {
     return { ok: false, reason: "status_changed", status: campaign.status };
+  }
+  if (campaign.kind !== (args.kind ?? "STANDARD")) {
+    return { ok: false, reason: "wrong_kind" };
+  }
+  const inviteImportId =
+    campaign.kind === "REPERMISSION" ? campaign.importId : null;
+  if (campaign.kind === "REPERMISSION" && !inviteImportId) {
+    return { ok: false, reason: "invalid_audience" };
   }
 
   const business = await loadCampaignBusiness(db, businessId);
@@ -226,7 +263,21 @@ export async function queueCampaign(
     contentFormat: check.isTiptap ? "tiptap" : "text",
     bodyText: campaign.bodyText,
     bodyJson: check.prepared.bodyJson,
+    ...(inviteImportId
+      ? { footerReason: repermissionFooterReason(business.name) }
+      : {}),
   });
+  // The invite's button is its whole point: never send one whose link was
+  // dropped (e.g. an unusable store URL made the walker discard it).
+  if (
+    inviteImportId &&
+    !(
+      rendered.html.includes(CONFIRM_TOKEN_PLACEHOLDER) &&
+      rendered.text.includes(CONFIRM_TOKEN_PLACEHOLDER)
+    )
+  ) {
+    throw new Error("Re-permission invite render is missing its confirm link");
+  }
 
   try {
     const outcome = await db.$transaction(
@@ -237,11 +288,21 @@ export async function queueCampaign(
         // The segment is applied here, once; the worker only re-checks
         // consent/suppression. Read before the CAS so a scheduled campaign
         // nobody matches can be failed without freezing anything.
-        const audience = await tx.customer.findMany({
-          where: marketingAudienceWhere(businessId, check.audience, now),
-          select: { id: true, email: true },
-          orderBy: { id: "asc" },
-        });
+        const audience = inviteImportId
+          ? await withoutDoNotEmail(
+              tx,
+              businessId,
+              await tx.customer.findMany({
+                where: repermissionAudienceWhere(businessId, inviteImportId),
+                select: { id: true, email: true },
+                orderBy: { id: "asc" },
+              }),
+            )
+          : await tx.customer.findMany({
+              where: marketingAudienceWhere(businessId, check.audience, now),
+              select: { id: true, email: true },
+              orderBy: { id: "asc" },
+            });
 
         // A scheduled send nobody is left to receive is a failure the owner
         // should see (the list shrank, or the segment emptied, since they
@@ -570,8 +631,10 @@ export async function queueDueScheduledCampaigns(
       if (queued.reason === "not_found" || queued.reason === "status_changed") {
         continue;
       }
+      // `wrong_kind`: a re-permission invite is never scheduled
+      // (`scheduleCampaign` refuses it); fail one that somehow is.
       const message =
-        queued.reason === "business_not_found"
+        queued.reason === "business_not_found" || queued.reason === "wrong_kind"
           ? SCHEDULED_SEND_GENERIC_ERROR
           : SCHEDULED_SEND_BLOCKED_ERRORS[queued.reason];
       if (await failScheduled(db, c.id, message, now)) {

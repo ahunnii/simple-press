@@ -34,6 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
@@ -211,6 +212,10 @@ export function CampaignDetail({
   const returning =
     unschedule.isPending || refreshing || campaign.status === "DRAFT";
   const scheduled = campaign.status === "SCHEDULED" || returning;
+  // The one-time invite sent after a contact import: fixed content, never
+  // duplicated (the server refuses it too).
+  const isInvite = campaign.kind === "REPERMISSION";
+
   const duplicate = api.marketing.duplicateCampaign.useMutation({
     onSuccess: ({ id: newId }) => {
       toast.success("Copied to a new draft");
@@ -266,6 +271,7 @@ export function CampaignDetail({
               {campaign.subject}
             </h1>
             <CampaignStatusBadge status={campaign.status} />
+            {isInvite && <Badge variant="outline">Invite</Badge>}
             {date && (
               <span className="text-muted-foreground hidden text-sm sm:inline">
                 {date}
@@ -277,7 +283,7 @@ export function CampaignDetail({
           </div>
         </div>
         <div className="toolbar-actions">
-          {emailMarketingEnabled && (
+          {emailMarketingEnabled && !isInvite && (
             <Button
               variant="outline"
               size="sm"

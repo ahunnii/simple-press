@@ -158,6 +158,8 @@ export default async function CustomerDetailPage({ params }: Props) {
               marketingUnsubscribedAt={customer.marketingUnsubscribedAt}
               marketingSuppressedAt={customer.marketingSuppressedAt}
               marketingSuppressionReason={customer.marketingSuppressionReason}
+              importId={customer.importId}
+              importStatus={customer.importStatus}
               canManage={canManage}
               anonymized={!!customer.anonymizedAt}
             />

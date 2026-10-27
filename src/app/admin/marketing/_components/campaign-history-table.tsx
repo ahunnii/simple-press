@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
@@ -212,15 +213,21 @@ export function CampaignHistoryTable({
                 campaign.status === "DRAFT" || campaign.status === "SCHEDULED";
               const isScheduled = campaign.status === "SCHEDULED";
               const date = dateLabel(campaign, timeZone);
+              // The one-time "still want to hear from us?" invite sent after a
+              // contact import: fixed content, so no Duplicate or Unschedule.
+              const isInvite = campaign.kind === "REPERMISSION";
               return (
                 <TableRow key={campaign.id} className="group/row">
                   <TableCell className={TABLE_CELL}>
-                    <Link
-                      href={`${CAMPAIGNS_PATH}/${campaign.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {campaign.subject}
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <Link
+                        href={`${CAMPAIGNS_PATH}/${campaign.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {campaign.subject}
+                      </Link>
+                      {isInvite && <Badge variant="outline">Invite</Badge>}
+                    </div>
                     <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm md:hidden">
                       <CampaignStatusBadge status={campaign.status} />
                       <span>{date}</span>
@@ -263,7 +270,7 @@ export function CampaignHistoryTable({
                   <TableCell
                     className={`${TABLE_CELL} ${STICKY_ACTIONS_CELL} text-right`}
                   >
-                    {(emailMarketingEnabled || isScheduled) && (
+                    {!isInvite && (emailMarketingEnabled || isScheduled) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button

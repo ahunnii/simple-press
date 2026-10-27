@@ -62,6 +62,7 @@ model User {
   createdInvites            PlatformInvite[]     @relation("CreatedInvites")
   editorNotes               EditorNote[]
   marketingCampaignsCreated MarketingCampaign[]
+  customerImportsCreated    CustomerImport[]
   productReviewReplies      ProductReview[]      @relation("ProductReviewOwnerReply")
   policyAcceptances         PolicyAcceptance[]
 
@@ -348,6 +349,7 @@ model Business {
   marketingCampaigns     MarketingCampaign[]
   marketingConsentEvents MarketingConsentEvent[]
   marketingDoNotEmail    MarketingDoNotEmail[]
+  customerImports        CustomerImport[]
   quickBooksConnection   QuickBooksConnection?
   quickBooksInvoices     QuickBooksInvoice[]
   invoiceSettings        InvoiceSettings?
@@ -1044,7 +1046,7 @@ model Customer {
   // Consent evidence for email marketing. `acceptsMarketing` stays the live
   // opt-in switch; these record when/how it was granted or withdrawn.
   marketingConsentAt         DateTime?
-  marketingConsentSource     String? // CHECKOUT | NEWSLETTER_FORM | ACCOUNT | RESUBSCRIBE_LINK | LEGACY_ACCOUNT
+  marketingConsentSource     String? // CHECKOUT | NEWSLETTER_FORM | ACCOUNT | RESUBSCRIBE_LINK | LEGACY_ACCOUNT | IMPORT_CONFIRM
   marketingUnsubscribedAt    DateTime?
   marketingSuppressedAt      DateTime? // hard bounce / complaint — excluded from all marketing sends
   marketingSuppressionReason String? // HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
@@ -1090,10 +1092,21 @@ model Customer {
   campaignRecipients MarketingCampaignRecipient[]
   consentEvents      MarketingConsentEvent[]
 
+  // Set only on rows CREATED by a contact import (src/lib/marketing/contact-import.ts);
+  // an existing customer matched by email is never re-tagged. Scopes the
+  // one-time re-permission invite audience.
+  importId String?
+  import   CustomerImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  // What the previous site said about marketing email for an imported row:
+  // subscribed | unsubscribed | unknown. ONLY "subscribed" rows are eligible
+  // for the re-permission invite (repermissionAudienceWhere). NOT consent.
+  importStatus String?
+
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
   @@index([businessId, birthMonth, birthDay]) // loyalty birthday cron sweep
+  @@index([businessId, importId]) // re-permission invite audience
 }
 
 model ShippingAddress {
@@ -2167,6 +2180,14 @@ model MarketingCampaign {
   audience    Json? // Segment definition (src/lib/marketing/segments.ts). Null = all opted-in customers.
   scheduledAt DateTime? // Set while status = SCHEDULED; the cron sweep queues it when due.
 
+  // STANDARD = owner-composed campaign to opted-in customers. REPERMISSION =
+  // the one-time "still want to hear from us?" invite to a contact import's
+  // NOT-opted-in rows (audience = repermissionAudienceWhere). `importId` is
+  // unique: one invite per import, ever.
+  kind     String          @default("STANDARD") // STANDARD | REPERMISSION
+  importId String?         @unique
+  import   CustomerImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+
   batches       MarketingCampaignBatch[]
   recipients    MarketingCampaignRecipient[]
   consentEvents MarketingConsentEvent[]
@@ -2279,6 +2300,37 @@ model MarketingDoNotEmail {
   reason    String // UNSUBSCRIBED | HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
 
   @@unique([businessId, emailHash])
+}
+
+/// One contact-list upload (e.g. a Wix contacts export) during a store move.
+/// Platform-admin-only to create (src/server/api/routers/contact-import.ts).
+/// Imported contacts are NEVER opted in: they land with acceptsMarketing=false
+/// and only join the list by clicking the one-time re-permission invite
+/// (MarketingCampaign kind=REPERMISSION, importId = this row).
+model CustomerImport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  fileName   String
+  sourceKind String @default("CSV") // WIX | CSV (detected from the headers)
+  counts     Json? // ContactImportCounts in src/lib/marketing/contact-import.ts
+
+  // Set when the invite is queued: what the platform admin attested on the
+  // owner's word, when, and who (plain id — no second User relation).
+  attestationWording String?   @db.Text
+  attestedAt         DateTime?
+  attestedById       String?
+
+  customers      Customer[]
+  inviteCampaign MarketingCampaign?
+
+  @@index([businessId, createdAt])
 }
 
 /// One QuickBooks Online company connection per business (1:1). Updated in

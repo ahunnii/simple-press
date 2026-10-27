@@ -22,6 +22,12 @@ interface MarketingBroadcastEmailProps {
   postalAddress?: string | null;
   /** Store marketing email style; omit for the neutral look. */
   theme?: EmailLayoutTheme;
+  /**
+   * Why the recipient got this email, shown in the footer. Defaults to the
+   * opted-in line; a contact import's re-permission invite (sent to people
+   * who have NOT opted in here) passes its own.
+   */
+  footerReason?: string;
 }
 
 export function MarketingBroadcastEmail({
@@ -33,6 +39,7 @@ export function MarketingBroadcastEmail({
   previewText,
   postalAddress,
   theme,
+  footerReason,
 }: MarketingBroadcastEmailProps) {
   const preview = previewText?.trim() ?? "";
   // Split on blank lines to form paragraphs; treat body as plain text only
@@ -72,7 +79,10 @@ export function MarketingBroadcastEmail({
         businessName={businessName}
         postalAddress={postalAddress}
         unsubscribeUrl={unsubscribeUrl}
-        reason={`You received this email because you opted in to marketing emails from ${businessName}.`}
+        reason={
+          footerReason ??
+          `You received this email because you opted in to marketing emails from ${businessName}.`
+        }
         linkColor={theme?.linkColor}
       />
     </EmailLayout>

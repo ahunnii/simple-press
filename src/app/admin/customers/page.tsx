@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Search, Users } from "lucide-react";
+import { History, Search, Upload, Users } from "lucide-react";
 
 import type { FilterDefFor } from "../_components/admin-filters";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
   CUSTOMER_MARKETING_DEFAULT as MARKETING_DEFAULT,
@@ -12,6 +13,7 @@ import {
   CUSTOMER_SORT_DEFAULT as SORT_DEFAULT,
   CUSTOMER_SORT_VALUES as SORT_VALUES,
 } from "~/lib/validators/customer";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import {
@@ -128,6 +130,20 @@ export default async function CustomersPage({ searchParams }: Props) {
 
   const { customers, totalCount, stats } = result;
 
+  // Same guard `/admin/layout.tsx` already ran, called again for its resolved
+  // `membershipRole` (null = platform admin). Importing contacts is
+  // platform-admin-only, mirroring `/admin/products`; owners and managers get a
+  // quiet read-only link to the history once a platform admin has imported
+  // something for them. Staff can't open the history page, so no link.
+  const { membershipRole, business } = await requireAdminAccess();
+  const isPlatformAdmin = membershipRole === null;
+  const showImportHistory =
+    membershipRole !== "STAFF" &&
+    (await db.customerImport.findFirst({
+      where: { businessId: business.id },
+      select: { id: true },
+    })) !== null;
+
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Customers" }]} />
@@ -137,6 +153,26 @@ export default async function CustomersPage({ searchParams }: Props) {
             <h1>Customers</h1>
             <p>View and search your customer list</p>
           </div>
+          {(isPlatformAdmin || showImportHistory) && (
+            <div className="flex flex-wrap gap-3">
+              {showImportHistory && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/admin/customers/import/history">
+                    <History aria-hidden="true" className="mr-2 h-4 w-4" />
+                    Import history
+                  </Link>
+                </Button>
+              )}
+              {isPlatformAdmin && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/admin/customers/import">
+                    <Upload aria-hidden="true" className="mr-2 h-4 w-4" />
+                    Import contacts
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Always rendered. Both figures are business-wide totals that don't

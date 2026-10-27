@@ -21,7 +21,7 @@ import {
   TABLE_CELL,
   TABLE_HEAD,
 } from "../../_components/admin-table-style";
-import { getMarketingStatus } from "./marketing-status";
+import { getImportedHint, getMarketingStatus } from "./marketing-status";
 
 const BASE_PATH = "/admin/customers";
 
@@ -93,6 +93,7 @@ export function CustomersTable({ customers }: Props) {
             );
 
             const marketing = getMarketingStatus(customer);
+            const importedHint = getImportedHint(customer);
 
             return (
               <TableRow key={customer.id}>
@@ -154,6 +155,12 @@ export function CustomersTable({ customers }: Props) {
                       </span>
                       <span aria-hidden="true">·</span>
                       <span>{marketing.label}</span>
+                      {importedHint ? (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>{importedHint}</span>
+                        </>
+                      ) : null}
                       <span aria-hidden="true">·</span>
                       <span>Joined {joined}</span>
                     </div>
@@ -180,6 +187,11 @@ export function CustomersTable({ customers }: Props) {
                   ) : (
                     <span className="text-muted-foreground">—</span>
                   )}
+                  {importedHint ? (
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {importedHint}
+                    </p>
+                  ) : null}
                 </TableCell>
 
                 <TableCell

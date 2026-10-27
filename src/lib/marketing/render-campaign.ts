@@ -19,6 +19,18 @@ import { tiptapToEmailHtml } from "./tiptap-to-email";
  */
 export const UNSUBSCRIBE_PLACEHOLDER = "__SP_UNSUBSCRIBE_URL__";
 
+/**
+ * Stands in for the per-recipient newsletter-confirm TOKEN (not the whole
+ * URL) in a re-permission invite's render (`./repermission-invite.ts`). The
+ * invite's button links to `buildNewsletterConfirmUrl(baseUrl, <this>)`,
+ * which the body walker keeps as an absolute link (it would drop a bare
+ * placeholder URL) and HTML-escapes (`&` → `&amp;`); a base64url token needs
+ * no escaping in either the HTML or the text part, so the worker can swap it
+ * in verbatim with `applyConfirmToken`. Substituted ONLY for REPERMISSION
+ * campaigns: in any other campaign the string is left as is.
+ */
+export const CONFIRM_TOKEN_PLACEHOLDER = "__SP_CONFIRM_TOKEN__";
+
 export type CampaignBusiness = {
   name: string;
   logoUrl?: string | null;
@@ -100,6 +112,11 @@ export type RenderCampaignInput = {
    * page previews unsaved settings with it).
    */
   styleOverride?: unknown;
+  /**
+   * Footer line explaining why the recipient got the email; omitted = the
+   * standard "you opted in" line (see `MarketingBroadcastEmail`).
+   */
+  footerReason?: string;
 };
 
 /** Short labels for the footer's social row ("Instagram · Facebook · X"). */
@@ -225,10 +242,16 @@ export function campaignEmailElement(
     previewText: preview === "" ? undefined : preview,
     postalAddress: getBusinessPostalAddress(business),
     theme: themes.layout,
+    ...(input.footerReason ? { footerReason: input.footerReason } : {}),
   });
 }
 
 /** Substitutes the recipient's real unsubscribe URL for every placeholder. */
 export function applyUnsubscribeUrl(s: string, url: string): string {
   return s.replaceAll(UNSUBSCRIBE_PLACEHOLDER, url);
+}
+
+/** Substitutes the recipient's confirm token (base64url) for every placeholder. */
+export function applyConfirmToken(s: string, token: string): string {
+  return s.replaceAll(CONFIRM_TOKEN_PLACEHOLDER, token);
 }

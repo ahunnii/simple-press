@@ -15,7 +15,17 @@ import { createSignedToken, readSignedToken } from "./signed-token";
  */
 const NEWSLETTER_CONFIRM_CONTEXT = "nl-confirm:v1";
 
-const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Default lifetime: the sign-up form's confirmation email. */
+const TOKEN_TTL_MS = 7 * DAY_MS;
+
+/**
+ * Lifetime of the confirm link in a contact import's one-time re-permission
+ * invite (`s: "imp"`): a cold list reads its mail slowly, and there is no
+ * reminder to catch latecomers.
+ */
+export const IMPORT_INVITE_TOKEN_TTL_MS = 30 * DAY_MS;
 
 const newsletterConfirmPayloadSchema = z
   .object({
@@ -28,6 +38,14 @@ const newsletterConfirmPayloadSchema = z
     f: z.string().min(1).optional(),
     /** Last name. */
     l: z.string().min(1).optional(),
+    /**
+     * Where the link was sent from. Absent = the sign-up form (the person
+     * asked for it). `"imp"` = a contact import's re-permission invite, which
+     * the person did NOT ask for: `newsletter.confirm` records it as
+     * IMPORT_CONFIRM and refuses to lift any suppression or do-not-email
+     * entry with it.
+     */
+    s: z.literal("imp").optional(),
     /** Issued at (ms). */
     iat: z.number(),
     /** Expires at (ms). */
@@ -49,6 +67,14 @@ export function createNewsletterConfirmToken(
     email: string;
     firstName?: string;
     lastName?: string;
+    /** `"imp"` for a contact import's re-permission invite (see the schema). */
+    source?: "imp";
+    /** Lifetime in ms; defaults to 7 days. */
+    ttlMs?: number;
+    /**
+     * Issue time. Fixed by callers that must mint the same token twice (the
+     * campaign worker passes `queuedAt`, so a retried batch is byte-identical).
+     */
     now?: Date;
   },
   secret: string = env.SIMPLEPRESS_HASH_SECRET,
@@ -62,10 +88,22 @@ export function createNewsletterConfirmToken(
     e: input.email.trim().toLowerCase(),
     ...(firstName ? { f: firstName } : {}),
     ...(lastName ? { l: lastName } : {}),
+    ...(input.source ? { s: input.source } : {}),
     iat,
-    exp: iat + TOKEN_TTL_MS,
+    exp: iat + (input.ttlMs ?? TOKEN_TTL_MS),
   };
   return createSignedToken(payload, secret, NEWSLETTER_CONFIRM_CONTEXT);
+}
+
+/**
+ * The /email-preferences confirm page for a token — the one URL shape both the
+ * sign-up form's email and the re-permission invite link to.
+ */
+export function buildNewsletterConfirmUrl(
+  baseUrl: string,
+  token: string,
+): string {
+  return `${baseUrl}/email-preferences?view=confirm&t=${encodeURIComponent(token)}`;
 }
 
 /**

@@ -1,7 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
-import { after } from "next/server";
 import { Prisma } from "generated/prisma";
-import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import Papa from "papaparse";
 import { z } from "zod";
@@ -25,7 +23,7 @@ import {
 } from "~/lib/marketing/campaign-status";
 import {
   cancelPendingWork,
-  drainCampaign,
+  startDrainAfterResponse,
 } from "~/lib/marketing/campaign-worker";
 import { marketingConsentSourceLabel } from "~/lib/marketing/consent";
 import {
@@ -50,9 +48,6 @@ import {
 } from "~/lib/rate-limit";
 
 import { createTRPCRouter, featureGate, ownerAdminProcedure } from "../trpc";
-
-/** How long the post-response drain may run before leaving the rest to cron. */
-const AFTER_DRAIN_DEADLINE_MS = 10 * 60_000;
 
 const MISSING_ADDRESS_MESSAGE =
   "Add a full business address in Settings before sending (street, city, and state or ZIP, or a PO box) — the law requires a postal address in marketing emails.";
@@ -83,6 +78,27 @@ const SEND_BLOCKER_MESSAGES: Record<SendBlocker, string> = {
     "A product block has no products to show. Pick products for it or remove it before sending.",
 };
 
+/**
+ * Refusal for any composer write aimed at a contact import's re-permission
+ * invite (`kind: "REPERMISSION"`). Its content, audience and one-time send
+ * belong to the import (`~/lib/marketing/repermission-invite.ts`); only
+ * cancel works on it here.
+ */
+const INVITE_CAMPAIGN_MESSAGE =
+  "This is the one-time invite sent to an imported contact list. It can't be edited, copied, scheduled or sent again.";
+
+function inviteCampaignError() {
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message: INVITE_CAMPAIGN_MESSAGE,
+  });
+}
+
+/** Throws the invite refusal for a REPERMISSION campaign. */
+function assertComposerCampaign(campaign: { kind: string }) {
+  if (campaign.kind !== "STANDARD") throw inviteCampaignError();
+}
+
 /** Tenant-scoped campaign lookup: another business's id is NOT_FOUND. */
 async function findCampaign<S extends Prisma.MarketingCampaignSelect>(
   db: DbClient,
@@ -101,9 +117,10 @@ async function findCampaign<S extends Prisma.MarketingCampaignSelect>(
 }
 
 /**
- * Throws NOT_FOUND for a missing / other-tenant id, else BAD_REQUEST. `message`
- * may be a function of the campaign's current status (to word the error for
- * a scheduled campaign differently from a sent one).
+ * Throws NOT_FOUND for a missing / other-tenant id, the invite refusal for a
+ * re-permission invite, else BAD_REQUEST. `message` may be a function of the
+ * campaign's current status (to word the error for a scheduled campaign
+ * differently from a sent one).
  */
 async function rejectStateChange(
   db: DbClient,
@@ -111,7 +128,11 @@ async function rejectStateChange(
   id: string,
   message: string | ((status: string) => string),
 ): Promise<never> {
-  const { status } = await findCampaign(db, businessId, id, { status: true });
+  const { status, kind } = await findCampaign(db, businessId, id, {
+    status: true,
+    kind: true,
+  });
+  assertComposerCampaign({ kind });
   throw new TRPCError({
     code: "BAD_REQUEST",
     message: typeof message === "function" ? message(status) : message,
@@ -166,32 +187,6 @@ async function recipientCounts(
     if (c) c.unsubscribed = row._count._all;
   }
   return counts;
-}
-
-/**
- * Starts sending once the response is out. `after()` keeps the work alive
- * past the response in the tRPC route handler; outside a request scope (a
- * script, a test caller) it throws, and we fall back to a detached promise.
- * Either way the cron resumes whatever this doesn't finish.
- */
-function startDrain(db: DbClient, campaignId: string) {
-  const run = () =>
-    drainCampaign(db, campaignId, {
-      deadlineMs: AFTER_DRAIN_DEADLINE_MS,
-    }).then(
-      () => undefined,
-      (err: unknown) => {
-        Sentry.captureException(err, {
-          tags: { "marketing.campaign": "drain_error" },
-          extra: { campaignId },
-        });
-      },
-    );
-  try {
-    after(run);
-  } catch {
-    void run();
-  }
 }
 
 /** Largest tiptap document (serialized) a campaign may store. */
@@ -275,6 +270,8 @@ const CAMPAIGN_LIST_SELECT = {
   completedAt: true,
   scheduledAt: true,
   recipientCount: true,
+  /** STANDARD | REPERMISSION (the UI labels and locks invites). */
+  kind: true,
   createdBy: { select: { name: true } },
 } satisfies Prisma.MarketingCampaignSelect;
 
@@ -574,9 +571,15 @@ export const marketingRouter = createTRPCRouter({
         return { id: created.id };
       }
 
-      // Compare-and-set: content is frozen once the campaign is queued.
+      // Compare-and-set: content is frozen once the campaign is queued, and
+      // an invite's is never the composer's to change.
       const { count } = await ctx.db.marketingCampaign.updateMany({
-        where: { id: input.id, businessId: ctx.businessId, status: "DRAFT" },
+        where: {
+          id: input.id,
+          businessId: ctx.businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
         data: content,
       });
       if (count === 0) {
@@ -594,7 +597,12 @@ export const marketingRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const { count } = await ctx.db.marketingCampaign.deleteMany({
-        where: { id: input.id, businessId: ctx.businessId, status: "DRAFT" },
+        where: {
+          id: input.id,
+          businessId: ctx.businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
       });
       if (count === 0) {
         await rejectStateChange(ctx.db, ctx.businessId, input.id, (status) =>
@@ -609,7 +617,9 @@ export const marketingRouter = createTRPCRouter({
   /**
    * Copies any campaign (whatever its status) into a new draft: content,
    * preview text and audience. Nothing about its sending (status, schedule,
-   * recipients, results) carries over.
+   * recipients, results) carries over. A re-permission invite is refused (a
+   * copy would be a standard campaign with the invite's wording and a
+   * confirm link that never gets filled in).
    */
   duplicateCampaign: ownerAdminProcedure
     .use(featureGate("emailMarketing"))
@@ -622,7 +632,9 @@ export const marketingRouter = createTRPCRouter({
         bodyText: true,
         bodyJson: true,
         audience: true,
+        kind: true,
       });
+      assertComposerCampaign(source);
       const copySubject = `Copy of ${source.subject}`;
       const created = await ctx.db.marketingCampaign.create({
         data: {
@@ -662,7 +674,10 @@ export const marketingRouter = createTRPCRouter({
         contentFormat: true,
         bodyText: true,
         bodyJson: true,
+        kind: true,
       });
+      // Its render differs (confirm link, footer); not a composer test send.
+      assertComposerCampaign(campaign);
 
       try {
         await marketingTestSendLimiter.consume(
@@ -761,6 +776,8 @@ export const marketingRouter = createTRPCRouter({
                   ? "This campaign is scheduled. Unschedule it to send it now."
                   : "This campaign has already been sent.",
             });
+          case "wrong_kind":
+            throw inviteCampaignError();
           default:
             throw new TRPCError({
               code: "BAD_REQUEST",
@@ -769,7 +786,9 @@ export const marketingRouter = createTRPCRouter({
         }
       }
 
-      if (result.recipientCount > 0) startDrain(ctx.db, result.campaignId);
+      if (result.recipientCount > 0) {
+        startDrainAfterResponse(ctx.db, result.campaignId);
+      }
       return { id: result.campaignId, recipientCount: result.recipientCount };
     }),
 
@@ -794,7 +813,9 @@ export const marketingRouter = createTRPCRouter({
         bodyText: true,
         bodyJson: true,
         audience: true,
+        kind: true,
       });
+      assertComposerCampaign(campaign);
       if (campaign.status !== "DRAFT") {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -849,7 +870,12 @@ export const marketingRouter = createTRPCRouter({
 
       // Compare-and-set: a concurrent send / delete / schedule wins cleanly.
       const { count } = await ctx.db.marketingCampaign.updateMany({
-        where: { id: campaign.id, businessId, status: "DRAFT" },
+        where: {
+          id: campaign.id,
+          businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
         // `lastError: null`: on a SCHEDULED campaign, lastError is the sweep's
         // retry marker (`SCHEDULED_SEND_RETRY_ERROR`); start clean.
         data: {

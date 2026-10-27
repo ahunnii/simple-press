@@ -25,9 +25,10 @@ function first(value: string | string[] | undefined): string | undefined {
 /**
  * Landing page for two email links, template-agnostic on purpose (it renders
  * inside whichever storefront layout the store uses):
- *  - `?view=confirm&t=` : newsletter double opt-in. Confirming is a button
- *    press (POST), never page load, so email link scanners can't subscribe
- *    anyone.
+ *  - `?view=confirm&t=` : newsletter double opt-in, or the "still want to
+ *    hear from us?" invite sent to a contact import (`s: "imp"` tokens, worded
+ *    as staying on the list). Confirming is a button press (POST), never page
+ *    load, so email link scanners can't subscribe anyone.
  *  - `?s=confirm&t=` : where GET /api/unsubscribe lands people. Unsubscribing
  *    is a button press (POST /api/unsubscribe), never a page load, so link
  *    scanners can't unsubscribe anyone. Once unsubscribed (the state is read
@@ -85,6 +86,7 @@ export default async function EmailPreferencesPage({
           businessName={business.name}
           token={token}
           email={verified.payload.e}
+          invite={verified.payload.s === "imp"}
         />
       );
     }

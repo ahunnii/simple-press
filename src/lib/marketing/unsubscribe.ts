@@ -164,6 +164,9 @@ export async function applyUnsubscribe(
     }
 
     const now = new Date();
+    // Only people with an account have preferences to return to; imported or
+    // guest-checkout contacts re-subscribe through the store's sign-up form.
+    let hasAccount = false;
     const changed = await db.$transaction(async (tx) => {
       const customer = await tx.customer.findFirst({
         // An erased customer has nothing left to opt out (and its placeholder
@@ -179,9 +182,11 @@ export async function applyUnsubscribe(
           acceptsMarketing: true,
           marketingUnsubscribedAt: true,
           marketingConsentAt: true,
+          userId: true,
         },
       });
       if (!customer) return false;
+      hasAccount = customer.userId !== null;
 
       // Always (re)assert the list entry: idempotent, and it backfills an
       // unsubscribe recorded before the list existed.
@@ -240,8 +245,9 @@ export async function applyUnsubscribe(
     return {
       ok: true,
       changed,
-      message:
-        "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences.",
+      message: hasAccount
+        ? "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences."
+        : "You will no longer receive marketing emails. You can sign up again on our website any time.",
     };
   } catch (error) {
     console.error("Error processing unsubscribe request:", error);
