@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Play, X } from "lucide-react";
@@ -30,6 +30,26 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
   // Length read from the preview <video> when the uploader didn't know it.
   const [loadedDuration, setLoadedDuration] = useState<number | null>(null);
   const durationSec = image.durationSec ?? loadedDuration;
+  // Saved videos preview as their poster image, so no <video> is mounted to
+  // report the length — read it from a detached element instead.
+  const needsDetachedProbe =
+    isVideo && Boolean(image.posterUrl) && !image.durationSec;
+  useEffect(() => {
+    if (!needsDetachedProbe) return;
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.muted = true;
+    probe.onloadedmetadata = () => {
+      const d = probe.duration;
+      if (Number.isFinite(d) && d > 0) setLoadedDuration(d);
+    };
+    probe.src = image.url;
+    return () => {
+      probe.onloadedmetadata = null;
+      probe.removeAttribute("src");
+      probe.load();
+    };
+  }, [needsDetachedProbe, image.url]);
   // Old uploads stored the file name as alt text. Show the field empty and say
   // what was there; the product form clears it on save unless it's replaced.
   const staleFilename = isFilenameAltText(image.altText);

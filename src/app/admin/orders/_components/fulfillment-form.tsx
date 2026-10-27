@@ -382,7 +382,9 @@ export function FulfillmentForm({
             <p className="text-sm text-blue-800">
               <strong>Note:</strong>{" "}
               {shipAllRemaining || items.length === 0
-                ? "Marking this order as fulfilled will send"
+                ? isLocalDelivery
+                  ? "Marking this order as delivered will send"
+                  : "Marking this order as fulfilled will send"
                 : "Recording this fulfillment will send"}{" "}
               an email to {customerEmail}
               {hasTracking

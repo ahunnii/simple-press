@@ -206,7 +206,7 @@ export function LocalDeliveryCard({ form, fallbackZip, originPlace }: Props) {
                 control={form.control}
                 name="feeDollars"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="content-start">
                     <FormLabel>Delivery fee</FormLabel>
                     <div className="relative">
                       <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
@@ -235,7 +235,7 @@ export function LocalDeliveryCard({ form, fallbackZip, originPlace }: Props) {
                 control={form.control}
                 name="minOrderDollars"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="content-start">
                     <FormLabel>Minimum order (optional)</FormLabel>
                     <div className="relative">
                       <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">

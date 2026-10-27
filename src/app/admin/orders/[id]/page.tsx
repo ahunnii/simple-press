@@ -132,8 +132,8 @@ export default async function OrderDetailPage({ params }: Props) {
             </Link>
           </Button>
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
-          <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <h1 className="text-base font-medium">
+          <div className="hidden min-w-0 flex-wrap items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium whitespace-nowrap">
               Order #{order.orderNumber}
             </h1>
 
