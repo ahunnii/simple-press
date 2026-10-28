@@ -32,7 +32,7 @@ export function ViiAboutTeamOwner({
   const { ref: imgRef, visible: imgVisible } = useViiReveal(0.1);
   // The accent is the owner's name ("Meet <em>Sevyn</em>"); the heading is
   // just the lead-in word, so it never joins the alt text.
-  const ownerName = headingAccent.trim() || businessName?.trim() || "";
+  const ownerName = (headingAccent.trim() || businessName?.trim()) ?? "";
 
   return (
     <section
