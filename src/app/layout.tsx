@@ -113,9 +113,10 @@ export async function generateMetadata() {
       // homepage title of just its name rather than "Name | Name".
       default: renderSeoTitle(ogTitle, brand),
     },
-    description:
-      firstNonBlank(business.siteContent?.metaDescription) ??
-      "The simplest way to get started with your online business.",
+    // Omitted rather than falling back to the platform tagline — a blank
+    // description lets Google build the snippet from the page's own text,
+    // which beats SimplePress marketing copy showing up on a tenant's store.
+    ...(ogDescription !== undefined ? { description: ogDescription } : {}),
     keywords:
       business.siteContent?.metaKeywords
         ?.split(",")

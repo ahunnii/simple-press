@@ -6,6 +6,7 @@ import { enforceCanonicalHost, getCanonicalUrl } from "~/lib/canonical";
 import { checkBusinessAnyStatus } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { resolveMaintenanceGate } from "~/lib/preview/maintenance-preview-context";
+import { getCachedBusiness } from "~/lib/seo";
 import { parseLocalPresence } from "~/lib/seo/local-presence";
 import { buildMerchantReturnPolicy } from "~/lib/seo/merchant-listing";
 import {
@@ -187,11 +188,23 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
     ? resolveSearchPopular(business.siteContent?.navigationItems, flagEnabled)
     : [];
 
+  // The homepage query doesn't select `SiteContent.metaDescription`; the
+  // per-request-cached SEO business (shared with the root layout's metadata)
+  // already has it, so reuse that for the Organization `description`.
+  const seoBusiness = await getCachedBusiness();
+  const organizationBusiness = {
+    ...business,
+    siteContent: {
+      ...business.siteContent,
+      metaDescription: seoBusiness?.siteContent?.metaDescription,
+    },
+  };
+
   return (
     <HydrateClient>
       <JsonLd
         data={[
-          buildOrganizationSchema(business, { returnPolicy }),
+          buildOrganizationSchema(organizationBusiness, { returnPolicy }),
           buildWebSiteSchema(business, { siteSearch: searchEnabled }),
           ...(parseLocalPresence(business.localPresence) !== "none"
             ? [buildLocalBusinessSchema(business)]

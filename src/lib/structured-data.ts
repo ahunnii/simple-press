@@ -29,8 +29,8 @@ import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { isValidGtin, normalizeGtin } from "~/lib/gtin";
 import { getEffectivePrice } from "~/lib/prices";
-import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { productDescriptionToPlainText } from "~/lib/product-description";
+import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { firstNonBlank } from "~/lib/seo/blank";
 import {
   normalizeAreaServed,
@@ -65,6 +65,8 @@ interface BusinessForOrganization extends CanonicalBusiness {
     logoUrl?: string | null;
     socialLinks?: unknown;
     seoBrandName?: string | null;
+    /** `SiteContent.metaDescription` → Organization `description`. */
+    metaDescription?: string | null;
   } | null;
 }
 
@@ -119,6 +121,8 @@ interface PageForBlogPosting {
   slug: string;
   excerpt?: string | null;
   ogImage?: string | null;
+  /** Fallback when `ogImage` is blank — the post's cover image. */
+  image?: string | null;
   publishedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -506,6 +510,11 @@ export function buildOrganizationSchema(
     ...(alternateName ? { alternateName } : {}),
     url: baseUrl,
   };
+
+  const description = nonBlank(business.siteContent?.metaDescription);
+  if (description) {
+    schema.description = description;
+  }
 
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
   if (logoUrl) {
@@ -1028,7 +1037,9 @@ export function buildBlogPostingSchema(
     schema.description = page.excerpt;
   }
 
-  const image = toAbsoluteUrl(page.ogImage);
+  // `ogImage` is the owner's dedicated share image; a blank one (the editor
+  // saves "" when cleared) falls through to the post's cover `image`.
+  const image = toAbsoluteUrl(firstNonBlank(page.ogImage, page.image));
   if (image) {
     schema.image = image;
   }
@@ -1050,6 +1061,39 @@ interface EventForSchema {
   allDay: boolean;
   location?: string | null;
   priceLabel?: string | null;
+  externalUrl?: string | null;
+}
+
+/**
+ * Best-effort machine reading of the owner's free-text `Event.priceLabel`.
+ *
+ * - "free" / "no charge" / "no cost" / "complimentary" (as whole words) → "0"
+ * - otherwise the FIRST money amount ("$25 per person", "$10–$20" → "10.00",
+ *   "$1,200", "$7.5") → a 2-decimal string
+ * - anything else ("sliding scale", "Donation", "$") → null
+ *
+ * Only amounts with an explicit "$" are read: a bare number in "2 for 1" or
+ * "Ages 5-10" is not a price. USD is the only currency events have, so this
+ * matches the `priceCurrency` emitted by `buildEventSchema`.
+ */
+export function parseEventPrice(
+  label: string | null | undefined,
+): string | null {
+  const text = label?.trim();
+  if (!text) return null;
+
+  const money = /\$\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?/.exec(text);
+  if (money) {
+    const whole = money[1]!.replace(/,/g, "");
+    const cents = (money[2] ?? "").padEnd(2, "0");
+    return `${whole}.${cents}`;
+  }
+
+  if (/\b(free|no\s+(?:charge|cost)|complimentary)\b/i.test(text)) {
+    return "0";
+  }
+
+  return null;
 }
 
 /**
@@ -1064,14 +1108,16 @@ interface EventForSchema {
  * zone — see src/lib/events/format.ts for why). Timed events emit the full
  * ISO instant, which already carries its own offset.
  *
- * IMPORTANT: `priceLabel` is a free-text display string ("$45 per person",
- * "Free", "sliding scale") entered by the owner, not a structured price. It
- * must NEVER be turned into an `offers` object — doing so would fabricate a
- * machine-readable price/currency/availability that we have no actual data
- * for (no checkout, no inventory, no currency selection exists for events).
- * If a future contributor is tempted to "complete" this schema with offers
- * because priceLabel looks parseable (e.g. "$45"), don't — that's exactly
- * the failure mode this comment exists to head off.
+ * `eventAttendanceMode` is OfflineEventAttendanceMode whenever a physical
+ * `location` is set (the model has no online/virtual signal) and omitted
+ * otherwise.
+ *
+ * `offers` is a best-effort reading of the free-text `priceLabel` via
+ * `parseEventPrice` (events have no checkout, so this is informational): a
+ * parsed price or "free" → a priced Offer (USD, InStock); an unparseable
+ * label with an `externalUrl` → an Offer carrying only that url; otherwise
+ * no `offers`. The Offer url is `externalUrl` when set (where tickets /
+ * signup live), else the event's own page.
  */
 export function buildEventSchema(
   event: EventForSchema,
@@ -1128,6 +1174,23 @@ export function buildEventSchema(
       // free-text location field, so it doubles as both name and address.
       address: event.location,
     };
+    schema.eventAttendanceMode =
+      "https://schema.org/OfflineEventAttendanceMode";
+  }
+
+  const externalUrl = toAbsoluteUrl(nonBlank(event.externalUrl));
+  const price = parseEventPrice(event.priceLabel);
+  const offerUrl = externalUrl ?? canonicalUrl;
+  if (price !== null) {
+    schema.offers = {
+      "@type": "Offer",
+      price,
+      priceCurrency: "USD",
+      url: offerUrl,
+      availability: "https://schema.org/InStock",
+    };
+  } else if (externalUrl) {
+    schema.offers = { "@type": "Offer", url: externalUrl };
   }
 
   return schema;

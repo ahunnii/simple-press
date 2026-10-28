@@ -8,6 +8,7 @@ import {
   buildProductSchema,
   buildVideoObjectSchema,
   buildWebSiteSchema,
+  parseEventPrice,
 } from "./structured-data";
 
 const business = {
@@ -18,37 +19,81 @@ const business = {
 };
 
 describe("buildEventSchema", () => {
-  it("never emits an `offers` key, even when priceLabel looks parseable", () => {
-    const schema = buildEventSchema(
-      {
-        name: "Market Day",
-        slug: "market-day",
-        startAt: new Date("2026-08-15T19:00:00.000Z"),
-        endAt: new Date("2026-08-15T21:00:00.000Z"),
-        allDay: false,
-        priceLabel: "$45",
-      },
-      business,
-      "America/Detroit",
-    );
+  const baseEvent = {
+    name: "Market Day",
+    slug: "market-day",
+    startAt: new Date("2026-08-15T19:00:00.000Z"),
+    allDay: false,
+  };
+  const build = (extra: Record<string, unknown>) =>
+    buildEventSchema({ ...baseEvent, ...extra }, business, "America/Detroit");
 
-    expect(schema).not.toHaveProperty("offers");
+  it("emits a priced InStock Offer pointing at the event page when priceLabel has a dollar amount", () => {
+    expect(build({ priceLabel: "$25 per person" }).offers).toEqual({
+      "@type": "Offer",
+      price: "25.00",
+      priceCurrency: "USD",
+      url: "https://testshop.simplepress.test/events/market-day",
+      availability: "https://schema.org/InStock",
+    });
   });
 
-  it("never emits `offers` for a free-text priceLabel like 'Free'", () => {
-    const schema = buildEventSchema(
-      {
-        name: "Community Meetup",
-        slug: "community-meetup",
-        startAt: new Date("2026-08-15T19:00:00.000Z"),
-        allDay: false,
-        priceLabel: "Free",
-      },
-      business,
-      "America/Detroit",
-    );
+  it("uses externalUrl as the Offer url when set", () => {
+    expect(
+      build({
+        priceLabel: "$10",
+        externalUrl: "https://tickets.example.com/market",
+      }).offers,
+    ).toMatchObject({
+      price: "10.00",
+      url: "https://tickets.example.com/market",
+    });
+  });
 
-    expect(schema).not.toHaveProperty("offers");
+  it("reads the first amount of a range label", () => {
+    expect(build({ priceLabel: "$10–$20" }).offers).toMatchObject({
+      price: "10.00",
+    });
+  });
+
+  it("emits price 0 for a free label", () => {
+    expect(build({ priceLabel: "Free" }).offers).toMatchObject({
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    });
+  });
+
+  it("emits a url-only Offer when the label is unparseable but externalUrl exists", () => {
+    expect(
+      build({
+        priceLabel: "Sliding scale",
+        externalUrl: "https://tickets.example.com/market",
+      }).offers,
+    ).toEqual({ "@type": "Offer", url: "https://tickets.example.com/market" });
+  });
+
+  it("omits offers when the label is unparseable/absent and there is no externalUrl", () => {
+    expect(build({ priceLabel: "Sliding scale" })).not.toHaveProperty("offers");
+    expect(build({})).not.toHaveProperty("offers");
+    expect(build({ priceLabel: "  ", externalUrl: " " })).not.toHaveProperty(
+      "offers",
+    );
+  });
+
+  it("sets eventAttendanceMode to offline only when a location is set", () => {
+    expect(build({ location: "Eastern Market" }).eventAttendanceMode).toBe(
+      "https://schema.org/OfflineEventAttendanceMode",
+    );
+    expect(build({})).not.toHaveProperty("eventAttendanceMode");
+    expect(build({ location: null })).not.toHaveProperty("eventAttendanceMode");
+  });
+
+  it("emits image once, from coverImage", () => {
+    const schema = build({
+      coverImage: "https://cdn.example.com/flier.jpg",
+    });
+    expect(schema.image).toBe("https://cdn.example.com/flier.jpg");
   });
 
   it("emits a date-only startDate/endDate for an all-day event, computed in the passed timeZone (west-of-UTC zone catches the endDate-rollover bug)", () => {
@@ -176,6 +221,40 @@ describe("buildEventSchema", () => {
     );
 
     expect(schema.url).toBe("https://testshop.simplepress.test/events/pop-up");
+  });
+});
+
+describe("parseEventPrice", () => {
+  it.each([
+    ["$25 per person", "25.00"],
+    ["$25", "25.00"],
+    ["$7.5 at the door", "7.50"],
+    ["$12.99", "12.99"],
+    ["$ 30", "30.00"],
+    ["$10–$20", "10.00"],
+    ["$1,200 per table", "1200.00"],
+    ["Adults $15, kids free", "15.00"],
+    ["Free", "0"],
+    ["FREE admission", "0"],
+    ["No charge", "0"],
+    ["Complimentary", "0"],
+  ])("parses %j as %j", (label, expected) => {
+    expect(parseEventPrice(label)).toBe(expected);
+  });
+
+  it.each([
+    ["Sliding scale"],
+    ["Donation"],
+    ["Ages 5-10"],
+    ["2 for 1"],
+    ["Carefree fun"],
+    ["$"],
+    [""],
+    ["   "],
+    [null],
+    [undefined],
+  ])("returns null for %j", (label) => {
+    expect(parseEventPrice(label)).toBeNull();
   });
 });
 
@@ -761,6 +840,33 @@ describe("buildBlogPostingSchema", () => {
 
     expect(schema.publisher).not.toHaveProperty("logo");
   });
+
+  it("prefers ogImage over image", () => {
+    const schema = buildBlogPostingSchema(
+      {
+        ...page,
+        ogImage: "https://cdn.example.com/og.jpg",
+        image: "https://cdn.example.com/cover.jpg",
+      },
+      business,
+    );
+
+    expect(schema.image).toBe("https://cdn.example.com/og.jpg");
+  });
+
+  it("falls back to image when ogImage is null or blank", () => {
+    for (const ogImage of [null, "", "   "]) {
+      const schema = buildBlogPostingSchema(
+        { ...page, ogImage, image: "https://cdn.example.com/cover.jpg" },
+        business,
+      );
+      expect(schema.image).toBe("https://cdn.example.com/cover.jpg");
+    }
+  });
+
+  it("omits image when neither is set", () => {
+    expect(buildBlogPostingSchema(page, business)).not.toHaveProperty("image");
+  });
 });
 
 describe("buildOrganizationSchema", () => {
@@ -773,6 +879,27 @@ describe("buildOrganizationSchema", () => {
 
     expect(schema.telephone).toBe("313-555-0100");
     expect(schema.email).toBe("hello@testshop.com");
+  });
+
+  it("emits description from siteContent.metaDescription, trimmed", () => {
+    const schema = buildOrganizationSchema({
+      ...business,
+      siteContent: { metaDescription: "  Handmade candles in Detroit.  " },
+    });
+
+    expect(schema.description).toBe("Handmade candles in Detroit.");
+  });
+
+  it("omits description when metaDescription is null, blank, or absent", () => {
+    for (const metaDescription of [null, "", "   "]) {
+      expect(
+        buildOrganizationSchema({
+          ...business,
+          siteContent: { metaDescription },
+        }),
+      ).not.toHaveProperty("description");
+    }
+    expect(buildOrganizationSchema(business)).not.toHaveProperty("description");
   });
 
   it("omits telephone and email when neither is set", () => {
