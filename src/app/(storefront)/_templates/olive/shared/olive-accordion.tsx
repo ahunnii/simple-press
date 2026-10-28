@@ -9,7 +9,7 @@ import {
   useId,
   useState,
 } from "react";
-import { ChevronDown } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
@@ -50,11 +50,10 @@ function initialOpenIds(children: ReactNode, type: "single" | "multiple") {
 }
 
 /**
- * OliveAccordion — stacked cards that open in place.
- *
- * Each panel is one `olive-card`, so a group of them reads as the same swatch
- * stock as everything else on the page rather than as a list of rules. The
- * chevron is the only moving part and it stops turning under reduced motion.
+ * OliveAccordion — hairline rows that open in place (DETAILS / SIZE & FIT /
+ * SHIPPING & RETURNS on the board). Tracked-caps triggers, a drawn Plus that
+ * becomes a Minus when open, and the panel's 0fr ↔ 1fr collapse from
+ * `.olive-accordion-panel-wrap` in globals.css.
  */
 export function OliveAccordion({
   children,
@@ -76,7 +75,9 @@ export function OliveAccordion({
 
   return (
     <AccordionContext.Provider value={value}>
-      <div className={cn("flex flex-col gap-2", className)}>{children}</div>
+      <div className={cn("olive-accordion flex flex-col", className)}>
+        {children}
+      </div>
     </AccordionContext.Provider>
   );
 }
@@ -97,7 +98,7 @@ type OliveAccordionItemProps = {
 };
 
 /**
- * OliveAccordionItem — one disclosure card.
+ * OliveAccordionItem — one disclosure row.
  *
  * The trigger is a real button inside an `h3`, so the panel titles show up in
  * a screen reader's heading list and the region is labelled by the button that
@@ -126,7 +127,7 @@ export function OliveAccordionItem({
   const panelId = `${generated}-panel`;
 
   return (
-    <div className={cn("olive-card overflow-hidden", className)}>
+    <div className={cn("olive-accordion-item", className)}>
       <TriggerHeading>
         <button
           type="button"
@@ -134,19 +135,24 @@ export function OliveAccordionItem({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+          className="olive-accordion-trigger"
         >
-          <span className="olive-h3" style={{ fontSize: "1.0625rem" }}>
-            {title}
-          </span>
-          <ChevronDown
-            aria-hidden="true"
-            className="h-4 w-4 shrink-0 transition-transform duration-200 ease-[var(--olive-ease)] motion-reduce:transition-none"
-            style={{
-              color: "var(--olive-leaf)",
-              transform: open ? "rotate(180deg)" : undefined,
-            }}
-          />
+          <span className="olive-label">{title}</span>
+          {open ? (
+            <Minus
+              aria-hidden="true"
+              className="shrink-0"
+              size={14}
+              strokeWidth={1.5}
+            />
+          ) : (
+            <Plus
+              aria-hidden="true"
+              className="shrink-0"
+              size={14}
+              strokeWidth={1.5}
+            />
+          )}
         </button>
       </TriggerHeading>
 
@@ -169,12 +175,7 @@ export function OliveAccordionItem({
           inert={!open}
           className="olive-accordion-panel"
         >
-          <div
-            className="px-4 pb-4 text-[0.9375rem] leading-relaxed"
-            style={{ color: "var(--olive-ink-soft)" }}
-          >
-            {children}
-          </div>
+          <div className="olive-accordion-body">{children}</div>
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { MAX_PRODUCT_VIDEOS } from "~/lib/products/media";
+
 /**
  * Per-route `maxFiles` caps for the `images` router at `src/app/api/upload/route.ts`.
  *
@@ -15,6 +17,9 @@ export const ROUTE_MAX_FILES: Record<string, number> = {
   libraryDocuments: 5,
   testimonials: 5,
   editorNoteImages: 3,
+  // Product gallery videos (`productVideos` route). media.ts is client-safe
+  // with no imports, so importing the shared cap here is safe.
+  productVideos: MAX_PRODUCT_VIDEOS,
 };
 
 /**

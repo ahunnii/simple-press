@@ -127,3 +127,66 @@ export async function removeFromDoNotEmail(
   });
   return count > 0;
 }
+
+/**
+ * Batch form of `addToDoNotEmail` for list imports: one `createMany` (existing
+ * rows are skipped, so nothing is ever downgraded) plus one conditional raise
+ * per weaker stored reason. Same end state as calling `addToDoNotEmail` per
+ * address, in a handful of queries instead of thousands.
+ */
+export async function addManyToDoNotEmail(
+  tx: TxClient,
+  businessId: string,
+  emails: readonly string[],
+  reason: DoNotEmailReason,
+): Promise<void> {
+  const hashes = [...new Set(emails.map((e) => hashEmailForDoNotEmail(e)))];
+  const weaker = DO_NOT_EMAIL_REASONS.filter(
+    (r) => REASON_RANK[r] < REASON_RANK[reason],
+  );
+  for (let i = 0; i < hashes.length; i += 1000) {
+    const chunk = hashes.slice(i, i + 1000);
+    await tx.marketingDoNotEmail.createMany({
+      data: chunk.map((emailHash) => ({ businessId, emailHash, reason })),
+      skipDuplicates: true,
+    });
+    if (weaker.length > 0) {
+      await tx.marketingDoNotEmail.updateMany({
+        where: {
+          businessId,
+          emailHash: { in: chunk },
+          reason: { in: [...weaker] },
+        },
+        data: { reason },
+      });
+    }
+  }
+}
+
+/**
+ * Which of these addresses are on the store's list, in one query per 1,000.
+ * Keys of the returned map are `normalizeEmail(email)`.
+ */
+export async function findDoNotEmailed(
+  db: TxClient,
+  businessId: string,
+  emails: readonly string[],
+): Promise<Map<string, DoNotEmailReason>> {
+  const byHash = new Map<string, string>();
+  for (const email of emails) {
+    byHash.set(hashEmailForDoNotEmail(email), normalizeEmail(email));
+  }
+  const hashes = [...byHash.keys()];
+  const found = new Map<string, DoNotEmailReason>();
+  for (let i = 0; i < hashes.length; i += 1000) {
+    const rows = await db.marketingDoNotEmail.findMany({
+      where: { businessId, emailHash: { in: hashes.slice(i, i + 1000) } },
+      select: { emailHash: true, reason: true },
+    });
+    for (const row of rows) {
+      const email = byHash.get(row.emailHash);
+      if (email) found.set(email, row.reason as DoNotEmailReason);
+    }
+  }
+  return found;
+}

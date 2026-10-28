@@ -76,6 +76,39 @@ describe("parseManifest back-compat", () => {
     // Map pin coordinates — absent from a pre-2026-09-25 manifest.
     expect(parsed.content.business.latitude).toBeUndefined();
     expect(parsed.content.business.longitude).toBeUndefined();
+    // Local delivery (2026-10-26) — absent keys stay undefined so an import
+    // leaves the target store's settings alone.
+    expect(parsed.content.business.offersLocalDelivery).toBeUndefined();
+    expect(parsed.content.business.localDeliveryRadiusMiles).toBeUndefined();
+    expect(parsed.content.business.localDeliveryFeeCents).toBeUndefined();
+    expect(parsed.content.business.localDeliveryBands).toBeUndefined();
+  });
+
+  it("parses a manifest carrying local delivery settings", () => {
+    const base = minimalContent();
+    const parsed = parseManifest(
+      manifest({
+        ...base,
+        business: {
+          ...(base.business as Record<string, unknown>),
+          offersLocalDelivery: true,
+          localDeliveryOriginZip: null,
+          localDeliveryRadiusMiles: 15,
+          localDeliveryFeeCents: 500,
+          localDeliveryBands: [{ upToMiles: 5, feeCents: 0 }],
+          localDeliveryMinOrderCents: null,
+          localDeliveryInstructions: "Tue/Thu evenings",
+        },
+      }),
+    );
+    const biz = parsed.content.business;
+    expect(biz.offersLocalDelivery).toBe(true);
+    expect(biz.localDeliveryOriginZip).toBeNull();
+    expect(biz.localDeliveryRadiusMiles).toBe(15);
+    expect(biz.localDeliveryFeeCents).toBe(500);
+    expect(biz.localDeliveryBands).toEqual([{ upToMiles: 5, feeCents: 0 }]);
+    expect(biz.localDeliveryMinOrderCents).toBeNull();
+    expect(biz.localDeliveryInstructions).toBe("Tue/Thu evenings");
   });
 
   it("keeps product optionGroupAttachments undefined when absent and parses present ones", () => {
@@ -333,5 +366,66 @@ describe("parseManifest back-compat", () => {
         maintenanceMessage,
       );
     }
+  });
+});
+
+describe("parseManifest product gallery videos", () => {
+  const productWithImages = (images: unknown[]) => ({
+    exportId: "p1",
+    name: "Glove",
+    slug: "glove",
+    price: 5000,
+    trackInventory: false,
+    allowBackorders: false,
+    published: true,
+    featured: false,
+    sortOrder: 0,
+    additionalFields: null,
+    images,
+    variants: [],
+    ownerReviews: [],
+  });
+
+  it("accepts older image rows without mediaType/posterUrl", () => {
+    const parsed = parseManifest(
+      manifest({
+        ...minimalContent(),
+        products: [
+          productWithImages([{ exportId: "i1", url: "u/a.jpg", sortOrder: 0 }]),
+        ],
+      }),
+    );
+    const img = parsed.content.products[0]!.images[0]!;
+    expect(img.mediaType).toBeUndefined();
+    expect(img.posterUrl).toBeUndefined();
+  });
+
+  it("keeps mediaType and posterUrl on video rows", () => {
+    const parsed = parseManifest(
+      manifest({
+        ...minimalContent(),
+        products: [
+          productWithImages([
+            {
+              exportId: "i1",
+              url: "u/a.jpg",
+              sortOrder: 0,
+              mediaType: "IMAGE",
+            },
+            {
+              exportId: "i2",
+              url: "u/video-b.mp4",
+              sortOrder: 1,
+              mediaType: "VIDEO",
+              posterUrl: "u/image-p.jpg",
+            },
+          ]),
+        ],
+      }),
+    );
+    expect(parsed.content.products[0]!.images[1]).toMatchObject({
+      mediaType: "VIDEO",
+      posterUrl: "u/image-p.jpg",
+    });
   });
 });

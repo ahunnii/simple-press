@@ -7,7 +7,10 @@ import { TrailHeader } from "../../_components/trail-header";
 import { ShippingSettings } from "./_components/shipping-settings";
 
 export default async function ShippingSettingsPage() {
-  const business = await api.business.getWith({});
+  const [business, origin] = await Promise.all([
+    api.business.getWith({}),
+    api.business.getLocalDeliveryOrigin(),
+  ]);
 
   if (!business) notFound();
 
@@ -21,7 +24,10 @@ export default async function ShippingSettingsPage() {
       />
       <HubSubNav hub="settings" />
 
-      <ShippingSettings business={business} />
+      <ShippingSettings
+        business={business}
+        localDeliveryOriginPlace={origin.originPlace}
+      />
     </>
   );
 }

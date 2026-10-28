@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import type { EditorEvents } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
 import * as React from "react";
 import { getMarkRange } from "@tiptap/core";
@@ -9,6 +10,7 @@ import type { LinkVariant } from "~/lib/tiptap/link-extension";
 import { coerceLinkVariant } from "~/lib/tiptap/link-extension";
 import { linkTargetAttr } from "~/lib/tiptap/link-target";
 
+import { OPEN_LINK_EDIT_META } from "../link/insert-button-link";
 import { LinkEditBlock } from "../link/link-edit-block";
 import { LinkPopoverBlock } from "../link/link-popover-block";
 import { isLinkBubbleTarget } from "./bubble-menu-predicates";
@@ -65,6 +67,19 @@ export const LinkBubbleMenu: React.FC<LinkBubbleMenuProps> = ({ editor }) => {
   const handleEdit = React.useCallback(() => {
     setShowEdit(true);
   }, []);
+
+  // A just-inserted button (see `insertButtonLink`) opens in the edit form.
+  React.useEffect(() => {
+    const onTransaction = ({ transaction }: EditorEvents["transaction"]) => {
+      if (!transaction.getMeta(OPEN_LINK_EDIT_META)) return;
+      updateLinkState();
+      setShowEdit(true);
+    };
+    editor.on("transaction", onTransaction);
+    return () => {
+      editor.off("transaction", onTransaction);
+    };
+  }, [editor, updateLinkState]);
 
   const onSetLink = React.useCallback(
     (

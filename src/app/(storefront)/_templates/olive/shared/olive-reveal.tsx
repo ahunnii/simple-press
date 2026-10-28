@@ -41,12 +41,6 @@ export function OliveReveal({
 
 type OliveRevealGroupProps = OliveRevealProps & {
   /**
-   * Fan the group: alternate children lean the opposite way (+0.6°) before
-   * straightening, so a row of cards arrives like a hand being dealt. Use it
-   * for card rows and grids; leave it off for stacked text blocks.
-   */
-  fan?: boolean;
-  /**
    * Stamped onto the group's own element, unchanged, so a scoped CSS rule can
    * retime the stagger when a caller deliberately remounts the group for a
    * reason other than first arrival — see `OliveProductGrid`'s `dealKey`,
@@ -59,15 +53,14 @@ type OliveRevealGroupProps = OliveRevealProps & {
 /**
  * Staggered reveal group. The observer lives on the container; every mapped
  * child must carry `className="olive-reveal-item"` and
- * `style={{ "--i": Math.min(i, 8) } as React.CSSProperties}` for the 60ms
- * cascade (delay is capped at 480ms, so an index above 8 changes nothing).
+ * `style={{ "--i": Math.min(i, 8) } as React.CSSProperties}` for the 70ms
+ * cascade (delay is capped at 560ms, so an index above 8 changes nothing).
  */
 export function OliveRevealGroup({
   children,
   className,
   style,
   threshold = 0.1,
-  fan = false,
   "data-redeal": dataRedeal,
 }: OliveRevealGroupProps) {
   const { ref, visible } = useOliveReveal(threshold);
@@ -77,7 +70,6 @@ export function OliveRevealGroup({
       data-redeal={dataRedeal}
       className={cn(
         "olive-reveal-group",
-        fan && "olive-fan",
         visible && "is-visible",
         className,
       )}

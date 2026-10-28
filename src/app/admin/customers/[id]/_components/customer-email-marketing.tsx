@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 import {
   consentEventLabel,
+  getImportedHint,
   getMarketingStatus,
 } from "../../_components/marketing-status";
 
@@ -36,6 +37,9 @@ type Props = {
   marketingUnsubscribedAt: Date | null;
   marketingSuppressedAt: Date | null;
   marketingSuppressionReason: string | null;
+  /** Set when the customer came in through a contact import. */
+  importId?: string | null;
+  importStatus?: string | null;
   /** `customer.markUnsubscribed` is owner/manager-tier; Staff see read-only. */
   canManage: boolean;
   anonymized: boolean;
@@ -52,6 +56,8 @@ export function CustomerEmailMarketing({
   marketingUnsubscribedAt,
   marketingSuppressedAt,
   marketingSuppressionReason,
+  importId,
+  importStatus,
   canManage,
   anonymized,
 }: Props) {
@@ -64,6 +70,13 @@ export function CustomerEmailMarketing({
     marketingUnsubscribedAt,
     marketingSuppressedAt,
     marketingSuppressionReason,
+  });
+
+  const importedHint = getImportedHint({
+    importId,
+    importStatus,
+    acceptsMarketing,
+    marketingUnsubscribedAt,
   });
 
   const events = api.customer.listConsentEvents.useQuery({
@@ -95,7 +108,16 @@ export function CustomerEmailMarketing({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Badge variant={status.variant}>{status.label}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={status.variant}>{status.label}</Badge>
+              {importedHint && <Badge variant="outline">{importedHint}</Badge>}
+            </div>
+            {importedHint && !marketingUnsubscribedAt && (
+              <p className="text-muted-foreground mt-2 text-sm">
+                Brought over from your previous site. They only join your email
+                list if they choose to in the invite email.
+              </p>
+            )}
             {status.kind === "suppressed" && (
               <p className="text-muted-foreground mt-2 text-sm">
                 We&apos;ve stopped sending marketing emails to this address

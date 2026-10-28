@@ -127,6 +127,63 @@ describe("shipping template", () => {
     expect(md).toContain("Mon–Fri 9:00 AM – 5:00 PM");
   });
 
+  it("adds a local delivery section only when it is on with a radius", () => {
+    expect(shipping({})).not.toContain("## Local Delivery");
+    expect(
+      shipping({ offersLocalDelivery: true, localDeliveryRadiusMiles: null }),
+    ).not.toContain("## Local Delivery");
+
+    const free = shipping({
+      offersLocalDelivery: true,
+      localDeliveryRadiusMiles: 15,
+      localDeliveryFeeCents: 0,
+      localDeliveryInstructions: "Tuesday and Thursday evenings.",
+    });
+    expect(free).toContain("## Local Delivery");
+    expect(free).toContain("within about 15 miles");
+    expect(free).toContain("Local delivery is free.");
+    expect(free).toContain("Tuesday and Thursday evenings.");
+
+    const paid = shipping({
+      offersLocalDelivery: true,
+      localDeliveryRadiusMiles: 1,
+      localDeliveryFeeCents: 450,
+      localDeliveryMinOrderCents: 3000,
+    });
+    expect(paid).toContain("within about 1 mile of us");
+    expect(paid).toContain(
+      "Local delivery costs $4.50, on orders of $30.00 or more.",
+    );
+  });
+
+  it("describes distance pricing when closer prices are set", () => {
+    const md = shipping({
+      offersLocalDelivery: true,
+      localDeliveryRadiusMiles: 15,
+      localDeliveryFeeCents: 500,
+      localDeliveryBands: [
+        { upToMiles: 10, feeCents: 300 },
+        { upToMiles: 5, feeCents: 0 },
+        // Beyond the radius: ignored.
+        { upToMiles: 20, feeCents: 100 },
+      ],
+      localDeliveryMinOrderCents: 3000,
+    });
+    expect(md).toContain(
+      "Local delivery pricing depends on distance: free within 5 miles, $3.00 within 10 miles, and $5.00 beyond that, on orders of $30.00 or more.",
+    );
+
+    const one = shipping({
+      offersLocalDelivery: true,
+      localDeliveryRadiusMiles: 15,
+      localDeliveryFeeCents: 400,
+      localDeliveryBands: [{ upToMiles: 1, feeCents: 0 }],
+    });
+    expect(one).toContain(
+      "pricing depends on distance: free within 1 mile and $4.00 beyond that.",
+    );
+  });
+
   it("names the origin state when set", () => {
     const md = shipping({ originState: "MI" });
     expect(md).toContain("Orders ship from Michigan.");

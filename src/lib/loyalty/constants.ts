@@ -37,7 +37,11 @@ export const LOYALTY_LEDGER_TYPE_LABELS: Record<LoyaltyLedgerType, string> = {
   adjust: "Manual adjustment",
 };
 
-/** Mirrors the keys of `socialLinksSchema` in src/lib/validators/content.ts. */
+/**
+ * The networks a follow claim can target — a subset of `socialLinksSchema` in
+ * src/lib/validators/content.ts (`threads` and the SEO-only
+ * `googleBusinessProfile` are deliberately not claimable).
+ */
 export const LOYALTY_SOCIAL_NETWORKS = [
   "instagram",
   "facebook",

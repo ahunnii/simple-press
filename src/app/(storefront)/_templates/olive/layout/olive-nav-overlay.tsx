@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Heart, Search, X } from "lucide-react";
+import { ArrowRight, Heart, Minus, Plus, Search, X } from "lucide-react";
 
 import type { NavItem } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
-import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import {
   activeEntryIndex,
@@ -17,7 +16,6 @@ import {
 } from "~/app/(storefront)/_components/nav";
 import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
-import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
 import { OliveNavOverlayAccount } from "./olive-nav-overlay-account";
 
@@ -59,13 +57,13 @@ type OliveNavOverlayProps = {
 const EXIT_MS = 240;
 
 /**
- * Mobile navigation: ONE full-screen white card that wipes in from the left,
- * not a stack of panels. Big Josefin links, the collections listed with their
- * category chips, an Account section underneath, and the utilities (search,
- * wishlist, bag) kept along the bottom edge.
+ * Mobile navigation: ONE full-screen ivory sheet that wipes in from the left,
+ * not a stack of panels. Large Bodoni links on hairline rows, the collections
+ * as a plain two-column list, an Account section underneath, and the
+ * utilities (search, wishlist, bag) kept along the bottom edge.
  *
- * Nav parents open as an accordion (their children indented underneath, never
- * flattened into siblings). The trigger is a button, so a group with an empty
+ * Nav parents open as an accordion (Plus/Minus; their children indented
+ * underneath, never flattened into siblings). The trigger is a button, so a group with an empty
  * href is a label rather than a dead link; a parent's own href is the first
  * entry in its list (`navGroupEntries`). The collections block belongs to the
  * `/shop` item, the same way the desktop Shop panel does.
@@ -264,20 +262,20 @@ export function OliveNavOverlay({
           href="/"
           onClick={onClose}
           aria-label={`${businessName} — Home`}
-          className="flex items-center"
+          className="flex min-w-0 items-center"
         >
           {logoUrl ? (
-            <span className="relative block h-9 w-32">
+            <span className="olive-header-logo">
               <Image
                 src={logoUrl}
                 alt={logoAlt}
                 fill
-                sizes="128px"
+                sizes="160px"
                 className="object-contain object-left"
               />
             </span>
           ) : (
-            <span className="olive-wordmark text-[0.8125rem]">
+            <span className="olive-wordmark block min-w-0 truncate">
               {businessName}
             </span>
           )}
@@ -288,17 +286,17 @@ export function OliveNavOverlay({
           type="button"
           onClick={onClose}
           aria-label="Close menu"
-          className="olive-icon-btn -mr-2"
+          className="olive-icon-btn -mr-3 shrink-0"
         >
-          <X className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+          <X className="h-5 w-5" strokeWidth={1.25} aria-hidden="true" />
         </button>
       </div>
 
       <nav
-        className="flex-1 overflow-y-auto px-[var(--olive-section-pad-x)] py-6"
+        className="flex-1 overflow-y-auto px-[var(--olive-section-pad-x)] pt-4 pb-10"
         aria-label="Mobile navigation"
       >
-        <ul className="m-0 flex list-none flex-col p-0">
+        <ul className="olive-nav-overlay-list">
           {navItems.map((item, index) => {
             const current = index === activeIndex;
 
@@ -317,33 +315,27 @@ export function OliveNavOverlay({
                     aria-controls={listId}
                     onClick={() => setExpanded(isExpanded ? null : index)}
                     data-current={current ? "true" : undefined}
-                    className="olive-nav-overlay-link"
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "1rem",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
+                    className="olive-nav-overlay-link olive-nav-overlay-toggle"
                   >
                     {item.label}
-                    <ChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0",
-                        !reduced && "transition-transform duration-200",
-                        isExpanded && "rotate-180",
-                      )}
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
+                    {isExpanded ? (
+                      <Minus
+                        className="h-5 w-5 shrink-0"
+                        strokeWidth={1.25}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Plus
+                        className="h-5 w-5 shrink-0"
+                        strokeWidth={1.25}
+                        aria-hidden="true"
+                      />
+                    )}
                   </button>
                   {isExpanded ? (
                     <ul
                       id={listId}
-                      className="m-0 mb-3 flex list-none flex-col p-0 pl-4"
-                      style={{ borderLeft: "1px solid var(--olive-hairline)" }}
+                      className="m-0 flex list-none flex-col p-0 pb-4 pl-4"
                     >
                       {entries.map((entry, j) => {
                         const active = j === activeEntry;
@@ -355,14 +347,6 @@ export function OliveNavOverlay({
                               onClick={onClose}
                               aria-current={active ? "page" : undefined}
                               className="olive-nav-overlay-sublink"
-                              style={
-                                active
-                                  ? {
-                                      color: "var(--olive-leaf)",
-                                      fontWeight: 500,
-                                    }
-                                  : undefined
-                              }
                             >
                               {entry.label}
                               {entry.external ? (
@@ -402,66 +386,65 @@ export function OliveNavOverlay({
         </ul>
 
         {showCollections ? (
-          <div
-            className="mt-7 pt-7"
-            style={{ borderTop: "1px solid var(--olive-hairline)" }}
-          >
-            <h2 className="olive-label">Collections</h2>
-            <ul className="m-0 mt-3 grid list-none grid-cols-1 gap-x-6 p-0 sm:grid-cols-2">
+          <div className="mt-10">
+            <h2 className="olive-label olive-nav-overlay-heading">
+              Collections
+            </h2>
+            <ul className="m-0 mt-2 grid list-none grid-cols-2 gap-x-6 p-0">
               {collections.map((collection, index) => {
                 const href = `/collections/${collection.slug}`;
                 const active = index === activeCollection;
                 return (
-                  <li key={collection.id}>
+                  <li key={collection.id} className="min-w-0">
                     <Link
                       href={href}
                       onClick={onClose}
                       aria-current={active ? "page" : undefined}
                       className="olive-nav-overlay-sublink"
                     >
-                      <span
-                        className="olive-chip"
-                        style={{
-                          backgroundColor: oliveChipToken(index),
-                          width: "0.875rem",
-                          height: "0.875rem",
-                        }}
-                        aria-hidden="true"
-                      />
                       {collection.name}
                     </Link>
                   </li>
                 );
               })}
             </ul>
-            <div className="mt-3 flex flex-wrap gap-x-6">
+            <div className="mt-3 flex flex-wrap gap-x-8">
               {productsEnabled ? (
                 <Link
                   href="/shop"
                   onClick={onClose}
-                  className="olive-btn olive-btn-ghost olive-btn-sm"
+                  className="olive-btn olive-btn-link"
                 >
                   All products
+                  <ArrowRight
+                    className="olive-btn-arrow"
+                    size={14}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
                 </Link>
               ) : null}
               <Link
                 href="/collections"
                 onClick={onClose}
-                className="olive-btn olive-btn-ghost olive-btn-sm"
+                className="olive-btn olive-btn-link"
               >
                 All collections
+                <ArrowRight
+                  className="olive-btn-arrow"
+                  size={14}
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
               </Link>
             </div>
           </div>
         ) : null}
 
         {accountsEnabled ? (
-          <div
-            className="mt-7 pt-7"
-            style={{ borderTop: "1px solid var(--olive-hairline)" }}
-          >
-            <h2 className="olive-label">Account</h2>
-            <div className="mt-3">
+          <div className="mt-10">
+            <h2 className="olive-label olive-nav-overlay-heading">Account</h2>
+            <div className="mt-2">
               <OliveNavOverlayAccount
                 initialSession={initialSession}
                 accountsEnabled={accountsEnabled}
@@ -475,10 +458,10 @@ export function OliveNavOverlay({
 
       {/* Bottom edge: the utilities, kept quiet under the links. */}
       <div
-        className="flex shrink-0 items-center justify-end gap-3 px-[var(--olive-section-pad-x)] py-4"
+        className="flex shrink-0 items-center justify-end px-[var(--olive-section-pad-x)] py-2"
         style={{ borderTop: "1px solid var(--olive-hairline)" }}
       >
-        <div className="flex items-center gap-1">
+        <div className="-mr-3 flex items-center">
           {productsEnabled || siteSearch.enabled ? (
             <Link
               href="/shop"
@@ -494,7 +477,7 @@ export function OliveNavOverlay({
             >
               <Search
                 className="h-[18px] w-[18px]"
-                strokeWidth={1.5}
+                strokeWidth={1.25}
                 aria-hidden="true"
               />
             </Link>
@@ -508,7 +491,7 @@ export function OliveNavOverlay({
             >
               <Heart
                 className="h-[18px] w-[18px]"
-                strokeWidth={1.5}
+                strokeWidth={1.25}
                 aria-hidden="true"
               />
             </Link>

@@ -39,10 +39,10 @@ function firstFilled(...candidates: (string | null | undefined)[]): string {
 }
 
 /**
- * `/events` — olive's events index on the generic page base: the white
+ * `/events` — olive's events index on the generic page base: the
  * `OlivePageBand` title band, then one `OlivePageSection` of event cards on
  * the same left edge (120px at 1440, 16px at 390 — B1.2/B1.7), then the
- * hideable paper closing band.
+ * hideable sand closing band.
  *
  * Data logic is Default's events page's, carried over: media precedence
  * (video → image → none, here with olive's date tile for none),
@@ -128,7 +128,7 @@ export function OliveEventsPage({
                     <time
                       dateTime={eventDateTimeAttr(event, timeZone)}
                       className="olive-label"
-                      style={{ color: "var(--olive-leaf)" }}
+                      style={{ color: "var(--olive-moss-deep)" }}
                     >
                       {formatEventDate(event, timeZone, { showZone: true })}
                     </time>
@@ -136,7 +136,7 @@ export function OliveEventsPage({
                     <h2 id={`olive-event-${event.id}`} className="olive-h2">
                       <Link
                         href={`/events/${event.slug}`}
-                        className="decoration-[var(--olive-sage-bright)] decoration-1 underline-offset-[6px] hover:underline"
+                        className="decoration-[var(--olive-moss)] decoration-1 underline-offset-[6px] hover:underline"
                       >
                         {event.name}
                       </Link>
@@ -150,7 +150,7 @@ export function OliveEventsPage({
                         <MapPin
                           aria-hidden="true"
                           className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                          style={{ color: "var(--olive-leaf)" }}
+                          style={{ color: "var(--olive-moss-deep)" }}
                         />
                         {event.location}
                       </p>
@@ -158,7 +158,7 @@ export function OliveEventsPage({
 
                     {event.blurb ? (
                       <p
-                        className="text-[0.9375rem] leading-relaxed"
+                        className="text-[0.9375rem] leading-[1.7]"
                         style={{
                           color: "var(--olive-ink-soft)",
                           maxWidth: "62ch",
@@ -177,7 +177,7 @@ export function OliveEventsPage({
                         ) : null}
                         {event.externalUrl ? (
                           <OliveButton
-                            variant="secondary"
+                            variant="outline"
                             size="sm"
                             href={event.externalUrl}
                             target="_blank"
@@ -199,7 +199,7 @@ export function OliveEventsPage({
                       logoUrl={business.siteContent?.logoUrl}
                       size="sm"
                       className="mt-2"
-                      tileClassName="rounded-[var(--olive-card-radius)] border border-[var(--olive-hairline)]"
+                      tileClassName="rounded-none border border-[var(--olive-hairline)]"
                       captionClassName="olive-caption"
                     />
                   </div>

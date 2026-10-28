@@ -243,6 +243,13 @@ exports.Prisma.BusinessScalarFieldEnum = {
   offersInStorePickup: 'offersInStorePickup',
   pickupLocation: 'pickupLocation',
   pickupInstructions: 'pickupInstructions',
+  offersLocalDelivery: 'offersLocalDelivery',
+  localDeliveryOriginZip: 'localDeliveryOriginZip',
+  localDeliveryRadiusMiles: 'localDeliveryRadiusMiles',
+  localDeliveryFeeCents: 'localDeliveryFeeCents',
+  localDeliveryBands: 'localDeliveryBands',
+  localDeliveryMinOrderCents: 'localDeliveryMinOrderCents',
+  localDeliveryInstructions: 'localDeliveryInstructions',
   originState: 'originState',
   shippingWeightTiers: 'shippingWeightTiers',
   businessHours: 'businessHours',
@@ -294,6 +301,7 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   primaryColor: 'primaryColor',
   secondaryColor: 'secondaryColor',
   accentColor: 'accentColor',
+  emailStyle: 'emailStyle',
   navigationItems: 'navigationItems',
   footerNavigationItems: 'footerNavigationItems',
   customFields: 'customFields',
@@ -546,6 +554,8 @@ exports.Prisma.ImageScalarFieldEnum = {
   width: 'width',
   height: 'height',
   sortOrder: 'sortOrder',
+  mediaType: 'mediaType',
+  posterUrl: 'posterUrl',
   productId: 'productId',
   businessId: 'businessId'
 };
@@ -575,7 +585,9 @@ exports.Prisma.CustomerScalarFieldEnum = {
   anonymizedAt: 'anonymizedAt',
   notes: 'notes',
   userId: 'userId',
-  businessId: 'businessId'
+  businessId: 'businessId',
+  importId: 'importId',
+  importStatus: 'importStatus'
 };
 
 exports.Prisma.ShippingAddressScalarFieldEnum = {
@@ -955,6 +967,22 @@ exports.Prisma.PlatformConfigScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PolicyAcceptanceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  businessId: 'businessId',
+  bundle: 'bundle',
+  version: 'version',
+  method: 'method',
+  acceptedAt: 'acceptedAt'
+};
+
+exports.Prisma.PolicyNoticeScalarFieldEnum = {
+  updateId: 'updateId',
+  sentAt: 'sentAt',
+  recipientCount: 'recipientCount'
+};
+
 exports.Prisma.ShippingZoneScalarFieldEnum = {
   id: 'id',
   businessId: 'businessId',
@@ -1058,7 +1086,11 @@ exports.Prisma.MarketingCampaignScalarFieldEnum = {
   startedAt: 'startedAt',
   completedAt: 'completedAt',
   canceledAt: 'canceledAt',
-  lastError: 'lastError'
+  lastError: 'lastError',
+  audience: 'audience',
+  scheduledAt: 'scheduledAt',
+  kind: 'kind',
+  importId: 'importId'
 };
 
 exports.Prisma.MarketingCampaignBatchScalarFieldEnum = {
@@ -1117,6 +1149,19 @@ exports.Prisma.MarketingDoNotEmailScalarFieldEnum = {
   reason: 'reason'
 };
 
+exports.Prisma.CustomerImportScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  createdById: 'createdById',
+  fileName: 'fileName',
+  sourceKind: 'sourceKind',
+  counts: 'counts',
+  attestationWording: 'attestationWording',
+  attestedAt: 'attestedAt',
+  attestedById: 'attestedById'
+};
+
 exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1144,6 +1189,19 @@ exports.Prisma.QuickBooksConnectionScalarFieldEnum = {
   serviceItemName: 'serviceItemName',
   lastSyncAt: 'lastSyncAt',
   lastSyncError: 'lastSyncError'
+};
+
+exports.Prisma.BusinessApiTokenScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  businessId: 'businessId',
+  name: 'name',
+  tokenHash: 'tokenHash',
+  prefix: 'prefix',
+  scopes: 'scopes',
+  createdById: 'createdById',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt'
 };
 
 exports.Prisma.QuickBooksInvoiceScalarFieldEnum = {
@@ -1419,6 +1477,11 @@ exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
   ACTIVE: 'ACTIVE'
 };
 
+exports.ImageMediaType = exports.$Enums.ImageMediaType = {
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   BusinessMembership: 'BusinessMembership',
@@ -1465,6 +1528,8 @@ exports.Prisma.ModelName = {
   PlatformInvite: 'PlatformInvite',
   TeamInvite: 'TeamInvite',
   PlatformConfig: 'PlatformConfig',
+  PolicyAcceptance: 'PolicyAcceptance',
+  PolicyNotice: 'PolicyNotice',
   ShippingZone: 'ShippingZone',
   ShippingRate: 'ShippingRate',
   BackInStockRequest: 'BackInStockRequest',
@@ -1477,7 +1542,9 @@ exports.Prisma.ModelName = {
   MarketingCampaignRecipient: 'MarketingCampaignRecipient',
   MarketingConsentEvent: 'MarketingConsentEvent',
   MarketingDoNotEmail: 'MarketingDoNotEmail',
+  CustomerImport: 'CustomerImport',
   QuickBooksConnection: 'QuickBooksConnection',
+  BusinessApiToken: 'BusinessApiToken',
   QuickBooksInvoice: 'QuickBooksInvoice',
   InvoiceSettings: 'InvoiceSettings',
   Invoice: 'Invoice',

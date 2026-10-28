@@ -6,6 +6,7 @@ import {
   Globe,
   LayoutDashboard,
   MessageSquare,
+  ScrollText,
   Users,
   Wrench,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const navItems = [
   { title: "Businesses", url: "/businesses", icon: Building2 },
   { title: "Domains", url: "/domains", icon: Globe },
   { title: "Notes", url: "/notes", icon: MessageSquare },
+  { title: "Policies", url: "/policies", icon: ScrollText },
   { title: "Maintenance", url: "/maintenance", icon: Wrench },
 ];
 

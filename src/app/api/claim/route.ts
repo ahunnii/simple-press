@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
+import { recordPolicyAcceptance } from "~/lib/legal/policy-acceptance.server";
 import {
   MERCHANT_TERMS_VERSION,
   PLATFORM_TERMS_VERSION,
@@ -155,11 +156,15 @@ export async function POST(req: NextRequest) {
     const business = invite.business;
     const userId = session.user.id;
 
+    // Server-generated acceptance instant — never read from the request body.
+    // Hoisted out of the transaction so the PolicyAcceptance log rows written
+    // after commit carry the same instant as the columns.
+    const acceptedAt = new Date();
+    // What the transaction actually stamped — only those get a log row.
+    const stamped = { merchant: false, platform: false };
+
     try {
       await db.$transaction(async (tx) => {
-        // Server-generated acceptance instant — never read from the request body.
-        const acceptedAt = new Date();
-
         // Grant ownership. `upsert` on the @@unique(userId, businessId) makes a
         // repeat claim idempotent WITHOUT aborting the surrounding transaction
         // (a raw create that hit P2002 would poison the Postgres transaction).
@@ -191,6 +196,7 @@ export async function POST(req: NextRequest) {
                 merchantTermsVersion: MERCHANT_TERMS_VERSION,
               },
         });
+        stamped.merchant = !existingMembership?.merchantTermsAcceptedAt;
 
         // Platform ToS + Privacy attach to the ACCOUNT, so they're only stamped
         // when the claimant actually agreed to them on this page (sign-up, or a
@@ -209,6 +215,7 @@ export async function POST(req: NextRequest) {
                 termsVersion: PLATFORM_TERMS_VERSION,
               },
             });
+            stamped.platform = true;
           }
         }
 
@@ -236,6 +243,35 @@ export async function POST(req: NextRequest) {
       }
       throw txError;
     }
+
+    // Append the clickwraps to the PolicyAcceptance log — AFTER commit, so a
+    // missing table (fails open, Sentry) can never roll back the claim.
+    await recordPolicyAcceptance([
+      ...(stamped.merchant
+        ? [
+            {
+              userId,
+              businessId: business.id,
+              bundle: "merchant" as const,
+              version: MERCHANT_TERMS_VERSION,
+              method: "clickwrap" as const,
+              acceptedAt,
+            },
+          ]
+        : []),
+      ...(stamped.platform
+        ? [
+            {
+              userId,
+              businessId: business.id,
+              bundle: "platform" as const,
+              version: PLATFORM_TERMS_VERSION,
+              method: "clickwrap" as const,
+              acceptedAt,
+            },
+          ]
+        : []),
+    ]);
 
     // Notify Artisanal Futures (fire-and-forget — never blocks the response and
     // never throws; see notify.ts). Skipped for non-AF invites (afProvisionCode

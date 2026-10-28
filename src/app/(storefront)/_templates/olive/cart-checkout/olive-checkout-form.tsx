@@ -4,11 +4,11 @@ import { useState } from "react";
 import Image from "next/image";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
@@ -45,31 +45,33 @@ type Props = {
 
 /** Matches the olive input face and height onto `PhoneInput`'s two children. */
 const PHONE_INPUT_CLASS =
-  "[&>button]:h-auto [&>button]:self-stretch [&>input]:h-auto [&>input]:bg-[var(--olive-paper)] [&>input]:py-[0.6875rem] [&>input]:text-[0.9375rem]";
+  "[&>button]:h-auto [&>button]:self-stretch [&>input]:h-auto [&>input]:bg-[var(--olive-bone)] [&>input]:py-[0.6875rem] [&>input]:text-[0.9375rem]";
 
 const CARD_CLASS = "olive-card flex min-w-0 flex-col gap-5 p-5 sm:p-6";
 
 const ROW_CLASS = "flex items-baseline justify-between gap-4";
 
 /**
- * The two delivery methods. Native radios inside labelled option rows, so
- * arrow-key selection, the required-group semantics and the sage accent
+ * The delivery methods. Native radios inside labelled option rows, so
+ * arrow-key selection, the required-group semantics and the moss accent
  * colour all come from the browser rather than from re-implemented
  * `aria-checked` buttons. These are option rows, not cards — a card inside
  * the delivery card would be a nested card.
  */
-const DELIVERY_OPTIONS = [
-  {
-    value: "ship",
+const DELIVERY_COPY: Partial<
+  Record<DeliveryMethod, { label: string; hint: string }>
+> = {
+  ship: {
     label: "Ship it to me",
     hint: "Priced from the address below.",
   },
-  {
-    value: "pickup",
+  pickup: {
     label: "Pick it up in store",
     hint: "No shipping charge. We hold it for you.",
   },
-] as const;
+  // Local delivery keeps the hook's label and description — the hint carries
+  // the owner's fee and radius, which no fixed string here could.
+};
 
 /**
  * Checkout form — design.md → "Per-page section concepts → CheckoutPage".
@@ -131,6 +133,15 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
   const summaryNote = f["olive.checkout.summary-note"] ?? "";
 
   const shipping = form.deliveryMethod === "ship";
+  const localDelivery = form.deliveryMethod === "delivery";
+  const deliveryStatusText =
+    form.localDelivery.status === "checking"
+      ? "Checking your ZIP…"
+      : form.localDelivery.status === "ineligible"
+        ? form.localDelivery.message
+        : form.localDelivery.status === "eligible"
+          ? "Great — we deliver to you."
+          : null;
 
   // A live rate is genuinely in flight once a destination exists but the
   // amount does not — show it and block submit until it lands.
@@ -141,7 +152,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
   // this composite is what `useOliveFigureChange` actually compares, so the
   // settle flash fires whenever what the shopper reads changes, not only
   // when the raw amount does.
-  const shippingDisplay = !shipping
+  const shippingDisplay = !form.needsAddress
     ? "free-in-store"
     : shippingCalculating
       ? "calculating"
@@ -167,7 +178,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
     return (
       <OliveSection
         bleed
-        tone="paper"
+        tone="ivory"
         aria-labelledby="olive-checkout-heading"
         {...sectionGroupAttr("checkout", "main")}
       >
@@ -194,7 +205,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
   // ── The form ──────────────────────────────────────────────────────────────
   return (
     <form onSubmit={onSubmit}>
-      <OliveSection bleed tone="paper" as="div">
+      <OliveSection bleed tone="ivory" as="div">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
           {/* ── Left: the form column ───────────────────────────────────── */}
           <div
@@ -305,8 +316,8 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
               </OliveFieldRow>
             </fieldset>
 
-            {/* ── Delivery — only when the store offers pickup ───────────── */}
-            {form.shippingConfig.offersInStorePickup ? (
+            {/* ── Delivery — only when the store offers more than shipping ── */}
+            {form.deliveryOptions.length > 1 ? (
               <div
                 className={CARD_CLASS}
                 role="radiogroup"
@@ -321,22 +332,22 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                 </h2>
 
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  {DELIVERY_OPTIONS.map((option) => {
-                    const selected = form.deliveryMethod === option.value;
+                  {form.deliveryOptions.map((option) => {
+                    const selected = form.deliveryMethod === option.id;
+                    const copy = DELIVERY_COPY[option.id];
                     return (
                       <label
-                        key={option.value}
+                        key={option.id}
                         className="flex flex-1 cursor-pointer items-start gap-3 p-4"
                         style={{
-                          borderRadius: "var(--radius)",
                           border: `1px solid ${
                             selected
-                              ? "var(--olive-leaf)"
+                              ? "var(--olive-espresso)"
                               : "var(--olive-hairline-strong)"
                           }`,
                           backgroundColor: selected
-                            ? "var(--olive-sage-tint)"
-                            : "var(--olive-paper)",
+                            ? "var(--olive-sand)"
+                            : "transparent",
                           transition: reducedMotion
                             ? undefined
                             : "background-color var(--olive-dur-hover) var(--olive-ease), border-color var(--olive-dur-hover) var(--olive-ease)",
@@ -345,19 +356,21 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                         <input
                           type="radio"
                           name="olive-delivery-method"
-                          value={option.value}
+                          value={option.id}
                           checked={selected}
-                          onChange={() => form.setDeliveryMethod(option.value)}
+                          onChange={() => form.setDeliveryMethod(option.id)}
                           className="mt-1 size-4 shrink-0"
                         />
                         <span className="flex flex-col gap-1">
                           <span
                             className="text-[0.9375rem] font-medium"
-                            style={{ color: "var(--olive-ink)" }}
+                            style={{ color: "var(--olive-espresso)" }}
                           >
-                            {option.label}
+                            {copy?.label ?? option.label}
                           </span>
-                          <span className="olive-caption">{option.hint}</span>
+                          <span className="olive-caption">
+                            {copy?.hint ?? option.description}
+                          </span>
                         </span>
                       </label>
                     );
@@ -382,11 +395,40 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                     ) : null}
                   </div>
                 ) : null}
+
+                {localDelivery &&
+                (deliveryStatusText || form.localDelivery.instructions) ? (
+                  <div
+                    className="flex flex-col gap-1 pt-4"
+                    style={{ borderTop: "1px solid var(--olive-hairline)" }}
+                  >
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="olive-caption"
+                      style={
+                        form.localDelivery.status === "ineligible"
+                          ? { color: "var(--olive-error)" }
+                          : undefined
+                      }
+                    >
+                      {deliveryStatusText}
+                    </p>
+                    {form.localDelivery.instructions ? (
+                      <>
+                        <p className="olive-label pt-2">Delivery details</p>
+                        <p className="olive-caption whitespace-pre-line">
+                          {form.localDelivery.instructions}
+                        </p>
+                      </>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
             {/* ── Where it ships ────────────────────────────────────────── */}
-            {shipping ? (
+            {form.needsAddress ? (
               <fieldset
                 className={CARD_CLASS}
                 aria-labelledby="olive-co-shipping-heading"
@@ -394,23 +436,28 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                 <h2
                   id="olive-co-shipping-heading"
                   className="olive-h3"
-                  {...fieldAttr("olive.checkout.shipping-heading")}
+                  {...(localDelivery
+                    ? {}
+                    : fieldAttr("olive.checkout.shipping-heading"))}
                 >
-                  {f["olive.checkout.shipping-heading"] ?? ""}
+                  {localDelivery
+                    ? "Delivery address"
+                    : (f["olive.checkout.shipping-heading"] ?? "")}
                 </h2>
 
                 <p className="olive-caption -mt-2">
-                  {form.shippingConfig.shippingType ===
-                  SHIPPING_TYPES.ZONE_WEIGHT
-                    ? "We price shipping from this address. Change it here before you continue."
+                  {form.addressLocked
+                    ? localDelivery
+                      ? "We check delivery from this address. Change it here before you continue."
+                      : "We price shipping from this address. Change it here before you continue."
                     : "This is passed to the payment page, where you can still confirm or edit it."}
                 </p>
 
                 <SavedAddressPicker
-                  className="text-[color:var(--olive-ink)]"
+                  className="text-[color:var(--olive-espresso)]"
                   legendClassName="olive-label"
-                  optionClassName="rounded-[var(--radius)] border-[color:var(--olive-hairline-strong)]"
-                  accentColor="var(--olive-sage)"
+                  optionClassName="rounded-none border-[color:var(--olive-hairline-strong)]"
+                  accentColor="var(--olive-moss)"
                   onSelect={(address) => applySavedAddressToForm(form, address)}
                 />
 
@@ -561,7 +608,6 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                       color: "var(--olive-error)",
                       backgroundColor: "var(--olive-error-bg)",
                       border: "1px solid var(--olive-error-border)",
-                      borderRadius: "var(--radius)",
                       padding: "0.75rem 0.875rem",
                     }}
                   >
@@ -586,21 +632,21 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                 onCheckedChange={form.setAcceptsMarketing}
                 businessName={business.name}
                 className="olive-caption flex items-start gap-2 text-left"
-                inputStyle={{ accentColor: "var(--olive-leaf)" }}
+                inputStyle={{ accentColor: "var(--olive-moss-deep)" }}
               />
 
               <CheckoutTermsNotice
                 disclosure={form.termsDisclosure}
                 className="olive-caption"
                 linkStyle={{
-                  color: "var(--olive-leaf)",
+                  color: "var(--olive-moss-deep)",
                   textDecoration: "underline",
                   textUnderlineOffset: "3px",
                 }}
               />
 
               <OliveButton
-                variant="primary"
+                variant="solid"
                 size="lg"
                 type="submit"
                 className="w-full"
@@ -620,7 +666,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
 
               <div className={ROW_CLASS}>
                 <OliveButton
-                  variant="ghost"
+                  variant="link"
                   href="/cart"
                   data-sp-field="olive.checkout.back-label"
                 >
@@ -638,10 +684,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
             aria-labelledby="olive-co-summary-heading"
             {...sectionGroupAttr("checkout", "summary")}
           >
-            <OliveReveal
-              className="olive-card flex flex-col gap-5 p-5 sm:p-6"
-              style={{ backgroundColor: "var(--olive-slate-tint)" }}
-            >
+            <OliveReveal className="olive-card flex flex-col gap-5 p-5 sm:p-6">
               <h2
                 id="olive-co-summary-heading"
                 className="olive-h3"
@@ -661,10 +704,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   <li key={cartItemId(item)} className="flex items-start gap-3">
                     <div
                       className="relative size-14 shrink-0 overflow-hidden"
-                      style={{
-                        borderRadius: "var(--radius)",
-                        border: "1px solid var(--olive-hairline)",
-                      }}
+                      style={{ border: "1px solid var(--olive-hairline)" }}
                     >
                       {hasOliveImage(item.imageUrl) ? (
                         <Image
@@ -743,7 +783,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                       className="flex-1"
                     />
                     <OliveButton
-                      variant="secondary"
+                      variant="outline"
                       onClick={form.handleApplyDiscount}
                       disabled={!form.discountCodeInput.trim()}
                       loading={form.isValidatingDiscount}
@@ -801,13 +841,13 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   <div className={ROW_CLASS}>
                     <dt
                       className="olive-caption"
-                      style={{ color: "var(--olive-leaf)" }}
+                      style={{ color: "var(--olive-moss-deep)" }}
                     >
                       Discount
                     </dt>
                     <dd
                       className="olive-price"
-                      style={{ color: "var(--olive-leaf)" }}
+                      style={{ color: "var(--olive-moss-deep)" }}
                     >
                       −{formatPrice(form.discountAmount)}
                     </dd>
@@ -815,7 +855,9 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                 ) : null}
 
                 <div className={ROW_CLASS}>
-                  <dt className="olive-caption">Shipping</dt>
+                  <dt className="olive-caption">
+                    {localDelivery ? "Delivery" : "Shipping"}
+                  </dt>
                   <dd
                     className={cn(
                       "olive-price",
@@ -823,15 +865,22 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                     )}
                     aria-live="polite"
                   >
-                    {!shipping
+                    {!form.needsAddress
                       ? "Free — in store"
-                      : shippingCalculating
-                        ? "Working it out…"
-                        : form.shippingPending
-                          ? "Set at payment"
-                          : form.shipping === 0
-                            ? "Free"
-                            : formatPrice(form.shipping)}
+                      : localDelivery && form.shippingPending
+                        ? form.localDelivery.status === "checking"
+                          ? "Working it out…"
+                          : "Enter your ZIP"
+                        : localDelivery &&
+                            form.localDelivery.status === "ineligible"
+                          ? "Not available"
+                          : shippingCalculating
+                            ? "Working it out…"
+                            : form.shippingPending
+                              ? "Set at payment"
+                              : form.shipping === 0
+                                ? "Free"
+                                : formatPrice(form.shipping)}
                   </dd>
                 </div>
 
@@ -840,7 +889,7 @@ export function OliveCheckoutForm({ business, merchantPolicies }: Props) {
                   style={{ borderTop: "1px solid var(--olive-hairline)" }}
                 >
                   <dt className="olive-h3">Total</dt>
-                  {/* Josefin for the word, Figtree 500 for the figure — the
+                  {/* Bodoni for the word, Montserrat for the figure — the
                       two faces, doing the two jobs design.md gives them. */}
                   <dd className="olive-price" style={{ fontSize: "1.25rem" }}>
                     {formatPrice(form.finalTotal)}

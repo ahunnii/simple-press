@@ -8,7 +8,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
@@ -201,39 +200,29 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
         )}
 
         {/* Delivery Method */}
-        {f.shippingConfig.offersInStorePickup && (
+        {f.deliveryOptions.length > 1 && (
           <section>
             <h2 className={sectionHeadingClass}>Delivery</h2>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => f.setDeliveryMethod("ship")}
-                aria-pressed={f.deliveryMethod === "ship"}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  f.deliveryMethod === "ship"
-                    ? "bg-[#215935] text-white"
-                    : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Ship to address
-              </button>
-              <button
-                type="button"
-                onClick={() => f.setDeliveryMethod("pickup")}
-                aria-pressed={f.deliveryMethod === "pickup"}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  f.deliveryMethod === "pickup"
-                    ? "bg-[#215935] text-white"
-                    : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                In-store pickup
-              </button>
+              {f.deliveryOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => f.setDeliveryMethod(option.id)}
+                  aria-pressed={f.deliveryMethod === option.id}
+                  className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                    f.deliveryMethod === option.id
+                      ? "bg-[#215935] text-white"
+                      : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
             <p className="mt-2 text-sm text-gray-600">
-              {f.deliveryMethod === "pickup"
-                ? "No shipping charge. You'll pick up your order at the store."
-                : "Shipping cost is based on your store's shipping settings."}
+              {f.deliveryOptions.find((o) => o.id === f.deliveryMethod)
+                ?.description ?? ""}
             </p>
             {f.deliveryMethod === "pickup" && (
               <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
@@ -250,16 +239,53 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                 ) : null}
               </div>
             )}
+            {f.deliveryMethod === "delivery" && (
+              <>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={`mt-3 text-sm ${
+                    f.localDelivery.status === "ineligible"
+                      ? "font-medium text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {f.localDelivery.status === "checking"
+                    ? "Checking your ZIP…"
+                    : f.localDelivery.status === "ineligible"
+                      ? f.localDelivery.message
+                      : f.localDelivery.status === "eligible"
+                        ? "Great — we deliver to you."
+                        : null}
+                </p>
+                {f.localDelivery.instructions ? (
+                  <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+                    <p className="font-medium text-gray-900">
+                      Delivery details
+                    </p>
+                    <p className="mt-1 whitespace-pre-line text-gray-600">
+                      {f.localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </section>
         )}
 
         {/* Shipping Address */}
-        {f.deliveryMethod === "ship" && (
+        {f.needsAddress && (
           <section>
-            <h2 className={sectionHeadingClass}>Shipping Address</h2>
+            <h2 className={sectionHeadingClass}>
+              {f.deliveryMethod === "delivery"
+                ? "Delivery Address"
+                : "Shipping Address"}
+            </h2>
             <p className="mb-4 text-sm text-gray-600">
-              {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {f.addressLocked
+                ? f.deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <SavedAddressPicker
@@ -279,7 +305,7 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                   onChange={(e) => f.setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
                   className={inputClass}
-                  required={f.deliveryMethod === "ship"}
+                  required={f.needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !f.addressLine1.trim() ? true : undefined
@@ -312,7 +338,7 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                     value={f.city}
                     onChange={(e) => f.setCity(e.target.value)}
                     className={inputClass}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.city.trim() ? true : undefined
@@ -361,7 +387,7 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                     value={f.postalCode}
                     onChange={(e) => f.setPostalCode(e.target.value)}
                     className={inputClass}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.postalCode.trim() ? true : undefined
@@ -462,7 +488,9 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
               </div>
             )}
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Shipping</span>
+              <span className="text-gray-600">
+                {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+              </span>
               <span className="text-gray-900">
                 {f.deliveryMethod === "pickup" ? (
                   "In-store pickup (free)"
@@ -478,7 +506,14 @@ export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
                     Calculating…
                   </span>
                 ) : f.shippingPending ? (
-                  "Calculated at checkout"
+                  f.deliveryMethod === "delivery" ? (
+                    "Enter your ZIP"
+                  ) : (
+                    "Calculated at checkout"
+                  )
+                ) : f.deliveryMethod === "delivery" &&
+                  f.localDelivery.status === "ineligible" ? (
+                  "Not available"
                 ) : f.shipping === 0 ? (
                   "Free"
                 ) : (

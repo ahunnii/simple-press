@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,8 +9,10 @@ import { AlertTriangle, ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { LocalDeliveryOriginPlace } from "./local-delivery-card";
 import type {
   DeliveryReturnsFormValues,
+  LocalDeliveryFormValues,
   ShippingFormValues,
   ZoneWeightFormValues,
 } from "~/lib/validators/shipping";
@@ -19,9 +21,12 @@ import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
 import {
+  createLocalDeliveryFormSchema,
   deliveryReturnsFormDefaults,
   deliveryReturnsFormSchema,
   deliveryReturnsFormToInput,
+  localDeliveryFormDefaults,
+  localDeliveryFormToInput,
   shippingFormSchema,
   zoneWeightFormSchema,
 } from "~/lib/validators/shipping";
@@ -53,12 +58,15 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
 import { DeliveryReturnsCards } from "./delivery-returns-cards";
+import { LocalDeliveryCard } from "./local-delivery-card";
 import { ZoneWeightEditor } from "./zone-weight-editor";
 
 type Business = NonNullable<RouterOutputs["business"]["getWith"]>;
 
 type Props = {
   business: Business;
+  /** City/state of the saved local-delivery origin ZIP (server-resolved). */
+  localDeliveryOriginPlace?: LocalDeliveryOriginPlace;
 };
 
 /**
@@ -199,7 +207,10 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function ShippingSettings({ business }: Props) {
+export function ShippingSettings({
+  business,
+  localDeliveryOriginPlace = null,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
@@ -268,6 +279,24 @@ export function ShippingSettings({ business }: Props) {
     defaultValues: deliveryReturnsFormDefaults(business),
   });
 
+  // ── Local delivery form ───────────────────────────────────────────────────
+  // Also independent of the shipping mode: own form + mutation, saved by the
+  // same toolbar button.
+  const fallbackZip = business.addressPostalCode ?? null;
+  const localDeliverySchema = useMemo(
+    () => createLocalDeliveryFormSchema(fallbackZip),
+    [fallbackZip],
+  );
+  const localForm = useForm<LocalDeliveryFormValues>({
+    resolver: zodResolver(localDeliverySchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: localDeliveryFormDefaults(business),
+  });
+  const [originPlace, setOriginPlace] = useState<LocalDeliveryOriginPlace>(
+    localDeliveryOriginPlace,
+  );
+
   // ── Mutations ─────────────────────────────────────────────────────────────
   // Toast ids are scoped so the shipping and delivery/returns saves can run in
   // parallel without either one clobbering (or stacking duplicates of) the
@@ -275,11 +304,13 @@ export function ShippingSettings({ business }: Props) {
   // one of them runs per save.
   const SHIPPING_TOAST_ID = "shipping-save";
   const DELIVERY_TOAST_ID = "delivery-returns-save";
+  const LOCAL_DELIVERY_TOAST_ID = "local-delivery-save";
   // Synchronous re-entrancy guards. The Save button only disables after a
   // re-render, so Enter / Cmd+Enter / a double click in the same tick could
   // otherwise submit twice. Set right before `.mutate`, cleared in `onSettled`.
   const shippingSaveInFlight = useRef(false);
   const deliverySaveInFlight = useRef(false);
+  const localSaveInFlight = useRef(false);
   const updateMutation = api.business.updateShipping.useMutation({
     onSuccess: (data) => {
       toast.success(data.message, { id: SHIPPING_TOAST_ID });
@@ -361,6 +392,31 @@ export function ShippingSettings({ business }: Props) {
       },
     });
 
+  const saveLocalDeliveryMutation =
+    api.business.updateLocalDelivery.useMutation({
+      onSuccess: (data) => {
+        toast.dismiss(LOCAL_DELIVERY_TOAST_ID);
+        toast.success(data.message);
+        setOriginPlace(data.originPlace);
+        localForm.reset(localDeliveryFormDefaults(data.business));
+        void utils.business.invalidate();
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.dismiss(LOCAL_DELIVERY_TOAST_ID);
+        toast.error(
+          friendlyErrorMessage(error, "Failed to update local delivery"),
+        );
+      },
+      onMutate: () =>
+        toast.loading("Saving local delivery...", {
+          id: LOCAL_DELIVERY_TOAST_ID,
+        }),
+      onSettled: () => {
+        localSaveInFlight.current = false;
+      },
+    });
+
   // ── Submit handlers ───────────────────────────────────────────────────────
   const handleFlatSubmit = async (data: ShippingFormValues): Promise<void> => {
     const flatCents =
@@ -427,6 +483,14 @@ export function ShippingSettings({ business }: Props) {
     saveDeliveryMutation.mutate(deliveryReturnsFormToInput(data));
   };
 
+  const handleLocalDeliverySubmit = async (
+    data: LocalDeliveryFormValues,
+  ): Promise<void> => {
+    if (localSaveInFlight.current) return;
+    localSaveInFlight.current = true;
+    saveLocalDeliveryMutation.mutate(localDeliveryFormToInput(data));
+  };
+
   const onShippingInvalid = () => {
     toast.error("Fix the highlighted shipping fields");
     // zoneForm validates the pickup rule too (its schema carries the pickup
@@ -441,7 +505,9 @@ export function ShippingSettings({ business }: Props) {
   const isFlatPending = updateMutation.isPending;
   const isZonePending = saveZoneWeightMutation.isPending;
   const isDeliveryPending = saveDeliveryMutation.isPending;
-  const isSubmitting = isFlatPending || isZonePending || isDeliveryPending;
+  const isLocalPending = saveLocalDeliveryMutation.isPending;
+  const isSubmitting =
+    isFlatPending || isZonePending || isDeliveryPending || isLocalPending;
 
   const isFlatDirty = form.formState.isDirty;
   const isZoneDirty = zoneForm.formState.isDirty;
@@ -450,7 +516,8 @@ export function ShippingSettings({ business }: Props) {
   const isShippingDirty =
     shippingType === "zone_weight" ? isZoneDirty || isFlatDirty : isFlatDirty;
   const isDeliveryDirty = deliveryForm.formState.isDirty;
-  const isDirty = isShippingDirty || isDeliveryDirty;
+  const isLocalDirty = localForm.formState.isDirty;
+  const isDirty = isShippingDirty || isDeliveryDirty || isLocalDirty;
 
   useKeyboardEnter(
     shippingType === "zone_weight" ? zoneForm : form,
@@ -468,14 +535,19 @@ export function ShippingSettings({ business }: Props) {
     if (!isDeliveryDirty) return;
     await handleDeliverySubmit(data);
   });
+  useKeyboardEnter(localForm, async (data: LocalDeliveryFormValues) => {
+    if (!isLocalDirty) return;
+    await handleLocalDeliverySubmit(data);
+  });
   useDirtyForm(isDirty);
 
   // ── Toolbar save handler (dispatches to correct form) ─────────────────────
   const handleToolbarSave = () => {
     // The shipping forms always saved on click, even when untouched. Keep that,
-    // except when ONLY delivery/returns changed: re-validating an unrelated
-    // (possibly half-configured) shipping form would block that save.
-    if (isShippingDirty || !isDeliveryDirty) {
+    // except when ONLY delivery/returns or local delivery changed:
+    // re-validating an unrelated (possibly half-configured) shipping form
+    // would block that save.
+    if (isShippingDirty || !(isDeliveryDirty || isLocalDirty)) {
       if (shippingType === "zone_weight") {
         void zoneForm.handleSubmit(handleZoneWeightSubmit, onShippingInvalid)();
       } else {
@@ -485,6 +557,11 @@ export function ShippingSettings({ business }: Props) {
     if (isDeliveryDirty) {
       void deliveryForm.handleSubmit(handleDeliverySubmit, () => {
         toast.error("Fix the highlighted delivery and returns fields");
+      })();
+    }
+    if (isLocalDirty) {
+      void localForm.handleSubmit(handleLocalDeliverySubmit, () => {
+        toast.error("Fix the highlighted local delivery fields");
       })();
     }
   };
@@ -884,6 +961,22 @@ export function ShippingSettings({ business }: Props) {
               </form>
             </Form>
           )}
+
+          {/* Local delivery — independent of the shipping mode */}
+          <Form {...localForm}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleToolbarSave();
+              }}
+            >
+              <LocalDeliveryCard
+                form={localForm}
+                fallbackZip={fallbackZip}
+                originPlace={originPlace}
+              />
+            </form>
+          </Form>
 
           {/* Delivery times + returns — independent of the shipping mode */}
           <Form {...deliveryForm}>

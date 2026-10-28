@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import type {
@@ -11,19 +12,32 @@ import type {
   ResendBatchResult,
 } from "~/lib/email/resend";
 import type { DbClient } from "~/server/db";
+import {
+  createNewsletterConfirmToken,
+  IMPORT_INVITE_TOKEN_TTL_MS,
+} from "~/lib/email/newsletter-confirm-token";
 import { isRetryableResendError, sendResendBatch } from "~/lib/email/resend";
 import {
   buildUnsubscribeUrl,
   oneClickUnsubscribeHeaders,
 } from "~/lib/email/unsubscribe-token";
-import { resolveFlags } from "~/lib/features/resolve-flags";
 
-import { marketingAudienceWhere } from "./audience";
+import {
+  marketingAudienceWhere,
+  repermissionAudienceWhere,
+  withoutDoNotEmail,
+} from "./audience";
+import {
+  BATCH_SIZE,
+  isBusinessSendable,
+  SENDABLE_BUSINESS_WHERE,
+} from "./campaign-business";
 import {
   ACCEPTED_RECIPIENT_STATUSES,
   ACTIVE_CAMPAIGN_STATUSES,
 } from "./campaign-status";
-import { applyUnsubscribeUrl } from "./render-campaign";
+import { queueDueScheduledCampaigns } from "./queue-campaign";
+import { applyConfirmToken, applyUnsubscribeUrl } from "./render-campaign";
 import { marketingSendThrottle } from "./send-throttle";
 
 /**
@@ -48,9 +62,15 @@ import { marketingSendThrottle } from "./send-throttle";
  * Every outcome write is conditional on still holding the lease (status
  * SENDING + the attempt number we claimed), so a worker whose lease expired
  * mid-send cannot clobber the worker that reclaimed it.
+ *
+ * RE-PERMISSION INVITES (`kind: "REPERMISSION"`, `./repermission-invite.ts`)
+ * run through the same machinery with two differences: the first-claim
+ * re-check uses `repermissionAudienceWhere` minus the do-not-email list, and
+ * each email carries a per-recipient newsletter-confirm token minted with
+ * `iat = queuedAt` (deterministic, so retries stay byte-identical).
  */
 
-export const BATCH_SIZE = 100;
+export { BATCH_SIZE };
 export const LEASE_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 6;
 export const SEND_TIMEOUT_MS = 60_000;
@@ -113,6 +133,8 @@ type FrozenCampaign = {
   fromAddress: string;
   replyTo: string | null;
   baseUrl: string;
+  /** Set only for a REPERMISSION campaign: whose import it invites. */
+  invite: { importId: string; queuedAt: Date } | null;
 };
 
 type ClaimedBatch = {
@@ -127,9 +149,6 @@ type ClaimedBatch = {
 /** Failure message for a batch whose earlier attempt never reported back. */
 const UNKNOWN_OUTCOME_ON_CANCEL =
   "Canceled after a send attempt that never reported back; some of these emails may have gone out.";
-
-/** Only an active store sends; `checkBusiness` resolves the same value. */
-const ACTIVE_BUSINESS_STATUS = "active";
 
 type Ctx = {
   db: DbClient;
@@ -236,10 +255,7 @@ export async function drainCampaign(
     // Checked before every batch so switching the feature off, or a
     // platform admin suspending the store, stops a send within one batch.
     // The campaign stays QUEUED/SENDING; the cron resumes it once both clear.
-    if (
-      state.business.status !== ACTIVE_BUSINESS_STATUS ||
-      !resolveFlags(state.business.featureFlags).isEnabled("emailMarketing")
-    ) {
+    if (!isBusinessSendable(state.business)) {
       return { batchesSent, stopped: "paused" };
     }
     if (state.status === "QUEUED") {
@@ -291,17 +307,23 @@ async function loadFrozenCampaign(
       fromAddress: true,
       replyTo: true,
       baseUrl: true,
+      kind: true,
+      importId: true,
+      queuedAt: true,
     },
   });
   // A queued campaign always has its render frozen (sendCampaign writes it in
   // the same transaction as DRAFT → QUEUED); guard anyway rather than send
   // an empty email. Such a campaign can never send, so fail it (once) instead
-  // of leaving it active for the cron to re-find every tick.
+  // of leaving it active for the cron to re-find every tick. An invite also
+  // needs its import and `queuedAt` (the confirm tokens' fixed issue time).
+  const isInvite = c?.kind === "REPERMISSION";
   if (
     !c?.renderedHtml ||
     c.renderedText === null ||
     !c.fromAddress ||
-    !c.baseUrl
+    !c.baseUrl ||
+    (isInvite && (!c.importId || !c.queuedAt))
   ) {
     if (c && (await failCampaignMissingRender(db, campaignId, now()))) {
       Sentry.captureMessage(
@@ -318,11 +340,18 @@ async function loadFrozenCampaign(
   return {
     db,
     campaign: {
-      ...c,
+      id: c.id,
+      businessId: c.businessId,
+      subject: c.subject,
       renderedHtml: c.renderedHtml,
       renderedText: c.renderedText,
       fromAddress: c.fromAddress,
+      replyTo: c.replyTo,
       baseUrl: c.baseUrl,
+      invite:
+        isInvite && c.importId && c.queuedAt
+          ? { importId: c.importId, queuedAt: c.queuedAt }
+          : null,
     },
     throttle: opts.throttle ?? marketingSendThrottle,
     send: opts.send ?? sendResendBatch,
@@ -487,6 +516,15 @@ async function processBatch(ctx: Ctx, batch: ClaimedBatch): Promise<boolean> {
  * every retry); the rest — unsubscribed, suppressed, anonymized or deleted
  * since queue time — become SKIPPED. On a retry no rows are PENDING, so this
  * is a no-op and the payload stays identical.
+ *
+ * Deliberately the base consent filter only, never the campaign's segment
+ * (`MarketingCampaign.audience`): the segment is applied once, when
+ * `sendCampaign` snapshots recipients at queue time. A customer who, say,
+ * orders mid-send stays in a "never ordered" campaign — but consent and
+ * suppression are re-checked here for every batch.
+ *
+ * A re-permission invite re-checks `repermissionAudienceWhere` instead, and
+ * also skips anyone put on the do-not-email list since queue time.
  */
 async function freezeMembership(
   db: DbClient,
@@ -494,6 +532,47 @@ async function freezeMembership(
   batchIndex: number,
 ) {
   const inBatch = { campaignId: campaign.id, batchIndex, status: "PENDING" };
+  if (campaign.invite) {
+    const { importId } = campaign.invite;
+    await db.$transaction(async (tx) => {
+      const pending = await tx.marketingCampaignRecipient.findMany({
+        where: inBatch,
+        select: { id: true, email: true },
+      });
+      const allowed = new Set(
+        (await withoutDoNotEmail(tx, campaign.businessId, pending)).map(
+          (r) => r.id,
+        ),
+      );
+      const listed = pending.filter((r) => !allowed.has(r.id));
+      if (listed.length > 0) {
+        await tx.marketingCampaignRecipient.updateMany({
+          where: { ...inBatch, id: { in: listed.map((r) => r.id) } },
+          data: {
+            status: "SKIPPED" satisfies CampaignRecipientStatus,
+            error: "On the do-not-email list when this batch was sent",
+          },
+        });
+      }
+      await tx.marketingCampaignRecipient.updateMany({
+        where: {
+          ...inBatch,
+          customer: {
+            is: repermissionAudienceWhere(campaign.businessId, importId),
+          },
+        },
+        data: { status: "SENDING" satisfies CampaignRecipientStatus },
+      });
+      await tx.marketingCampaignRecipient.updateMany({
+        where: inBatch,
+        data: {
+          status: "SKIPPED" satisfies CampaignRecipientStatus,
+          error: "No longer eligible for the invite when this batch was sent",
+        },
+      });
+    });
+    return;
+  }
   await db.$transaction([
     db.marketingCampaignRecipient.updateMany({
       where: {
@@ -512,6 +591,26 @@ async function freezeMembership(
   ]);
 }
 
+/**
+ * The re-permission invite's confirm token for one recipient. Deterministic:
+ * issued at the campaign's `queuedAt`, from the snapshot email only (no
+ * names), so every retry mints the identical token. Its 30 days run from
+ * queue time; `newsletter.confirm` refuses it once the person has
+ * unsubscribed after `queuedAt`, or is suppressed / on the do-not-email list.
+ */
+export function inviteConfirmToken(
+  campaign: { businessId: string; invite: { queuedAt: Date } },
+  email: string,
+): string {
+  return createNewsletterConfirmToken({
+    businessId: campaign.businessId,
+    email,
+    source: "imp",
+    ttlMs: IMPORT_INVITE_TOKEN_TTL_MS,
+    now: campaign.invite.queuedAt,
+  });
+}
+
 /** One recipient's email, built only from frozen campaign fields + the row. */
 function buildEmail(
   campaign: FrozenCampaign,
@@ -524,13 +623,25 @@ function buildEmail(
     businessId: campaign.businessId,
     r: row.id,
   });
+  const personalize = (s: string) => {
+    const withUnsubscribe = applyUnsubscribeUrl(s, unsubscribeUrl);
+    return campaign.invite
+      ? applyConfirmToken(
+          withUnsubscribe,
+          inviteConfirmToken(
+            { businessId: campaign.businessId, invite: campaign.invite },
+            row.email,
+          ),
+        )
+      : withUnsubscribe;
+  };
   return {
     from: campaign.fromAddress,
     to: [row.email],
     ...(campaign.replyTo ? { replyTo: campaign.replyTo } : {}),
     subject: campaign.subject,
-    html: applyUnsubscribeUrl(campaign.renderedHtml, unsubscribeUrl),
-    text: applyUnsubscribeUrl(campaign.renderedText, unsubscribeUrl),
+    html: personalize(campaign.renderedHtml),
+    text: personalize(campaign.renderedText),
     // RFC 8058 one-click unsubscribe (handled by /api/unsubscribe POST).
     headers: oneClickUnsubscribeHeaders(unsubscribeUrl),
     // Tag values allow only ASCII letters, digits, "_" and "-"; cuid ids comply.
@@ -821,11 +932,42 @@ export async function cancelPendingWork(
   });
 }
 
+/** How long the post-response drain may run before leaving the rest to cron. */
+const AFTER_DRAIN_DEADLINE_MS = 10 * 60_000;
+
+/**
+ * Starts sending a just-queued campaign once the response is out. `after()`
+ * keeps the work alive past the response in the tRPC route handler; outside a
+ * request scope (a script, a test caller) it throws, and we fall back to a
+ * detached promise. Either way the cron resumes whatever this doesn't finish.
+ */
+export function startDrainAfterResponse(db: DbClient, campaignId: string) {
+  const run = () =>
+    drainCampaign(db, campaignId, {
+      deadlineMs: AFTER_DRAIN_DEADLINE_MS,
+    }).then(
+      () => undefined,
+      (err: unknown) => {
+        Sentry.captureException(err, {
+          tags: { "marketing.campaign": "drain_error" },
+          extra: { campaignId },
+        });
+      },
+    );
+  try {
+    after(run);
+  } catch {
+    void run();
+  }
+}
+
 // ─── Cron entry point ────────────────────────────────────────────────────────
 
 /**
- * Cron: resumes every QUEUED / SENDING campaign, oldest first, within one
- * shared time budget. Covers drains cut short by a crash, deploy, deadline,
+ * Cron: first queues every SCHEDULED campaign that is due
+ * (`queueDueScheduledCampaigns`), then resumes every QUEUED / SENDING
+ * campaign, oldest first, within one
+ * shared time budget (the sweep's time counts against it). Covers drains cut short by a crash, deploy, deadline,
  * expired lease, or a flag that was off. Per-campaign failures are isolated.
  * Returns the number of batches sent.
  *
@@ -833,20 +975,34 @@ export async function cancelPendingWork(
  * out of the query (drainCampaign would only pause them), so they can't fill
  * the `take` window and starve sendable campaigns. `emailMarketing` has no
  * registry dependencies and defaults off, so a stored `true` is exactly
- * "enabled"; drainCampaign re-checks through `resolveFlags` anyway.
+ * "enabled"; drainCampaign re-checks through `isBusinessSendable` anyway.
  */
 export async function resumeMarketingCampaigns(
   db: DbClient,
   opts: { budgetMs: number } & Omit<DrainOptions, "deadlineMs">,
 ): Promise<number> {
   const startedAt = Date.now();
+
+  // Scheduled campaigns that are due become QUEUED first, so they drain in
+  // this same run. The sweep shares the run's budget (its time is counted
+  // below) and stops starting campaigns once it is spent. A sweep failure
+  // must not stop the resume below.
+  try {
+    await queueDueScheduledCampaigns(db, {
+      now: opts.now?.(),
+      budgetMs: opts.budgetMs,
+    });
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { "cron.job": "marketing-campaigns" },
+      extra: { step: "queue_scheduled" },
+    });
+  }
+
   const campaigns = await db.marketingCampaign.findMany({
     where: {
       status: { in: [...ACTIVE_CAMPAIGN_STATUSES] },
-      business: {
-        status: ACTIVE_BUSINESS_STATUS,
-        featureFlags: { path: ["emailMarketing"], equals: true },
-      },
+      business: SENDABLE_BUSINESS_WHERE,
     },
     select: { id: true },
     orderBy: [{ queuedAt: "asc" }, { id: "asc" }],

@@ -20,6 +20,18 @@ export type FormProductImage = {
   url: string;
   altText: string | null;
   sortOrder: number;
-  /** Present when this image is pending upload. `url` is a local blob: object URL. */
+  /** Present when this item is pending upload. `url` is a local blob: object URL. */
   file?: File;
+  /** Absent = photo (rows and callers that predate videos). */
+  mediaType?: "IMAGE" | "VIDEO";
+  /**
+   * VIDEO only: still frame shown before playback. A stored URL, or a local
+   * blob: URL while `posterFile` is pending upload. Null = no poster (the
+   * storefront falls back to the video's first frame).
+   */
+  posterUrl?: string | null;
+  /** VIDEO only: poster captured in the browser, uploaded on save. */
+  posterFile?: File;
+  /** VIDEO only, client-side display: length in seconds when known. Never saved. */
+  durationSec?: number;
 };

@@ -16,6 +16,7 @@ import {
   sectionGroupAttr,
 } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { isVideoMedia } from "~/lib/products/media";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -28,6 +29,11 @@ import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { resolveFields } from "..";
@@ -137,6 +143,7 @@ export function SledgeProductPage({
   // Lightbox focus management
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
   const enlargeTriggerRef = useRef<HTMLButtonElement>(null);
+  const lightboxVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (lightboxOpen) {
@@ -157,10 +164,22 @@ export function SledgeProductPage({
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeLightbox();
-      // Trap Tab — the dialog has exactly one focusable element (the close button)
+      // Trap Tab — the dialog's focusables are the close button and, when
+      // showing a video, the player itself.
       if (e.key === "Tab") {
         e.preventDefault();
-        lightboxCloseRef.current?.focus();
+        const focusables = [
+          lightboxVideoRef.current,
+          lightboxCloseRef.current,
+        ].filter((el): el is HTMLVideoElement | HTMLButtonElement => !!el);
+        if (focusables.length === 0) return;
+        const currentIndex = focusables.indexOf(
+          document.activeElement as HTMLVideoElement | HTMLButtonElement,
+        );
+        const nextIndex = e.shiftKey
+          ? (currentIndex - 1 + focusables.length) % focusables.length
+          : (currentIndex + 1) % focusables.length;
+        focusables[nextIndex]?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -231,6 +250,7 @@ export function SledgeProductPage({
 
   const images = product.images.length > 0 ? product.images : [];
   const activeImage = images[activeImg];
+  const activeIsVideo = isVideoMedia(activeImage);
 
   const hasAdditionalTab = !isAdditionalEmpty || !!questionText;
 
@@ -283,7 +303,15 @@ export function SledgeProductPage({
           {/* Gallery */}
           <div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[var(--sl-green)]">
-              {activeImage ? (
+              {activeImage && activeIsVideo ? (
+                <ProductGalleryVideo
+                  key={activeImage.url}
+                  item={activeImage}
+                  active={!lightboxOpen}
+                  fill
+                  fallbackLabel={`${product.name ?? "Product"} video`}
+                />
+              ) : activeImage ? (
                 <Image
                   src={activeImage.url}
                   alt={product.name ?? "Product image"}
@@ -308,8 +336,8 @@ export function SledgeProductPage({
                   ref={enlargeTriggerRef}
                   type="button"
                   onClick={() => setLightboxOpen(true)}
-                  aria-label="Enlarge image"
-                  className="absolute top-3 right-3 flex items-center justify-center rounded-full border border-[var(--sl-border)] bg-white/90 p-2 shadow-sm transition-opacity hover:opacity-80"
+                  aria-label={activeIsVideo ? "Enlarge video" : "Enlarge image"}
+                  className="absolute top-3 right-3 z-20 flex items-center justify-center rounded-full border border-[var(--sl-border)] bg-white/90 p-2 shadow-sm transition-opacity hover:opacity-80"
                 >
                   <Search className="size-4 text-[var(--sl-ink)]" />
                 </button>
@@ -329,16 +357,20 @@ export function SledgeProductPage({
                         ? "ring-2 ring-[var(--sl-coral)] ring-offset-2"
                         : "ring-1 ring-[var(--sl-border)]",
                     )}
-                    aria-label={`View image ${i + 1}`}
+                    aria-label={`View ${isVideoMedia(img) ? "video" : "image"} ${i + 1}`}
                     aria-current={activeImg === i ? "true" : undefined}
                   >
-                    <Image
-                      src={img.url}
-                      alt={`View ${i + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
+                    {isVideoMedia(img) ? (
+                      <ProductGalleryThumb item={img} sizes="80px" />
+                    ) : (
+                      <Image
+                        src={img.url}
+                        alt={`View ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    )}
                   </button>
                 ))}
               </div>
@@ -646,7 +678,7 @@ export function SledgeProductPage({
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="Product image"
+            aria-label={activeIsVideo ? "Product video" : "Product image"}
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
@@ -670,13 +702,22 @@ export function SledgeProductPage({
               className="relative max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
-              <Image
-                src={images[activeImg]?.url ?? "/placeholder.svg"}
-                alt={product.name ?? "Product image"}
-                width={1200}
-                height={1200}
-                className="max-h-[90vh] max-w-[90vw] object-contain"
-              />
+              {activeImage && activeIsVideo ? (
+                <ProductLightboxVideo
+                  key={activeImage.url}
+                  ref={lightboxVideoRef}
+                  item={activeImage}
+                  fallbackLabel={`${product.name ?? "Product"} video`}
+                />
+              ) : (
+                <Image
+                  src={images[activeImg]?.url ?? "/placeholder.svg"}
+                  alt={product.name ?? "Product image"}
+                  width={1200}
+                  height={1200}
+                  className="max-h-[90vh] max-w-[90vw] object-contain"
+                />
+              )}
               <button
                 ref={lightboxCloseRef}
                 type="button"

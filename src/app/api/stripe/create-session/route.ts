@@ -16,6 +16,7 @@ import type { CartAvailabilityResult } from "~/lib/checkout/validate-cart";
 import type { CustomizerDefinition } from "~/lib/customizer/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
+import type { LocalDeliveryIneligibleReason } from "~/lib/local-delivery";
 import { env } from "~/env";
 import {
   appendHold,
@@ -54,6 +55,10 @@ import {
   loadCustomizerDefinitions,
   PRODUCT_OPTIONS_FEATURE_KEY,
 } from "~/lib/customizer/load";
+import {
+  deliveryMethodNeedsAddress,
+  parseDeliveryMethod,
+} from "~/lib/delivery-method";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { resolveFlags } from "~/lib/features/resolve-flags";
@@ -64,8 +69,11 @@ import {
   reserveInventory,
   sweepStaleReservations,
 } from "~/lib/inventory/reservation";
+import { checkLocalDelivery } from "~/lib/local-delivery";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { consentRequestMeta } from "~/lib/marketing/consent-log";
+import { formatPrice } from "~/lib/prices";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
 import {
   buildZoneWeightConfig,
@@ -168,6 +176,31 @@ const REQUIRED_SHIPPING_FIELDS = [
   "state",
   "postalCode",
 ] as const;
+
+/**
+ * Shopper-facing copy for a failed local delivery check. Coarse on purpose —
+ * never a distance (see ~/lib/local-delivery).
+ */
+function localDeliveryRejectionMessage(result: {
+  reason: LocalDeliveryIneligibleReason;
+  minOrderCents?: number;
+}): string {
+  switch (result.reason) {
+    case "out_of_range":
+      return "This address is outside our local delivery area. Please choose another option.";
+    case "below_minimum":
+      return result.minOrderCents != null
+        ? `Local delivery starts at ${formatPrice(result.minOrderCents)}.`
+        : "This order is below the local delivery minimum.";
+    case "unknown_zip":
+      return "We couldn't find that ZIP code. Please check your delivery address.";
+    case "not_us":
+      return "Local delivery is only available in the US.";
+    case "no_origin":
+    case "not_offered":
+      return "Local delivery isn't available right now. Please choose another option.";
+  }
+}
 
 // Helper function to create a one-time Stripe coupon for the discount
 async function createStripeCoupon(
@@ -447,6 +480,7 @@ export async function POST(req: NextRequest) {
                     weightUnit: true,
                     images: {
                       select: { url: true },
+                      where: PHOTO_ONLY_WHERE,
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                     },
@@ -478,6 +512,7 @@ export async function POST(req: NextRequest) {
             _count: { select: { variants: true } },
             images: {
               select: { url: true },
+              where: PHOTO_ONLY_WHERE,
               orderBy: { sortOrder: "asc" },
               take: 1,
             },
@@ -772,8 +807,10 @@ export async function POST(req: NextRequest) {
       return rejectUnavailable(availability);
     }
 
-    const deliveryMethod = body.deliveryMethod === "pickup" ? "pickup" : "ship";
+    const deliveryMethod = parseDeliveryMethod(body.deliveryMethod);
     errorContext.deliveryMethod = deliveryMethod;
+    // Ship and local delivery both need (and validate) a destination address.
+    const needsAddress = deliveryMethodNeedsAddress(deliveryMethod);
 
     if (deliveryMethod === "pickup" && !business.offersInStorePickup) {
       // The checkout UI is offering a delivery option the store never enabled —
@@ -794,7 +831,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (deliveryMethod === "ship") {
+    if (deliveryMethod === "delivery" && !business.offersLocalDelivery) {
+      // Same failure shape as pickup above: a template offering the local
+      // delivery option when the store has it switched off (or the owner
+      // switching it off mid-checkout).
+      reportCheckoutBlocked("local-delivery-not-enabled", {
+        businessId: business.id,
+        templateId: business.templateId,
+        extra: {
+          requestedDeliveryMethod: deliveryMethod,
+          offersLocalDelivery: business.offersLocalDelivery,
+        },
+      });
+      return NextResponse.json(
+        { error: "Local delivery is not available for this store" },
+        { status: 400 },
+      );
+    }
+
+    if (needsAddress) {
       const saPre = customerInfo.shippingAddress;
       if (
         !saPre ||
@@ -846,7 +901,27 @@ export async function POST(req: NextRequest) {
           },
         });
         return NextResponse.json(
-          { error: "Complete shipping address is required" },
+          {
+            error:
+              deliveryMethod === "delivery"
+                ? "Complete delivery address is required"
+                : "Complete shipping address is required",
+          },
+          { status: 400 },
+        );
+      }
+
+      // Local delivery binds the order to the address entered here (Stripe
+      // never re-collects it — see `lockShippingAddress`), and that lock needs
+      // a contact phone. Without one the session would carry no address at
+      // all. The checkout form always requires a phone, so this is a crafted
+      // or broken request — not reported.
+      if (
+        deliveryMethod === "delivery" &&
+        !(customerInfo.phone ?? saPre.phone)?.trim()
+      ) {
+        return NextResponse.json(
+          { error: "A phone number is required for local delivery" },
           { status: 400 },
         );
       }
@@ -861,6 +936,7 @@ export async function POST(req: NextRequest) {
       // that would trip here has been captured as `incomplete-shipping-address`
       // one branch earlier, so a capture here could only ever be a duplicate.
       if (
+        deliveryMethod === "ship" &&
         business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT &&
         saPre?.country &&
         !getAllowedCountries(business.salesCountries).includes(
@@ -887,6 +963,44 @@ export async function POST(req: NextRequest) {
         unitPrices,
       );
     let subtotalCents = subtotalOf(cart, assessed.unitPrices);
+
+    // Local delivery: the authoritative eligibility check. The storefront's
+    // `shipping.checkLocalDelivery` preview is advisory (and prices configured
+    // lines at their base price); this one runs on the real, customizer-priced,
+    // PRE-discount subtotal. Hold-independent, so it sits before the supersede
+    // below and a doomed request never kills the shopper's working session.
+    // Prices don't change across the supersede reload, so neither can this.
+    let localDeliveryFeeCents = 0;
+    if (deliveryMethod === "delivery") {
+      const sa = customerInfo.shippingAddress;
+      const eligibility = await checkLocalDelivery({
+        settings: business,
+        destinationZip: sa?.postalCode ?? null,
+        destinationCountry: sa?.country ?? null,
+        subtotalCents,
+      });
+      if (!eligibility.eligible) {
+        // Only the store-side reasons are reported: a store with delivery on
+        // but no resolvable origin ZIP / radius rejects every shopper. An
+        // out-of-range or below-minimum shopper is the feature working.
+        // Never the distance (see ~/lib/local-delivery) or the address.
+        if (
+          eligibility.reason === "no_origin" ||
+          eligibility.reason === "not_offered"
+        ) {
+          reportCheckoutBlocked("local-delivery-misconfigured", {
+            businessId: business.id,
+            templateId: business.templateId,
+            extra: { reason: eligibility.reason },
+          });
+        }
+        return NextResponse.json(
+          { error: localDeliveryRejectionMessage(eligibility) },
+          { status: 400 },
+        );
+      }
+      localDeliveryFeeCents = eligibility.feeCents;
+    }
 
     // Ignore any supplied discount code when the coupons feature is disabled —
     // the store has turned discounts off, so a stale/injected code must not apply.
@@ -1056,6 +1170,9 @@ export async function POST(req: NextRequest) {
     if (deliveryMethod === "pickup") {
       shippingCents = 0;
       shippingDisplayName = "In-Store Pickup";
+    } else if (deliveryMethod === "delivery") {
+      shippingCents = localDeliveryFeeCents;
+      shippingDisplayName = "Local delivery";
     } else if (business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT) {
       // Load zones with rates for this business (not included in getBusinessByDomain).
       const businessZones = await db.shippingZone.findMany({
@@ -1107,12 +1224,14 @@ export async function POST(req: NextRequest) {
     let freeShippingDiscountCents = 0;
     if (
       verifiedDiscountType === "free_shipping" &&
-      deliveryMethod === "ship" &&
+      needsAddress &&
       shippingCents > 0
     ) {
+      // Free-shipping codes cover the local delivery fee too.
       freeShippingDiscountCents = shippingCents;
       shippingCents = 0;
-      shippingDisplayName = "Free shipping";
+      shippingDisplayName =
+        deliveryMethod === "delivery" ? "Local delivery" : "Free shipping";
     }
 
     // Initialize Stripe with platform account
@@ -1229,7 +1348,7 @@ export async function POST(req: NextRequest) {
     const sa = customerInfo.shippingAddress;
     const contactPhone = (customerInfo.phone ?? sa?.phone)?.trim() ?? "";
     const hasFullShipping =
-      deliveryMethod === "ship" &&
+      needsAddress &&
       !!sa &&
       typeof sa.line1 === "string" &&
       sa.line1.trim().length > 0 &&
@@ -1283,9 +1402,14 @@ export async function POST(req: NextRequest) {
     // orders — otherwise a shopper could pick a cheap state here, then switch to a
     // far one on Stripe and pay the cheaper fixed rate. Address-independent modes
     // (free/flat) keep Stripe's editable address.
+    //
+    // Local delivery is locked the same way, always: eligibility was decided
+    // from the ZIP entered here, so an address edited on Stripe could move the
+    // order outside the radius.
     const lockShippingAddress =
-      deliveryMethod === "ship" &&
-      business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT &&
+      ((deliveryMethod === "ship" &&
+        business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT) ||
+        deliveryMethod === "delivery") &&
       hasFullShipping &&
       !!sa;
 
@@ -1322,6 +1446,8 @@ export async function POST(req: NextRequest) {
           },
         },
       ],
+      // Never for delivery: if it somehow isn't locked (no phone → no
+      // `hasFullShipping`), Stripe still must not collect a new address.
       ...(deliveryMethod === "ship" && !lockShippingAddress
         ? {
             shipping_address_collection: {

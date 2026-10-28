@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-import { OliveLeafMark } from "../shared/olive-leaf-mark";
+import { Check } from "lucide-react";
 
 /**
  * Event name any olive component dispatches on `window` after a successful
@@ -32,9 +31,10 @@ const EXIT_MS = 260;
 type ToastItem = { id: number; name: string };
 
 /**
- * "Every transition announced" — the add-to-bag confirmation. A small white
- * card bottom-right carrying the leaf rivet, the confirmation and the item's
- * name, up for 2.4s.
+ * "Every transition announced" — the add-to-bag confirmation. A small square
+ * espresso card bottom-right (ivory type, one soft shadow — floating UI is
+ * the only place olive allows one) carrying a drawn check, the confirmation
+ * in tracked caps and the item's name, up for 2.4s.
  *
  * Mounted once by `OliveLayout`. The live region wrapper is always in the DOM
  * so assistive tech announces the message when it appears rather than
@@ -78,28 +78,20 @@ export function OliveToast() {
     <div className="olive-toast-region" role="status" aria-live="polite">
       {item ? (
         <div className="olive-toast" data-state={open ? "open" : "closed"}>
-          {/* The same leading-edge idiom as the product page's swatch turn —
-              a leaf-green edge wiping in left-to-right — so pill → toast →
-              badge reads as one vocabulary rather than three techniques. */}
+          {/* A stone hairline wiping in along the top edge, riding the
+              toast's own entrance. */}
           <span className="olive-toast-edge" aria-hidden="true" />
-          <span
-            className="flex items-center"
-            style={{ color: "var(--olive-leaf)" }}
-          >
-            <OliveLeafMark size={18} />
-          </span>
+          <Check
+            className="h-[18px] w-[18px] shrink-0"
+            strokeWidth={1.25}
+            aria-hidden="true"
+          />
           <span className="min-w-0">
-            <span
-              className="block text-[0.875rem] leading-tight font-medium"
-              style={{ color: "var(--olive-ink)" }}
-            >
+            <span className="olive-label block leading-tight">
               Added to bag
             </span>
             {item.name ? (
-              <span
-                className="block truncate text-[0.8125rem] leading-snug"
-                style={{ color: "var(--olive-ink-soft)" }}
-              >
+              <span className="olive-toast-name block truncate">
                 {item.name}
               </span>
             ) : null}

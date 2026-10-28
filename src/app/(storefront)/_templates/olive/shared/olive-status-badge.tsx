@@ -44,23 +44,27 @@ type StatusSpec = {
  * — money that will stop arriving unless someone acts — takes the error token.
  */
 const STATUS: Record<OliveStatus, StatusSpec> = {
-  open: { label: "Open", color: "var(--olive-sage-bright)" },
-  pending: { label: "Pending", color: "var(--olive-slate)" },
-  processing: { label: "Processing", color: "var(--olive-slate-deep)" },
-  completed: { label: "Completed", color: "var(--olive-leaf)" },
-  fulfilled: { label: "Fulfilled", color: "var(--olive-leaf)" },
-  shipped: { label: "Shipped", color: "var(--olive-sage)" },
+  open: { label: "Open", color: "var(--olive-moss)" },
+  pending: { label: "Pending", color: "var(--olive-taupe)" },
+  processing: { label: "Processing", color: "var(--olive-taupe-ink)" },
+  completed: { label: "Completed", color: "var(--olive-moss-deep)" },
+  fulfilled: { label: "Fulfilled", color: "var(--olive-moss-deep)" },
+  shipped: { label: "Shipped", color: "var(--olive-moss)" },
   cancelled: { label: "Cancelled", color: "var(--olive-ink-soft)" },
-  refunded: { label: "Refunded", color: "var(--olive-slate)" },
-  active: { label: "Active", color: "var(--olive-sage-bright)" },
-  paused: { label: "Paused", color: "var(--olive-slate-deep)" },
+  refunded: { label: "Refunded", color: "var(--olive-taupe)" },
+  active: { label: "Active", color: "var(--olive-moss)" },
+  paused: { label: "Paused", color: "var(--olive-taupe-ink)" },
   past_due: {
     label: "Past due",
     color: "var(--olive-error)",
     textColor: "var(--olive-error)",
   },
-  "in-stock": { label: "In stock", color: "var(--olive-sage-bright)" },
-  low: { label: "Low stock", color: "var(--olive-leaf)", chipState: "low" },
+  "in-stock": { label: "In stock", color: "var(--olive-moss)" },
+  low: {
+    label: "Low stock",
+    color: "var(--olive-moss-deep)",
+    chipState: "low",
+  },
   "sold-out": {
     label: "Sold out",
     color: "var(--olive-ink-soft)",
@@ -68,12 +72,12 @@ const STATUS: Record<OliveStatus, StatusSpec> = {
   },
   "pre-order": {
     label: "Pre-order",
-    color: "var(--olive-slate-deep)",
+    color: "var(--olive-taupe-ink)",
     chipState: "pre-order",
   },
   "coming-soon": {
     label: "Coming soon",
-    color: "var(--olive-sage-bright)",
+    color: "var(--olive-moss)",
     chipState: "coming-soon",
   },
 };
@@ -90,7 +94,8 @@ type OliveStatusBadgeProps = {
 };
 
 /**
- * OliveStatusBadge — a state, said in a word and marked with a chip.
+ * OliveStatusBadge — a state, said in tracked caps inside a square hairline
+ * frame and marked with a small swatch dot.
  *
  * The chip is the template's one piece of colour language and the label is the
  * meaning; neither stands alone, so the badge survives greyscale, colour
@@ -110,12 +115,9 @@ export function OliveStatusBadge({
 
   return (
     <span
-      className={cn("inline-flex items-center gap-2", className)}
+      className={cn("olive-status-badge", className)}
       style={{
-        backgroundColor: "var(--olive-paper)",
-        border: "1px solid var(--olive-hairline)",
-        borderRadius: "999px",
-        padding: size === "sm" ? "0.1875rem 0.5rem" : "0.3125rem 0.6875rem",
+        padding: size === "sm" ? "0.25rem 0.5rem" : "0.375rem 0.75rem",
         ...style,
       }}
     >
@@ -123,14 +125,14 @@ export function OliveStatusBadge({
         color={spec.color}
         label={text}
         state={spec.chipState}
-        size={size === "sm" ? 12 : 14}
+        size={size === "sm" ? 8 : 10}
         srOnlyLabel={false}
       />
       <span
         className="olive-label"
         style={{
-          color: spec.textColor ?? "var(--olive-ink)",
-          fontSize: size === "sm" ? "0.6875rem" : "0.75rem",
+          color: spec.textColor ?? "var(--olive-espresso)",
+          fontSize: size === "sm" ? "0.625rem" : "0.6875rem",
         }}
         {...(labelFieldKey ? fieldAttr(labelFieldKey) : {})}
       >

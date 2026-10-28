@@ -1,5 +1,13 @@
 import type { JSONContent } from "@tiptap/core";
 
+import type { EmailProductItem } from "~/lib/tiptap/email-products-node";
+import { formatPrice } from "~/lib/prices";
+import {
+  coerceEmailProductsButtonLabel,
+  sanitizeEmailProductItems,
+} from "~/lib/tiptap/email-products-node";
+import { coerceSpacerSize } from "~/lib/tiptap/spacer-node";
+
 /**
  * Converts a tiptap document into email-safe HTML (inline styles only: no
  * classes, flex or grid) plus a plain-text alternative.
@@ -13,20 +21,47 @@ import type { JSONContent } from "@tiptap/core";
  * Allowlist:
  *  - nodes: doc, paragraph, heading (1-3; deeper levels clamp to 3), text,
  *    hardBreak, bulletList, orderedList, listItem, blockquote,
- *    horizontalRule, image
+ *    horizontalRule, image, spacer (sm/md/lg → a fixed-height table row),
+ *    emailProducts (1 product → a centered card; 2-4 → a 2-column table)
  *  - marks: bold, italic, underline, strike, link, textStyle (color only),
  *    highlight, subscript, superscript
- *  - attrs: textAlign on paragraph/heading, image src/alt/width/size/align
+ *  - attrs: textAlign on paragraph/heading, image src/alt/width/size/align,
+ *    spacer size, emailProducts items/buttonLabel (through the shared
+ *    sanitizers in `~/lib/tiptap/email-products-node`)
+ *
+ * Product blocks render the items exactly as given. Campaign sends re-read
+ * them from the database first (`hydrateEmailProducts` in
+ * `./email-products`), so the snapshot in a draft is never trusted. Each
+ * product links to `/shop/<slug>` on `options.baseUrl`; with no base URL the
+ * card is text only (no link, no button).
  *
  * Links: absolute http(s) and mailto: pass through. A site-relative link
  * (`/contact`, as the page picker inserts) is resolved against
  * `options.baseUrl` (the store's public URL) into an absolute link; with no
  * base URL it is dropped. Everything else (javascript:, data:, `//host`) is
  * dropped.
+ *
+ * Theme: campaign emails pass the store's marketing email style
+ * (`emailBodyThemeFromStyle` in `./email-style`) to color links and buttons
+ * and set the font. Without a theme the output is the neutral look, and must
+ * stay byte-identical to it (see tiptap-to-email-theme.test.ts).
  */
+export type EmailBodyTheme = {
+  /** Text-link color (readable on the white card). */
+  linkColor: string;
+  /** Solid button fill. */
+  accent: string;
+  /** Label color on a solid button. */
+  buttonText: string;
+  /** CSS font-family value for text blocks. */
+  fontStack: string;
+};
+
 export type TiptapEmailOptions = {
   /** The store's public origin, e.g. `https://shop.example.com`. */
   baseUrl?: string | null;
+  /** Marketing email style; omitted = the neutral default look. */
+  theme?: EmailBodyTheme | null;
 };
 
 export type TiptapEmailResult = {
@@ -73,6 +108,38 @@ function safeColor(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const v = value.trim();
   return HEX_COLOR.test(v) || RGB_COLOR.test(v) ? v : null;
+}
+
+/**
+ * A font-family value safe inside a double-quoted style attribute, else
+ * `null`. Double quotes become single quotes (`"Times New Roman"` →
+ * `'Times New Roman'`), which need no escaping there.
+ */
+function safeFontStack(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim().replace(/"/g, "'");
+  return v !== "" && /^[A-Za-z0-9 ,'-]+$/.test(v) ? v : null;
+}
+
+type ResolvedTheme = {
+  linkColor: string;
+  accent: string;
+  buttonText: string;
+  /** `;font-family:...`, or "" when the font stack was unusable. */
+  font: string;
+};
+
+function resolveTheme(
+  theme: EmailBodyTheme | null | undefined,
+): ResolvedTheme | null {
+  if (!theme) return null;
+  const font = safeFontStack(theme.fontStack);
+  return {
+    linkColor: safeColor(theme.linkColor) ?? LINK_COLOR,
+    accent: safeColor(theme.accent) ?? "#111827",
+    buttonText: safeColor(theme.buttonText) ?? "#ffffff",
+    font: font ? `;font-family:${font}` : "",
+  };
 }
 
 /** The http(s) origin of a base URL, else `null`. */
@@ -158,7 +225,13 @@ const NODE_LABELS: Record<string, string> = {
 
 // ─── Walker ──────────────────────────────────────────────────────────────
 
-type Ctx = { warnings: Set<string>; baseUrl: string | null };
+type Ctx = {
+  warnings: Set<string>;
+  baseUrl: string | null;
+  theme: ResolvedTheme | null;
+  /** `baseText` plus the theme font, if any. */
+  text: string;
+};
 
 function warn(ctx: Ctx, message: string) {
   ctx.warnings.add(message);
@@ -273,8 +346,14 @@ function renderMarks(
         }
         href = safe;
         const variant: unknown = attrs.variant;
-        const style =
-          variant === "solid"
+        const theme = ctx.theme;
+        const style = theme
+          ? variant === "solid"
+            ? `display:inline-block;padding:9px 19px;border-radius:6px;border:1px solid ${theme.accent};background-color:${theme.accent};color:${theme.buttonText};text-decoration:none;font-weight:600`
+            : variant === "outline"
+              ? `display:inline-block;padding:9px 19px;border-radius:6px;border:1px solid ${theme.linkColor};color:${theme.linkColor};text-decoration:none;font-weight:600`
+              : `color:${theme.linkColor};text-decoration:underline`
+          : variant === "solid"
             ? `display:inline-block;padding:10px 20px;border-radius:6px;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600`
             : variant === "outline"
               ? `display:inline-block;padding:9px 19px;border-radius:6px;border:1px solid #111827;color:#111827;text-decoration:none;font-weight:600`
@@ -328,6 +407,132 @@ function renderImage(node: JSONContent, ctx: Ctx, inline: boolean): Rendered {
   return { html, text: `[${alt.trim() || "image"}]` };
 }
 
+// ─── Spacer & product blocks ─────────────────────────────────────────────
+
+const SPACER_HEIGHT_PX: Record<string, number> = { sm: 16, md: 32, lg: 56 };
+
+function renderSpacer(node: JSONContent): Rendered {
+  const px = SPACER_HEIGHT_PX[coerceSpacerSize(attrOf(node).size)] ?? 32;
+  return {
+    html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height:${px}px;line-height:${px}px;font-size:1px">&nbsp;</td></tr></table>`,
+    text: "",
+  };
+}
+
+/** Widest a product photo renders in the 2-column grid. */
+const PRODUCT_GRID_IMAGE_MAX_WIDTH = 280;
+
+const PRODUCT_TABLE = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px">`;
+
+/**
+ * An absolute http(s) URL for a product photo, else `null`. A site-relative
+ * path (template/seed photos like `/templates/glove/images/…`) is resolved
+ * against the store's URL, like links are.
+ */
+function safeProductImageSrc(
+  value: string | null,
+  baseUrl: string | null,
+): string | null {
+  if (value === null) return null;
+  const href = safeHref(value, baseUrl);
+  return href && /^https?:/i.test(href) ? href : null;
+}
+
+function productHref(item: EmailProductItem, ctx: Ctx): string | null {
+  return safeHref(`/shop/${encodeURIComponent(item.slug)}`, ctx.baseUrl);
+}
+
+/** "$12.00", with the compare-at price struck through before it when on sale. */
+function productPriceHtml(item: EmailProductItem): string {
+  const price = escapeHtml(formatPrice(item.priceCents));
+  if (item.compareAtCents === null || item.compareAtCents <= item.priceCents)
+    return price;
+  return `<s style="color:#9ca3af">${escapeHtml(formatPrice(item.compareAtCents))}</s>&nbsp;${price}`;
+}
+
+function productText(item: EmailProductItem, href: string | null): string {
+  const was =
+    item.compareAtCents !== null && item.compareAtCents > item.priceCents
+      ? ` (was ${formatPrice(item.compareAtCents)})`
+      : "";
+  return `${item.name} — ${formatPrice(item.priceCents)}${was}${href ? `: ${href}` : ""}`;
+}
+
+function productButtonStyle(ctx: Ctx, small: boolean): string {
+  const size = small
+    ? "padding:8px 16px;font-size:14px;line-height:20px"
+    : "padding:10px 20px";
+  const theme = ctx.theme;
+  return theme
+    ? `display:inline-block;${size};border-radius:6px;border:1px solid ${theme.accent};background-color:${theme.accent};color:${theme.buttonText};text-decoration:none;font-weight:600`
+    : `display:inline-block;${size};border-radius:6px;background-color:#111827;color:#ffffff;text-decoration:none;font-weight:600`;
+}
+
+/** Photo, name, price and button for one product (the inside of its cell). */
+function productCellHtml(
+  item: EmailProductItem,
+  label: string,
+  href: string | null,
+  ctx: Ctx,
+  small: boolean,
+): string {
+  const font = ctx.theme?.font ?? "";
+  const src = safeProductImageSrc(item.imageUrl, ctx.baseUrl);
+  const maxWidth = small ? PRODUCT_GRID_IMAGE_MAX_WIDTH : EMAIL_IMAGE_MAX_WIDTH;
+  const anchor = href
+    ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener"`
+    : "";
+  let html = "";
+  if (src) {
+    const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.name)}" width="${maxWidth}" style="width:100%;max-width:${maxWidth}px;height:auto;display:block;border:0;margin:0 auto">`;
+    html += href ? `${anchor} style="text-decoration:none">${img}</a>` : img;
+  }
+  html += small
+    ? `<p style="margin:12px 0 4px;font-size:15px;line-height:22px;font-weight:700;color:#111827${font}">${escapeHtml(item.name)}</p>`
+    : `<p style="margin:16px 0 4px;font-size:18px;line-height:26px;font-weight:700;color:#111827${font}">${escapeHtml(item.name)}</p>`;
+  html += small
+    ? `<p style="margin:0 0 12px;font-size:14px;line-height:20px;color:${TEXT_COLOR}${font}">${productPriceHtml(item)}</p>`
+    : `<p style="margin:0 0 16px;font-size:${FONT_SIZE};line-height:24px;color:${TEXT_COLOR}${font}">${productPriceHtml(item)}</p>`;
+  if (href) {
+    html += `${anchor} style="${productButtonStyle(ctx, small)}${font}">${escapeHtml(label)}</a>`;
+  }
+  return html;
+}
+
+function renderEmailProducts(node: JSONContent, ctx: Ctx): Rendered {
+  const attrs = attrOf(node);
+  const items = sanitizeEmailProductItems(attrs.items);
+  if (items.length === 0) {
+    warn(ctx, "A product block has no products and was left out.");
+    return { html: "", text: "" };
+  }
+  const label = coerceEmailProductsButtonLabel(attrs.buttonLabel);
+  const font = ctx.theme?.font ?? "";
+  const hrefs = items.map((item) => productHref(item, ctx));
+  const text = items.map((item, i) => productText(item, hrefs[i]!)).join("\n");
+
+  if (items.length === 1) {
+    const cell = productCellHtml(items[0]!, label, hrefs[0]!, ctx, false);
+    return {
+      html: `${PRODUCT_TABLE}<tr><td align="center" style="padding:8px 0;text-align:center${font}">${cell}</td></tr></table>`,
+      text,
+    };
+  }
+
+  const cellOpen = `<td width="50%" valign="top" align="center" style="width:50%;padding:8px;vertical-align:top;text-align:center${font}">`;
+  let rows = "";
+  for (let i = 0; i < items.length; i += 2) {
+    const cells = [0, 1].map((offset) => {
+      const item = items[i + offset];
+      return item
+        ? `${cellOpen}${productCellHtml(item, label, hrefs[i + offset]!, ctx, true)}</td>`
+        : `${cellOpen}&nbsp;</td>`;
+    });
+    rows += `<tr>${cells.join("")}</tr>`;
+  }
+  return { html: `${PRODUCT_TABLE}${rows}</table>`, text };
+}
+
 function renderInline(children: JSONContent[], ctx: Ctx): Rendered {
   let html = "";
   let text = "";
@@ -368,9 +573,9 @@ function warnUnknown(ctx: Ctx, type: string | undefined) {
   );
 }
 
-function plainParagraph(value: string): Rendered {
+function plainParagraph(value: string, ctx: Ctx): Rendered {
   return {
-    html: `<p style="${baseText};margin:0 0 16px">${escapeHtml(value).replace(/\n/g, "<br>")}</p>`,
+    html: `<p style="${ctx.text};margin:0 0 16px">${escapeHtml(value).replace(/\n/g, "<br>")}</p>`,
     text: value,
   };
 }
@@ -393,7 +598,7 @@ function renderList(
   }
   const nested = depth > 0;
   const margin = nested ? "6px 0 0" : "0 0 16px";
-  let html = `<${tag}${start > 1 ? ` start="${start}"` : ""} style="margin:${margin};padding:0 0 0 24px;${baseText}">`;
+  let html = `<${tag}${start > 1 ? ` start="${start}"` : ""} style="margin:${margin};padding:0 0 0 24px;${ctx.text}">`;
   const lines: string[] = [];
   items.forEach((item, i) => {
     const marker = ordered ? `${start + i}. ` : "- ";
@@ -412,7 +617,7 @@ function renderList(
         if (r.text) parts.push(r.text);
       }
     }
-    html += `<li style="margin:0 0 6px;${baseText}">${itemHtml}</li>`;
+    html += `<li style="margin:0 0 6px;${ctx.text}">${itemHtml}</li>`;
     const body = parts.join("\n").split("\n");
     lines.push(
       body.map((l, idx) => (idx === 0 ? marker + l : indent + l)).join("\n"),
@@ -434,13 +639,13 @@ function renderBlock(node: JSONContent, ctx: Ctx, depth: number): Rendered {
       if (inline.html === "") {
         // An empty paragraph is a deliberate gap in the editor.
         return {
-          html: `<p style="${baseText};margin:0 0 16px">&nbsp;</p>`,
+          html: `<p style="${ctx.text};margin:0 0 16px">&nbsp;</p>`,
           text: "",
         };
       }
       const align = safeAlign(attrs.textAlign);
       return {
-        html: `<p style="${blockStyle(align, `${baseText};margin:0 0 16px`)}">${inline.html}</p>`,
+        html: `<p style="${blockStyle(align, `${ctx.text};margin:0 0 16px`)}">${inline.html}</p>`,
         text: inline.text,
       };
     }
@@ -456,7 +661,7 @@ function renderBlock(node: JSONContent, ctx: Ctx, depth: number): Rendered {
       if (inline.html === "") return { html: "", text: "" };
       const align = safeAlign(attrs.textAlign);
       return {
-        html: `<h${level} style="${blockStyle(align, `margin:24px 0 12px;font-size:${size};line-height:${lh};font-weight:700;color:#111827`)}">${inline.html}</h${level}>`,
+        html: `<h${level} style="${blockStyle(align, `margin:24px 0 12px;font-size:${size};line-height:${lh};font-weight:700;color:#111827${ctx.theme?.font ?? ""}`)}">${inline.html}</h${level}>`,
         text: inline.text,
       };
     }
@@ -468,7 +673,7 @@ function renderBlock(node: JSONContent, ctx: Ctx, depth: number): Rendered {
       const inner = renderBlocks(nodeContent(node), ctx, depth + 1);
       if (inner.html === "") return { html: "", text: "" };
       return {
-        html: `<blockquote style="margin:0 0 16px;padding:4px 0 4px 16px;border-left:3px solid #d1d5db;color:#4b5563">${inner.html}</blockquote>`,
+        html: `<blockquote style="margin:0 0 16px;padding:4px 0 4px 16px;border-left:3px solid #d1d5db;color:#4b5563${ctx.theme?.font ?? ""}">${inner.html}</blockquote>`,
         text: inner.text
           .split("\n")
           .map((l) => (l ? `> ${l}` : ">"))
@@ -482,6 +687,10 @@ function renderBlock(node: JSONContent, ctx: Ctx, depth: number): Rendered {
       };
     case "image":
       return renderImage(node, ctx, false);
+    case "spacer":
+      return renderSpacer(node);
+    case "emailProducts":
+      return renderEmailProducts(node, ctx);
     case "listItem":
       // A stray list item outside a list: render its blocks.
       return renderBlocks(nodeContent(node), ctx, depth + 1);
@@ -489,7 +698,7 @@ function renderBlock(node: JSONContent, ctx: Ctx, depth: number): Rendered {
       warnUnknown(ctx, node.type);
       const blocks = collectTextBlocks(node);
       if (blocks.length === 0) return { html: "", text: "" };
-      const rendered = blocks.map(plainParagraph);
+      const rendered = blocks.map((b) => plainParagraph(b, ctx));
       return {
         html: rendered.map((r) => r.html).join(""),
         text: rendered.map((r) => r.text).join("\n\n"),
@@ -514,9 +723,12 @@ export function tiptapToEmailHtml(
   doc: JSONContent | null | undefined,
   options: TiptapEmailOptions = {},
 ): TiptapEmailResult {
+  const theme = resolveTheme(options.theme);
   const ctx: Ctx = {
     warnings: new Set(),
     baseUrl: options.baseUrl?.trim() ?? null,
+    theme,
+    text: `${baseText}${theme?.font ?? ""}`,
   };
   if (!doc || typeof doc !== "object" || doc.type !== "doc") {
     return { html: "", text: "", warnings: [] };
@@ -530,8 +742,9 @@ export function tiptapToEmailHtml(
 }
 
 /**
- * True when the document would produce visible content: any text or at least
- * one sendable image. Used to refuse sending an empty campaign.
+ * True when the document would produce visible content: any text, at least
+ * one sendable image, or a product block with products. Spacers and empty
+ * product blocks alone don't count. Used to refuse sending an empty campaign.
  */
 export function tiptapHasContent(doc: JSONContent | null | undefined): boolean {
   const { html, text } = tiptapToEmailHtml(doc);

@@ -32,6 +32,15 @@ const NEXT_STEPS = [
   },
 ] as const;
 
+/** Local-delivery orders never ship, so swap the tracking-number promise. */
+const LOCAL_DELIVERY_STEPS = [
+  NEXT_STEPS[0],
+  {
+    icon: "↗",
+    text: "We'll let you know when your order is on its way.",
+  },
+] as const;
+
 type Props = {
   business: {
     id: string;
@@ -50,6 +59,7 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
     amount_total: number;
     currency: string;
     payment_status: string;
+    delivery_method?: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   // M-11: ref for focusing the confirmation heading when order loads
@@ -58,7 +68,11 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
   const sessionId = searchParams.get("session_id");
   const processing = isPaymentProcessing(orderDetails?.payment_status);
   // While a bank payment clears no email has gone out yet — skip that step.
-  const nextSteps = processing ? NEXT_STEPS.slice(1) : NEXT_STEPS;
+  const baseSteps =
+    orderDetails?.delivery_method === "delivery"
+      ? LOCAL_DELIVERY_STEPS
+      : NEXT_STEPS;
+  const nextSteps = processing ? baseSteps.slice(1) : baseSteps;
 
   useEffect(() => {
     if (!sessionId) {
@@ -77,6 +91,7 @@ export function SledgeOrderConfirmation({ business, notes }: Props) {
             amount_total: number;
             currency: string;
             payment_status: string;
+            delivery_method?: string | null;
           };
           setOrderDetails(data);
         }

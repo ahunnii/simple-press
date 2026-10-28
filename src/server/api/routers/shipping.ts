@@ -1,12 +1,30 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { LocalDeliveryIneligibleReason } from "~/lib/local-delivery";
 import { checkBusiness } from "~/lib/check-business";
 import {
+  computeCartSubtotalCents,
   quoteShippingCents,
   ShippingQuoteBusinessNotFoundError,
 } from "~/lib/checkout/quote-shipping";
+import { checkLocalDelivery } from "~/lib/local-delivery";
+import {
+  getClientIpFromHeaders,
+  localDeliveryCheckLimiter,
+} from "~/lib/rate-limit";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+
+const cartItemsInput = z
+  .array(
+    z.object({
+      productId: z.string().min(1).max(255),
+      variantId: z.string().max(255).nullable(),
+      quantity: z.number().int().positive().max(10000),
+    }),
+  )
+  .min(1)
+  .max(200);
 
 export const shippingRouter = createTRPCRouter({
   /**
@@ -23,16 +41,7 @@ export const shippingRouter = createTRPCRouter({
   quote: publicProcedure
     .input(
       z.object({
-        items: z
-          .array(
-            z.object({
-              productId: z.string().min(1).max(255),
-              variantId: z.string().max(255).nullable(),
-              quantity: z.number().int().positive().max(10000),
-            }),
-          )
-          .min(1)
-          .max(200),
+        items: cartItemsInput,
         destinationState: z.string(),
         destinationCountry: z.string(),
         deliveryMethod: z.enum(["ship", "pickup"]),
@@ -78,4 +87,100 @@ export const shippingRouter = createTRPCRouter({
         throw error;
       }
     }),
+  /**
+   * Can this cart be locally delivered to this ZIP? Powers the checkout's
+   * "Local delivery" option preview; `create-session` re-runs the same
+   * `checkLocalDelivery` against the real (customizer-priced) subtotal before
+   * any money moves, so this is advisory.
+   *
+   * Never returns a distance (or anything finer than the coarse reason) — a
+   * visitor probing ZIPs must not be able to triangulate the owner's origin.
+   *
+   * Throttled FIRST, ahead of any database read, like `quoteCalculator.lookupZip`:
+   * it is public, anonymous and fires on ZIP / cart edits.
+   */
+  checkLocalDelivery: publicProcedure
+    .use(async ({ ctx, next }) => {
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      try {
+        await localDeliveryCheckLimiter.consume(`${rawIp}:${requestHost}`);
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many delivery checks. Please try again later.",
+        });
+      }
+      return next();
+    })
+    .input(
+      z.object({
+        items: cartItemsInput,
+        postalCode: z.string().max(20),
+        country: z.string().max(2),
+      }),
+    )
+    .query(
+      async ({
+        ctx,
+        input,
+      }): Promise<{
+        eligible: boolean;
+        reason?: LocalDeliveryIneligibleReason;
+        feeCents?: number;
+        minOrderCents?: number;
+      }> => {
+        const tenant = await checkBusiness();
+        if (!tenant) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Business not found",
+          });
+        }
+
+        const settings = await ctx.db.business.findUnique({
+          where: { id: tenant.id },
+          select: {
+            offersLocalDelivery: true,
+            localDeliveryOriginZip: true,
+            addressPostalCode: true,
+            localDeliveryRadiusMiles: true,
+            localDeliveryFeeCents: true,
+            localDeliveryBands: true,
+            localDeliveryMinOrderCents: true,
+          },
+        });
+        if (!settings) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Business not found",
+          });
+        }
+
+        // Skip the product reads when the answer can't depend on the cart.
+        const subtotalCents = settings.offersLocalDelivery
+          ? await computeCartSubtotalCents(ctx.db, tenant.id, input.items)
+          : 0;
+
+        const result = await checkLocalDelivery({
+          settings,
+          destinationZip: input.postalCode,
+          destinationCountry: input.country,
+          subtotalCents,
+        });
+
+        return result.eligible
+          ? { eligible: true, feeCents: result.feeCents }
+          : {
+              eligible: false,
+              reason: result.reason,
+              ...(result.minOrderCents != null
+                ? { minOrderCents: result.minOrderCents }
+                : {}),
+              // below_minimum only: this address's (band) price once the
+              // minimum is met — see LocalDeliveryResult.
+              ...(result.feeCents != null ? { feeCents: result.feeCents } : {}),
+            };
+      },
+    ),
 });

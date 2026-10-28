@@ -362,6 +362,20 @@ describe("manualOrderFormSchema", () => {
     expect(issues({ ...base, deliveryMethod: "pickup" as const })).toEqual([]);
   });
 
+  it("accepts a local delivery order and requires its address when captured", () => {
+    const delivery = { ...base, deliveryMethod: "delivery" as const };
+    expect(issues(delivery)).toEqual([]);
+    expect(issues({ ...delivery, includeAddress: true })).toEqual([
+      "shippingAddress.line1: Street address is required",
+      "shippingAddress.city: City is required",
+      "shippingAddress.postal_code: Postal code is required",
+    ]);
+  });
+
+  it("rejects an unknown delivery method", () => {
+    expect(issues({ ...base, deliveryMethod: "drone" })).not.toEqual([]);
+  });
+
   it("requires the address members once an address is being captured", () => {
     expect(issues({ ...base, includeAddress: true })).toEqual([
       "shippingAddress.line1: Street address is required",

@@ -24,6 +24,7 @@ import {
   CUSTOMIZER_MAX_VALUES_PER_GROUP,
   CUSTOMIZER_TEXT_MAX_LENGTH,
 } from "~/lib/customizer/types";
+import { parseLocalDeliveryBands } from "~/lib/local-delivery-bands";
 import {
   normalizeMaintenanceMessage,
   normalizeMaintenanceText,
@@ -407,6 +408,20 @@ export async function importStoreBundle(args: {
     return (value as Prisma.InputJsonValue | null) ?? Prisma.DbNull;
   }
 
+  // Local delivery bands: a missing key (older bundle) leaves the target
+  // untouched; otherwise keep only the rows that still make sense against the
+  // imported radius, and clear the column when none are left.
+  function resolveImportedLocalDeliveryBands(
+    b: ExportedBusiness,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull | undefined {
+    if (b.localDeliveryBands === undefined) return undefined;
+    const bands = parseLocalDeliveryBands(
+      b.localDeliveryBands,
+      b.localDeliveryRadiusMiles ?? null,
+    );
+    return bands.length > 0 ? bands : Prisma.DbNull;
+  }
+
   // ── 3a. Business config UPDATE only (never touch identity/stripe/domain fields)
   try {
     const biz = content.business;
@@ -479,6 +494,15 @@ export async function importStoreBundle(args: {
         offersInStorePickup: biz.offersInStorePickup,
         pickupLocation: biz.pickupLocation ?? null,
         pickupInstructions: biz.pickupInstructions ?? null,
+        // Local delivery — absent in bundles exported before 2026-10-26; a
+        // missing key leaves the target's current value untouched.
+        offersLocalDelivery: biz.offersLocalDelivery,
+        localDeliveryOriginZip: biz.localDeliveryOriginZip,
+        localDeliveryRadiusMiles: biz.localDeliveryRadiusMiles,
+        localDeliveryFeeCents: biz.localDeliveryFeeCents,
+        localDeliveryBands: resolveImportedLocalDeliveryBands(biz),
+        localDeliveryMinOrderCents: biz.localDeliveryMinOrderCents,
+        localDeliveryInstructions: biz.localDeliveryInstructions,
         originState: biz.originState ?? null,
         shippingWeightTiers: biz.shippingWeightTiers ?? undefined,
         businessHours: biz.businessHours ?? undefined,
@@ -1139,6 +1163,11 @@ export async function importStoreBundle(args: {
               width: img.width ?? null,
               height: img.height ?? null,
               sortOrder: img.sortOrder,
+              // Older exports have neither field: photo, no poster.
+              mediaType: img.mediaType ?? "IMAGE",
+              posterUrl: img.posterUrl
+                ? rewriteUrl(img.posterUrl, urlMap)
+                : null,
             },
           });
         }

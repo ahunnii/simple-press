@@ -15,6 +15,11 @@ import { emailOverridesSchema } from "~/lib/email/customization";
 import { parseZonedDateTime } from "~/lib/events/normalize";
 import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import {
+  lookupOriginPlace,
+  normalizeUsZip,
+  resolveDeliveryOriginZip,
+} from "~/lib/local-delivery";
+import {
   getPlatformMaintenance,
   maintenanceCtaSchema,
   maintenanceHeadlineSchema,
@@ -31,6 +36,8 @@ import { getBusinessPostalAddress } from "~/lib/marketing/render-campaign";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
+import { toPublicProduct } from "~/lib/products/public-product";
 import {
   LOCAL_PRESENCE_MODES,
   normalizeAreaServed,
@@ -39,6 +46,7 @@ import { stripeClient } from "~/lib/stripe/client";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import {
   deliveryReturnsInputSchema,
+  localDeliveryInputSchema,
   zoneWeightFormSchema,
 } from "~/lib/validators/shipping";
 import {
@@ -117,6 +125,18 @@ export const businessRouter = createTRPCRouter({
         offersInStorePickup: true,
         pickupLocation: true,
         pickupInstructions: true,
+        // Local delivery: what the checkout needs to offer and describe the
+        // option. `localDeliveryOriginZip` is deliberately NOT here — the
+        // owner may deliver from a home ZIP that isn't public; eligibility is
+        // decided server-side by `shipping.checkLocalDelivery`.
+        offersLocalDelivery: true,
+        localDeliveryRadiusMiles: true,
+        localDeliveryFeeCents: true,
+        // Distance-band prices are public (they're shown at checkout); only
+        // the origin ZIP is private.
+        localDeliveryBands: true,
+        localDeliveryMinOrderCents: true,
+        localDeliveryInstructions: true,
         originState: true,
         shippingWeightTiers: true,
         shippingFallbackRate: true,
@@ -210,9 +230,16 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         featureFlags: true,
         businessAddress: true,
-        // City only (public, like `businessAddress`) — vii's wordmark
-        // location tag. See `_templates/vii/shared/vii-location-tag.ts`.
+        // Structured address parts. Public by design — they render in the
+        // LocalBusiness / Organization JSON-LD `PostalAddress` alongside the
+        // already-public `businessAddress` display string (the homepage emits
+        // the same schema as /contact, so it needs the same parts). `city`
+        // also feeds vii's wordmark location tag. See
+        // `_templates/vii/shared/vii-location-tag.ts`.
+        addressStreet: true,
         addressCity: true,
+        addressState: true,
+        addressPostalCode: true,
         // Map pin. Public by design — see `~/lib/address/coordinates`.
         latitude: true,
         longitude: true,
@@ -270,7 +297,10 @@ export const businessRouter = createTRPCRouter({
         products: {
           where: { published: true },
           include: {
-            images: true,
+            images: {
+              where: PHOTO_ONLY_WHERE,
+              orderBy: { sortOrder: "asc" },
+            },
           },
           omit: { cost: true },
         },
@@ -283,6 +313,8 @@ export const businessRouter = createTRPCRouter({
             navigationItems: true,
             footerNavigationItems: true,
             socialLinks: true,
+            // Short brand form — the Organization/WebSite `alternateName`.
+            seoBrandName: true,
             customFields: true,
             previewCustomFields: true,
             bannerConfig: true,
@@ -350,6 +382,7 @@ export const businessRouter = createTRPCRouter({
 
     return {
       ...restWithoutSiteContent,
+      products: restWithoutSiteContent.products.map(toPublicProduct),
       siteContent: sanitizedSiteContent,
       isStripeConnected: !!stripeAccountId,
       maintenance,
@@ -433,16 +466,22 @@ export const businessRouter = createTRPCRouter({
             description: true,
             variants: true,
             images: {
+              where: PHOTO_ONLY_WHERE,
               take: 2,
               orderBy: { sortOrder: "asc" },
             },
             additionalFields: true,
             trackInventory: true,
             inventoryQty: true,
+            reservedQty: true,
             allowBackorders: true,
             baseUnitsConsumed: true,
             baseInventoryUnit: {
-              select: { inventoryQty: true, allowBackorders: true },
+              select: {
+                inventoryQty: true,
+                reservedQty: true,
+                allowBackorders: true,
+              },
             },
           },
           // 8 so templates with two product rails (default, noise) can fill
@@ -467,7 +506,11 @@ export const businessRouter = createTRPCRouter({
     const sanitizedHomepageSc = homepageSc
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(homepageSc)
       : homepageSc;
-    return { ...homepageRest, siteContent: sanitizedHomepageSc };
+    return {
+      ...homepageRest,
+      products: homepageRest.products.map(toPublicProduct),
+      siteContent: sanitizedHomepageSc,
+    };
   }),
 
   getForEmailPreview: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -611,6 +654,7 @@ export const businessRouter = createTRPCRouter({
                   where: { published: true },
                   include: {
                     images: {
+                      where: PHOTO_ONLY_WHERE,
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                     },
@@ -643,9 +687,64 @@ export const businessRouter = createTRPCRouter({
           id: businessId.id,
           status: "active",
         },
-        include: {
-          siteContent: true,
-          images: true,
+        // Explicit allowlist — this used to be a bare `include`, which shipped
+        // EVERY Business column (owner email, Stripe account id, private
+        // delivery origin ZIP, provisioning code, raw maintenance drafts...)
+        // into the /shop page payload. Same public set as `simplifiedGet`.
+        select: {
+          id: true,
+          name: true,
+          templateId: true,
+          featureFlags: true,
+          subdomain: true,
+          customDomain: true,
+          domainStatus: true,
+          supportEmail: true,
+          phoneNumber: true,
+          businessAddress: true,
+          addressStreet: true,
+          addressCity: true,
+          addressState: true,
+          addressPostalCode: true,
+          latitude: true,
+          longitude: true,
+          businessHours: true,
+          timeZone: true,
+          localPresence: true,
+          areaServed: true,
+          salesCountries: true,
+          // Read only to derive `isStripeConnected`; stripped below.
+          stripeAccountId: true,
+          stripeChargesEnabled: true,
+          donationLabel: true,
+          donationPresetAmounts: true,
+          venmoHandle: true,
+          cashAppHandle: true,
+          donationShowInHeader: true,
+          donationShowInFooter: true,
+          shippingType: true,
+          shippingFlatRate: true,
+          freeShippingThreshold: true,
+          offersInStorePickup: true,
+          pickupLocation: true,
+          returnWindowDays: true,
+          siteContent: {
+            select: {
+              logoUrl: true,
+              faviconUrl: true,
+              logoAltText: true,
+              footerText: true,
+              primaryColor: true,
+              navigationItems: true,
+              footerNavigationItems: true,
+              socialLinks: true,
+              seoBrandName: true,
+              customFields: true,
+              previewCustomFields: true,
+              bannerConfig: true,
+              popupConfig: true,
+            },
+          },
           products: {
             where: { published: true },
             // Explicit select keeps the shop-page payload lean: only fields
@@ -664,11 +763,13 @@ export const businessRouter = createTRPCRouter({
               compareAtPrice: true,
               trackInventory: true,
               inventoryQty: true,
+              reservedQty: true,
               allowBackorders: true,
               baseUnitsConsumed: true,
               additionalFields: true, // comingSoon / productTagline etc.
               images: {
                 select: { id: true, url: true, altText: true },
+                where: PHOTO_ONLY_WHERE,
                 orderBy: { sortOrder: "asc" },
                 take: 2,
               },
@@ -679,6 +780,7 @@ export const businessRouter = createTRPCRouter({
                   price: true,
                   compareAtPrice: true,
                   inventoryQty: true,
+                  reservedQty: true,
                 },
               },
               collectionProducts: {
@@ -689,7 +791,11 @@ export const businessRouter = createTRPCRouter({
                 },
               },
               baseInventoryUnit: {
-                select: { inventoryQty: true, allowBackorders: true },
+                select: {
+                  inventoryQty: true,
+                  reservedQty: true,
+                  allowBackorders: true,
+                },
               },
               // Product customizer: cards link to the product page instead
               // of quick-adding. Callers gate it on the `productOptions` flag.
@@ -709,7 +815,7 @@ export const businessRouter = createTRPCRouter({
       }),
     ]);
 
-    if (business && business.products && Array.isArray(business.products)) {
+    if (business?.products && Array.isArray(business.products)) {
       // Move products with additionalFields.comingSoon === true to the bottom
       business.products = [
         ...business.products.filter(
@@ -747,9 +853,12 @@ export const businessRouter = createTRPCRouter({
 
     // Total published products (the products array above is capped at 500),
     // so consumers can detect truncation without another query.
+    const { stripeAccountId, products, ...rest } = business;
     return {
-      ...business,
+      ...rest,
+      products: products.map(toPublicProduct),
       siteContent: sanitizedSiteContent,
+      isStripeConnected: !!stripeAccountId,
       publishedProductCount,
     };
   }),
@@ -1337,6 +1446,105 @@ export const businessRouter = createTRPCRouter({
       return {
         message: "Delivery and returns settings updated successfully",
         business: updatedBusiness,
+      };
+    }),
+
+  /**
+   * City/state of the ZIP local delivery is measured from — the saved "Deliver
+   * from ZIP", else the business address ZIP. Feeds the "Measuring from Ann
+   * Arbor, MI" line on the shipping settings page. `null` when neither is set
+   * or the ZIP isn't in the dataset.
+   */
+  getLocalDeliveryOrigin: ownerAdminProcedure.query(async ({ ctx }) => {
+    const business = await ctx.db.business.findFirst({
+      where: { id: ctx.businessId },
+      select: { localDeliveryOriginZip: true, addressPostalCode: true },
+    });
+    const zip = business ? resolveDeliveryOriginZip(business) : null;
+    return { originPlace: zip ? await lookupOriginPlace(zip) : null };
+  }),
+
+  /**
+   * Local delivery (the owner drives orders to customers within N miles of a
+   * ZIP). Separate from `updateShipping` for the same reason as
+   * `updateDeliveryAndReturns`: it is independent of the shipping mode, so a
+   * zone+weight store can save it too, and it touches no shipping field.
+   *
+   * A blank "Deliver from ZIP" means "use the business address ZIP". Any ZIP
+   * that is saved (or relied on) must exist in the ZIP dataset, since distance
+   * is measured between ZIP centroids.
+   */
+  updateLocalDelivery: ownerAdminProcedure
+    .input(localDeliveryInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const enteredZip = input.originZip
+        ? normalizeUsZip(input.originZip)
+        : null;
+      if (input.originZip && !enteredZip) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find that ZIP code.",
+        });
+      }
+
+      let originZip = enteredZip;
+      if (!originZip && input.offersLocalDelivery) {
+        const existing = await ctx.db.business.findFirst({
+          where: { id: businessId },
+          select: { addressPostalCode: true },
+        });
+        originZip = normalizeUsZip(existing?.addressPostalCode);
+        if (!originZip) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Enter the ZIP code you deliver from — your business address doesn't have a valid ZIP yet.",
+          });
+        }
+      }
+
+      const originPlace = originZip ? await lookupOriginPlace(originZip) : null;
+      if (originZip && !originPlace) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find that ZIP code.",
+        });
+      }
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          offersLocalDelivery: input.offersLocalDelivery,
+          // Only the owner's own entry is stored; a blank keeps following the
+          // business address.
+          localDeliveryOriginZip: enteredZip,
+          localDeliveryRadiusMiles: input.radiusMiles,
+          localDeliveryFeeCents: input.feeCents,
+          // Closer prices inside the radius; none = one price, stored as
+          // SQL NULL (the input schema already sorted them nearest first).
+          localDeliveryBands:
+            input.bands.length > 0
+              ? (input.bands as Prisma.InputJsonValue)
+              : Prisma.DbNull,
+          localDeliveryMinOrderCents: input.minOrderCents,
+          localDeliveryInstructions: input.instructions,
+        },
+        select: {
+          offersLocalDelivery: true,
+          localDeliveryOriginZip: true,
+          localDeliveryRadiusMiles: true,
+          localDeliveryFeeCents: true,
+          localDeliveryBands: true,
+          localDeliveryMinOrderCents: true,
+          localDeliveryInstructions: true,
+        },
+      });
+      return {
+        message: "Local delivery settings updated successfully",
+        business: updatedBusiness,
+        originPlace,
       };
     }),
 

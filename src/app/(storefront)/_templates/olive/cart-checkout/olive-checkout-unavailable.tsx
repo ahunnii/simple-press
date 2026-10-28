@@ -2,12 +2,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
-import {
-  OliveButton,
-  OliveLeafMark,
-  OliveReveal,
-  OliveSection,
-} from "../shared";
+import { OliveButton, OliveReveal, OliveSection } from "../shared";
 
 type Props = {
   /**
@@ -51,19 +46,12 @@ export async function OliveCheckoutUnavailable({ customFields }: Props = {}) {
   return (
     <OliveSection
       bleed
-      tone="paper"
+      tone="ivory"
       aria-labelledby="olive-checkout-unavailable-heading"
       {...sectionGroupAttr("checkout", "unavailable")}
     >
       <OliveReveal className="mx-auto w-full max-w-[36rem]">
         <div className="olive-ghost-card">
-          <span
-            className="flex items-center"
-            style={{ color: "var(--olive-leaf)" }}
-          >
-            <OliveLeafMark size={22} />
-          </span>
-
           <h1
             id="olive-checkout-unavailable-heading"
             className="olive-h1"
@@ -74,7 +62,7 @@ export async function OliveCheckoutUnavailable({ customFields }: Props = {}) {
 
           {body ? (
             <p
-              className="max-w-[46ch] text-[0.9375rem] leading-relaxed"
+              className="max-w-[46ch] text-[0.9375rem] leading-[1.7]"
               style={{ color: "var(--olive-ink-soft)" }}
               {...fieldAttr("olive.checkout.unavailable-body")}
             >
@@ -83,7 +71,8 @@ export async function OliveCheckoutUnavailable({ customFields }: Props = {}) {
           ) : null}
 
           <OliveButton
-            variant="secondary"
+            variant="outline"
+            arrow
             href="/shop"
             className="mt-1"
             data-sp-field="olive.checkout.unavailable-cta"

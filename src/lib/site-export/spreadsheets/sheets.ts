@@ -13,6 +13,7 @@
 import type { Row, Sheet } from "./format";
 import { orderItemOptionLines } from "~/lib/customizer/display";
 import { marketingConsentSourceLabel } from "~/lib/marketing/consent";
+import { photosOnly, videosOnly } from "~/lib/products/media";
 
 import {
   centsToMoney,
@@ -80,7 +81,12 @@ export interface ProductSheetProduct {
   metaDescription: string | null;
   createdAt: Date;
   baseInventoryUnit: { name: string } | null;
-  images: Array<{ url: string; sortOrder: number }>;
+  /** `mediaType` absent = photo (older callers / fixtures). */
+  images: Array<{
+    url: string;
+    sortOrder: number;
+    mediaType?: "IMAGE" | "VIDEO" | null;
+  }>;
   variants: ProductSheetVariant[];
   collectionProducts: Array<{ collection: { name: string } }>;
   /** Product customizer groups attached to this product (optional: absent = none). */
@@ -112,6 +118,7 @@ export const PRODUCT_COLUMNS = [
   "Short description",
   "Description",
   "Image URLs",
+  "Video URLs",
   "Variant image URL",
   "Subscribe & save",
   "Search title (SEO)",
@@ -159,9 +166,14 @@ export function productsSheet(
 
   for (const product of products) {
     const tracked = product.trackInventory && !product.baseInventoryUnit;
-    const images = [...product.images]
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+    const gallery = [...product.images].sort(
+      (a, b) => a.sortOrder - b.sortOrder,
+    );
+    const images = photosOnly(gallery)
       .map((image) => image.url)
+      .join(LIST_SEPARATOR);
+    const videos = videosOnly(gallery)
+      .map((video) => video.url)
       .join(LIST_SEPARATOR);
     const collections = product.collectionProducts
       .map((cp) => cp.collection.name)
@@ -195,6 +207,7 @@ export function productsSheet(
       "Short description": plainText(product.excerpt),
       Description: plainText(product.description),
       "Image URLs": images,
+      "Video URLs": videos,
       Collections: collections,
       "Option groups": optionGroups,
     };
@@ -202,6 +215,7 @@ export function productsSheet(
       "Short description": "",
       Description: "",
       "Image URLs": "",
+      "Video URLs": "",
       Collections: "",
       "Option groups": "",
     };
@@ -501,6 +515,11 @@ export const ORDER_COLUMNS = [
   "Stripe payment ID",
 ] as const;
 
+/** "Local delivery" for the owner-driven method; the rest read as before. */
+function orderDeliveryMethodLabel(method: string): string {
+  return method === "delivery" ? "Local delivery" : humanize(method);
+}
+
 export function ordersSheet(
   orders: OrderSheetOrder[],
   ctx: SheetContext,
@@ -516,7 +535,7 @@ export function ordersSheet(
       "Order status": humanize(o.status),
       "Payment status": humanize(o.paymentStatus),
       "Fulfillment status": humanize(o.fulfillmentStatus),
-      "Delivery method": humanize(o.deliveryMethod),
+      "Delivery method": orderDeliveryMethodLabel(o.deliveryMethod),
       "Payment method": humanize(o.paymentMethod),
       "Items subtotal": centsToMoney(o.subtotal),
       Shipping: centsToMoney(o.shipping),

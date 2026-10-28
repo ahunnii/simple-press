@@ -14,7 +14,6 @@ import {
   OliveButton,
   OliveField,
   OliveInput,
-  OliveLeafMark,
   OliveReveal,
   OliveTextarea,
 } from "../shared";
@@ -129,7 +128,7 @@ export function OliveContactMain({
         maxWidth: "var(--olive-container)",
         paddingBlock: "var(--olive-section-pad-y)",
         paddingInline: "var(--olive-section-pad-x)",
-        backgroundColor: "var(--olive-white)",
+        backgroundColor: "var(--olive-ivory)",
       }}
     >
       <div
@@ -145,9 +144,6 @@ export function OliveContactMain({
                 role="status"
                 className="flex flex-col items-center gap-4 py-8 text-center"
               >
-                <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
-                  <OliveLeafMark size={28} />
-                </span>
                 <h2
                   ref={successHeadingRef}
                   tabIndex={-1}
@@ -158,13 +154,14 @@ export function OliveContactMain({
                 </h2>
                 {successBody ? (
                   <p
-                    className="olive-caption max-w-[40ch]"
+                    className="max-w-[40ch] text-[0.9375rem] leading-[1.7]"
+                    style={{ color: "var(--olive-ink-soft)" }}
                     {...fieldAttr(successBodyFieldKey)}
                   >
                     {successBody}
                   </p>
                 ) : null}
-                <OliveButton variant="secondary" onClick={resetSuccess}>
+                <OliveButton variant="outline" onClick={resetSuccess}>
                   Send another
                 </OliveButton>
               </div>
@@ -176,7 +173,7 @@ export function OliveContactMain({
                   </h2>
                   {formBody ? (
                     <p
-                      className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed"
+                      className="mt-2 max-w-[52ch] text-[0.9375rem] leading-[1.7]"
                       style={{ color: "var(--olive-ink-soft)" }}
                       {...fieldAttr(formBodyFieldKey)}
                     >
@@ -199,7 +196,6 @@ export function OliveContactMain({
                         backgroundColor: "var(--olive-error-bg)",
                         border: "1px solid var(--olive-error-border)",
                         color: "var(--olive-error)",
-                        borderRadius: "var(--olive-card-radius)",
                       }}
                     >
                       {error}
@@ -274,7 +270,7 @@ export function OliveContactMain({
 
                   <OliveButton
                     type="submit"
-                    variant="primary"
+                    variant="solid"
                     disabled={isSubmitting || !captchaToken}
                     loading={isSubmitting}
                     className="self-start"
@@ -292,92 +288,98 @@ export function OliveContactMain({
             {/* The card sizes to its own content and pins under the header while the (taller) form scrolls; wrapper keeps the reveal transform off the sticky element. */}
             <OliveReveal className="olive-card olive-card-paper flex flex-col gap-6 p-6 sm:p-8">
               {showVisit ? (
-              <div>
-                <p className="olive-label" {...fieldAttr(visitHeadingFieldKey)}>
-                  {visitHeading}
-                </p>
-                {address ? (
+                <div>
                   <p
-                    className="mt-2 text-[0.9375rem] leading-relaxed"
-                    style={{ color: "var(--olive-ink)" }}
+                    className="olive-label"
+                    {...fieldAttr(visitHeadingFieldKey)}
                   >
-                    {address}
+                    {visitHeading}
                   </p>
-                ) : null}
-                {notes ? (
+                  {address ? (
+                    <p
+                      className="mt-2 text-[0.9375rem] leading-[1.7]"
+                      style={{ color: "var(--olive-espresso)" }}
+                    >
+                      {address}
+                    </p>
+                  ) : null}
+                  {notes ? (
+                    <p
+                      className={cn(
+                        "text-[0.9375rem] leading-[1.7] whitespace-pre-line",
+                        address ? "mt-1" : "mt-2",
+                      )}
+                      style={{
+                        color: address
+                          ? "var(--olive-ink-soft)"
+                          : "var(--olive-espresso)",
+                      }}
+                      {...fieldAttr(visitNotesFieldKey)}
+                    >
+                      {notes}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+              {phone ? (
+                <div>
+                  <p className="olive-label">Phone</p>
+                  <a
+                    href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                    className="mt-2 inline-block text-[0.9375rem] leading-[1.7] underline-offset-4 hover:underline"
+                    style={{ color: "var(--olive-espresso)" }}
+                  >
+                    {phone}
+                  </a>
+                </div>
+              ) : null}
+              {email ? (
+                <div>
+                  <p className="olive-label">Email</p>
+                  <a
+                    href={`mailto:${email}`}
+                    className="mt-2 inline-block text-[0.9375rem] leading-[1.7] break-all underline-offset-4 hover:underline"
+                    style={{ color: "var(--olive-espresso)" }}
+                  >
+                    {email}
+                  </a>
+                </div>
+              ) : null}
+              {showHours ? (
+                <div>
                   <p
-                    className={cn(
-                      "text-[0.9375rem] leading-relaxed whitespace-pre-line",
-                      address ? "mt-1" : "mt-2",
-                    )}
-                    style={{
-                      color: address
-                        ? "var(--olive-ink-soft)"
-                        : "var(--olive-ink)",
-                    }}
-                    {...fieldAttr(visitNotesFieldKey)}
+                    className="olive-label"
+                    {...fieldAttr(hoursHeadingFieldKey)}
                   >
-                    {notes}
+                    {hoursHeading}
                   </p>
-                ) : null}
-              </div>
-            ) : null}
-            {phone ? (
-              <div>
-                <p className="olive-label">Phone</p>
-                <a
-                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
-                  className="mt-2 inline-block text-[0.9375rem] leading-relaxed underline-offset-4 hover:underline"
-                  style={{ color: "var(--olive-ink)" }}
-                >
-                  {phone}
-                </a>
-              </div>
-            ) : null}
-            {email ? (
-              <div>
-                <p className="olive-label">Email</p>
-                <a
-                  href={`mailto:${email}`}
-                  className="mt-2 inline-block text-[0.9375rem] leading-relaxed break-all underline-offset-4 hover:underline"
-                  style={{ color: "var(--olive-ink)" }}
-                >
-                  {email}
-                </a>
-              </div>
-            ) : null}
-            {showHours ? (
-              <div>
-                <p className="olive-label" {...fieldAttr(hoursHeadingFieldKey)}>
-                  {hoursHeading}
-                </p>
-                {hoursRows.length > 0 ? (
-                  <dl
-                    className="mt-2 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-[0.9375rem] leading-relaxed"
-                    style={{ color: "var(--olive-ink)" }}
-                  >
-                    {hoursRows.map((row) => (
-                      <div key={row.label} className="contents">
-                        <dt>{row.label}</dt>
-                        <dd
-                          className="m-0"
-                          style={{ color: "var(--olive-ink-soft)" }}
-                        >
-                          {row.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p
-                    className="mt-2 text-[0.9375rem] leading-relaxed whitespace-pre-line"
-                    style={{ color: "var(--olive-ink)" }}
-                  >
-                    {legacyHours}
-                  </p>
-                )}
-              </div>
-            ) : null}
+                  {hoursRows.length > 0 ? (
+                    <dl
+                      className="mt-2 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-[0.9375rem] leading-[1.7]"
+                      style={{ color: "var(--olive-espresso)" }}
+                    >
+                      {hoursRows.map((row) => (
+                        <div key={row.label} className="contents">
+                          <dt>{row.label}</dt>
+                          <dd
+                            className="m-0"
+                            style={{ color: "var(--olive-ink-soft)" }}
+                          >
+                            {row.value}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : (
+                    <p
+                      className="mt-2 text-[0.9375rem] leading-[1.7] whitespace-pre-line"
+                      style={{ color: "var(--olive-espresso)" }}
+                    >
+                      {legacyHours}
+                    </p>
+                  )}
+                </div>
+              ) : null}
             </OliveReveal>
           </div>
         ) : null}

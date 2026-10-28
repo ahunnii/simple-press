@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
-import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
@@ -13,19 +14,27 @@ import {
   isPaymentProcessing,
   PAYMENT_PROCESSING_MESSAGE,
 } from "~/app/(storefront)/_components/checkout/payment-status";
+import { useOrderAccountCta } from "~/app/(storefront)/_components/checkout/use-order-account-cta";
 
-import { umscTelHref } from "../shared/umsc-contact-details";
 import { UmscButton } from "../shared/umsc-button";
+import { umscTelHref } from "../shared/umsc-contact-details";
 
 /** `session.metadata.deliveryMethod`, echoed back by `/api/stripe/session`. */
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
+
+/**
+ * The general list promises the order "ships" — a driven local delivery has
+ * no carrier, so those orders get their own plain steps.
+ */
+const LOCAL_DELIVERY_STEPS =
+  "You'll receive an email confirmation shortly.\nWe'll be in touch about your delivery.";
 
 type OrderDetails = {
   customer_email: string;
   amount_total: number;
   currency: string;
   payment_status: string;
-  delivery_method?: DeliveryMethod;
+  delivery_method?: OrderDeliveryMethod;
 };
 
 type Props = {
@@ -61,13 +70,14 @@ type Props = {
  * pickup/ship split only decides WHICH field's text is shown.
  */
 function resolveNextSteps(
-  deliveryMethod: DeliveryMethod | undefined,
+  deliveryMethod: OrderDeliveryMethod | undefined,
   nextSteps: string,
   nextStepsPickup: string,
 ): string {
   if (deliveryMethod === "pickup" && nextStepsPickup.trim()) {
     return nextStepsPickup;
   }
+  if (deliveryMethod === "delivery") return LOCAL_DELIVERY_STEPS;
   return nextSteps;
 }
 
@@ -184,7 +194,11 @@ export function UmscOrderConfirmation({
   // whose delivery method the Stripe session fetch hasn't resolved yet (or
   // couldn't) — never a pickup order left on ship-specific wording.
   const deliveryMethod = orderDetails?.delivery_method ?? null;
-  const nextStepsLines = resolveNextSteps(deliveryMethod, nextSteps, nextStepsPickup)
+  const nextStepsLines = resolveNextSteps(
+    deliveryMethod,
+    nextSteps,
+    nextStepsPickup,
+  )
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
@@ -242,7 +256,9 @@ export function UmscOrderConfirmation({
             </p>
           )}
 
-          {(orderDetails?.customer_email ?? formattedTotal) && (
+          {(orderDetails?.customer_email ??
+            formattedTotal ??
+            deliveryMethod === "delivery") && (
             <div className="mb-8 flex flex-col items-center gap-2">
               {orderDetails?.customer_email && (
                 <p className="umsc-sans text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)]">
@@ -258,6 +274,14 @@ export function UmscOrderConfirmation({
                 <p className="umsc-tabular umsc-sans text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)]">
                   Order total:{" "}
                   <strong className="font-semibold">{formattedTotal}</strong>
+                </p>
+              )}
+              {deliveryMethod === "delivery" && (
+                <p className="umsc-sans text-[14px] leading-[1.6] text-[var(--umsc-cream-on-black)]">
+                  Delivery:{" "}
+                  <strong className="font-semibold">
+                    {deliveryMethodLabel("delivery")}
+                  </strong>
                 </p>
               )}
             </div>

@@ -109,4 +109,23 @@ describe("buildImportFiles", () => {
       expect.objectContaining({ where: { businessId: "b1" } }),
     );
   });
+
+  it("leaves product videos out of the files and adds a note", async () => {
+    findMany.mockResolvedValue([
+      dbProduct({
+        images: [
+          { url: "/images/tee.jpg", altText: null, mediaType: "IMAGE" },
+          { url: "/images/tee.mp4", altText: null, mediaType: "VIDEO" },
+        ],
+      }),
+    ]);
+    const out = await buildImportFiles("b1", business);
+    for (const f of out.files) {
+      expect(String(f.contents)).not.toContain("tee.mp4");
+    }
+    expect(out.files.some((f) => String(f.contents).includes("tee.jpg"))).toBe(
+      true,
+    );
+    expect(out.notes.some((n) => /videos/i.test(n.message))).toBe(true);
+  });
 });

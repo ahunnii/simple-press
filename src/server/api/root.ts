@@ -2,11 +2,13 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 import { accountRouter } from "./routers/account";
 import { analyticsRouter } from "./routers/analytics";
+import { apiTokenRouter } from "./routers/api-token";
 import { backInStockRouter } from "./routers/back-in-stock";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
 import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
 import { contactRouter } from "./routers/contact";
+import { contactImportRouter } from "./routers/contact-import";
 import { contentRouter } from "./routers/content";
 import { customerRouter } from "./routers/customer";
 import { dashboardRouter } from "./routers/dashboard";
@@ -61,6 +63,7 @@ import { videosRouter } from "./routers/videos";
  */
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
+  apiToken: apiTokenRouter,
   backInStock: backInStockRouter,
   dashboard: dashboardRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
@@ -111,6 +114,7 @@ export const appRouter = createTRPCRouter({
   external: externalRouter,
   faq: faqRouter,
   marketing: marketingRouter,
+  contactImport: contactImportRouter,
   newsletter: newsletterRouter,
   team: teamRouter,
 

@@ -1,5 +1,7 @@
 import { Text } from "@react-email/components";
 
+import type { EmailLayoutTheme } from "./components/layout";
+
 import { EmailLayout } from "./components/layout";
 import { MarketingFooter } from "./components/marketing-footer";
 
@@ -18,6 +20,14 @@ interface MarketingBroadcastEmailProps {
   previewText?: string;
   /** Sender's postal address, shown in the footer (CAN-SPAM). Omitted when null. */
   postalAddress?: string | null;
+  /** Store marketing email style; omit for the neutral look. */
+  theme?: EmailLayoutTheme;
+  /**
+   * Why the recipient got this email, shown in the footer. Defaults to the
+   * opted-in line; a contact import's re-permission invite (sent to people
+   * who have NOT opted in here) passes its own.
+   */
+  footerReason?: string;
 }
 
 export function MarketingBroadcastEmail({
@@ -28,6 +38,8 @@ export function MarketingBroadcastEmail({
   unsubscribeUrl,
   previewText,
   postalAddress,
+  theme,
+  footerReason,
 }: MarketingBroadcastEmailProps) {
   const preview = previewText?.trim() ?? "";
   // Split on blank lines to form paragraphs; treat body as plain text only
@@ -43,12 +55,21 @@ export function MarketingBroadcastEmail({
       }
       businessName={businessName}
       logoUrl={logoUrl}
+      theme={theme}
     >
       {bodyHtml ? (
-        <div style={richBody} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+        <div
+          style={
+            theme ? { ...richBody, fontFamily: theme.fontStack } : richBody
+          }
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
+        />
       ) : (
         paragraphs.map((paragraph, i) => (
-          <Text key={i} style={text}>
+          <Text
+            key={i}
+            style={theme ? { ...text, fontFamily: theme.fontStack } : text}
+          >
             {paragraph}
           </Text>
         ))
@@ -58,7 +79,11 @@ export function MarketingBroadcastEmail({
         businessName={businessName}
         postalAddress={postalAddress}
         unsubscribeUrl={unsubscribeUrl}
-        reason={`You received this email because you opted in to marketing emails from ${businessName}.`}
+        reason={
+          footerReason ??
+          `You received this email because you opted in to marketing emails from ${businessName}.`
+        }
+        linkColor={theme?.linkColor}
       />
     </EmailLayout>
   );

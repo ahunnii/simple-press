@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -45,13 +46,13 @@ function firstFilled(...candidates: (string | null | undefined)[]): string {
  * `/services` — olive's services index on the generic page base (parity
  * finding PF11 / TP5).
  *
- * - `services.hero`: `OlivePageBand` — the plain white title band, or, with
- *   an owner photo, the cover variant with the title card on the page edge.
- * - `services.list`: one `OlivePageSection` of paper cards in the same card
- *   language as the journal (4:3 photo that pushes in on hover, Josefin
- *   title, caption, ghost link affordance), dealt in as a fanned group. The
+ * - `services.hero`: `OlivePageBand` — the plain ivory title band, or, with
+ *   an owner photo, the cover variant with the title panel on the page edge.
+ * - `services.list`: one `OlivePageSection` of unframed cards in the same card
+ *   language as the journal (4:3 photo that pushes in on hover, Bodoni
+ *   title, caption, link affordance), dealt in as a staggered group. The
  *   whole card is one link to `/services/<slug>`. Empty → the ghost card.
- * - `services.cta` (hideable): the paper `OliveClosingBand`, its button
+ * - `services.cta` (hideable): the sand `OliveClosingBand`, its button
  *   flag-gated (B2.5).
  *
  * Every section sits on the same left edge (120px at 1440, 16px at 390).
@@ -93,15 +94,14 @@ export function OliveServicesIndexPage({ business, services }: Props) {
         ) : (
           <OliveRevealGroup
             threshold={0}
-            fan
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
           >
             {services.map((service, i) => (
               <Link
                 key={service.id}
                 href={`/services/${service.slug}`}
                 aria-label={service.name}
-                className="olive-card olive-card-paper olive-card-lift olive-reveal-item group flex flex-col overflow-hidden"
+                className="olive-reveal-item group flex flex-col"
                 style={{ "--i": Math.min(i, 8) } as CSSProperties}
               >
                 <span className="relative block aspect-[4/3] overflow-hidden">
@@ -119,12 +119,15 @@ export function OliveServicesIndexPage({ business, services }: Props) {
                   )}
                 </span>
 
-                <span className="flex flex-1 flex-col items-start gap-2 p-5">
+                <span className="flex flex-1 flex-col items-start gap-2 pt-4">
                   <h2 className="olive-h3">{service.name}</h2>
                   {service.description ? (
                     <span
-                      className="olive-caption line-clamp-3"
-                      style={{ maxWidth: "60ch" }}
+                      className="line-clamp-3 text-[0.875rem] leading-[1.7]"
+                      style={{
+                        maxWidth: "60ch",
+                        color: "var(--olive-ink-soft)",
+                      }}
                     >
                       {service.description}
                     </span>
@@ -132,10 +135,15 @@ export function OliveServicesIndexPage({ business, services }: Props) {
                   {cardLinkLabel.trim() ? (
                     <span
                       aria-hidden="true"
-                      className="olive-btn olive-btn-ghost olive-btn-sm mt-auto pt-2"
+                      className="olive-btn olive-btn-link mt-auto"
                       {...fieldAttr("olive.services.card-link-label")}
                     >
                       {cardLinkLabel}
+                      <ArrowRight
+                        className="olive-btn-arrow"
+                        size={14}
+                        strokeWidth={1.5}
+                      />
                     </span>
                   ) : null}
                 </span>

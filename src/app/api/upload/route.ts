@@ -8,6 +8,10 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "~/env";
 import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import {
+  MAX_PRODUCT_VIDEO_BYTES,
+  PRODUCT_VIDEO_EXTS,
+} from "~/lib/products/media";
 import { s3Client } from "~/lib/s3/client";
 import { libraryDocumentKey, pdfExtOrNull } from "~/lib/s3/pdf";
 import { keyToPublicUrl } from "~/lib/s3/url";
@@ -64,6 +68,16 @@ function safeRasterImageExt(filename: string): string {
 function safeVideoExt(filename: string): string {
   const ext = path.extname(filename).toLowerCase();
   if (!ALLOWED_VIDEO_EXTS.has(ext)) throw new RejectUpload("Invalid file type");
+  return ext;
+}
+
+const ALLOWED_PRODUCT_VIDEO_EXTS = new Set<string>(PRODUCT_VIDEO_EXTS);
+
+/** Product gallery videos only (`PRODUCT_VIDEO_EXTS`: .mp4 / .webm / .mov). */
+function safeProductVideoExt(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_PRODUCT_VIDEO_EXTS.has(ext))
+    throw new RejectUpload("Invalid file type");
   return ext;
 }
 
@@ -317,6 +331,31 @@ const router: Router = {
           generateObjectInfo: ({ file }) => {
             const ext = safeRasterImageExt(file.name);
             const key = uniqueKey(business.id, "image", ext);
+            return {
+              key,
+              metadata: { pathname: keyToPublicUrl(key) },
+            };
+          },
+        };
+      },
+    }),
+    // Product gallery videos (short clips shown alongside photos). The `video-`
+    // key prefix lets the Media Library classify them as videos. Keep
+    // `maxFileSize` in sync with MAX_PRODUCT_VIDEO_BYTES (src/lib/products/media.ts).
+    productVideos: route({
+      fileTypes: ["video/mp4", "video/webm", "video/quicktime"],
+      multipleFiles: true,
+      // Keep in sync with ROUTE_MAX_FILES.productVideos (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.productVideos,
+      maxFileSize: MAX_PRODUCT_VIDEO_BYTES,
+
+      onBeforeUpload: async ({ req }) => {
+        const { business } = await requireBusinessManager(req);
+
+        return {
+          generateObjectInfo: ({ file }) => {
+            const ext = safeProductVideoExt(file.name);
+            const key = uniqueKey(business.id, "video", ext);
             return {
               key,
               metadata: { pathname: keyToPublicUrl(key) },

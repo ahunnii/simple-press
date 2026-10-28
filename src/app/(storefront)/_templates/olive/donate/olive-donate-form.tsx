@@ -54,8 +54,8 @@ type Props = {
 
 /**
  * OliveDonateForm — Default's donation checkout form, restyled in olive's
- * own controls: preset amounts as pill toggles (`aria-pressed`, the selected
- * one filled sage), then `OliveInput`/`OliveTextarea` faces for the custom
+ * own controls: preset amounts as square toggles (`aria-pressed`, the selected
+ * one filled espresso), then `OliveInput`/`OliveTextarea` faces for the custom
  * amount, name and message, and one primary `OliveButton` to submit.
  *
  * Behaviour is Default's, unchanged: pick a preset or type an amount, post
@@ -151,7 +151,6 @@ export function OliveDonateForm({ label, presetAmountsCents }: Props) {
             padding: "0.75rem 1rem",
             backgroundColor: "var(--olive-error-bg)",
             border: "1px solid var(--olive-error-border)",
-            borderRadius: "var(--olive-card-radius)",
             color: "var(--olive-error)",
           }}
         >
@@ -172,7 +171,7 @@ export function OliveDonateForm({ label, presetAmountsCents }: Props) {
                 aria-pressed={pressed}
                 className={cn(
                   "olive-btn",
-                  pressed ? "olive-btn-primary" : "olive-btn-secondary",
+                  pressed ? "olive-btn-solid" : "olive-btn-outline",
                 )}
               >
                 {formatPrice(cents)}
@@ -236,7 +235,7 @@ export function OliveDonateForm({ label, presetAmountsCents }: Props) {
       </div>
 
       <OliveButton
-        variant="primary"
+        variant="solid"
         size="lg"
         type="submit"
         loading={isProcessing}

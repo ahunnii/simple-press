@@ -9,7 +9,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
@@ -253,7 +252,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
           )}
 
           {/* Delivery Method */}
-          {f.shippingConfig.offersInStorePickup && (
+          {f.deliveryOptions.length > 1 && (
             <fieldset className="border-border mt-10 border-t pt-10">
               <legend className="text-foreground text-xs font-semibold tracking-widest uppercase">
                 Delivery
@@ -264,39 +263,29 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                 aria-describedby="delivery-method-hint"
                 className="mt-6 flex flex-wrap gap-2"
               >
-                <button
-                  type="button"
-                  onClick={() => f.setDeliveryMethod("ship")}
-                  aria-pressed={f.deliveryMethod === "ship"}
-                  className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
-                    f.deliveryMethod === "ship"
-                      ? "bg-primary text-primary-foreground border-transparent"
-                      : "border-border text-foreground hover:bg-muted bg-transparent"
-                  }`}
-                >
-                  Ship to address
-                </button>
-                <button
-                  type="button"
-                  onClick={() => f.setDeliveryMethod("pickup")}
-                  aria-pressed={f.deliveryMethod === "pickup"}
-                  className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
-                    f.deliveryMethod === "pickup"
-                      ? "bg-primary text-primary-foreground border-transparent"
-                      : "border-border text-foreground hover:bg-muted bg-transparent"
-                  }`}
-                >
-                  In-store pickup
-                </button>
+                {f.deliveryOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => f.setDeliveryMethod(option.id)}
+                    aria-pressed={f.deliveryMethod === option.id}
+                    className={`border px-6 py-3 text-sm font-medium tracking-wide transition-opacity ${
+                      f.deliveryMethod === option.id
+                        ? "bg-primary text-primary-foreground border-transparent"
+                        : "border-border text-foreground hover:bg-muted bg-transparent"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
               <p
                 id="delivery-method-hint"
                 role="status"
                 className="text-muted-foreground mt-3 text-sm"
               >
-                {f.deliveryMethod === "pickup"
-                  ? "No shipping charge. You'll pick up your order at the store."
-                  : "Shipping cost is based on your store's shipping settings."}
+                {f.deliveryOptions.find((o) => o.id === f.deliveryMethod)
+                  ?.description ?? ""}
               </p>
               {f.deliveryMethod === "pickup" && (
                 <div className="border-border mt-3 border-t pt-3 text-sm">
@@ -313,18 +302,52 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                   ) : null}
                 </div>
               )}
+              {f.deliveryMethod === "delivery" && (
+                <>
+                  <div aria-live="polite">
+                    {f.localDelivery.status === "checking" ? (
+                      <p className="text-muted-foreground mt-3 text-sm">
+                        Checking your ZIP…
+                      </p>
+                    ) : f.localDelivery.status === "ineligible" &&
+                      f.localDelivery.message ? (
+                      <p className="mt-3 text-sm text-red-600">
+                        {f.localDelivery.message}
+                      </p>
+                    ) : f.localDelivery.status === "eligible" ? (
+                      <p className="mt-3 text-sm text-green-700">
+                        Great — we deliver to you.
+                      </p>
+                    ) : null}
+                  </div>
+                  {f.localDelivery.instructions ? (
+                    <div className="border-border mt-3 border-t pt-3 text-sm">
+                      <p className="text-foreground font-medium">
+                        Delivery details
+                      </p>
+                      <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                        {f.localDelivery.instructions}
+                      </p>
+                    </div>
+                  ) : null}
+                </>
+              )}
             </fieldset>
           )}
 
-          {/* Shipping Address */}
-          {f.deliveryMethod === "ship" && (
+          {/* Shipping / delivery address */}
+          {f.needsAddress && (
             <fieldset className="border-border mt-10 border-t pt-10">
               <legend className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                Shipping Address
+                {f.deliveryMethod === "delivery"
+                  ? "Delivery address"
+                  : "Shipping Address"}
               </legend>
               <p className="text-muted-foreground mt-2 text-sm">
-                {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                  ? "We price shipping from this address. Make changes here before continuing to payment."
+                {f.addressLocked
+                  ? f.deliveryMethod === "delivery"
+                    ? "We check delivery from this address. Make changes here before continuing to payment."
+                    : "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe Checkout prefilled so you can confirm or edit before paying."}
               </p>
               <SavedAddressPicker
@@ -347,7 +370,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                     id="address"
                     type="text"
                     autoComplete="shipping address-line1"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.addressLine1.trim()
@@ -382,7 +405,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                     id="city"
                     type="text"
                     autoComplete="shipping address-level2"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.city.trim() ? true : undefined
@@ -404,7 +427,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                   <select
                     id="state"
                     aria-labelledby="state-label"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.state ? true : undefined
@@ -431,7 +454,7 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                     id="zip"
                     type="text"
                     autoComplete="shipping postal-code"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.postalCode.trim() ? true : undefined
@@ -525,7 +548,9 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                 </div>
               )}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-muted-foreground">
+                  {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                </span>
                 <span className="text-foreground">
                   {f.deliveryMethod === "pickup" ? (
                     "In-store pickup (free)"
@@ -540,6 +565,15 @@ export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
                       />
                       Calculating…
                     </span>
+                  ) : f.deliveryMethod === "delivery" && f.shippingPending ? (
+                    f.localDelivery.status === "checking" ? (
+                      "Calculating…"
+                    ) : (
+                      "Enter your ZIP"
+                    )
+                  ) : f.deliveryMethod === "delivery" &&
+                    f.localDelivery.status === "ineligible" ? (
+                    "Not available"
                   ) : f.shippingPending ? (
                     "Calculated at checkout"
                   ) : f.shipping === 0 ? (

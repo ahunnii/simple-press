@@ -1,9 +1,12 @@
 /** "Site details.html" — everything about the business that isn't a page. */
+import type { RenderCtx, SiteDetailsInput } from "./types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { parsePageMeta, STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
+
 import { callout, esc, fieldTable } from "../html";
 import { SITE_DETAILS_PATH } from "../types";
 import {
+  formatMoney,
   humanize,
   imgHtml,
   inlineText,
@@ -14,16 +17,17 @@ import {
   tableHtml,
   yesNo,
 } from "./shared";
-import type { RenderCtx, SiteDetailsInput } from "./types";
 
 const SOCIAL_LABELS: Record<string, string> = {
   instagram: "Instagram",
+  threads: "Threads",
   facebook: "Facebook",
   twitter: "X / Twitter",
   linkedin: "LinkedIn",
   tiktok: "TikTok",
   pinterest: "Pinterest",
   youtube: "YouTube",
+  googleBusinessProfile: "Google Business Profile",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -85,9 +89,17 @@ function bannerHtml(raw: unknown, ctx: RenderCtx): string {
   if (!isRecord(raw)) return "";
   const text = richTextHtml(ctx, SITE_DETAILS_PATH, raw.content).html;
   const table = fieldTable([
-    ["Switched on", raw.enabled === true ? yesNo(true) : "No (saved but not showing)"],
+    [
+      "Switched on",
+      raw.enabled === true ? yesNo(true) : "No (saved but not showing)",
+    ],
     ["Text", text],
-    ["Link", str(raw.linkUrl) ? linkHtml(str(raw.linkUrl), str(raw.linkLabel) || str(raw.linkUrl)) : ""],
+    [
+      "Link",
+      str(raw.linkUrl)
+        ? linkHtml(str(raw.linkUrl), str(raw.linkLabel) || str(raw.linkUrl))
+        : "",
+    ],
     ["Background color", swatch(str(raw.bgColor))],
     ["Text color", swatch(str(raw.textColor))],
   ]);
@@ -101,12 +113,25 @@ function popupHtml(raw: unknown, ctx: RenderCtx): string {
   const image = str(raw.imagePath);
   if (!text && !heading && !image) return "";
   return fieldTable([
-    ["Switched on", raw.enabled === true ? yesNo(true) : "No (saved but not showing)"],
+    [
+      "Switched on",
+      raw.enabled === true ? yesNo(true) : "No (saved but not showing)",
+    ],
     ["Style", raw.mode === "image" ? "Picture only" : "Text"],
     ["Heading", inlineText(heading)],
     ["Text", text],
-    ["Picture", image ? imgHtml(ctx, SITE_DETAILS_PATH, image, str(raw.imageAlt), 280) : ""],
-    ["Button", str(raw.ctaUrl) ? linkHtml(str(raw.ctaUrl), str(raw.ctaLabel) || str(raw.ctaUrl)) : ""],
+    [
+      "Picture",
+      image
+        ? imgHtml(ctx, SITE_DETAILS_PATH, image, str(raw.imageAlt), 280)
+        : "",
+    ],
+    [
+      "Button",
+      str(raw.ctaUrl)
+        ? linkHtml(str(raw.ctaUrl), str(raw.ctaLabel) || str(raw.ctaUrl))
+        : "",
+    ],
   ]);
 }
 
@@ -121,7 +146,10 @@ function seoPerPage(raw: unknown, ctx: RenderCtx): string {
       m.ogImage ? imgHtml(ctx, SITE_DETAILS_PATH, m.ogImage, "", 96) : "",
     ];
   });
-  return tableHtml(["Page", "Search title", "Search description", "Share image"], rows);
+  return tableHtml(
+    ["Page", "Search title", "Search description", "Share image"],
+    rows,
+  );
 }
 
 export function renderSiteDetailsDoc(
@@ -139,7 +167,9 @@ export function renderSiteDetailsDoc(
     ["Address", inlineText(d.businessAddress)],
     [
       "Map pin (latitude, longitude)",
-      d.latitude !== null && d.longitude !== null ? `${esc(d.latitude)}, ${esc(d.longitude)}` : "",
+      d.latitude !== null && d.longitude !== null
+        ? `${esc(d.latitude)}, ${esc(d.longitude)}`
+        : "",
     ],
     ["Areas served", d.areaServed.map(esc).join(", ")],
     ["Time zone", esc(d.timeZone)],
@@ -160,6 +190,53 @@ export function renderSiteDetailsDoc(
       ])
     : "";
 
+  const deliveryZip = d.localDeliveryOriginZip ?? d.addressPostalCode;
+  const localDelivery = d.offersLocalDelivery
+    ? fieldTable([
+        [
+          "Delivering from ZIP code",
+          deliveryZip
+            ? esc(deliveryZip) +
+              (d.localDeliveryOriginZip ? "" : " (your business address)")
+            : "",
+        ],
+        [
+          "Delivery radius",
+          d.localDeliveryRadiusMiles !== null
+            ? `${esc(d.localDeliveryRadiusMiles)} miles`
+            : "",
+        ],
+        [
+          d.localDeliveryBands.length > 0
+            ? "Delivery fee (farthest ring)"
+            : "Delivery fee",
+          d.localDeliveryFeeCents > 0
+            ? esc(formatMoney(d.localDeliveryFeeCents))
+            : "Free",
+        ],
+        [
+          "Closer prices",
+          d.localDeliveryBands
+            .map(
+              (b) =>
+                `${b.feeCents > 0 ? esc(formatMoney(b.feeCents)) : "Free"} within ${esc(b.upToMiles)} ${b.upToMiles === 1 ? "mile" : "miles"}`,
+            )
+            .join("; "),
+        ],
+        [
+          "Minimum order",
+          d.localDeliveryMinOrderCents !== null &&
+          d.localDeliveryMinOrderCents > 0
+            ? esc(formatMoney(d.localDeliveryMinOrderCents))
+            : "",
+        ],
+        [
+          "Delivery days and instructions",
+          inlineText(d.localDeliveryInstructions),
+        ],
+      ])
+    : "";
+
   const social = isRecord(sc?.socialLinks)
     ? fieldTable(
         Object.entries(sc.socialLinks)
@@ -176,9 +253,15 @@ export function renderSiteDetailsDoc(
   const footerNav = navListHtml(footerItems, ctx);
 
   const logos = [
-    sc?.logoUrl ? `<h3>Logo</h3>${photosGridHtml(ctx, docPath, [{ url: sc.logoUrl, alt: sc.logoAltText ?? d.name }])}` : "",
-    sc?.faviconUrl ? `<h3>Favicon (browser tab icon)</h3>${photosGridHtml(ctx, docPath, [{ url: sc.faviconUrl, alt: "Favicon" }])}` : "",
-    sc?.logoAltText ? fieldTable([["Logo description (alt text)", esc(sc.logoAltText)]]) : "",
+    sc?.logoUrl
+      ? `<h3>Logo</h3>${photosGridHtml(ctx, docPath, [{ url: sc.logoUrl, alt: sc.logoAltText ?? d.name }])}`
+      : "",
+    sc?.faviconUrl
+      ? `<h3>Favicon (browser tab icon)</h3>${photosGridHtml(ctx, docPath, [{ url: sc.faviconUrl, alt: "Favicon" }])}`
+      : "",
+    sc?.logoAltText
+      ? fieldTable([["Logo description (alt text)", esc(sc.logoAltText)]])
+      : "",
   ].join("");
 
   const colors = fieldTable([
@@ -205,18 +288,33 @@ export function renderSiteDetailsDoc(
     ["Site description", inlineText(sc?.metaDescription)],
     ["Keywords", inlineText(sc?.metaKeywords)],
     ["Short brand name (page title ending)", esc(sc?.seoBrandName ?? "")],
-    ["Default share image", sc?.ogImage ? imgHtml(ctx, docPath, sc.ogImage, "", 280) : ""],
+    [
+      "Default share image",
+      sc?.ogImage ? imgHtml(ctx, docPath, sc.ogImage, "", 280) : "",
+    ],
   ]);
   const seoPages = seoPerPage(sc?.pageMeta, ctx);
 
   const legacy = fieldTable([
     ["Hero title", inlineText(sc?.heroTitle)],
     ["Hero subtitle", inlineText(sc?.heroSubtitle)],
-    ["Hero button", sc?.heroButtonText ? esc(sc.heroButtonText) + (sc.heroButtonLink ? ` → ${linkHtml(sc.heroButtonLink)}` : "") : ""],
-    ["Hero image", sc?.heroImageUrl ? imgHtml(ctx, docPath, sc.heroImageUrl, "", 280) : ""],
+    [
+      "Hero button",
+      sc?.heroButtonText
+        ? esc(sc.heroButtonText) +
+          (sc.heroButtonLink ? ` → ${linkHtml(sc.heroButtonLink)}` : "")
+        : "",
+    ],
+    [
+      "Hero image",
+      sc?.heroImageUrl ? imgHtml(ctx, docPath, sc.heroImageUrl, "", 280) : "",
+    ],
     ["About title", inlineText(sc?.aboutTitle)],
     ["About text", inlineText(sc?.aboutText)],
-    ["About image", sc?.aboutImageUrl ? imgHtml(ctx, docPath, sc.aboutImageUrl, "", 280) : ""],
+    [
+      "About image",
+      sc?.aboutImageUrl ? imgHtml(ctx, docPath, sc.aboutImageUrl, "", 280) : "",
+    ],
   ]);
 
   const domain = [
@@ -237,12 +335,15 @@ export function renderSiteDetailsDoc(
     block("Business", about),
     block("Opening hours", hoursHtml),
     block("Pickup", pickup),
+    block("Local delivery", localDelivery),
     block("Social media", social),
     block("Main menu", nav),
     block(
       "Footer links",
       footerNav ||
-        (nav ? `<p class="muted">No separate footer links are set; your footer shows the main menu links.</p>` : ""),
+        (nav
+          ? `<p class="muted">No separate footer links are set; your footer shows the main menu links.</p>`
+          : ""),
     ),
     block("Footer text", sc?.footerText ? `<p>${esc(sc.footerText)}</p>` : ""),
     block("Logo and icon", logos),

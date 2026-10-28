@@ -5,13 +5,25 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { meaningfulAltText } from "~/lib/images/alt-text";
+import { isVideoMedia, type ProductMediaType } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import {
+  ProductGalleryThumb,
+  ProductGalleryVideo,
+  ProductLightboxVideo,
+} from "~/app/(storefront)/_components/product-page/product-gallery-video";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
 import { PinkBadge } from "../shared/pink-badge";
 
-type GalleryImage = { id: string; url: string; altText?: string | null };
+type GalleryImage = {
+  id: string;
+  url: string;
+  altText?: string | null;
+  mediaType?: ProductMediaType | null;
+  posterUrl?: string | null;
+};
 
 type Props = {
   images: GalleryImage[];
@@ -48,6 +60,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
 
   const enlargeBtnRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const lightboxVideoRef = useRef<HTMLVideoElement>(null);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -66,6 +79,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
   // 74px column — a thumbnail-sized hero beside an empty half-page.
   const hasThumbs = list.length > 1;
   const activeImage = list[active] ?? list[0];
+  const activeIsVideo = isVideoMedia(activeImage);
 
   const closeLightbox = () => {
     setLightboxOpen(false);
@@ -92,21 +106,27 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
         closeLightbox();
         return;
       }
-      if (hasThumbs && e.key === "ArrowRight") {
+      // A focused <video> owns the arrow keys (native seek).
+      const videoFocused = document.activeElement?.tagName === "VIDEO";
+      if (hasThumbs && !videoFocused && e.key === "ArrowRight") {
         e.preventDefault();
         goToNext();
         return;
       }
-      if (hasThumbs && e.key === "ArrowLeft") {
+      if (hasThumbs && !videoFocused && e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrev();
         return;
       }
       if (e.key === "Tab") {
         e.preventDefault();
-        const trapOrder = hasThumbs
-          ? [closeBtnRef, prevBtnRef, nextBtnRef]
-          : [closeBtnRef];
+        const trapOrder: { current: HTMLElement | null }[] = hasThumbs
+          ? [closeBtnRef, lightboxVideoRef, prevBtnRef, nextBtnRef]
+          : [closeBtnRef, lightboxVideoRef];
+        // The video ref is null unless the active slide is a video.
+        const live = trapOrder.filter((ref) => ref.current !== null);
+        trapOrder.length = 0;
+        trapOrder.push(...live);
         const currentIndex = trapOrder.findIndex(
           (ref) => ref.current === document.activeElement,
         );
@@ -146,7 +166,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 key={img.id}
                 type="button"
                 onClick={() => setActive(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={`View ${isVideoMedia(img) ? "video" : "image"} ${i + 1}`}
                 aria-pressed={active === i}
                 className="relative overflow-hidden"
                 style={{
@@ -158,67 +178,113 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                       : "1px solid var(--pink-line)",
                 }}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="74px"
-                />
+                {isVideoMedia(img) ? (
+                  <ProductGalleryThumb item={img} sizes="74px" />
+                ) : (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="74px"
+                  />
+                )}
               </button>
             ))}
           </div>
         )}
 
-        {/* ── Main frame — cross-fades between views, opens the lightbox ── */}
-        <button
-          ref={enlargeBtnRef}
-          type="button"
-          onClick={() => setLightboxOpen(true)}
-          aria-label="Enlarge image"
-          aria-haspopup="dialog"
-          className="relative block w-full cursor-zoom-in overflow-hidden border-0 p-0 text-left"
+        {/* ── Main frame — cross-fades between views, opens the lightbox.
+            A <div> (not a <button>) so a video slide's own controls aren't
+            nested in a button; photo slides get a full-frame enlarge button
+            overlay, video slides bring theirs via `onExpand`. ── */}
+        <div
+          className="relative block w-full overflow-hidden"
           style={{
             aspectRatio: "4 / 5",
             background: "var(--pink-panel)",
-            font: "inherit",
           }}
         >
-          {list.map((img, i) => (
-            <div
-              key={img.id}
-              className="absolute inset-0 transition-opacity duration-500"
-              style={{ opacity: active === i ? 1 : 0 }}
-            >
-              {/* Ambient backdrop: tiny blurred self-copy fills the 4:5
-                  letterbox as a glow over var(--pink-panel) (same recipe as
-                  the shared gallery's mainImageFit="contain"). scale-125
-                  suffices at this ~45vw frame; rendered per image so the
-                  backdrop cross-fades in lockstep with its foreground. */}
-              <Image
-                src={img.url}
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="128px"
-                className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
-              />
-              <Image
-                src={img.url}
-                alt={meaningfulAltText(img.altText) ?? productName}
-                fill
-                priority={i === 0}
-                className="object-contain"
-                sizes="(max-width: 640px) 100vw, 45vw"
-              />
-            </div>
-          ))}
+          {list.map((img, i) => {
+            const isActive = active === i;
+            const isVideo = isVideoMedia(img);
+            return (
+              <div
+                key={img.id}
+                inert={!isActive}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-500",
+                  !isActive && "pointer-events-none",
+                )}
+                style={{ opacity: isActive ? 1 : 0 }}
+              >
+                {/* Ambient backdrop: tiny blurred self-copy fills the 4:5
+                    letterbox as a glow over var(--pink-panel) (same recipe as
+                    the shared gallery's mainImageFit="contain"). scale-125
+                    suffices at this ~45vw frame; rendered per image so the
+                    backdrop cross-fades in lockstep with its foreground. A
+                    video borrows its poster, or skips the glow without one. */}
+                {isVideo ? (
+                  <>
+                    {img.posterUrl ? (
+                      <Image
+                        src={img.posterUrl}
+                        alt=""
+                        aria-hidden="true"
+                        fill
+                        sizes="128px"
+                        className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
+                      />
+                    ) : null}
+                    <ProductGalleryVideo
+                      item={img}
+                      fill
+                      objectFit="contain"
+                      active={isActive && !lightboxOpen}
+                      fallbackLabel={`${productName} video`}
+                      onExpand={() => setLightboxOpen(true)}
+                      expandButtonRef={isActive ? enlargeBtnRef : undefined}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Image
+                      src={img.url}
+                      alt=""
+                      aria-hidden="true"
+                      fill
+                      sizes="128px"
+                      className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
+                    />
+                    <Image
+                      src={img.url}
+                      alt={meaningfulAltText(img.altText) ?? productName}
+                      fill
+                      priority={i === 0}
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 45vw"
+                    />
+                  </>
+                )}
+              </div>
+            );
+          })}
+          {!activeIsVideo && (
+            <button
+              ref={enlargeBtnRef}
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="Enlarge image"
+              aria-haspopup="dialog"
+              className="absolute inset-0 z-[1] cursor-zoom-in appearance-none border-0 bg-transparent p-0"
+            />
+          )}
           {badge && (
-            <span className="absolute top-3 left-3">
+            <span className="pointer-events-none absolute top-3 left-3 z-[2]">
               <PinkBadge tone={badge.tone}>{badge.label}</PinkBadge>
             </span>
           )}
-        </button>
+        </div>
 
         {/* ── Horizontal thumbnail strip (mobile) ── */}
         {list.length > 1 && (
@@ -232,7 +298,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 key={img.id}
                 type="button"
                 onClick={() => setActive(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={`View ${isVideoMedia(img) ? "video" : "image"} ${i + 1}`}
                 aria-pressed={active === i}
                 className="relative overflow-hidden"
                 style={{
@@ -244,13 +310,17 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                       : "1px solid var(--pink-line)",
                 }}
               >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="25vw"
-                />
+                {isVideoMedia(img) ? (
+                  <ProductGalleryThumb item={img} sizes="25vw" />
+                ) : (
+                  <Image
+                    src={img.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -272,7 +342,7 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={`${productName} — enlarged image`}
+            aria-label={`${productName} — enlarged ${activeIsVideo ? "video" : "image"}`}
             className="relative max-h-[90vh] max-w-[90vw]"
             style={{
               animation: shouldReduce
@@ -281,18 +351,27 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
-              src={activeImage?.url ?? "/placeholder.svg"}
-              alt={meaningfulAltText(activeImage?.altText) ?? productName}
-              width={1400}
-              height={1750}
-              className="max-h-[90vh] max-w-[90vw] object-contain"
-            />
+            {activeImage && activeIsVideo ? (
+              <ProductLightboxVideo
+                key={activeImage.url}
+                ref={lightboxVideoRef}
+                item={activeImage}
+                fallbackLabel={`${productName} video`}
+              />
+            ) : (
+              <Image
+                src={activeImage?.url ?? "/placeholder.svg"}
+                alt={meaningfulAltText(activeImage?.altText) ?? productName}
+                width={1400}
+                height={1750}
+                className="max-h-[90vh] max-w-[90vw] object-contain"
+              />
+            )}
             <button
               ref={closeBtnRef}
               type="button"
               onClick={closeLightbox}
-              aria-label="Close enlarged image"
+              aria-label={`Close enlarged ${activeIsVideo ? "video" : "image"}`}
               className="absolute top-3 right-3 flex items-center justify-center"
               style={{
                 width: 40,
@@ -352,7 +431,11 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 </button>
                 <div
                   aria-live="polite"
-                  className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[12px] font-medium"
+                  className={cn(
+                    "absolute left-1/2 -translate-x-1/2 text-[12px] font-medium",
+                    // Native video controls own the bottom edge.
+                    activeIsVideo ? "top-3" : "bottom-3",
+                  )}
                   style={{
                     background: "var(--pink-white)",
                     padding: "4px 10px",

@@ -3,10 +3,16 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { DbClient } from "~/server/db";
+import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
+import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { sendNewReviewNotification } from "~/lib/email/templates";
-import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
+import {
+  getClientIpFromHeaders,
+  reviewSubmitLimiter,
+  reviewVoteLimiter,
+} from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
 import {
   reviewBulkApproveSchema,
@@ -360,11 +366,38 @@ export const reviewRouter = createTRPCRouter({
         rating: z.number().min(1).max(5),
         title: z.string().min(1).max(200),
         comment: z.string().min(10).max(2000),
-        images: z.array(z.string().url()).max(5).optional(),
-        videoUrl: z.string().url().optional(),
+        captchaToken: z.string().max(4096),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
+
+      // Keyed on the signed-in user (not the IP): rotating IPs doesn't help a
+      // scripted account, and every submission emails the owner.
+      try {
+        await reviewSubmitLimiter.consume(
+          `${ctx.session.user.id}:${requestHost}`,
+        );
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many reviews. Please try again later.",
+        });
+      }
+
+      // No `NODE_ENV === "development"` short-circuit — see contact.ts for
+      // why: verifyRecaptcha owns the test-bypass decision itself now.
+      const result = await verifyRecaptcha(input.captchaToken, {
+        action: "review",
+        requestHost,
+        remoteIp,
+      });
+      if (!result.ok) {
+        throw captchaFailureToTrpcError(result.reason);
+      }
+
       const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
         select: { email: true, name: true },
@@ -380,6 +413,20 @@ export const reviewRouter = createTRPCRouter({
       // guard.
       const normalizedUserEmail = normalizeEmail(user.email);
 
+      // The product must belong to the store this request is for — otherwise a
+      // signed-in user could file a pending review (and email the owner) on any
+      // store's product by id.
+      const storeBusiness = await checkBusiness();
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId },
+        select: { businessId: true, name: true },
+      });
+      if (!product || product.businessId !== storeBusiness?.id)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+
       const existing = await ctx.db.productReview.findFirst({
         where: {
           productId: input.productId,
@@ -391,16 +438,6 @@ export const reviewRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "You have already reviewed this product",
-        });
-
-      const product = await ctx.db.product.findUnique({
-        where: { id: input.productId },
-        select: { businessId: true, name: true },
-      });
-      if (!product)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Product not found",
         });
 
       const order = await ctx.db.order.findFirst({
@@ -438,8 +475,7 @@ export const reviewRouter = createTRPCRouter({
           rating: input.rating,
           title: input.title,
           comment: input.comment,
-          images: input.images ?? [],
-          videoUrl: input.videoUrl,
+          images: [],
           verifiedPurchase: !!order,
           orderId: order?.id,
           isApproved: false, // always needs approval

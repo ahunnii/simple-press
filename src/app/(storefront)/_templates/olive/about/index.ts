@@ -1,6 +1,6 @@
-import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 
 // ─── Built-in list defaults ─────────────────────────────────────────────────
 
@@ -31,24 +31,24 @@ const OLIVE_ABOUT_STORY_DEFAULT_ROWS = [
   },
 ] satisfies Record<string, string>[];
 
-// Built-in example CTA tiles, shown by the editor as real rows and copied
-// into the saved value on the first edit (copy-on-write). Text copied
-// verbatim from the pre-migration `DEFAULT_CTA_TILES` constant in
-// `olive-about-page.tsx`.
+// Built-in closing buttons, shown by the editor as real rows and copied into
+// the saved value on the first edit (copy-on-write). Since the 2026-10-21
+// "three beats" rebuild the page shows at most two buttons and no photos, so
+// the old photo tiles ("Shop new", "Read the journal", "Say hello") became
+// the first and last of those labels, with no `image` key.
 const OLIVE_ABOUT_CTA_DEFAULT_ROWS = [
-  { image: "", label: "Shop new", link: "/shop" },
-  { image: "", label: "Read the journal", link: "/blog" },
-  { image: "", label: "Say hello", link: "/contact" },
+  { label: "Shop new", link: "/shop" },
+  { label: "Say hello", link: "/contact" },
 ] satisfies Record<string, string>[];
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// ─── Opening (group about.hero) ──────────────────────────────────────────────
 
 const aboutHeroData: TemplateField[] = [
   {
     key: "olive.about.hero-image",
     label: "Photo",
     description:
-      "Full-bleed photo at the top of the About page, with the page title on a card over it.",
+      "Photo beside the statement at the top of the About page, running to the right edge of the screen (above the statement on phones). Leave blank for a text-only opening.",
     type: "image",
     page: "about",
     group: "about.hero",
@@ -57,8 +57,9 @@ const aboutHeroData: TemplateField[] = [
   },
   {
     key: "olive.about.hero-heading",
-    label: "Heading",
-    description: "The page title, shown on a card over the photo.",
+    label: "Page title",
+    description:
+      "The page title, set in small spaced capitals above the statement. Leave blank to show About us.",
     type: "text",
     page: "about",
     group: "about.hero",
@@ -67,23 +68,25 @@ const aboutHeroData: TemplateField[] = [
   },
 ];
 
-// ─── Manifesto ────────────────────────────────────────────────────────────────
+// ─── Statement (group about.manifesto) ────────────────────────────────────────
 
 const aboutManifestoData: TemplateField[] = [
   {
     key: "olive.about.manifesto-heading",
-    label: "Heading",
-    description: "Centred display heading below the hero.",
+    label: "Statement",
+    description:
+      "The large serif statement at the top of the About page, under the page title. Leave blank to hide it.",
     type: "text",
     page: "about",
     group: "about.manifesto",
     gridColumn: "col-span-full",
-    defaultValue: "Made for people who dress on purpose.",
+    defaultValue: "Made for the woman who dresses on purpose.",
   },
   {
     key: "olive.about.manifesto-body",
-    label: "Body",
-    description: "One short paragraph under the manifesto heading.",
+    label: "Text under the statement",
+    description:
+      "One short paragraph under the statement. Leave blank to hide it.",
     type: "textarea",
     page: "about",
     group: "about.manifesto",
@@ -97,10 +100,32 @@ const aboutManifestoData: TemplateField[] = [
 
 const aboutStoryData: TemplateField[] = [
   {
-    key: "olive.about.story",
-    label: "Our story",
+    key: "olive.about.story-label",
+    label: "Label above heading",
     description:
-      "Alternating photo-and-text rows telling the shop's story, up to 4. Leave empty to use the built-in example story.",
+      "Small spaced capitals above the story heading (e.g. Our story). Leave blank to hide it.",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-1",
+    defaultValue: "Our story",
+  },
+  {
+    key: "olive.about.story-heading",
+    label: "Heading",
+    description:
+      "Serif heading above the story paragraphs. Leave blank to hide it.",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-1",
+    defaultValue: "Style meets convenience.",
+  },
+  {
+    key: "olive.about.story",
+    label: "Story paragraphs",
+    description:
+      "The shop's story, one paragraph per row (up to 4), beside one photo. Leave empty to use the built-in example story.",
     type: "list",
     page: "about",
     group: "about.story",
@@ -113,7 +138,7 @@ const aboutStoryData: TemplateField[] = [
         key: "image",
         label: "Photo",
         type: "image",
-        description: "Photo for this row. Shown at 4:3, alternating sides.",
+        description: "Only the first row's photo is shown, beside the story.",
         placeholder: "Upload a photo for this row",
         optional: true,
       },
@@ -121,14 +146,15 @@ const aboutStoryData: TemplateField[] = [
         key: "heading",
         label: "Heading",
         type: "text",
-        description: "Short heading for this row. Leave blank to skip it.",
+        description:
+          "Small serif heading over this paragraph. Leave blank to skip it.",
         placeholder: "e.g. Started on a card table",
       },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        description: "A short paragraph for this row.",
+        description: "The paragraph for this row.",
         placeholder: "A short paragraph for this row",
         optional: true,
       },
@@ -137,14 +163,14 @@ const aboutStoryData: TemplateField[] = [
   },
 ];
 
-// ─── Founding line ────────────────────────────────────────────────────────────
+// ─── Closing line ─────────────────────────────────────────────────────────────
 
 const aboutFoundingData: TemplateField[] = [
   {
     key: "olive.about.founding-line",
     label: "Line",
     description:
-      "One centred, tracked-uppercase line between two hairlines (e.g. your founding year and city). Leave blank to hide.",
+      "One centred line in italic serif type at the end of the page, between two short rules (e.g. Est. 2022 · Detroit). Leave blank to hide it.",
     type: "text",
     page: "about",
     group: "about.founding",
@@ -153,42 +179,37 @@ const aboutFoundingData: TemplateField[] = [
   },
 ];
 
-// ─── CTA tiles ────────────────────────────────────────────────────────────────
+// ─── Closing buttons ──────────────────────────────────────────────────────────
+// Rows saved before 2026-10-21 still carry an `image` prop from the old photo
+// tiles; the page ignores it and the editor drops it on the next save.
 
 const aboutCtaData: TemplateField[] = [
   {
     key: "olive.about.cta",
-    label: "Tiles",
+    label: "Buttons",
     description:
-      "Up to 3 photo tiles linking elsewhere on the site, shown at the bottom of the About page. Leave empty to use the built-in defaults.",
+      "Up to two buttons at the end of the page, under the closing line. The first is filled, the second outlined. Leave empty to use the built-in buttons.",
     type: "list",
     page: "about",
     group: "about.cta",
     gridColumn: "col-span-full",
-    maxItems: 3,
-    itemLabel: "tile",
+    maxItems: 2,
+    itemLabel: "button",
     defaultsWhenEmpty: true,
     itemSchema: [
-      {
-        key: "image",
-        label: "Photo",
-        type: "image",
-        description: "Photo for this tile.",
-        placeholder: "Upload a photo for this tile",
-        optional: true,
-      },
       {
         key: "label",
         label: "Label",
         type: "text",
-        description: "The word or two printed on the tile's card.",
+        description:
+          "The words on the button. A row without a label is skipped.",
         placeholder: "e.g. Shop new",
       },
       {
         key: "link",
         label: "Link",
         type: "url",
-        description: "Where the tile goes.",
+        description: "Where the button goes. Leave blank to link to the shop.",
         placeholder: "e.g. /shop",
         optional: true,
       },
@@ -210,36 +231,36 @@ export const oliveAboutData: TemplateField[] = [
 export const oliveAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
-    title: "Hero",
-    description: "Full-bleed photo with the page title on a card",
+    title: "Opening",
+    description: "Page title, statement and photo",
     icon: "🌿",
     columns: 2,
   },
   {
     id: "about.manifesto",
-    title: "Manifesto",
-    description: "Centred brand statement below the hero",
+    title: "Statement",
+    description: "Large serif statement and a short paragraph beside the photo",
     icon: "✒️",
     columns: 1,
   },
   {
     id: "about.story",
     title: "Our story",
-    description: "Alternating photo-and-text rows telling the shop's story",
+    description: "The shop's story in a few paragraphs, beside one photo",
     icon: "📖",
-    columns: 1,
+    columns: 2,
   },
   {
     id: "about.founding",
-    title: "Founding line",
-    description: "One small centred line between two hairlines",
+    title: "Closing line",
+    description: "One italic line at the end of the page",
     icon: "🏷️",
     columns: 1,
   },
   {
     id: "about.cta",
-    title: "Where to next",
-    description: "Up to three photo tiles linking elsewhere on the site",
+    title: "Closing buttons",
+    description: "Up to two buttons at the end of the page",
     icon: "🔗",
     columns: 1,
   },
@@ -249,8 +270,8 @@ export const oliveAboutSections: TemplateSection[] = [
   {
     id: "about.hero",
     page: "about",
-    title: "Hero",
-    description: "Full-bleed photo with the page title",
+    title: "Opening",
+    description: "Page title, statement and photo",
     groupIds: ["about.hero"],
     order: 0,
     hideable: false,
@@ -258,8 +279,8 @@ export const oliveAboutSections: TemplateSection[] = [
   {
     id: "about.manifesto",
     page: "about",
-    title: "Manifesto",
-    description: "Centred brand statement",
+    title: "Statement",
+    description: "Large serif statement and a short paragraph",
     groupIds: ["about.manifesto"],
     order: 1,
     hideable: true,
@@ -268,7 +289,7 @@ export const oliveAboutSections: TemplateSection[] = [
     id: "about.story",
     page: "about",
     title: "Our story",
-    description: "Alternating photo-and-text story rows",
+    description: "The shop's story beside one photo",
     groupIds: ["about.story"],
     order: 2,
     hideable: true,
@@ -276,8 +297,8 @@ export const oliveAboutSections: TemplateSection[] = [
   {
     id: "about.founding",
     page: "about",
-    title: "Founding line",
-    description: "Small centred line between two hairlines",
+    title: "Closing line",
+    description: "One italic line at the end of the page",
     groupIds: ["about.founding"],
     order: 3,
     hideable: true,
@@ -285,8 +306,8 @@ export const oliveAboutSections: TemplateSection[] = [
   {
     id: "about.cta",
     page: "about",
-    title: "Where to next",
-    description: "Up to three photo tiles linking elsewhere on the site",
+    title: "Closing buttons",
+    description: "Up to two buttons at the end of the page",
     groupIds: ["about.cta"],
     order: 4,
     hideable: true,

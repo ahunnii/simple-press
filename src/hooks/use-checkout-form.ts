@@ -8,11 +8,17 @@ import type {
   CheckoutMerchantPolicies,
   DefaultCheckoutPageTemplateProps,
 } from "~/app/(storefront)/_templates/types";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { CartItem } from "~/providers/cart-context";
 import {
   getAllowedCountries, // used at runtime inside useCheckoutForm
 } from "~/lib/geo/regions";
+import {
+  localDeliveryFeeRange,
+  parseLocalDeliveryBands,
+} from "~/lib/local-delivery-bands";
+import { formatPrice } from "~/lib/prices";
 import {
   calculateShipping,
   SHIPPING_TYPES,
@@ -60,9 +66,25 @@ type UseCheckoutFormReturn = {
   country: SupportedCountry;
   setCountry: (v: SupportedCountry) => void;
   allowedCountries: SupportedCountry[];
-  // Delivery method
-  deliveryMethod: "ship" | "pickup";
-  setDeliveryMethod: (v: "ship" | "pickup") => void;
+  // Delivery method. `deliveryMethod` is the EFFECTIVE method: a stale
+  // "delivery" choice falls back to "ship" when the store doesn't offer it.
+  deliveryMethod: DeliveryMethod;
+  setDeliveryMethod: (m: DeliveryMethod) => void;
+  /**
+   * The methods this store offers, in display order: ship always, pickup iff
+   * `offersInStorePickup`, delivery iff `offersLocalDelivery`. Templates
+   * render one radio per entry.
+   */
+  deliveryOptions: DeliveryOption[];
+  /** The method needs a destination address (ship or delivery). */
+  needsAddress: boolean;
+  /**
+   * The address entered here is final — Stripe won't let the shopper edit it
+   * (zone+weight shipping, or local delivery). Templates should say so.
+   */
+  addressLocked: boolean;
+  /** Local delivery eligibility for the entered ZIP (only live when chosen). */
+  localDelivery: LocalDeliveryState;
   // Discount
   couponsEnabled: boolean;
   discountCodeInput: string;
@@ -97,8 +119,101 @@ type UseCheckoutFormReturn = {
   termsDisclosure: CheckoutTermsDisclosure;
 };
 
+export type DeliveryOption = {
+  id: DeliveryMethod;
+  label: string;
+  description: string;
+};
+
+export type LocalDeliveryState = {
+  /**
+   * - `idle`       — delivery not chosen, or no 5-digit US ZIP entered yet.
+   * - `checking`   — waiting on the debounce or the server check.
+   * - `eligible`   — this cart can be delivered to this ZIP.
+   * - `ineligible` — it can't; `message` says why.
+   */
+  status: "idle" | "checking" | "eligible" | "ineligible";
+  /** Shopper-facing reason when ineligible; otherwise null. */
+  message: string | null;
+  /**
+   * The delivery fee in cents (0 = free). Once eligible this is the server's
+   * price for the shopper's ZIP (its distance band, if any); before that it
+   * is the store's radius-wide base fee and shouldn't be presented as final.
+   */
+  feeCents: number;
+  /** The owner's delivery notes ("We deliver Tue–Sat afternoons"), if any. */
+  instructions: string | null;
+  radiusMiles: number | null;
+};
+
 // Debounce delay (ms) for the zone+weight shipping quote.
 const QUOTE_DEBOUNCE_MS = 500;
+
+const LOCAL_DELIVERY_UNAVAILABLE = "Local delivery isn't available right now.";
+
+/** Client-side mirror of `normalizeUsZip` (~/lib/local-delivery is server-only). */
+function normalizeUsZipClient(input: string): string | null {
+  const match = /^(\d{5})(?:-?\d{4})?$/.exec(input.replace(/\s+/g, ""));
+  return match?.[1] ?? null;
+}
+
+/**
+ * Option-card copy. With distance bands the price depends on the address, so
+ * it reads as a range floor ("Delivery within 15 miles, from $3.00.") until
+ * the server prices the shopper's ZIP; the order summary then shows the real
+ * fee. Bands that all cost the same read exactly like a single fee.
+ */
+function deliveryOptionDescription(business: {
+  localDeliveryFeeCents: number;
+  localDeliveryRadiusMiles: number | null;
+  localDeliveryMinOrderCents: number | null;
+  localDeliveryBands?: unknown;
+}): string {
+  const radius = business.localDeliveryRadiusMiles;
+  const { minCents, maxCents } = localDeliveryFeeRange(
+    parseLocalDeliveryBands(business.localDeliveryBands, radius),
+    business.localDeliveryFeeCents,
+  );
+  const within =
+    radius != null && radius > 0
+      ? `within ${radius} ${radius === 1 ? "mile" : "miles"}`
+      : null;
+  const min = business.localDeliveryMinOrderCents;
+  const minimum =
+    min != null && min > 0 ? ` Orders over ${formatPrice(min)}.` : "";
+  if (minCents !== maxCents) {
+    const from = minCents > 0 ? formatPrice(minCents) : "Free";
+    const where = within ? ` ${within}` : " to nearby addresses";
+    return `Delivery${where}, from ${from}.${minimum}`;
+  }
+  const lead =
+    minCents > 0 ? `${formatPrice(minCents)} delivery` : "Free delivery";
+  const where = within ? ` ${within}.` : " to nearby addresses.";
+  return `${lead}${where}${minimum}`;
+}
+
+function localDeliveryMessage(
+  reason: string | undefined,
+  radiusMiles: number | null,
+  minOrderCents: number | null,
+): string {
+  switch (reason) {
+    case "out_of_range":
+      return radiusMiles != null
+        ? `We only deliver within ${radiusMiles} ${radiusMiles === 1 ? "mile" : "miles"}. Choose another option.`
+        : "We don't deliver to this address. Choose another option.";
+    case "below_minimum":
+      return minOrderCents != null
+        ? `Local delivery starts at ${formatPrice(minOrderCents)}.`
+        : LOCAL_DELIVERY_UNAVAILABLE;
+    case "unknown_zip":
+      return "We couldn't find that ZIP code.";
+    case "not_us":
+      return "Local delivery is only available in the US.";
+    default:
+      return LOCAL_DELIVERY_UNAVAILABLE;
+  }
+}
 
 // Stands in for the apply-discount handler when the coupons flag is off.
 const noopApplyDiscount = () => {
@@ -416,9 +531,45 @@ export function useCheckoutForm(
     setState("");
   };
 
-  const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">(
-    "ship",
-  );
+  const offersLocalDelivery = business.offersLocalDelivery === true;
+  const [chosenDeliveryMethod, setDeliveryMethod] =
+    useState<DeliveryMethod>("ship");
+  // A stale "delivery" choice (the owner switched it off, or a template set it
+  // without checking `deliveryOptions`) falls back to shipping rather than
+  // posting a method create-session will reject.
+  const deliveryMethod: DeliveryMethod =
+    chosenDeliveryMethod === "delivery" && !offersLocalDelivery
+      ? "ship"
+      : chosenDeliveryMethod;
+  const isDelivery = deliveryMethod === "delivery";
+  const needsAddress = deliveryMethod !== "pickup";
+
+  const deliveryOptions: DeliveryOption[] = [
+    {
+      id: "ship",
+      label: "Ship to address",
+      description: "Shipping cost is based on your store's shipping settings.",
+    },
+    ...(business.offersInStorePickup
+      ? [
+          {
+            id: "pickup" as const,
+            label: "In-store pickup",
+            description:
+              "No shipping charge. You'll pick up your order at the store.",
+          },
+        ]
+      : []),
+    ...(offersLocalDelivery
+      ? [
+          {
+            id: "delivery" as const,
+            label: "Local delivery",
+            description: deliveryOptionDescription(business),
+          },
+        ]
+      : []),
+  ];
 
   const discount = useDiscountCode();
   // When coupons are disabled, never let an applied/stale discount affect
@@ -444,6 +595,10 @@ export function useCheckoutForm(
     destinationCountry: string;
     deliveryMethod: "ship" | "pickup";
   } | null>(null);
+  // Local delivery is priced from store settings, never by `shipping.quote`;
+  // the zone+weight quote only runs for ship / pickup.
+  const zoneQuoteMethod: "ship" | "pickup" =
+    deliveryMethod === "pickup" ? "pickup" : "ship";
 
   // Whether the debounce timer is pending (input changed but not yet sent).
   const [quoteInputPending, setQuoteInputPending] = useState(false);
@@ -460,7 +615,7 @@ export function useCheckoutForm(
 
   // Debounce the quote input whenever cart/address/method changes (zone_weight only).
   useEffect(() => {
-    if (!isZoneWeight) return;
+    if (!isZoneWeight || isDelivery) return;
 
     setQuoteInputPending(true);
 
@@ -473,7 +628,7 @@ export function useCheckoutForm(
         items: quoteItems,
         destinationState: state,
         destinationCountry: country,
-        deliveryMethod,
+        deliveryMethod: zoneQuoteMethod,
       });
       setQuoteInputPending(false);
     }, QUOTE_DEBOUNCE_MS);
@@ -485,11 +640,19 @@ export function useCheckoutForm(
     };
     // quoteItems is captured via the stable quoteItemsKey below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isZoneWeight, quoteItemsKey, state, country, deliveryMethod]);
+  }, [
+    isZoneWeight,
+    isDelivery,
+    quoteItemsKey,
+    state,
+    country,
+    zoneQuoteMethod,
+  ]);
 
   // Only fire the tRPC query when we have a destination state and items.
   const quoteEnabled =
     isZoneWeight &&
+    !isDelivery &&
     !quoteInputPending &&
     debouncedQuoteInput !== null &&
     debouncedQuoteInput.items.length > 0 &&
@@ -511,6 +674,146 @@ export function useCheckoutForm(
   );
 
   // ──────────────────────────────────────────────────────────────────────────
+  // Local delivery eligibility (debounced server call, same shape as above)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const deliveryZip =
+    country === "US" ? normalizeUsZipClient(postalCode) : null;
+  const [debouncedDeliveryInput, setDebouncedDeliveryInput] = useState<{
+    items: { productId: string; variantId: string | null; quantity: number }[];
+    postalCode: string;
+    country: string;
+  } | null>(null);
+  const [deliveryInputPending, setDeliveryInputPending] = useState(false);
+  const deliveryDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!isDelivery || deliveryZip === null || quoteItems.length === 0) {
+      setDeliveryInputPending(false);
+      return;
+    }
+
+    setDeliveryInputPending(true);
+    if (deliveryDebounceTimerRef.current !== null) {
+      clearTimeout(deliveryDebounceTimerRef.current);
+    }
+    deliveryDebounceTimerRef.current = setTimeout(() => {
+      setDebouncedDeliveryInput({
+        items: quoteItems,
+        postalCode: deliveryZip,
+        country: "US",
+      });
+      setDeliveryInputPending(false);
+    }, QUOTE_DEBOUNCE_MS);
+
+    return () => {
+      if (deliveryDebounceTimerRef.current !== null) {
+        clearTimeout(deliveryDebounceTimerRef.current);
+      }
+    };
+    // quoteItems is captured via the stable quoteItemsKey.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDelivery, deliveryZip, quoteItemsKey]);
+
+  // The debounced input only counts while it still matches what's on screen —
+  // otherwise a result for the PREVIOUS ZIP could read as this one's.
+  const deliveryInputCurrent =
+    debouncedDeliveryInput !== null &&
+    debouncedDeliveryInput.postalCode === deliveryZip &&
+    JSON.stringify(debouncedDeliveryInput.items) === quoteItemsKey;
+
+  const deliveryQuery = api.shipping.checkLocalDelivery.useQuery(
+    debouncedDeliveryInput ?? {
+      items: [{ productId: "", variantId: null, quantity: 1 }],
+      postalCode: "",
+      country: "US",
+    },
+    {
+      enabled: isDelivery && !deliveryInputPending && deliveryInputCurrent,
+      // Eligibility is cheap and ZIP-specific: never show a stale answer.
+      retry: false,
+    },
+  );
+
+  const radiusMiles = business.localDeliveryRadiusMiles ?? null;
+  const minOrderCents = business.localDeliveryMinOrderCents ?? null;
+  const localDelivery: LocalDeliveryState = (() => {
+    const base = {
+      feeCents: business.localDeliveryFeeCents ?? 0,
+      instructions: business.localDeliveryInstructions ?? null,
+      radiusMiles,
+    };
+    if (!isDelivery) return { ...base, status: "idle", message: null };
+    if (country !== "US") {
+      return {
+        ...base,
+        status: "ineligible",
+        message: localDeliveryMessage("not_us", radiusMiles, minOrderCents),
+      };
+    }
+    if (deliveryZip === null || items.length === 0) {
+      return { ...base, status: "idle", message: null };
+    }
+    if (
+      deliveryInputPending ||
+      !deliveryInputCurrent ||
+      deliveryQuery.isFetching
+    ) {
+      return { ...base, status: "checking", message: null };
+    }
+    const data = deliveryQuery.data;
+    if (deliveryQuery.isError || !data) {
+      return {
+        ...base,
+        status: deliveryQuery.isError ? "ineligible" : "checking",
+        message: deliveryQuery.isError
+          ? "We couldn't check local delivery right now. Please try again."
+          : null,
+      };
+    }
+    // The server prices configured (customizer) lines at their base price, so
+    // its minimum check can read low. The cart subtotal here includes add-ons;
+    // create-session re-checks against the real server-priced subtotal anyway.
+    if (
+      !data.eligible &&
+      data.reason === "below_minimum" &&
+      minOrderCents != null &&
+      subtotal >= minOrderCents
+    ) {
+      // The server still prices the address (its distance band) on
+      // below_minimum — use that, not the radius-wide base fee.
+      return {
+        ...base,
+        feeCents: data.feeCents ?? base.feeCents,
+        status: "eligible",
+        message: null,
+      };
+    }
+    if (data.eligible) {
+      return {
+        ...base,
+        feeCents: data.feeCents ?? base.feeCents,
+        status: "eligible",
+        message: null,
+      };
+    }
+    return {
+      ...base,
+      status: "ineligible",
+      message: localDeliveryMessage(
+        data.reason,
+        radiusMiles,
+        data.minOrderCents ?? minOrderCents,
+      ),
+    };
+  })();
+
+  const addressLocked =
+    (isZoneWeight && deliveryMethod === "ship") || isDelivery;
+
+  // ──────────────────────────────────────────────────────────────────────────
   // Unified shipping value
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -518,7 +821,12 @@ export function useCheckoutForm(
   let isQuotingShipping: boolean;
   let shippingPending: boolean;
 
-  if (isZoneWeight) {
+  if (isDelivery) {
+    shipping = localDelivery.status === "eligible" ? localDelivery.feeCents : 0;
+    isQuotingShipping = localDelivery.status === "checking";
+    shippingPending =
+      localDelivery.status === "checking" || localDelivery.status === "idle";
+  } else if (isZoneWeight) {
     // Before the user has entered a state (and before any quote resolves),
     // use 0 as a placeholder so finalTotal renders. The UI should show
     // "Calculated at checkout" in place of the shipping dollar amount
@@ -542,7 +850,7 @@ export function useCheckoutForm(
   // create-session sets the real discount to the computed shipping cost. The
   // payload only carries the code id, so zeroing shipping here is display-only
   // and mirrors what Stripe will charge — no double-discount.
-  if (effectiveDiscountFreeShipping && deliveryMethod === "ship") {
+  if (effectiveDiscountFreeShipping && needsAddress) {
     shipping = 0;
     isQuotingShipping = false;
     shippingPending = false;
@@ -693,7 +1001,7 @@ export function useCheckoutForm(
         throw new Error("Please fill in all required contact fields");
       }
 
-      if (deliveryMethod === "ship") {
+      if (needsAddress) {
         const missingShippingFields = [
           addressLine1.trim() ? null : "addressLine1",
           city.trim() ? null : "city",
@@ -712,8 +1020,31 @@ export function useCheckoutForm(
               templateId,
             },
           });
-          throw new Error("Please fill in all required shipping fields");
+          throw new Error(
+            isDelivery
+              ? "Please fill in all required delivery fields"
+              : "Please fill in all required shipping fields",
+          );
         }
+      }
+
+      if (isDelivery && localDelivery.status !== "eligible") {
+        Sentry.addBreadcrumb({
+          category: "checkout",
+          level: "info",
+          message: "Checkout pre-check failed: local delivery not confirmed",
+          data: {
+            rule: "local-delivery-eligibility",
+            status: localDelivery.status,
+            templateId,
+          },
+        });
+        throw new Error(
+          localDelivery.message ??
+            (localDelivery.status === "checking"
+              ? "Still checking local delivery for your ZIP code. Please try again in a moment."
+              : "Enter your ZIP code to check local delivery."),
+        );
       }
 
       if (items.length === 0) {
@@ -748,18 +1079,17 @@ export function useCheckoutForm(
             ...(marketingOptInEnabled && acceptsMarketing
               ? { acceptsMarketing: true }
               : {}),
-            shippingAddress:
-              deliveryMethod === "ship"
-                ? {
-                    line1: addressLine1.trim(),
-                    line2: addressLine2.trim() || null,
-                    city: city.trim(),
-                    state: state.trim(),
-                    postalCode: postalCode.trim(),
-                    country,
-                    phone: phone.trim(),
-                  }
-                : null,
+            shippingAddress: needsAddress
+              ? {
+                  line1: addressLine1.trim(),
+                  line2: addressLine2.trim() || null,
+                  city: city.trim(),
+                  state: state.trim(),
+                  postalCode: postalCode.trim(),
+                  country,
+                  phone: phone.trim(),
+                }
+              : null,
           },
           discountCodeId: effectiveDiscountCodeId,
         }),
@@ -893,6 +1223,10 @@ export function useCheckoutForm(
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     couponsEnabled,
     discountCodeInput: discount.discountCodeInput,
     setDiscountCodeInput: discount.setDiscountCodeInput,

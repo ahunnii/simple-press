@@ -117,7 +117,7 @@ function OliveToc({
                 lineHeight: 1.4,
                 color:
                   activeId === h.id
-                    ? "var(--olive-ink)"
+                    ? "var(--olive-espresso)"
                     : "var(--olive-ink-soft)",
                 fontWeight: activeId === h.id ? 500 : 400,
               }}
@@ -128,8 +128,7 @@ function OliveToc({
                   width: 6,
                   height: 6,
                   flexShrink: 0,
-                  borderRadius: "999px",
-                  backgroundColor: "var(--olive-sage-bright)",
+                  backgroundColor: "var(--olive-moss)",
                   opacity: activeId === h.id ? 1 : 0,
                 }}
               />
@@ -149,7 +148,7 @@ function OliveToc({
  * as `ViiGenericPage`.
  *
  * The base every optional page is built on: `OlivePageBand` (cover photo +
- * edge-aligned title card, or the plain white title band) and
+ * edge-aligned title panel, or the plain ivory title band) and
  * `OlivePageSection` for the body, both on the page's one left edge.
  */
 export function OliveGenericPage({ page }: { page: Page }) {
@@ -168,7 +167,10 @@ export function OliveGenericPage({ page }: { page: Page }) {
       style={{ width: "100%", maxWidth: wide ? undefined : "68ch" }}
     >
       {isPolicy ? (
-        <p className="olive-caption" style={{ marginBottom: "2rem" }}>
+        <p
+          className="olive-label"
+          style={{ marginBottom: "2rem", color: "var(--olive-taupe-ink)" }}
+        >
           Last updated · {formatDate(page.updatedAt)}
         </p>
       ) : null}

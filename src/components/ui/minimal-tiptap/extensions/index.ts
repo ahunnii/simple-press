@@ -2,6 +2,7 @@ export * from "./code-block-lowlight";
 export * from "./columns";
 export * from "./color";
 export * from "./container-trailing-paragraph";
+export * from "./email-products";
 export * from "./embed";
 export * from "./file-handler";
 export * from "./form";

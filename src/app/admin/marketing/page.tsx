@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Palette, Plus } from "lucide-react";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
@@ -36,12 +36,20 @@ export default async function MarketingPage() {
             </p>
           </div>
           {emailMarketingEnabled && (
-            <Button asChild>
-              <Link href="/admin/marketing/campaigns/new">
-                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-                New campaign
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/admin/marketing/style">
+                  <Palette className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Email style
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/admin/marketing/campaigns/new">
+                  <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                  New campaign
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
 
@@ -60,6 +68,7 @@ export default async function MarketingPage() {
           <CampaignHistoryTable
             initialPage={firstPage}
             timeZone={business?.timeZone ?? "UTC"}
+            emailMarketingEnabled={emailMarketingEnabled}
           />
         </section>
       </div>

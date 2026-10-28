@@ -9,6 +9,7 @@ import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import {
+  buildNewsletterConfirmUrl,
   createNewsletterConfirmToken,
   verifyNewsletterConfirmToken,
 } from "~/lib/email/newsletter-confirm-token";
@@ -26,6 +27,7 @@ import {
 } from "~/lib/marketing/consent-log";
 import {
   NEWSLETTER_CONSENT_WORDING,
+  REPERMISSION_CONSENT_WORDING,
   RESUBSCRIBE_WORDING,
 } from "~/lib/marketing/consent-wording";
 import {
@@ -206,7 +208,7 @@ export const newsletterRouter = createTRPCRouter({
         customDomain: business.customDomain,
         domainStatus: business.domainStatus,
       });
-      const confirmUrl = `${baseUrl}/email-preferences?view=confirm&t=${encodeURIComponent(token)}`;
+      const confirmUrl = buildNewsletterConfirmUrl(baseUrl, token);
 
       const report = (err?: unknown) => {
         const context = {
@@ -269,22 +271,30 @@ export const newsletterRouter = createTRPCRouter({
       }
 
       const { e: email, f, l, iat } = verified.payload;
+      // A contact import's re-permission invite: the person never asked for
+      // that email, so its link opts in (as IMPORT_CONFIRM) but never lifts
+      // a block — not a bounce / complaint / provider suppression on the
+      // customer, and no do-not-email entry of any reason. The invite's send
+      // already skips all of those; this is the same rule at the door.
+      const isInvite = verified.payload.s === "imp";
+      const source = isInvite ? "IMPORT_CONFIRM" : "NEWSLETTER_FORM";
       const where = {
         businessId_email: { businessId: business.id, email },
       };
       const meta = consentRequestMeta(ctx.headers);
-      // Clicking the link proves current inbox access, which is the one
-      // thing allowed to lift a bounce / complaint suppression — on the
-      // customer row AND on the store's do-not-email list (any reason).
+      // Clicking the sign-up form's link proves current inbox access, which
+      // is the one thing allowed to lift a bounce / complaint suppression —
+      // on the customer row AND on the store's do-not-email list (any reason).
       const optIn = () =>
-        marketingOptInData("NEWSLETTER_FORM", { clearSuppression: true });
+        marketingOptInData(source, { clearSuppression: !isInvite });
 
       /**
        * Consent evidence for a confirm, in the caller's transaction. The
        * do-not-email entry is lifted on every confirm (it's a no-op when
        * absent); UNSUPPRESSED is logged only when something was actually
        * lifted (customer suppression or a list entry). OPT_IN is logged only
-       * by callers that really flip `acceptsMarketing`.
+       * by callers that really flip `acceptsMarketing`. Never called for an
+       * invite token (see `isInvite`).
        */
       const liftDoNotEmail = async (
         tx: TxClient,
@@ -308,13 +318,20 @@ export const newsletterRouter = createTRPCRouter({
           businessId: business.id,
           customerId,
           type: "OPT_IN",
-          source: "NEWSLETTER_FORM",
+          source,
           ip: meta.ip,
           userAgent: meta.userAgent,
-          wording: NEWSLETTER_CONSENT_WORDING,
+          wording: isInvite
+            ? REPERMISSION_CONSENT_WORDING
+            : NEWSLETTER_CONSENT_WORDING,
         });
+      /** Invite tokens only: any do-not-email entry refuses the confirm. */
+      const inviteBlocked = async (tx: TxClient) =>
+        isInvite && !!(await isOnDoNotEmailList(tx, business.id, email));
 
-      const applyExisting = (): Promise<"missing" | "stale" | "applied"> =>
+      const applyExisting = (): Promise<
+        "missing" | "stale" | "blocked" | "applied"
+      > =>
         ctx.db.$transaction(async (tx) => {
           const row = await tx.customer.findUnique({
             where,
@@ -324,6 +341,7 @@ export const newsletterRouter = createTRPCRouter({
               lastName: true,
               acceptsMarketing: true,
               marketingSuppressedAt: true,
+              marketingSuppressionReason: true,
               marketingUnsubscribedAt: true,
             },
           });
@@ -336,6 +354,9 @@ export const newsletterRouter = createTRPCRouter({
           ) {
             return "stale" as const;
           }
+          if (isInvite && (isSuppressed(row) || (await inviteBlocked(tx)))) {
+            return "blocked" as const;
+          }
           const names = {
             ...(f && !row.firstName ? { firstName: f } : {}),
             ...(l && !row.lastName ? { lastName: l } : {}),
@@ -345,9 +366,24 @@ export const newsletterRouter = createTRPCRouter({
             row.acceptsMarketing && !row.marketingSuppressedAt;
           const data = alreadyOptedIn ? names : { ...optIn(), ...names };
           if (Object.keys(data).length > 0) {
-            await tx.customer.update({ where: { id: row.id }, data });
+            if (isInvite) {
+              // Conditional, so a suppression landing in between still wins.
+              const { count } = await tx.customer.updateMany({
+                where: { id: row.id, marketingSuppressedAt: null },
+                data,
+              });
+              if (count === 0) return "blocked" as const;
+            } else {
+              await tx.customer.update({ where: { id: row.id }, data });
+            }
           }
-          await liftDoNotEmail(tx, row.id, row.marketingSuppressedAt !== null);
+          if (!isInvite) {
+            await liftDoNotEmail(
+              tx,
+              row.id,
+              row.marketingSuppressedAt !== null,
+            );
+          }
           if (!alreadyOptedIn) await logOptIn(tx, row.id);
           return "applied" as const;
         });
@@ -355,7 +391,8 @@ export const newsletterRouter = createTRPCRouter({
       let outcome = await applyExisting();
       if (outcome === "missing") {
         try {
-          await ctx.db.$transaction(async (tx) => {
+          outcome = await ctx.db.$transaction(async (tx) => {
+            if (await inviteBlocked(tx)) return "blocked" as const;
             const created = await tx.customer.create({
               data: {
                 businessId: business.id,
@@ -366,15 +403,20 @@ export const newsletterRouter = createTRPCRouter({
               },
               select: { id: true },
             });
-            await liftDoNotEmail(tx, created.id, false);
+            if (!isInvite) await liftDoNotEmail(tx, created.id, false);
             await logOptIn(tx, created.id);
+            return "applied" as const;
           });
-          outcome = "applied";
         } catch (err) {
           // Lost a race with an order / another confirm click: update instead.
           if (!isUniqueConstraintError(err)) throw err;
           outcome = await applyExisting();
         }
+      }
+      // The card tells them to sign up on the website instead, whose own
+      // double opt-in proves current inbox access.
+      if (outcome === "blocked") {
+        return { ok: false as const, reason: "suppressed" as const };
       }
       // Shown as the friendly "link has expired, sign up again" state.
       if (outcome === "stale") {

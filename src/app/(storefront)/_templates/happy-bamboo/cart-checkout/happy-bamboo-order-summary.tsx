@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import { formatPrice } from "~/lib/prices";
 import { Separator } from "~/components/ui/separator";
 import { CartLineOptions } from "~/components/customizer/cart-line-options";
 import { cartItemId, useCart } from "~/providers/cart-context";
 
 type OrderSummaryProps = {
-  deliveryMethod: "ship" | "pickup";
+  deliveryMethod: DeliveryMethod;
   discountAmount: number;
   // Authoritative shipping cost from the checkout hook (a live zone+weight
   // quote when applicable). The summary must not recompute it.
@@ -19,6 +20,9 @@ type OrderSummaryProps = {
   // True while a live rate is actively being fetched for a known destination
   // (show a spinner so the customer knows the amount is loading).
   shippingCalculating?: boolean;
+  // True when local delivery is selected but the customer is ineligible
+  // (show "Not available" instead of a misleading "Free").
+  deliveryUnavailable?: boolean;
 };
 
 export function HappyBambooOrderSummary({
@@ -27,6 +31,7 @@ export function HappyBambooOrderSummary({
   shipping,
   shippingPending,
   shippingCalculating,
+  deliveryUnavailable,
 }: OrderSummaryProps) {
   const { items, subtotal } = useCart();
   const effectiveShipping = deliveryMethod === "pickup" ? 0 : shipping;
@@ -76,7 +81,9 @@ export function HappyBambooOrderSummary({
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-muted-foreground">
+            {deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+          </span>
           {deliveryMethod === "pickup" ? (
             <span className="text-foreground">In-store pickup (free)</span>
           ) : shippingCalculating ? (
@@ -88,7 +95,13 @@ export function HappyBambooOrderSummary({
               Calculating…
             </span>
           ) : shippingPending ? (
-            <span className="text-foreground">Calculated at checkout</span>
+            <span className="text-foreground">
+              {deliveryMethod === "delivery"
+                ? "Enter your ZIP"
+                : "Calculated at checkout"}
+            </span>
+          ) : deliveryUnavailable ? (
+            <span className="text-muted-foreground">Not available</span>
           ) : shipping === 0 ? (
             <span className="text-foreground">Free</span>
           ) : (

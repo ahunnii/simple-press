@@ -36,8 +36,8 @@ function resolveVideoCopy(
 }
 
 /**
- * `/videos` — olive's video gallery on the generic base: the white
- * `OlivePageBand`, then a grid of paper cards in one `OlivePageSection` on
+ * `/videos` — olive's video gallery on the generic base: the
+ * `OlivePageBand`, then a grid of sand cards in one `OlivePageSection` on
  * the same left edge. Data logic is Default's videos page's:
  * `resolveVideoCopy` override precedence, one `VideoFacade` per video (no
  * iframe until clicked) and the designed empty state.
@@ -83,7 +83,6 @@ export function OliveVideosPage({
         ) : (
           <OliveRevealGroup
             threshold={0}
-            fan
             className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             {videos.map((video, i) => {

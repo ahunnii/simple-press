@@ -5,8 +5,8 @@
  * so the renderers are unit-testable without a database (and without Prisma
  * enums/Decimal leaking into the HTML layer).
  */
-import type { GalleryMap } from "~/lib/wordpress/tiptap-to-html";
 import type { MediaIndex, SiteExportBusiness } from "../types";
+import type { GalleryMap } from "~/lib/wordpress/tiptap-to-html";
 
 /** Lookup tables used to turn record ids stored inside template fields into names/links. */
 export interface ReadableRefs {
@@ -34,6 +34,8 @@ export interface RenderCtx {
 
 export interface ImageRef {
   url: string;
+  /** Absent = photo. Product galleries may hold videos. */
+  mediaType?: "IMAGE" | "VIDEO" | null;
   alt?: string | null;
   caption?: string | null;
 }
@@ -238,6 +240,16 @@ export interface SiteDetailsInput {
   offersInStorePickup: boolean;
   pickupLocation: string | null;
   pickupInstructions: string | null;
+  offersLocalDelivery: boolean;
+  localDeliveryOriginZip: string | null;
+  localDeliveryRadiusMiles: number | null;
+  localDeliveryFeeCents: number;
+  /** Closer prices inside the radius, nearest first (already parsed). */
+  localDeliveryBands: { upToMiles: number; feeCents: number }[];
+  localDeliveryMinOrderCents: number | null;
+  localDeliveryInstructions: string | null;
+  /** The ZIP on the business address, used when no delivery ZIP is set. */
+  addressPostalCode: string | null;
   siteContent: {
     heroTitle: string | null;
     heroSubtitle: string | null;

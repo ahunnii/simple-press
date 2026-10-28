@@ -21,7 +21,7 @@ export const oliveProductData: TemplateField[] = [
     key: "olive.global.product-shipping-description",
     label: "Shipping text",
     description:
-      "Shown in the 'Shipping' row on every product page. A link to your shipping policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
+      "Shown first in the 'Shipping & returns' panel on every product page. A link to your shipping policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
     type: "textarea",
     page: "product",
     group: "product.shipping",
@@ -33,7 +33,7 @@ export const oliveProductData: TemplateField[] = [
     key: "olive.global.product-returns-description",
     label: "Returns text",
     description:
-      "Shown in the 'Returns' row on every product page. A link to your returns policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
+      "Shown after the shipping text in the 'Shipping & returns' panel on every product page. A link to your returns policy is added automatically once that page is published. Leave this blank to show just the link — or hide the row entirely with its eye toggle if there's no policy either.",
     type: "textarea",
     page: "product",
     group: "product.returns",
@@ -43,7 +43,7 @@ export const oliveProductData: TemplateField[] = [
   },
   {
     key: "olive.global.product-question-text",
-    label: "\"Questions?\" line",
+    label: '"Questions?" line',
     description:
       "Short line under the accordion inviting a question; it links to the contact page. Leave blank to hide the row.",
     type: "text",
@@ -51,6 +51,17 @@ export const oliveProductData: TemplateField[] = [
     group: "product.questions",
     gridColumn: "col-span-full",
     defaultValue: "Not sure about the fit or shade? Ask us.",
+  },
+  {
+    key: "olive.global.product-size-fit",
+    label: "Size and fit",
+    description:
+      "Shown as the Size & fit panel on every product page. Leave blank to hide it.",
+    type: "textarea",
+    page: "product",
+    group: "product.details",
+    gridColumn: "col-span-full",
+    defaultValue: "",
   },
   {
     key: "olive.global.product-reviews-heading",

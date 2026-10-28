@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { createInvoiceToken } from "~/lib/invoices/token";
 
 import {
+  buildNewsletterConfirmUrl,
   createNewsletterConfirmToken,
+  IMPORT_INVITE_TOKEN_TTL_MS,
   verifyNewsletterConfirmToken,
 } from "./newsletter-confirm-token";
 import { createSignedToken } from "./signed-token";
@@ -163,5 +165,135 @@ describe("createNewsletterConfirmToken / verifyNewsletterConfirmToken", () => {
         reason: "invalid",
       });
     }
+  });
+
+  describe("re-permission invite tokens (s: imp)", () => {
+    it("round-trips s and a 30-day TTL", () => {
+      const token = createNewsletterConfirmToken(
+        {
+          businessId: "biz_1",
+          email: "a@b.co",
+          source: "imp",
+          ttlMs: IMPORT_INVITE_TOKEN_TTL_MS,
+          now: NOW,
+        },
+        SECRET,
+      );
+      expect(IMPORT_INVITE_TOKEN_TTL_MS).toBe(30 * DAY_MS);
+      expect(verifyNewsletterConfirmToken(token, NOW, SECRET)).toEqual({
+        ok: true,
+        payload: {
+          k: "nlc",
+          b: "biz_1",
+          e: "a@b.co",
+          s: "imp",
+          iat: NOW.getTime(),
+          exp: NOW.getTime() + 30 * DAY_MS,
+        },
+      });
+      expect(
+        verifyNewsletterConfirmToken(
+          token,
+          new Date(NOW.getTime() + 30 * DAY_MS - 1),
+          SECRET,
+        ),
+      ).toMatchObject({ ok: true });
+      expect(
+        verifyNewsletterConfirmToken(
+          token,
+          new Date(NOW.getTime() + 30 * DAY_MS + 1),
+          SECRET,
+        ),
+      ).toEqual({ ok: false, reason: "expired" });
+    });
+
+    it("leaves sign-up tokens without s and on the 7-day default", () => {
+      const token = createNewsletterConfirmToken(
+        { businessId: "biz_1", email: "a@b.co", now: NOW },
+        SECRET,
+      );
+      const result = verifyNewsletterConfirmToken(token, NOW, SECRET);
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.payload).not.toHaveProperty("s");
+        expect(result.payload.exp - result.payload.iat).toBe(7 * DAY_MS);
+      }
+    });
+
+    it("mints byte-identical tokens for the same inputs and fixed now", () => {
+      const mint = () =>
+        createNewsletterConfirmToken(
+          {
+            businessId: "biz_1",
+            email: "A@B.co",
+            source: "imp",
+            ttlMs: IMPORT_INVITE_TOKEN_TTL_MS,
+            now: NOW,
+          },
+          SECRET,
+        );
+      expect(mint()).toBe(mint());
+      expect(
+        createNewsletterConfirmToken(
+          {
+            businessId: "biz_1",
+            email: "a@b.co",
+            source: "imp",
+            ttlMs: IMPORT_INVITE_TOKEN_TTL_MS,
+            now: new Date(NOW.getTime() + 1),
+          },
+          SECRET,
+        ),
+      ).not.toBe(mint());
+    });
+
+    it("rejects an unknown s value and unknown keys, even when correctly signed", () => {
+      const base = {
+        k: "nlc",
+        b: "biz_1",
+        e: "a@b.co",
+        iat: NOW.getTime(),
+        exp: NOW.getTime() + DAY_MS,
+      };
+      for (const payload of [
+        { ...base, s: "form" },
+        { ...base, s: "imp", admin: true },
+        { ...base, src: "imp" },
+      ]) {
+        const token = createSignedToken(payload, SECRET, "nl-confirm:v1");
+        expect(verifyNewsletterConfirmToken(token, NOW, SECRET)).toEqual({
+          ok: false,
+          reason: "invalid",
+        });
+      }
+    });
+
+    it("can't be forged by adding s to a signed sign-up token", () => {
+      const token = createNewsletterConfirmToken(
+        { businessId: "biz_1", email: "a@b.co", now: NOW },
+        SECRET,
+      );
+      const dot = token.lastIndexOf(".");
+      const payload = JSON.parse(
+        Buffer.from(token.slice(0, dot), "base64url").toString("utf-8"),
+      ) as Record<string, unknown>;
+      const forged = `${Buffer.from(
+        JSON.stringify({
+          ...payload,
+          s: "imp",
+          exp: NOW.getTime() + 30 * DAY_MS,
+        }),
+      ).toString("base64url")}.${token.slice(dot + 1)}`;
+      expect(verifyNewsletterConfirmToken(forged, NOW, SECRET)).toEqual({
+        ok: false,
+        reason: "invalid",
+      });
+    });
+  });
+
+  it("buildNewsletterConfirmUrl matches the confirm page's query shape", () => {
+    expect(buildNewsletterConfirmUrl("https://shop.test", "abc.def")).toBe(
+      "https://shop.test/email-preferences?view=confirm&t=abc.def",
+    );
   });
 });

@@ -45,18 +45,18 @@ const globalBrandingData: TemplateField[] = [
     key: "olive.global.wordmark-tagline",
     label: "Wordmark tagline",
     description:
-      "Short line under the wordmark in the footer. Leave blank to hide.",
+      "Short line in tracked capitals under the wordmark at the top of the footer. Leave blank to hide it.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "",
+    defaultValue: "Style without compromise",
   },
   {
     key: "olive.global.footer-cta-heading",
-    label: "Heading",
+    label: "Note heading",
     description:
-      "Heading of the footer's call-to-action card. Leave the link blank to hide the whole card.",
+      "Heading of the short note on the left of the footer, above its link. Leave the link blank to hide the whole note (the Branding footer tagline shows instead).",
     type: "text",
     page: "global",
     group: "global.branding",
@@ -65,8 +65,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "olive.global.footer-cta-body",
-    label: "Body",
-    description: "One line under the footer call-to-action heading.",
+    label: "Note text",
+    description:
+      "One line under the footer note's heading. Leave blank to hide it.",
     type: "textarea",
     page: "global",
     group: "global.branding",
@@ -76,8 +77,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "olive.global.footer-cta-label",
-    label: "Button label",
-    description: "Label of the footer call-to-action button.",
+    label: "Link label",
+    description:
+      "Text of the arrow link under the footer note. Leave blank to hide the whole note.",
     type: "text",
     page: "global",
     group: "global.branding",
@@ -86,9 +88,9 @@ const globalBrandingData: TemplateField[] = [
   },
   {
     key: "olive.global.footer-cta-link",
-    label: "Button link",
+    label: "Link",
     description:
-      "Where the footer call-to-action button goes (an Instagram profile, a newsletter page, anything). Leave blank to hide the card.",
+      "Where the footer note's arrow link goes (an Instagram profile, a newsletter page, anything). Leave blank to hide the whole note.",
     type: "url",
     page: "global",
     group: "global.branding",
@@ -115,7 +117,8 @@ const globalAuthenticationData: TemplateField[] = [
   {
     key: "olive.global.logo-size-width",
     label: "Logo width",
-    description: "Width of the logo on the sign-in and sign-up screens.",
+    description:
+      "Width of your uploaded logo in the header and on the sign-in and sign-up screens (the header caps it to fit).",
     type: "number",
     page: "global",
     group: "global.authentication",
@@ -129,7 +132,8 @@ const globalAuthenticationData: TemplateField[] = [
   {
     key: "olive.global.logo-size-height",
     label: "Logo height",
-    description: "Height of the logo on the sign-in and sign-up screens.",
+    description:
+      "Height of your uploaded logo in the header and on the sign-in and sign-up screens (the header caps it to fit).",
     type: "number",
     page: "global",
     group: "global.authentication",
@@ -187,7 +191,7 @@ export const oliveFieldGroups: Record<string, TemplateFieldGroup[]> = {
       id: "global.branding",
       title: "Footer",
       description:
-        "Wordmark tagline and the footer call-to-action card. Footer tagline and social links live in Content → Branding.",
+        "Wordmark tagline and the short note with an arrow link on the left of the footer. Footer tagline and social links live in Content → Branding.",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,

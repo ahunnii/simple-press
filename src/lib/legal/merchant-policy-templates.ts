@@ -6,6 +6,7 @@ import {
   getAllowedCountries,
   US_STATES,
 } from "~/lib/geo/regions";
+import { parseLocalDeliveryBands } from "~/lib/local-delivery-bands";
 import { formatPrice } from "~/lib/prices";
 
 /**
@@ -29,6 +30,14 @@ export type PolicyBusiness = {
   offersInStorePickup: boolean;
   pickupLocation: string | null;
   pickupInstructions: string | null;
+  // Local delivery — optional so callers/fixtures that predate it still type.
+  offersLocalDelivery?: boolean;
+  localDeliveryRadiusMiles?: number | null;
+  localDeliveryFeeCents?: number | null;
+  /** Json column: closer prices inside the radius. */
+  localDeliveryBands?: unknown;
+  localDeliveryMinOrderCents?: number | null;
+  localDeliveryInstructions?: string | null;
   originState: string | null;
   businessHours: unknown;
   umamiEnabled: boolean;
@@ -45,6 +54,7 @@ export type PolicyVars = {
   shipsTo: string;
   shippingRates: string;
   pickup: string;
+  localDelivery: string;
   shipsFrom: string;
   shipsInternational: boolean;
   isZoneWeight: boolean;
@@ -154,6 +164,54 @@ export function formatPickupSection(
 We also offer free in-store pickup${locationText}. Look for pickup details at checkout and in your order confirmation email.${extraText}`;
 }
 
+export function formatLocalDeliverySection(
+  business: Pick<
+    PolicyBusiness,
+    | "offersLocalDelivery"
+    | "localDeliveryRadiusMiles"
+    | "localDeliveryFeeCents"
+    | "localDeliveryBands"
+    | "localDeliveryMinOrderCents"
+    | "localDeliveryInstructions"
+  >,
+): string {
+  const radius = business.localDeliveryRadiusMiles;
+  if (!business.offersLocalDelivery || !radius) return "";
+
+  const fee = business.localDeliveryFeeCents ?? 0;
+  const bands = parseLocalDeliveryBands(business.localDeliveryBands, radius);
+  const money = (cents: number) =>
+    cents > 0 ? `$${(cents / 100).toFixed(2)}` : "free";
+  const miles = (n: number) => `${n} ${n === 1 ? "mile" : "miles"}`;
+  let feeText: string;
+  if (bands.length > 0) {
+    // Nearest first: "free within 5 miles, $3.00 within 10 miles, and $5.00
+    // beyond that".
+    const parts = [
+      ...bands.map((b) => `${money(b.feeCents)} within ${miles(b.upToMiles)}`),
+      `${money(fee)} beyond that`,
+    ];
+    const list =
+      parts.length === 2
+        ? parts.join(" and ")
+        : `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`;
+    feeText = `Local delivery pricing depends on distance: ${list}`;
+  } else {
+    feeText =
+      fee > 0
+        ? `Local delivery costs $${(fee / 100).toFixed(2)}`
+        : "Local delivery is free";
+  }
+  const minimum = business.localDeliveryMinOrderCents ?? 0;
+  const minimumText =
+    minimum > 0 ? `, on orders of $${(minimum / 100).toFixed(2)} or more` : "";
+  const instructions = blankToNull(business.localDeliveryInstructions);
+
+  return `## Local Delivery
+
+We deliver orders ourselves to customers within about ${radius} ${radius === 1 ? "mile" : "miles"} of us. ${feeText}${minimumText}. Distance is estimated from ZIP codes, so it is approximate near the edge of our delivery area. Local delivery appears at checkout when your address is in range.${instructions ? ` ${instructions}` : ""}`;
+}
+
 function formatDonationProcessors(business: PolicyBusiness): string {
   const { isEnabled } = resolveFlags(business.featureFlags);
   if (!isEnabled("donations")) return "";
@@ -195,6 +253,7 @@ export function buildPolicyVars(business: PolicyBusiness): PolicyVars {
   const law = formatGoverningLaw(business.addressState);
   const origin = stateName(business.originState);
   const pickup = formatPickupSection(business);
+  const localDelivery = formatLocalDeliverySection(business);
   const supportEmail =
     blankToNull(business.supportEmail) ??
     blankToNull(business.ownerEmail) ??
@@ -208,6 +267,7 @@ export function buildPolicyVars(business: PolicyBusiness): PolicyVars {
     shipsTo: formatShipsTo(countries),
     shippingRates: formatShippingRates(business),
     pickup,
+    localDelivery,
     shipsFrom: origin ? `Orders ship from ${origin}.` : "",
     shipsInternational: countries.some((c) => c === "CA" || c === "MX"),
     isZoneWeight: business.shippingType === "zone_weight",
@@ -496,6 +556,7 @@ function shippingMarkdown(v: PolicyVars): string {
     return sections(
       `This store does not currently offer shipped product orders. If that changes, we will update this page.`,
       v.pickup,
+      v.localDelivery,
       `## Contact Us
 
 Shipping questions? We're happy to help — reach us at ${v.email}.${contactDetailsSuffix(v)}`,
@@ -536,6 +597,8 @@ Once your order ships, you will receive a confirmation email with your tracking 
 If your tracking shows your package has been delivered but you have not received it, please check with neighbors and your local post office first. If the package is confirmed lost, contact us within [X] days of the expected delivery date and we will work with the carrier to investigate and make it right.`,
 
     v.pickup,
+
+    v.localDelivery,
 
     `## Contact Us
 

@@ -11,7 +11,7 @@ import {
   getAccountNavLinks,
 } from "~/app/(storefront)/_components/nav";
 
-import { OliveBreadcrumb, OliveChip, OliveSection } from "../shared";
+import { OliveBreadcrumb, OliveSection } from "../shared";
 
 type Props = {
   children: ReactNode;
@@ -21,11 +21,10 @@ type Props = {
 
 /**
  * OliveAccountLayout — the shared shell for Settings, Security, Address Book,
- * Orders, Preferences and Subscriptions: a slate band hero (h1 + breadcrumb,
- * no eyebrow — the craft floor bans kickers), then a `[220px_1fr]`
- * slate-tint-sidebar + content grid on desktop, horizontally scrolling pill
- * tabs on mobile. The active sidebar item carries a small leaf-coloured
- * `OliveChip`. The outermost wrapper is `olive-account`, the shadcn bridge
+ * Orders, Preferences and Subscriptions: an espresso band hero (Bodoni h1 +
+ * breadcrumb), then a `[220px_1fr]` sand sidebar + content grid on desktop,
+ * horizontally scrolling square tabs on mobile. The active item is marked by
+ * an ivory face and heavier type. The outermost wrapper is `olive-account`, the shadcn bridge
  * the chrome CSS block already declares for the better-auth-ui cards and the
  * shared `AddressBookContent` / `PreferencesContent`.
  *
@@ -41,7 +40,7 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
 
   return (
     <div className="olive-account">
-      <OliveSection tone="slate" bleed>
+      <OliveSection tone="espresso" bleed>
         <div>
           <h1 className="olive-h1" style={{ margin: 0 }}>
             {heading}
@@ -56,7 +55,7 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
       </OliveSection>
 
       <OliveSection>
-        {/* Mobile: horizontally scrolling pill tabs */}
+        {/* Mobile: horizontally scrolling square tabs */}
         <nav aria-label="Account navigation" className="mb-8 md:hidden">
           <ul
             role="list"
@@ -69,15 +68,17 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className="olive-label inline-flex items-center rounded-full border px-4 py-2 whitespace-nowrap"
+                    className="olive-label inline-flex min-h-11 items-center border px-4 py-2 whitespace-nowrap"
                     style={{
                       backgroundColor: active
-                        ? "var(--olive-sage)"
-                        : "var(--olive-paper)",
+                        ? "var(--olive-espresso)"
+                        : "transparent",
                       borderColor: active
-                        ? "var(--olive-sage)"
+                        ? "var(--olive-espresso)"
                         : "var(--olive-hairline-strong)",
-                      color: active ? "var(--olive-white)" : "var(--olive-ink)",
+                      color: active
+                        ? "var(--olive-on-dark)"
+                        : "var(--olive-espresso)",
                     }}
                   >
                     {item.label}
@@ -88,15 +89,14 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
           </ul>
         </nav>
 
-        {/* Desktop: slate-tint sidebar + content */}
+        {/* Desktop: sand sidebar + content */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[220px_1fr]">
           <nav aria-label="Account navigation" className="hidden md:block">
             <ul
               role="list"
               className="m-0 flex list-none flex-col gap-1 p-0"
               style={{
-                backgroundColor: "var(--olive-slate-tint)",
-                borderRadius: "var(--olive-card-radius)",
+                backgroundColor: "var(--olive-sand)",
                 padding: "0.75rem",
               }}
             >
@@ -107,33 +107,15 @@ export function OliveAccountLayout({ children, heading, breadcrumb }: Props) {
                     <Link
                       href={item.href}
                       aria-current={active ? "page" : undefined}
-                      className="flex items-center gap-2 rounded-[var(--olive-card-radius)] px-3 py-2 text-sm"
+                      className="olive-label flex items-center px-3 py-3"
                       style={{
-                        fontFamily: "var(--olive-font-body)",
-                        fontWeight: active ? 600 : 400,
-                        color: "var(--olive-ink)",
+                        fontWeight: active ? 600 : 500,
+                        color: "var(--olive-espresso)",
                         backgroundColor: active
-                          ? "var(--olive-white)"
+                          ? "var(--olive-ivory)"
                           : "transparent",
                       }}
                     >
-                      {active ? (
-                        <OliveChip
-                          color="var(--olive-leaf)"
-                          label={item.label}
-                          size={8}
-                          srOnlyLabel={false}
-                        />
-                      ) : (
-                        <span
-                          aria-hidden
-                          style={{
-                            display: "inline-block",
-                            width: 8,
-                            height: 8,
-                          }}
-                        />
-                      )}
                       {item.label}
                     </Link>
                   </li>

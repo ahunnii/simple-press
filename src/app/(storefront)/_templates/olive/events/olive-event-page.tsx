@@ -21,7 +21,7 @@ function firstFilled(...candidates: (string | null | undefined)[]): string {
 /**
  * `/events/<slug>` — single-event detail on olive's generic base.
  *
- * The band is the generic page's white `OlivePageBand`: a breadcrumb back to
+ * The band is the generic page's `OlivePageBand`: a breadcrumb back to
  * the Events page (its first crumb is the Events page heading), the event
  * name as the page's only h1, and the date / location / past-event note
  * underneath. The body carries Default's event detail page's data logic —
@@ -77,10 +77,9 @@ export function OliveEventPage({
               className="olive-label"
               style={{
                 padding: "0.375rem 0.75rem",
-                backgroundColor: "var(--olive-paper)",
+                backgroundColor: "var(--olive-sand)",
                 border: "1px solid var(--olive-hairline-strong)",
-                borderRadius: "999px",
-                color: "var(--olive-ink)",
+                color: "var(--olive-espresso)",
               }}
             >
               This event has passed
@@ -89,7 +88,7 @@ export function OliveEventPage({
           <time
             dateTime={eventDateTimeAttr(event, timeZone)}
             className="olive-label"
-            style={{ color: "var(--olive-leaf)" }}
+            style={{ color: "var(--olive-moss-deep)" }}
           >
             {formatEventDate(event, timeZone, { showZone: true })}
           </time>
@@ -101,7 +100,7 @@ export function OliveEventPage({
               <MapPin
                 aria-hidden="true"
                 className="mt-0.5 h-4 w-4 shrink-0"
-                style={{ color: "var(--olive-leaf)" }}
+                style={{ color: "var(--olive-moss-deep)" }}
               />
               {event.location}
             </p>
@@ -142,7 +141,7 @@ export function OliveEventPage({
               >
                 {event.blurb ? (
                   <p
-                    className="text-base leading-relaxed"
+                    className="text-base leading-[1.7]"
                     style={{
                       color: "var(--olive-ink-soft)",
                       whiteSpace: "pre-line",
@@ -159,7 +158,7 @@ export function OliveEventPage({
                     ) : null}
                     {event.externalUrl ? (
                       <OliveButton
-                        variant="primary"
+                        variant="solid"
                         href={event.externalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -180,7 +179,7 @@ export function OliveEventPage({
                   logoUrl={business.siteContent?.logoUrl}
                   size="lg"
                   className="mt-1"
-                  tileClassName="rounded-[var(--olive-card-radius)] border border-[var(--olive-hairline)]"
+                  tileClassName="rounded-none border border-[var(--olive-hairline)]"
                   captionClassName="olive-caption"
                 />
               </div>

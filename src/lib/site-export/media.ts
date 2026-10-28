@@ -33,6 +33,7 @@ import type { DownloadedObject } from "~/lib/s3/download";
 import type { ListedObject, MediaKind } from "~/lib/s3/list";
 import type { TemplateField } from "~/lib/template-fields";
 import { normalizeUrl } from "~/lib/media/usage";
+import { isVideoMedia } from "~/lib/products/media";
 import { chunkedAsync, downloadStoredObjects } from "~/lib/s3/download";
 import { listBusinessObjects } from "~/lib/s3/list";
 import { isStorageUrl, keyToPublicUrl, publicUrlToKey } from "~/lib/s3/url";
@@ -631,7 +632,10 @@ export async function collectMediaReferences(
         ogImage: true,
         description: true,
         additionalFields: true,
-        images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
+        images: {
+          orderBy: { sortOrder: "asc" },
+          select: { url: true, mediaType: true, posterUrl: true },
+        },
         variants: { select: { imageUrl: true } },
       },
     }),
@@ -746,7 +750,24 @@ export async function collectMediaReferences(
       groupKey: p.id,
       groupName: p.name,
     };
-    for (const img of p.images) push(img.url, { ...g, isImageField: true });
+    let videoN = 0;
+    for (const img of p.images) {
+      if (isVideoMedia(img)) {
+        // Product videos (and their still frames) are filed in the Videos
+        // folder, named after the product, so owners find them with their
+        // other videos rather than numbered among the product's photos.
+        videoN++;
+        const stem = safeName(`${p.name} - video ${videoN}`);
+        push(img.url, { category: "videos", label: stem });
+        push(img.posterUrl, {
+          category: "videos",
+          label: `${stem} - poster`,
+          isImageField: true,
+        });
+      } else {
+        push(img.url, { ...g, isImageField: true });
+      }
+    }
     for (const v of p.variants) push(v.imageUrl, { ...g, isImageField: true });
     push(p.ogImage, { ...g, isImageField: true });
     walk(p.description, g);

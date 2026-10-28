@@ -24,6 +24,7 @@
  */
 
 import type { TemplateField } from "~/lib/template-fields";
+import { isVideoMedia } from "~/lib/products/media";
 import { isStorageUrl, STORAGE_BASE } from "~/lib/s3/url";
 import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
@@ -984,19 +985,37 @@ async function scanMediaReferences(
       where: {
         OR: [{ businessId }, { product: { businessId } }],
       },
-      select: { id: true, url: true, productId: true },
+      select: {
+        id: true,
+        url: true,
+        productId: true,
+        mediaType: true,
+        posterUrl: true,
+      },
     })
     .then((images) => {
       for (const img of images) {
+        const isVideo = isVideoMedia(img);
         addUsage(map, img.url, {
           url: img.url,
-          location: "Product image",
+          location: isVideo ? "Product video" : "Product image",
           entityType: "image",
           entityId: img.id,
           adminHref: img.productId
             ? `/admin/products/${img.productId}`
             : undefined,
         });
+        if (img.posterUrl) {
+          addUsage(map, img.posterUrl, {
+            url: img.posterUrl,
+            location: "Product video poster",
+            entityType: "image",
+            entityId: img.id,
+            adminHref: img.productId
+              ? `/admin/products/${img.productId}`
+              : undefined,
+          });
+        }
       }
     });
 

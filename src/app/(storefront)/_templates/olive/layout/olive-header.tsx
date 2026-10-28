@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,7 +29,6 @@ import {
 } from "~/app/(storefront)/_components/nav";
 import { useSiteSearch } from "~/app/(storefront)/_components/search";
 
-import { oliveChipToken } from "../shared/olive-color";
 import { OliveCartButton } from "./olive-cart-button";
 import { oliveActiveItemIndex, oliveShopPanelIndex } from "./olive-nav";
 import { OliveNavOverlay } from "./olive-nav-overlay";
@@ -40,6 +39,11 @@ type OliveHeaderProps = DefaultHeaderTemplateProps & {
   /** Owner nav (or `OLIVE_DEFAULT_NAV`), already flag-filtered by the
    *  layout. The same array feeds the overlay and the footer. */
   navItems: NavItem[];
+  /** `olive.global.logo-size-width/height` (px), resolved by the layout.
+   *  The uploaded logo's box; capped by `.olive-header-logo` so an
+   *  oversized value can never blow out the header row. */
+  logoWidth?: number;
+  logoHeight?: number;
 };
 
 /** Icons for the desktop `UserButton` menu, keyed by `getAccountNavLinks` key. */
@@ -54,10 +58,11 @@ function externalHint(external?: boolean) {
 }
 
 /**
- * White, sticky, one hairline at the bottom — the counter the swatch book sits
- * on. Three columns from 1024px up: nav left, the tracked wordmark dead
- * centre, the icon cluster right. Below that the nav collapses into a
- * hamburger that opens `OliveNavOverlay`.
+ * Ivory, sticky, one hairline at the bottom (design.md § First viewport). One
+ * row: the wordmark left, the tracked-caps nav straight after it from 1024px
+ * up, the icon cluster (search, account, wishlist, bag) far right. Below
+ * 1024px the nav collapses into a hamburger, left of the wordmark, that opens
+ * `OliveNavOverlay`.
  *
  * The nav is the owner's (Admin → Content → Navigation) or olive's shipped
  * default, flag-filtered once by the layout. The item whose href is `/shop`
@@ -75,6 +80,8 @@ export function OliveHeader({
   initialSession,
   collections = [],
   navItems,
+  logoWidth = 120,
+  logoHeight = 40,
 }: OliveHeaderProps) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
@@ -251,7 +258,7 @@ export function OliveHeader({
         className="olive-nav-link"
         aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-controls={panelIdFor(index)}
+        aria-controls={isOpen ? panelIdFor(index) : undefined}
         data-current={current ? "true" : undefined}
         onClick={() => onTriggerClick(index, isOpen)}
         onKeyDown={(event) => {
@@ -263,6 +270,7 @@ export function OliveHeader({
       >
         {item.label}
         <ChevronDown
+          strokeWidth={1.5}
           className={cn(
             "h-3 w-3",
             !reduced && "transition-transform duration-200",
@@ -278,7 +286,6 @@ export function OliveHeader({
     entry: NavChild,
     key: string,
     active: boolean,
-    chip?: ReactNode,
   ) => (
     <li key={key}>
       <Link
@@ -289,7 +296,6 @@ export function OliveHeader({
         aria-current={active ? "page" : undefined}
         onClick={closeDropdown}
       >
-        {chip}
         {entry.label}
         {externalHint(entry.external)}
       </Link>
@@ -327,26 +333,18 @@ export function OliveHeader({
         {openIndex === index ? (
           <div
             id={panelIdFor(index)}
-            className="absolute top-full left-0 z-20 pt-3"
+            className="olive-dropdown-anchor absolute top-full left-0 z-20"
           >
             <div className="olive-dropdown">
               {collectionEntries.length > 0 ? (
                 <>
-                  <ul className="m-0 grid list-none grid-cols-2 gap-x-3 p-0">
+                  <p className="olive-dropdown-title">Collections</p>
+                  <ul className="m-0 grid list-none grid-cols-2 gap-x-6 p-0">
                     {collectionEntries.map((entry, j) =>
                       renderDropdownLink(
                         entry,
                         navCollections[j]!.id,
                         j === activeEntry,
-                        <span
-                          className="olive-chip"
-                          style={{
-                            backgroundColor: oliveChipToken(j),
-                            width: "0.75rem",
-                            height: "0.75rem",
-                          }}
-                          aria-hidden="true"
-                        />,
                       ),
                     )}
                   </ul>
@@ -354,7 +352,7 @@ export function OliveHeader({
                 </>
               ) : null}
 
-              <ul className="m-0 grid list-none grid-cols-2 gap-x-3 p-0">
+              <ul className="m-0 grid list-none grid-cols-2 gap-x-6 p-0">
                 {footEntries.map((entry, j) =>
                   renderDropdownLink(
                     entry,
@@ -385,9 +383,9 @@ export function OliveHeader({
         {openIndex === index ? (
           <div
             id={panelIdFor(index)}
-            className="absolute top-full left-0 z-20 pt-3"
+            className="olive-dropdown-anchor absolute top-full left-0 z-20"
           >
-            <div className="olive-dropdown" style={{ minWidth: "13rem" }}>
+            <div className="olive-dropdown olive-dropdown-narrow">
               <ul className="m-0 flex list-none flex-col p-0">
                 {entries.map((entry, j) =>
                   renderDropdownLink(
@@ -423,19 +421,27 @@ export function OliveHeader({
     );
   };
 
+  // Uploaded logo wins; its box is the owner's logo size (capped in CSS).
+  // Otherwise the business name as the Bodoni caps wordmark, truncated
+  // rather than wrapped so a long name can't push the icons off a phone.
+  const logoBoxStyle = {
+    "--olive-logo-w": `${logoWidth}px`,
+    "--olive-logo-h": `${logoHeight}px`,
+  } as CSSProperties;
+
   const wordmark = logoUrl ? (
-    <span className="relative block h-9 w-32 lg:h-11 lg:w-40">
+    <span className="olive-header-logo" style={logoBoxStyle}>
       <Image
         src={logoUrl}
         alt={logoAlt}
         fill
-        sizes="(min-width: 1024px) 160px, 128px"
-        className="object-contain"
+        sizes={`${Math.min(logoWidth, 320)}px`}
+        className="object-contain object-left"
         priority
       />
     </span>
   ) : (
-    <span className="olive-wordmark text-[0.8125rem] lg:text-[1rem]">
+    <span className="olive-wordmark block min-w-0 truncate">
       {businessName}
     </span>
   );
@@ -444,46 +450,45 @@ export function OliveHeader({
     <>
       <header className="olive-header">
         <div
-          className="mx-auto grid w-full [grid-template-columns:minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-[var(--olive-section-pad-x)]"
+          className="mx-auto flex w-full items-center gap-2 px-[var(--olive-section-pad-x)] lg:gap-10 xl:gap-14"
           style={{
             maxWidth: "var(--olive-container)",
             minHeight: "var(--olive-header-h)",
           }}
         >
-          {/* ── Left: hamburger (mobile) / nav (desktop) ── */}
-          <div className="flex min-w-0 items-center">
-            <button
-              ref={burgerRef}
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              className="olive-icon-btn olive-d-hide -ml-2 lg:hidden"
-              aria-label="Menu"
-              aria-haspopup="dialog"
-              aria-expanded={menuOpen}
-              aria-controls={mobileMenuId}
-            >
-              <Menu className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-            </button>
+          {/* ── Hamburger (below 1024px) ── */}
+          <button
+            ref={burgerRef}
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="olive-icon-btn olive-d-hide -ml-3 shrink-0 lg:hidden"
+            aria-label="Menu"
+            aria-haspopup="dialog"
+            aria-expanded={menuOpen}
+            aria-controls={menuOpen ? mobileMenuId : undefined}
+          >
+            <Menu className="h-5 w-5" strokeWidth={1.25} aria-hidden="true" />
+          </button>
 
-            <nav
-              className="hidden flex-wrap items-center gap-x-5 gap-y-1 lg:flex xl:gap-x-7"
-              aria-label="Primary navigation"
-            >
-              {navItems.map(renderNavItem)}
-            </nav>
-          </div>
-
-          {/* ── Centre: wordmark ── */}
+          {/* ── Wordmark, left ── */}
           <Link
             href="/"
             aria-label={`${businessName} — Home`}
-            className="flex items-center justify-self-center"
+            className="flex min-w-0 shrink items-center"
           >
             {wordmark}
           </Link>
 
+          {/* ── Nav, straight after the wordmark (desktop) ── */}
+          <nav
+            className="hidden min-w-0 flex-1 flex-wrap items-center gap-x-6 gap-y-1 lg:flex xl:gap-x-8"
+            aria-label="Primary navigation"
+          >
+            {navItems.map(renderNavItem)}
+          </nav>
+
           {/* ── Right: search, account, wishlist, bag ── */}
-          <div className="flex items-center justify-end">
+          <div className="-mr-3 ml-auto flex shrink-0 items-center justify-end">
             {productsEnabled || siteSearch.enabled ? (
               <Link
                 href="/shop"
@@ -500,7 +505,7 @@ export function OliveHeader({
               >
                 <Search
                   className="h-[18px] w-[18px]"
-                  strokeWidth={1.5}
+                  strokeWidth={1.25}
                   aria-hidden="true"
                 />
               </Link>
@@ -509,14 +514,19 @@ export function OliveHeader({
             {accountsEnabled ? (
               <div className="hidden items-center sm:flex">
                 {isPending ? (
+                  // Holds the account slot while the session settles: the
+                  // same 44px square and a faded icon, so nothing shifts.
                   <span
-                    className="mx-3 h-7 w-7 animate-pulse rounded-full"
-                    style={{ background: "var(--olive-paper)" }}
-                  />
+                    className="olive-icon-btn opacity-40"
+                    aria-hidden="true"
+                  >
+                    <User className="h-[18px] w-[18px]" strokeWidth={1.25} />
+                  </span>
                 ) : session?.user ? (
+                  // A 44px square trigger around the 28px avatar.
                   <UserButton
                     size="icon"
-                    className="mx-2 h-auto w-auto rounded-full p-0"
+                    className="flex size-11 items-center justify-center rounded-none p-0"
                     avatarClassName="size-7"
                     links={userButtonLinks}
                   />
@@ -528,7 +538,7 @@ export function OliveHeader({
                   >
                     <User
                       className="h-[18px] w-[18px]"
-                      strokeWidth={1.5}
+                      strokeWidth={1.25}
                       aria-hidden="true"
                     />
                   </Link>
@@ -548,7 +558,7 @@ export function OliveHeader({
               >
                 <Heart
                   className="h-[18px] w-[18px]"
-                  strokeWidth={1.5}
+                  strokeWidth={1.25}
                   aria-hidden="true"
                 />
                 {wishlistCount > 0 ? (
@@ -559,7 +569,7 @@ export function OliveHeader({
               </Link>
             ) : null}
 
-            {cartEnabled ? <OliveCartButton className="-mr-2" /> : null}
+            {cartEnabled ? <OliveCartButton /> : null}
           </div>
         </div>
       </header>

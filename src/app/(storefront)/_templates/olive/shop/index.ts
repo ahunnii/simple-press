@@ -2,7 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 // ─── Shop: Intro, toolbar and grid ───────────────────────────────────────────
-// The page title, the one line under it, and the copy the ghost card shows when
+// The page title, the one line under it, and the copy the empty-state panel shows when
 // the grid comes back empty. Two empty cases, because they need two different
 // answers: a store with nothing published yet, and a filter that matched
 // nothing.
@@ -34,7 +34,7 @@ const shopIntroData: TemplateField[] = [
     key: "olive.shop.empty-heading",
     label: "Empty shop heading",
     description:
-      "Shown on the ghost card when the shop has no published products at all.",
+      "Shown in the empty-state panel when the shop has no published products at all.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -56,7 +56,7 @@ const shopIntroData: TemplateField[] = [
     key: "olive.shop.no-results-heading",
     label: "No matches heading",
     description:
-      "Shown on the ghost card when the shopper's filters match nothing.",
+      "Shown in the empty-state panel when the shopper's filters match nothing.",
     type: "text",
     page: "shop",
     group: "shop.intro",
@@ -77,9 +77,9 @@ const shopIntroData: TemplateField[] = [
 ];
 
 // ─── Shop: Promo band ────────────────────────────────────────────────────────
-// Two tiles below the grid — a photograph and a short pitch — or, with the
+// A photograph beside a short pitch below the grid — or, with the
 // takeover switch on and a real photo uploaded, the photograph running the
-// full width of the page with the copy on a card in its corner.
+// full width of the page with the copy printed on it under a dark scrim.
 // Hideable: a store that has nothing to cross-sell should not invent one.
 
 const shopPromoData: TemplateField[] = [
@@ -87,7 +87,7 @@ const shopPromoData: TemplateField[] = [
     key: "olive.shop.promo-takeover",
     label: "Full-photo takeover",
     description:
-      "On: the promo photo fills the width of the page with the copy on a card in its corner. Off: a photo-and-text band. Needs a photo to take effect.",
+      "On: the promo photo fills the width of the page with the copy printed on it. Off: a photo-and-text band. Needs a photo to take effect.",
     type: "boolean",
     page: "shop",
     group: "shop.promo",
@@ -168,8 +168,8 @@ export const oliveShopFieldGroups: TemplateFieldGroup[] = [
     id: "shop.promo",
     title: "Promo",
     description:
-      "Photo-and-text band below the product grid, or a full-photo takeover with the copy on a card in its corner — the button can point anywhere: rewards, a collection, an event",
-    icon: "🌿",
+      "Photo-and-text band below the product grid, or a full-photo takeover with the copy on the photo — the button can point anywhere: rewards, a collection, an event",
+    icon: "🖼️",
     columns: 2,
   },
 ];

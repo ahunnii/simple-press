@@ -3,6 +3,7 @@ import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 
 import type { CustomizationSnapshot } from "~/lib/customizer/types";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { DbClient, TxClient } from "~/server/db";
 import {
   LINE_CONFIG_METADATA_KEY,
@@ -206,7 +207,7 @@ export type CreateOrderParams = {
   fullSession: Stripe.Checkout.Session;
   verifiedDiscountCodeId: string | null;
   discountAmount: number;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
   /**
    * Merchant-terms acceptance, captured at checkout — see the `Order` model
    * docblock in schema.prisma. All optional/nullable: callers that don't

@@ -13,8 +13,10 @@ import {
   Truck,
 } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { Session } from "~/server/better-auth/config";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatCurrency } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -29,14 +31,14 @@ import {
 } from "~/app/(storefront)/_components/checkout/payment-status";
 
 /** `session.metadata.deliveryMethod` as returned by `/api/stripe/session`. */
-type DeliveryMethod = "ship" | "pickup" | null;
+type OrderDeliveryMethod = DeliveryMethod | null;
 
 type OrderDetails = {
   customer_email: string | null;
   amount_total: number | null;
   currency: string | null;
   payment_status: string;
-  delivery_method: DeliveryMethod;
+  delivery_method: OrderDeliveryMethod;
 };
 
 /**
@@ -201,6 +203,8 @@ export function PollenOrderConfirmation({
   }, [sessionId, clearCart]);
 
   const deliveryMethod = orderDetails?.delivery_method ?? null;
+  // Local delivery has no tracking promise, so it takes the general
+  // "order updates" line below rather than the shipping one.
   const fulfilmentStep: Step =
     deliveryMethod === "pickup"
       ? {
@@ -243,8 +247,8 @@ export function PollenOrderConfirmation({
   const deliveryLabel =
     deliveryMethod === "pickup"
       ? "In-store pickup"
-      : deliveryMethod === "ship"
-        ? "Shipping"
+      : deliveryMethod === "ship" || deliveryMethod === "delivery"
+        ? deliveryMethodLabel(deliveryMethod)
         : null;
   const hasDetails = [total, email, deliveryLabel].some(Boolean);
 

@@ -58,7 +58,7 @@ export function OliveContactMap({
         maxWidth: "var(--olive-container)",
         paddingBlock: "var(--olive-section-pad-y)",
         paddingInline: "var(--olive-section-pad-x)",
-        backgroundColor: "var(--olive-white)",
+        backgroundColor: "var(--olive-ivory)",
       }}
     >
       {heading ? (
@@ -69,10 +69,7 @@ export function OliveContactMap({
         </OliveReveal>
       ) : null}
 
-      <OliveReveal
-        className="relative h-[380px] w-full overflow-hidden"
-        style={{ borderRadius: "var(--olive-card-radius)" }}
-      >
+      <OliveReveal className="relative h-[380px] w-full overflow-hidden">
         <Map
           viewport={viewport}
           onViewportChange={setViewport}
@@ -89,8 +86,8 @@ export function OliveContactMap({
                 style={{
                   width: 16,
                   height: 16,
-                  backgroundColor: "var(--olive-leaf)",
-                  borderColor: "var(--olive-white)",
+                  backgroundColor: "var(--olive-moss-deep)",
+                  borderColor: "var(--olive-ivory)",
                   boxShadow: "var(--olive-shadow)",
                 }}
               />
@@ -110,7 +107,7 @@ export function OliveContactMap({
           {address ? <p className="olive-caption mt-1">{address}</p> : null}
           <div className="mt-3 flex flex-wrap items-center gap-4">
             <OliveButton
-              variant="primary"
+              variant="solid"
               size="sm"
               href={directionsUrl}
               target="_blank"
@@ -120,8 +117,7 @@ export function OliveContactMap({
               Directions
             </OliveButton>
             <OliveButton
-              variant="ghost"
-              size="sm"
+              variant="link"
               href={viewUrl}
               target="_blank"
               rel="noopener noreferrer"

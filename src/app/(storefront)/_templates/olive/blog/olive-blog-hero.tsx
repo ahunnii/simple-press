@@ -20,12 +20,10 @@ type Props = {
 /**
  * OliveBlogHero — the journal index's masthead.
  *
- * design.md: "cover image (optional; photo band with white card title when
- * set, slate band when blank)". With a cover image it's a full-bleed photo
- * band with the heading printed on a white card pinned bottom-left (the same
- * card language as `OliveImageTile`); without one it's a quiet
- * `OliveSection tone="slate"` band, which already carries ink type per the
- * measured tone pair.
+ * With a cover image it's a full-bleed photo band with the heading printed
+ * straight on the photograph, bottom-left, under an espresso scrim (the same
+ * copy-on-photo language as `OliveImageTile`); without one it's an espresso
+ * band carrying ivory Bodoni type.
  *
  * No `data-sp-group` hotspot here — the parent (`OliveBlogPage`) puts one
  * wrapping root around this component AND the search/grid/empty-state area
@@ -42,10 +40,10 @@ export function OliveBlogHero({
 }: Props) {
   if (!hasOliveImage(image)) {
     return (
-      <OliveSection tone="slate">
+      <OliveSection tone="espresso" bleed>
         <OliveReveal>
           <OliveSectionHeading
-            tone="slate"
+            tone="invert"
             as="h1"
             heading={heading}
             body={subtitle}
@@ -71,14 +69,22 @@ export function OliveBlogHero({
         sizes="100vw"
         className="object-cover"
       />
-      <div className="absolute inset-0 flex items-end p-4 sm:p-8">
-        <OliveReveal className="olive-card flex max-w-[min(34rem,90%)] flex-col gap-2 p-6">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to top, color-mix(in srgb, var(--olive-espresso) 78%, transparent), transparent 72%), var(--olive-scrim)",
+        }}
+      />
+      <div className="olive-on-photo absolute inset-0 flex items-end p-4 sm:p-10">
+        <OliveReveal className="flex max-w-[min(38rem,90%)] flex-col gap-3">
           <h1 className="olive-h1" {...fieldAttr(headingFieldKey)}>
             {heading}
           </h1>
           {subtitle ? (
             <p
-              className="olive-caption"
+              className="olive-body"
               {...fieldAttr(subtitleFieldKey)}
               style={{ maxWidth: "48ch" }}
             >

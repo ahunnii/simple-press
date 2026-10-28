@@ -9,6 +9,8 @@ export const MARKETING_CONSENT_SOURCES = [
   "ACCOUNT",
   "RESUBSCRIBE_LINK",
   "LEGACY_ACCOUNT",
+  /** Clicked the one-time re-permission invite sent to a contact import. */
+  "IMPORT_CONFIRM",
 ] as const;
 
 export type MarketingConsentSource = (typeof MARKETING_CONSENT_SOURCES)[number];
@@ -32,6 +34,7 @@ export const MARKETING_CONSENT_SOURCE_LABELS: Record<
   ACCOUNT: "Account preferences",
   RESUBSCRIBE_LINK: "Resubscribed from email link",
   LEGACY_ACCOUNT: "Account (before consent tracking)",
+  IMPORT_CONFIRM: "Confirmed from an invite after moving stores",
 };
 
 /** Human label for a stored source value; tolerates unknown / null values. */

@@ -56,6 +56,7 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
   const logoUrl = business?.siteContent?.logoUrl;
   const address = order.shippingAddress;
   const isPickup = order.deliveryMethod === "pickup";
+  const isLocalDelivery = order.deliveryMethod === "delivery";
   const itemCount = order.items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
@@ -102,7 +103,11 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
       <section className="grid grid-cols-2 gap-8 py-6">
         <div>
           <h2 className="mb-1.5 text-xs font-bold tracking-wide uppercase">
-            {isPickup ? "Pickup Order" : "Ship To"}
+            {isPickup
+              ? "Pickup Order"
+              : isLocalDelivery
+                ? "Local Delivery To"
+                : "Ship To"}
           </h2>
           {isPickup ? (
             <div className="text-sm">
@@ -116,6 +121,8 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
             </div>
           ) : address ? (
             <address className="text-sm not-italic">
+              {isLocalDelivery && <strong>Local delivery</strong>}
+              {isLocalDelivery && <br />}
               {address.firstName} {address.lastName}
               <br />
               {address.address1}
@@ -131,7 +138,11 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
               {address.country}
             </address>
           ) : (
-            <p className="text-sm">No shipping address on file.</p>
+            <p className="text-sm">
+              {isLocalDelivery
+                ? "No delivery address on file."
+                : "No shipping address on file."}
+            </p>
           )}
         </div>
 
@@ -225,7 +236,7 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
               </div>
             )}
             <div className="flex justify-between">
-              <span>Shipping</span>
+              <span>{isLocalDelivery ? "Local delivery" : "Shipping"}</span>
               <span className="tabular-nums">
                 {formatPrice(order.shipping)}
               </span>

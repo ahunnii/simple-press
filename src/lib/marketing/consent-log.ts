@@ -48,6 +48,8 @@ export const MARKETING_CONSENT_EVENT_SOURCES = [
   "HARD_BOUNCE",
   /** Provider webhook: address on the provider's suppression list. */
   "PROVIDER_SUPPRESSED",
+  /** Contact import: marked unsubscribed on the previous site (OPT_OUT). */
+  "IMPORT",
 ] as const;
 
 export type MarketingConsentEventSource =
@@ -62,12 +64,14 @@ export const MARKETING_CONSENT_EVENT_SOURCE_LABELS: Record<
   ACCOUNT: "Account preferences",
   RESUBSCRIBE_LINK: "Resubscribed from email link",
   LEGACY_ACCOUNT: "Account (before consent tracking)",
+  IMPORT_CONFIRM: "Confirmed from an invite after moving stores",
   UNSUBSCRIBE_LINK: "Unsubscribe link",
   ONE_CLICK: "One-click unsubscribe (mail app)",
   OWNER: "Changed by the store",
   COMPLAINT: "Marked as spam",
   HARD_BOUNCE: "Email bounced",
   PROVIDER_SUPPRESSED: "Blocked by the email provider",
+  IMPORT: "Unsubscribed on the previous site (imported)",
 };
 
 /** Max stored lengths (applied before encryption). */

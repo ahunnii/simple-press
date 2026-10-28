@@ -125,6 +125,13 @@ export const reviewVoteLimiter = makeLazy({
   keyPrefix: "rl:review-vote",
 });
 
+// 5 review submissions per 15 minutes per signed-in user, keyed userId:host
+export const reviewSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:review-submit",
+});
+
 // 5 contact form submissions per 10 minutes per IP
 export const contactLimiter = makeLazy({
   points: 5,
@@ -144,6 +151,14 @@ export const quoteZipLookupLimiter = makeLazy({
   points: 30,
   duration: 60,
   keyPrefix: "rl:quote-zip",
+});
+
+// 30 local-delivery eligibility checks per minute per IP (debounced on ZIP /
+// cart edits at checkout), keyed ip:host
+export const localDeliveryCheckLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:local-delivery",
 });
 
 // 30 live-estimate previews per minute per IP (keystroke-adjacent, no captcha), keyed ip:host
@@ -271,6 +286,23 @@ export const marketingTestSendLimiter = makeLazy({
   points: 10,
   duration: 3600,
   keyPrefix: "rl:marketing-test-send",
+});
+
+// 120 live email previews per minute per business+user (the composer and the
+// email style page re-render on a 500ms debounce while typing; nothing is sent)
+export const marketingPreviewLimiter = makeLazy({
+  points: 120,
+  duration: 60,
+  keyPrefix: "rl:marketing-preview",
+});
+
+// 30 requests per minute per API token — owner-issued read tokens for the
+// Business Profile API (`/api/v1/*`), keyed by token id (not IP: the caller is
+// a server, e.g. ProfitMax, and one token = one connected app).
+export const apiTokenLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:api-token",
 });
 
 /**

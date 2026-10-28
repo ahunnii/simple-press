@@ -8,7 +8,10 @@
  * `POLICY_LAST_UPDATED` rather than hardcoding a date, and the acceptance code
  * paths stamp from the same constants. The two cannot drift.
  *
- * **When you edit a policy page, bump its date here.** That is the whole ritual.
+ * **When you edit a policy page, bump its date here.** For a typo or other
+ * non-material edit, that is the whole ritual. For a MATERIAL change, also
+ * append an entry to `MATERIAL_POLICY_UPDATES` in `./material-updates` (with
+ * ≥ 30 days' notice) and send the hub notice — see that file.
  */
 
 /** ISO `YYYY-MM-DD`, one per policy document. */

@@ -11,13 +11,12 @@ import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import {
   OliveButton,
-  OliveChip,
+  OliveCheckbox,
   OliveEmptyState,
   OliveProductGrid,
   OliveReveal,
   OliveSelect,
 } from "../shared";
-import { oliveChipToken } from "../shared/olive-color";
 
 /** Cards per page. Four columns × six rows on a desktop grid. */
 const PAGE_SIZE = 24;
@@ -38,9 +37,10 @@ type Props = {
 /**
  * OliveShopClient — the shop's own half of the page.
  *
- * The toolbar pins under the header (`--olive-header-h`) so the collection
- * tabs, the stock switch and the sort stay readable however far down a long
- * grid the shopper is. Everything it controls comes from `useShopFilters`;
+ * An ivory title block, then a toolbar between two hairlines that pins under
+ * the header (`--olive-header-h`): text tabs for the collections on the left,
+ * the count, the stock switch and the sort on the right — all readable however
+ * far down a long grid the shopper is. Everything it controls comes from `useShopFilters`;
  * nothing about filtering, sorting or paging is re-implemented here.
  *
  * The empty result is answered twice, differently: a store with nothing
@@ -95,12 +95,12 @@ export function OliveShopClient({
   return (
     <section
       aria-labelledby="olive-shop-heading"
-      style={{ backgroundColor: "var(--olive-white)" }}
+      style={{ backgroundColor: "var(--olive-ivory)" }}
       {...sectionAttrs}
     >
       {/* Title block — heading plus one line, and nothing else above it. */}
-      <div style={containerStyle} className="pt-10 pb-6 md:pt-14 md:pb-8">
-        <OliveReveal className="flex flex-col gap-3">
+      <div style={containerStyle} className="pt-10 pb-8 md:pt-16 md:pb-10">
+        <OliveReveal className="flex flex-col gap-4">
           <h1
             id="olive-shop-heading"
             className="olive-h1"
@@ -110,7 +110,7 @@ export function OliveShopClient({
           </h1>
           {body ? (
             <p
-              className="max-w-[58ch] text-[0.9375rem] leading-relaxed"
+              className="max-w-[58ch] text-[0.9375rem] leading-[1.7]"
               style={{ color: "var(--olive-ink-soft)" }}
               {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
             >
@@ -120,56 +120,69 @@ export function OliveShopClient({
         </OliveReveal>
       </div>
 
-      {/* Sticky toolbar — white card stock, one hairline, pinned under the header. */}
+      {/* Sticky toolbar — between two hairlines, pinned under the header. */}
       {hasProducts ? (
         <div
           className="sticky z-20"
           style={{
             top: "var(--olive-header-h)",
-            backgroundColor: "var(--olive-white)",
+            backgroundColor: "var(--olive-ivory)",
             borderTop: "1px solid var(--olive-hairline)",
             borderBottom: "1px solid var(--olive-hairline)",
           }}
         >
-          <OliveReveal
+          {/* One row at lg: the tabs take the free width (scrolling
+              sideways when they overflow) and the count · stock · sort
+              cluster keeps its natural width on the right, every control
+              centred on the tab row's 44px line. Below lg: tabs, then a row
+              with the count left and the filters right. */}
+          <div
             style={containerStyle}
-            className="flex flex-col gap-3 py-3"
+            className="flex flex-col lg:flex-row lg:items-center lg:gap-10"
           >
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            {collections.length > 0 ? (
+              <div className="min-w-0 lg:flex-1">
+                <OliveCollectionTabs
+                  collections={collections}
+                  activeId={activeCollectionId}
+                  onChange={setActiveCollectionId}
+                />
+              </div>
+            ) : (
+              <span aria-hidden="true" className="hidden lg:block lg:flex-1" />
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 py-2 lg:flex-none lg:flex-nowrap lg:justify-end lg:gap-x-7 lg:py-1.5">
               <p
-                className="olive-label"
+                className="olive-label olive-tabular m-0 whitespace-nowrap"
                 aria-live="polite"
                 aria-atomic="true"
-                style={{ color: "var(--olive-ink)" }}
+                style={{ color: "var(--olive-taupe-ink)" }}
               >
                 {count} {count === 1 ? "item" : "items"}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                <span className="inline-flex items-center gap-2">
-                  <input
+              <div className="flex items-center gap-x-5 lg:gap-x-7">
+                <span className="inline-flex min-h-11 items-center gap-2.5">
+                  <OliveCheckbox
                     id={stockId}
-                    type="checkbox"
                     checked={inStockOnly}
                     onChange={(event) => handleInStock(event.target.checked)}
-                    style={{
-                      width: "1rem",
-                      height: "1rem",
-                      accentColor: "var(--olive-sage)",
-                      cursor: "pointer",
-                    }}
                   />
                   <label
                     htmlFor={stockId}
-                    className="olive-caption cursor-pointer"
-                    style={{ color: "var(--olive-ink)" }}
+                    className="olive-label cursor-pointer whitespace-nowrap"
+                    style={{ color: "var(--olive-espresso)" }}
                   >
                     In stock only
                   </label>
                 </span>
 
-                <span className="inline-flex items-center gap-2">
-                  <label htmlFor={sortId} className="olive-label">
+                <span className="inline-flex items-center gap-2.5">
+                  <label
+                    htmlFor={sortId}
+                    className="olive-label max-sm:sr-only"
+                  >
                     Sort
                   </label>
                   <OliveSelect
@@ -178,10 +191,16 @@ export function OliveShopClient({
                     onChange={(event) =>
                       handleSort(event.target.value as SortOption)
                     }
-                    // Width is set inline on purpose: the scoped
-                    // `.olive .olive-select` rule is unlayered and would beat a
-                    // Tailwind width utility.
-                    style={{ width: "auto", paddingBlock: "0.4375rem" }}
+                    // Size is set inline on purpose: the scoped
+                    // `.olive .olive-select` rule is unlayered and would beat
+                    // Tailwind utilities. 44px tall, centred on the tab line.
+                    style={{
+                      width: "auto",
+                      height: "2.75rem",
+                      minHeight: "2.75rem",
+                      paddingBlock: 0,
+                      fontSize: "0.875rem",
+                    }}
                   >
                     {Object.entries(SORT_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>
@@ -192,20 +211,12 @@ export function OliveShopClient({
                 </span>
               </div>
             </div>
-
-            {collections.length > 0 ? (
-              <OliveCollectionTabs
-                collections={collections}
-                activeId={activeCollectionId}
-                onChange={setActiveCollectionId}
-              />
-            ) : null}
-          </OliveReveal>
+          </div>
         </div>
       ) : null}
 
-      {/* The swatch grid */}
-      <div style={containerStyle} className="pt-8 pb-16 md:pt-10 md:pb-24">
+      {/* The grid */}
+      <div style={containerStyle} className="pt-8 pb-16 md:pt-12 md:pb-24">
         {count === 0 ? (
           <OliveReveal>
             <OliveEmptyState
@@ -220,7 +231,7 @@ export function OliveShopClient({
             >
               {hasProducts && hasActiveFilters ? (
                 <OliveButton
-                  variant="secondary"
+                  variant="outline"
                   onClick={clearFilters}
                   className="mt-1"
                 >
@@ -267,11 +278,12 @@ const containerStyle: CSSProperties = {
 type OliveShopCollection = { id: string; name: string; slug: string };
 
 /**
- * The collection tabs — dividers in the swatch book, not buttons.
+ * The collection tabs — tracked-caps text, no boxes, no dots.
  *
  * A radio group with one tab stop: Arrow keys move and select, Home and End
- * jump to the ends. "All" comes first and carries no chip, because it is not
- * a category — the chip discipline reserves the mark for the ones that are.
+ * jump to the ends. The chosen tab is espresso with a 1px espresso underline
+ * (the rule is drawn by `.olive-shop-tab::after`, so hover can preview it);
+ * the row scrolls sideways on a phone without widening the page.
  */
 function OliveCollectionTabs({
   collections,
@@ -344,48 +356,21 @@ function OliveCollectionTabs({
       role="radiogroup"
       aria-label="Filter by collection"
       onKeyDown={onKeyDown}
-      className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 py-0.5"
+      className="olive-shop-tabs"
     >
-      {items.map((item, index) => {
-        const selected = item.id === activeId;
-        return (
-          <button
-            key={item.id ?? "olive-all-collections"}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            tabIndex={index === activeIndex ? 0 : -1}
-            onClick={() => onChange(item.id)}
-            className="olive-label inline-flex shrink-0 items-center gap-2 whitespace-nowrap"
-            style={{
-              height: "2.25rem",
-              paddingInline: "0.75rem",
-              borderRadius: "var(--olive-card-radius)",
-              border: `1px solid ${
-                selected ? "var(--olive-leaf)" : "var(--olive-hairline)"
-              }`,
-              boxShadow: selected
-                ? "inset 0 0 0 1px var(--olive-leaf)"
-                : undefined,
-              backgroundColor: selected
-                ? "var(--olive-sage-tint)"
-                : "var(--olive-white)",
-              color: selected ? "var(--olive-leaf)" : "var(--olive-ink)",
-              cursor: "pointer",
-            }}
-          >
-            {item.id ? (
-              <OliveChip
-                color={oliveChipToken(index - 1)}
-                label={item.name}
-                size={12}
-                srOnlyLabel={false}
-              />
-            ) : null}
-            {item.name}
-          </button>
-        );
-      })}
+      {items.map((item, index) => (
+        <button
+          key={item.id ?? "olive-all-collections"}
+          type="button"
+          role="radio"
+          aria-checked={item.id === activeId}
+          tabIndex={index === activeIndex ? 0 : -1}
+          onClick={() => onChange(item.id)}
+          className="olive-shop-tab olive-label"
+        >
+          {item.name}
+        </button>
+      ))}
     </div>
   );
 }
@@ -419,7 +404,7 @@ function OliveShopPagination({
   return (
     <nav
       aria-label="Pagination"
-      className="mt-12 flex flex-wrap items-center justify-center gap-2"
+      className="mt-14 flex flex-wrap items-center justify-center gap-1.5"
     >
       <OlivePageButton
         linkProps={
@@ -436,7 +421,7 @@ function OliveShopPagination({
           <span
             key={entry}
             aria-hidden="true"
-            className="olive-caption flex h-11 w-6 items-center justify-center"
+            className="olive-label flex h-11 w-6 items-center justify-center"
           >
             …
           </span>
@@ -487,15 +472,10 @@ function OlivePageButton({
     "aria-label": label,
     "aria-current": active ? ("page" as const) : undefined,
     className: cn(
-      "olive-btn",
-      active ? "olive-btn-primary" : "olive-btn-secondary",
+      "olive-page-btn olive-label olive-tabular",
+      active && "is-active",
+      wide && "is-wide",
     ),
-    style: {
-      height: "2.75rem",
-      minWidth: "2.75rem",
-      paddingInline: wide ? "1.125rem" : "0.5rem",
-      fontSize: "0.8125rem",
-    },
   };
 
   if (disabled || !linkProps) {

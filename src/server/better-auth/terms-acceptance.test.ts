@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 
-import { resolvePlatformTermsAcceptance } from "./terms-acceptance";
+import {
+  resolvePlatformTermsAcceptance,
+  resolveSignupClickwrapLogEntry,
+} from "./terms-acceptance";
 
 describe("resolvePlatformTermsAcceptance", () => {
   it("stamps a server-generated timestamp + version for credential sign-up with the box checked", () => {
@@ -115,5 +118,54 @@ describe("resolvePlatformTermsAcceptance", () => {
   it("returns null when context is missing entirely", () => {
     expect(resolvePlatformTermsAcceptance(null)).toBeNull();
     expect(resolvePlatformTermsAcceptance(undefined)).toBeNull();
+  });
+});
+
+describe("resolveSignupClickwrapLogEntry", () => {
+  it("returns a platform clickwrap row for credential sign-up, reusing the column timestamp", () => {
+    const stamped = new Date("2026-10-21T15:00:00.000Z");
+    expect(
+      resolveSignupClickwrapLogEntry(
+        { id: "user_1", termsAcceptedAt: stamped },
+        { path: "/sign-up/email", body: { termsAccepted: true } },
+      ),
+    ).toEqual({
+      userId: "user_1",
+      bundle: "platform",
+      version: PLATFORM_TERMS_VERSION,
+      method: "clickwrap",
+      acceptedAt: stamped,
+    });
+  });
+
+  it("falls back to the server clock when the adapter omits the column", () => {
+    const before = Date.now();
+    const entry = resolveSignupClickwrapLogEntry(
+      { id: "user_1" },
+      { path: "/sign-up/email" },
+    );
+    expect(entry?.acceptedAt.getTime()).toBeGreaterThanOrEqual(before);
+    expect(entry?.acceptedAt.getTime()).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("ignores a client-supplied string timestamp", () => {
+    const entry = resolveSignupClickwrapLogEntry(
+      { id: "user_1", termsAcceptedAt: "2000-01-01T00:00:00.000Z" },
+      { path: "/sign-up/email" },
+    );
+    expect(entry?.acceptedAt.getFullYear()).not.toBe(2000);
+  });
+
+  it.each([["/callback/discord"], ["/update-user"], [null], [undefined]])(
+    "returns null for path %s",
+    (path) => {
+      expect(
+        resolveSignupClickwrapLogEntry({ id: "user_1" }, { path }),
+      ).toBeNull();
+    },
+  );
+
+  it("returns null with no context", () => {
+    expect(resolveSignupClickwrapLogEntry({ id: "user_1" }, null)).toBeNull();
   });
 });

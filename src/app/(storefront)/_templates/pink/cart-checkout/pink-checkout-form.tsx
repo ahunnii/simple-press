@@ -10,7 +10,6 @@ import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
@@ -123,7 +122,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
   // banner via `form.error`, but never marks which control is at fault. These
   // mirror its exact required-field rules so the offending input can be
   // styled + focused without touching the shared hook.
-  const shippingRequired = form.deliveryMethod === "ship";
+  const shippingRequired = form.needsAddress;
   const invalid = {
     email: submitAttempted && !form.email,
     name: submitAttempted && !form.name.trim(),
@@ -145,7 +144,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
     // call above only takes effect on the *next* render) — reusing it here
     // would silently no-op focus-management on exactly the first failure.
     // Field order matches the visual top-to-bottom layout.
-    const shippingRequiredNow = form.deliveryMethod === "ship";
+    const shippingRequiredNow = form.needsAddress;
     const invalidFieldId = !form.email
       ? "pink-checkout-email"
       : !form.name.trim()
@@ -420,7 +419,9 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
               )}
 
               <div className="flex items-baseline justify-between">
-                <span className="pink-label-dark">Shipping</span>
+                <span className="pink-label-dark">
+                  {form.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                </span>
                 <span className="text-[14px]">
                   {form.deliveryMethod === "pickup" ? (
                     "Free — pickup"
@@ -436,7 +437,14 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                       Calculating…
                     </span>
                   ) : form.shippingPending ? (
-                    "Calculated at checkout"
+                    form.deliveryMethod === "delivery" ? (
+                      "Enter your ZIP"
+                    ) : (
+                      "Calculated at checkout"
+                    )
+                  ) : form.deliveryMethod === "delivery" &&
+                    form.localDelivery.status === "ineligible" ? (
+                    "Not available"
                   ) : form.shipping === 0 ? (
                     "Free"
                   ) : (
@@ -605,14 +613,14 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
             {f["pink.checkout.shipping-heading"] ?? ""}
           </h2>
 
-          {form.shippingConfig.offersInStorePickup && (
+          {form.deliveryOptions.length > 1 && (
             <div
               role="group"
               aria-label="Delivery method"
               className="flex flex-col gap-3"
             >
               <div className="flex flex-wrap gap-3">
-                {(["ship", "pickup"] as const).map((method) => (
+                {form.deliveryOptions.map(({ id: method, label }) => (
                   <button
                     key={method}
                     type="button"
@@ -633,7 +641,11 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                           : "var(--pink-ink)",
                     }}
                   >
-                    {method === "ship" ? "Ship to address" : "Pick up"}
+                    {method === "ship"
+                      ? "Ship to address"
+                      : method === "pickup"
+                        ? "Pick up"
+                        : label}
                   </button>
                 ))}
               </div>
@@ -643,7 +655,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
               >
                 {form.deliveryMethod === "pickup"
                   ? "No shipping charge. We'll confirm pickup details by email."
-                  : "Shipping cost is based on your basket."}
+                  : form.deliveryMethod === "delivery"
+                    ? (form.deliveryOptions.find((o) => o.id === "delivery")
+                        ?.description ?? "")
+                    : "Shipping cost is based on your basket."}
               </p>
               {form.deliveryMethod === "pickup" && (
                 <div
@@ -669,17 +684,56 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                   )}
                 </div>
               )}
+              {form.deliveryMethod === "delivery" && (
+                <>
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className="text-[13px]"
+                    style={{
+                      color:
+                        form.localDelivery.status === "ineligible"
+                          ? "var(--pink-error)"
+                          : "var(--pink-subtle)",
+                    }}
+                  >
+                    {form.localDelivery.status === "checking"
+                      ? "Checking your ZIP…"
+                      : form.localDelivery.status === "ineligible"
+                        ? form.localDelivery.message
+                        : form.localDelivery.status === "eligible"
+                          ? "Great — we deliver to you."
+                          : null}
+                  </p>
+                  {form.localDelivery.instructions && (
+                    <div
+                      className="flex flex-col gap-1 p-4"
+                      style={{ background: "var(--pink-panel)" }}
+                    >
+                      <p className="pink-label">Delivery details</p>
+                      <p
+                        className="text-[13px] whitespace-pre-line"
+                        style={{ color: "var(--pink-subtle)" }}
+                      >
+                        {form.localDelivery.instructions}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
-          {form.deliveryMethod === "ship" && (
+          {form.needsAddress && (
             <div className="flex flex-col gap-5">
               <p
                 className="text-[13px]"
                 style={{ color: "var(--pink-subtle)" }}
               >
-                {form.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                  ? "We price shipping from this address. Make changes here before continuing to payment."
+                {form.addressLocked
+                  ? form.deliveryMethod === "delivery"
+                    ? "We check delivery from this address. Make changes here before continuing to payment."
+                    : "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe prefilled so you can confirm or edit it before you pay."}
               </p>
 
@@ -701,7 +755,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     value={form.addressLine1}
                     onChange={(e) => form.setAddressLine1(e.target.value)}
                     placeholder="Street address, P.O. box"
-                    required={form.deliveryMethod === "ship"}
+                    required={form.needsAddress}
                     aria-required="true"
                     aria-invalid={invalid.addressLine1 ? true : undefined}
                     className={cn(
@@ -735,7 +789,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     autoComplete="shipping address-level2"
                     value={form.city}
                     onChange={(e) => form.setCity(e.target.value)}
-                    required={form.deliveryMethod === "ship"}
+                    required={form.needsAddress}
                     aria-required="true"
                     aria-invalid={invalid.city ? true : undefined}
                     className={cn(
@@ -793,7 +847,7 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     autoComplete="shipping postal-code"
                     value={form.postalCode}
                     onChange={(e) => form.setPostalCode(e.target.value)}
-                    required={form.deliveryMethod === "ship"}
+                    required={form.needsAddress}
                     aria-required="true"
                     aria-invalid={invalid.postalCode ? true : undefined}
                     className={cn(

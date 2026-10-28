@@ -21,12 +21,19 @@ const socialUrlSchema = safeHrefSchema.refine(
 const socialLinksSchema = z
   .object({
     instagram: socialUrlSchema.optional().nullable().or(z.literal("")),
+    threads: socialUrlSchema.optional().nullable().or(z.literal("")),
     facebook: socialUrlSchema.optional().nullable().or(z.literal("")),
     twitter: socialUrlSchema.optional().nullable().or(z.literal("")),
     linkedin: socialUrlSchema.optional().nullable().or(z.literal("")),
     tiktok: socialUrlSchema.optional().nullable().or(z.literal("")),
     pinterest: socialUrlSchema.optional().nullable().or(z.literal("")),
     youtube: socialUrlSchema.optional().nullable().or(z.literal("")),
+    // SEO-only (JSON-LD `sameAs`); never rendered as an icon — see
+    // `GOOGLE_BUSINESS_PROFILE_KEY` in `~/lib/social-links`.
+    googleBusinessProfile: socialUrlSchema
+      .optional()
+      .nullable()
+      .or(z.literal("")),
   })
   .optional();
 

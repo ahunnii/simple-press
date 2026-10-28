@@ -8,7 +8,6 @@ import { resolveFields } from "..";
 import {
   OliveButton,
   OliveEmptyState,
-  OliveLeafMark,
   OliveReveal,
   OliveRevealGroup,
   OliveSection,
@@ -41,29 +40,29 @@ function TestimonialCard({
 
   return (
     <div
-      className="olive-card olive-card-paper olive-reveal-item mb-3 flex break-inside-avoid flex-col gap-3 p-6"
+      className="olive-card olive-card-paper olive-reveal-item mb-4 flex break-inside-avoid flex-col gap-4 p-6 sm:p-8"
       style={{ "--i": Math.min(index, 8) } as React.CSSProperties}
     >
-      <span aria-hidden="true" style={{ color: "var(--olive-sage-bright)" }}>
-        <OliveLeafMark size={18} />
-      </span>
       {testimonial.title ? (
         <p className="olive-card-title">{testimonial.title}</p>
       ) : null}
       <p
-        className="text-[0.9375rem] leading-relaxed"
-        style={{ color: "var(--olive-ink)" }}
+        className="text-[0.9375rem] leading-[1.7]"
+        style={{ color: "var(--olive-espresso)" }}
       >
         {testimonial.text}
       </p>
       <div>
-        <p className="olive-label" style={{ color: "var(--olive-ink)" }}>
+        <p className="olive-label" style={{ color: "var(--olive-espresso)" }}>
           {testimonial.customerName}
         </p>
-        {attribution ? <p className="olive-caption">{attribution}</p> : null}
+        {attribution ? (
+          <p className="olive-caption mt-1">{attribution}</p>
+        ) : null}
         <time
           dateTime={new Date(testimonial.testimonialDate).toISOString()}
           className="olive-caption mt-1 block"
+          style={{ color: "var(--olive-taupe-ink)" }}
         >
           {formatTestimonialDate(testimonial.testimonialDate)}
         </time>
@@ -104,7 +103,7 @@ export async function OliveTestimonialsPage({
       <OliveSection
         as="section"
         aria-label="Kind words"
-        tone="white"
+        tone="ivory"
         {...sectionGroupAttr("testimonials", "hero")}
       >
         <OliveSectionHeading
@@ -117,23 +116,22 @@ export async function OliveTestimonialsPage({
       </OliveSection>
 
       {featured ? (
-        <OliveSection as="section" aria-label="Featured review" tone="slate">
+        <OliveSection
+          as="section"
+          aria-label="Featured review"
+          tone="espresso"
+          bleed
+        >
           <OliveReveal className="mx-auto flex max-w-[720px] flex-col items-center gap-6 text-center">
-            <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
-              <OliveLeafMark size={28} />
-            </span>
             <blockquote className="m-0 flex flex-col gap-6">
               {featured.title ? (
-                <p className="olive-card-title">{featured.title}</p>
+                <p className="olive-label">{featured.title}</p>
               ) : null}
-              <p className="olive-display" style={{ fontStyle: "italic" }}>
+              <p className="olive-h1" style={{ fontStyle: "italic" }}>
                 {featured.text}
               </p>
               <footer>
-                <cite
-                  className="olive-label not-italic"
-                  style={{ color: "var(--olive-ink)" }}
-                >
+                <cite className="olive-label not-italic">
                   {featured.customerName}
                   {attributionLine(featured)
                     ? `, ${attributionLine(featured)}`
@@ -147,7 +145,7 @@ export async function OliveTestimonialsPage({
         <OliveSection
           as="section"
           aria-label="No reviews yet"
-          tone="paper"
+          tone="sand"
           className="flex justify-center"
         >
           <OliveEmptyState
@@ -161,7 +159,7 @@ export async function OliveTestimonialsPage({
       )}
 
       {rest.length > 0 ? (
-        <OliveSection as="section" aria-label="More reviews" tone="paper">
+        <OliveSection as="section" aria-label="More reviews" tone="ivory">
           <OliveRevealGroup className="columns-1 gap-4 sm:columns-2 lg:columns-3">
             {rest.map((testimonial, i) => (
               <TestimonialCard
@@ -178,7 +176,7 @@ export async function OliveTestimonialsPage({
         <OliveSection
           as="section"
           aria-label="Share your experience"
-          tone="white"
+          tone="sand"
           {...sectionGroupAttr("testimonials", "cta")}
           className="flex flex-col items-center gap-4 text-center"
         >
@@ -190,7 +188,7 @@ export async function OliveTestimonialsPage({
           </h2>
           {f["olive.testimonials.cta-body"] ? (
             <p
-              className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
+              className="max-w-[52ch] text-[0.9375rem] leading-[1.7]"
               style={{ color: "var(--olive-ink-soft)" }}
               {...fieldAttr("olive.testimonials.cta-body")}
             >
@@ -198,7 +196,8 @@ export async function OliveTestimonialsPage({
             </p>
           ) : null}
           <OliveButton
-            variant="primary"
+            variant="solid"
+            arrow
             href="/testimonials/submit"
             data-sp-field="olive.testimonials.cta-button-label"
           >

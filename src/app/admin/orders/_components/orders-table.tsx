@@ -75,7 +75,7 @@ function statusVariant(
 type OrderRow = RouterOutputs["order"]["getAll"]["orders"][number];
 
 /**
- * The conditional flag badges — partial fulfillment, pickup, oversell — used
+ * The conditional flag badges — partial fulfillment, pickup, local delivery, oversell — used
  * in BOTH the desktop Status cell and the md:hidden reflow line. A single
  * source so the two can't drift, and so "Oversold" (the one that matters most:
  * money was taken for stock that isn't there) can't silently vanish on a
@@ -100,6 +100,9 @@ function OrderFlagBadges({ order }: { order: OrderRow }) {
       )}
       {order.deliveryMethod === "pickup" && (
         <Badge variant="warning">Pickup</Badge>
+      )}
+      {order.deliveryMethod === "delivery" && (
+        <Badge variant="warning">Local delivery</Badge>
       )}
       {order.subscriptionId && <Badge variant="secondary">Subscription</Badge>}
       {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}

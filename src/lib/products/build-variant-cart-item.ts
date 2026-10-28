@@ -1,3 +1,4 @@
+import { primaryPhoto } from "~/lib/products/media";
 import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,
@@ -9,7 +10,7 @@ export type CartItemProductInput = {
   name: string;
   price: number;
   compareAtPrice: number | null;
-  images: { url: string }[];
+  images: { url: string; mediaType?: "IMAGE" | "VIDEO" | null }[];
 };
 
 export type CartItemVariantInput = {
@@ -50,7 +51,7 @@ export function buildVariantCartItem(
     price,
     compareAtPrice:
       compareAtPrice && compareAtPrice > price ? compareAtPrice : null,
-    imageUrl: variant.imageUrl ?? product.images[0]?.url ?? null,
+    imageUrl: variant.imageUrl ?? primaryPhoto(product.images)?.url ?? null,
     sku: variant.sku,
     maxInventory,
   };

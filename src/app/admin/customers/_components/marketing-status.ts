@@ -72,6 +72,26 @@ export function getMarketingStatus(c: MarketingStatusInput): MarketingStatus {
   };
 }
 
+/**
+ * Quiet secondary hint for customers who came in through a contact import
+ * (`Customer.importId`) and are not opted in. Imported contacts are never
+ * subscribed by the import itself; they join only by confirming the invite.
+ * Null for everyone else (including imported people who have since joined).
+ */
+export function getImportedHint(c: {
+  importId?: string | null;
+  importStatus?: string | null;
+  acceptsMarketing: boolean;
+  marketingUnsubscribedAt: Date | null;
+}): string | null {
+  if (!c.importId || c.acceptsMarketing) return null;
+  // Only rows the old site marked subscribed are ever invited; for them,
+  // "not confirmed" means the invite is (or was) theirs to click.
+  return c.importStatus === "subscribed" && !c.marketingUnsubscribedAt
+    ? "Imported, not confirmed"
+    : "Imported";
+}
+
 /** Owner-facing label for a consent event ("Subscribed at checkout"). */
 export function consentEventLabel(event: {
   type: string;
@@ -90,6 +110,8 @@ export function consentEventLabel(event: {
         return "Subscribed in their account (before consent tracking)";
       case "RESUBSCRIBE_LINK":
         return "Resubscribed from an email link";
+      case "IMPORT_CONFIRM":
+        return "Subscribed from the invite after your store moved";
       default:
         return `Subscribed (${marketingConsentSourceLabel(source)})`;
     }
@@ -104,6 +126,8 @@ export function consentEventLabel(event: {
         return "Unsubscribed by you";
       case "ACCOUNT":
         return "Unsubscribed in their account";
+      case "IMPORT":
+        return "Unsubscribed on your previous site";
       default:
         return "Unsubscribed";
     }

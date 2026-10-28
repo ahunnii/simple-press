@@ -3,12 +3,24 @@ import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from "react";
 import { cn } from "~/lib/utils";
 
 /**
- * The six grounds a section may be printed on. Each pair is measured in
- * design.md: `sage` is the committed field and takes WHITE type; every other
- * tone is a card stock or a wash and takes INK type. There is no seventh
- * option on purpose — a tone outside this list has no measured text pair.
+ * The five grounds a section may be printed on (design.md § Tokens):
+ * `ivory` (page ground), `sand` (alternate band), `stone` (decorative field —
+ * espresso type only), and the two dark fields `espresso` and `moss`, which
+ * take ivory type. Measured pairs: espresso on ivory 15.58:1, on sand
+ * 14.16:1, on stone 9.04:1; ivory on espresso 15.58:1, on moss 6.09:1.
  */
-export type OliveSectionTone =
+export type OliveSectionToneName =
+  | "ivory"
+  | "sand"
+  | "espresso"
+  | "moss"
+  | "stone";
+
+/**
+ * Pre-2026-10-21 tone names, still accepted so older call sites compile.
+ * Each maps onto one of the five grounds above (see `normalizeOliveTone`).
+ */
+export type OliveLegacySectionTone =
   | "white"
   | "paper"
   | "sage"
@@ -16,23 +28,46 @@ export type OliveSectionTone =
   | "sage-tint"
   | "slate-tint";
 
-const TONE_BACKGROUND: Record<OliveSectionTone, string> = {
-  white: "var(--olive-white)",
-  paper: "var(--olive-paper)",
-  sage: "var(--olive-sage)",
-  slate: "var(--olive-slate)",
-  "sage-tint": "var(--olive-sage-tint)",
-  "slate-tint": "var(--olive-slate-tint)",
+export type OliveSectionTone = OliveSectionToneName | OliveLegacySectionTone;
+
+const LEGACY_TONE: Record<OliveLegacySectionTone, OliveSectionToneName> = {
+  white: "ivory",
+  paper: "sand",
+  sage: "moss",
+  slate: "stone",
+  "sage-tint": "sand",
+  "slate-tint": "sand",
 };
 
-/** White type is only ever legal on the sage field. See design.md § Palette. */
-const TONE_FOREGROUND: Record<OliveSectionTone, string> = {
-  white: "var(--olive-ink)",
-  paper: "var(--olive-ink)",
-  sage: "var(--olive-white)",
-  slate: "var(--olive-ink)",
-  "sage-tint": "var(--olive-ink)",
-  "slate-tint": "var(--olive-ink)",
+/** Map any accepted tone (new or legacy) onto one of the five grounds. */
+export function normalizeOliveTone(
+  tone: OliveSectionTone,
+): OliveSectionToneName {
+  return tone in LEGACY_TONE
+    ? LEGACY_TONE[tone as OliveLegacySectionTone]
+    : (tone as OliveSectionToneName);
+}
+
+/** True for the two dark fields, which take ivory type. */
+export function isOliveDarkTone(tone: OliveSectionTone): boolean {
+  const name = normalizeOliveTone(tone);
+  return name === "espresso" || name === "moss";
+}
+
+const TONE_BACKGROUND: Record<OliveSectionToneName, string> = {
+  ivory: "var(--olive-ivory)",
+  sand: "var(--olive-sand)",
+  espresso: "var(--olive-espresso)",
+  moss: "var(--olive-moss)",
+  stone: "var(--olive-stone)",
+};
+
+const TONE_FOREGROUND: Record<OliveSectionToneName, string> = {
+  ivory: "var(--olive-espresso)",
+  sand: "var(--olive-espresso)",
+  espresso: "var(--olive-on-dark)",
+  moss: "var(--olive-on-dark)",
+  stone: "var(--olive-espresso)",
 };
 
 type OliveSectionProps = Omit<
@@ -44,8 +79,10 @@ type OliveSectionProps = Omit<
   as?: "section" | "div" | "aside" | "article";
   /**
    * Full-width band: the tone runs edge to edge and the content sits in an
-   * inner container. Without it the section IS the container, so a tone reads
-   * as a capped panel rather than a band across the page.
+   * inner container capped at `--olive-content-max` (the container minus its
+   * two paddings), so band content starts on the same edge as the header
+   * wordmark and every non-bleed section. Without it the section IS the
+   * container, so a tone reads as a capped panel rather than a band.
    */
   bleed?: boolean;
   tone?: OliveSectionTone;
@@ -58,26 +95,26 @@ type OliveSectionProps = Omit<
 /**
  * OliveSection — the template's one layout rhythm.
  *
- * Caps content at `--olive-container` (1280px), pads with
+ * Caps content at `--olive-container`, pads with
  * `--olive-section-pad-y` / `--olive-section-pad-x` (the same x-padding the
- * header and footer use, so every edge lines up), and paints one of the six
- * measured tone pairs.
+ * header and footer use, so every edge lines up), and paints one of the five
+ * measured tone pairs. Legacy tone names are normalised first, and
+ * `data-olive-tone` always carries the NEW name.
  *
  * Extra props spread onto the root element, so
  * `{...sectionGroupAttr("homepage", "categories")}` and `aria-labelledby`
  * work without a dedicated prop.
  *
- * On `tone="sage"` the root sets `color: var(--olive-white)`, which plain
- * text and `OliveSectionHeading tone="invert"` inherit. The scoped type-scale
- * classes (`olive-h2`, `olive-caption`, …) hardcode ink, so on a sage band
- * either use `OliveSectionHeading` with `tone="invert"` or set the colour
- * yourself — the section also carries `data-olive-tone` for a future CSS hook.
+ * On the dark tones (`espresso`, `moss`) the root sets ivory type, and the
+ * `[data-olive-tone="espresso"|"moss"]` rules in globals.css flip the scoped
+ * type classes (`olive-h2`, `olive-label`, `olive-eyebrow`, …), the link /
+ * outline buttons and the focus ring to their on-dark values.
  */
 export function OliveSection({
   children,
   as = "section",
   bleed = false,
-  tone = "white",
+  tone: toneProp = "ivory",
   className,
   innerClassName,
   innerStyle,
@@ -88,6 +125,7 @@ export function OliveSection({
   // block tags, all of which take the same attribute set at runtime; the cast
   // just stops TypeScript widening the JSX element to a union.
   const Tag = as as "section";
+  const tone = normalizeOliveTone(toneProp);
 
   const rootStyle: CSSProperties = {
     backgroundColor: TONE_BACKGROUND[tone],
@@ -108,7 +146,7 @@ export function OliveSection({
       {bleed ? (
         <div
           className={cn("mx-auto w-full", innerClassName)}
-          style={{ maxWidth: "var(--olive-container)", ...innerStyle }}
+          style={{ maxWidth: "var(--olive-content-max)", ...innerStyle }}
         >
           {children}
         </div>

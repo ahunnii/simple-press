@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "~/env";
 import { SETUP_PRESETS } from "~/lib/admin/setup-plan";
 import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
+import { recordPolicyAcceptance } from "~/lib/legal/policy-acceptance.server";
 import {
   MERCHANT_TERMS_VERSION,
   PLATFORM_TERMS_VERSION,
@@ -388,10 +389,14 @@ export async function POST(req: NextRequest) {
     // The user was already created via better-auth signUpEmail on the client
     // before this route is called (see StoreCustomizationStep) — verified
     // above via getSession(). Create business + site content in a transaction.
-    const business = await db.$transaction(async (tx) => {
-      // Server-generated acceptance instant — never read from the request body.
-      const acceptedAt = new Date();
+    // Server-generated acceptance instant — never read from the request body.
+    // Hoisted out of the transaction so the PolicyAcceptance log rows written
+    // after commit carry the same instant as the columns.
+    const acceptedAt = new Date();
+    // Decided up front from the same read the transaction uses below.
+    const stampPlatformTerms = !existingUser.termsAcceptedAt;
 
+    const business = await db.$transaction(async (tx) => {
       // 1. Create business
       const newBusiness = await tx.business.create({
         data: {
@@ -442,7 +447,7 @@ export async function POST(req: NextRequest) {
       // created (via better-auth on the client, immediately before this call).
       // Only stamp when nothing is recorded yet: a retry after a failed store
       // step must not overwrite the original acceptance instant/version.
-      if (!existingUser.termsAcceptedAt) {
+      if (stampPlatformTerms) {
         await tx.user.update({
           where: { id: existingUser.id },
           data: {
@@ -465,6 +470,31 @@ export async function POST(req: NextRequest) {
 
       return newBusiness;
     });
+
+    // Append the clickwraps to the PolicyAcceptance log — AFTER commit, so a
+    // missing table (fails open, Sentry) can never roll back store creation.
+    await recordPolicyAcceptance([
+      {
+        userId: existingUser.id,
+        businessId: business.id,
+        bundle: "merchant",
+        version: MERCHANT_TERMS_VERSION,
+        method: "clickwrap",
+        acceptedAt,
+      },
+      ...(stampPlatformTerms
+        ? [
+            {
+              userId: existingUser.id,
+              businessId: business.id,
+              bundle: "platform" as const,
+              version: PLATFORM_TERMS_VERSION,
+              method: "clickwrap" as const,
+              acceptedAt,
+            },
+          ]
+        : []),
+    ]);
 
     // Notify Artisanal Futures that this token was consumed (non-blocking).
     if (aftoken) {

@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 
-import { DEFAULT_OLIVE_ABOUT_CTA_TILES, DEFAULT_OLIVE_ABOUT_STORY, oliveAboutData } from "./about";
+import {
+  DEFAULT_OLIVE_ABOUT_CTA_TILES,
+  DEFAULT_OLIVE_ABOUT_STORY,
+  oliveAboutData,
+} from "./about";
 
 /**
  * Regression test for the 2026-09-26 migration of olive's list-field
@@ -16,6 +20,10 @@ import { DEFAULT_OLIVE_ABOUT_CTA_TILES, DEFAULT_OLIVE_ABOUT_STORY, oliveAboutDat
  * `olive-about-page.tsx` before it was rewritten — so this test proves the
  * storefront output is byte-for-byte identical (this test passed against the
  * pre-migration constants too, before the migration landed).
+ *
+ * 2026-10-21 "three beats" About rebuild: the story rows are unchanged; the
+ * CTA list became up to two closing buttons with no photo, so its built-in
+ * rows dropped the `image` key and the journal row ("Read the journal").
  */
 
 const EXPECTED_STORY: TemplateListRow[] = [
@@ -46,14 +54,8 @@ const EXPECTED_STORY: TemplateListRow[] = [
 ];
 
 const EXPECTED_CTA_TILES: TemplateListRow[] = [
-  { _id: "default-cta-1", image: "", label: "Shop new", link: "/shop" },
-  {
-    _id: "default-cta-2",
-    image: "",
-    label: "Read the journal",
-    link: "/blog",
-  },
-  { _id: "default-cta-3", image: "", label: "Say hello", link: "/contact" },
+  { _id: "default-cta-1", label: "Shop new", link: "/shop" },
+  { _id: "default-cta-2", label: "Say hello", link: "/contact" },
 ];
 
 describe("olive list-field defaults (moved into TemplateField.defaultRows 2026-09-26)", () => {
@@ -61,7 +63,7 @@ describe("olive list-field defaults (moved into TemplateField.defaultRows 2026-0
     expect(DEFAULT_OLIVE_ABOUT_STORY).toEqual(EXPECTED_STORY);
   });
 
-  it("DEFAULT_OLIVE_ABOUT_CTA_TILES (olive.about.cta) matches the pre-migration copy", () => {
+  it("DEFAULT_OLIVE_ABOUT_CTA_TILES (olive.about.cta) is the two built-in closing buttons", () => {
     expect(DEFAULT_OLIVE_ABOUT_CTA_TILES).toEqual(EXPECTED_CTA_TILES);
   });
 
@@ -91,5 +93,15 @@ describe("olive list-field defaults (moved into TemplateField.defaultRows 2026-0
 
   it("olive.about.cta declares defaultsWhenEmpty + matching defaultRows", () => {
     expectListDefaultsMatch("olive.about.cta");
+  });
+
+  it("olive.about.cta is capped at two buttons with no photo sub-field", () => {
+    const field = oliveAboutData.find((f) => f.key === "olive.about.cta");
+    if (field?.type !== "list") {
+      throw new Error('expected "olive.about.cta" to be a list field');
+    }
+    expect(field.maxItems).toBe(2);
+    expect(field.itemSchema.map((s) => s.key)).toEqual(["label", "link"]);
+    expect((field.defaultRows ?? []).length).toBeLessThanOrEqual(2);
   });
 });

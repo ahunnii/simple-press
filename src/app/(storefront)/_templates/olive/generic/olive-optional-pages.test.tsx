@@ -24,7 +24,7 @@ vi.mock("~/components/tiptap-renderer", () => ({
 /**
  * Smoke + contract tests for the pages on olive's generic base (parity
  * TP5: PF10, PF11, PF12). Each page: one h1 in the olive title band,
- * Josefin type classes (`olive-h1`), content on the shared page edge, the
+ * Bodoni type classes (`olive-h1`), content on the shared page edge, the
  * designed empty state, and the editor hotspots it declares.
  */
 
@@ -114,7 +114,7 @@ describe("OliveEventsPage", () => {
     expect(container.querySelector(".olive-ghost-card")).not.toBeNull();
     const cta = screen.getByRole("link", { name: /Get in touch/ });
     expect(cta).toHaveAttribute("href", "/contact");
-    expect(cta).toHaveClass("olive-btn-primary");
+    expect(cta).toHaveClass("olive-btn-solid");
     expect(container.innerHTML).not.toContain("#0a0a0a");
   });
 
@@ -134,7 +134,7 @@ describe("OliveEventsPage", () => {
       "target",
       "_blank",
     );
-    // No media → the paper date tile (Apr 12 in Detroit).
+    // No media → the sand date tile (Apr 12 in Detroit).
     expect(container.textContent).toContain("Apr");
     expect(container.textContent).toContain("12");
   });
@@ -332,7 +332,7 @@ describe("OliveGenericPage (PF12)", () => {
       />,
     );
     expectOneOliveH1("Our story");
-    const card = container.querySelector(".olive-card");
+    const card = container.querySelector(".olive-page-title-panel");
     const edge = card!.parentElement!;
     expect(edge.style.maxWidth).toBe(OLIVE_PAGE_EDGE_MAX);
     expect(edge.className).toContain("mx-auto");

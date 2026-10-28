@@ -18,6 +18,7 @@ import {
   financeOrderScope,
   financeOrderStatusSql,
 } from "~/lib/finance/order-scope";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { formatCurrency } from "~/lib/utils";
 
 import {
@@ -407,7 +408,11 @@ export async function topProducts(
           select: {
             id: true,
             name: true,
-            images: { take: 1, orderBy: { sortOrder: "asc" } },
+            images: {
+              where: PHOTO_ONLY_WHERE,
+              take: 1,
+              orderBy: { sortOrder: "asc" },
+            },
           },
         })
       : [];

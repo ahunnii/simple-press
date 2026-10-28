@@ -168,6 +168,35 @@ describe("assignStoredPaths", () => {
     });
   });
 
+  it("files product videos and posters in the Videos folder", () => {
+    const objects = [
+      obj("image-a.jpg"),
+      obj("video-v.mp4", "video"),
+      obj("image-p.jpg"),
+    ];
+    const refs: MediaReference[] = [
+      {
+        url: u("image-a.jpg"),
+        category: "products",
+        groupKey: "p1",
+        groupName: "Blue Mug",
+        isImageField: true,
+      },
+      { url: u("video-v.mp4"), category: "videos", label: "Blue Mug - video 1" },
+      {
+        url: u("image-p.jpg"),
+        category: "videos",
+        label: "Blue Mug - video 1 - poster",
+        isImageField: true,
+      },
+    ];
+    expect(Object.fromEntries(assignStoredPaths(objects, refs, BIZ))).toEqual({
+      [k("image-a.jpg")]: "Photos/Products/Blue Mug/01.jpg",
+      [k("video-v.mp4")]: "Photos/Videos/Blue Mug - video 1.mp4",
+      [k("image-p.jpg")]: "Photos/Videos/Blue Mug - video 1 - poster.jpg",
+    });
+  });
+
   it("de-duplicates group folders and file names", () => {
     const objects = [
       obj("image-1.jpg"),

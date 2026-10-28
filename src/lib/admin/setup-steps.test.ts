@@ -292,6 +292,7 @@ describe("computeSetupStatus — completion rules", () => {
     expect(shipping({})).toBe(0);
     expect(shipping({ facts: { shippingType: "flat_rate" } })).toBe(1);
     expect(shipping({ facts: { offersInStorePickup: true } })).toBe(1);
+    expect(shipping({ facts: { offersLocalDelivery: true } })).toBe(1);
     expect(
       shipping({ confirmations: { shippingPickup: "2026-10-12T00:00:00Z" } }),
     ).toBe(1);

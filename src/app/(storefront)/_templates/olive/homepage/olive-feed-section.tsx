@@ -31,9 +31,10 @@ type Props = {
 };
 
 /**
- * The feed — six squares of the shop as it actually looks, at the density of
- * a contact sheet rather than a carousel. Six across on a laptop, three on a
- * phone, so the block keeps its shape at both ends.
+ * The feed — six square photographs of the shop as it actually looks, at the
+ * density of a contact sheet rather than a carousel: no frames, a hairline
+ * gutter, a slow push-in on hover. Six across on a laptop, three on a phone,
+ * so the block keeps its shape at both ends.
  *
  * Each square links out to the profile only when the owner has given a URL;
  * without one the photographs are shown plainly rather than as links that go
@@ -57,20 +58,22 @@ export function OliveFeedSection({
   return (
     <OliveSection
       bleed
-      tone="paper"
+      tone="ivory"
       aria-labelledby="olive-feed-heading"
       {...sectionAttrs}
     >
       <OliveSectionHeading
         heading={heading}
         id="olive-feed-heading"
+        caps
+        align="center"
         body={handle.trim() ? handle : undefined}
         headingFieldKey={headingFieldKey}
         bodyFieldKey={handleFieldKey}
-        className="mb-8"
+        className="mb-8 md:mb-10"
       />
 
-      <OliveRevealGroup fan className="grid grid-cols-3 gap-3 md:grid-cols-6">
+      <OliveRevealGroup className="grid grid-cols-3 gap-1 md:grid-cols-6 md:gap-1.5">
         {shown.map((item, index) => {
           const caption = item.caption.trim();
           const photo = hasOliveImage(item.image) ? (
@@ -79,17 +82,23 @@ export function OliveFeedSection({
               alt={href ? "" : caption}
               fill
               sizes="(max-width: 768px) 33vw, 16vw"
-              className="object-cover"
+              className="olive-photo-push object-cover"
             />
           ) : (
-            <OliveImageFallback className="absolute inset-0" size={22} />
+            <OliveImageFallback className="absolute inset-0" />
           );
 
-          const tileStyle = { "--i": index } as CSSProperties;
+          const tileStyle = {
+            "--i": index,
+            backgroundColor: "var(--olive-sand)",
+          } as CSSProperties;
           const frame =
-            "olive-card olive-reveal-item relative aspect-square overflow-hidden";
+            "olive-reveal-item relative block aspect-square overflow-hidden";
 
-          const itemAttrs = listItemAttr("olive.homepage.feed-images", item.index);
+          const itemAttrs = listItemAttr(
+            "olive.homepage.feed-images",
+            item.index,
+          );
 
           return href ? (
             <a
@@ -98,14 +107,19 @@ export function OliveFeedSection({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${caption ? caption : `Photograph ${index + 1}`} (opens in a new tab)`}
-              className={cn(frame, "olive-card-lift")}
+              className={cn(frame, "group")}
               style={tileStyle}
               {...itemAttrs}
             >
               {photo}
             </a>
           ) : (
-            <div key={item.id} className={frame} style={tileStyle} {...itemAttrs}>
+            <div
+              key={item.id}
+              className={frame}
+              style={tileStyle}
+              {...itemAttrs}
+            >
               {photo}
             </div>
           );

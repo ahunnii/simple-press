@@ -29,6 +29,7 @@ import { sessionShopperEmail } from "~/lib/checkout/session-shopper-email";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import { splitCustomerName } from "~/lib/customer-name";
 import { expandOrderItemsForInventory } from "~/lib/customizer/inventory";
+import { parseDeliveryMethod } from "~/lib/delivery-method";
 import { handleDonationCheckoutCompleted } from "~/lib/donations/webhook";
 import { getBusinessAlertRecipients } from "~/lib/email/alert-recipients";
 import {
@@ -255,6 +256,7 @@ export async function POST(req: NextRequest) {
             ownerEmail: true,
             pickupLocation: true,
             pickupInstructions: true,
+            localDeliveryInstructions: true,
             businessAddress: true,
             addressStreet: true,
             addressCity: true,
@@ -496,8 +498,9 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId = dc?.id ?? null;
         }
 
-        const deliveryMethod =
-          session.metadata?.deliveryMethod === "pickup" ? "pickup" : "ship";
+        const deliveryMethod = parseDeliveryMethod(
+          session.metadata?.deliveryMethod,
+        );
 
         // Terms are agreed when the shopper starts checkout, which for a
         // delayed (bank) payment is days before this order is written. So
@@ -1176,28 +1179,31 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // Shipping address for the emails, when the order has one. Shared by
+        // the customer confirmation and (for local delivery, so the owner
+        // knows where to drive) the owner notification.
+        const loadEmailShippingAddress = async () => {
+          if (!shippingAddressId) return undefined;
+          const addr = await db.shippingAddress.findUnique({
+            where: { id: shippingAddressId },
+          });
+          if (!addr) return undefined;
+          return {
+            name: `${addr.firstName} ${addr.lastName}`.trim(),
+            line1: addr.address1,
+            line2: addr.address2 ?? null,
+            city: addr.city,
+            state: addr.province ?? "",
+            postalCode: addr.zip,
+            country: addr.country,
+          };
+        };
+
         // Send order confirmation email (skip if customer email is unknown)
         if (customerEmail === "unknown@example.com") {
         } else
           try {
-            // Fetch shipping address for email if available
-            let shippingAddressForEmail = undefined;
-            if (shippingAddressId) {
-              const addr = await db.shippingAddress.findUnique({
-                where: { id: shippingAddressId },
-              });
-              if (addr) {
-                shippingAddressForEmail = {
-                  name: `${addr.firstName} ${addr.lastName}`.trim(),
-                  line1: addr.address1,
-                  line2: addr.address2 ?? null,
-                  city: addr.city,
-                  state: addr.province ?? "",
-                  postalCode: addr.zip,
-                  country: addr.country,
-                };
-              }
-            }
+            const shippingAddressForEmail = await loadEmailShippingAddress();
 
             await sendOrderConfirmation({
               to: order.customerEmail,
@@ -1217,13 +1223,19 @@ export async function POST(req: NextRequest) {
               discount: order.discount,
               total: order.total,
               shippingAddress: shippingAddressForEmail,
-              deliveryMethod: order.deliveryMethod as "ship" | "pickup",
+              deliveryMethod: parseDeliveryMethod(order.deliveryMethod),
               ...(order.deliveryMethod === "pickup"
                 ? {
                     pickupLocation:
                       resolvePickupLocation(business) ?? undefined,
                     pickupInstructions:
                       business.pickupInstructions ?? undefined,
+                  }
+                : {}),
+              ...(order.deliveryMethod === "delivery"
+                ? {
+                    deliveryInstructions:
+                      business.localDeliveryInstructions ?? null,
                   }
                 : {}),
               business: {
@@ -1276,7 +1288,14 @@ export async function POST(req: NextRequest) {
             tax: order.tax,
             discount: order.discount,
             total: order.total,
-            deliveryMethod: order.deliveryMethod as "ship" | "pickup",
+            deliveryMethod: parseDeliveryMethod(order.deliveryMethod),
+            ...(order.deliveryMethod === "delivery"
+              ? {
+                  shippingAddress: await loadEmailShippingAddress(),
+                  deliveryInstructions:
+                    business.localDeliveryInstructions ?? null,
+                }
+              : {}),
             business: {
               name: business.name,
               siteContent: business.siteContent,

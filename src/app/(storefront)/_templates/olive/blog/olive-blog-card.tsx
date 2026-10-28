@@ -1,6 +1,7 @@
 import type { CSSProperties, ElementType } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { deriveExcerpt } from "~/lib/blog-search";
@@ -22,10 +23,9 @@ type Props = {
 };
 
 /**
- * OliveBlogCard — the journal's one card language: image 4:3 (or full-bleed
- * left column on "lead"), date in slate-deep, title in the shared
- * `.olive-card-title` face, excerpt, a decorative "Read more" ghost
- * affordance. The whole card is one link (`aria-label` set to the post
+ * OliveBlogCard — the journal's one card language, unframed: image 4:3 (or a
+ * left column on "lead"), a taupe-ink date, the title in Bodoni, the
+ * excerpt, a decorative "Read more" link affordance. The whole card is one link (`aria-label` set to the post
  * title so its accessible name doesn't also read the excerpt); the
  * "Read more" span is `aria-hidden` rather than a second nested link.
  */
@@ -47,9 +47,9 @@ export function OliveBlogCard({
       href={`/blog/${post.slug}`}
       aria-label={post.title}
       className={cn(
-        "olive-card olive-card-paper olive-card-lift group block overflow-hidden",
+        "group block",
         revealIndex != null && "olive-reveal-item",
-        isLead && "md:grid md:grid-cols-2 md:items-stretch",
+        isLead && "md:grid md:grid-cols-2 md:items-center md:gap-10",
       )}
       style={{
         ...(revealIndex != null
@@ -58,12 +58,7 @@ export function OliveBlogCard({
         ...(isLead ? { gridColumn: "1 / -1" } : undefined),
       }}
     >
-      <div
-        className={cn(
-          "relative aspect-[4/3] overflow-hidden",
-          isLead && "md:aspect-auto md:h-full",
-        )}
-      >
+      <div className={cn("relative aspect-[4/3] overflow-hidden")}>
         {hasOliveImage(post.image) ? (
           <Image
             src={post.image ?? "/placeholder.svg"}
@@ -84,30 +79,26 @@ export function OliveBlogCard({
 
       <div
         className={cn(
-          "flex flex-col items-start gap-2 p-5",
-          isLead && "md:justify-center md:gap-3 md:p-8",
+          "flex flex-col items-start gap-2 pt-4",
+          isLead && "md:justify-center md:gap-3 md:pt-0",
         )}
       >
         <time
           dateTime={new Date(post.createdAt).toISOString()}
-          className="olive-caption"
-          style={{ color: "var(--olive-slate-deep)" }}
+          className="olive-label"
+          style={{ color: "var(--olive-taupe-ink)" }}
         >
           {formatDate(post.createdAt)}
         </time>
-        <Title className={isLead ? "olive-h3" : "olive-card-title"}>
-          {post.title}
-        </Title>
+        <Title className={isLead ? "olive-h2" : "olive-h3"}>{post.title}</Title>
         {excerpt ? (
           <p className="olive-caption" style={{ maxWidth: "60ch" }}>
             {excerpt}
           </p>
         ) : null}
-        <span
-          aria-hidden="true"
-          className="olive-btn olive-btn-ghost olive-btn-sm mt-1"
-        >
+        <span aria-hidden="true" className="olive-btn olive-btn-link mt-1">
           Read more
+          <ArrowRight className="olive-btn-arrow" size={14} strokeWidth={1.5} />
         </span>
       </div>
     </Link>

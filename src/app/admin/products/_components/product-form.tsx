@@ -33,14 +33,16 @@ import {
   pruneColorSwatches,
   readColorSwatches,
 } from "~/lib/products/color-swatches";
+import { isVideoMedia } from "~/lib/products/media";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { parseProductIntervals } from "~/lib/subscriptions/intervals";
-import { getStoredPath } from "~/lib/uploads";
+import { getStoredPath, ROUTE_MAX_FILES } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import {
   MAX_PRODUCT_IMAGES,
   productFormSchema,
+  refineProductMedia,
   variantSchema,
 } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
@@ -309,6 +311,13 @@ export function ProductForm({
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
   const imagesToSyncRef = useRef<FormProductImage[]>([]);
+  // Save-time gallery problem (photo-first / video cap), shown under the
+  // gallery; cleared as soon as the gallery changes.
+  const [galleryError, setGalleryError] = useState<string | null>(null);
+  const handleImagesChange = (next: FormProductImage[]) => {
+    setImages(next);
+    setGalleryError(null);
+  };
   const initialImagesRef = useRef<FormProductImage[]>([]);
 
   // OG image state (kept separate, same pattern as gallery images)
@@ -432,12 +441,16 @@ export function ProductForm({
   // Load existing images on mount
   useEffect(() => {
     if (product?.images) {
-      const loaded = product.images.map((img) => ({
-        id: img.id,
-        url: img.url,
-        altText: img.altText,
-        sortOrder: img.sortOrder,
-      }));
+      const loaded = product.images.map(
+        (img): FormProductImage => ({
+          id: img.id,
+          url: img.url,
+          altText: img.altText,
+          sortOrder: img.sortOrder,
+          mediaType: img.mediaType,
+          posterUrl: img.posterUrl,
+        }),
+      );
       setImages(loaded);
       initialImagesRef.current = loaded;
     }
@@ -453,7 +466,8 @@ export function ProductForm({
         img.id !== orig.id ||
         img.url !== orig.url ||
         img.altText !== orig.altText ||
-        img.sortOrder !== orig.sortOrder
+        img.sortOrder !== orig.sortOrder ||
+        (img.posterUrl ?? null) !== (orig.posterUrl ?? null)
       );
     });
   }, [images]);
@@ -471,6 +485,14 @@ export function ProductForm({
     route: "images",
     onError: (error) => {
       toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  const videoUploader = useUploadFiles({
+    api: "/api/upload",
+    route: "productVideos",
+    onError: (error) => {
+      toast.error(error.message ?? "Video upload failed.");
     },
   });
 
@@ -668,6 +690,36 @@ export function ProductForm({
       variants,
     );
 
+    // Gallery rules (≤10 items, ≤3 videos, a photo first) — the same
+    // refinement `product.syncImages` enforces, checked before anything is
+    // uploaded so the owner sees it under the gallery instead of after a
+    // half-finished save.
+    const galleryCheck = z
+      .array(
+        z.object({
+          url: z.string(),
+          sortOrder: z.number(),
+          mediaType: z.enum(["IMAGE", "VIDEO"]),
+        }),
+      )
+      .superRefine(refineProductMedia)
+      .safeParse(
+        images.map((img, idx) => ({
+          url: img.url,
+          sortOrder: idx,
+          mediaType: img.mediaType ?? "IMAGE",
+        })),
+      );
+    if (!galleryCheck.success) {
+      const message =
+        galleryCheck.error.issues[0]?.message ?? "Check the product photos.";
+      setGalleryError(message);
+      setActiveTab("basics");
+      toast.error(message);
+      return;
+    }
+    setGalleryError(null);
+
     // Objects freshly uploaded to S3 during THIS submit — if the save
     // mutation below fails, these have nothing referencing them in the DB
     // yet, so they're discarded via `upload.discardUploads` to avoid
@@ -695,53 +747,98 @@ export function ProductForm({
       resolvedOgImage = data.ogImage ?? null;
     }
 
-    // Resolve gallery images: upload any pending (blob:) images before saving.
-    const pendingImages = images.filter((img) => img.file);
-    let resolvedImages = images.map((img, idx) => ({
-      id: img.id,
-      url: img.url,
-      // A file name left over from an old upload isn't a description; clear it.
-      altText: isFilenameAltText(img.altText) ? "" : img.altText,
-      sortOrder: idx,
-    }));
-    if (pendingImages.length > 0) {
-      let galleryResult;
-      try {
-        galleryResult = await galleryUploader.upload(
-          pendingImages.map((p) => p.file!),
+    // Resolve gallery media: upload pending (blob:) photos, videos and video
+    // posters before saving. Photos and posters share the `images` route;
+    // videos go through `productVideos`.
+    const pendingPhotoFiles = images.flatMap((img) =>
+      img.file && !isVideoMedia(img) ? [img.file] : [],
+    );
+    const pendingPosterFiles = images.flatMap((img) =>
+      img.posterFile ? [img.posterFile] : [],
+    );
+    const pendingVideoFiles = images.flatMap((img) =>
+      img.file && isVideoMedia(img) ? [img.file] : [],
+    );
+    const fileToUrl = new Map<File, string>();
+    const pendingImageFiles = [...pendingPhotoFiles, ...pendingPosterFiles];
+    try {
+      // Chunked to the route's per-request cap (photos + posters can't
+      // exceed the gallery cap, but don't lean on that).
+      const batchSize = ROUTE_MAX_FILES.images ?? MAX_PRODUCT_IMAGES;
+      for (let i = 0; i < pendingImageFiles.length; i += batchSize) {
+        const result = await galleryUploader.upload(
+          pendingImageFiles.slice(i, i + batchSize),
         );
-      } catch {
-        toast.error("Failed to upload images.");
-        return;
+        for (const f of result.files) {
+          const stored = getStoredPath(f);
+          fileToUrl.set(f.raw, stored);
+          newlyUploadedUrls.push(stored);
+        }
+        if (result.failedFiles.length > 0) {
+          throw new Error("Some images failed to upload.");
+        }
       }
-      if (galleryResult.failedFiles.length > 0) {
-        toast.error("Some images failed to upload.");
-        return;
+      if (pendingVideoFiles.length > 0) {
+        const result = await videoUploader.upload(pendingVideoFiles);
+        for (const f of result.files) {
+          const stored = getStoredPath(f);
+          fileToUrl.set(f.raw, stored);
+          newlyUploadedUrls.push(stored);
+        }
+        if (result.failedFiles.length > 0) {
+          throw new Error("Some videos failed to upload.");
+        }
       }
-      const fileToUrl = new Map<File, string>();
-      for (const f of galleryResult.files) {
-        fileToUrl.set(f.raw, getStoredPath(f));
+    } catch (error) {
+      toast.error(
+        error instanceof Error && error.message.startsWith("Some ")
+          ? error.message
+          : "Failed to upload photos or videos.",
+      );
+      if (newlyUploadedUrls.length > 0) {
+        discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
       }
-      newlyUploadedUrls.push(...fileToUrl.values());
-      resolvedImages = images.map((img, idx) => ({
-        id: img.id,
-        url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
-        altText: isFilenameAltText(img.altText) ? "" : img.altText,
-        sortOrder: idx,
-      }));
-      if (resolvedImages.some((i) => !i.url)) {
-        toast.error("Failed to resolve uploaded images.");
-        return;
-      }
+      return;
     }
 
-    // Variant images must point at a current gallery image. Remap any
+    const resolvedImages = images.map((img, idx) => {
+      const isVideo = isVideoMedia(img);
+      return {
+        id: img.id,
+        url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
+        // A file name left over from an old upload isn't a description; clear it.
+        altText: isFilenameAltText(img.altText) ? "" : img.altText,
+        sortOrder: idx,
+        mediaType: isVideo ? ("VIDEO" as const) : ("IMAGE" as const),
+        // A poster that failed to resolve is dropped (storefront falls back
+        // to the first frame) rather than failing the whole save.
+        posterUrl: !isVideo
+          ? null
+          : img.posterFile
+            ? (fileToUrl.get(img.posterFile) ?? null)
+            : img.posterUrl?.startsWith("blob:")
+              ? null
+              : (img.posterUrl ?? null),
+      };
+    });
+    if (resolvedImages.some((i) => !i.url)) {
+      toast.error("Failed to resolve uploaded images.");
+      if (newlyUploadedUrls.length > 0) {
+        discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
+      }
+      return;
+    }
+
+    // Variant images must point at a current gallery photo. Remap any
     // pending (blob:) URLs to their uploaded URL and drop references to
-    // images that were removed from the gallery.
+    // photos that were removed from the gallery (videos are never variant
+    // images).
     const resolvedUrlByFormUrl = new Map<string, string>();
     images.forEach((img, idx) => {
       const resolved = resolvedImages[idx];
-      if (resolved) resolvedUrlByFormUrl.set(img.url, resolved.url);
+      if (resolved && !isVideoMedia(img)) {
+        resolvedUrlByFormUrl.set(img.url, resolved.url);
+      }
     });
     const resolveVariantImageUrl = (url: string | null | undefined) =>
       url ? (resolvedUrlByFormUrl.get(url) ?? null) : null;
@@ -915,6 +1012,8 @@ export function ProductForm({
             url: image.url,
             altText: image.altText,
             sortOrder: image.sortOrder,
+            mediaType: image.mediaType,
+            posterUrl: image.posterUrl,
           })),
         });
       }
@@ -937,6 +1036,7 @@ export function ProductForm({
           form.reset(getNewProductDefaults());
           slugManuallyEditedRef.current = false;
           setImages([]);
+          setGalleryError(null);
           setVariants([]);
           setVariantErrors({});
           setCollectionIds([]);
@@ -976,7 +1076,8 @@ export function ProductForm({
     createProductMutation.isPending ||
     syncImagesMutation.isPending ||
     ogImageUploader.isPending ||
-    galleryUploader.isPending;
+    galleryUploader.isPending ||
+    videoUploader.isPending;
 
   const isDeleting = deleteProductMutation.isPending;
 
@@ -1178,6 +1279,7 @@ export function ProductForm({
                       slugManuallyEditedRef.current = false;
                       setCollectionIds(baselineCollectionIds);
                       setImages([...initialImagesRef.current]);
+                      setGalleryError(null);
                       setVariants([...initialVariantsRef.current]);
                       setVariantErrors({});
                       setVariantManagerKey((k) => k + 1);
@@ -1634,7 +1736,8 @@ export function ProductForm({
                     <ImageUploader
                       ref={imageUploaderRef}
                       images={images}
-                      onImagesChange={setImages}
+                      onImagesChange={handleImagesChange}
+                      error={galleryError}
                       maxImages={MAX_PRODUCT_IMAGES}
                       mediaLibraryEnabled={mediaEnabled}
                     />

@@ -8,7 +8,6 @@ import { CreditCard, Loader2, Tag } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
@@ -81,10 +80,10 @@ export function ViiCheckoutForm({
   // PF24 — number the steps from the sections actually rendered, instead of
   // baking "Step N" into each section's saved text (which goes stale the
   // moment a step above it is hidden). Contact always renders; delivery only
-  // renders when the store offers in-store pickup; the shipping-address
-  // fieldset only renders when the customer has shipping selected.
-  const deliveryStepVisible = f.shippingConfig.offersInStorePickup;
-  const shippingStepVisible = f.deliveryMethod === "ship";
+  // renders when the store offers more than shipping; the address fieldset
+  // only renders when the customer has shipping or local delivery selected.
+  const deliveryStepVisible = f.deliveryOptions.length > 1;
+  const shippingStepVisible = f.needsAddress;
   let viiCheckoutStep = 1;
   const contactStepNumber = viiCheckoutStep++;
   const deliveryStepNumber = deliveryStepVisible ? viiCheckoutStep++ : null;
@@ -273,8 +272,8 @@ export function ViiCheckoutForm({
             </div>
           </fieldset>
 
-          {/* Delivery Method — only when store offers in-store pickup */}
-          {f.shippingConfig.offersInStorePickup && (
+          {/* Delivery Method — only when store offers more than shipping */}
+          {f.deliveryOptions.length > 1 && (
             <div
               role="group"
               aria-labelledby="vii-co-delivery-heading"
@@ -319,115 +318,68 @@ export function ViiCheckoutForm({
                   aria-label="Delivery method"
                   style={{ display: "flex", flexWrap: "wrap", gap: 12 }}
                 >
-                  {/* Ship tile */}
-                  <button
-                    type="button"
-                    aria-pressed={f.deliveryMethod === "ship"}
-                    onClick={() => f.setDeliveryMethod("ship")}
-                    style={{
-                      flex: 1,
-                      minWidth: 140,
-                      padding: "16px 20px",
-                      border: `1.5px solid ${f.deliveryMethod === "ship" ? "var(--vii-navy)" : "var(--vii-hairline)"}`,
-                      borderRadius: "var(--radius)",
-                      background:
-                        f.deliveryMethod === "ship"
-                          ? "color-mix(in srgb, var(--vii-navy) 5%, transparent)"
-                          : "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition:
-                        "border-color 0.15s ease, background 0.15s ease",
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      {f.deliveryMethod === "ship" && (
-                        <span
-                          aria-hidden="true"
-                          className="vii-fade-up"
-                          style={{
-                            width: 14,
-                            height: 14,
-                            borderRadius: "50%",
-                            background: "var(--vii-copper-deep)",
-                            flex: "none",
-                          }}
-                        />
-                      )}
-                      <span
+                  {f.deliveryOptions.map((option) => {
+                    const selected = f.deliveryMethod === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => f.setDeliveryMethod(option.id)}
                         style={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          letterSpacing: "0.04em",
-                          color: "var(--vii-navy)",
+                          flex: 1,
+                          minWidth: 140,
+                          padding: "16px 20px",
+                          border: `1.5px solid ${selected ? "var(--vii-navy)" : "var(--vii-hairline)"}`,
+                          borderRadius: "var(--radius)",
+                          background: selected
+                            ? "color-mix(in srgb, var(--vii-navy) 5%, transparent)"
+                            : "transparent",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition:
+                            "border-color 0.15s ease, background 0.15s ease",
                         }}
                       >
-                        Ship to address
-                      </span>
-                    </span>
-                  </button>
-
-                  {/* Pickup tile */}
-                  <button
-                    type="button"
-                    aria-pressed={f.deliveryMethod === "pickup"}
-                    onClick={() => f.setDeliveryMethod("pickup")}
-                    style={{
-                      flex: 1,
-                      minWidth: 140,
-                      padding: "16px 20px",
-                      border: `1.5px solid ${f.deliveryMethod === "pickup" ? "var(--vii-navy)" : "var(--vii-hairline)"}`,
-                      borderRadius: "var(--radius)",
-                      background:
-                        f.deliveryMethod === "pickup"
-                          ? "color-mix(in srgb, var(--vii-navy) 5%, transparent)"
-                          : "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition:
-                        "border-color 0.15s ease, background 0.15s ease",
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      {f.deliveryMethod === "pickup" && (
                         <span
-                          aria-hidden="true"
-                          className="vii-fade-up"
                           style={{
-                            width: 14,
-                            height: 14,
-                            borderRadius: "50%",
-                            background: "var(--vii-copper-deep)",
-                            flex: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
                           }}
-                        />
-                      )}
-                      <span
-                        style={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          letterSpacing: "0.04em",
-                          color: "var(--vii-navy)",
-                        }}
-                      >
-                        In-store pickup
-                      </span>
-                    </span>
-                  </button>
+                        >
+                          {selected && (
+                            <span
+                              aria-hidden="true"
+                              className="vii-fade-up"
+                              style={{
+                                width: 14,
+                                height: 14,
+                                borderRadius: "50%",
+                                background: "var(--vii-copper-deep)",
+                                flex: "none",
+                              }}
+                            />
+                          )}
+                          <span
+                            style={{
+                              fontFamily: "var(--font-sans)",
+                              fontSize: 13,
+                              fontWeight: 500,
+                              letterSpacing: "0.04em",
+                              color: "var(--vii-navy)",
+                            }}
+                          >
+                            {option.id === "ship"
+                              ? "Ship to address"
+                              : option.id === "pickup"
+                                ? "In-store pickup"
+                                : option.label}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <p
@@ -441,7 +393,10 @@ export function ViiCheckoutForm({
                 >
                   {f.deliveryMethod === "pickup"
                     ? "No shipping charge. You'll pick up your order at the store."
-                    : "Shipping cost is based on your store's shipping settings."}
+                    : f.deliveryMethod === "delivery"
+                      ? (f.deliveryOptions.find((o) => o.id === "delivery")
+                          ?.description ?? "")
+                      : "Shipping cost is based on your store's shipping settings."}
                 </p>
                 {f.deliveryMethod === "pickup" && (
                   <div
@@ -499,12 +454,81 @@ export function ViiCheckoutForm({
                     ) : null}
                   </div>
                 )}
+                {f.deliveryMethod === "delivery" && (
+                  <>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 13,
+                        fontWeight:
+                          f.localDelivery.status === "ineligible" ? 500 : 400,
+                        color:
+                          f.localDelivery.status === "ineligible"
+                            ? "var(--vii-error)"
+                            : "var(--vii-ink-soft)",
+                        marginTop: 12,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {f.localDelivery.status === "checking"
+                        ? "Checking your ZIP…"
+                        : f.localDelivery.status === "ineligible"
+                          ? f.localDelivery.message
+                          : f.localDelivery.status === "eligible"
+                            ? "Great — we deliver to you."
+                            : null}
+                    </p>
+                    {f.localDelivery.instructions ? (
+                      <div
+                        className="vii-fade-up"
+                        style={{
+                          marginTop: 12,
+                          padding: "12px 14px",
+                          border: "1px solid var(--vii-hairline)",
+                          borderRadius: "var(--radius)",
+                          background: "var(--vii-cream)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 4,
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: 11,
+                            fontWeight: 500,
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: "var(--vii-navy)",
+                            margin: 0,
+                          }}
+                        >
+                          Delivery details
+                        </p>
+                        <p
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: 13,
+                            color: "var(--vii-ink-soft)",
+                            lineHeight: 1.5,
+                            whiteSpace: "pre-line",
+                            margin: 0,
+                          }}
+                        >
+                          {f.localDelivery.instructions}
+                        </p>
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </div>
             </div>
           )}
 
-          {/* Shipping Address — only when delivery method is ship */}
-          {f.deliveryMethod === "ship" && (
+          {/* Address — shipping and local delivery; pickup needs none */}
+          {f.needsAddress && (
             <fieldset
               aria-labelledby="vii-co-shipping-heading"
               className="vii-fade-up"
@@ -538,7 +562,9 @@ export function ViiCheckoutForm({
                     margin: 0,
                   }}
                 >
-                  {shippingHeading}
+                  {f.deliveryMethod === "delivery"
+                    ? "Delivery address"
+                    : shippingHeading}
                 </h2>
               </div>
 
@@ -559,8 +585,10 @@ export function ViiCheckoutForm({
                     marginTop: -8,
                   }}
                 >
-                  {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                    ? "We price shipping from this address. Make changes here before continuing to payment."
+                  {f.addressLocked
+                    ? f.deliveryMethod === "delivery"
+                      ? "We check delivery from this address. Make changes here before continuing to payment."
+                      : "We price shipping from this address. Make changes here before continuing to payment."
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your address before paying."}
                 </p>
 
@@ -589,7 +617,7 @@ export function ViiCheckoutForm({
                     value={f.addressLine1}
                     onChange={(e) => f.setAddressLine1(e.target.value)}
                     placeholder="Street address, P.O. box"
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.addressLine1.trim()
@@ -640,7 +668,7 @@ export function ViiCheckoutForm({
                       autoComplete="shipping address-level2"
                       value={f.city}
                       onChange={(e) => f.setCity(e.target.value)}
-                      required={f.deliveryMethod === "ship"}
+                      required={f.needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !f.city.trim() ? true : undefined
@@ -723,7 +751,7 @@ export function ViiCheckoutForm({
                       autoComplete="shipping postal-code"
                       value={f.postalCode}
                       onChange={(e) => f.setPostalCode(e.target.value)}
-                      required={f.deliveryMethod === "ship"}
+                      required={f.needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !f.postalCode.trim()
@@ -1214,7 +1242,7 @@ export function ViiCheckoutForm({
                       color: "var(--vii-ink-soft)",
                     }}
                   >
-                    Shipping
+                    {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
                   </span>
                   <span
                     style={{
@@ -1238,7 +1266,14 @@ export function ViiCheckoutForm({
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (
-                      "Calculated at checkout"
+                      f.deliveryMethod === "delivery" ? (
+                        "Enter your ZIP"
+                      ) : (
+                        "Calculated at checkout"
+                      )
+                    ) : f.deliveryMethod === "delivery" &&
+                      f.localDelivery.status === "ineligible" ? (
+                      "Not available"
                     ) : f.shipping === 0 ? (
                       "Free"
                     ) : (

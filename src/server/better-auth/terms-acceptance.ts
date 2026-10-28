@@ -76,3 +76,37 @@ export function resolvePlatformTermsAcceptance(
     termsVersion: PLATFORM_TERMS_VERSION,
   };
 }
+
+/**
+ * The `PolicyAcceptance` log row to append after a credential sign-up, or
+ * `null` when this `user.create` was not one. Called from
+ * `databaseHooks.user.create.after` in `config.tsx`, which better-auth queues
+ * until AFTER the user row commits (`queueAfterTransactionHook`), so the log's
+ * FK to `user` is satisfied.
+ *
+ * Only `/sign-up/email` gets a row: that is the one path where
+ * `resolvePlatformTermsAcceptance` stamps (or throws), so reaching `after` on
+ * it means the box was ticked. The row reuses the column's own timestamp when
+ * the adapter hands it back, so the two records agree to the millisecond;
+ * otherwise the server clock now (milliseconds later). Never from the request.
+ */
+export function resolveSignupClickwrapLogEntry(
+  user: { id: string; termsAcceptedAt?: unknown },
+  context: TermsAcceptanceContext | null | undefined,
+): {
+  userId: string;
+  bundle: "platform";
+  version: string;
+  method: "clickwrap";
+  acceptedAt: Date;
+} | null {
+  if (context?.path !== SIGN_UP_EMAIL_PATH) return null;
+  return {
+    userId: user.id,
+    bundle: "platform",
+    version: PLATFORM_TERMS_VERSION,
+    method: "clickwrap",
+    acceptedAt:
+      user.termsAcceptedAt instanceof Date ? user.termsAcceptedAt : new Date(),
+  };
+}

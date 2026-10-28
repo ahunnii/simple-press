@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 
+import type { DeliveryMethod as SharedDeliveryMethod } from "~/lib/delivery-method";
 import type { CartItem } from "~/providers/cart-context";
 import type { Session } from "~/server/better-auth/config";
+import { deliveryMethodLabel } from "~/lib/delivery-method";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
@@ -30,7 +32,11 @@ import { GloveRevealGroup } from "../shared/glove-reveal";
 import { GloveSection } from "../shared/glove-section";
 
 /** `session.metadata.deliveryMethod`, echoed back by `/api/stripe/session`. */
-type DeliveryMethod = "ship" | "pickup" | null;
+type DeliveryMethod = SharedDeliveryMethod | null;
+
+/** Local-delivery orders never "ship", so they skip the shipped-order list. */
+const LOCAL_DELIVERY_STEPS =
+  "You'll receive an email confirmation shortly\nWe'll let you know when your order is on its way";
 
 /** What `/api/stripe/session` answers with. */
 type OrderDetails = {
@@ -213,7 +219,9 @@ export function GloveOrderConfirmation({
   const steps = splitLines(
     deliveryMethod === "pickup" && nextStepsPickup.trim()
       ? nextStepsPickup
-      : nextSteps,
+      : deliveryMethod === "delivery"
+        ? LOCAL_DELIVERY_STEPS
+        : nextSteps,
   );
   const showPickupLocation =
     deliveryMethod === "pickup" && !!business.pickupLocation?.trim();
@@ -228,12 +236,9 @@ export function GloveOrderConfirmation({
     : orderDetails?.payment_status === "paid"
       ? "Paid"
       : (orderDetails?.payment_status ?? "");
-  const deliveryLabel =
-    deliveryMethod === "pickup"
-      ? "In-store pickup"
-      : deliveryMethod === "ship"
-        ? "Shipping"
-        : "";
+  const deliveryLabel = deliveryMethod
+    ? deliveryMethodLabel(deliveryMethod)
+    : "";
 
   const meta = [
     {

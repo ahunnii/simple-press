@@ -151,10 +151,9 @@ export default async function SubscribePage({ searchParams }: Props) {
   // uses (see `create-session/route.ts` ~308-403), run here so a sold-out
   // product renders a friendly card instead of a form that can only fail at
   // submit. Built from the `product.get` payload already fetched above
-  // rather than a second query; `baseInventoryUnit.reservedQty` isn't
-  // selected by that procedure, so shared-pool stock is treated
-  // conservatively (reservedQty: 0) — the same tradeoff `getCartItemsStatus`
-  // in `product.ts` already makes.
+  // rather than a second query. That payload's `inventoryQty` (product,
+  // variant and shared pool alike) is already net of reservations — see
+  // `toPublicProduct` — so every `reservedQty` below is 0.
   const availabilityLine = {
     productId: product.id,
     variantId,
@@ -170,7 +169,7 @@ export default async function SubscribePage({ searchParams }: Props) {
             {
               price: variant.price,
               inventoryQty: variant.inventoryQty,
-              reservedQty: variant.reservedQty,
+              reservedQty: 0,
               product: {
                 price: product.price,
                 published: product.published,
@@ -192,7 +191,7 @@ export default async function SubscribePage({ searchParams }: Props) {
         trackInventory: product.trackInventory,
         allowBackorders: product.allowBackorders,
         inventoryQty: product.inventoryQty,
-        reservedQty: product.reservedQty,
+        reservedQty: 0,
         additionalFields: product.additionalFields,
         baseInventoryUnitId: product.baseInventoryUnitId,
         baseUnitsConsumed: product.baseUnitsConsumed,

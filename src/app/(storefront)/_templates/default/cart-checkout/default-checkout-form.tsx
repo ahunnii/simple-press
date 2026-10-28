@@ -8,7 +8,6 @@ import { CreditCard, Loader2, Tag } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -150,7 +149,7 @@ export function DefaultCheckoutForm({
           </Card>
 
           {/* Delivery Method */}
-          {f.shippingConfig.offersInStorePickup && (
+          {f.deliveryOptions.length > 1 && (
             <Card>
               <CardHeader>
                 <CardTitle>Delivery</CardTitle>
@@ -161,41 +160,28 @@ export function DefaultCheckoutForm({
                   aria-label="Delivery method"
                   className="flex flex-wrap gap-2"
                 >
-                  <Button
-                    type="button"
-                    variant={
-                      f.deliveryMethod === "ship" ? "default" : "outline"
-                    }
-                    aria-pressed={f.deliveryMethod === "ship"}
-                    onClick={() => f.setDeliveryMethod("ship")}
-                    style={
-                      f.deliveryMethod === "ship"
-                        ? { backgroundColor: primaryColor }
-                        : undefined
-                    }
-                  >
-                    Ship to address
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={
-                      f.deliveryMethod === "pickup" ? "default" : "outline"
-                    }
-                    aria-pressed={f.deliveryMethod === "pickup"}
-                    onClick={() => f.setDeliveryMethod("pickup")}
-                    style={
-                      f.deliveryMethod === "pickup"
-                        ? { backgroundColor: primaryColor }
-                        : undefined
-                    }
-                  >
-                    In-store pickup
-                  </Button>
+                  {f.deliveryOptions.map((option) => (
+                    <Button
+                      key={option.id}
+                      type="button"
+                      variant={
+                        f.deliveryMethod === option.id ? "default" : "outline"
+                      }
+                      aria-pressed={f.deliveryMethod === option.id}
+                      onClick={() => f.setDeliveryMethod(option.id)}
+                      style={
+                        f.deliveryMethod === option.id
+                          ? { backgroundColor: primaryColor }
+                          : undefined
+                      }
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
                 </div>
                 <p className="text-sm text-[#6b6b6b]">
-                  {f.deliveryMethod === "pickup"
-                    ? "No shipping charge. You'll pick up your order at the store."
-                    : "Shipping cost is based on your store's shipping settings."}
+                  {f.deliveryOptions.find((o) => o.id === f.deliveryMethod)
+                    ?.description ?? ""}
                 </p>
                 {f.deliveryMethod === "pickup" && (
                   <div className="rounded-[var(--radius)] border border-gray-200 bg-[#f6f6f6] p-3 text-sm">
@@ -214,22 +200,56 @@ export function DefaultCheckoutForm({
                     ) : null}
                   </div>
                 )}
+                {f.deliveryMethod === "delivery" && (
+                  <>
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className={
+                        f.localDelivery.status === "ineligible"
+                          ? "text-sm font-medium text-red-700"
+                          : "text-sm text-[#6b6b6b]"
+                      }
+                    >
+                      {f.localDelivery.status === "checking"
+                        ? "Checking your ZIP…"
+                        : f.localDelivery.status === "ineligible"
+                          ? f.localDelivery.message
+                          : f.localDelivery.status === "eligible"
+                            ? "Great — we deliver to you."
+                            : null}
+                    </p>
+                    {f.localDelivery.instructions ? (
+                      <div className="rounded-[var(--radius)] border border-gray-200 bg-[#f6f6f6] p-3 text-sm">
+                        <p className="font-medium text-[#0a0a0a]">
+                          Delivery details
+                        </p>
+                        <p className="mt-1 whitespace-pre-line text-[#6b6b6b]">
+                          {f.localDelivery.instructions}
+                        </p>
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
 
           {/* Shipping Address */}
-          {f.deliveryMethod === "ship" && (
+          {f.needsAddress && (
             <Card>
               <CardContent className="space-y-4 pt-6">
                 <fieldset className="space-y-4 border-0 p-0">
                   <legend className="pb-2 text-xl leading-none font-semibold tracking-tight">
-                    Shipping Address
+                    {f.deliveryMethod === "delivery"
+                      ? "Delivery Address"
+                      : "Shipping Address"}
                   </legend>
                   <p className="text-sm text-[#6b6b6b]">
-                    {f.shippingConfig.shippingType ===
-                    SHIPPING_TYPES.ZONE_WEIGHT
-                      ? "We price shipping from this address. Make changes here before continuing to payment."
+                    {f.addressLocked
+                      ? f.deliveryMethod === "delivery"
+                        ? "We check delivery from this address. Make changes here before continuing to payment."
+                        : "We price shipping from this address. Make changes here before continuing to payment."
                       : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                   </p>
                   <SavedAddressPicker
@@ -248,7 +268,7 @@ export function DefaultCheckoutForm({
                       value={f.addressLine1}
                       onChange={(e) => f.setAddressLine1(e.target.value)}
                       placeholder="Street address, P.O. box"
-                      required={f.deliveryMethod === "ship"}
+                      required={f.needsAddress}
                       aria-required="true"
                       aria-invalid={
                         submitAttempted && !f.addressLine1.trim()
@@ -279,7 +299,7 @@ export function DefaultCheckoutForm({
                         autoComplete="shipping address-level2"
                         value={f.city}
                         onChange={(e) => f.setCity(e.target.value)}
-                        required={f.deliveryMethod === "ship"}
+                        required={f.needsAddress}
                         aria-required="true"
                         aria-invalid={
                           submitAttempted && !f.city.trim() ? true : undefined
@@ -326,7 +346,7 @@ export function DefaultCheckoutForm({
                         autoComplete="shipping postal-code"
                         value={f.postalCode}
                         onChange={(e) => f.setPostalCode(e.target.value)}
-                        required={f.deliveryMethod === "ship"}
+                        required={f.needsAddress}
                         aria-required="true"
                         aria-invalid={
                           submitAttempted && !f.postalCode.trim()
@@ -523,7 +543,9 @@ export function DefaultCheckoutForm({
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#6b6b6b]">Shipping</span>
+                  <span className="text-[#6b6b6b]">
+                    {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                  </span>
                   <span>
                     {f.deliveryMethod === "pickup" ? (
                       "In-store pickup (free)"
@@ -539,7 +561,14 @@ export function DefaultCheckoutForm({
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (
-                      "Calculated at checkout"
+                      f.deliveryMethod === "delivery" ? (
+                        "Enter your ZIP"
+                      ) : (
+                        "Calculated at checkout"
+                      )
+                    ) : f.deliveryMethod === "delivery" &&
+                      f.localDelivery.status === "ineligible" ? (
+                      "Not available"
                     ) : f.shipping === 0 ? (
                       "Free"
                     ) : (

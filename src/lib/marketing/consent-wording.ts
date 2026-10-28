@@ -10,6 +10,20 @@
 export const NEWSLETTER_CONSENT_WORDING =
   "We'll email you a link to confirm. Unsubscribe anytime.";
 
+/**
+ * The button in a contact import's one-time re-permission invite AND on the
+ * confirm page it links to (`/email-preferences?view=confirm`, `s: "imp"`
+ * tokens). The page's button press is the opt-in.
+ */
+export const REPERMISSION_CONFIRM_LABEL = "Yes, keep me on the list";
+
+/**
+ * Recorded with the OPT_IN / IMPORT_CONFIRM consent event when someone
+ * confirms from the re-permission invite: what they were asked, and what they
+ * pressed.
+ */
+export const REPERMISSION_CONSENT_WORDING = `Pressed “${REPERMISSION_CONFIRM_LABEL}” after an email asking whether they still wanted to hear from this store following its move to a new website.`;
+
 /** Checkout "email me news and offers" checkbox label. */
 export function checkoutMarketingOptInWording(businessName: string): string {
   return `Email me news and offers from ${businessName}`;

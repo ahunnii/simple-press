@@ -5436,10 +5436,10 @@ details.sp-details > summary.sp-details__summary > * {
   --sp-button-bg-hover: var(--pink-ink);
 }
 .olive {
-  /* white on sage 5.75:1; hover leaf 7.9:1 */
-  --sp-button-bg: var(--olive-sage);
-  --sp-button-fg: var(--olive-white);
-  --sp-button-bg-hover: var(--olive-leaf);
+  /* ivory on espresso 15.6:1; hover ivory on moss-deep 8.2:1 */
+  --sp-button-bg: var(--olive-espresso);
+  --sp-button-fg: var(--olive-ivory);
+  --sp-button-bg-hover: var(--olive-moss-deep);
 }
 .vii {
   /* paper on navy 12.1:1; hover copper-deep 4.96:1 */
@@ -15767,44 +15767,80 @@ details.sp-details > summary.sp-details__summary > * {
 }
 /* wealth pass2 P4 — END */
 
-/* ── Olive Mode — design tokens. Scoped to .olive so they never bleed into other templates. ── */
+/* ── Olive Mode — design tokens. Scoped to .olive so they never bleed into other templates. ──
+   Authority: docs/templates/olive/design.md ("Olive Mode" editorial, 2026-10-21).
+
+   Measured WCAG 2.x contrast (node script, sRGB relative luminance):
+     espresso #1F1B17   on ivory 15.58 · sand 14.16 · bone 16.26 · stone 9.04
+     ink-soft #5E554B   on ivory  6.65 · sand  6.04 · bone  6.94 (stone 3.86 — use espresso on stone)
+     taupe-ink #6A6052  on ivory  5.61 · sand  5.10 · bone  5.86
+     moss #556042       on ivory  6.09 · sand  5.54 (ivory on moss 6.09)
+     moss-deep #434C33  on ivory  8.24 · sand  7.49 (ivory on moss-deep 8.24)
+     taupe #948777      on ivory  3.19 · sand  2.90 → decorative only, never text
+     on-dark-soft (ivory 82% over the field) on espresso 10.78 · moss 4.72
+     error #9B3B2E      on error-bg #F7E9E4 5.80 · ivory 6.25
+     control border (espresso 50%) on ivory 3.22 · bone 3.27 (WCAG 1.4.11 ≥ 3:1)
+     hairline (espresso 14%) 1.32 and hairline-strong (32%) 1.99 are rules, not
+     control boundaries. ── */
 
 .olive {
-  /* ── Palette (docs/templates/olive/design.md § Palette) ── */
-  --olive-white: #ffffff; /* page ground, card faces */
-  --olive-paper: #f6f7f5; /* resting card face, alternating bands, inputs */
-  --olive-ink: #1f2a26; /* body text, headings, prices (14.8:1 on white) */
-  --olive-ink-soft: #5a6661; /* secondary text, captions (6.0:1 on white) */
-  --olive-sage: #3f6f60; /* the committed field: footer, primary buttons (white on it 5.75:1) */
-  --olive-sage-bright: #5f9484; /* chips, hover fills, focus rings — UI + large text ONLY (3.47:1) */
-  --olive-sage-tint: #e6efeb; /* soft sage wash: hover face, chip halo, success bg */
-  --olive-leaf: #2f5a45; /* small-text accent, the rivet, footer deep strip (7.9:1 on white) */
-  --olive-slate: #7e99a3; /* the quiet card: hero bands, info panels — never text below 24px */
-  --olive-slate-tint: #e9eef0; /* slate wash: account sidebars, table stripes */
-  --olive-slate-deep: #4d6570; /* slate-coloured text on white (6.2:1) */
-  --olive-hairline: color-mix(in srgb, var(--olive-ink) 12%, transparent);
-  --olive-hairline-strong: color-mix(
+  /* ── Palette (design.md § Tokens) ── */
+  --olive-ivory: #f7f4ed; /* page ground, header, footer */
+  --olive-bone: #fbf9f4; /* inputs, raised faces (cart/checkout summary, floating UI) */
+  --olive-sand: #efe9de; /* alternate bands, hover wash, About split panel, image beds */
+  --olive-espresso: #1f1b17; /* type, announcement strip, solid buttons, dark fields */
+  --olive-ink-soft: #5e554b; /* secondary text — ≥4.5:1 on ivory, sand AND bone */
+  --olive-moss: #556042; /* the olive accent field, selected states */
+  --olive-moss-deep: #434c33; /* moss hover, small olive text */
+  --olive-stone: #c7bba7; /* rules, swatch rings, decorative fields — NOT a text colour */
+  --olive-taupe: #948777; /* decorative only (fails AA as text) */
+  --olive-taupe-ink: #6a6052; /* taupe captions, dates, counts */
+  --olive-on-dark: #f7f4ed; /* text on espresso / moss / photo scrim */
+  --olive-on-dark-soft: color-mix(
     in srgb,
-    var(--olive-ink) 28%,
+    var(--olive-on-dark) 82%,
     transparent
   );
+
+  --olive-hairline: color-mix(in srgb, var(--olive-espresso) 14%, transparent);
+  --olive-hairline-strong: color-mix(
+    in srgb,
+    var(--olive-espresso) 32%,
+    transparent
+  );
+  /* Input / select / checkbox boundary — must clear 3:1 against its ground. */
+  --olive-control-border: color-mix(
+    in srgb,
+    var(--olive-espresso) 50%,
+    transparent
+  );
+  /* The ONE shadow, for floating UI only (dropdown, toast, sheets). Cards never take it. */
   --olive-shadow:
-    0 1px 2px rgb(31 42 38 / 0.06), 0 8px 24px rgb(31 42 38 / 0.08);
-  --olive-scrim: rgb(
-    31 42 38 / 0.45
-  ); /* minimum scrim for white type over a photo */
+    0 2px 6px rgb(31 27 23 / 0.06), 0 14px 36px rgb(31 27 23 / 0.1);
+  /* Left-weighted scrim for copy printed straight onto a photograph. */
+  --olive-scrim: linear-gradient(
+    90deg,
+    rgb(31 27 23 / 0.7) 0%,
+    rgb(31 27 23 / 0.5) 38%,
+    rgb(31 27 23 / 0.12) 70%,
+    rgb(31 27 23 / 0) 100%
+  );
 
-  /* Semantic form states — constant, never re-themed */
-  --olive-error: #a8362b;
-  --olive-error-bg: #fbefed;
-  --olive-error-border: #e4b3ad;
-  --olive-success: #2f5a45;
-  --olive-success-bg: #e6efeb;
-  --olive-success-border: #b7d3c7;
+  /* Semantic form states — warm, never re-themed */
+  --olive-error: #9b3b2e;
+  --olive-error-bg: #f7e9e4;
+  --olive-error-border: #d9a99f;
+  --olive-success: var(--olive-moss-deep);
+  --olive-success-bg: var(--olive-sand);
+  --olive-success-border: color-mix(
+    in srgb,
+    var(--olive-moss) 45%,
+    transparent
+  );
 
-  /* ── Shape ── */
-  --radius: 0.375rem;
-  --olive-card-radius: 0.5rem;
+  /* ── Shape — square everywhere; pills only on swatches and the cart badge ── */
+  --radius: 0;
+  --olive-card-radius: 0;
 
   /* ── Motion ── */
   --olive-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -15812,36 +15848,68 @@ details.sp-details > summary.sp-details__summary > * {
   --olive-dur-reveal: 600ms;
 
   /* ── Layout ── */
-  --olive-container: 1280px;
-  --olive-section-pad-y: clamp(56px, 8vw, 104px);
-  --olive-section-pad-x: clamp(16px, 4vw, 40px);
-  --olive-header-h: 60px;
+  --olive-container: 1320px;
+  --olive-section-pad-y: clamp(56px, 8vw, 112px);
+  --olive-section-pad-x: clamp(16px, 4vw, 48px);
+  /* The one content edge: a container-capped box padded by pad-x on each
+     side. Header, footer and every section's content sit inside this width,
+     so a full-bleed band's inner wrapper uses it (not --olive-container) to
+     land on the same left edge as the wordmark. */
+  --olive-content-max: calc(
+    var(--olive-container) - 2 * var(--olive-section-pad-x)
+  );
+  --olive-header-h: 64px;
 
   /* ── Fonts — mapped from the next/font variables olive-layout.tsx loads. ── */
-  --olive-font-display: var(--font-olive-display), "Josefin Sans", sans-serif;
-  --olive-font-body: var(--font-olive-body), "Figtree", system-ui, sans-serif;
+  --olive-font-display:
+    var(--font-olive-display), "Bodoni Moda", "Didot", serif;
+  --olive-font-body:
+    var(--font-olive-body), "Montserrat", system-ui, sans-serif;
 
-  background: var(--olive-white);
-  color: var(--olive-ink);
+  background: var(--olive-ivory);
+  color: var(--olive-espresso);
   font-family: var(--olive-font-body);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
   /* Browser surfaces belong to the design too. */
-  accent-color: var(--olive-sage);
-  caret-color: var(--olive-leaf);
-  scrollbar-color: var(--olive-sage-bright) var(--olive-paper);
+  accent-color: var(--olive-moss);
+  caret-color: var(--olive-espresso);
+  scrollbar-color: var(--olive-stone) var(--olive-ivory);
+  scrollbar-width: thin;
 }
 
 @media (min-width: 1024px) {
   .olive {
-    --olive-header-h: 76px;
+    --olive-header-h: 84px;
   }
 }
 
 .olive ::selection {
-  background: var(--olive-sage-tint);
-  color: var(--olive-ink);
+  background: var(--olive-stone);
+  color: var(--olive-espresso);
+}
+
+.olive ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.olive ::-webkit-scrollbar-track {
+  background: var(--olive-ivory);
+}
+
+.olive ::-webkit-scrollbar-thumb {
+  background: var(--olive-stone);
+  border: 2px solid var(--olive-ivory);
+}
+
+.olive a {
+  text-underline-offset: 0.28em;
+  text-decoration-thickness: 1px;
 }
 
 /* ── Base typography ────────────────────────────────────────────────────── */
@@ -15856,56 +15924,125 @@ details.sp-details > summary.sp-details__summary > * {
   text-wrap: pretty;
 }
 
+/* Scoped face helpers — never Tailwind arbitrary font-family utilities. */
+.olive .olive-serif {
+  font-family: var(--olive-font-display);
+}
+
+.olive .olive-sans {
+  font-family: var(--olive-font-body);
+}
+
+/* Display faces: kerning and ligatures always on (Bodoni's V/W/Y pairs gap
+   without it), never positive tracking, and optical size capped so the
+   hairlines stay solid when the headline sits on a photograph. */
+.olive .olive-display,
+.olive .olive-h1,
+.olive .olive-h2,
+.olive .olive-h3,
+.olive .olive-section-title {
+  font-kerning: normal;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
+}
+
 .olive .olive-display {
   font-family: var(--olive-font-display);
-  font-weight: 300;
-  font-size: clamp(2.25rem, 1.5rem + 3vw, 4rem);
-  line-height: 1.06;
-  letter-spacing: -0.01em;
-  color: var(--olive-ink);
+  font-weight: 400;
+  font-size: clamp(3rem, 6.5vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 60;
+  color: var(--olive-espresso);
 }
 
 .olive .olive-h1 {
   font-family: var(--olive-font-display);
-  font-weight: 300;
-  font-size: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
-  line-height: 1.14;
-  letter-spacing: -0.005em;
-  color: var(--olive-ink);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 4.2vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 60;
+  color: var(--olive-espresso);
 }
 
 .olive .olive-h2 {
   font-family: var(--olive-font-display);
-  font-weight: 300;
-  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
-  line-height: 1.2;
-  color: var(--olive-ink);
+  font-weight: 400;
+  font-size: clamp(1.875rem, 3.2vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 48;
+  color: var(--olive-espresso);
 }
 
 .olive .olive-h3 {
   font-family: var(--olive-font-display);
   font-weight: 400;
-  font-size: 1.25rem;
-  line-height: 1.3;
-  color: var(--olive-ink);
+  font-size: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 28;
+  color: var(--olive-espresso);
 }
 
-/* Small tracked label. NEVER used as a kicker above a heading — it is either a
-   list/column heading in its own right or a control label. */
-.olive .olive-label {
+/* "NEW ARRIVALS", "SHOP BY OCCASION" — Bodoni set in spaced capitals. */
+.olive .olive-section-title {
   font-family: var(--olive-font-display);
   font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.2;
+  font-size: clamp(1.375rem, 2vw, 1.875rem);
+  line-height: 1.1;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+  font-variation-settings: "opsz" 28;
+  color: var(--olive-espresso);
+}
+
+/* Small tracked caps ABOVE a heading ("DISTINCTIVE STYLE.", "THE EDIT").
+   The client's board pins eyebrows; design.md overrides the craft-floor ban. */
+.olive .olive-eyebrow {
+  display: block;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
   color: var(--olive-ink-soft);
+}
+
+/* Nav, buttons, accordion triggers, captions under tiles. */
+.olive .olive-label {
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--olive-ink-soft);
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-label {
+    font-size: 0.71875rem;
+  }
 }
 
 .olive .olive-caption {
   font-family: var(--olive-font-body);
+  font-weight: 400;
   font-size: 0.8125rem;
   line-height: 1.6;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-body {
+  font-family: var(--olive-font-body);
+  font-weight: 400;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  max-width: 68ch;
   color: var(--olive-ink-soft);
 }
 
@@ -15918,13 +16055,13 @@ details.sp-details > summary.sp-details__summary > * {
    above) keeps every other shared component that happens to use `bg-card`
    etc. exactly as it renders today. */
 .olive .olive-subscribe-panel {
-  --card: var(--olive-paper);
-  --card-foreground: var(--olive-ink);
+  --card: var(--olive-sand);
+  --card-foreground: var(--olive-espresso);
   --muted-foreground: var(--olive-ink-soft);
   --border: var(--olive-hairline);
-  --primary: var(--olive-sage);
-  --primary-foreground: var(--olive-white);
-  --ring: var(--olive-sage-bright);
+  --primary: var(--olive-espresso);
+  --primary-foreground: var(--olive-on-dark);
+  --ring: var(--olive-espresso);
   --radius: var(--olive-card-radius);
 }
 
@@ -15948,10 +16085,10 @@ details.sp-details > summary.sp-details__summary > * {
 .olive .olive-maintenance-body h1,
 .olive .olive-maintenance-body h2 {
   font-family: var(--olive-font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem);
   line-height: 1.2;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   margin: 1.1em 0 0.4em;
 }
 
@@ -15961,7 +16098,7 @@ details.sp-details > summary.sp-details__summary > * {
   font-weight: 400;
   font-size: 1.0625rem;
   margin: 1em 0 0.4em;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
 }
 
 .olive .olive-maintenance-body > :first-child {
@@ -15981,14 +16118,14 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 .olive .olive-maintenance-body a {
-  color: var(--olive-leaf);
+  color: var(--olive-espresso);
   text-decoration: underline;
-  text-decoration-color: var(--olive-sage-bright);
-  text-underline-offset: 2px;
+  text-decoration-color: var(--olive-stone);
+  text-underline-offset: 0.28em;
 }
 
 .olive .olive-maintenance-body a:hover {
-  text-decoration-color: var(--olive-leaf);
+  text-decoration-color: var(--olive-espresso);
 }
 
 /* Announcement flyer — capped to the card body's usable width, framed in
@@ -15999,7 +16136,7 @@ details.sp-details > summary.sp-details__summary > * {
   width: 100%;
   max-width: 360px;
   border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -16020,30 +16157,30 @@ details.sp-details > summary.sp-details__summary > * {
 .olive .olive-maintenance-countdown [data-caption] {
   display: block;
   margin-bottom: 0.625rem;
-  font-family: var(--olive-font-display);
-  font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.2;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   color: var(--olive-ink-soft);
 }
 
 .olive .olive-maintenance-countdown [data-value] {
   font-family: var(--olive-font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
   line-height: 1;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   font-variant-numeric: tabular-nums;
 }
 
 .olive .olive-maintenance-countdown [data-label] {
   margin-top: 0.375rem;
-  font-family: var(--olive-font-display);
-  font-weight: 400;
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--olive-ink-soft);
 }
@@ -16053,90 +16190,198 @@ details.sp-details > summary.sp-details__summary > * {
 .olive p.olive-maintenance-countdown {
   margin: 0;
   font-family: var(--olive-font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 1.25rem;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
 }
 
 .olive .olive-price {
   font-family: var(--olive-font-body);
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.4;
-  font-variant-numeric: tabular-nums;
-  color: var(--olive-ink);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--olive-espresso);
 }
 
+/* Tabular figures anywhere money or counts line up in a column. */
+.olive .olive-tabular,
+.olive table {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Focus: 2px espresso, 3px off the edge. On a dark field or a photograph the
+   ring turns ivory (see the on-dark contexts below). */
 .olive :focus-visible {
-  outline: 2px solid var(--olive-sage-bright);
-  outline-offset: 2px;
+  outline: 2px solid var(--olive-espresso);
+  outline-offset: 3px;
+}
+
+.olive .olive-invert :focus-visible,
+.olive .olive-on-photo :focus-visible,
+.olive [data-olive-tone="espresso"] :focus-visible,
+.olive [data-olive-tone="moss"] :focus-visible,
+.olive .olive-announcement-bar :focus-visible {
+  outline-color: var(--olive-on-dark);
 }
 
 /* ── Chrome: announcement bar, header, nav, dropdown ────────────────────── */
 
+/* The espresso strip — centred ivory tracked caps. An owner's own banner
+   colours (inline styles from the platform banner) still win; the link
+   follows the strip's ink, underlined. Three columns: an empty spacer, the
+   message (+ link) centred, the dismiss control — spacer and control share a
+   width so the copy sits on the true centre line. */
 .olive .olive-announcement-bar {
-  background: var(--olive-white);
-  color: var(--olive-ink-soft);
-  border-bottom: 1px solid var(--olive-hairline);
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 36px;
+  padding: 0.5rem var(--olive-section-pad-x);
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
   font-family: var(--olive-font-body);
+  font-weight: 500;
   font-size: 0.6875rem;
-  letter-spacing: 0.14em;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  text-align: center;
+}
+
+.olive .olive-announcement-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 1.25rem;
+  row-gap: 0.125rem;
+  min-width: 0;
+}
+
+.olive .olive-announcement-bar a,
+.olive .olive-announcement-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35em;
+  white-space: nowrap;
+}
+
+.olive .olive-announcement-bar a:hover,
+.olive .olive-announcement-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.olive .olive-announcement-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.72;
+  cursor: pointer;
+  transition: opacity var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-announcement-dismiss:hover {
+  opacity: 1;
 }
 
 .olive .olive-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--olive-white);
+  background: var(--olive-ivory);
   border-bottom: 1px solid var(--olive-hairline);
 }
 
-/* The wordmark echoes the shopping bag: thin geometric caps, wide tracking. */
+/* Text fallback for the logo: a Bodoni wordmark of the business name. */
 .olive .olive-wordmark {
   font-family: var(--olive-font-display);
-  font-weight: 300;
+  font-weight: 400;
+  font-size: 1.375rem;
   text-transform: uppercase;
-  letter-spacing: 0.28em;
-  line-height: 1;
-  color: var(--olive-ink);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  font-variation-settings: "opsz" 36;
+  color: var(--olive-espresso);
   white-space: nowrap;
-  /* the trailing letter-space would push the mark off-centre */
-  margin-right: -0.28em;
+  /* the trailing letter-space would push the mark off its edge */
+  margin-right: -0.04em;
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-wordmark {
+    font-size: 1.75rem;
+  }
+}
+
+/* The uploaded logo's box: the owner's logo size
+   (`olive.global.logo-size-width/height`, set inline as --olive-logo-w/h by
+   the header), capped so it never outgrows the row — 40px tall / 45vw wide
+   on a phone, 60px / 280px from 1024px up. The image is `fill` +
+   `object-contain` inside it, anchored left. */
+.olive .olive-header-logo {
+  position: relative;
+  display: block;
+  flex-shrink: 1;
+  width: min(var(--olive-logo-w, 120px), 45vw);
+  height: min(var(--olive-logo-h, 40px), 40px);
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-header-logo {
+    width: min(var(--olive-logo-w, 120px), 280px);
+    height: min(var(--olive-logo-h, 40px), 60px);
+  }
 }
 
 .olive .olive-nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0 0.375rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0;
   background: transparent;
   border: none;
+  border-radius: 0;
   cursor: pointer;
-  font-family: var(--olive-font-display);
-  font-weight: 400;
-  font-size: 0.75rem;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--olive-ink);
+  letter-spacing: 0.18em;
+  color: var(--olive-espresso);
   text-decoration: none;
   white-space: nowrap;
   transition: color var(--olive-dur-hover) var(--olive-ease);
 }
 
-/* The underline draws left → right rather than fading in. */
+/* The 1px espresso underline draws left → right rather than fading in. It
+   spans the label only — the trailing letter-space and the chevron sit
+   outside it. */
 .olive .olive-nav-link::after {
   content: "";
   position: absolute;
-  inset-inline: 0;
+  left: 0;
+  right: 0.18em;
   bottom: 0;
-  height: 2px;
-  background: var(--olive-sage-bright);
+  height: 1px;
+  background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 240ms var(--olive-ease);
+  transition: transform 260ms var(--olive-ease);
+}
+
+.olive .olive-nav-link[aria-haspopup]::after {
+  right: calc(0.75rem + 0.375rem);
 }
 
 .olive .olive-nav-link:hover::after,
@@ -16146,6 +16391,7 @@ details.sp-details > summary.sp-details__summary > * {
   transform: scaleX(1);
 }
 
+/* Icon controls: square 44px hit target, colour-only hover. */
 .olive .olive-icon-btn {
   position: relative;
   display: inline-flex;
@@ -16155,48 +16401,55 @@ details.sp-details > summary.sp-details__summary > * {
   min-height: 2.75rem;
   padding: 0;
   border: none;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   cursor: pointer;
   transition:
     background var(--olive-dur-hover) var(--olive-ease),
-    color var(--olive-dur-hover) var(--olive-ease);
+    color var(--olive-dur-hover) var(--olive-ease),
+    opacity var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive .olive-icon-btn:hover {
-  background: var(--olive-sage-tint);
-  color: var(--olive-leaf);
+  color: var(--olive-moss-deep);
 }
 
-/* Same button on a committed field (the sage cover, the leaf strip): white
-   ink, and a hover wash mixed from white so the label never loses contrast. */
+.olive .olive-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Same button on a dark field (espresso, moss, a photograph): ivory ink and
+   a hover wash mixed from ivory. */
 .olive .olive-icon-btn-invert {
-  color: var(--olive-white);
+  color: var(--olive-on-dark);
 }
 
 .olive .olive-icon-btn-invert:hover {
-  background: color-mix(in srgb, var(--olive-white) 16%, transparent);
-  color: var(--olive-white);
+  background: color-mix(in srgb, var(--olive-on-dark) 14%, transparent);
+  color: var(--olive-on-dark);
 }
 
+/* The bag count — one of only two round things in the template. */
 .olive .olive-cart-badge {
   position: absolute;
   top: 0.375rem;
-  right: 0.3125rem;
+  right: 0.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.0625rem;
-  height: 1.0625rem;
+  min-width: 1rem;
+  height: 1rem;
   padding: 0 0.25rem;
   border-radius: 999px;
-  background: var(--olive-leaf);
-  color: var(--olive-white);
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
   font-family: var(--olive-font-body);
   font-size: 0.625rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   line-height: 1;
 }
 
@@ -16209,55 +16462,83 @@ details.sp-details > summary.sp-details__summary > * {
     transform: scale(1);
   }
   35% {
-    transform: scale(1.4);
+    transform: scale(1.3);
   }
   100% {
     transform: scale(1);
   }
 }
 
+/* Dropdown panels hang from the header's bottom hairline: the anchor pads
+   down from the trigger by the rest of the header row (the trigger is
+   0.6875rem type + 2 × 0.375rem padding = 1.4375rem tall). The padding is
+   inside the hover group, so the pointer can cross it without closing. */
+.olive .olive-dropdown-anchor {
+  padding-top: calc((var(--olive-header-h) - 1.4375rem) / 2);
+}
+
+/* Square ivory-bone panel, one hairline, the single soft shadow floating UI
+   is allowed. */
 .olive .olive-dropdown {
-  background: var(--olive-white);
+  background: var(--olive-bone);
   border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border-radius: 0;
   box-shadow: var(--olive-shadow);
-  padding: 0.875rem;
-  min-width: 22rem;
+  padding: 1.5rem 1.75rem 1.25rem;
+  min-width: 26rem;
+}
+
+.olive .olive-dropdown-narrow {
+  min-width: 14rem;
+  padding: 1rem 1.25rem;
+}
+
+.olive .olive-dropdown-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--olive-taupe-ink);
 }
 
 .olive .olive-dropdown-link {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.4375rem 0.5rem;
-  border-radius: var(--radius);
+  min-height: 2.25rem;
+  padding: 0.375rem 0;
+  border-radius: 0;
   font-family: var(--olive-font-body);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.3;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   text-decoration: none;
-  transition: background var(--olive-dur-hover) var(--olive-ease);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: color var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive .olive-dropdown-link:hover {
-  background: var(--olive-sage-tint);
+  color: var(--olive-moss-deep);
+  text-decoration-line: underline;
 }
 
 .olive .olive-dropdown-link[data-current="true"] {
-  color: var(--olive-leaf);
-  font-weight: 500;
+  text-decoration-line: underline;
 }
 
 .olive .olive-dropdown-divider {
   height: 1px;
-  margin: 0.625rem 0.5rem;
+  margin: 0.875rem 0;
   background: var(--olive-hairline);
 }
 
-/* ── Mobile nav: one full-screen white card wiping in from the left ───── */
+/* ── Mobile nav: one full-screen ivory sheet wiping in from the left ──── */
 
 .olive .olive-nav-overlay {
-  background: var(--olive-white);
+  background: var(--olive-ivory);
   transform: translateX(-100%);
   transition: transform 320ms var(--olive-ease);
 }
@@ -16271,37 +16552,74 @@ details.sp-details > summary.sp-details__summary > * {
   transition: transform 240ms cubic-bezier(0.4, 0, 1, 1);
 }
 
+/* Top-level rows: hairline-separated, large Bodoni. */
+.olive .olive-nav-overlay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.olive .olive-nav-overlay-list > li {
+  border-bottom: 1px solid var(--olive-hairline);
+}
+
 .olive .olive-nav-overlay-link {
-  display: inline-block;
-  padding: 0.6875rem 0;
+  display: block;
+  width: 100%;
+  padding: 0.875rem 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   font-family: var(--olive-font-display);
-  font-weight: 300;
-  font-size: clamp(1.625rem, 6vw, 2.125rem);
-  line-height: 1.15;
-  color: var(--olive-ink);
+  font-weight: 400;
+  font-size: clamp(1.625rem, 6.5vw, 2.125rem);
+  line-height: 1.1;
+  font-variation-settings: "opsz" 48;
+  text-align: left;
+  color: var(--olive-espresso);
   text-decoration: none;
   transition: color var(--olive-dur-hover) var(--olive-ease);
 }
 
+.olive .olive-nav-overlay-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+}
+
 .olive .olive-nav-overlay-link:hover,
 .olive .olive-nav-overlay-link[data-current="true"] {
-  color: var(--olive-leaf);
+  color: var(--olive-moss-deep);
+}
+
+.olive .olive-nav-overlay-heading {
+  color: var(--olive-taupe-ink);
 }
 
 .olive .olive-nav-overlay-sublink {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 0;
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
   font-family: var(--olive-font-body);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   line-height: 1.3;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   text-decoration: none;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  overflow-wrap: anywhere;
 }
 
 .olive .olive-nav-overlay-sublink:hover {
-  color: var(--olive-leaf);
+  color: var(--olive-moss-deep);
+}
+
+.olive .olive-nav-overlay-sublink[aria-current="page"] {
+  font-weight: 500;
+  text-decoration-line: underline;
 }
 
 /* Mobile nav — account section. Plain anchors only, see
@@ -16317,8 +16635,8 @@ details.sp-details > summary.sp-details__summary > * {
   align-items: center;
   gap: 0.625rem;
   font-family: var(--olive-font-body);
-  font-size: 0.9375rem;
-  color: var(--olive-ink);
+  font-size: 0.875rem;
+  color: var(--olive-espresso);
 }
 
 .olive .olive-nav-overlay-account-list {
@@ -16326,96 +16644,159 @@ details.sp-details > summary.sp-details__summary > * {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   column-gap: 1.5rem;
-}
-
-@media (min-width: 640px) {
-  .olive .olive-nav-overlay-account-list {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 .olive .olive-nav-overlay-account-link {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  min-height: 44px;
+  min-height: 2.75rem;
+  border-radius: 0;
   font-family: var(--olive-font-body);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   line-height: 1.3;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   text-decoration: none;
   transition: color 160ms var(--olive-ease);
 }
 
+.olive .olive-nav-overlay-account-link svg {
+  color: var(--olive-taupe-ink);
+}
+
 .olive .olive-nav-overlay-account-link:hover {
-  color: var(--olive-leaf);
+  color: var(--olive-moss-deep);
 }
 
 .olive .olive-nav-overlay-account-skeleton {
   width: 2rem;
   height: 2rem;
-  border-radius: 50%;
-  background: var(--olive-paper);
+  border-radius: 0;
+  background: var(--olive-sand);
 }
 
-/* ── Footer ─────────────────────────────────────────────────────────────── */
+/* ── Footer — minimal editorial on the ivory ground (design.md § Story) ── */
 
-.olive .olive-footer-field {
-  background: var(--olive-sage);
-  color: var(--olive-white);
+.olive .olive-footer {
+  background: var(--olive-ivory);
+  color: var(--olive-espresso);
+  border-top: 1px solid var(--olive-hairline);
 }
 
-.olive .olive-footer-strip {
+/* A long business name wraps here rather than running off a phone. */
+.olive .olive-footer .olive-wordmark {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.olive .olive-footer-logo {
   position: relative;
-  background: var(--olive-leaf);
-  color: var(--olive-white);
-  overflow: hidden;
+  display: block;
+  width: min(200px, 60vw);
+  height: 48px;
+}
+
+.olive .olive-footer-tagline {
+  color: var(--olive-taupe-ink);
+}
+
+.olive .olive-footer-body {
+  margin: 0;
+  font-family: var(--olive-font-body);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-footer-address {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.olive .olive-footer-address .olive-footer-link {
+  color: var(--olive-ink-soft);
+}
+
+/* Square outlined social icons — no circles. */
+.olive .olive-footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
+  color: var(--olive-espresso);
+  transition:
+    border-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-footer-social:hover {
+  border-color: var(--olive-espresso);
+  color: var(--olive-moss-deep);
 }
 
 .olive .olive-footer-col-title {
-  font-family: var(--olive-font-display);
+  margin: 0;
+  font-family: var(--olive-font-body);
   font-weight: 500;
   font-size: 0.6875rem;
+  line-height: 1.3;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--olive-sage-tint);
+  letter-spacing: 0.2em;
+  color: var(--olive-espresso);
 }
 
 .olive .olive-footer-link {
   font-family: var(--olive-font-body);
   font-size: 0.8125rem;
-  line-height: 1.35;
-  color: var(--olive-white);
+  line-height: 1.5;
+  color: var(--olive-ink-soft);
   text-decoration: none;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
   transition: color var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive .olive-footer-link:hover {
-  color: var(--olive-sage-tint);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  color: var(--olive-espresso);
+  text-decoration-line: underline;
 }
 
-/* The book cover's spine: the wordmark set huge, clipped by the page edge. */
-.olive .olive-footer-watermark {
-  display: block;
-  margin-bottom: -0.18em;
-  font-family: var(--olive-font-display);
-  font-weight: 300;
-  font-size: clamp(2.25rem, 12vw, 6rem);
-  line-height: 0.82;
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-  text-align: center;
-  white-space: nowrap;
-  /* 50% white over leaf ≈ 3.3:1 — the WCAG large-text floor for the decorative mark. */
-  color: color-mix(in srgb, var(--olive-white) 50%, transparent);
-  user-select: none;
+/* The legal row: hairline, copyright left, policies right. Small but AA:
+   ink-soft on ivory. */
+.olive .olive-footer-legal {
+  border-top: 1px solid var(--olive-hairline);
+  font-family: var(--olive-font-body);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--olive-ink-soft);
 }
 
-/* ── Added-to-bag toast ─────────────────────────────────────────────────── */
+.olive .olive-footer-legal-link {
+  display: inline-block;
+  padding: 0.25rem 0;
+  color: var(--olive-ink-soft);
+  text-decoration: none;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  transition: color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-footer-legal-link:hover {
+  color: var(--olive-espresso);
+  text-decoration-line: underline;
+}
+
+/* ── Added-to-bag toast — floating UI, so it may keep the one soft shadow.
+   Square espresso card, ivory type. ── */
 
 .olive .olive-toast-region {
   position: fixed;
@@ -16429,14 +16810,15 @@ details.sp-details > summary.sp-details__summary > * {
 .olive .olive-toast {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.875rem;
   max-width: min(22rem, calc(100vw - 2rem));
-  padding: 0.75rem 1rem;
-  background: var(--olive-white);
-  border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  padding: 1rem 1.25rem;
+  background: var(--olive-espresso);
+  border: none;
+  border-radius: 0;
   box-shadow: var(--olive-shadow);
-  color: var(--olive-ink);
+  color: var(--olive-on-dark);
+  font-size: 0.8125rem;
   pointer-events: auto;
   opacity: 0;
   transform: translateY(0.5rem);
@@ -16450,137 +16832,248 @@ details.sp-details > summary.sp-details__summary > * {
   transform: none;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────────── */
+.olive .olive-toast .olive-label {
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-toast-name {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--olive-on-dark-soft);
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────────
+   Rectangles in tracked caps, with an optional drawn arrow (lucide
+   ArrowRight, rendered by OliveButton) that nudges 3px on hover.
+   Variants: solid · outline · on-photo · ivory · link. The pre-2026-10-21
+   names stay as aliases: primary = solid, secondary = outline, ghost = link. */
 
 .olive .olive-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0 1.75rem;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 0;
+  background-color: transparent;
   font-family: var(--olive-font-body);
-  font-size: 0.875rem;
   font-weight: 500;
+  font-size: 0.6875rem;
   line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
   text-decoration: none;
+  text-align: center;
   white-space: nowrap;
   cursor: pointer;
   transition:
     background-color var(--olive-dur-hover) var(--olive-ease),
     border-color var(--olive-dur-hover) var(--olive-ease),
     color var(--olive-dur-hover) var(--olive-ease),
-    box-shadow var(--olive-dur-hover) var(--olive-ease);
+    background-size 300ms var(--olive-ease);
 }
 
 .olive .olive-btn:disabled,
 .olive .olive-btn[aria-disabled="true"] {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
+.olive .olive-btn-arrow {
+  flex: none;
+  transition: transform var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive
+  .olive-btn:hover:not(:disabled):not([aria-disabled="true"])
+  .olive-btn-arrow,
+.olive .olive-btn:focus-visible .olive-btn-arrow {
+  transform: translateX(3px);
+}
+
+/* solid — espresso → moss-deep */
+.olive .olive-btn-solid,
 .olive .olive-btn-primary {
-  background-color: var(--olive-sage);
-  color: var(--olive-white);
+  background-color: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
 }
 
+.olive .olive-btn-solid:hover:not(:disabled):not([aria-disabled="true"]),
 .olive .olive-btn-primary:hover:not(:disabled):not([aria-disabled="true"]) {
-  background-color: var(--olive-leaf);
+  background-color: var(--olive-moss-deep);
+  border-color: var(--olive-moss-deep);
 }
 
+/* outline — espresso hairline, fills espresso on hover */
+.olive .olive-btn-outline,
 .olive .olive-btn-secondary {
-  background-color: var(--olive-white);
-  color: var(--olive-ink);
-  border-color: var(--olive-hairline-strong);
-}
-
-.olive .olive-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
-  background-color: var(--olive-sage-tint);
-  border-color: var(--olive-sage-bright);
-}
-
-.olive .olive-btn-ghost {
-  padding: 0.25rem 0;
-  border-radius: 0;
   background-color: transparent;
-  color: var(--olive-leaf);
-  text-decoration: underline;
-  text-decoration-color: var(--olive-sage-bright);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 5px;
-  transition:
-    color var(--olive-dur-hover) var(--olive-ease),
-    text-decoration-color var(--olive-dur-hover) var(--olive-ease);
+  border-color: var(--olive-espresso);
+  color: var(--olive-espresso);
 }
 
-.olive .olive-btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
-  color: var(--olive-ink);
-  text-decoration-color: var(--olive-leaf);
+.olive .olive-btn-outline:hover:not(:disabled):not([aria-disabled="true"]),
+.olive .olive-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+/* on-photo — ivory hairline + ivory type, fills ivory on hover */
+.olive .olive-btn-on-photo {
+  background-color: transparent;
+  border-color: var(--olive-on-dark);
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-btn-on-photo:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--olive-on-dark);
+  color: var(--olive-espresso);
+}
+
+/* ivory — ivory card stock with espresso type (takeovers, the moss panel) */
+.olive .olive-btn-ivory {
+  background-color: var(--olive-ivory);
+  border-color: var(--olive-ivory);
+  color: var(--olive-espresso);
+}
+
+.olive .olive-btn-ivory:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--olive-sand);
+  border-color: var(--olive-sand);
+}
+
+/* link — tracked caps; a 1px underline draws left → right on hover */
+.olive .olive-btn-link,
+.olive .olive-btn-ghost {
+  min-height: 2rem;
+  padding: 0.25rem 0;
+  border: none;
+  background-color: transparent;
+  color: var(--olive-espresso);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 0.125rem);
+  background-size: 0% 1px;
+}
+
+.olive .olive-btn-link:hover:not(:disabled):not([aria-disabled="true"]),
+.olive .olive-btn-ghost:hover:not(:disabled):not([aria-disabled="true"]),
+.olive .olive-btn-link:focus-visible,
+.olive .olive-btn-ghost:focus-visible {
+  background-size: 100% 1px;
 }
 
 .olive .olive-btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.8125rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
 }
 
 .olive .olive-btn-lg {
-  padding: 0.9375rem 2rem;
-  font-size: 0.9375rem;
+  min-height: 3.25rem;
+  padding: 0 2.25rem;
+  font-size: 0.75rem;
 }
 
+.olive .olive-btn-link.olive-btn-sm,
+.olive .olive-btn-link.olive-btn-lg,
 .olive .olive-btn-ghost.olive-btn-sm,
 .olive .olive-btn-ghost.olive-btn-lg {
+  min-height: 2rem;
   padding-inline: 0;
 }
 
-/* ── Cards ──────────────────────────────────────────────────────────────── */
+/* On a dark field the ink-led variants flip to ivory. */
+.olive .olive-invert .olive-btn-link,
+.olive .olive-invert .olive-btn-ghost,
+.olive [data-olive-tone="espresso"] .olive-btn-link,
+.olive [data-olive-tone="espresso"] .olive-btn-ghost,
+.olive [data-olive-tone="moss"] .olive-btn-link,
+.olive [data-olive-tone="moss"] .olive-btn-ghost,
+.olive .olive-on-photo .olive-btn-link,
+.olive .olive-on-photo .olive-btn-ghost {
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-invert .olive-btn-outline,
+.olive .olive-invert .olive-btn-secondary,
+.olive [data-olive-tone="espresso"] .olive-btn-outline,
+.olive [data-olive-tone="espresso"] .olive-btn-secondary,
+.olive [data-olive-tone="moss"] .olive-btn-outline,
+.olive [data-olive-tone="moss"] .olive-btn-secondary {
+  border-color: var(--olive-on-dark);
+  color: var(--olive-on-dark);
+}
+
+.olive
+  .olive-invert
+  .olive-btn-outline:hover:not(:disabled):not([aria-disabled="true"]),
+.olive
+  .olive-invert
+  .olive-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]),
+.olive
+  [data-olive-tone="espresso"]
+  .olive-btn-outline:hover:not(:disabled):not([aria-disabled="true"]),
+.olive
+  [data-olive-tone="espresso"]
+  .olive-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]),
+.olive
+  [data-olive-tone="moss"]
+  .olive-btn-outline:hover:not(:disabled):not([aria-disabled="true"]),
+.olive
+  [data-olive-tone="moss"]
+  .olive-btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--olive-on-dark);
+  color: var(--olive-espresso);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────────
+   A "card" in this world is a square panel on a hairline — never a shadow,
+   never a lift. Raised faces (cart / checkout summary, account panels) sit
+   on bone. */
 
 .olive .olive-card {
-  background-color: var(--olive-white);
+  background-color: var(--olive-bone);
   border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border-radius: 0;
 }
 
 .olive .olive-card-paper {
-  background-color: var(--olive-paper);
+  background-color: var(--olive-sand);
 }
 
-/* Hover warms the card from inside (paper → white) and lifts it 2px. */
+/* Retired lift: the hairline firms up and nothing moves. */
 .olive .olive-card-lift {
-  transition:
-    background-color var(--olive-dur-hover) var(--olive-ease),
-    border-color var(--olive-dur-hover) var(--olive-ease),
-    box-shadow var(--olive-dur-hover) var(--olive-ease),
-    transform var(--olive-dur-hover) var(--olive-ease);
+  transition: border-color var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive .olive-card-lift:hover,
 .olive .olive-card-lift:focus-within {
-  background-color: var(--olive-white);
   border-color: var(--olive-hairline-strong);
-  box-shadow: var(--olive-shadow);
-  transform: translateY(-2px);
 }
 
-/* A ghost card draws an absence deliberately — empty states, never a blank. */
+/* Empty states: a quiet, square frame — absence drawn deliberately. */
 .olive .olive-ghost-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: clamp(1.75rem, 6vw, 3.5rem) 1.5rem;
-  background-color: var(--olive-paper);
-  border: 1px dashed var(--olive-hairline-strong);
-  border-radius: var(--olive-card-radius);
+  gap: 1rem;
+  padding: clamp(2.5rem, 7vw, 4.5rem) 1.5rem;
+  background-color: transparent;
+  border-top: 1px solid var(--olive-hairline-strong);
+  border-bottom: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
   text-align: center;
   color: var(--olive-ink-soft);
 }
 
-/* ── Colour chips ───────────────────────────────────────────────────────
-   A chip only ever carries meaning: a real variant colour, a category tab,
-   or a stock state. Consumers set the swatch with an inline background-color;
-   these rules only own the ring, the states and the hover. */
+/* ── Colour swatches ───────────────────────────────────────────────────────
+   The only round element besides the cart badge, and real colours only.
+   Consumers set the swatch with an inline background-color; these rules own
+   the stone ring, the states and the hover. */
 
 .olive .olive-chip {
   position: relative;
@@ -16591,11 +17084,9 @@ details.sp-details > summary.sp-details__summary > * {
   padding: 0;
   border: none;
   border-radius: 999px;
-  background-color: var(--olive-paper);
-  box-shadow: inset 0 0 0 1px var(--olive-hairline-strong);
-  transition:
-    transform var(--olive-dur-hover) var(--olive-ease),
-    box-shadow var(--olive-dur-hover) var(--olive-ease);
+  background-color: var(--olive-sand);
+  box-shadow: inset 0 0 0 1px var(--olive-stone);
+  transition: box-shadow var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive button.olive-chip,
@@ -16605,17 +17096,18 @@ details.sp-details > summary.sp-details__summary > * {
 
 .olive button.olive-chip:hover,
 .olive .olive-chip[role="radio"]:hover {
-  transform: scale(1.15);
   box-shadow:
-    inset 0 0 0 1px var(--olive-hairline-strong),
-    0 0 0 2px var(--olive-sage-bright);
+    inset 0 0 0 1px var(--olive-stone),
+    0 0 0 2px var(--olive-ivory),
+    0 0 0 3px var(--olive-stone);
 }
 
-.olive .olive-chip[data-selected="true"] {
+.olive .olive-chip[data-selected="true"],
+.olive .olive-chip[data-selected="true"]:hover {
   box-shadow:
-    inset 0 0 0 1px var(--olive-hairline-strong),
-    0 0 0 2px var(--olive-white),
-    0 0 0 4px var(--olive-leaf);
+    inset 0 0 0 1px var(--olive-stone),
+    0 0 0 2px var(--olive-ivory),
+    0 0 0 3px var(--olive-espresso);
 }
 
 .olive .olive-chip[data-state="sold-out"] {
@@ -16623,7 +17115,7 @@ details.sp-details > summary.sp-details__summary > * {
   background-image: repeating-linear-gradient(
     45deg,
     transparent 0 3px,
-    var(--olive-ink) 3px 4px
+    var(--olive-espresso) 3px 4px
   );
 }
 
@@ -16635,8 +17127,8 @@ details.sp-details > summary.sp-details__summary > * {
   width: 0.375rem;
   height: 0.375rem;
   border-radius: 999px;
-  background-color: var(--olive-leaf);
-  box-shadow: 0 0 0 1.5px var(--olive-white);
+  background-color: var(--olive-moss-deep);
+  box-shadow: 0 0 0 1.5px var(--olive-ivory);
 }
 
 .olive .olive-chip[data-state="pre-order"]::before {
@@ -16644,7 +17136,7 @@ details.sp-details > summary.sp-details__summary > * {
   position: absolute;
   inset: -3px;
   border-radius: 999px;
-  border: 1.5px dashed var(--olive-slate-deep);
+  border: 1px dashed var(--olive-taupe-ink);
 }
 
 .olive .olive-chip[disabled],
@@ -16652,17 +17144,18 @@ details.sp-details > summary.sp-details__summary > * {
   cursor: not-allowed;
 }
 
-/* ── Form controls ──────────────────────────────────────────────────────── */
+/* ── Form controls — bone face, square, a ≥3:1 boundary, espresso focus ── */
 
 .olive .olive-input,
 .olive .olive-select,
 .olive .olive-textarea {
   width: 100%;
-  padding: 0.6875rem 0.875rem;
-  background-color: var(--olive-paper);
-  color: var(--olive-ink);
-  border: 1px solid var(--olive-hairline-strong);
-  border-radius: var(--radius);
+  min-height: 2.875rem;
+  padding: 0.75rem 0.875rem;
+  background-color: var(--olive-bone);
+  color: var(--olive-espresso);
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
   font-family: var(--olive-font-body);
   font-size: 0.9375rem;
   line-height: 1.5;
@@ -16680,21 +17173,21 @@ details.sp-details > summary.sp-details__summary > * {
 .olive .olive-input::placeholder,
 .olive .olive-textarea::placeholder {
   color: var(--olive-ink-soft);
+  opacity: 1;
 }
 
 .olive .olive-input:hover,
 .olive .olive-select:hover,
 .olive .olive-textarea:hover {
-  background-color: var(--olive-white);
+  border-color: var(--olive-espresso);
 }
 
 .olive .olive-input:focus-visible,
 .olive .olive-select:focus-visible,
 .olive .olive-textarea:focus-visible {
   outline: none;
-  background-color: var(--olive-white);
-  border-color: var(--olive-sage-bright);
-  box-shadow: 0 0 0 3px var(--olive-sage-tint);
+  border-color: var(--olive-espresso);
+  box-shadow: inset 0 0 0 1px var(--olive-espresso);
 }
 
 .olive .olive-input[aria-invalid="true"],
@@ -16706,22 +17199,60 @@ details.sp-details > summary.sp-details__summary > * {
 
 .olive .olive-select {
   appearance: none;
-  padding-right: 2.25rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6661' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f1b17' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem 1rem;
+  background-position: right 0.875rem center;
+  background-size: 0.875rem 0.875rem;
 }
 
-/* ── Reveal system ──────────────────────────────────────────────────────
-   Cards arrive as if dealt: fade + 14px rise + a 0.6° straighten. Armed only
-   once `useOliveReveal` adds `.olive-js` to the `.olive` root, so with JS off
-   the class is never set and every section ships fully visible. */
+/* Square checkbox (OliveCheckbox). Radios stay native but take the accent. */
+.olive .olive-checkbox {
+  appearance: none;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  background-color: var(--olive-bone);
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0.75rem 0.75rem;
+  transition:
+    background-color var(--olive-dur-hover) var(--olive-ease),
+    border-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-checkbox:hover {
+  border-color: var(--olive-espresso);
+}
+
+.olive .olive-checkbox:checked {
+  background-color: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7f4ed' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+
+.olive .olive-checkbox:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.olive .olive-checkbox[aria-invalid="true"] {
+  border-color: var(--olive-error);
+}
+
+/* ── Reveal system ──────────────────────────────────────────────────────────
+   Fade + 12px rise, 600ms, 70ms stagger — no rotation. Armed only once
+   `useOliveReveal` adds `.olive-js` to the `.olive` root, so with JS off the
+   class is never set and every section ships fully visible. */
 
 .olive-js .olive-reveal,
 .olive-js .olive-reveal-group .olive-reveal-item {
   opacity: 0;
-  transform: translateY(14px) rotate(-0.6deg);
+  transform: translateY(12px);
   transition:
     opacity var(--olive-dur-reveal) var(--olive-ease),
     transform var(--olive-dur-reveal) var(--olive-ease);
@@ -16734,22 +17265,18 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 .olive-js .olive-reveal-group.is-visible .olive-reveal-item {
-  transition-delay: min(calc(var(--i, 0) * 60ms), 480ms);
+  transition-delay: min(calc(var(--i, 0) * 70ms), 560ms);
 }
 
-/* The fan: alternate cards lean the other way before they straighten. */
-.olive-js .olive-reveal-group.olive-fan .olive-reveal-item:nth-child(even) {
-  transform: translateY(14px) rotate(0.6deg);
-}
-
-.olive-js .olive-reveal-group.olive-fan.is-visible .olive-reveal-item {
-  transform: none;
-}
+/* `fan` (OliveRevealGroup) is a no-op since 2026-10-21: no rotation in this
+   world. The class stays harmless so callers compile until they drop it. */
 
 /* ── Press marquee ──────────────────────────────────────────────────────── */
 
 .olive .olive-marquee {
   overflow: hidden;
+  border-block: 1px solid var(--olive-hairline);
+  padding-block: 1.25rem;
   mask-image: linear-gradient(
     to right,
     transparent,
@@ -16763,8 +17290,8 @@ details.sp-details > summary.sp-details__summary > * {
   display: flex;
   width: max-content;
   align-items: center;
-  gap: clamp(2rem, 6vw, 4.5rem);
-  animation: olive-marquee 34s linear infinite;
+  gap: clamp(2.5rem, 7vw, 5.5rem);
+  animation: olive-marquee 40s linear infinite;
 }
 
 .olive .olive-marquee:hover .olive-marquee-track,
@@ -16784,28 +17311,29 @@ details.sp-details > summary.sp-details__summary > * {
 /* ── Account section — bridge olive tokens onto the shadcn variables the
    shared account UI (better-auth-ui cards, AddressBookContent) reads.
    Scoped to .olive-account, set on the outermost wrapper of the account
-   layout. Structurally mirrors the .vii-account bridge above. ── */
+   layout. Structurally mirrors the .vii-account bridge above. Square, on
+   ivory and bone, sand for muted washes. ── */
 
 .olive-account {
-  --background: var(--olive-white);
-  --foreground: var(--olive-ink);
-  --card: var(--olive-white);
-  --card-foreground: var(--olive-ink);
-  --popover: var(--olive-white);
-  --popover-foreground: var(--olive-ink);
-  --primary: var(--olive-sage);
-  --primary-foreground: var(--olive-white);
-  --secondary: var(--olive-slate-tint);
-  --secondary-foreground: var(--olive-ink);
-  --muted: var(--olive-paper);
+  --background: var(--olive-ivory);
+  --foreground: var(--olive-espresso);
+  --card: var(--olive-bone);
+  --card-foreground: var(--olive-espresso);
+  --popover: var(--olive-bone);
+  --popover-foreground: var(--olive-espresso);
+  --primary: var(--olive-espresso);
+  --primary-foreground: var(--olive-on-dark);
+  --secondary: var(--olive-sand);
+  --secondary-foreground: var(--olive-espresso);
+  --muted: var(--olive-sand);
   --muted-foreground: var(--olive-ink-soft);
-  --accent: var(--olive-sage-tint);
-  --accent-foreground: var(--olive-ink);
+  --accent: var(--olive-sand);
+  --accent-foreground: var(--olive-espresso);
   --destructive: var(--olive-error);
   --border: var(--olive-hairline-strong);
-  --input: var(--olive-hairline-strong);
-  --ring: var(--olive-sage-bright);
-  --radius: 0.5rem;
+  --input: var(--olive-control-border);
+  --ring: var(--olive-espresso);
+  --radius: 0;
   font-family: var(--olive-font-body);
 }
 
@@ -16814,10 +17342,15 @@ details.sp-details > summary.sp-details__summary > * {
    Card (rounded-xl, shadow-sm, bg-muted). These rules are unlayered, so they
    win over Tailwind's @layer utilities regardless of specificity. */
 .olive-account [data-slot="card"] {
-  background-color: var(--olive-white);
+  background-color: var(--olive-bone);
   border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border-radius: 0;
   box-shadow: none;
+}
+
+.olive-account [data-slot="button"],
+.olive-account button {
+  border-radius: 0;
 }
 
 /* The auth UI renders section headings as a plain h2 outside the card; the
@@ -16826,11 +17359,12 @@ details.sp-details > summary.sp-details__summary > * {
   font-family: var(--olive-font-display);
   font-weight: 400;
   letter-spacing: 0;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
 }
 
 .olive-account [data-slot="item"] {
   border-color: var(--olive-hairline);
+  border-radius: 0;
 }
 
 .olive-account [data-slot="item-separator"] {
@@ -16843,16 +17377,17 @@ details.sp-details > summary.sp-details__summary > * {
 
 .olive-account [data-slot="card-footer"] {
   border-top-color: var(--olive-hairline);
+  background-color: var(--olive-sand);
 }
 
 .olive-account
   input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
 .olive-account textarea,
 .olive-account [data-slot="select-trigger"] {
-  background-color: var(--olive-paper);
-  border: 1px solid var(--olive-hairline-strong);
-  border-radius: var(--radius);
-  color: var(--olive-ink);
+  background-color: var(--olive-bone);
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
+  color: var(--olive-espresso);
 }
 
 .olive-account
@@ -16861,10 +17396,10 @@ details.sp-details > summary.sp-details__summary > * {
   ):focus-visible,
 .olive-account textarea:focus-visible,
 .olive-account [data-slot="select-trigger"]:focus-visible {
-  background-color: var(--olive-white);
-  border-color: var(--olive-sage-bright);
+  background-color: var(--olive-bone);
+  border-color: var(--olive-espresso);
   outline: none;
-  box-shadow: 0 0 0 1px var(--olive-sage-bright);
+  box-shadow: inset 0 0 0 1px var(--olive-espresso);
 }
 
 /* ── Reduced motion — every transform, transition and animation above is
@@ -16878,23 +17413,23 @@ details.sp-details > summary.sp-details__summary > * {
   .olive .olive-icon-btn,
   .olive .olive-dropdown-link,
   .olive .olive-nav-overlay-link,
+  .olive .olive-announcement-dismiss,
+  .olive .olive-footer-social,
+  .olive .olive-footer-legal-link,
   .olive .olive-btn,
+  .olive .olive-btn-arrow,
   .olive .olive-card-lift,
   .olive .olive-chip,
   .olive .olive-input,
   .olive .olive-select,
   .olive .olive-textarea,
+  .olive .olive-checkbox,
   .olive .olive-footer-link {
     transition: none;
   }
 
-  .olive .olive-card-lift:hover,
-  .olive .olive-card-lift:focus-within {
-    transform: none;
-  }
-
-  .olive button.olive-chip:hover,
-  .olive .olive-chip[role="radio"]:hover {
+  .olive .olive-btn:hover .olive-btn-arrow,
+  .olive .olive-btn:focus-visible .olive-btn-arrow {
     transform: none;
   }
 
@@ -16927,8 +17462,7 @@ details.sp-details > summary.sp-details__summary > * {
   }
 
   .olive-js .olive-reveal,
-  .olive-js .olive-reveal-group .olive-reveal-item,
-  .olive-js .olive-reveal-group.olive-fan .olive-reveal-item {
+  .olive-js .olive-reveal-group .olive-reveal-item {
     opacity: 1;
     transform: none;
     transition: none;
@@ -16936,21 +17470,60 @@ details.sp-details > summary.sp-details__summary > * {
   }
 }
 
-/* ── Olive Mode — Phase 3 top-ups (orchestrator, from the primitives report). ── */
-
-/* Opt in by putting `olive-invert` on a subtree that sits directly on the sage
-   or leaf field. Ratios: white on sage 5.75:1, sage-tint on sage 4.90:1. */
+/* ── On-dark contexts ───────────────────────────────────────────────────────
+   Opt in with `olive-invert` (or `olive-on-photo` for copy printed on a
+   photograph) on a subtree that sits on espresso, moss or a scrimmed photo;
+   `OliveSection` tones espresso/moss get the same treatment through
+   `data-olive-tone`. Ivory on espresso 15.58:1, on moss 6.09:1;
+   on-dark-soft on espresso 10.78:1, on moss 4.72:1. */
 .olive .olive-invert .olive-display,
 .olive .olive-invert .olive-h1,
 .olive .olive-invert .olive-h2,
 .olive .olive-invert .olive-h3,
-.olive .olive-invert .olive-price {
-  color: var(--olive-white);
+.olive .olive-invert .olive-section-title,
+.olive .olive-invert .olive-price,
+.olive .olive-on-photo .olive-display,
+.olive .olive-on-photo .olive-h1,
+.olive .olive-on-photo .olive-h2,
+.olive .olive-on-photo .olive-h3,
+.olive .olive-on-photo .olive-section-title,
+.olive [data-olive-tone="espresso"] .olive-display,
+.olive [data-olive-tone="espresso"] .olive-h1,
+.olive [data-olive-tone="espresso"] .olive-h2,
+.olive [data-olive-tone="espresso"] .olive-h3,
+.olive [data-olive-tone="espresso"] .olive-section-title,
+.olive [data-olive-tone="espresso"] .olive-price,
+.olive [data-olive-tone="moss"] .olive-display,
+.olive [data-olive-tone="moss"] .olive-h1,
+.olive [data-olive-tone="moss"] .olive-h2,
+.olive [data-olive-tone="moss"] .olive-h3,
+.olive [data-olive-tone="moss"] .olive-section-title,
+.olive [data-olive-tone="moss"] .olive-price {
+  color: var(--olive-on-dark);
 }
 
 .olive .olive-invert .olive-caption,
-.olive .olive-invert .olive-label {
-  color: var(--olive-sage-tint);
+.olive .olive-invert .olive-label,
+.olive .olive-invert .olive-eyebrow,
+.olive .olive-invert .olive-body,
+.olive .olive-on-photo .olive-caption,
+.olive .olive-on-photo .olive-label,
+.olive .olive-on-photo .olive-eyebrow,
+.olive .olive-on-photo .olive-body,
+.olive [data-olive-tone="espresso"] .olive-caption,
+.olive [data-olive-tone="espresso"] .olive-label,
+.olive [data-olive-tone="espresso"] .olive-eyebrow,
+.olive [data-olive-tone="espresso"] .olive-body,
+.olive [data-olive-tone="moss"] .olive-caption,
+.olive [data-olive-tone="moss"] .olive-label,
+.olive [data-olive-tone="moss"] .olive-eyebrow,
+.olive [data-olive-tone="moss"] .olive-body {
+  color: var(--olive-on-dark-soft);
+}
+
+/* Eyebrows on a photograph read as part of the headline, so full ivory. */
+.olive .olive-on-photo .olive-eyebrow {
+  color: var(--olive-on-dark);
 }
 
 .olive .olive-chip[data-state="coming-soon"]::before {
@@ -16958,39 +17531,234 @@ details.sp-details > summary.sp-details__summary > * {
   position: absolute;
   inset: -3px;
   border-radius: 999px;
-  border: 1.5px dashed var(--olive-sage-bright);
+  border: 1px dashed var(--olive-moss);
 }
 
+/* Product names on cards and similar list titles: Montserrat, not caps. */
 .olive .olive-card-title {
-  font-family: var(--olive-font-display);
+  font-family: var(--olive-font-body);
+  font-weight: 400;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--olive-espresso);
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-card-title {
+    font-size: 0.875rem;
+  }
+}
+
+/* ── Hero (homepage pass 2026-10-21) ──────────────────────────────────────
+   A magazine cover: full-bleed photograph under the left-weighted espresso
+   scrim, copy printed straight onto it on the left (eyebrow, Bodoni display
+   h1, one line, ivory outline button). No card. With no media the ground is
+   espresso. The photograph settles 1.04 → 1 over ~1.6s on the first painted
+   frame; the copy staggers in (eyebrow, h1, body, button) on a hero-only
+   cadence. Carousel: 900ms cross-fade, controls bottom-left. */
+.olive .olive-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  overflow: hidden;
+  min-height: clamp(520px, 78vh, 820px);
+  padding-inline: var(--olive-section-pad-x);
+  padding-block: clamp(40px, 7vw, 88px);
+  background-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+/* Room under the copy for the carousel controls. */
+.olive .olive-hero[data-controls="true"] {
+  padding-bottom: calc(clamp(1rem, 3vw, 2rem) + 2.75rem + 1.5rem);
+}
+
+@media (min-width: 768px) {
+  .olive .olive-hero {
+    justify-content: center;
+  }
+}
+
+.olive .olive-hero-inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--olive-content-max);
+  margin-inline: auto;
+}
+
+.olive .olive-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 40rem;
+}
+
+.olive .olive-hero-copy .olive-eyebrow {
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.olive .olive-hero-body {
+  margin-top: clamp(1.25rem, 2.2vw, 1.75rem);
+  max-width: 34ch;
+  font-family: var(--olive-font-body);
   font-weight: 400;
   font-size: 0.9375rem;
-  line-height: 1.3;
-  color: var(--olive-ink);
+  line-height: 1.7;
+  color: var(--olive-on-dark-soft);
 }
 
-/* Hero photograph settles into place on the first painted frame (homepage). */
-.olive .olive-hero {
-  min-height: clamp(440px, 68vh, 700px);
+.olive .olive-hero-cta {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+/* Left-weighted espresso scrim for copy printed on the photograph. */
+.olive .olive-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--olive-scrim);
+}
+
+/* Phone: the copy runs the full width at the bottom of the frame, so the
+   scrim rises from the bottom instead of falling off to the right. */
+@media (max-width: 767.98px) {
+  .olive .olive-hero-scrim {
+    background: linear-gradient(
+      0deg,
+      rgb(31 27 23 / 0.84) 0%,
+      rgb(31 27 23 / 0.66) 42%,
+      rgb(31 27 23 / 0.14) 78%,
+      rgb(31 27 23 / 0) 100%
+    );
+  }
 }
 
 /* Gated on .olive-js so a no-JS visitor never sees the un-settled 1.04 scale. */
 .olive-js .olive-hero-media {
   transform: scale(1.04);
-  transition: transform 1400ms var(--olive-ease);
+  transition: transform 1600ms var(--olive-ease);
 }
 
 .olive-js .olive-hero-media[data-settled="true"] {
   transform: scale(1);
 }
 
-/* A control disc over a photograph (hero video pause, gallery controls). */
+/* A control over a photograph (gallery controls elsewhere): a quiet
+   espresso wash so ivory icons hold on a pale frame. Square. */
 .olive .olive-icon-btn-on-photo {
-  background: color-mix(in srgb, var(--olive-ink) 45%, transparent);
+  background: color-mix(in srgb, var(--olive-espresso) 40%, transparent);
 }
 
 .olive .olive-icon-btn-on-photo:hover {
-  background: color-mix(in srgb, var(--olive-ink) 62%, transparent);
+  background: color-mix(in srgb, var(--olive-espresso) 62%, transparent);
+}
+
+/* Hero-only cadence: a 200ms head start, then 120ms per step. */
+.olive-js .olive-hero .olive-reveal-group.is-visible .olive-reveal-item {
+  transition-delay: calc(200ms + min(calc(var(--i, 0) * 120ms), 600ms));
+}
+
+/* Carousel cross-fade: the incoming frame fades in over the outgoing one,
+   which stays mounted underneath (HERO_FADE_MS in olive-hero-section.tsx
+   must stay ≥ this duration). */
+.olive .olive-hero-fade {
+  animation: olive-hero-fade 900ms var(--olive-ease) both;
+}
+
+@keyframes olive-hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Controls — bottom-left on the board: ← 01 02 03 → plus a small square
+   pause. Aligned to the copy's left edge (the arrow glyph, not its 44px
+   target, lines up with the text). */
+.olive .olive-hero-controls {
+  position: absolute;
+  left: calc(
+    var(--olive-section-pad-x) + max(0px, (100% - var(--olive-container)) / 2)
+  );
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  margin-inline-start: -0.8125rem;
+  color: var(--olive-on-dark);
+}
+
+/* Slide numeral ("01") — tracked Montserrat; the current one is underlined. */
+.olive .olive-hero-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.75rem;
+  padding: 0 0.125rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--olive-on-dark-soft);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.55em;
+  transition:
+    color var(--olive-dur-hover) var(--olive-ease),
+    text-decoration-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-hero-dot:hover,
+.olive .olive-hero-dot[aria-current="true"] {
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-hero-dot[aria-current="true"] {
+  text-decoration-color: currentColor;
+}
+
+/* Pause / play: a small square drawn inside the 44px target. */
+.olive .olive-hero-pause {
+  margin-inline-start: 0.5rem;
+}
+
+.olive .olive-hero-pause::before {
+  content: "";
+  position: absolute;
+  inset: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--olive-on-dark) 55%, transparent);
+  transition: border-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-hero-pause:hover {
+  background: transparent;
+}
+
+.olive .olive-hero-pause:hover::before {
+  border-color: var(--olive-on-dark);
+}
+
+/* The video's own pause control, bottom-right. */
+.olive .olive-hero-video-toggle {
+  position: absolute;
+  right: var(--olive-section-pad-x);
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 20;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -16999,176 +17767,28 @@ details.sp-details > summary.sp-details__summary > * {
     transform: none;
     transition: none;
   }
-}
-
-/* ── Hero load moment: the cover opens ──────────────────────────────────
-   One sage-tinted leaf edge sweeps the scrim left→right on the first
-   painted frame (client-mounted off the hero's `settled` flag, so never
-   SSR'd and nothing for a no-JS visitor to gate), and the card's print is
-   dealt in its wake on a slower, hero-only stagger. Reuses the swatch
-   turn's keyframes and tint variable rather than declaring new ones. */
-.olive .olive-hero {
-  --olive-turn-tint: color-mix(
-    in srgb,
-    var(--olive-sage-tint) 85%,
-    transparent
-  );
-}
-
-.olive .olive-hero-sweep {
-  position: absolute;
-  inset: 0;
-  z-index: 5; /* over the scrim, under the card (z-10) and the video button (z-20); the section is `isolate` */
-  pointer-events: none;
-  background: linear-gradient(
-    to right,
-    transparent 0 calc(100% - clamp(140px, 22vw, 320px)),
-    color-mix(in srgb, var(--olive-turn-tint) 30%, transparent) calc(100% - 3px),
-    var(--olive-turn-tint) calc(100% - 3px) 100%
-  );
-  animation: olive-swatch-edge 600ms var(--olive-ease) both;
-}
-
-/* Hero-only cadence: a 180ms head start so the card lands in the band's
-   wake, then 110ms per step so the headline arrives after the surface. */
-.olive-js .olive-hero .olive-reveal-group.is-visible .olive-reveal-item {
-  transition-delay: calc(180ms + min(calc(var(--i, 0) * 110ms), 550ms));
-}
-
-/* Print inside the card rises straight; only the card itself straightens. */
-.olive-js .olive-hero .olive-reveal-group .olive-card .olive-reveal-item {
-  transform: translateY(10px);
-}
-
-.olive-js
-  .olive-hero
-  .olive-reveal-group.is-visible
-  .olive-card
-  .olive-reveal-item {
-  transform: none;
-}
-
-/* Reduced motion is a designed state: the band becomes the swatch turn's
-   brief tint hold, and the ladder collapses to the system's instant
-   arrival. The hero selectors out-specify the global reduced-motion reveal
-   block, so every rule above is re-zeroed here explicitly. */
-@media (prefers-reduced-motion: reduce) {
-  .olive .olive-hero-sweep {
-    background: color-mix(in srgb, var(--olive-turn-tint) 16%, transparent);
-    transform: none;
-    animation: olive-swatch-tint-hold 200ms linear both;
-  }
 
   .olive-js .olive-hero .olive-reveal-group.is-visible .olive-reveal-item {
     transition-delay: 0ms;
   }
 
-  .olive-js .olive-hero .olive-reveal-group .olive-card .olive-reveal-item,
-  .olive-js
-    .olive-hero
-    .olive-reveal-group.is-visible
-    .olive-card
-    .olive-reveal-item {
-    transform: none;
+  .olive .olive-hero-fade {
+    animation: none;
+  }
+
+  .olive .olive-hero-dot,
+  .olive .olive-hero-pause::before {
     transition: none;
   }
 }
 
-/* ── Hero carousel: the leaves turn on their own ────────────────────────
-   Two or more hero photographs are turned with the swatch turn itself —
-   the same `olive-swatch-turn` wipe and travelling `olive-swatch-edge`
-   the product gallery uses for a colour change — so nothing new has to be
-   invented for "the next picture". Only the band's width is re-measured:
-   28px reads as a leaf edge on a gallery frame and as a hairline across a
-   100vw hero, so the hero widens it. It stays well under the load sweep's
-   clamp(140px, 22vw, 320px), because arrival is the bigger gesture and an
-   idle turn must not out-shout it. The hero declares its own sage
-   `--olive-turn-tint` a few rules above, and deliberately does NOT take
-   `olive-swatch-stage`, which would win on equal specificity and replace
-   it with the stage's ink fallback. Scoped to plain `.olive`: every rule
-   here is a resting state, put on by a client component in the first
-   place, so there is nothing to gate on `.olive-js`. */
-.olive .olive-hero {
-  --olive-hero-turn-band: clamp(56px, 6vw, 96px);
-  padding-block: clamp(40px, 7vw, 72px);
-}
+/* ── Photographs, prose, tone hooks ─────────────────────────────────────── */
 
-.olive .olive-hero-media .olive-swatch-edge {
-  background: linear-gradient(
-    to right,
-    transparent 0 calc(100% - var(--olive-hero-turn-band)),
-    color-mix(in srgb, var(--olive-turn-tint) 24%, transparent)
-      calc(100% - var(--olive-hero-turn-band)) calc(100% - 3px),
-    var(--olive-turn-tint) calc(100% - 3px) 100%
-  );
-}
-
-/* Dots and the pause disc share the corner the video disc has always used:
-   z-20 puts them over the scrim and the load sweep (z-5), and they sit
-   outside the aria-hidden ground so they are reachable. */
-.olive .olive-hero-controls {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 0.125rem;
-}
-
-/* A dot is drawn in the middle of a full 44px `olive-icon-btn` target: the
-   mark is quiet, the thing you can hit is not. The ink ring keeps it
-   legible over a pale photograph, where white alone would disappear. */
-.olive .olive-hero-dot::before {
-  content: "";
-  display: block;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--olive-white) 55%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--olive-ink) 30%, transparent);
-  transition:
-    background var(--olive-dur-hover) var(--olive-ease),
-    transform var(--olive-dur-hover) var(--olive-ease);
-}
-
-.olive .olive-hero-dot:hover::before,
-.olive .olive-hero-dot[aria-current="true"]::before {
-  background: var(--olive-white);
-}
-
-.olive .olive-hero-dot[aria-current="true"]::before {
-  transform: scale(1.3);
-}
-
-/* Phone: the card runs the full width, so the controls would land on top of
-   the button. Give them their own strip below it. */
-@media (max-width: 639.98px) {
-  .olive .olive-hero[data-controls="true"] {
-    padding-bottom: calc(clamp(40px, 7vw, 72px) + 2.75rem);
-  }
-}
-
-/* Reduced motion: the wipe is already retired by the swatch turn's own
-   block, which leaves the edge as the 200ms tint hold — olive's designed
-   stand-in, kept. Only the two things added above need re-zeroing: the
-   widened band collapses back to the flat tint, and the dot stops easing. */
-@media (prefers-reduced-motion: reduce) {
-  .olive .olive-hero-media .olive-swatch-edge {
-    background: color-mix(in srgb, var(--olive-turn-tint) 16%, transparent);
-  }
-
-  .olive .olive-hero-dot::before {
-    transition: none;
-  }
-}
-
-/* ── Olive Mode — Phase 3.5 top-ups (orchestrator) ── */
-
-/* Photograph push-in shared by every olive card family (product/category
-   tiles, blog cards). One rule so the three families stay in step. */
+/* Photograph push-in shared by every olive photo family (product/occasion
+   tiles, blog cards): a slow 1.03 on hover/focus. One rule so they stay in
+   step. */
 .olive .olive-photo-push {
-  transition: transform 300ms var(--olive-ease);
+  transition: transform 700ms var(--olive-ease);
 }
 
 .olive .olive-card-lift:hover .olive-photo-push,
@@ -17183,22 +17803,23 @@ details.sp-details > summary.sp-details__summary > * {
    olive tokens. Put it on the wrapper of any shared shadcn control rendered
    inside .olive outside the account area. */
 .olive .olive-shadcn-bridge {
-  --background: var(--olive-paper);
-  --foreground: var(--olive-ink);
+  --background: var(--olive-bone);
+  --foreground: var(--olive-espresso);
   --muted-foreground: var(--olive-ink-soft);
-  --border: var(--olive-hairline-strong);
-  --input: var(--olive-hairline-strong);
-  --ring: var(--olive-sage-bright);
+  --border: var(--olive-control-border);
+  --input: var(--olive-control-border);
+  --ring: var(--olive-espresso);
   --destructive: var(--olive-error);
+  --radius: 0;
 }
 
 /* Tiptap prose (blog posts, CMS pages). Maps rendered rich text onto olive
    tokens instead of Tailwind Typography's default gray palette. */
 .olive .olive-prose {
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
   font-family: var(--olive-font-body);
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.9375rem;
+  line-height: 1.75;
   max-width: none;
 }
 
@@ -17209,22 +17830,21 @@ details.sp-details > summary.sp-details__summary > * {
 .olive .olive-prose h2,
 .olive .olive-prose h3 {
   font-family: var(--olive-font-display);
-  color: var(--olive-ink);
+  font-weight: 400;
+  color: var(--olive-espresso);
   scroll-margin-top: calc(var(--olive-header-h) + 24px);
 }
 
 .olive .olive-prose h2 {
-  font-weight: 300;
-  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
-  line-height: 1.25;
+  font-size: clamp(1.625rem, 1.2rem + 1.4vw, 2.25rem);
+  line-height: 1.12;
   margin-top: 2em;
   margin-bottom: 0.6em;
 }
 
 .olive .olive-prose h3 {
-  font-weight: 400;
-  font-size: 1.25rem;
-  line-height: 1.3;
+  font-size: 1.375rem;
+  line-height: 1.2;
   margin-top: 1.75em;
   margin-bottom: 0.5em;
 }
@@ -17234,29 +17854,34 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 .olive .olive-prose a {
-  color: var(--olive-leaf);
+  color: var(--olive-espresso);
   text-decoration: underline;
-  text-decoration-color: var(--olive-sage-bright);
-  text-underline-offset: 2px;
+  text-decoration-color: var(--olive-stone);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  transition: text-decoration-color var(--olive-dur-hover) var(--olive-ease);
 }
 
 .olive .olive-prose a:hover {
-  text-decoration-color: var(--olive-leaf);
+  text-decoration-color: var(--olive-espresso);
 }
 
 .olive .olive-prose strong {
   font-weight: 600;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
 }
 
+/* Pull quote: Bodoni italic between hairlines, no tinted box. */
 .olive .olive-prose blockquote {
   margin: 0;
-  padding: 1rem 1.25rem;
-  background-color: var(--olive-paper);
-  border-top: 2px solid var(--olive-sage-bright);
-  border-radius: var(--olive-card-radius);
+  padding: 1.25rem 0;
+  border-block: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
+  font-family: var(--olive-font-display);
+  font-size: 1.25rem;
+  line-height: 1.4;
   font-style: italic;
-  color: var(--olive-ink);
+  color: var(--olive-espresso);
 }
 
 .olive .olive-prose ul,
@@ -17269,7 +17894,7 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 .olive .olive-prose li::marker {
-  color: var(--olive-sage-bright);
+  color: var(--olive-taupe-ink);
 }
 
 .olive .olive-prose hr {
@@ -17282,22 +17907,22 @@ details.sp-details > summary.sp-details__summary > * {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border: none;
+  border-radius: 0;
 }
 
 .olive .olive-prose code {
   font-family: ui-monospace, "SFMono-Regular", monospace;
   font-size: 0.875em;
-  background-color: var(--olive-paper);
+  background-color: var(--olive-sand);
   padding: 0.125em 0.375em;
-  border-radius: 0.25rem;
+  border-radius: 0;
 }
 
 .olive .olive-prose pre {
-  background-color: var(--olive-paper);
+  background-color: var(--olive-sand);
   border: 1px solid var(--olive-hairline);
-  border-radius: var(--olive-card-radius);
+  border-radius: 0;
   padding: 1rem;
   overflow-x: auto;
 }
@@ -17317,18 +17942,24 @@ details.sp-details > summary.sp-details__summary > * {
     transform: none;
     transition: none;
   }
+
+  .olive .olive-prose a {
+    transition: none;
+  }
 }
 
-/* Slate bands: design.md's "ink text on it" rule. Secondary text and the
-   focus ring fall back to ink on slate (ink-soft is 1.99:1 there, sage-bright
-   1.13:1). Hooked on the data-olive-tone attribute OliveSection already emits. */
-.olive [data-olive-tone="slate"] .olive-label,
-.olive [data-olive-tone="slate"] .olive-caption {
-  color: var(--olive-ink);
+/* Stone bands: ink-soft is only 3.86:1 on stone, so secondary text and the
+   focus ring fall back to espresso there (9.04:1). Hooked on the
+   data-olive-tone attribute OliveSection emits. */
+.olive [data-olive-tone="stone"] .olive-label,
+.olive [data-olive-tone="stone"] .olive-caption,
+.olive [data-olive-tone="stone"] .olive-eyebrow,
+.olive [data-olive-tone="stone"] .olive-body {
+  color: var(--olive-espresso);
 }
 
-.olive [data-olive-tone="slate"] :focus-visible {
-  outline-color: var(--olive-ink);
+.olive [data-olive-tone="stone"] :focus-visible {
+  outline-color: var(--olive-espresso);
 }
 
 /* Responsive display helpers that can beat the unlayered `.olive-*` display
@@ -17351,6 +17982,376 @@ details.sp-details > summary.sp-details__summary > * {
   .olive .olive-sm-hide {
     display: none;
   }
+}
+
+/* ── Image fallback — sand field with the business initials in Bodoni ──
+   `--olive-initials` is a quoted CSS string set on the `.olive` root by
+   olive-layout.tsx; OliveImageFallback can override it per instance. */
+.olive .olive-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--olive-sand);
+  container-type: inline-size;
+}
+
+.olive .olive-image-fallback::before {
+  content: var(--olive-initials, "");
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: clamp(0.875rem, 22cqi, 6rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  font-variation-settings: "opsz" 72;
+  color: var(--olive-stone);
+  user-select: none;
+}
+
+/* ── Product card — editorial, frameless ──────────────────────────────────
+   No frame, shadow or lift. Quick-add is a full-width bar pinned to the
+   image bottom, revealed on hover / focus-within for fine pointers. On touch
+   it stays visually hidden (the card links to the product page) but becomes
+   visible the moment it takes keyboard focus. */
+.olive .olive-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent;
+}
+
+.olive .olive-product-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background-color: var(--olive-sand);
+}
+
+/* Second photograph cross-fades over the first on hover. */
+.olive .olive-product-card-alt {
+  opacity: 0;
+  transition: opacity 500ms var(--olive-ease);
+}
+
+.olive .olive-product-card[data-hovered="true"] .olive-product-card-alt {
+  opacity: 1;
+}
+
+/* Status label — a small ivory tag, top-left, tracked caps. */
+.olive .olive-product-card-tag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 3;
+  padding: 0.375rem 0.5rem;
+  background: var(--olive-ivory);
+  color: var(--olive-espresso);
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.olive .olive-quick-add {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 4;
+}
+
+.olive .olive-quick-add-bar {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--olive-ivory) 94%, transparent);
+  color: var(--olive-espresso);
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-quick-add-bar:hover:not(:disabled) {
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-quick-add-bar:disabled {
+  cursor: not-allowed;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-quick-add-bar:focus-visible {
+  outline-offset: -4px;
+}
+
+/* Hidden until wanted. Visually hidden (not display:none) so the bar stays
+   in the tab order; any focus inside it brings it on screen. */
+.olive .olive-quick-add {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+  transition:
+    opacity 260ms var(--olive-ease),
+    transform 260ms var(--olive-ease);
+}
+
+.olive .olive-quick-add:focus-within,
+.olive .olive-quick-add[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .olive .olive-product-card:hover .olive-quick-add,
+  .olive .olive-product-card:focus-within .olive-quick-add {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+/* The in-card options sheet sits on top of the bar. */
+.olive .olive-quick-add-sheet {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  display: flex;
+  max-height: 14rem;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  overflow-y: auto;
+  padding: 0.75rem;
+  background: var(--olive-bone);
+  border-top: 1px solid var(--olive-hairline);
+}
+
+.olive .olive-quick-add-option {
+  min-width: 2.75rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--olive-espresso);
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease),
+    border-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-quick-add-option:hover:not(:disabled) {
+  background: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-quick-add-option:disabled {
+  color: var(--olive-ink-soft);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.olive .olive-product-card-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.olive .olive-product-card-name a:hover {
+  text-decoration: underline;
+}
+
+/* The commit press on the bar: a brief espresso hold. */
+.olive .olive-quick-add-bar[data-commit="true"] {
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-product-card-alt,
+  .olive .olive-quick-add,
+  .olive .olive-quick-add-bar,
+  .olive .olive-quick-add-option {
+    transition: none;
+  }
+
+  .olive .olive-quick-add {
+    transform: none;
+  }
+}
+
+/* ── Occasion tile (OliveCategoryCard) ─────────────────────────────────── */
+.olive .olive-occasion-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  height: 100%;
+  text-decoration: none;
+  color: var(--olive-espresso);
+}
+
+.olive .olive-occasion-tile-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--olive-sand);
+}
+
+.olive .olive-occasion-tile-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.olive .olive-occasion-tile .olive-label {
+  color: var(--olive-espresso);
+}
+
+.olive .olive-occasion-tile-count {
+  font-family: var(--olive-font-body);
+  font-size: 0.75rem;
+  color: var(--olive-taupe-ink);
+}
+
+/* ── Image tile (OliveImageTile) — copy straight on the photograph ─────── */
+.olive .olive-image-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background-color: var(--olive-sand);
+  text-decoration: none;
+}
+
+.olive .olive-image-tile-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    rgb(31 27 23 / 0.78) 0%,
+    rgb(31 27 23 / 0.4) 42%,
+    rgb(31 27 23 / 0) 78%
+  );
+}
+
+.olive .olive-image-tile:hover .olive-btn-arrow,
+.olive .olive-image-tile:focus-visible .olive-btn-arrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-image-tile:hover .olive-btn-arrow,
+  .olive .olive-image-tile:focus-visible .olive-btn-arrow {
+    transform: none;
+  }
+}
+
+/* ── Accordion — hairline rows ─────────────────────────────────────────── */
+.olive .olive-accordion {
+  border-top: 1px solid var(--olive-hairline-strong);
+}
+
+.olive .olive-accordion-item {
+  border-bottom: 1px solid var(--olive-hairline-strong);
+}
+
+.olive .olive-accordion-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 0;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--olive-espresso);
+}
+
+.olive .olive-accordion-trigger .olive-label {
+  color: var(--olive-espresso);
+}
+
+.olive .olive-accordion-body {
+  padding-bottom: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--olive-ink-soft);
+}
+
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.olive .olive-breadcrumb {
+  font-family: var(--olive-font-body);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--olive-taupe-ink);
+}
+
+.olive .olive-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.olive .olive-breadcrumb a:hover {
+  color: var(--olive-espresso);
+  text-decoration: underline;
+}
+
+.olive .olive-breadcrumb [aria-current="page"] {
+  color: var(--olive-espresso);
+}
+
+/* ── Status badge — a word on a hairline, with a swatch dot ────────────── */
+.olive .olive-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+/* ── Quantity stepper ───────────────────────────────────────────────────── */
+.olive .olive-qty {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
+  background: var(--olive-bone);
 }
 
 /* ── Olive Mode — motion pass: the swatch turn ── */
@@ -17376,7 +18377,7 @@ details.sp-details > summary.sp-details__summary > * {
    claiming to know a paint it does not (see `shared/olive-color.ts`). The
    gallery sets the real tint inline, which wins over this declaration. */
 .olive .olive-swatch-stage {
-  --olive-turn-tint: color-mix(in srgb, var(--olive-ink) 30%, transparent);
+  --olive-turn-tint: color-mix(in srgb, var(--olive-espresso) 30%, transparent);
 }
 
 /* The incoming photograph, laid over the one it replaces — the gallery keeps
@@ -17439,19 +18440,12 @@ details.sp-details > summary.sp-details__summary > * {
   }
 }
 
-/* The same material on the product card. The hover second image is the back
-   of the leaf, so it is turned rather than dissolved — the wipe runs
-   alongside the card's existing 300ms opacity fade, at the card's own hover
-   timing rather than the product page's 520ms, because a hover is an aside
-   and a colour choice is the point. Driven by an attribute instead of an
-   inline style so reduced motion can retire it here with everything else. */
+/* Legacy hook: the product card's second image used to be "turned" with a
+   clip wipe. Since 2026-10-21 it simply cross-fades (OliveProductCard uses
+   `.olive-product-card-alt`); this class is kept as a plain cross-fade so
+   any remaining caller still behaves. */
 .olive .olive-leaf-turn {
-  clip-path: inset(0 0 0 0);
-  transition: clip-path 300ms var(--olive-ease);
-}
-
-.olive .olive-leaf-turn[data-olive-turned="false"] {
-  clip-path: inset(0 100% 0 0);
+  transition: opacity 500ms var(--olive-ease);
 }
 
 /* Reduced motion's stand-in for the travelling band: the colour stops moving
@@ -17489,9 +18483,7 @@ details.sp-details > summary.sp-details__summary > * {
     animation: olive-swatch-tint-hold 200ms linear both;
   }
 
-  .olive .olive-leaf-turn,
-  .olive .olive-leaf-turn[data-olive-turned="false"] {
-    clip-path: none;
+  .olive .olive-leaf-turn {
     transition: none;
   }
 }
@@ -17541,8 +18533,7 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 /* ── Cart line removal ─────────────────────────────────────────────────────
-   The exit is the dealt-card arrival reversed: the row fades, rises 6px and
-   rotates 0.6° over 260ms while still holding its place in the list, and
+   The exit is the reveal reversed: the row fades and rises 6px over 260ms while still holding its place in the list, and
    only once that finishes does its own height collapse from `1fr` to `0fr`
    over another 260ms — a `transition-delay` on the collapse chains the two
    phases without a second JS timer. The two phases run in series, not
@@ -17577,7 +18568,7 @@ details.sp-details > summary.sp-details__summary > * {
 
 .olive .olive-cart-line[data-leaving="true"] .olive-cart-line-body {
   opacity: 0;
-  transform: translateY(-6px) rotate(0.6deg);
+  transform: translateY(-6px);
 }
 
 /* ── Figures that change ───────────────────────────────────────────────────
@@ -17644,7 +18635,7 @@ details.sp-details > summary.sp-details__summary > * {
 
 /* ── Add to cart: press-commit ─────────────────────────────────────────────
    Connects the click to the toast and badge that already confirm it: the
-   pill dips to 97% scale and back over 460ms while a sage-tint layer warms
+   button dips to 97% scale and back over 460ms while a sand layer warms
    over it and fades — an overlay's own opacity, never the button's
    `background-color`, so the keyframe stays inside the transform/opacity
    envelope. `data-commit` is set by the caller for one ~460ms cycle
@@ -17662,7 +18653,7 @@ details.sp-details > summary.sp-details__summary > * {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--olive-sage-tint);
+  background: var(--olive-sand);
   pointer-events: none;
   animation: olive-btn-commit-warm 460ms var(--olive-ease);
 }
@@ -17692,11 +18683,10 @@ details.sp-details > summary.sp-details__summary > * {
 }
 
 /* The toast's own leading edge — the same idiom as the swatch turn's colour
-   riding the wipe, so pill → toast → badge reads as one vocabulary rather
-   than three separate techniques. A 2px leaf-green bar, clipped to the
-   card's own rounded corners by the `overflow: hidden` added below, that
-   wipes in with a left-anchored `scaleX` over the toast's existing 240ms
-   entrance rather than its own separate timing. */
+   riding the wipe. A 1px stone hairline along the espresso card's top,
+   clipped by the `overflow: hidden` below, that wipes in with a
+   left-anchored `scaleX` over the toast's existing 240ms entrance rather
+   than its own separate timing. */
 .olive .olive-toast {
   position: relative;
   overflow: hidden;
@@ -17707,8 +18697,8 @@ details.sp-details > summary.sp-details__summary > * {
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: var(--olive-leaf);
+  height: 1px;
+  background: var(--olive-stone);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 240ms var(--olive-ease);
@@ -17806,6 +18796,1131 @@ details.sp-details > summary.sp-details__summary > * {
   .olive .olive-qty-readout[data-bump="true"] {
     animation: none;
   }
+}
+
+/* ── Product page editorial (2026-10-21) ─────────────────────────────────
+   PDP-only chrome: the rating line, the square option boxes (size etc.),
+   and the reviews anchor offset. Colour swatches, quantity stepper, buttons
+   and accordions come from their own sections above. */
+
+/* Rating line under the price: five small stars + "(N)", one link to the
+   reviews section. Stars are espresso; the empty ones are an outline only. */
+.olive .olive-pdp-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  color: var(--olive-espresso);
+  text-decoration: none;
+}
+
+.olive .olive-pdp-rating-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.olive .olive-pdp-star {
+  position: relative;
+  display: inline-flex;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.olive .olive-pdp-star > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.olive .olive-pdp-star-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.olive .olive-pdp-rating-count {
+  font-family: var(--olive-font-body);
+  font-size: 0.8125rem;
+  line-height: 1;
+  color: var(--olive-taupe-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.olive .olive-pdp-rating:hover .olive-pdp-rating-count {
+  color: var(--olive-espresso);
+  text-decoration: underline;
+}
+
+/* Option boxes (size, length, scent): square, 44px minimum, 1px control
+   border; chosen = espresso fill + ivory type. Sold out stays visible with a
+   diagonal strike so the shopper can still see what exists. */
+.olive .olive-option-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.875rem;
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--olive-espresso);
+  cursor: pointer;
+  transition:
+    background var(--olive-dur-hover) var(--olive-ease),
+    border-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-option-box.olive-label {
+  color: var(--olive-espresso);
+}
+
+.olive .olive-option-box:hover:not([aria-checked="true"]):not(
+    [aria-disabled="true"]
+  ) {
+  border-color: var(--olive-espresso);
+}
+
+.olive .olive-option-box[aria-checked="true"] {
+  background: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+}
+
+.olive .olive-option-box[aria-checked="true"],
+.olive .olive-option-box.olive-label[aria-checked="true"] {
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-option-box[aria-disabled="true"] {
+  cursor: not-allowed;
+  color: var(--olive-taupe-ink);
+  background-image: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    var(--olive-control-border) calc(50% - 0.5px),
+    var(--olive-control-border) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+.olive .olive-option-box[aria-disabled="true"].olive-label {
+  color: var(--olive-taupe-ink);
+}
+
+/* The reviews section is the target of the rating link; keep it clear of the
+   sticky header when scrolled to. */
+.olive #reviews {
+  scroll-margin-top: calc(var(--olive-header-h) + 1rem);
+}
+
+/* ── PDP reviews + write-review dialog (2026-10-21) ──────────────────────
+   The shared ProductReviews / WriteReviewDialog hardcode shadcn cards,
+   yellow stars, grey text and a stock button. Re-tone them to olive from
+   here: ivory ground, hairline frames, no shadow, square corners, taupe
+   stars (espresso when filled), tracked-caps rectangle buttons.
+   The dialog portals to <body>, outside .olive, so it gets the few olive
+   tokens it needs re-declared on its own content node (literal values, kept
+   in step with the :root tokens above) and inherits the body typeface. */
+
+body:has(.olive) [data-slot="dialog-content"] {
+  --olive-espresso: #1f1b17;
+  --olive-ivory: #f7f4ed;
+  --olive-bone: #fbf9f4;
+  --olive-sand: #efe9de;
+  --olive-ink-soft: #5e554b;
+  --olive-taupe: #948777;
+  --olive-taupe-ink: #6a6052;
+  --olive-on-dark: #f7f4ed;
+  --olive-moss-deep: #434c33;
+  --olive-error: #9b3b2e;
+  --olive-hairline: rgb(31 27 23 / 14%);
+  --olive-hairline-strong: rgb(31 27 23 / 32%);
+  --olive-control-border: rgb(31 27 23 / 50%);
+  --background: #fbf9f4;
+  --foreground: #1f1b17;
+  --card: #fbf9f4;
+  --card-foreground: #1f1b17;
+  --primary: #1f1b17;
+  --primary-foreground: #f7f4ed;
+  --muted: #efe9de;
+  --muted-foreground: #5e554b;
+  --accent: #efe9de;
+  --accent-foreground: #1f1b17;
+  --destructive: #9b3b2e;
+  --border: rgb(31 27 23 / 14%);
+  --input: rgb(31 27 23 / 50%);
+  --ring: #1f1b17;
+  --radius: 0;
+  border-radius: 0;
+  border-color: var(--olive-hairline-strong);
+  background: var(--olive-bone);
+  color: var(--olive-espresso);
+  box-shadow: 0 2px 6px rgb(31 27 23 / 0.06), 0 14px 36px rgb(31 27 23 / 0.1);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="card"] {
+  background: transparent;
+  border: 1px solid var(--olive-hairline);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--olive-espresso);
+}
+
+/* Empty-state / review headings in Bodoni (dialog title keeps the body face:
+   the next/font Bodoni variable only exists inside .olive). */
+.olive .olive-reviews [data-slot="card-content"] p.font-medium,
+.olive .olive-reviews [data-slot="card-content"] h3.font-medium {
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-kerning: normal;
+  font-variation-settings: "opsz" 28;
+  color: var(--olive-espresso);
+}
+
+.olive .olive-reviews [data-slot="card-content"] h3.font-medium {
+  font-size: 1.25rem;
+}
+
+.olive .olive-reviews .text-4xl.font-bold {
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-variation-settings: "opsz" 60;
+  color: var(--olive-espresso);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  :is(.text-gray-500, .text-gray-600, .text-gray-700) {
+  color: var(--olive-ink-soft);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .text-gray-900 {
+  color: var(--olive-espresso);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .text-red-500 {
+  color: var(--olive-error);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .text-green-600 {
+  color: var(--olive-moss-deep);
+}
+
+/* Stars: empty = taupe outline, filled = espresso. */
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .text-gray-300 {
+  color: var(--olive-taupe);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .text-yellow-400 {
+  color: var(--olive-espresso);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  .fill-yellow-400 {
+  fill: var(--olive-espresso);
+}
+
+.olive .olive-reviews .hover\:text-blue-600:hover {
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-reviews .border-t,
+.olive .olive-reviews .border-gray-200 {
+  border-color: var(--olive-hairline);
+}
+
+.olive .olive-reviews [data-slot="badge"] {
+  border: 1px solid var(--olive-hairline);
+  border-radius: 0;
+  background: var(--olive-sand);
+  color: var(--olive-espresso);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+
+.olive .olive-reviews img,
+.olive .olive-reviews video {
+  border-radius: 0;
+}
+
+.olive .olive-reviews [data-slot="progress"] {
+  height: 0.25rem;
+  border-radius: 0;
+  background: var(--olive-hairline);
+}
+
+.olive .olive-reviews [data-slot="progress-indicator"] {
+  background: var(--olive-espresso);
+}
+
+/* Buttons: the olive rectangle — espresso fill / ivory type, outline for
+   secondary; Montserrat 500, tracked caps, square, 44px+. */
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"] {
+  min-height: 2.75rem;
+  height: auto;
+  padding: 0 1.5rem;
+  border: 1px solid var(--olive-espresso);
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
+  font-family: var(--olive-font-body, inherit);
+  font-weight: 500;
+  font-size: 0.71875rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"]:hover:not(:disabled) {
+  background: var(--olive-moss-deep);
+  border-color: var(--olive-moss-deep);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"][data-variant="outline"] {
+  background: transparent;
+  border-color: var(--olive-espresso);
+  color: var(--olive-espresso);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"][data-variant="outline"]:hover:not(:disabled) {
+  background: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"][data-size="sm"] {
+  padding: 0 1rem;
+  letter-spacing: 0.12em;
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="button"]:focus-visible,
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  [data-slot="select-trigger"]:focus-visible,
+body:has(.olive)
+  [data-slot="dialog-content"]
+  :is(input, textarea, button):focus-visible {
+  outline: 2px solid var(--olive-espresso);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+:is(.olive .olive-reviews, body:has(.olive) [data-slot="dialog-content"])
+  :is([data-slot="select-trigger"], input, textarea) {
+  border: 1px solid var(--olive-control-border);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--olive-espresso);
+}
+
+body:has(.olive) [data-slot="dialog-content"] [data-slot="dialog-title"] {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+body:has(.olive) [data-slot="dialog-content"] [data-slot="dialog-close"] {
+  border-radius: 0;
+}
+
+/* ── PDP product options (chain / charm tiles) ───────────────────────────
+   Two columns on mobile, three from lg; image 1:1 on sand, name left-aligned
+   in caption size, price in taupe-ink tabular figures. Chosen = 1px espresso
+   border. Sold out stays muted (the renderer already drops it to 50%). */
+
+.olive .olive-customizer [data-display="tiles"] [data-slot="customizer-values"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .olive
+    .olive-customizer
+    [data-display="tiles"]
+    [data-slot="customizer-values"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.olive .olive-customizer [data-display="tiles"] [data-slot="customizer-value"] {
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.75rem;
+  border: 1px solid var(--olive-hairline);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  text-align: left;
+  transition: border-color var(--olive-dur-hover, 200ms) var(--olive-ease, ease);
+}
+
+.olive
+  .olive-customizer
+  [data-display="tiles"]
+  [data-slot="customizer-value"]:hover:not([data-disabled="true"]) {
+  border-color: var(--olive-hairline-strong);
+  background: transparent;
+}
+
+.olive
+  .olive-customizer
+  [data-display="tiles"]
+  [data-slot="customizer-value"][data-selected="true"] {
+  border-color: var(--olive-espresso);
+  background: transparent;
+  box-shadow: none;
+}
+
+.olive .olive-customizer [data-slot="customizer-value-image"] {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--olive-sand);
+}
+
+.olive .olive-customizer [data-slot="customizer-swatch"] {
+  border-radius: 0;
+}
+
+.olive .olive-customizer [data-slot="customizer-value-label"] {
+  color: var(--olive-espresso);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.olive .olive-customizer [data-slot="customizer-value-price"] {
+  margin-top: auto;
+  color: var(--olive-taupe-ink);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+/* ── Shop + collections editorial (2026-10-21) ─────────────────────────────
+   Shop collection tabs (tracked-caps text, 1px espresso underline), square
+   pagination, and the single-collection photo header. Self-contained. */
+
+.olive .olive-shop-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(1.25rem, 2.4vw, 2rem);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.olive .olive-shop-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* When the tabs overflow (they scroll sideways), the last visible one fades
+   out instead of being cut at a hard edge — a hint that there is more. The
+   row is left-aligned, so a row that fits only fades empty space. */
+.olive .olive-shop-tabs {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 2.5rem),
+    transparent
+  );
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+}
+
+.olive .olive-shop-tab {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  white-space: nowrap;
+  color: var(--olive-ink-soft);
+  cursor: pointer;
+  transition: color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-shop-tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.5rem;
+  height: 1px;
+  background-color: var(--olive-espresso);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-shop-tab:hover,
+.olive .olive-shop-tab[aria-checked="true"] {
+  color: var(--olive-espresso);
+}
+
+.olive .olive-shop-tab:hover::after,
+.olive .olive-shop-tab[aria-checked="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Square pagination — tabular numerals, the current page filled espresso. */
+.olive .olive-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  padding-inline: 0.5rem;
+  background-color: transparent;
+  border: 1px solid var(--olive-hairline-strong);
+  border-radius: 0;
+  color: var(--olive-espresso);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease),
+    border-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-page-btn.is-wide {
+  padding-inline: 1.125rem;
+}
+
+.olive a.olive-page-btn:hover {
+  border-color: var(--olive-espresso);
+}
+
+.olive .olive-page-btn.is-active {
+  background-color: var(--olive-espresso);
+  border-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Scrim for copy printed on a full-bleed photograph (collection header,
+   promo takeover). Left-weighted on wide screens with a bottom lift for
+   bright photos; on a phone the copy spans the frame, so a uniform wash
+   plus a bottom rise holds 4.5:1 for ivory text on pale photographs. */
+.olive .olive-photo-scrim {
+  background:
+    linear-gradient(
+      0deg,
+      rgb(31 27 23 / 0.62) 0%,
+      rgb(31 27 23 / 0.3) 40%,
+      rgb(31 27 23 / 0) 75%
+    ),
+    var(--olive-scrim);
+}
+
+@media (max-width: 767.98px) {
+  .olive .olive-photo-scrim {
+    background:
+      linear-gradient(
+        0deg,
+        rgb(31 27 23 / 0.84) 0%,
+        rgb(31 27 23 / 0.66) 45%,
+        rgb(31 27 23 / 0.5) 100%
+      );
+  }
+}
+
+/* Collection page photo header: the breadcrumb prints on the scrim in ivory. */
+.olive .olive-collection-hero {
+  min-height: clamp(22rem, 52vh, 34rem);
+}
+
+.olive .olive-on-photo .olive-breadcrumb,
+.olive .olive-on-photo .olive-breadcrumb a,
+.olive .olive-on-photo .olive-breadcrumb [aria-current="page"] {
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-on-photo .olive-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* ── Inner pages editorial (2026-10-21) ─────────────────────────────────────
+   Conformance sweep of about / blog / account / contact / generic / events /
+   testimonials / maintenance. Dark title bands (espresso, moss) print the
+   breadcrumb in on-dark type; the satellite surfaces keep square corners. */
+.olive [data-olive-tone="espresso"] .olive-breadcrumb,
+.olive [data-olive-tone="moss"] .olive-breadcrumb {
+  color: var(--olive-on-dark-soft);
+}
+
+.olive [data-olive-tone="espresso"] .olive-breadcrumb a,
+.olive [data-olive-tone="moss"] .olive-breadcrumb a {
+  color: inherit;
+}
+
+.olive [data-olive-tone="espresso"] .olive-breadcrumb a:hover,
+.olive [data-olive-tone="moss"] .olive-breadcrumb a:hover,
+.olive [data-olive-tone="espresso"] .olive-breadcrumb [aria-current="page"],
+.olive [data-olive-tone="moss"] .olive-breadcrumb [aria-current="page"] {
+  color: var(--olive-on-dark);
+}
+
+/* The shared video facade (thumbnail frame) ships rounded-md; olive is square. */
+.olive .olive-card [class*="rounded-md"] {
+  border-radius: 0;
+}
+
+/* ── Homepage editorial (2026-10-21) ──────────────────────────────────────
+   The Edit band, the About split, the pull-quote, journal teasers and the
+   Inner Circle sign-up (homepage/*.tsx). Hero rules live in the Hero block
+   above. Content edges line up with the page container through
+   `--olive-home-edge`, measured against each band's own inline size. */
+
+/* Homepage rhythm: two adjacent sections on the same ground (About split →
+   photo tiles, feed → press → journal) would otherwise stack two full
+   --olive-section-pad-y paddings into one dead band of ivory. The second
+   section drops its top padding so the pair is separated by exactly one.
+   `!important` because OliveSection sets its padding inline. */
+.olive .olive-home > [data-olive-tone="ivory"] + [data-olive-tone="ivory"],
+.olive .olive-home > [data-olive-tone="sand"] + [data-olive-tone="sand"] {
+  padding-top: 0 !important;
+}
+
+/* The Edit — moss panel (≈ a third) beside a photograph that bleeds right. */
+.olive .olive-band {
+  container-type: inline-size;
+  display: grid;
+  background-color: var(--olive-moss);
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-band-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background-color: var(--olive-moss-deep);
+}
+
+@media (min-width: 640px) {
+  .olive .olive-band-media {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+.olive .olive-band-panel {
+  --olive-home-edge: calc(
+    var(--olive-section-pad-x) + max(0px, (100cqw - var(--olive-container)) / 2)
+  );
+  display: flex;
+  align-items: center;
+  padding-block: clamp(3rem, 8vw, 5.5rem);
+  padding-inline: var(--olive-home-edge);
+}
+
+.olive .olive-band-panel .olive-h2 {
+  max-width: 16ch;
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-band-split {
+    grid-template-columns: minmax(0, 32fr) minmax(0, 68fr);
+    min-height: clamp(420px, 46vw, 640px);
+  }
+
+  .olive .olive-band-split .olive-band-media {
+    grid-column: 2;
+    grid-row: 1;
+    aspect-ratio: auto;
+  }
+
+  .olive .olive-band-split .olive-band-panel {
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline-end: clamp(2rem, 3.5vw, 3.5rem);
+  }
+}
+
+/* About split — sand panel (≈45%) beside a photograph (≈55%). */
+.olive .olive-story {
+  display: grid;
+  background-color: var(--olive-sand);
+}
+
+.olive .olive-story-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4.5rem);
+}
+
+.olive .olive-story-split .olive-story-panel {
+  justify-content: flex-start;
+}
+
+.olive .olive-story .olive-h2 {
+  max-width: 18ch;
+}
+
+.olive .olive-story .olive-story-heading p:not(.olive-eyebrow) {
+  max-width: 46ch;
+}
+
+.olive .olive-story-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+}
+
+@media (min-width: 640px) {
+  .olive .olive-story-media {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-story-split {
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    min-height: clamp(420px, 40vw, 600px);
+  }
+
+  .olive .olive-story-split .olive-story-media {
+    aspect-ratio: auto;
+  }
+}
+
+/* Customer quote — Bodoni italic, set like a magazine pull-quote. */
+.olive .olive-pull-quote {
+  font-family: var(--olive-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.625rem, 1.1rem + 2vw, 2.75rem);
+  line-height: 1.22;
+  letter-spacing: -0.005em;
+  font-variation-settings: "opsz" 48;
+  color: var(--olive-espresso);
+  text-wrap: balance;
+}
+
+/* Journal teasers — no frame; the title takes the hover underline. */
+.olive .olive-blog-teaser-title {
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-blog-teaser:hover .olive-blog-teaser-title,
+.olive .olive-blog-teaser:focus-visible .olive-blog-teaser-title {
+  text-decoration-color: currentColor;
+}
+
+/* The Inner Circle — espresso (or a scrimmed photograph) band. Two columns
+   on the page edge at lg (copy left, form right, vertically centred);
+   stacked below. */
+.olive .olive-newsletter {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--olive-espresso);
+  color: var(--olive-on-dark);
+  padding-block: clamp(56px, 7vw, 96px);
+  padding-inline: var(--olive-section-pad-x);
+}
+
+.olive .olive-newsletter-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--olive-scrim);
+}
+
+@media (max-width: 767.98px) {
+  .olive .olive-newsletter-scrim {
+    background: rgb(31 27 23 / 0.66);
+  }
+}
+
+.olive .olive-newsletter-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2rem;
+  width: 100%;
+  max-width: var(--olive-content-max);
+  margin-inline: auto;
+}
+
+.olive .olive-newsletter-copy {
+  max-width: 34rem;
+}
+
+.olive .olive-newsletter-form-wrap {
+  width: 100%;
+  max-width: 34rem;
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-newsletter-inner[data-has-heading="true"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    align-items: center;
+    column-gap: clamp(3rem, 6vw, 6rem);
+  }
+
+  .olive
+    .olive-newsletter-inner[data-has-heading="true"]
+    .olive-newsletter-form-wrap {
+    justify-self: end;
+  }
+}
+
+/* Ivory box + square espresso arrow attached flush to its right edge. */
+.olive .olive-newsletter-form {
+  display: flex;
+  align-items: stretch;
+  height: 3.25rem;
+}
+
+.olive .olive-newsletter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 1.125rem;
+  border: 1px solid var(--olive-bone);
+  border-right: none;
+  border-radius: 0;
+  background: var(--olive-bone);
+  font-family: var(--olive-font-body);
+  font-weight: 400;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  color: var(--olive-espresso);
+  caret-color: var(--olive-espresso);
+}
+
+/* ink-soft on bone ≈ 7:1. */
+.olive .olive-newsletter-input::placeholder {
+  color: var(--olive-ink-soft);
+  opacity: 1;
+}
+
+.olive .olive-newsletter-input:focus {
+  outline: none;
+}
+
+.olive .olive-newsletter-form:focus-within {
+  outline: 2px solid var(--olive-on-dark);
+  outline-offset: 3px;
+}
+
+.olive .olive-newsletter-input[aria-invalid="true"] {
+  box-shadow: inset 0 -2px 0 var(--olive-espresso);
+}
+
+/* Browser autofill would paint its own face over the ivory box. */
+.olive .olive-newsletter-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--olive-espresso);
+  box-shadow: 0 0 0 100px var(--olive-bone) inset;
+  transition: background-color 9999s;
+}
+
+.olive .olive-newsletter-submit {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 100%;
+  border: 1px solid var(--olive-bone);
+  border-radius: 0;
+  background: var(--olive-espresso);
+  color: var(--olive-on-dark);
+  cursor: pointer;
+  transition:
+    background-color var(--olive-dur-hover) var(--olive-ease),
+    color var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-newsletter-submit:focus-visible {
+  outline: 2px solid var(--olive-on-dark);
+  outline-offset: 3px;
+}
+
+.olive .olive-newsletter-submit svg {
+  transition: transform var(--olive-dur-hover) var(--olive-ease);
+}
+
+.olive .olive-newsletter-submit:hover:not(:disabled) {
+  background-color: var(--olive-moss-deep);
+}
+
+.olive .olive-newsletter-submit:hover:not(:disabled) svg,
+.olive .olive-newsletter-submit:focus-visible svg {
+  transform: translateX(3px);
+}
+
+.olive .olive-newsletter-submit:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.olive .olive-newsletter-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 999px;
+}
+
+/* The live region stays rendered (an emptied, display:none region is not
+   reliably announced); only its content takes space. */
+.olive .olive-newsletter-status > * {
+  margin-top: 1rem;
+}
+
+.olive .olive-newsletter-error {
+  font-family: var(--olive-font-body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--olive-on-dark);
+}
+
+.olive .olive-newsletter-consent {
+  margin-top: 1rem;
+  max-width: 52ch;
+  font-family: var(--olive-font-body);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--olive-on-dark-soft);
+}
+
+.olive .olive-newsletter-consent a {
+  color: var(--olive-on-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olive .olive-blog-teaser-title,
+  .olive .olive-newsletter-submit,
+  .olive .olive-newsletter-submit svg {
+    transition: none;
+  }
+}
+
+/* ── About page (2026-10-21 simplified) ───────────────────────────────────
+   "Three beats" (about/olive-about-page.tsx + olive-about-story.tsx; spec
+   docs/templates/olive/checkpoint/about-simple-2026-10-21/a-three-beats.html):
+   1 opening — sand copy panel ≈45% beside a photograph ≈55% that bleeds to
+   the right edge; 2 our story — one sticky photograph beside the paragraphs;
+   3 close — italic Bodoni line + up to two buttons between two short rules.
+   Copy edges land on the wordmark through --olive-about-edge, measured
+   against the opening's own inline size like --olive-home-edge. */
+
+/* 1 · Opening. Phones and tablets: photograph first, then the panel. */
+.olive .olive-about-open {
+  container-type: inline-size;
+  display: grid;
+  background-color: var(--olive-sand);
+  color: var(--olive-espresso);
+}
+
+.olive .olive-about-open-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background-color: var(--olive-sand);
+}
+
+@media (min-width: 640px) {
+  .olive .olive-about-open-media {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+.olive .olive-about-open-panel {
+  --olive-about-edge: calc(
+    var(--olive-section-pad-x) + max(0px, (100cqw - var(--olive-container)) / 2)
+  );
+  display: flex;
+  align-items: center;
+  padding-block: clamp(3rem, 6vw, 4rem);
+  padding-inline: var(--olive-about-edge);
+}
+
+.olive .olive-about-open-copy,
+.olive .olive-about-open-manifesto {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+}
+
+.olive .olive-about-statement {
+  max-width: 13ch;
+  text-wrap: balance;
+}
+
+.olive .olive-about-lede {
+  max-width: 44ch;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--olive-ink-soft);
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-about-open-split {
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    min-height: clamp(520px, 62vw, 760px);
+  }
+
+  .olive .olive-about-open-split .olive-about-open-media {
+    grid-column: 2;
+    grid-row: 1;
+    aspect-ratio: auto;
+  }
+
+  .olive .olive-about-open-split .olive-about-open-panel {
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline-end: clamp(2rem, 5vw, 5rem);
+  }
+}
+
+/* 2 · Our story. The photograph sticks under the header (the outer box is
+   sticky, the inner frame is the positioned box next/image fills). */
+.olive .olive-about-story {
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 4rem);
+}
+
+.olive .olive-about-story-photo {
+  width: 100%;
+  max-width: 30rem;
+}
+
+.olive .olive-about-story-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background-color: var(--olive-sand);
+}
+
+.olive .olive-about-story-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 56ch;
+}
+
+.olive .olive-about-story:not(.olive-about-story-split) .olive-about-story-text {
+  width: 100%;
+  max-width: 62ch;
+  margin-inline: auto;
+}
+
+.olive .olive-about-story-heading {
+  margin-block: 0.5rem;
+}
+
+.olive .olive-about-story-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.olive .olive-about-story-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--olive-ink-soft);
+}
+
+.olive .olive-about-dropcap::first-letter {
+  float: left;
+  padding: 0.375rem 0.625rem 0 0;
+  font-family: var(--olive-font-display);
+  font-weight: 400;
+  font-size: 4.2em;
+  line-height: 0.82;
+  font-variation-settings: "opsz" 60;
+  color: var(--olive-espresso);
+}
+
+@media (min-width: 1024px) {
+  .olive .olive-about-story-split {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: clamp(40px, 7vw, 112px);
+    align-items: start;
+  }
+
+  .olive .olive-about-story-split .olive-about-story-photo {
+    position: sticky;
+    top: calc(var(--olive-header-h) + 1.5rem);
+    max-width: none;
+  }
+
+  .olive .olive-about-story-split .olive-about-story-text {
+    padding-top: 1.5rem;
+  }
+}
+
+/* 3 · Close — centred between two short stone rules. */
+.olive .olive-about-close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  text-align: center;
+}
+
+.olive .olive-about-close::before,
+.olive .olive-about-close::after {
+  content: "";
+  width: 64px;
+  height: 1px;
+  background-color: var(--olive-stone);
+}
+
+.olive .olive-about-founding {
+  max-width: 32ch;
+  font-family: var(--olive-font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.3;
+  font-variation-settings: "opsz" 48;
+  color: var(--olive-espresso);
+  text-wrap: balance;
+}
+
+.olive .olive-about-close-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
 /* ── Dream Your Theme — design tokens. Scoped to .dream so they never bleed into other templates. ── */

@@ -8,7 +8,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
@@ -68,7 +67,8 @@ function CardShell({
 }: {
   headingId: string;
   heading: string;
-  headingFieldKey: string;
+  /** Omitted when the heading is fixed copy, not an owner-editable field. */
+  headingFieldKey?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -79,7 +79,7 @@ function CardShell({
       <div className="border-b border-[var(--umsc-line)] px-6 py-5 sm:px-7">
         <h2
           id={headingId}
-          {...fieldAttr(headingFieldKey)}
+          {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
           className="umsc-serif text-[20px] font-normal text-[var(--umsc-ink)]"
         >
           {heading}
@@ -206,8 +206,8 @@ export function UmscCheckoutForm({
             </div>
           </CardShell>
 
-          {/* Delivery method — only when the store offers in-store pickup */}
-          {f.shippingConfig.offersInStorePickup && (
+          {/* Delivery method — only when the store offers more than shipping */}
+          {f.deliveryOptions.length > 1 && (
             <CardShell
               headingId="umsc-co-delivery"
               heading={deliveryHeading}
@@ -218,42 +218,33 @@ export function UmscCheckoutForm({
                 value={f.deliveryMethod}
                 onChange={f.setDeliveryMethod}
                 pillClassName="flex-1 min-w-[140px] justify-start rounded-none px-5 py-4 text-left"
-                options={[
-                  {
-                    value: "ship",
-                    label: (active) => (
-                      <span className="flex items-center gap-2">
-                        {active && (
-                          <span
-                            aria-hidden="true"
-                            className="size-3 shrink-0 rounded-full bg-[var(--umsc-gold-ink)]"
-                          />
-                        )}
-                        Ship to address
-                      </span>
-                    ),
-                  },
-                  {
-                    value: "pickup",
-                    label: (active) => (
-                      <span className="flex items-center gap-2">
-                        {active && (
-                          <span
-                            aria-hidden="true"
-                            className="size-3 shrink-0 rounded-full bg-[var(--umsc-gold-ink)]"
-                          />
-                        )}
-                        In-store pickup
-                      </span>
-                    ),
-                  },
-                ]}
+                options={f.deliveryOptions.map((option) => ({
+                  value: option.id,
+                  label: (active: boolean) => (
+                    <span className="flex items-center gap-2">
+                      {active && (
+                        <span
+                          aria-hidden="true"
+                          className="size-3 shrink-0 rounded-full bg-[var(--umsc-gold-ink)]"
+                        />
+                      )}
+                      {option.id === "ship"
+                        ? "Ship to address"
+                        : option.id === "pickup"
+                          ? "In-store pickup"
+                          : option.label}
+                    </span>
+                  ),
+                }))}
               />
 
               <p className="umsc-sans text-[13px] leading-[1.5] text-[var(--umsc-muted)]">
                 {f.deliveryMethod === "pickup"
                   ? "No shipping charge. You'll pick up your order at the store."
-                  : "Shipping cost is based on this store's shipping settings."}
+                  : f.deliveryMethod === "delivery"
+                    ? (f.deliveryOptions.find((o) => o.id === "delivery")
+                        ?.description ?? "")
+                    : "Shipping cost is based on this store's shipping settings."}
               </p>
 
               {f.deliveryMethod === "pickup" && (
@@ -273,19 +264,62 @@ export function UmscCheckoutForm({
                   )}
                 </div>
               )}
+
+              {f.deliveryMethod === "delivery" && (
+                <>
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className={cn(
+                      "umsc-sans text-[13px] leading-[1.5]",
+                      f.localDelivery.status === "ineligible"
+                        ? "font-medium text-[var(--umsc-error)]"
+                        : "text-[var(--umsc-muted)]",
+                    )}
+                  >
+                    {f.localDelivery.status === "checking"
+                      ? "Checking your ZIP…"
+                      : f.localDelivery.status === "ineligible"
+                        ? f.localDelivery.message
+                        : f.localDelivery.status === "eligible"
+                          ? "Great — we deliver to you."
+                          : null}
+                  </p>
+                  {f.localDelivery.instructions && (
+                    <div className="flex flex-col gap-1 border border-[var(--umsc-line)] bg-[var(--umsc-cream)] px-4 py-3">
+                      <p className="umsc-sans text-[11px] font-semibold tracking-[0.1em] text-[var(--umsc-ink)] uppercase">
+                        Delivery details
+                      </p>
+                      <p className="umsc-sans text-[13px] leading-[1.5] whitespace-pre-line text-[var(--umsc-muted)]">
+                        {f.localDelivery.instructions}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </CardShell>
           )}
 
-          {/* Shipping address — only when delivery method is ship */}
-          {f.deliveryMethod === "ship" && (
+          {/* Address — shipping and local delivery; pickup needs none */}
+          {f.needsAddress && (
             <CardShell
               headingId="umsc-co-shipping"
-              heading={shippingHeading}
-              headingFieldKey="umsc.checkout.shipping-heading"
+              heading={
+                f.deliveryMethod === "delivery"
+                  ? "Delivery address"
+                  : shippingHeading
+              }
+              headingFieldKey={
+                f.deliveryMethod === "delivery"
+                  ? undefined
+                  : "umsc.checkout.shipping-heading"
+              }
             >
               <p className="umsc-sans -mt-2 text-[13px] leading-[1.5] text-[var(--umsc-muted)]">
-                {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                  ? "We price shipping from this address. Make changes here before continuing to payment."
+                {f.addressLocked
+                  ? f.deliveryMethod === "delivery"
+                    ? "We check delivery from this address. Make changes here before continuing to payment."
+                    : "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe Checkout prefilled so you can confirm or edit your address before paying."}
               </p>
 
@@ -309,7 +343,7 @@ export function UmscCheckoutForm({
                   value={f.addressLine1}
                   onChange={(e) => f.setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
-                  required={f.deliveryMethod === "ship"}
+                  required={f.needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !f.addressLine1.trim() ? true : undefined
@@ -344,7 +378,7 @@ export function UmscCheckoutForm({
                     autoComplete="shipping address-level2"
                     value={f.city}
                     onChange={(e) => f.setCity(e.target.value)}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.city.trim() ? true : undefined
@@ -393,7 +427,7 @@ export function UmscCheckoutForm({
                     autoComplete="shipping postal-code"
                     value={f.postalCode}
                     onChange={(e) => f.setPostalCode(e.target.value)}
-                    required={f.deliveryMethod === "ship"}
+                    required={f.needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !f.postalCode.trim() ? true : undefined
@@ -610,7 +644,9 @@ export function UmscCheckoutForm({
                 )}
 
                 <div className="umsc-sans flex justify-between text-[13px]">
-                  <span className="text-[var(--umsc-muted)]">Shipping</span>
+                  <span className="text-[var(--umsc-muted)]">
+                    {f.deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                  </span>
                   <span className="umsc-tabular text-[var(--umsc-ink)]">
                     {f.deliveryMethod === "pickup" ? (
                       "In-store pickup (free)"
@@ -626,7 +662,14 @@ export function UmscCheckoutForm({
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (
-                      "Calculated at checkout"
+                      f.deliveryMethod === "delivery" ? (
+                        "Enter your ZIP"
+                      ) : (
+                        "Calculated at checkout"
+                      )
+                    ) : f.deliveryMethod === "delivery" &&
+                      f.localDelivery.status === "ineligible" ? (
+                      "Not available"
                     ) : f.shipping === 0 ? (
                       "Free"
                     ) : (

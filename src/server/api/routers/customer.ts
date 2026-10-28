@@ -24,6 +24,7 @@ import {
   DO_NOT_EMAIL_REASONS,
   removeFromDoNotEmail,
 } from "~/lib/marketing/do-not-email";
+import { redactOrderForStaff } from "~/lib/orders/staff-redaction";
 import { normalizeEmail } from "~/lib/utils";
 import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
@@ -40,6 +41,25 @@ import {
   protectedProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
+
+// The shopper-facing reads below (`getMyProfile`, `getMyOrders`,
+// `getMyOrderById`) are callable by any signed-in customer, so they must not
+// return a bare row: `include` ships every scalar. These columns are owner /
+// platform bookkeeping — the owner's CRM note and internal order note above
+// all (both say "never shown to the customer" in the schema).
+const SHOPPER_CUSTOMER_OMIT = {
+  notes: true,
+  stripeCustomerId: true,
+  importId: true,
+  importStatus: true,
+} as const satisfies Prisma.CustomerOmit;
+
+const SHOPPER_ORDER_OMIT = {
+  internalNote: true,
+  stripeSessionId: true,
+  stripePaymentIntentId: true,
+  stripeInvoiceId: true,
+} as const satisfies Prisma.OrderOmit;
 
 export const customerRouter = createTRPCRouter({
   // Get customer profile for current user
@@ -66,6 +86,7 @@ export const customerRouter = createTRPCRouter({
           orderBy: { isDefault: "desc" },
         },
       },
+      omit: SHOPPER_CUSTOMER_OMIT,
     });
 
     return customer;
@@ -106,6 +127,7 @@ export const customerRouter = createTRPCRouter({
           shippingAddress: true,
           shipments: true,
         },
+        omit: SHOPPER_ORDER_OMIT,
       });
 
       return order ?? null;
@@ -154,6 +176,7 @@ export const customerRouter = createTRPCRouter({
         items: true,
         shippingAddress: true,
       },
+      omit: SHOPPER_ORDER_OMIT,
       orderBy: { createdAt: "desc" },
     });
 
@@ -1016,12 +1039,19 @@ export const customerRouter = createTRPCRouter({
 
       if (!customer) return null;
 
-      // STAFF is fulfillment-only and must not see owner-private CRM notes.
+      // STAFF is fulfillment-only and must not see owner-private CRM notes,
+      // nor the order history's owner-only columns (`internalNote`, Stripe
+      // ids) — the same D2 redaction `order.getAll` / `order.getById` apply.
       // `ctx.membershipRole` is resolved live from the DB by `staffProcedure`;
-      // PLATFORM_ADMIN reads null there, so notes stay visible for them.
-      const showNotes = ctx.membershipRole !== "STAFF";
+      // PLATFORM_ADMIN reads null there, so everything stays visible for them.
+      const isStaff = ctx.membershipRole === "STAFF";
+      if (!isStaff) return customer;
 
-      return showNotes ? customer : { ...customer, notes: null };
+      return {
+        ...customer,
+        notes: null,
+        orders: customer.orders.map((o) => redactOrderForStaff(o, true)),
+      };
     }),
 
   list: staffProcedure

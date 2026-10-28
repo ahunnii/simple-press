@@ -1,3 +1,4 @@
+import { render } from "@react-email/components";
 import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
@@ -33,6 +34,7 @@ import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import OwnerSubscriptionNotificationEmail from "~/emails/owner-subscription-notification";
 import PaymentsDisabledEmail from "~/emails/payments-disabled";
+import PolicyUpdateNoticeEmail from "~/emails/policy-update-notice";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
@@ -48,7 +50,9 @@ import type { AbandonedCheckoutItem } from "~/emails/abandoned-checkout";
 import type { InvoiceSummaryLineItem } from "~/emails/components/invoice-summary";
 import type { OverdueInvoiceRow } from "~/emails/invoice-overdue-owner";
 import type { DigestInvoiceRow } from "~/emails/invoice-weekly-digest";
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { DonationLabel } from "~/lib/donations/label";
+import type { MaterialPolicyUpdate } from "~/lib/legal/material-updates";
 import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
 import {
@@ -62,6 +66,9 @@ import {
   subscriptionUpdatedDefaultSubject,
 } from "~/lib/email/default-subjects";
 import { getEmailOverrides } from "~/lib/email/overrides.server";
+import { isPending } from "~/lib/legal/material-updates";
+import { policyDocsFor, policyUrl } from "~/lib/legal/policy-docs";
+import { formatPolicyDate } from "~/lib/legal/policy-versions";
 import { createOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
 
@@ -95,9 +102,11 @@ export async function sendOrderConfirmation(params: {
   discount: number;
   total: number;
   shippingAddress?: any;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
   pickupLocation?: string;
   pickupInstructions?: string;
+  /** Local delivery only: the owner's "Delivery days & instructions". */
+  deliveryInstructions?: string | null;
   business: {
     name: string;
     ownerEmail: string;
@@ -151,6 +160,7 @@ export async function sendOrderConfirmation(params: {
       deliveryMethod: params.deliveryMethod,
       pickupLocation: params.pickupLocation,
       pickupInstructions: params.pickupInstructions,
+      deliveryInstructions: params.deliveryInstructions,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -188,7 +198,19 @@ export async function sendNewOrderNotification(params: {
   tax: number;
   discount: number;
   total: number;
-  deliveryMethod?: "ship" | "pickup";
+  deliveryMethod?: DeliveryMethod;
+  /** Local delivery only: where to drive the order. */
+  shippingAddress?: {
+    name: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  /** Local delivery only: the owner's "Delivery days & instructions". */
+  deliveryInstructions?: string | null;
   /** Present when this order was created from a paid subscription invoice — lets the owner tell a renewal from a one-off. */
   subscription?: { intervalLabel: string; adminUrl: string };
   business: {
@@ -224,6 +246,8 @@ export async function sendNewOrderNotification(params: {
       discount: params.discount,
       total: params.total,
       deliveryMethod: params.deliveryMethod,
+      shippingAddress: params.shippingAddress,
+      deliveryInstructions: params.deliveryInstructions,
       subscription: params.subscription,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
@@ -933,6 +957,51 @@ export async function sendPaymentsDisabledAlert(params: {
     ],
     idempotencyKey: params.idempotencyKey,
   });
+}
+
+/** Where store owners write about a policy change. */
+export const POLICY_NOTICE_SUPPORT_EMAIL =
+  process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
+  "help@generativejustice.org";
+
+/**
+ * Renders the "Updates to SimplePress policies" legal notice for a material
+ * policy update (to every store owner; the same content goes to all of them).
+ *
+ * Returns rendered parts rather than sending: the platform-hub send goes out
+ * as Resend batches (`sendResendBatch`), which take `html` + `text`. This is a
+ * transactional/legal notice, deliberately NOT a marketing email — no
+ * unsubscribe link, no marketing-consent check.
+ *
+ * `platformDomain` is `NEXT_PUBLIC_PLATFORM_DOMAIN`; the policy links are
+ * absolute because the email is read outside any store.
+ */
+export async function renderPolicyUpdateNoticeEmail(params: {
+  update: MaterialPolicyUpdate;
+  platformDomain: string;
+  now?: Date;
+}): Promise<{ subject: string; html: string; text: string }> {
+  const { update, platformDomain } = params;
+  const effectiveOnLabel = formatPolicyDate(update.effectiveOn);
+  const element = PolicyUpdateNoticeEmail({
+    summary: update.summary,
+    effectiveOnLabel,
+    inEffect: !isPending(update, params.now ?? new Date()),
+    policies: policyDocsFor(update.documents).map((doc) => ({
+      label: doc.label,
+      url: policyUrl(platformDomain, doc.slug),
+    })),
+    supportEmail: POLICY_NOTICE_SUPPORT_EMAIL,
+  });
+  const [html, text] = await Promise.all([
+    render(element),
+    render(element, { plainText: true }),
+  ]);
+  return {
+    subject: `Updates to SimplePress policies — effective ${effectiveOnLabel}`,
+    html,
+    text,
+  };
 }
 
 // Order Ready for Pickup (customer)

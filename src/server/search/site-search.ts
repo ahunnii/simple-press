@@ -10,6 +10,7 @@ import { formatEventDate } from "~/lib/events/format";
 import { upcomingEventWhere } from "~/lib/events/query";
 import { routeEnabled } from "~/lib/features/route-flags";
 import { formatProductDisplayPrice } from "~/lib/prices";
+import { PHOTO_ONLY_WHERE } from "~/lib/products/media";
 import { isReservedPageSlug } from "~/lib/reserved-page-slugs";
 import { db as defaultDb } from "~/server/db";
 
@@ -333,7 +334,12 @@ async function loadProducts({
       description: true,
       sku: true,
       price: true,
-      images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
+      images: {
+        where: PHOTO_ONLY_WHERE,
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { url: true },
+      },
       variants: { select: { price: true } },
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],

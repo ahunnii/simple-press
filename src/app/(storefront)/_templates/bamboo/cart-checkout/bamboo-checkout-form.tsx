@@ -9,7 +9,6 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -63,6 +62,10 @@ export function CheckoutForm({
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
@@ -257,35 +260,28 @@ export function CheckoutForm({
           </fieldset>
         )}
 
-        {shippingConfig.offersInStorePickup && (
+        {deliveryOptions.length > 1 && (
           <fieldset className="flex flex-col gap-3">
             <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
               Delivery
             </legend>
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant={deliveryMethod === "ship" ? "default" : "outline"}
-                aria-pressed={deliveryMethod === "ship"}
-                onClick={() => setDeliveryMethod("ship")}
-                className="rounded-full"
-              >
-                Ship to address
-              </Button>
-              <Button
-                type="button"
-                variant={deliveryMethod === "pickup" ? "default" : "outline"}
-                aria-pressed={deliveryMethod === "pickup"}
-                onClick={() => setDeliveryMethod("pickup")}
-                className="rounded-full"
-              >
-                In-store pickup
-              </Button>
+              {deliveryOptions.map((option) => (
+                <Button
+                  key={option.id}
+                  type="button"
+                  variant={deliveryMethod === option.id ? "default" : "outline"}
+                  aria-pressed={deliveryMethod === option.id}
+                  onClick={() => setDeliveryMethod(option.id)}
+                  className="rounded-full"
+                >
+                  {option.label}
+                </Button>
+              ))}
             </div>
             <p className="text-muted-foreground text-sm">
-              {deliveryMethod === "pickup"
-                ? "No shipping charge. You'll pick up your order at the store."
-                : "Shipping cost is based on your store's shipping settings."}
+              {deliveryOptions.find((o) => o.id === deliveryMethod)
+                ?.description ?? ""}
             </p>
             {deliveryMethod === "pickup" && (
               <div className="bg-muted/40 rounded-md border p-3 text-sm">
@@ -302,17 +298,51 @@ export function CheckoutForm({
                 ) : null}
               </div>
             )}
+            {deliveryMethod === "delivery" && (
+              <>
+                <div aria-live="polite">
+                  {localDelivery.status === "checking" ? (
+                    <p className="text-muted-foreground text-sm">
+                      Checking your ZIP…
+                    </p>
+                  ) : localDelivery.status === "ineligible" &&
+                    localDelivery.message ? (
+                    <p className="text-destructive text-sm">
+                      {localDelivery.message}
+                    </p>
+                  ) : localDelivery.status === "eligible" ? (
+                    <p className="text-sm text-green-700">
+                      Great — we deliver to you.
+                    </p>
+                  ) : null}
+                </div>
+                {localDelivery.instructions ? (
+                  <div className="bg-muted/40 rounded-md border p-3 text-sm">
+                    <p className="text-foreground font-medium">
+                      Delivery details
+                    </p>
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                      {localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </fieldset>
         )}
 
-        {deliveryMethod === "ship" && (
+        {needsAddress && (
           <fieldset className="flex flex-col gap-4">
             <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
-              Shipping Address
+              {deliveryMethod === "delivery"
+                ? "Delivery address"
+                : "Shipping Address"}
             </legend>
             <p className="text-muted-foreground text-sm">
-              {shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {addressLocked
+                ? deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <SavedAddressPicker
@@ -345,7 +375,7 @@ export function CheckoutForm({
                   value={addressLine1}
                   onChange={(e) => setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !addressLine1.trim() ? true : undefined
@@ -372,7 +402,7 @@ export function CheckoutForm({
                     autoComplete="shipping address-level2"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    required={deliveryMethod === "ship"}
+                    required={needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !city.trim() ? true : undefined
@@ -418,7 +448,7 @@ export function CheckoutForm({
                     autoComplete="shipping postal-code"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
-                    required={deliveryMethod === "ship"}
+                    required={needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !postalCode.trim() ? true : undefined
@@ -524,7 +554,9 @@ export function CheckoutForm({
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--bam-forest)]/75">Shipping</span>
+                  <span className="text-[var(--bam-forest)]/75">
+                    {deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+                  </span>
                   <span className="text-[var(--bam-forest-deep)]">
                     {deliveryMethod === "pickup" ? (
                       "In-store pickup (free)"
@@ -539,6 +571,15 @@ export function CheckoutForm({
                         />
                         Calculating…
                       </span>
+                    ) : deliveryMethod === "delivery" && shippingPending ? (
+                      localDelivery.status === "checking" ? (
+                        "Calculating…"
+                      ) : (
+                        "Enter your ZIP"
+                      )
+                    ) : deliveryMethod === "delivery" &&
+                      localDelivery.status === "ineligible" ? (
+                      "Not available"
                     ) : shippingPending ? (
                       "Calculated at checkout"
                     ) : shipping === 0 ? (

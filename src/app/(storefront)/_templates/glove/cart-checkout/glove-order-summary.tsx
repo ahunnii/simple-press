@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
+import type { DeliveryMethod } from "~/lib/delivery-method";
 import type { CartItem } from "~/providers/cart-context";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
@@ -13,7 +14,7 @@ import { GloveLineOptions } from "../shared/glove-line-options";
 type GloveOrderSummaryProps = {
   heading: string;
   taxNote: string;
-  deliveryMethod: "ship" | "pickup";
+  deliveryMethod: DeliveryMethod;
   discountAmount: number;
   /** Authoritative shipping cost from the checkout hook (a live quote when applicable). */
   shipping: number;
@@ -21,6 +22,8 @@ type GloveOrderSummaryProps = {
   shippingPending: boolean;
   /** True while a live rate is being fetched for a known destination. */
   shippingCalculating: boolean;
+  /** True when local delivery is selected but the customer is ineligible. */
+  deliveryUnavailable?: boolean;
 };
 
 const ROW =
@@ -82,6 +85,7 @@ export function GloveOrderSummary({
   shipping,
   shippingPending,
   shippingCalculating,
+  deliveryUnavailable,
 }: GloveOrderSummaryProps) {
   const { items, subtotal } = useCart();
   const effectiveShipping = deliveryMethod === "pickup" ? 0 : shipping;
@@ -121,7 +125,9 @@ export function GloveOrderSummary({
           </div>
         ) : null}
         <div className={ROW}>
-          <dt className={DT}>Shipping</dt>
+          <dt className={DT}>
+            {deliveryMethod === "delivery" ? "Delivery" : "Shipping"}
+          </dt>
           <dd className={`${DD} text-right`}>
             {deliveryMethod === "pickup" ? (
               "In-store pickup (free)"
@@ -138,7 +144,13 @@ export function GloveOrderSummary({
               </span>
             ) : shippingPending ? (
               <span className="font-normal text-[var(--glove-muted)]">
-                Calculated at checkout
+                {deliveryMethod === "delivery"
+                  ? "Enter your ZIP"
+                  : "Calculated at checkout"}
+              </span>
+            ) : deliveryUnavailable ? (
+              <span className="font-normal text-[var(--glove-muted)]">
+                Not available
               </span>
             ) : shipping === 0 ? (
               "Free"

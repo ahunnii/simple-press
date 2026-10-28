@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Figtree, Josefin_Sans } from "next/font/google";
+import { Bodoni_Moda, Montserrat } from "next/font/google";
 import Image from "next/image";
 
 import type { MaintenancePageTemplateProps } from "../../types";
@@ -9,7 +9,7 @@ import { LaunchCountdown } from "~/components/maintenance/launch-countdown";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
-import { OliveButton, OliveLeafMark, OliveRevealGroup } from "../shared";
+import { OliveButton, OliveRevealGroup } from "../shared";
 
 /*
   This screen renders OUTSIDE `OliveLayout` — `src/app/(storefront)/layout.tsx`
@@ -20,15 +20,16 @@ import { OliveButton, OliveLeafMark, OliveRevealGroup } from "../shared";
   resolveThemeVars"), so unlike vii's maintenance page there is no theme-vars
   call here.
 */
-const fontDisplay = Josefin_Sans({
+const fontDisplay = Bodoni_Moda({
   subsets: ["latin"],
   variable: "--font-olive-display",
-  weight: ["300", "400", "600"],
+  weight: "variable",
+  axes: ["opsz"],
   style: ["normal", "italic"],
   display: "swap",
 });
 
-const fontBody = Figtree({
+const fontBody = Montserrat({
   subsets: ["latin"],
   variable: "--font-olive-body",
   weight: ["300", "400", "500", "600"],
@@ -38,8 +39,8 @@ const fontBody = Figtree({
 /**
  * Static per-variant heading. Not a template field (this domain declares
  * none, by design) — platform lifecycle copy, same precedent as
- * `vii-maintenance-page.tsx`'s own `COPY` map. No kicker/overline above the
- * heading (craft-floor ban); the state is folded into the sentence itself.
+ * `vii-maintenance-page.tsx`'s own `COPY` map. The state is
+ * folded into the sentence itself; an overline only appears if the owner types one.
  */
 const COPY = {
   maintenance: { heading: "We'll be right back." },
@@ -47,9 +48,9 @@ const COPY = {
 } as const;
 
 /**
- * OliveMaintenancePage — a white page, a centred `olive-card` with the leaf
- * mark, the wordmark, the maintenance heading/body, and the wordmark
- * tagline (blank/hidden by default; the owner can set one).
+ * OliveMaintenancePage — an ivory page, a centred square bone panel with a
+ * hairline holding the wordmark, the Bodoni maintenance heading/body, and the
+ * wordmark tagline (blank/hidden by default; the owner can set one).
  *
  * Owner-editable fields (mirroring vii-maintenance-page.tsx): an optional
  * headline override, an announcement flyer image, a when/where line, and a
@@ -76,8 +77,7 @@ export function OliveMaintenancePage({
   const tagline = f["olive.global.wordmark-tagline"] ?? "";
 
   // `null` means "no owner value" → variant default. Overline has no
-  // default of its own — olive's craft-floor ban on kickers stays intact
-  // unless the owner explicitly types one in.
+  // default of its own — it only renders when the owner types one in.
   const heading = maintenance.headline ?? copy.heading;
   const overline = maintenance.overline;
 
@@ -94,7 +94,7 @@ export function OliveMaintenancePage({
         "olive flex min-h-dvh items-center justify-center",
       )}
       style={{
-        backgroundColor: "var(--olive-white)",
+        backgroundColor: "var(--olive-ivory)",
         padding: "clamp(24px, 6vw, 64px)",
       }}
     >
@@ -106,13 +106,9 @@ export function OliveMaintenancePage({
       <main className="w-full" style={{ maxWidth: 480 }}>
         <OliveRevealGroup
           className="olive-card flex w-full flex-col items-center gap-5 text-center"
-          style={{
-            padding: "clamp(32px, 6vw, 56px)",
-            boxShadow: "var(--olive-shadow)",
-          }}
+          style={{ padding: "clamp(32px, 6vw, 56px)" }}
         >
-          {/* No default overline — olive's craft-floor ban on kickers stays
-              kicker-free unless the owner explicitly sets one. */}
+          {/* No default overline — only rendered when the owner sets one. */}
           {overline ? (
             <span
               className="olive-label olive-reveal-item"
@@ -121,14 +117,6 @@ export function OliveMaintenancePage({
               {overline}
             </span>
           ) : null}
-
-          <span
-            aria-hidden
-            className="olive-reveal-item"
-            style={{ "--i": 0, color: "var(--olive-leaf)" } as CSSProperties}
-          >
-            <OliveLeafMark size={24} />
-          </span>
 
           {logoUrl ? (
             <span
@@ -154,7 +142,7 @@ export function OliveMaintenancePage({
           )}
 
           <h1
-            className="olive-display olive-reveal-item"
+            className="olive-h1 olive-reveal-item"
             style={{ margin: 0, "--i": 2 } as CSSProperties}
           >
             {heading}
@@ -225,7 +213,8 @@ export function OliveMaintenancePage({
 
           {cta ? (
             <OliveButton
-              variant="primary"
+              variant="solid"
+              arrow
               href={cta.href}
               target={cta.type === "external" ? "_blank" : undefined}
               rel={cta.type === "external" ? "noopener noreferrer" : undefined}

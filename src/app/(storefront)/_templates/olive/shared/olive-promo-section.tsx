@@ -1,69 +1,75 @@
 import Image from "next/image";
 
+import type { OliveSectionTone } from "./olive-section";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { OliveButton } from "./olive-button";
 import { hasOliveImage } from "./olive-image-fallback";
-import { OliveLeafMark } from "./olive-leaf-mark";
 import { OliveReveal } from "./olive-reveal";
 import { OliveSection } from "./olive-section";
 
-/** The three grounds a promo card may sit on. `sage` is not offered: the card
- *  variant prints ink type, and ink on the sage field is not a measured pair. */
-export type OlivePromoTone = "paper" | "sage-tint" | "white";
+/**
+ * Grounds the card look may sit on. Light grounds only — the card prints
+ * espresso type. Legacy names (`paper`, `sage-tint`, `white`) are still
+ * accepted and map to sand / sand / ivory.
+ */
+export type OlivePromoTone = Extract<
+  OliveSectionTone,
+  "ivory" | "sand" | "paper" | "sage-tint" | "white"
+>;
 
 type Props = {
   /** From the boolean template field (`=== "true"`). Only takes effect with a real photo. */
   takeover: boolean;
   image: string;
+  /** Small tracked caps above the heading ("THE COLLECTION"). Hidden when empty. */
+  eyebrow?: string;
   heading: string;
   body: string;
   buttonLabel: string;
   buttonLink: string;
-  /** Ground for the card variant. Defaults to "sage-tint". */
+  /** Ground for the card look. Defaults to "sand". */
   tone?: OlivePromoTone;
   /** Unique per page (e.g. "olive-promo-homepage"); the h2 id used by aria-labelledby. */
   id: string;
   sectionAttrs?: Record<string, string>;
+  eyebrowField?: string;
   headingFieldKey?: string;
   bodyFieldKey?: string;
   buttonLabelFieldKey?: string;
 };
 
 /**
- * OlivePromoSection — the one cross-sell band, in two sizes.
+ * OlivePromoSection — the collection takeover, in two sizes.
  *
- * The card look is the everyday one: a 4:3 photograph beside a short pitch on
- * a wash, both tiles the same height so the band reads as one spread rather
- * than a card sitting on a card. The takeover look is the same band with the
- * volume up — the photograph becomes the section, edge to edge, and the copy
- * prints on a white card pinned into its bottom-left corner, the same motif
- * `OliveImageTile` uses at tile scale.
+ * Takeover: the photograph becomes the section, edge to edge, under a
+ * left-weighted espresso scrim (`--olive-scrim`), and the copy prints
+ * straight onto it — eyebrow, Bodoni h2, body, an `ivory` button with an
+ * arrow. No card. Ivory on the scrim's darkest third measures ≥ 7:1 at the
+ * copy's position; the scrim is what makes the pairing safe whatever the
+ * owner uploads.
  *
- * A takeover needs a photograph. `takeover` is honoured only when `image` is a
- * real, owner-supplied file; with a blank or placeholder src there is nothing
- * to take over the page, so the card look renders instead. And in the card
- * look a missing photo does not draw a grey stand-in either: the copy simply
- * centres itself into a clean band, because an owner who wrote a pitch but has
- * no picture yet deserves the pitch, not the hole where a picture would go.
+ * Card: a square photograph beside the copy on a light ground with a `solid`
+ * button. With no photo the copy centres itself into a clean band, because
+ * an owner who wrote a pitch but has no picture yet deserves the pitch, not
+ * the hole where a picture would go.
  *
- * There is no scrim, and there never will be. White type over a photograph is
- * a contrast gamble the owner's own uploads decide; the template's answer is
- * to print on the photograph instead — copy sits on white card stock, the
- * photo stays unclouded, and the pairing is measured whatever the picture is.
- *
- * The whole section disappears when the heading and the body are both blank.
+ * A takeover needs a photograph: `takeover` is honoured only when `image` is
+ * a real, owner-supplied file; otherwise the card look renders. The whole
+ * section disappears when the heading and the body are both blank.
  */
 export function OlivePromoSection({
   takeover,
   image,
+  eyebrow,
   heading,
   body,
   buttonLabel,
   buttonLink,
-  tone = "sage-tint",
+  tone = "sand",
   id,
   sectionAttrs,
+  eyebrowField,
   headingFieldKey,
   bodyFieldKey,
   buttonLabelFieldKey,
@@ -74,6 +80,7 @@ export function OlivePromoSection({
 
   const showButton =
     buttonLabel.trim().length > 0 && buttonLink.trim().length > 0;
+  const hasEyebrow = (eyebrow ?? "").trim().length > 0;
   const hasImage = hasOliveImage(image);
   const isTakeover = takeover && hasImage;
 
@@ -81,21 +88,13 @@ export function OlivePromoSection({
     ? { "aria-labelledby": id }
     : { "aria-label": "Promotion" };
 
-  const leaf = (
-    <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
-      <OliveLeafMark size={20} />
-    </span>
-  );
-
-  const button = showButton ? (
-    <OliveButton
-      variant="primary"
-      href={buttonLink}
-      className="self-start"
-      data-sp-field={buttonLabelFieldKey}
+  const eyebrowEl = hasEyebrow ? (
+    <p
+      className="olive-eyebrow"
+      {...(eyebrowField ? fieldAttr(eyebrowField) : {})}
     >
-      {buttonLabel}
-    </OliveButton>
+      {eyebrow}
+    </p>
   ) : null;
 
   const headingEl = hasHeading ? (
@@ -112,14 +111,14 @@ export function OlivePromoSection({
     return (
       <OliveSection
         bleed
-        tone="white"
+        tone="espresso"
         style={{ paddingBlock: 0, paddingInline: 0 }}
         innerStyle={{ maxWidth: "none" }}
-        innerClassName="relative pb-8 md:pb-0"
+        innerClassName="relative"
         {...labelAttrs}
         {...sectionAttrs}
       >
-        <div className="relative aspect-[4/5] w-full overflow-hidden md:aspect-auto md:min-h-[clamp(26rem,64vh,40rem)]">
+        <div className="relative flex min-h-[clamp(28rem,78vh,44rem)] w-full items-center overflow-hidden">
           <Image
             src={image}
             alt=""
@@ -127,49 +126,80 @@ export function OlivePromoSection({
             sizes="100vw"
             className="object-cover"
           />
-        </div>
+          <span
+            aria-hidden="true"
+            className="olive-photo-scrim pointer-events-none absolute inset-0"
+          />
 
-        {/* On a phone the card sits in flow under the photo and only laps its
-            bottom edge, so at least half the picture stays uncovered; from
-            `md` up it pins into the bottom-left corner like the tile label. */}
-        <OliveReveal className="olive-card relative mx-[var(--olive-section-pad-x)] -mt-16 flex flex-col gap-3 p-6 sm:p-8 md:absolute md:bottom-[clamp(1rem,4vw,2.5rem)] md:left-[var(--olive-section-pad-x)] md:mx-0 md:mt-0 md:max-w-[min(34rem,calc(100%_-_2_*_var(--olive-section-pad-x)))]">
-          {leaf}
-          {headingEl}
-          {hasBody ? (
-            <p
-              className="max-w-[46ch] text-[0.9375rem] leading-relaxed"
-              style={{ color: "var(--olive-ink-soft)" }}
-              {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
-            >
-              {body}
-            </p>
-          ) : null}
-          {button}
-        </OliveReveal>
+          <div
+            className="relative mx-auto w-full py-16"
+            style={{
+              maxWidth: "var(--olive-container)",
+              paddingInline: "var(--olive-section-pad-x)",
+            }}
+          >
+            <OliveReveal className="olive-on-photo flex max-w-[34rem] flex-col items-start gap-5">
+              {eyebrowEl}
+              {headingEl}
+              {hasBody ? (
+                <p
+                  className="max-w-[44ch] text-[0.9375rem] leading-[1.7]"
+                  style={{ color: "var(--olive-on-dark)" }}
+                  {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
+                >
+                  {body}
+                </p>
+              ) : null}
+              {showButton ? (
+                <OliveButton
+                  variant="ivory"
+                  arrow
+                  href={buttonLink}
+                  className="mt-2"
+                  data-sp-field={buttonLabelFieldKey}
+                >
+                  {buttonLabel}
+                </OliveButton>
+              ) : null}
+            </OliveReveal>
+          </div>
+        </div>
       </OliveSection>
     );
   }
 
   const bodyEl = hasBody ? (
     <p
-      className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
-      style={{ color: "var(--olive-ink)" }}
+      className="max-w-[52ch] text-[0.9375rem] leading-[1.7]"
+      style={{ color: "var(--olive-ink-soft)" }}
       {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
     >
       {body}
     </p>
   ) : null;
 
+  const button = showButton ? (
+    <OliveButton
+      variant="solid"
+      arrow
+      href={buttonLink}
+      className="mt-2"
+      data-sp-field={buttonLabelFieldKey}
+    >
+      {buttonLabel}
+    </OliveButton>
+  ) : null;
+
   return (
     <OliveSection bleed tone={tone} {...labelAttrs} {...sectionAttrs}>
       <OliveReveal>
         {hasImage ? (
-          <div className="grid items-stretch gap-6 md:grid-cols-2 md:gap-10">
+          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
             <div
               className="relative overflow-hidden"
               style={{
-                aspectRatio: "4 / 3",
-                borderRadius: "var(--olive-card-radius)",
+                aspectRatio: "1 / 1",
+                backgroundColor: "var(--olive-sand)",
               }}
             >
               <Image
@@ -181,7 +211,8 @@ export function OlivePromoSection({
               />
             </div>
 
-            <div className="flex flex-col justify-center gap-4 md:py-4">
+            <div className="flex flex-col items-start gap-4 md:py-4">
+              {eyebrowEl}
               {headingEl}
               {bodyEl}
               {button}
@@ -189,17 +220,10 @@ export function OlivePromoSection({
           </div>
         ) : (
           <div className="mx-auto flex max-w-[62ch] flex-col items-center gap-4 text-center">
+            {eyebrowEl}
             {headingEl}
             {bodyEl}
-            {showButton ? (
-              <OliveButton
-                variant="primary"
-                href={buttonLink}
-                data-sp-field={buttonLabelFieldKey}
-              >
-                {buttonLabel}
-              </OliveButton>
-            ) : null}
+            {button}
           </div>
         )}
       </OliveReveal>

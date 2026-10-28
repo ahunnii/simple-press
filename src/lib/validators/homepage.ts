@@ -41,12 +41,14 @@ export const brandingFormSchema = z.object({
   socialLinks: z
     .object({
       instagram: z.string().optional().nullable(),
+      threads: z.string().optional().nullable(),
       facebook: z.string().optional().nullable(),
       twitter: z.string().optional().nullable(),
       linkedin: z.string().optional().nullable(),
       tiktok: z.string().optional().nullable(),
       pinterest: z.string().optional().nullable(),
       youtube: z.string().optional().nullable(),
+      googleBusinessProfile: z.string().optional().nullable(),
     })
     .optional()
     .nullable(),

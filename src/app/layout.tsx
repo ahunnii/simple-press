@@ -100,6 +100,10 @@ export async function generateMetadata() {
 
   return {
     metadataBase: new URL(canonicalBase),
+    // Home-screen / app-switcher names. The full business name, matching
+    // `og:site_name` — `seoBrandName` only shortens the `<title>` suffix.
+    applicationName: business.name,
+    appleWebApp: { title: business.name },
     title: {
       // Fallback for any route that doesn't go through `buildPageMetadata`;
       // that helper ships `{ absolute }` and applies the same suffix itself.

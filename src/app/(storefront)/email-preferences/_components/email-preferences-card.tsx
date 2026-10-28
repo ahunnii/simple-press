@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 
-import { RESUBSCRIBE_WORDING } from "~/lib/marketing/consent-wording";
+import {
+  REPERMISSION_CONFIRM_LABEL,
+  RESUBSCRIBE_WORDING,
+} from "~/lib/marketing/consent-wording";
 import { api } from "~/trpc/react";
 
 type Mode =
@@ -22,6 +25,11 @@ type Props = {
   canResubscribe?: boolean;
   /** Address being confirmed (confirm mode only). */
   email?: string;
+  /**
+   * Confirm mode: the link came from a contact import's re-permission invite
+   * ("still want to hear from us?"), not the sign-up form.
+   */
+  invite?: boolean;
 };
 
 const CARD =
@@ -44,6 +52,7 @@ export function EmailPreferencesCard({
   token,
   canResubscribe,
   email,
+  invite,
 }: Props) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +69,9 @@ export function EmailPreferencesCard({
         result.reason === "expired"
           ? "That link has expired. Please sign up again to get a new one."
           : result.reason === "suppressed"
-            ? `We can't resubscribe this address from a link. Sign up again on the ${businessName} website.`
+            ? mode === "confirm"
+              ? `We can't add this address from this link. Sign up on the ${businessName} website instead.`
+              : `We can't resubscribe this address from a link. Sign up again on the ${businessName} website.`
             : "That link isn't valid anymore. Please use the latest email we sent you.",
       );
     }
@@ -110,7 +121,7 @@ export function EmailPreferencesCard({
         </h1>
         <p className={BODY}>
           {mode === "expired"
-            ? `Confirmation links only last 7 days. Sign up again on the ${businessName} website to get a fresh one.`
+            ? `Confirmation links only last a limited time. Sign up again on the ${businessName} website to get a fresh one.`
             : mode === "unavailable"
               ? `${businessName} isn't accepting email sign-ups right now.`
               : "Please use the link from the latest email we sent you."}
@@ -123,7 +134,9 @@ export function EmailPreferencesCard({
     if (done) {
       return (
         <section className={CARD} role="status">
-          <h1 className={HEADING}>You&apos;re subscribed</h1>
+          <h1 className={HEADING}>
+            {invite ? "You're on the list" : "You're subscribed"}
+          </h1>
           <p className={BODY}>
             Thanks! You&apos;ll now get news and offers from {businessName}. You
             can unsubscribe from any email we send.
@@ -133,9 +146,25 @@ export function EmailPreferencesCard({
     }
     return (
       <section className={CARD}>
-        <h1 className={HEADING}>Confirm your subscription to {businessName}</h1>
+        <h1 className={HEADING}>
+          {invite
+            ? `Stay on the ${businessName} email list?`
+            : `Confirm your subscription to ${businessName}`}
+        </h1>
         <p className={BODY}>
-          {email ? (
+          {invite ? (
+            email ? (
+              <>
+                Press the button to keep getting news and offers from{" "}
+                {businessName} at <span className="font-medium">{email}</span>.
+              </>
+            ) : (
+              <>
+                Press the button to keep getting news and offers from{" "}
+                {businessName}.
+              </>
+            )
+          ) : email ? (
             <>
               Press the button to get news and offers from {businessName} at{" "}
               <span className="font-medium">{email}</span>.
@@ -152,7 +181,11 @@ export function EmailPreferencesCard({
             if (token) confirm.mutate({ token });
           }}
         >
-          {pending ? "Confirming..." : "Confirm subscription"}
+          {pending
+            ? "Confirming..."
+            : invite
+              ? REPERMISSION_CONFIRM_LABEL
+              : "Confirm subscription"}
         </button>
         {error && (
           <p role="alert" className="mt-4 text-sm text-red-600">

@@ -10,7 +10,7 @@ type OlivePriceProps = {
   compareAtPrice?: number | null;
   /** Prefix with "From" — variants that do not all share one price. */
   from?: boolean;
-  /** Render the savings pill next to the struck-through original. Default true. */
+  /** Render the saving in words next to the struck-through original. Default true. */
   showSavings?: boolean;
   /** "true" = "Save 20%", "false" = "Save $5.00". Matches the platform's sale-badge setting. */
   savingsFormat?: string;
@@ -22,13 +22,10 @@ type OlivePriceProps = {
 /**
  * OlivePrice — one money line, formatted by the platform's own formatter.
  *
- * Prices are tabular (`olive-price`) so a column of them lines up. On sale the
- * current price stays first and loudest, the original follows struck through
- * in the caption size, and the saving is stated in words on a sage-tint pill
- * in leaf ink (6.7:1) rather than left for the reader to subtract.
- *
- * The pill is a LABEL, not a colour chip — the chip discipline reserves chips
- * for real colours, categories and stock states.
+ * Tabular, lining figures (`olive-price`) so a column of them lines up. On
+ * sale the current price stays first, the original follows struck through in
+ * ink-soft, and the saving is stated in words as plain moss-deep text
+ * (7.49:1 on sand, 8.24:1 on ivory) — no pill, no tint.
  */
 export function OlivePrice({
   price,
@@ -64,7 +61,7 @@ export function OlivePrice({
       </span>
 
       {wasPrice !== null ? (
-        <span className="olive-caption line-through">
+        <span className="olive-caption olive-tabular line-through">
           <span className="sr-only">Original price </span>
           {formatPrice(wasPrice)}
         </span>
@@ -72,14 +69,8 @@ export function OlivePrice({
 
       {wasPrice !== null && showSavings ? (
         <span
-          className="olive-label"
-          style={{
-            color: "var(--olive-leaf)",
-            backgroundColor: "var(--olive-sage-tint)",
-            borderRadius: "999px",
-            padding: "0.1875rem 0.5rem",
-            fontSize: "0.6875rem",
-          }}
+          className="olive-tabular text-[0.75rem] font-medium"
+          style={{ color: "var(--olive-moss-deep)" }}
         >
           {computeSavingsLabel(price, wasPrice, savingsFormat)}
         </span>

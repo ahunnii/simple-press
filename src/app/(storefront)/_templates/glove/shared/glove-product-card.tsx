@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { Product } from "~/types";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { photosOnly } from "~/lib/products/media";
 import { cn } from "~/lib/utils";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
@@ -49,8 +50,10 @@ export function GloveProductCard({
     })),
   });
 
-  const primary = product.images[0]?.url ?? "/placeholder.svg";
-  const secondary = product.images[1]?.url ?? null;
+  // Related rails can hand us the full PDP gallery, which includes videos.
+  const photos = photosOnly(product.images);
+  const primary = photos[0]?.url ?? "/placeholder.svg";
+  const secondary = photos[1]?.url ?? null;
 
   let maxPrice: number | null = null;
   if (status.variablePricing) {

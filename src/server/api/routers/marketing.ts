@@ -1,80 +1,102 @@
 import type { JSONContent } from "@tiptap/core";
-import { after } from "next/server";
 import { Prisma } from "generated/prisma";
-import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import Papa from "papaparse";
 import { z } from "zod";
 
 import type { CampaignRecipientStatus } from "~/lib/marketing/campaign-status";
+import type { SendBlocker } from "~/lib/marketing/queue-campaign";
+import type { Audience } from "~/lib/marketing/segments";
 import type { DbClient } from "~/server/db";
 import { getBusinessUrl } from "~/lib/business-url";
+import { TEMPLATES } from "~/lib/constants";
 import { sanitizeCsvRows } from "~/lib/csv/escape-cell";
-import { EMAIL_FROM, formatFromAddress, sendEmail } from "~/lib/email/send";
+import { EMAIL_FROM, sendEmail } from "~/lib/email/send";
 import { marketingAudienceWhere } from "~/lib/marketing/audience";
+import {
+  loadCampaignBusiness,
+  storedBodyJson,
+} from "~/lib/marketing/campaign-business";
 import {
   ACCEPTED_RECIPIENT_STATUSES,
   CAMPAIGN_RECIPIENT_STATUSES,
 } from "~/lib/marketing/campaign-status";
 import {
-  BATCH_SIZE,
   cancelPendingWork,
-  drainCampaign,
+  startDrainAfterResponse,
 } from "~/lib/marketing/campaign-worker";
 import { marketingConsentSourceLabel } from "~/lib/marketing/consent";
 import {
-  campaignEmailElement,
-  getBusinessPostalAddress,
-  renderCampaign,
-} from "~/lib/marketing/render-campaign";
-import { tiptapHasContent } from "~/lib/marketing/tiptap-to-email";
-import { marketingTestSendLimiter } from "~/lib/rate-limit";
+  emailStyleSchema,
+  parseEmailStyle,
+  resolveEmailStyle,
+} from "~/lib/marketing/email-style";
+import {
+  emailSocialLinks,
+  renderCampaignPreview,
+} from "~/lib/marketing/preview-campaign";
+import {
+  checkCampaignSendable,
+  prepareCampaignBody,
+  queueCampaign,
+} from "~/lib/marketing/queue-campaign";
+import { campaignEmailElement } from "~/lib/marketing/render-campaign";
+import { audienceSchema, parseAudience } from "~/lib/marketing/segments";
+import {
+  marketingPreviewLimiter,
+  marketingTestSendLimiter,
+} from "~/lib/rate-limit";
 
 import { createTRPCRouter, featureGate, ownerAdminProcedure } from "../trpc";
-
-/** How long the post-response drain may run before leaving the rest to cron. */
-const AFTER_DRAIN_DEADLINE_MS = 10 * 60_000;
-/** Recipient rows per `createMany` when snapshotting the audience. */
-const SNAPSHOT_CHUNK = 1000;
 
 const MISSING_ADDRESS_MESSAGE =
   "Add a full business address in Settings before sending (street, city, and state or ZIP, or a PO box) — the law requires a postal address in marketing emails.";
 
-/** Same display-name format `sendEmail` uses (`~/lib/email/send.ts`). */
-function marketingFromAddress(businessName: string): string {
-  return formatFromAddress(
-    `${businessName} via SimplePress`,
-    EMAIL_FROM.MARKETING,
-  );
-}
+/** Earliest / latest a campaign may be scheduled, relative to now. */
+const MIN_SCHEDULE_LEAD_MS = 10 * 60_000;
+const MAX_SCHEDULE_AHEAD_MS = 90 * 24 * 60 * 60_000;
 
-const BUSINESS_SELECT = {
-  name: true,
-  ownerEmail: true,
-  subdomain: true,
-  customDomain: true,
-  domainStatus: true,
-  addressStreet: true,
-  addressCity: true,
-  addressState: true,
-  addressPostalCode: true,
-  businessAddress: true,
-  siteContent: { select: { logoUrl: true } },
-} satisfies Prisma.BusinessSelect;
-
+/**
+ * The business as a `CampaignBusiness` (same select the scheduled-send sweep
+ * uses, `~/lib/marketing/campaign-business.ts`).
+ */
 async function loadBusiness(db: DbClient, businessId: string) {
-  const business = await db.business.findUnique({
-    where: { id: businessId },
-    select: BUSINESS_SELECT,
-  });
+  const business = await loadCampaignBusiness(db, businessId);
   if (!business) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
   }
-  return {
-    ...business,
-    logoUrl: business.siteContent?.logoUrl ?? null,
-    baseUrl: getBusinessUrl(business),
-  };
+  return business;
+}
+
+/** The router's message for a send check that failed (send + schedule). */
+const SEND_BLOCKER_MESSAGES: Record<SendBlocker, string> = {
+  no_postal_address: MISSING_ADDRESS_MESSAGE,
+  invalid_audience:
+    "This campaign's audience is no longer valid. Pick the audience again and save.",
+  empty_body: "Write a message before sending.",
+  empty_product_block:
+    "A product block has no products to show. Pick products for it or remove it before sending.",
+};
+
+/**
+ * Refusal for any composer write aimed at a contact import's re-permission
+ * invite (`kind: "REPERMISSION"`). Its content, audience and one-time send
+ * belong to the import (`~/lib/marketing/repermission-invite.ts`); only
+ * cancel works on it here.
+ */
+const INVITE_CAMPAIGN_MESSAGE =
+  "This is the one-time invite sent to an imported contact list. It can't be edited, copied, scheduled or sent again.";
+
+function inviteCampaignError() {
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message: INVITE_CAMPAIGN_MESSAGE,
+  });
+}
+
+/** Throws the invite refusal for a REPERMISSION campaign. */
+function assertComposerCampaign(campaign: { kind: string }) {
+  if (campaign.kind !== "STANDARD") throw inviteCampaignError();
 }
 
 /** Tenant-scoped campaign lookup: another business's id is NOT_FOUND. */
@@ -94,15 +116,27 @@ async function findCampaign<S extends Prisma.MarketingCampaignSelect>(
   return campaign;
 }
 
-/** Throws NOT_FOUND for a missing / other-tenant id, else BAD_REQUEST. */
+/**
+ * Throws NOT_FOUND for a missing / other-tenant id, the invite refusal for a
+ * re-permission invite, else BAD_REQUEST. `message` may be a function of the
+ * campaign's current status (to word the error for a scheduled campaign
+ * differently from a sent one).
+ */
 async function rejectStateChange(
   db: DbClient,
   businessId: string,
   id: string,
-  message: string,
+  message: string | ((status: string) => string),
 ): Promise<never> {
-  await findCampaign(db, businessId, id, { id: true });
-  throw new TRPCError({ code: "BAD_REQUEST", message });
+  const { status, kind } = await findCampaign(db, businessId, id, {
+    status: true,
+    kind: true,
+  });
+  assertComposerCampaign({ kind });
+  throw new TRPCError({
+    code: "BAD_REQUEST",
+    message: typeof message === "function" ? message(status) : message,
+  });
 }
 
 type CampaignCounts = {
@@ -155,32 +189,6 @@ async function recipientCounts(
   return counts;
 }
 
-/**
- * Starts sending once the response is out. `after()` keeps the work alive
- * past the response in the tRPC route handler; outside a request scope (a
- * script, a test caller) it throws, and we fall back to a detached promise.
- * Either way the cron resumes whatever this doesn't finish.
- */
-function startDrain(db: DbClient, campaignId: string) {
-  const run = () =>
-    drainCampaign(db, campaignId, {
-      deadlineMs: AFTER_DRAIN_DEADLINE_MS,
-    }).then(
-      () => undefined,
-      (err: unknown) => {
-        Sentry.captureException(err, {
-          tags: { "marketing.campaign": "drain_error" },
-          extra: { campaignId },
-        });
-      },
-    );
-  try {
-    after(run);
-  } catch {
-    void run();
-  }
-}
-
 /** Largest tiptap document (serialized) a campaign may store. */
 const MAX_BODY_JSON_BYTES = 200_000;
 
@@ -192,16 +200,6 @@ const bodyJsonSchema = z
   .refine((doc) => JSON.stringify(doc).length <= MAX_BODY_JSON_BYTES, {
     message: "The message is too large. Remove some content and try again.",
   });
-
-/** The stored campaign body as a tiptap doc, or `null` when it isn't one. */
-function storedBodyJson(value: unknown): JSONContent | null {
-  return value &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    (value as { type?: unknown }).type === "doc"
-    ? (value as JSONContent)
-    : null;
-}
 
 /** ASCII control characters (incl. CR/LF), which have no place in a header. */
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
@@ -229,7 +227,39 @@ const draftInput = z.object({
   bodyText: z.string().max(20_000).optional(),
   /** Tiptap document for `contentFormat: "tiptap"` (the rich composer). */
   bodyJson: bodyJsonSchema.optional(),
+  /**
+   * Segment to send to. Omitted = leave the saved audience as is (new
+   * drafts: everyone); null or `{ type: "all" }` = everyone opted in.
+   */
+  audience: audienceSchema.nullish(),
 });
+
+/** The stored form of an audience: null for "everyone opted in". */
+function storedAudience(
+  audience: Audience | null,
+): Prisma.InputJsonValue | typeof Prisma.DbNull {
+  return audience && audience.type !== "all"
+    ? (audience as Prisma.InputJsonValue)
+    : Prisma.DbNull;
+}
+
+/** Rejects a "bought" segment naming any product outside this business. */
+async function assertAudienceProducts(
+  db: DbClient,
+  businessId: string,
+  audience: Audience | null | undefined,
+) {
+  if (audience?.type !== "bought") return;
+  const owned = await db.product.count({
+    where: { id: { in: audience.productIds }, businessId },
+  });
+  if (owned !== audience.productIds.length) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "One or more of the chosen products wasn't found.",
+    });
+  }
+}
 
 const CAMPAIGN_LIST_SELECT = {
   id: true,
@@ -238,7 +268,10 @@ const CAMPAIGN_LIST_SELECT = {
   createdAt: true,
   queuedAt: true,
   completedAt: true,
+  scheduledAt: true,
   recipientCount: true,
+  /** STANDARD | REPERMISSION (the UI labels and locks invites). */
+  kind: true,
   createdBy: { select: { name: true } },
 } satisfies Prisma.MarketingCampaignSelect;
 
@@ -278,65 +311,85 @@ export const marketingRouter = createTRPCRouter({
   }),
 
   /**
+   * How many opted-in customers a segment reaches right now. Same guards as
+   * listRecipients (owner/manager, not featureGated). A "bought" segment
+   * naming another store's products simply matches nobody here — those ids
+   * are rejected when the draft is saved.
+   */
+  countAudience: ownerAdminProcedure
+    .input(z.object({ audience: audienceSchema }))
+    .query(async ({ ctx, input }) => {
+      const count = await ctx.db.customer.count({
+        where: marketingAudienceWhere(ctx.businessId, input.audience),
+      });
+      return { count };
+    }),
+
+  /**
    * Export the opted-in marketing list as a CSV. Like listRecipients, this is
    * not featureGated — the owner's opt-in list is their data regardless of
-   * whether the broadcast feature is enabled.
+   * whether the broadcast feature is enabled. An optional `audience` exports
+   * just that segment.
    */
-  exportRecipients: ownerAdminProcedure.mutation(async ({ ctx }) => {
-    const { businessId } = ctx;
+  exportRecipients: ownerAdminProcedure
+    .input(z.object({ audience: audienceSchema.optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
 
-    const customers = await ctx.db.customer.findMany({
-      where: marketingAudienceWhere(businessId),
-      select: {
-        marketingConsentSource: true,
-        marketingConsentAt: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        orderCount: true,
-        totalSpent: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (customers.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "No opted-in customers to export",
+      const customers = await ctx.db.customer.findMany({
+        where: marketingAudienceWhere(businessId, input?.audience),
+        select: {
+          marketingConsentSource: true,
+          marketingConsentAt: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          orderCount: true,
+          totalSpent: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
       });
-    }
 
-    const rows = customers.map((c) => ({
-      Email: c.email,
-      "First Name": c.firstName ?? "",
-      "Last Name": c.lastName ?? "",
-      "Order Count": c.orderCount,
-      "Total Spent": (c.totalSpent / 100).toFixed(2),
-      "Customer Since": c.createdAt.toISOString(),
-      "Consent Source": marketingConsentSourceLabel(c.marketingConsentSource),
-      "Consent Date": c.marketingConsentAt?.toISOString() ?? "",
-    }));
+      if (customers.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No opted-in customers to export",
+        });
+      }
 
-    const csv = Papa.unparse(sanitizeCsvRows(rows), {
-      quotes: true,
-      header: true,
-    });
+      const rows = customers.map((c) => ({
+        Email: c.email,
+        "First Name": c.firstName ?? "",
+        "Last Name": c.lastName ?? "",
+        "Order Count": c.orderCount,
+        "Total Spent": (c.totalSpent / 100).toFixed(2),
+        "Customer Since": c.createdAt.toISOString(),
+        "Consent Source": marketingConsentSourceLabel(c.marketingConsentSource),
+        "Consent Date": c.marketingConsentAt?.toISOString() ?? "",
+      }));
 
-    const business = await ctx.db.business.findUnique({
-      where: { id: businessId },
-      select: { name: true },
-    });
+      const csv = Papa.unparse(sanitizeCsvRows(rows), {
+        quotes: true,
+        header: true,
+      });
 
-    const slug = (business?.name ?? "store").toLowerCase().replace(/\s+/g, "-");
-    const date = new Date().toISOString().split("T")[0];
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: { name: true },
+      });
 
-    return {
-      csv,
-      filename: `marketing-list-${slug}-${date}.csv`,
-      count: customers.length,
-    };
-  }),
+      const slug = (business?.name ?? "store")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+      const date = new Date().toISOString().split("T")[0];
+
+      return {
+        csv,
+        filename: `marketing-list-${slug}-${date}.csv`,
+        count: customers.length,
+      };
+    }),
 
   // ─── Campaign history (reads; not feature-gated, like the audience) ───────
 
@@ -382,24 +435,51 @@ export const marketingRouter = createTRPCRouter({
         contentFormat: true,
         bodyText: true,
         bodyJson: true,
+        audience: true,
         baseUrl: true,
         startedAt: true,
         canceledAt: true,
         lastError: true,
       });
-      const [counts, batches] = await Promise.all([
+      const [counts, batches, business] = await Promise.all([
         recipientCounts(ctx.db, [campaign.id]),
         ctx.db.marketingCampaignBatch.groupBy({
           by: ["status"],
           where: { campaignId: campaign.id },
           _count: { _all: true },
         }),
+        // Fallback for `baseUrl` below: a campaign that never queued (failed
+        // while scheduled, canceled) has no frozen one.
+        ctx.db.business.findUnique({
+          where: { id: ctx.businessId },
+          select: { subdomain: true, customDomain: true, domainStatus: true },
+        }),
       ]);
       const batchCount = (status: string) =>
         batches.find((b) => b.status === status)?._count._all ?? 0;
-      const { createdBy, ...rest } = campaign;
+      const { createdBy, audience, ...rest } = campaign;
+      const parsedAudience = parseAudience(audience);
+      // Names for a "bought" segment's products (the composer's chips and the
+      // detail page's audience line). Products since deleted simply drop out.
+      const productRows =
+        parsedAudience.type === "bought"
+          ? await ctx.db.product.findMany({
+              where: {
+                businessId: ctx.businessId,
+                id: { in: parsedAudience.productIds },
+              },
+              select: { id: true, name: true },
+            })
+          : [];
       return {
         ...rest,
+        // The frozen send-time URL, else the store's current public URL, so
+        // relative product photos / page links in the preview always resolve.
+        baseUrl: rest.baseUrl ?? (business ? getBusinessUrl(business) : null),
+        audience: parsedAudience,
+        audienceProductNames: Object.fromEntries(
+          productRows.map((p) => [p.id, p.name]),
+        ) as Record<string, string>,
         createdByName: createdBy?.name ?? null,
         counts: counts.get(campaign.id) ?? emptyCounts(),
         batches: {
@@ -460,6 +540,7 @@ export const marketingRouter = createTRPCRouter({
     .use(featureGate("emailMarketing"))
     .input(draftInput)
     .mutation(async ({ ctx, input }) => {
+      await assertAudienceProducts(ctx.db, ctx.businessId, input.audience);
       const content = {
         subject: input.subject,
         previewText:
@@ -473,6 +554,9 @@ export const marketingRouter = createTRPCRouter({
           input.contentFormat === "tiptap" && input.bodyJson
             ? (input.bodyJson as Prisma.InputJsonValue)
             : Prisma.DbNull,
+        ...(input.audience !== undefined
+          ? { audience: storedAudience(input.audience) }
+          : {}),
       };
 
       if (!input.id) {
@@ -487,17 +571,22 @@ export const marketingRouter = createTRPCRouter({
         return { id: created.id };
       }
 
-      // Compare-and-set: content is frozen once the campaign is queued.
+      // Compare-and-set: content is frozen once the campaign is queued, and
+      // an invite's is never the composer's to change.
       const { count } = await ctx.db.marketingCampaign.updateMany({
-        where: { id: input.id, businessId: ctx.businessId, status: "DRAFT" },
+        where: {
+          id: input.id,
+          businessId: ctx.businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
         data: content,
       });
       if (count === 0) {
-        await rejectStateChange(
-          ctx.db,
-          ctx.businessId,
-          input.id,
-          "This campaign has already been sent and can no longer be edited.",
+        await rejectStateChange(ctx.db, ctx.businessId, input.id, (status) =>
+          status === "SCHEDULED"
+            ? "This campaign is scheduled. Unschedule it first to edit it."
+            : "This campaign has already been sent and can no longer be edited.",
         );
       }
       return { id: input.id };
@@ -508,17 +597,65 @@ export const marketingRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const { count } = await ctx.db.marketingCampaign.deleteMany({
-        where: { id: input.id, businessId: ctx.businessId, status: "DRAFT" },
+        where: {
+          id: input.id,
+          businessId: ctx.businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
       });
       if (count === 0) {
-        await rejectStateChange(
-          ctx.db,
-          ctx.businessId,
-          input.id,
-          "Only drafts can be deleted.",
+        await rejectStateChange(ctx.db, ctx.businessId, input.id, (status) =>
+          status === "SCHEDULED"
+            ? "This campaign is scheduled. Unschedule it first to delete it."
+            : "Only drafts can be deleted.",
         );
       }
       return { id: input.id };
+    }),
+
+  /**
+   * Copies any campaign (whatever its status) into a new draft: content,
+   * preview text and audience. Nothing about its sending (status, schedule,
+   * recipients, results) carries over. A re-permission invite is refused (a
+   * copy would be a standard campaign with the invite's wording and a
+   * confirm link that never gets filled in).
+   */
+  duplicateCampaign: ownerAdminProcedure
+    .use(featureGate("emailMarketing"))
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const source = await findCampaign(ctx.db, ctx.businessId, input.id, {
+        subject: true,
+        previewText: true,
+        contentFormat: true,
+        bodyText: true,
+        bodyJson: true,
+        audience: true,
+        kind: true,
+      });
+      assertComposerCampaign(source);
+      const copySubject = `Copy of ${source.subject}`;
+      const created = await ctx.db.marketingCampaign.create({
+        data: {
+          businessId: ctx.businessId,
+          createdById: ctx.session.user.id,
+          subject: copySubject.length <= 200 ? copySubject : source.subject,
+          previewText: source.previewText,
+          contentFormat: source.contentFormat,
+          bodyText: source.bodyText,
+          bodyJson:
+            source.bodyJson === null
+              ? Prisma.DbNull
+              : (source.bodyJson as Prisma.InputJsonValue),
+          audience:
+            source.audience === null
+              ? Prisma.DbNull
+              : (source.audience as Prisma.InputJsonValue),
+        },
+        select: { id: true },
+      });
+      return { id: created.id };
     }),
 
   /**
@@ -537,7 +674,10 @@ export const marketingRouter = createTRPCRouter({
         contentFormat: true,
         bodyText: true,
         bodyJson: true,
+        kind: true,
       });
+      // Its render differs (confirm link, footer); not a composer test send.
+      assertComposerCampaign(campaign);
 
       try {
         await marketingTestSendLimiter.consume(
@@ -559,6 +699,17 @@ export const marketingRouter = createTRPCRouter({
         });
       }
 
+      const isTiptap = campaign.contentFormat === "tiptap";
+      const testBody = isTiptap
+        ? (
+            await prepareCampaignBody(
+              ctx.db,
+              ctx.businessId,
+              storedBodyJson(campaign.bodyJson),
+            )
+          ).bodyJson
+        : null;
+
       const unsubscribeUrl = `${business.baseUrl}/api/unsubscribe?t=test`;
       const result = await sendEmail({
         from: EMAIL_FROM.MARKETING,
@@ -571,10 +722,9 @@ export const marketingRouter = createTRPCRouter({
             business,
             subject: campaign.subject,
             previewText: campaign.previewText,
-            contentFormat:
-              campaign.contentFormat === "tiptap" ? "tiptap" : "text",
+            contentFormat: isTiptap ? "tiptap" : "text",
             bodyText: campaign.bodyText,
-            bodyJson: storedBodyJson(campaign.bodyJson),
+            bodyJson: testBody,
           },
           unsubscribeUrl,
         ),
@@ -601,122 +751,183 @@ export const marketingRouter = createTRPCRouter({
     .use(featureGate("emailMarketing"))
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
+      const result = await queueCampaign(ctx.db, {
+        campaignId: input.id,
+        businessId: ctx.businessId,
+        expectStatus: "DRAFT",
+      });
+      if (!result.ok) {
+        switch (result.reason) {
+          case "not_found":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Campaign not found",
+            });
+          case "business_not_found":
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Business not found",
+            });
+          case "status_changed":
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                result.status === "SCHEDULED"
+                  ? "This campaign is scheduled. Unschedule it to send it now."
+                  : "This campaign has already been sent.",
+            });
+          case "wrong_kind":
+            throw inviteCampaignError();
+          default:
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: SEND_BLOCKER_MESSAGES[result.reason],
+            });
+        }
+      }
+
+      if (result.recipientCount > 0) {
+        startDrainAfterResponse(ctx.db, result.campaignId);
+      }
+      return { id: result.campaignId, recipientCount: result.recipientCount };
+    }),
+
+  /**
+   * Schedules a draft to be sent at `scheduledAt` (10 minutes to 90 days
+   * out). Runs the send checks now so the owner hears about problems while
+   * they can fix them; nothing is rendered or snapshotted — the cron sweep
+   * (`queueDueScheduledCampaigns`) does that when it comes due, so the
+   * segment and content are applied as of the send time. The campaign is
+   * frozen (no edits) while scheduled; `unscheduleCampaign` returns it to a
+   * draft.
+   */
+  scheduleCampaign: ownerAdminProcedure
+    .use(featureGate("emailMarketing"))
+    .input(z.object({ id: z.string().min(1), scheduledAt: z.date() }))
+    .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const campaign = await findCampaign(ctx.db, businessId, input.id, {
         id: true,
         status: true,
-        subject: true,
-        previewText: true,
         contentFormat: true,
         bodyText: true,
         bodyJson: true,
+        audience: true,
+        kind: true,
       });
+      assertComposerCampaign(campaign);
       if (campaign.status !== "DRAFT") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "This campaign has already been sent.",
+          message:
+            campaign.status === "SCHEDULED"
+              ? "This campaign is already scheduled. Unschedule it to pick a new time."
+              : "Only drafts can be scheduled.",
+        });
+      }
+
+      const now = new Date();
+      const at = input.scheduledAt.getTime();
+      if (Number.isNaN(at) || at < now.getTime() + MIN_SCHEDULE_LEAD_MS) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pick a time at least 10 minutes from now.",
+        });
+      }
+      if (at > now.getTime() + MAX_SCHEDULE_AHEAD_MS) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pick a time within the next 90 days.",
         });
       }
 
       const business = await loadBusiness(ctx.db, businessId);
-      if (getBusinessPostalAddress(business) === null) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: MISSING_ADDRESS_MESSAGE,
-        });
-      }
-
-      const isTiptap = campaign.contentFormat === "tiptap";
-      const bodyJson = isTiptap ? storedBodyJson(campaign.bodyJson) : null;
-      const hasBody = isTiptap
-        ? tiptapHasContent(bodyJson)
-        : !!campaign.bodyText?.trim();
-      if (!hasBody) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Write a message before sending.",
-        });
-      }
-
-      const rendered = await renderCampaign({
+      const check = await checkCampaignSendable(
+        ctx.db,
+        businessId,
         business,
-        subject: campaign.subject,
-        previewText: campaign.previewText,
-        contentFormat: isTiptap ? "tiptap" : "text",
-        bodyText: campaign.bodyText,
-        bodyJson,
-      });
-
-      const recipientCount = await ctx.db.$transaction(
-        async (tx) => {
-          const now = new Date();
-          const { count } = await tx.marketingCampaign.updateMany({
-            where: { id: campaign.id, businessId, status: "DRAFT" },
-            data: {
-              status: "QUEUED",
-              queuedAt: now,
-              renderedHtml: rendered.html,
-              renderedText: rendered.text,
-              fromAddress: marketingFromAddress(business.name),
-              replyTo: business.ownerEmail,
-              baseUrl: business.baseUrl,
-            },
-          });
-          if (count === 0) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "This campaign has already been sent.",
-            });
-          }
-
-          // Snapshot the audience. Ordered by id so batch membership is
-          // deterministic; the worker re-checks each row on first claim.
-          const audience = await tx.customer.findMany({
-            where: marketingAudienceWhere(businessId),
-            select: { id: true, email: true },
-            orderBy: { id: "asc" },
-          });
-          for (let i = 0; i < audience.length; i += SNAPSHOT_CHUNK) {
-            await tx.marketingCampaignRecipient.createMany({
-              data: audience.slice(i, i + SNAPSHOT_CHUNK).map((c, j) => ({
-                campaignId: campaign.id,
-                businessId,
-                customerId: c.id,
-                email: c.email,
-                batchIndex: Math.floor((i + j) / BATCH_SIZE),
-              })),
-              skipDuplicates: true,
-            });
-          }
-          const batchCount = Math.ceil(audience.length / BATCH_SIZE);
-          if (batchCount > 0) {
-            await tx.marketingCampaignBatch.createMany({
-              data: Array.from({ length: batchCount }, (_, batchIndex) => ({
-                campaignId: campaign.id,
-                businessId,
-                batchIndex,
-              })),
-            });
-          }
-
-          await tx.marketingCampaign.update({
-            where: { id: campaign.id },
-            data: {
-              recipientCount: audience.length,
-              // Nobody to send to: done already.
-              ...(audience.length === 0
-                ? { status: "SENT", completedAt: now }
-                : {}),
-            },
-          });
-          return audience.length;
-        },
-        // Large lists: tens of thousands of rows inserted in one transaction.
-        { timeout: 60_000, maxWait: 10_000 },
+        campaign,
       );
+      if (!check.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: SEND_BLOCKER_MESSAGES[check.reason],
+        });
+      }
 
-      if (recipientCount > 0) startDrain(ctx.db, campaign.id);
-      return { id: campaign.id, recipientCount };
+      // Refuse an empty audience now rather than "sending" to nobody later.
+      // The segment (validated strictly by the check above, never widened to
+      // everyone) is applied again when the campaign is queued.
+      const audienceCount = await ctx.db.customer.count({
+        where: marketingAudienceWhere(businessId, check.audience, now),
+      });
+      if (audienceCount === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No one matches this audience yet.",
+        });
+      }
+
+      // Compare-and-set: a concurrent send / delete / schedule wins cleanly.
+      const { count } = await ctx.db.marketingCampaign.updateMany({
+        where: {
+          id: campaign.id,
+          businessId,
+          status: "DRAFT",
+          kind: "STANDARD",
+        },
+        // `lastError: null`: on a SCHEDULED campaign, lastError is the sweep's
+        // retry marker (`SCHEDULED_SEND_RETRY_ERROR`); start clean.
+        data: {
+          status: "SCHEDULED",
+          scheduledAt: input.scheduledAt,
+          lastError: null,
+        },
+      });
+      if (count === 0) {
+        await rejectStateChange(
+          ctx.db,
+          businessId,
+          campaign.id,
+          "Only drafts can be scheduled.",
+        );
+      }
+      return {
+        id: campaign.id,
+        scheduledAt: input.scheduledAt,
+        audienceCount,
+        warnings: check.prepared.warnings,
+      };
+    }),
+
+  /**
+   * Returns a scheduled campaign to a draft. CONFLICT when it is no longer
+   * scheduled (the sweep already queued it, or it was unscheduled already).
+   *
+   * Deliberately not featureGated, like cancelCampaign: with the flag off a
+   * scheduled campaign only waits (up to 24h past its time), and the owner
+   * must be able to pull it back meanwhile.
+   */
+  unscheduleCampaign: ownerAdminProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { count } = await ctx.db.marketingCampaign.updateMany({
+        where: {
+          id: input.id,
+          businessId: ctx.businessId,
+          status: "SCHEDULED",
+        },
+        data: { status: "DRAFT", scheduledAt: null, lastError: null },
+      });
+      if (count === 0) {
+        await findCampaign(ctx.db, ctx.businessId, input.id, { id: true });
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "This campaign is no longer scheduled — it may have already started sending.",
+        });
+      }
+      return { id: input.id };
     }),
 
   /**
@@ -749,5 +960,98 @@ export const marketingRouter = createTRPCRouter({
       }
       await cancelPendingWork(ctx.db, input.id, now);
       return { id: input.id };
+    }),
+
+  // ─── Email style + live preview ───────────────────────────────────────────
+
+  /**
+   * The store's marketing email style: what the owner saved (`{}` = nothing),
+   * the resolved defaults for its storefront template, and what the style
+   * page needs to explain itself (logo present? which social links exist?).
+   */
+  getEmailStyle: ownerAdminProcedure
+    .use(featureGate("emailMarketing"))
+    .query(async ({ ctx }) => {
+      const business = await loadBusiness(ctx.db, ctx.businessId);
+      const template = TEMPLATES.find((t) => t.id === business.templateId);
+      return {
+        saved: parseEmailStyle(business.emailStyle),
+        defaults: resolveEmailStyle({
+          emailStyle: null,
+          templateId: business.templateId,
+        }),
+        templateId: business.templateId,
+        templateName: template?.name ?? "Default",
+        hasLogo: !!business.logoUrl,
+        businessName: business.name,
+        socialLinks: emailSocialLinks(business),
+      };
+    }),
+
+  /**
+   * Saves the style exactly as submitted (so a later change to a template's
+   * defaults never silently shifts a customized store). `null` resets to the
+   * template defaults.
+   */
+  saveEmailStyle: ownerAdminProcedure
+    .use(featureGate("emailMarketing"))
+    .input(emailStyleSchema.nullable())
+    .mutation(async ({ ctx, input }) => {
+      // JSON? column: a plain `null` is not reliably SQL NULL; use DbNull.
+      const emailStyle = input ?? Prisma.DbNull;
+      await ctx.db.siteContent.upsert({
+        where: { businessId: ctx.businessId },
+        create: { businessId: ctx.businessId, emailStyle },
+        update: { emailStyle },
+      });
+      return { saved: input ?? {} };
+    }),
+
+  /**
+   * Renders the email for the admin's live preview (composer + style page).
+   * Nothing is stored or sent; a missing postal address does not block it.
+   * `styleOverride`: omitted = the saved style, null = template defaults,
+   * object = unsaved settings.
+   */
+  previewCampaign: ownerAdminProcedure
+    .use(featureGate("emailMarketing"))
+    .input(
+      z.object({
+        subject: z.string().max(200).optional(),
+        previewText: z.string().max(200).optional(),
+        bodyJson: bodyJsonSchema,
+        styleOverride: emailStyleSchema.nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await marketingPreviewLimiter.consume(
+          `${ctx.businessId}:${ctx.session.user.id}`,
+        );
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many previews. Please wait a moment.",
+        });
+      }
+
+      const business = await loadBusiness(ctx.db, ctx.businessId);
+      // Product blocks preview exactly as they'd send: rebuilt from the
+      // store's current published products, never the editor's snapshot.
+      const prepared = await prepareCampaignBody(
+        ctx.db,
+        ctx.businessId,
+        input.bodyJson as JSONContent,
+      );
+      const rendered = await renderCampaignPreview({
+        business,
+        previewText: input.previewText,
+        bodyJson: prepared.bodyJson ?? (input.bodyJson as JSONContent),
+        styleOverride: input.styleOverride,
+      });
+      return {
+        html: rendered.html,
+        warnings: [...new Set([...prepared.warnings, ...rendered.warnings])],
+      };
     }),
 });

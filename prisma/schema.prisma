@@ -62,7 +62,9 @@ model User {
   createdInvites            PlatformInvite[]     @relation("CreatedInvites")
   editorNotes               EditorNote[]
   marketingCampaignsCreated MarketingCampaign[]
+  customerImportsCreated    CustomerImport[]
   productReviewReplies      ProductReview[]      @relation("ProductReviewOwnerReply")
+  policyAcceptances         PolicyAcceptance[]
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -264,6 +266,16 @@ model Business {
   pickupLocation        String? // free-text pickup address; falls back to businessAddress when blank
   pickupInstructions    String? @db.Text // combined "pickup hours & instructions", shown verbatim at checkout + in emails
 
+  // Local delivery (owner drives it). Eligibility = ZIP-centroid distance from
+  // the origin ZIP (src/lib/local-delivery.ts); no geocoding.
+  offersLocalDelivery        Boolean @default(false)
+  localDeliveryOriginZip     String? // 5-digit US ZIP; falls back to addressPostalCode when blank
+  localDeliveryRadiusMiles   Int? // 1–100; required when offersLocalDelivery (app layer)
+  localDeliveryFeeCents      Int     @default(0) // 0 = free delivery
+  localDeliveryBands         Json? // [{ upToMiles, feeCents }] closer prices inside the radius; nearest matching band wins, else localDeliveryFeeCents
+  localDeliveryMinOrderCents Int? // null = no minimum; pre-discount subtotal
+  localDeliveryInstructions  String? @db.Text // shown at checkout + in emails, e.g. delivery days
+
   // Zone + weight shipping fields
   originState                 String? // 2-letter US state code for shipping origin
   shippingWeightTiers         Json? // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
@@ -337,7 +349,9 @@ model Business {
   marketingCampaigns     MarketingCampaign[]
   marketingConsentEvents MarketingConsentEvent[]
   marketingDoNotEmail    MarketingDoNotEmail[]
+  customerImports        CustomerImport[]
   quickBooksConnection   QuickBooksConnection?
+  apiTokens              BusinessApiToken[]
   quickBooksInvoices     QuickBooksInvoice[]
   invoiceSettings        InvoiceSettings?
   invoices               Invoice[]
@@ -347,6 +361,7 @@ model Business {
   loyaltyProgram         LoyaltyProgram?
   loyaltyLedger          LoyaltyLedger[]
   productOptionGroups    ProductOptionGroup[]
+  policyAcceptances      PolicyAcceptance[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -409,6 +424,7 @@ model SiteContent {
   primaryColor   String? @default("#000000")
   secondaryColor String? @default("#ffffff")
   accentColor    String? @default("#3b82f6")
+  emailStyle     Json? // Marketing email style (accent, background, font, header). Null = template default. Validated by src/lib/marketing/email-style.ts
 
   // Navigation (custom menu items)
   navigationItems       Json? // [{ label, href, external?, children?: [{ label, href, external? }] }]
@@ -978,6 +994,11 @@ model Video {
   @@index([businessId, sortOrder])
 }
 
+enum ImageMediaType {
+  IMAGE
+  VIDEO
+}
+
 model Image {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -987,6 +1008,12 @@ model Image {
   width     Int?
   height    Int?
   sortOrder Int     @default(0)
+
+  // Product galleries mix photos and short videos. A product's first item
+  // (lowest sortOrder) is always IMAGE so images[0] stays a photo everywhere.
+  mediaType ImageMediaType @default(IMAGE)
+  // Still frame for VIDEO rows, captured client-side at upload.
+  posterUrl String?
 
   // What this image is for
   productId  String?
@@ -1020,7 +1047,7 @@ model Customer {
   // Consent evidence for email marketing. `acceptsMarketing` stays the live
   // opt-in switch; these record when/how it was granted or withdrawn.
   marketingConsentAt         DateTime?
-  marketingConsentSource     String? // CHECKOUT | NEWSLETTER_FORM | ACCOUNT | RESUBSCRIBE_LINK | LEGACY_ACCOUNT
+  marketingConsentSource     String? // CHECKOUT | NEWSLETTER_FORM | ACCOUNT | RESUBSCRIBE_LINK | LEGACY_ACCOUNT | IMPORT_CONFIRM
   marketingUnsubscribedAt    DateTime?
   marketingSuppressedAt      DateTime? // hard bounce / complaint — excluded from all marketing sends
   marketingSuppressionReason String? // HARD_BOUNCE | COMPLAINT | PROVIDER_SUPPRESSED
@@ -1066,10 +1093,21 @@ model Customer {
   campaignRecipients MarketingCampaignRecipient[]
   consentEvents      MarketingConsentEvent[]
 
+  // Set only on rows CREATED by a contact import (src/lib/marketing/contact-import.ts);
+  // an existing customer matched by email is never re-tagged. Scopes the
+  // one-time re-permission invite audience.
+  importId String?
+  import   CustomerImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  // What the previous site said about marketing email for an imported row:
+  // subscribed | unsubscribed | unknown. ONLY "subscribed" rows are eligible
+  // for the re-permission invite (repermissionAudienceWhere). NOT consent.
+  importStatus String?
+
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
   @@index([businessId, birthMonth, birthDay]) // loyalty birthday cron sweep
+  @@index([businessId, importId]) // re-permission invite audience
 }
 
 model ShippingAddress {
@@ -1155,7 +1193,7 @@ model Order {
   paymentMethod String @default("card") // card | cash | check | manual
 
   // Fulfillment method chosen at checkout
-  deliveryMethod String @default("ship") // ship | pickup
+  deliveryMethod String @default("ship") // ship | pickup | delivery
 
   // Refund
   refundReason      String?
@@ -1750,8 +1788,8 @@ model ProductReview {
 
   // Owner's public reply (one per review). ownerReplyAt = first posted; edits
   // keep it. ownerReplyBy is admin-only (never in the public select).
-  ownerReply     String?   @db.Text
-  ownerReplyAt   DateTime?
+  ownerReply   String?   @db.Text
+  ownerReplyAt DateTime?
 
   // Relationships
   productId String
@@ -1862,6 +1900,47 @@ model PlatformConfig {
   maintenanceMode    Boolean  @default(false)
   maintenanceMessage String?
   updatedAt          DateTime @updatedAt
+}
+
+// ============================================
+// POLICY ACCEPTANCE LOG
+// ============================================
+
+/// Append-only evidence log of policy acceptances. Written alongside — never
+/// instead of — the first-acceptance columns (`User.termsAcceptedAt`,
+/// `BusinessMembership.merchantTermsAcceptedAt`), which stay the FIRST
+/// acceptance and are never overwritten. This log is what records everything
+/// after that: acknowledgements of material updates (src/lib/legal/material-updates.ts).
+/// Never update or delete rows from app code. See src/lib/legal/policy-acceptance.server.ts.
+model PolicyAcceptance {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Set for merchant-bundle rows (the Seller & Merchant Agreement is accepted
+  // per store) and for notice-acks given from a store's admin. Null for
+  // account-level platform clickwrap at signup.
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  bundle  String // "merchant" | "platform"
+  // clickwrap → the *_TERMS_VERSION in force; notice-ack → MaterialPolicyUpdate.id
+  version String
+  method  String // "clickwrap" | "notice-ack"
+
+  acceptedAt DateTime @default(now()) // server clock only
+
+  @@index([userId, bundle, version])
+  @@index([businessId])
+}
+
+/// One row per material update whose notice email has gone out — makes the
+/// platform-hub send idempotent. `updateId` = MaterialPolicyUpdate.id.
+model PolicyNotice {
+  updateId       String   @id
+  sentAt         DateTime
+  recipientCount Int
 }
 
 // ============================================
@@ -2083,7 +2162,7 @@ model MarketingCampaign {
   bodyText      String? @db.Text
   bodyJson      Json?
 
-  status String @default("DRAFT") // DRAFT | QUEUED | SENDING | SENT | FAILED | CANCELED
+  status String @default("DRAFT") // DRAFT | SCHEDULED | QUEUED | SENDING | SENT | FAILED | CANCELED
 
   // Frozen at queue time so every retry sends byte-identical payloads (Resend idempotency)
   renderedHtml String? @db.Text // contains __SP_UNSUBSCRIBE_URL__ placeholder
@@ -2099,12 +2178,24 @@ model MarketingCampaign {
   canceledAt     DateTime?
   lastError      String?
 
+  audience    Json? // Segment definition (src/lib/marketing/segments.ts). Null = all opted-in customers.
+  scheduledAt DateTime? // Set while status = SCHEDULED; the cron sweep queues it when due.
+
+  // STANDARD = owner-composed campaign to opted-in customers. REPERMISSION =
+  // the one-time "still want to hear from us?" invite to a contact import's
+  // NOT-opted-in rows (audience = repermissionAudienceWhere). `importId` is
+  // unique: one invite per import, ever.
+  kind     String          @default("STANDARD") // STANDARD | REPERMISSION
+  importId String?         @unique
+  import   CustomerImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+
   batches       MarketingCampaignBatch[]
   recipients    MarketingCampaignRecipient[]
   consentEvents MarketingConsentEvent[]
 
   @@index([businessId, createdAt])
   @@index([status])
+  @@index([status, scheduledAt])
 }
 
 /// One Resend batch of a campaign (leased by the sender cron, retried safely).
@@ -2212,6 +2303,37 @@ model MarketingDoNotEmail {
   @@unique([businessId, emailHash])
 }
 
+/// One contact-list upload (e.g. a Wix contacts export) during a store move.
+/// Platform-admin-only to create (src/server/api/routers/contact-import.ts).
+/// Imported contacts are NEVER opted in: they land with acceptsMarketing=false
+/// and only join the list by clicking the one-time re-permission invite
+/// (MarketingCampaign kind=REPERMISSION, importId = this row).
+model CustomerImport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  fileName   String
+  sourceKind String @default("CSV") // WIX | CSV (detected from the headers)
+  counts     Json? // ContactImportCounts in src/lib/marketing/contact-import.ts
+
+  // Set when the invite is queued: what the platform admin attested on the
+  // owner's word, when, and who (plain id — no second User relation).
+  attestationWording String?   @db.Text
+  attestedAt         DateTime?
+  attestedById       String?
+
+  customers      Customer[]
+  inviteCampaign MarketingCampaign?
+
+  @@index([businessId, createdAt])
+}
+
 /// One QuickBooks Online company connection per business (1:1). Updated in
 /// place on reconnect and never deleted by the app, so deposit settings and
 /// the cached QBO reference ids survive a disconnect/reconnect cycle.
@@ -2261,6 +2383,32 @@ model QuickBooksConnection {
   lastSyncError String?   @db.Text
 
   @@index([status, lastSyncAt]) // cron: active connections, stalest first
+}
+
+/// Read-only API token a business owner issues to an external integration
+/// (e.g. ProfitMax). Stored HASHED, not encrypted: auth looks the row up with
+/// `where: { tokenHash }`, and encrypted columns can never appear in a
+/// `where`. The raw token (`spk_...`) is shown to the owner exactly once at
+/// creation and is unrecoverable afterwards; `prefix` (its first 12 chars) is
+/// all the UI ever displays. Revoke = set `revokedAt`; rows are never deleted
+/// by the app. `createdById` is a plain User id (no relation), like other
+/// audit-only creator columns.
+model BusinessApiToken {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  name        String // owner label, e.g. "ProfitMax"
+  tokenHash   String    @unique // sha256 hex of the raw token
+  prefix      String // first 12 chars of the raw token (incl. "spk_")
+  scopes      String[]  @default([]) // ApiTokenScope values, e.g. "profile:read"
+  createdById String?
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+
+  @@index([businessId])
 }
 
 /// One row per invoice SimplePress created in QuickBooks: audit trail, the

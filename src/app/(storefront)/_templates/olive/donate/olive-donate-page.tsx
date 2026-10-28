@@ -24,7 +24,7 @@ function firstFilled(...candidates: (string | null | undefined)[]): string {
 
 /**
  * `/donate` — olive's Donate / Tip / Support page on the generic base: the
- * white `OlivePageBand`, then one `OlivePageSection` on the same edge. With
+ * `OlivePageBand`, then one `OlivePageSection` on the same edge. With
  * both a card form and Venmo/Cash App configured, the form and "Other ways
  * to give" sit side by side at lg (form first); otherwise whichever exists
  * takes the column alone.
@@ -104,7 +104,6 @@ export function OliveDonatePage({
                   padding: "clamp(1.25rem, 3vw, 1.75rem)",
                   backgroundColor: "var(--olive-success-bg)",
                   border: "1px solid var(--olive-success-border)",
-                  borderRadius: "var(--olive-card-radius)",
                 }}
               >
                 <CheckCircle2
@@ -124,7 +123,7 @@ export function OliveDonatePage({
                   </p>
                   {thankYouBody ? (
                     <p
-                      className="text-[0.9375rem] leading-relaxed"
+                      className="text-[0.9375rem] leading-[1.7]"
                       style={{ color: "var(--olive-ink-soft)" }}
                       {...fieldAttr("default.donate.thank-you-body")}
                     >

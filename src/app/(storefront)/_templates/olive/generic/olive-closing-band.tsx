@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import { OliveLeafMark, OliveReveal } from "../shared";
+import { OliveReveal } from "../shared";
 import { OlivePageSection } from "./olive-page-section";
 
 type Props = {
@@ -22,13 +22,13 @@ type Props = {
 };
 
 /**
- * OliveClosingBand — the paper band that ends a page on the generic base
+ * OliveClosingBand — the sand band that ends a page on the generic base
  * ("Want us at your event?", "Not sure what to book?").
  *
  * Deliberately centred — heading, line and button move together on the
  * page's centre line (B1.7 allows a centred heading + text block), the same
- * composition as the testimonials page's review invite. Paper, not sage, so
- * it never merges into the sage footer directly below it.
+ * composition as the testimonials page's review invite. Sand, so it reads
+ * as its own band above the footer directly below it.
  */
 export function OliveClosingBand({
   heading,
@@ -42,15 +42,12 @@ export function OliveClosingBand({
 
   return (
     <OlivePageSection
-      tone="paper"
+      tone="sand"
       aria-label={heading || undefined}
       sectionAttrs={sectionAttrs}
       className="flex flex-col items-center text-center"
     >
       <OliveReveal className="flex max-w-[40rem] flex-col items-center gap-4">
-        <span aria-hidden="true" style={{ color: "var(--olive-leaf)" }}>
-          <OliveLeafMark size={22} />
-        </span>
         {heading.trim() ? (
           <h2
             className="olive-h2"
@@ -61,7 +58,7 @@ export function OliveClosingBand({
         ) : null}
         {bodyText ? (
           <p
-            className="max-w-[52ch] text-[0.9375rem] leading-relaxed"
+            className="max-w-[52ch] text-[0.9375rem] leading-[1.7]"
             style={{ color: "var(--olive-ink-soft)" }}
             {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
           >

@@ -65,11 +65,7 @@ export function OliveQuantityStepper({
     <div
       role="group"
       aria-label={`Quantity${suffix}`}
-      className={cn("inline-flex items-center", className)}
-      style={{
-        border: "1px solid var(--olive-hairline-strong)",
-        borderRadius: "999px",
-      }}
+      className={cn("olive-qty", className)}
     >
       <button
         type="button"

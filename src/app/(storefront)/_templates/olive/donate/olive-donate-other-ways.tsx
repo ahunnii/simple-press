@@ -27,11 +27,11 @@ function HandleCard({
   return (
     <div className="olive-card olive-card-paper flex h-full flex-col items-center gap-4 p-6 text-center">
       <span
-        className="grid h-11 w-11 place-items-center rounded-full"
+        className="grid h-11 w-11 place-items-center"
         style={{
-          backgroundColor: "var(--olive-white)",
+          backgroundColor: "var(--olive-ivory)",
           border: "1px solid var(--olive-hairline)",
-          color: "var(--olive-leaf)",
+          color: "var(--olive-moss-deep)",
         }}
       >
         <Icon className="h-5 w-5" />
@@ -48,14 +48,13 @@ function HandleCard({
         logoUrl={logoUrl}
         className="size-40"
         style={{
-          backgroundColor: "var(--olive-white)",
+          backgroundColor: "var(--olive-ivory)",
           border: "1px solid var(--olive-hairline)",
-          borderRadius: "var(--olive-card-radius)",
         }}
       />
 
       <OliveButton
-        variant="secondary"
+        variant="outline"
         size="sm"
         href={handle.url}
         target="_blank"
@@ -70,7 +69,7 @@ function HandleCard({
 }
 
 /**
- * Venmo/Cash App cards — one paper `olive-card` per handle the owner has
+ * Venmo/Cash App cards — one sand `olive-card` per handle the owner has
  * configured, each with a deep link and a scannable QR code. Same behaviour
  * as Default's `DefaultDonateOtherWays`; with a single handle the card sits
  * alone at a fixed width instead of half of a 2-up grid. `stacked` puts the

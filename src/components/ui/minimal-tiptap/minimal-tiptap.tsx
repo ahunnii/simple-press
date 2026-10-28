@@ -39,6 +39,13 @@ export interface MinimalTiptapProps extends Omit<
    * round-trips); this only gates the insert items.
    */
   layoutBlocksEnabled?: boolean;
+  /**
+   * Adds the "Products" block to the Insert menu and "/" menu in email
+   * mode. Pass the `products` feature flag. The node itself is registered in
+   * every email-mode editor (so saved blocks still render); this only gates
+   * inserting new ones.
+   */
+  productsEnabled?: boolean;
 }
 
 // Module-level so the arrays are stable props for the toolbar sections.
@@ -52,6 +59,7 @@ const Toolbar = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  productsEnabled,
   emailMode,
 }: {
   editor: Editor;
@@ -60,6 +68,7 @@ const Toolbar = ({
   quotesEnabled?: boolean;
   formsEnabled?: boolean;
   layoutBlocksEnabled?: boolean;
+  productsEnabled?: boolean;
   emailMode?: boolean;
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
@@ -136,6 +145,7 @@ const Toolbar = ({
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
         layoutBlocksEnabled={layoutBlocksEnabled}
+        productsEnabled={productsEnabled}
       />
     </div>
   </div>
@@ -151,6 +161,7 @@ export const MinimalTiptapEditor = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  productsEnabled,
   emailMode,
   ...props
 }: MinimalTiptapProps) => {
@@ -180,6 +191,7 @@ export const MinimalTiptapEditor = ({
         quotesEnabled={quotesEnabled}
         formsEnabled={formsEnabled}
         layoutBlocksEnabled={layoutBlocksEnabled}
+        productsEnabled={productsEnabled}
         emailMode={emailMode}
       />
     </EditorContext.Provider>
@@ -199,6 +211,7 @@ export const MainMinimalTiptapEditor = ({
   quotesEnabled,
   formsEnabled,
   layoutBlocksEnabled,
+  productsEnabled,
   emailMode,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
@@ -214,7 +227,7 @@ export const MainMinimalTiptapEditor = ({
       as="div"
       name="editor"
       className={cn(
-        "border-input min-data-[orientation=vertical]:h-72 relative flex h-auto w-full flex-col rounded-md border shadow-xs",
+        "border-input min-data-[orientation=vertical]:h-72 relative flex h-auto w-full min-w-0 flex-col rounded-md border shadow-xs",
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
         className,
       )}
@@ -229,6 +242,7 @@ export const MainMinimalTiptapEditor = ({
           quotesEnabled={quotesEnabled}
           formsEnabled={formsEnabled}
           layoutBlocksEnabled={layoutBlocksEnabled}
+          productsEnabled={productsEnabled}
           emailMode={emailMode}
         />
         <EditorContent
@@ -238,7 +252,8 @@ export const MainMinimalTiptapEditor = ({
         <LinkBubbleMenu editor={providedEditor} />
         {!emailMode && <TableBubbleMenu editor={providedEditor} />}
         {!emailMode && <ColumnsBubbleMenu editor={providedEditor} />}
-        {!emailMode && <SpacerBubbleMenu editor={providedEditor} />}
+        {/* Spacers are registered in every editor, email included. */}
+        <SpacerBubbleMenu editor={providedEditor} />
         <ImageBubbleMenu editor={providedEditor} />
         {/* After EditorContent: the side menu is positioned against this
             (relative) frame and hidden by CSS when the editor is read-only. */}
@@ -251,6 +266,7 @@ export const MainMinimalTiptapEditor = ({
           quotesEnabled={quotesEnabled}
           formsEnabled={formsEnabled}
           layoutBlocksEnabled={layoutBlocksEnabled}
+          productsEnabled={productsEnabled}
         />
       </InsertDialogProvider>
     </MeasuredContainer>

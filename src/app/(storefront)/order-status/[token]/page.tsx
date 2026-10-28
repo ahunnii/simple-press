@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 
 import { checkBusiness } from "~/lib/check-business";
+import {
+  deliveryMethodLabel,
+  parseDeliveryMethod,
+} from "~/lib/delivery-method";
 import { formatDate } from "~/lib/format-date";
 import { verifyOrderStatusToken } from "~/lib/order-status-token";
 import { formatPrice } from "~/lib/prices";
@@ -128,6 +132,18 @@ export default async function OrderStatusTokenPage({ params }: Props) {
   if (!order) notFound();
 
   const addr = order.shippingAddress;
+  const deliveryMethod = parseDeliveryMethod(order.deliveryMethod);
+  const isLocalDelivery = deliveryMethod === "delivery";
+  // The owner's "Delivery days & instructions" live on the business, not the
+  // order, so read the current text only when this is a local delivery.
+  const deliveryInstructionsRow = isLocalDelivery
+    ? await db.business.findUnique({
+        where: { id: business.id },
+        select: { localDeliveryInstructions: true },
+      })
+    : null;
+  const deliveryInstructions =
+    deliveryInstructionsRow?.localDeliveryInstructions?.trim() ?? "";
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16">
@@ -216,7 +232,9 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-muted-foreground">
+                  {isLocalDelivery ? "Local delivery" : "Shipping"}
+                </span>
                 <span>
                   {order.shipping === 0 ? "Free" : formatPrice(order.shipping)}
                 </span>
@@ -276,7 +294,9 @@ export default async function OrderStatusTokenPage({ params }: Props) {
         {/* Right — address + info */}
         <div className="flex flex-col gap-5">
           {addr && (
-            <Section title="Shipping Address">
+            <Section
+              title={isLocalDelivery ? "Delivery Address" : "Shipping Address"}
+            >
               <address className="flex flex-col gap-0.5 text-sm leading-relaxed not-italic">
                 {addr.firstName && addr.lastName && (
                   <p className="font-medium">
@@ -292,6 +312,14 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 </p>
                 <p className="text-muted-foreground">{addr.country}</p>
               </address>
+            </Section>
+          )}
+
+          {isLocalDelivery && deliveryInstructions !== "" && (
+            <Section title="Delivery Details">
+              <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
+                {deliveryInstructions}
+              </p>
             </Section>
           )}
 
@@ -315,11 +343,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 <dt className="text-muted-foreground mb-0.5 text-[11px] font-medium tracking-[0.1em] uppercase">
                   Delivery
                 </dt>
-                <dd className="capitalize">
-                  {order.deliveryMethod === "pickup"
-                    ? "In-store pickup"
-                    : "Shipping"}
-                </dd>
+                <dd>{deliveryMethodLabel(deliveryMethod)}</dd>
               </div>
             </dl>
           </Section>

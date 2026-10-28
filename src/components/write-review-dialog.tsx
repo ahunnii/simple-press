@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
 import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -20,6 +21,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 
 type WriteReviewDialogProps = {
   productId: string;
@@ -44,6 +46,9 @@ export function WriteReviewDialog({
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
+
+  const captchaRef = useRef<RecaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const utils = api.useUtils();
 
@@ -74,9 +79,10 @@ export function WriteReviewDialog({
     setRating(5);
     setTitle("");
     setComment("");
+    setCaptchaToken("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -89,11 +95,22 @@ export function WriteReviewDialog({
       return;
     }
 
+    if (!captchaToken) {
+      toast.error("Please complete the captcha");
+      return;
+    }
+
+    // Mint a fresh token right at submit rather than reusing the staged one
+    // — a shopper can spend longer than the token's TTL writing a review.
+    const freshCaptchaToken =
+      (await captchaRef.current?.execute()) ?? captchaToken;
+
     submitMutation.mutate({
       productId,
       rating,
       title: title.trim(),
       comment: comment.trim(),
+      captchaToken: freshCaptchaToken,
     });
   };
 
@@ -228,13 +245,26 @@ export function WriteReviewDialog({
             <p className="text-xs text-gray-500">
               Reviews are checked by the store before they appear publicly.
             </p>
+
+            <RecaptchaField
+              ref={captchaRef}
+              action="review"
+              onVerify={(token) => setCaptchaToken(token)}
+              onExpire={() => setCaptchaToken("")}
+              onError={() => setCaptchaToken("")}
+              fieldId="review-captcha"
+              errorId="review-captcha-error"
+            />
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitMutation.isPending}>
+            <Button
+              type="submit"
+              disabled={submitMutation.isPending || !captchaToken}
+            >
               {submitMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

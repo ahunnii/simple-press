@@ -134,6 +134,22 @@ describe("UmscOrderConfirmation", () => {
       expect(screen.queryByText(/ready for pickup/)).not.toBeInTheDocument();
     });
 
+    it("local delivery: names the method and never says the order ships", async () => {
+      searchParams = new URLSearchParams({ session_id: "cs_test_delivery" });
+      mockFetchResponse({ ...PAID, delivery_method: "delivery" });
+
+      render(<UmscOrderConfirmation {...BASE_PROPS} />);
+
+      await waitFor(() =>
+        expect(screen.getByText("Local delivery")).toBeInTheDocument(),
+      );
+      expect(
+        screen.getByText("We'll be in touch about your delivery."),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/order ships/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/ready for pickup/)).not.toBeInTheDocument();
+    });
+
     it("pickup: shows the pickup list, never says the order ships", async () => {
       searchParams = new URLSearchParams({ session_id: "cs_test_pickup" });
       mockFetchResponse({ ...PAID, delivery_method: "pickup" });
@@ -151,7 +167,9 @@ describe("UmscOrderConfirmation", () => {
     });
 
     it("pickup with a blank pickup override: reuses the general list (saved-field fallback)", async () => {
-      searchParams = new URLSearchParams({ session_id: "cs_test_pickup_blank" });
+      searchParams = new URLSearchParams({
+        session_id: "cs_test_pickup_blank",
+      });
       mockFetchResponse({ ...PAID, delivery_method: "pickup" });
 
       render(<UmscOrderConfirmation {...BASE_PROPS} nextStepsPickup="" />);
@@ -212,7 +230,9 @@ describe("UmscOrderConfirmation", () => {
           screen.getByText("We'll let you know as soon as your order ships."),
         ).toBeInTheDocument(),
       );
-      expect(screen.queryByText(/Questions\? Call or text/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Questions\? Call or text/),
+      ).not.toBeInTheDocument();
     });
   });
 

@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -62,6 +61,10 @@ export function HappyBambooCheckoutForm({
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    deliveryOptions,
+    needsAddress,
+    addressLocked,
+    localDelivery,
     discountCodeInput,
     setDiscountCodeInput,
 
@@ -90,11 +93,6 @@ export function HappyBambooCheckoutForm({
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
     deliveryMethod === "ship" && state.trim().length > 0 && shippingPending;
-
-  // Zone+weight stores lock the address on Stripe (it's used to price shipping),
-  // so it can't be edited at payment — the copy must reflect that.
-  const isZoneWeightShipping =
-    shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -257,33 +255,27 @@ export function HappyBambooCheckoutForm({
           </fieldset>
         )}
 
-        {shippingConfig.offersInStorePickup && (
+        {deliveryOptions.length > 1 && (
           <fieldset className="flex flex-col gap-3">
             <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
               Delivery
             </legend>
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant={deliveryMethod === "ship" ? "default" : "outline"}
-                onClick={() => setDeliveryMethod("ship")}
-                aria-pressed={deliveryMethod === "ship"}
-              >
-                Ship to address
-              </Button>
-              <Button
-                type="button"
-                variant={deliveryMethod === "pickup" ? "default" : "outline"}
-                onClick={() => setDeliveryMethod("pickup")}
-                aria-pressed={deliveryMethod === "pickup"}
-              >
-                In-store pickup
-              </Button>
+              {deliveryOptions.map((option) => (
+                <Button
+                  key={option.id}
+                  type="button"
+                  variant={deliveryMethod === option.id ? "default" : "outline"}
+                  onClick={() => setDeliveryMethod(option.id)}
+                  aria-pressed={deliveryMethod === option.id}
+                >
+                  {option.label}
+                </Button>
+              ))}
             </div>
             <p className="text-muted-foreground text-sm">
-              {deliveryMethod === "pickup"
-                ? "No shipping charge. You’ll pick up your order at the store."
-                : "Shipping cost is based on your store’s shipping settings."}
+              {deliveryOptions.find((o) => o.id === deliveryMethod)
+                ?.description ?? ""}
             </p>
             {deliveryMethod === "pickup" && (
               <div className="bg-muted/40 rounded-md border p-3 text-sm">
@@ -300,17 +292,53 @@ export function HappyBambooCheckoutForm({
                 ) : null}
               </div>
             )}
+            {deliveryMethod === "delivery" && (
+              <>
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "text-sm",
+                    localDelivery.status === "ineligible"
+                      ? "text-destructive font-medium"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {localDelivery.status === "checking"
+                    ? "Checking your ZIP…"
+                    : localDelivery.status === "ineligible"
+                      ? localDelivery.message
+                      : localDelivery.status === "eligible"
+                        ? "Great — we deliver to you."
+                        : null}
+                </p>
+                {localDelivery.instructions ? (
+                  <div className="bg-muted/40 rounded-md border p-3 text-sm">
+                    <p className="text-foreground font-medium">
+                      Delivery details
+                    </p>
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                      {localDelivery.instructions}
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
           </fieldset>
         )}
 
-        {deliveryMethod === "ship" && (
+        {needsAddress && (
           <fieldset className="flex flex-col gap-4">
             <legend className="text-foreground font-heading pb-4 text-lg font-semibold">
-              Shipping Address
+              {deliveryMethod === "delivery"
+                ? "Delivery Address"
+                : "Shipping Address"}
             </legend>
             <p className="text-muted-foreground text-sm">
-              {isZoneWeightShipping
-                ? "We price shipping from this address. Make changes here before continuing to payment."
+              {addressLocked
+                ? deliveryMethod === "delivery"
+                  ? "We check delivery from this address. Make changes here before continuing to payment."
+                  : "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
             <SavedAddressPicker
@@ -345,7 +373,7 @@ export function HappyBambooCheckoutForm({
                   value={addressLine1}
                   onChange={(e) => setAddressLine1(e.target.value)}
                   placeholder="Street address, P.O. box"
-                  required={deliveryMethod === "ship"}
+                  required={needsAddress}
                   aria-required="true"
                   aria-invalid={
                     submitAttempted && !addressLine1.trim() ? true : undefined
@@ -374,7 +402,7 @@ export function HappyBambooCheckoutForm({
                     autoComplete="shipping address-level2"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    required={deliveryMethod === "ship"}
+                    required={needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !city.trim() ? true : undefined
@@ -424,7 +452,7 @@ export function HappyBambooCheckoutForm({
                     placeholder="e.g. 94102"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
-                    required={deliveryMethod === "ship"}
+                    required={needsAddress}
                     aria-required="true"
                     aria-invalid={
                       submitAttempted && !postalCode.trim() ? true : undefined
@@ -470,6 +498,10 @@ export function HappyBambooCheckoutForm({
             shipping={shipping}
             shippingPending={shippingPending}
             shippingCalculating={shippingCalculating}
+            deliveryUnavailable={
+              deliveryMethod === "delivery" &&
+              localDelivery.status === "ineligible"
+            }
           />
 
           <div role="alert" aria-live="assertive" aria-atomic="true">

@@ -6,11 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import type { NavChild } from "~/app/(storefront)/_components/nav";
 import type { Session } from "~/server/better-auth/config";
+import { googleMapsUrls } from "~/lib/address/coordinates";
 import { resolveDonationLabel } from "~/lib/donations/label";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
+import { telHref } from "~/lib/tel-href";
 import {
   getRawCustomFieldString,
   parseTemplateListRows,
@@ -22,13 +25,12 @@ import {
   filterNavByFlags,
   getAccountNavLinks,
   resolveFooterNav,
-  type NavChild,
 } from "~/app/(storefront)/_components/nav";
 
 import { resolveFields } from "..";
-import { PinkFooterAccount } from "./pink-footer-account";
 import { PinkSocialLinks } from "../shared/pink-social-links";
 import { PinkWordmarkSvg } from "../shared/pink-wordmark-svg";
+import { PinkFooterAccount } from "./pink-footer-account";
 
 /** A resolved footer link, optionally tagged with its position in the
  *  SAVED `pink.global.footer-col1-links` / `footer-col2-links` list (never
@@ -98,9 +100,10 @@ function splitAccentWordmark(name: string, accentWord: string) {
 }
 
 /**
- * Every part of the footer — brand column, link columns, legal strip —
- * belongs to the single `global.footer` section, so all three wrappers carry
- * the same `sectionGroupAttr`; the preview overlay dedupes them into one
+ * Every part of the footer — brand column (wordmark, tagline, Settings
+ * contact block, socials), link columns, legal strip — belongs to the
+ * single `global.footer` section, so all three wrappers carry the same
+ * `sectionGroupAttr`; the preview overlay dedupes them into one
  * hotspot and focus lands on the first. The section is not hideable: the
  * social row and the legal links each disappear on their own once their
  * source list is empty, so a toggle would have nothing left to do.
@@ -161,6 +164,12 @@ export function PinkFooter({
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
+  const address = nonBlank(business?.businessAddress);
+  const phone = nonBlank(business?.phoneNumber);
+  const email = nonBlank(business?.supportEmail);
+  const addressMapUrl = address ? googleMapsUrls(address).viewUrl : null;
+  const hasContact = Boolean(address ?? phone ?? email);
+
   const col1Title = f["pink.global.footer-col1-title"] ?? "Shop";
   const col2Title = f["pink.global.footer-col2-title"] ?? "Studio";
   const col1LinksRaw = parseTemplateListRows(
@@ -198,10 +207,7 @@ export function PinkFooter({
           { label: "Collections", href: "/collections" },
           { label: "Services", href: "/services" },
         ];
-  const shopLinks = filterNavByFlags(
-    col1Source,
-    isEnabled,
-  ) as FooterLinkRow[];
+  const shopLinks = filterNavByFlags(col1Source, isEnabled) as FooterLinkRow[];
 
   // ── Studio column (col2) is now the shared footer quick links (PF19,
   // decision 2026-09-28): Admin's footer quick links
@@ -221,7 +227,10 @@ export function PinkFooter({
   const col2Fallback: FooterLinkRow[] =
     col2Saved.length > 0 ? col2Saved : col2Defaults;
   const studioLinks = filterNavByFlags(
-    resolveFooterNav(business?.siteContent?.footerNavigationItems, col2Fallback),
+    resolveFooterNav(
+      business?.siteContent?.footerNavigationItems,
+      col2Fallback,
+    ),
     isEnabled,
   ) as FooterLinkRow[];
 
@@ -376,6 +385,52 @@ export function PinkFooter({
             >
               {footerTagline}
             </p>
+          )}
+
+          {/* Contact block (B10.6): values come from Settings, not a template
+              field, so no `fieldAttr` — a click lands on the `global.footer`
+              section. `businessAddress` is the display string derived from the
+              structured address parts, so a city/state-only "general" address
+              still renders (e.g. "Detroit, MI"). Each line hides on its own;
+              `mutedFg` follows the footer tone so the light variant (/about,
+              /blog/[slug]) stays readable. */}
+          {hasContact && (
+            <address
+              className="flex flex-col gap-1 text-[15px] leading-[1.75] not-italic"
+              style={{ color: mutedFg }}
+            >
+              {address && (
+                <a
+                  href={addressMapUrl ?? undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:underline"
+                >
+                  {address}
+                  <span className="sr-only"> (opens in new tab)</span>
+                </a>
+              )}
+              {phone &&
+                (telHref(phone) ? (
+                  <a
+                    href={telHref(phone)}
+                    className="tabular-nums transition-colors hover:underline"
+                  >
+                    {phone}
+                  </a>
+                ) : (
+                  <span className="tabular-nums">{phone}</span>
+                ))}
+              {email && (
+                <a
+                  href={`mailto:${email}`}
+                  className="transition-colors hover:underline"
+                  style={{ overflowWrap: "anywhere" }}
+                >
+                  {email}
+                </a>
+              )}
+            </address>
           )}
 
           {/* Socials sit under the tagline rather than in a column of their own.

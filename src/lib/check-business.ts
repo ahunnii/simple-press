@@ -87,11 +87,21 @@ export const checkBusinessMembership = async (
 ): Promise<{
   role: string;
   merchantTermsAcceptedAt?: Date | null;
+  /**
+   * Version stamped with the acceptance above. Rides along for the `/admin`
+   * policy-update notice (`clickwrapCoversUpdate`); omitted under the same
+   * fallback as `merchantTermsAcceptedAt`.
+   */
+  merchantTermsVersion?: string | null;
 } | null> => {
   try {
     return await db.businessMembership.findUnique({
       where: { userId_businessId: { userId, businessId } },
-      select: { role: true, merchantTermsAcceptedAt: true },
+      select: {
+        role: true,
+        merchantTermsAcceptedAt: true,
+        merchantTermsVersion: true,
+      },
     });
   } catch {
     return db.businessMembership.findUnique({
