@@ -5,6 +5,7 @@ import { Clock, Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { telHref } from "~/lib/tel-href";
@@ -30,6 +31,7 @@ export function HappyBambooContactPage({
     "happy-bamboo.contact.header",
     "happy-bamboo.contact.subheader",
     "happy-bamboo.contact-image",
+    "happy-bamboo.contact-image-alt",
     "happy-bamboo.contact-faq-title",
     "happy-bamboo.contact-faq-subtitle",
     "happy-bamboo.contact.form-success-heading",
@@ -135,7 +137,10 @@ export function HappyBambooContactPage({
                 <img
                   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- cleared field resolves to "", not null/undefined
                   src={f["happy-bamboo.contact-image"] || "/placeholder.svg"}
-                  alt="Bamboo contact illustration"
+                  alt={
+                    meaningfulAltText(f["happy-bamboo.contact-image-alt"]) ??
+                    "Bamboo contact illustration"
+                  }
                   className="h-full w-full object-cover object-center"
                   loading="lazy"
                 />
@@ -150,7 +155,9 @@ export function HappyBambooContactPage({
           <div className="mx-auto flex w-full flex-col gap-12 lg:flex-row">
             {/* Form */}
             <HappyBambooContactForm
-              successHeading={f["happy-bamboo.contact.form-success-heading"] ?? ""}
+              successHeading={
+                f["happy-bamboo.contact.form-success-heading"] ?? ""
+              }
               successBody={f["happy-bamboo.contact.form-success-body"] ?? ""}
               successAgainLabel={
                 f["happy-bamboo.contact.form-success-again-label"] ?? ""
@@ -166,9 +173,9 @@ export function HappyBambooContactPage({
                       <info.icon className="text-primary size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-foreground text-sm font-semibold">
+                      <p className="text-foreground text-sm font-semibold">
                         {info.label}
-                      </h2>
+                      </p>
                       {info.lines ? (
                         <dl className="mt-1 space-y-0.5">
                           {info.lines.map((line, i) => (
@@ -234,11 +241,22 @@ export function HappyBambooContactPage({
               <FadeIn delay={0.1} className="mx-auto max-w-3xl">
                 <Accordion type="single" collapsible className="w-full">
                   {frequentlyAsked.map((faq) => (
-                    <AccordionItem key={faq.id} value={faq.id}>
+                    <AccordionItem
+                      key={faq.id}
+                      value={faq.id}
+                      // `forceMount` keeps closed answers in the server HTML
+                      // (crawlers / no-JS); hide the closed ones with CSS. The
+                      // shared AccordionContent puts `className` on an inner
+                      // div, so target the content slot from the item.
+                      className="[&[data-state=closed]>[data-slot=accordion-content]]:hidden"
+                    >
                       <AccordionTrigger className="text-left">
                         {faq.question}
                       </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">
+                      <AccordionContent
+                        forceMount
+                        className="text-muted-foreground"
+                      >
                         {faq.answer}
                       </AccordionContent>
                     </AccordionItem>

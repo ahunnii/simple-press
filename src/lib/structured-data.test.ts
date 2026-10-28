@@ -346,9 +346,18 @@ const baseProduct = {
   allowBackorders: false,
 };
 
+/** buildProductSchema for fixtures that are expected to produce a Product. */
+function productSchemaOf(
+  ...args: Parameters<typeof buildProductSchema>
+): Record<string, unknown> {
+  const schema = buildProductSchema(...args);
+  if (!schema) throw new Error("expected a Product schema, got null");
+  return schema;
+}
+
 describe("buildProductSchema", () => {
   it("emits an array of every absolute product image URL", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         images: [
@@ -367,7 +376,7 @@ describe("buildProductSchema", () => {
   });
 
   it("omits image entirely when there are no usable image URLs", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, images: [{ url: "/relative/only.jpg" }] },
       business,
     );
@@ -376,7 +385,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits a single Offer when there is only one variant", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, variants: [{ price: 1500, inventoryQty: 5 }] },
       business,
     );
@@ -391,7 +400,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits a single Offer when multiple variants all resolve to the same effective price", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -410,7 +419,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits an AggregateOffer with the correct low/high prices when variant prices differ", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -435,7 +444,7 @@ describe("buildProductSchema", () => {
   });
 
   it("treats a variant price of 0 as inheriting the base price when computing the AggregateOffer range", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -912,7 +921,7 @@ describe("buildOrganizationSchema", () => {
 
 describe("buildProductSchema — description and gtin", () => {
   it("emits the description as plain text (tags stripped, entities decoded)", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         description: "<h2>Soft &amp; warm</h2><p>Hand-knit<br/>wool.</p>",
@@ -923,7 +932,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits description when it is blank after stripping tags", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, description: "<p>  </p>" },
       business,
     );
@@ -931,7 +940,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("emits a normalized gtin from a valid product barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, barcode: "0360-00 291452" },
       business,
     );
@@ -939,7 +948,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits gtin for an invalid product barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, barcode: "036000291453" },
       business,
     );
@@ -947,7 +956,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("falls back to the single variant with a valid barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         barcode: null,
@@ -963,7 +972,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits gtin when two variants carry different valid barcodes", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         variants: [
@@ -977,7 +986,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("prefers the product barcode over variant barcodes", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         barcode: "96385074",
@@ -1008,7 +1017,7 @@ describe("buildProductSchema — merchant listing", () => {
   };
 
   it("leaves offers unchanged when merchant is not passed", () => {
-    const schema = buildProductSchema(baseProduct, business);
+    const schema = productSchemaOf(baseProduct, business);
     expect(schema.offers).toEqual({
       "@type": "Offer",
       price: "10.00",
@@ -1019,7 +1028,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("adds a single shippingDetails object and hasMerchantReturnPolicy to an Offer", () => {
-    const schema = buildProductSchema(baseProduct, business, [], {
+    const schema = productSchemaOf(baseProduct, business, [], {
       merchant: {
         shipping,
         returns,
@@ -1053,7 +1062,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("prices shipping from the AggregateOffer lowPrice", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 4000,
@@ -1075,7 +1084,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("uses the effective price for the free-shipping threshold", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, price: 5000 },
       business,
       [],
@@ -1087,7 +1096,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("emits a shippingDetails array for multi-entry zone_weight stores", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, weight: 1, weightUnit: "lb" },
       business,
       [],
@@ -1120,7 +1129,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("omits shippingDetails when nothing can be priced", () => {
-    const schema = buildProductSchema(baseProduct, business, [], {
+    const schema = productSchemaOf(baseProduct, business, [], {
       merchant: {
         shipping: {
           shippingType: "zone_weight",
@@ -1257,6 +1266,119 @@ describe("buildLocalBusinessSchema — service_area full address", () => {
       addressRegion: "MI",
       postalCode: "48201",
       addressCountry: "US",
+    });
+  });
+});
+
+describe("buildProductSchema — coming-soon (price 0)", () => {
+  const review = {
+    rating: 5,
+    customerName: "Sam",
+    comment: "Lovely",
+    reviewDate: new Date("2026-06-01T12:00:00.000Z"),
+  };
+
+  it("returns null for a $0 product with no reviews", () => {
+    expect(
+      buildProductSchema({ ...baseProduct, price: 0 }, business),
+    ).toBeNull();
+  });
+
+  it("returns null for a $0 product with $0/inheriting variants and no reviews", () => {
+    expect(
+      buildProductSchema(
+        {
+          ...baseProduct,
+          price: 0,
+          variants: [
+            { price: 0, inventoryQty: 0 },
+            { price: null, inventoryQty: 0 },
+          ],
+        },
+        business,
+      ),
+    ).toBeNull();
+  });
+
+  it("returns null for $0 even when merchant data is supplied", () => {
+    expect(
+      buildProductSchema({ ...baseProduct, price: 0 }, business, [], {
+        merchant: {
+          shipping: {
+            shippingType: "flat_rate",
+            shippingFlatRate: 599,
+            freeShippingThreshold: null,
+            salesCountries: [],
+            shippingDefaultItemWeightLb: 0,
+            transitDaysMin: 2,
+            transitDaysMax: 5,
+          },
+          returns: {},
+        } as never,
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps the Product but omits offers when a $0 product has an aggregateRating", () => {
+    const schema = productSchemaOf(
+      { ...baseProduct, price: 0, averageRating: 4.5, reviewCount: 2 },
+      business,
+    );
+
+    expect(schema["@type"]).toBe("Product");
+    expect(schema).not.toHaveProperty("offers");
+    expect(schema.aggregateRating).toMatchObject({
+      "@type": "AggregateRating",
+      ratingValue: "4.5",
+      reviewCount: 2,
+    });
+  });
+
+  it("keeps the Product but omits offers when a $0 product has reviews", () => {
+    const schema = productSchemaOf({ ...baseProduct, price: 0 }, business, [
+      review,
+    ]);
+
+    expect(schema).not.toHaveProperty("offers");
+    expect(schema.review).toHaveLength(1);
+  });
+
+  it("returns null when reviews exist but are switched off and the price is $0", () => {
+    expect(
+      buildProductSchema(
+        { ...baseProduct, price: 0, averageRating: 4.5, reviewCount: 2 },
+        business,
+        [review],
+        { includeReviews: false },
+      ),
+    ).toBeNull();
+  });
+
+  it("still emits an Offer for a $0 base price when a variant has its own positive price", () => {
+    const schema = productSchemaOf(
+      {
+        ...baseProduct,
+        price: 0,
+        variants: [
+          { price: 0, inventoryQty: 5 },
+          { price: 1500, inventoryQty: 5 },
+        ],
+      },
+      business,
+    );
+
+    expect(schema.offers).toMatchObject({ "@type": "Offer", price: "15.00" });
+  });
+
+  it("keeps a positive-price product's Offer unchanged", () => {
+    const schema = productSchemaOf({ ...baseProduct, price: 2500 }, business);
+
+    expect(schema.offers).toEqual({
+      "@type": "Offer",
+      price: "25.00",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: expect.any(String) as string,
     });
   });
 });

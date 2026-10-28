@@ -132,7 +132,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <HydrateClient>
-      <JsonLd data={[productSchema, breadcrumbSchema]} />
+      <JsonLd
+        data={
+          productSchema ? [productSchema, breadcrumbSchema] : [breadcrumbSchema]
+        }
+      />
       <VariantImageProvider>
         <t.ProductPage
           product={product}

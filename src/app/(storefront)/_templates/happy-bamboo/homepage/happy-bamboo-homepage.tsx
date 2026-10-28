@@ -58,7 +58,9 @@ export async function HappyBambooHomepage({
     "happy-bamboo.homepage-about-small-label",
     "happy-bamboo.homepage-about-video",
     "happy-bamboo.homepage-about-video-poster",
+    "happy-bamboo.homepage-about-video-poster-alt",
     "happy-bamboo.homepage-about-image",
+    "happy-bamboo.homepage-about-image-alt",
     "happy-bamboo.homepage-about-heading",
     "happy-bamboo.homepage-about-button-text",
     "happy-bamboo.homepage-about-button-link",
@@ -125,11 +127,15 @@ export async function HappyBambooHomepage({
             aboutSmallLabel={f["happy-bamboo.homepage-about-small-label"]}
             aboutVideoUrl={f["happy-bamboo.homepage-about-video"]}
             aboutVideoPosterUrl={f["happy-bamboo.homepage-about-video-poster"]}
+            aboutVideoPosterAlt={
+              f["happy-bamboo.homepage-about-video-poster-alt"]
+            }
             aboutHeading={f["happy-bamboo.homepage-about-heading"]}
             aboutDescription={missionRichContent}
             aboutButtonText={f["happy-bamboo.homepage-about-button-text"]}
             aboutButtonLink={f["happy-bamboo.homepage-about-button-link"]}
             aboutImageUrl={f["happy-bamboo.homepage-about-image"]}
+            aboutImageAlt={f["happy-bamboo.homepage-about-image-alt"]}
             sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
           />
         )}

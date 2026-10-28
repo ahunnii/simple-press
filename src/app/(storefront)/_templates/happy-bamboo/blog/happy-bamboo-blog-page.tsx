@@ -15,6 +15,7 @@ import {
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
@@ -79,12 +80,16 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
     "happy-bamboo.blog-listing-title",
     "happy-bamboo.blog-listing-intro",
     "happy-bamboo.blog-listing-image",
+    "happy-bamboo.blog-listing-image-alt",
   ]);
 
   const smallLabel = fields["happy-bamboo.blog-listing-small-label"]!;
   const pageTitle = fields["happy-bamboo.blog-listing-title"]!;
   const pageIntro = fields["happy-bamboo.blog-listing-intro"]!;
   const blogImage = fields["happy-bamboo.blog-listing-image"]!;
+  const blogImageAlt =
+    meaningfulAltText(fields["happy-bamboo.blog-listing-image-alt"]) ??
+    "Blog listing image";
 
   const [query, setQuery] = useState("");
 
@@ -175,7 +180,7 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
               <div className="aspect-video w-full max-w-md overflow-hidden rounded-xl border border-white/20 bg-white/20 shadow-md">
                 <img
                   src={blogImage}
-                  alt="Blog listing image"
+                  alt={blogImageAlt}
                   className="h-full w-full object-cover object-center"
                   loading="lazy"
                 />

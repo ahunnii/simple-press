@@ -28,7 +28,6 @@ import {
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { isValidGtin, normalizeGtin } from "~/lib/gtin";
-import { getEffectivePrice } from "~/lib/prices";
 import { productDescriptionToPlainText } from "~/lib/product-description";
 import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { firstNonBlank } from "~/lib/seo/blank";
@@ -332,6 +331,10 @@ function buildProductVideoObjects(
  *   product with 0-1 variants or with ≥2 variants all priced the same; an
  *   AggregateOffer (lowPrice/highPrice/offerCount) when ≥2 variants have
  *   different effective prices
+ * - no offers when no (variant-resolved) price is positive — coming-soon
+ *   products saved at 0 would otherwise read as free
+ * - returns null when the result has no offers, review or aggregateRating
+ *   (Google's Product snippet requires one of them)
  * - aggregateRating — ONLY when reviewCount > 0 (Google rejects zero-review ratings)
  * - gtin — from a valid product barcode, else the single variant with one
  * - offers.shippingDetails / offers.hasMerchantReturnPolicy — only when
@@ -342,72 +345,70 @@ export function buildProductSchema(
   business: CanonicalBusiness & { name: string },
   reviews: ReviewForSchema[] = [],
   options: BuildProductSchemaOptions = {},
-): Record<string, unknown> {
+): Record<string, unknown> | null {
   const includeReviews = options.includeReviews ?? true;
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
   const images = photosOnly(product.images)
     .map((i) => toAbsoluteUrl(i.url))
     .filter((url): url is string => Boolean(url));
 
-  // Prices in the DB are stored in cents. Use the same effective-price
-  // resolution as the rest of the app (variant-aware — a variant price of
-  // 0/null means "inherit the product base price") and convert to a decimal
-  // dollar string for the JSON-LD Offer.
-  const effectivePriceCents = getEffectivePrice({
-    price: product.price,
-    compareAtPrice: null,
-    variants: (product.variants ?? []).map((v) => ({
-      price: v.price ?? null,
-      compareAtPrice: null,
-    })),
-  });
-
-  // Every variant's own effective price (0/null inherits the base price —
-  // same rule as getEffectivePrice/getAvailability), used to decide whether
-  // this product needs an AggregateOffer (a real price range) instead of a
-  // single Offer.
-  const variantPriceCents = (product.variants ?? []).map((v) =>
-    resolveVariantPrice(v.price, product.price),
-  );
+  // Prices in the DB are stored in cents. Every variant's own effective price
+  // (0/null inherits the base price — same rule as getEffectivePrice /
+  // getAvailability) is resolved first; a product with no variants uses its
+  // base price. Only positive prices count: a price of 0 is how "coming soon"
+  // products are saved, and an Offer at "0.00" tells Google the product is
+  // free (Merchant listing / rich result errors). With no positive price there
+  // is no Offer at all.
+  const pricedCents = (
+    (product.variants ?? []).length > 0
+      ? (product.variants ?? []).map((v) =>
+          resolveVariantPrice(v.price, product.price),
+        )
+      : [product.price]
+  ).filter((cents) => cents > 0);
   const hasPriceRange =
-    variantPriceCents.length >= 2 &&
-    Math.min(...variantPriceCents) !== Math.max(...variantPriceCents);
+    pricedCents.length >= 2 &&
+    Math.min(...pricedCents) !== Math.max(...pricedCents);
 
-  const offers: Record<string, unknown> = hasPriceRange
-    ? {
-        "@type": "AggregateOffer",
-        lowPrice: (Math.min(...variantPriceCents) / 100).toFixed(2),
-        highPrice: (Math.max(...variantPriceCents) / 100).toFixed(2),
-        offerCount: variantPriceCents.length,
-        priceCurrency: SCHEMA_CURRENCY,
-        availability: getAvailability(product),
-        url: canonicalUrl,
+  let offers: Record<string, unknown> | null = null;
+  if (pricedCents.length > 0) {
+    offers = hasPriceRange
+      ? {
+          "@type": "AggregateOffer",
+          lowPrice: (Math.min(...pricedCents) / 100).toFixed(2),
+          highPrice: (Math.max(...pricedCents) / 100).toFixed(2),
+          offerCount: pricedCents.length,
+          priceCurrency: SCHEMA_CURRENCY,
+          availability: getAvailability(product),
+          url: canonicalUrl,
+        }
+      : {
+          "@type": "Offer",
+          price: ((pricedCents[0] ?? 0) / 100).toFixed(2),
+          priceCurrency: SCHEMA_CURRENCY,
+          availability: getAvailability(product),
+          url: canonicalUrl,
+        };
+
+    if (options.merchant) {
+      const { shipping, returns, returnPolicyUrl } = options.merchant;
+      const shippingDetails = buildShippingDetails(shipping, {
+        priceCents: Math.min(...pricedCents),
+        weightLb: productWeightLb(
+          product,
+          shipping.shippingDefaultItemWeightLb,
+        ),
+      });
+      if (shippingDetails.length > 0) {
+        offers.shippingDetails =
+          shippingDetails.length === 1 ? shippingDetails[0] : shippingDetails;
       }
-    : {
-        "@type": "Offer",
-        price: (effectivePriceCents / 100).toFixed(2),
-        priceCurrency: SCHEMA_CURRENCY,
-        availability: getAvailability(product),
-        url: canonicalUrl,
-      };
-
-  if (options.merchant) {
-    const { shipping, returns, returnPolicyUrl } = options.merchant;
-    const shippingDetails = buildShippingDetails(shipping, {
-      priceCents: hasPriceRange
-        ? Math.min(...variantPriceCents)
-        : effectivePriceCents,
-      weightLb: productWeightLb(product, shipping.shippingDefaultItemWeightLb),
-    });
-    if (shippingDetails.length > 0) {
-      offers.shippingDetails =
-        shippingDetails.length === 1 ? shippingDetails[0] : shippingDetails;
-    }
-    const returnPolicy = buildMerchantReturnPolicy(returns, {
-      returnPolicyUrl,
-    });
-    if (returnPolicy) {
-      offers.hasMerchantReturnPolicy = returnPolicy;
+      const returnPolicy = buildMerchantReturnPolicy(returns, {
+        returnPolicyUrl,
+      });
+      if (returnPolicy) {
+        offers.hasMerchantReturnPolicy = returnPolicy;
+      }
     }
   }
 
@@ -420,7 +421,7 @@ export function buildProductSchema(
       "@type": "Brand",
       name: business.name,
     },
-    offers,
+    ...(offers ? { offers } : {}),
   };
 
   // Imported descriptions can carry HTML / literal "\n" escapes — JSON-LD
@@ -476,6 +477,12 @@ export function buildProductSchema(
       ...(r.title ? { name: r.title } : {}),
       reviewBody: r.comment,
     }));
+  }
+
+  // Google's Product snippet needs offers, review or aggregateRating — a
+  // priceless product with none of them has nothing valid to say.
+  if (!schema.offers && !schema.aggregateRating && !schema.review) {
+    return null;
   }
 
   return schema;

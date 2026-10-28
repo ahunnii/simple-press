@@ -208,7 +208,7 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Luxuriously soft, tree-free happy-bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it.",
+      "Luxuriously soft, tree-free bamboo paper products crafted in Detroit. Because what you bring into your home should be as thoughtful as the life you build in it.",
     placeholder: "Luxuriously soft, tree-free paper products crafted...",
   },
   {
@@ -288,6 +288,17 @@ const homepageAboutTeaserData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "happy-bamboo.homepage-about-video-poster-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-full",
+    defaultValue: "Video preview image",
+  },
+  {
     key: "happy-bamboo.homepage-about-image",
     label: "Second image",
     description: "Second photo, shown below the video or poster image.",
@@ -295,6 +306,17 @@ const homepageAboutTeaserData: TemplateField[] = [
     page: "homepage",
     group: "homepage.aboutTeaser",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.homepage-about-image-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.aboutTeaser",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper products",
   },
   {
     key: "happy-bamboo.homepage-about-button-text",
@@ -347,7 +369,7 @@ const homepageFeaturedData: TemplateField[] = [
     page: "homepage",
     group: "homepage.featured",
     defaultValue:
-      "Every product is 100% happy-bamboo, tree-free, and crafted to the highest standard. No compromises.",
+      "Every product is 100% bamboo, tree-free, and crafted to the highest standard. No compromises.",
     placeholder: "Every product is 100% bamboo, tree-free...",
   },
   {
@@ -545,6 +567,17 @@ const aboutHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
+  {
+    key: "happy-bamboo.about-hero-image-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper products",
+  },
 ];
 
 const aboutMissionData: TemplateField[] = [
@@ -727,6 +760,17 @@ const aboutBambooData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "happy-bamboo.about-bamboo-image-1-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.bamboo",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper product",
+  },
+  {
     key: "happy-bamboo.about-bamboo-image-2",
     label: "Second photo",
     description: "Smaller photo, top of the pair below the main photo.",
@@ -737,6 +781,17 @@ const aboutBambooData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "happy-bamboo.about-bamboo-image-2-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.bamboo",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper product",
+  },
+  {
     key: "happy-bamboo.about-bamboo-image-3",
     label: "Third photo",
     description: "Smaller photo, bottom of the pair below the main photo.",
@@ -745,6 +800,17 @@ const aboutBambooData: TemplateField[] = [
     group: "about.bamboo",
     gridColumn: "col-span-1",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.about-bamboo-image-3-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.bamboo",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper product",
   },
 ];
 
@@ -759,6 +825,17 @@ const aboutCTAData: TemplateField[] = [
     group: "about.cta",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.about-cta-image-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo forest",
   },
 ];
 
@@ -926,6 +1003,17 @@ const contactPageData: TemplateField[] = [
     group: "contact.info",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.contact-image-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "contact",
+    group: "contact.info",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper products",
   },
 ];
 
@@ -1121,6 +1209,17 @@ const blogListingData: TemplateField[] = [
     group: "blog.listing",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "happy-bamboo.blog-listing-image-alt",
+    label: "Image alt text",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "blog",
+    group: "blog.listing",
+    gridColumn: "col-span-full",
+    defaultValue: "Bamboo paper products",
   },
 ];
 

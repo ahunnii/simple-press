@@ -63,7 +63,11 @@ export function ProductDetailsAdditionalInfoTabs({
       </TabsList>
       <TabsContent
         value="description"
-        className={cn(styleProps?.tabsContentClassName)}
+        forceMount
+        className={cn(
+          "data-[state=inactive]:hidden",
+          styleProps?.tabsContentClassName,
+        )}
       >
         {includeCard && (
           <Card>
@@ -86,7 +90,11 @@ export function ProductDetailsAdditionalInfoTabs({
           </p>
         )}
       </TabsContent>
-      <TabsContent value="additional">
+      <TabsContent
+        value="additional"
+        forceMount
+        className="data-[state=inactive]:hidden"
+      >
         {includeCard && (
           <Card>
             <CardHeader>

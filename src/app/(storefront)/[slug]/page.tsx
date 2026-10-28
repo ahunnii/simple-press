@@ -2,12 +2,14 @@ import type { JSONContent } from "@tiptap/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { extractTiptapLikeText } from "~/lib/blog-search";
 import {
   buildPageMetadata,
   firstNonBlank,
   getCachedBusiness,
   preferNonBlank,
 } from "~/lib/seo";
+import { deriveDescription } from "~/lib/seo/derive-description";
 import {
   buildBreadcrumbSchema,
   buildWebPageSchema,
@@ -93,11 +95,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Page Not Found" };
   }
 
+  // Policies have no meta-description or excerpt field in admin, so without a
+  // derived description every policy inherits the store's homepage text.
+  // Derive one from the body only when the owner has set neither field.
+  const description =
+    page.type === "policy" &&
+    firstNonBlank(page.metaDescription, page.excerpt) === undefined
+      ? deriveDescription(extractTiptapLikeText(page.content)) || page.excerpt
+      : page.excerpt;
+
   return buildPageMetadata({
     business,
     path: `/${slug}`,
     title: page.title,
-    description: page.excerpt,
+    description,
     keywords: page.metaKeywords,
     entity: {
       title: page.metaTitle,

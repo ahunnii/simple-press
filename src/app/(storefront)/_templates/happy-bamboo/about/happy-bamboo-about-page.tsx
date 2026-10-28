@@ -3,6 +3,7 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import {
   fieldAttr,
   listItemAttr,
@@ -44,6 +45,7 @@ export function HappyBambooAboutPage({
     "happy-bamboo.about-hero-small-label",
     "happy-bamboo.about-hero-heading",
     "happy-bamboo.about-hero-image",
+    "happy-bamboo.about-hero-image-alt",
     "happy-bamboo.about-hero-mission-heading",
     "happy-bamboo.about-hero-mission",
     "happy-bamboo.about-hero-vision-heading",
@@ -59,10 +61,14 @@ export function HappyBambooAboutPage({
     "happy-bamboo.about-bamboo-tagline",
     "happy-bamboo.about-bamboo-description",
     "happy-bamboo.about-bamboo-image-1",
+    "happy-bamboo.about-bamboo-image-1-alt",
     "happy-bamboo.about-bamboo-image-2",
+    "happy-bamboo.about-bamboo-image-2-alt",
     "happy-bamboo.about-bamboo-image-3",
+    "happy-bamboo.about-bamboo-image-3-alt",
 
     "happy-bamboo.about-cta-image",
+    "happy-bamboo.about-cta-image-alt",
 
     "happy-bamboo.about-connect-with-us-small-label",
     "happy-bamboo.about-connect-with-us-heading",
@@ -180,7 +186,10 @@ export function HappyBambooAboutPage({
                   // resolves to `""`, never `null`/`undefined`.
                   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   src={f["happy-bamboo.about-hero-image"] || "/placeholder.svg"}
-                  alt="About page hero"
+                  alt={
+                    meaningfulAltText(f["happy-bamboo.about-hero-image-alt"]) ??
+                    "About page hero"
+                  }
                   fill
                   className="object-cover"
                   priority
@@ -380,7 +389,11 @@ export function HappyBambooAboutPage({
                         f["happy-bamboo.about-bamboo-image-1"] ||
                         "/placeholder.svg"
                       }
-                      alt="Premium bamboo toilet paper"
+                      alt={
+                        meaningfulAltText(
+                          f["happy-bamboo.about-bamboo-image-1-alt"],
+                        ) ?? "Bamboo paper product"
+                      }
                       fill
                       className="object-cover"
                     />
@@ -393,7 +406,11 @@ export function HappyBambooAboutPage({
                           f["happy-bamboo.about-bamboo-image-2"] ||
                           "/placeholder.svg"
                         }
-                        alt="Mega rolls bamboo toilet paper"
+                        alt={
+                          meaningfulAltText(
+                            f["happy-bamboo.about-bamboo-image-2-alt"],
+                          ) ?? "Bamboo paper product"
+                        }
                         fill
                         className="object-cover"
                       />
@@ -405,7 +422,11 @@ export function HappyBambooAboutPage({
                           f["happy-bamboo.about-bamboo-image-3"] ||
                           "/placeholder.svg"
                         }
-                        alt="Trial pack bamboo toilet paper"
+                        alt={
+                          meaningfulAltText(
+                            f["happy-bamboo.about-bamboo-image-3-alt"],
+                          ) ?? "Bamboo paper product"
+                        }
                         fill
                         className="object-cover"
                       />
@@ -429,8 +450,13 @@ export function HappyBambooAboutPage({
             className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
           >
             <Image
-              src={f["happy-bamboo.about-cta-image"] ?? "/placeholder.svg"}
-              alt="Bamboo forest"
+              // `||` (not `??`): a cleared image field resolves to `""`.
+              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+              src={f["happy-bamboo.about-cta-image"] || "/placeholder.svg"}
+              alt={
+                meaningfulAltText(f["happy-bamboo.about-cta-image-alt"]) ??
+                "Bamboo forest"
+              }
               fill
               className="object-cover object-bottom"
             />
