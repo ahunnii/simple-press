@@ -26,6 +26,8 @@ import { parsePageMeta, STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
 export const LLMS_PRODUCT_CAP = 50;
 export const LLMS_EVENT_CAP = 20;
 export const LLMS_FAQ_CAP = 30;
+export const LLMS_SERVICE_CAP = 50;
+export const LLMS_PAGE_CAP = 50;
 const LLMS_FAQ_ANSWER_MAX = 1200;
 const LLMS_BLURB_MAX = 200;
 
@@ -46,6 +48,23 @@ export interface LlmsEvent {
   allDay: boolean;
   location?: string | null;
   blurb?: string | null;
+}
+
+export interface LlmsService {
+  name: string;
+  slug: string;
+  /** SEO description; wins over `description` when non-blank. */
+  metaDescription?: string | null;
+  description?: string | null;
+}
+
+/** A published custom CMS page (not a blog post or policy). */
+export interface LlmsPage {
+  title: string;
+  slug: string;
+  /** SEO description; wins over `excerpt` when non-blank. */
+  metaDescription?: string | null;
+  excerpt?: string | null;
 }
 
 export interface LlmsFaq {
@@ -75,6 +94,10 @@ export interface LlmsTxtInput {
   /** Upcoming only (published, not archived, not over). */
   events: LlmsEvent[];
   faqs: LlmsFaq[];
+  /** Published services, in display order; listed when the `services` flag is on. */
+  services?: LlmsService[];
+  /** Published custom pages, in display order (no flag governs these). */
+  pages?: LlmsPage[];
   counts?: {
     collections?: number;
     blogPosts?: number;
@@ -160,6 +183,8 @@ export function buildLlmsTxt(input: LlmsTxtInput): string {
 
   const products = input.products.slice(0, LLMS_PRODUCT_CAP);
   const events = input.events.slice(0, LLMS_EVENT_CAP);
+  const services = (input.services ?? []).slice(0, LLMS_SERVICE_CAP);
+  const cmsPages = (input.pages ?? []).slice(0, LLMS_PAGE_CAP);
   const faqs = input.faqs.filter(
     (f) => oneLine(f.question).length > 0 && oneLine(f.answer).length > 0,
   );
@@ -170,7 +195,7 @@ export function buildLlmsTxt(input: LlmsTxtInput): string {
     collections: (counts.collections ?? 0) > 0,
     blog: (counts.blogPosts ?? 0) > 0,
     testimonials: (counts.testimonials ?? 0) > 0,
-    services: (counts.services ?? 0) > 0,
+    services: (input.services?.length ?? 0) > 0 || (counts.services ?? 0) > 0,
     videos: (counts.videos ?? 0) > 0,
     events: input.events.length > 0,
     faq: faqs.length > 0,
@@ -210,6 +235,21 @@ export function buildLlmsTxt(input: LlmsTxtInput): string {
   }
   lines.push("", "## Pages", ...pageLines);
 
+  // ─── Services ─────────────────────────────────────────────────────────────
+
+  if (isSeoRouteEnabled(isEnabled, "services") && services.length > 0) {
+    lines.push("", "## Services");
+    for (const svc of services) {
+      const blurb = toMetaDescription(
+        firstNonBlank(svc.metaDescription, svc.description),
+        LLMS_BLURB_MAX,
+      );
+      lines.push(
+        link(svc.name, `${baseUrl}${SEO_PATHS.service(svc.slug)}`, blurb),
+      );
+    }
+  }
+
   // ─── Products ─────────────────────────────────────────────────────────────
 
   if (isSeoRouteEnabled(isEnabled, "shop") && products.length > 0) {
@@ -233,6 +273,21 @@ export function buildLlmsTxt(input: LlmsTxtInput): string {
       const head = where ? `${when}, ${where}` : when;
       const note = blurb ? `${head} — ${blurb}` : head;
       lines.push(link(e.name, `${baseUrl}${SEO_PATHS.event(e.slug)}`, note));
+    }
+  }
+
+  // ─── Custom pages ─────────────────────────────────────────────────────────
+
+  if (cmsPages.length > 0) {
+    lines.push("", "## More pages");
+    for (const pg of cmsPages) {
+      const blurb = toMetaDescription(
+        firstNonBlank(pg.metaDescription, pg.excerpt),
+        LLMS_BLURB_MAX,
+      );
+      lines.push(
+        link(pg.title, `${baseUrl}${SEO_PATHS.cmsPage(pg.slug)}`, blurb),
+      );
     }
   }
 

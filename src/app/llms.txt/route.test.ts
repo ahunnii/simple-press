@@ -13,6 +13,8 @@ let mockBusiness: BusinessRow = null;
 
 const findFirst = vi.fn(async () => mockBusiness);
 const emptyList = vi.fn(async () => []);
+let mockServices: unknown[] = [];
+let mockPages: unknown[] = [];
 const zero = vi.fn(async () => 0);
 
 vi.mock("~/server/db", () => ({
@@ -29,9 +31,9 @@ vi.mock("~/server/db", () => ({
       ]),
     },
     collection: { count: () => zero() },
-    page: { count: () => zero() },
+    page: { count: () => zero(), findMany: async () => mockPages },
     testimonial: { count: () => zero() },
-    service: { count: () => zero() },
+    service: { findMany: async () => mockServices },
     video: { count: () => zero() },
   },
 }));
@@ -71,6 +73,8 @@ function business(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   mockBusiness = business();
+  mockServices = [];
+  mockPages = [];
 });
 
 describe("GET /llms.txt", () => {
@@ -86,6 +90,37 @@ describe("GET /llms.txt", () => {
     expect(body).toContain("- Location: Ann Arbor, MI");
     expect(body).toContain("https://demo.example.com/about");
     expect(body).toContain("### Do you ship?");
+  });
+
+  it("lists published services and custom pages, dropping slugs a built-in route shadows", async () => {
+    mockBusiness = business({ featureFlags: { services: true } });
+    mockServices = [
+      {
+        name: "Balloons",
+        slug: "balloons",
+        metaDescription: "Garlands and arches.",
+        description: null,
+      },
+    ];
+    mockPages = [
+      {
+        title: "Gallery",
+        slug: "gallery",
+        type: "page",
+        metaDescription: null,
+        excerpt: "Our recent work.",
+      },
+      // Shadowed by the built-in /shop route, so unreachable.
+      { title: "Shop", slug: "shop", type: "page" },
+    ];
+    const body = await (await GET()).text();
+    expect(body).toContain(
+      "- [Balloons](https://demo.example.com/services/balloons): Garlands and arches.",
+    );
+    expect(body).toContain(
+      "- [Gallery](https://demo.example.com/gallery): Our recent work.",
+    );
+    expect(body).not.toContain("[Shop](");
   });
 
   it("404s when no business matches the host", async () => {

@@ -100,7 +100,10 @@ function makeDb(businesses: BusinessRow[]) {
       count: vi.fn().mockResolvedValue(0),
       findFirst: vi.fn().mockResolvedValue(null),
     },
-    testimonial: { findFirst: vi.fn().mockResolvedValue(null) },
+    testimonial: {
+      count: vi.fn().mockResolvedValue(0),
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
     video: {
       count: vi.fn().mockResolvedValue(0),
       findFirst: vi.fn().mockResolvedValue(null),

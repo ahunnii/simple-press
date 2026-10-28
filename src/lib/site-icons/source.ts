@@ -29,6 +29,15 @@ export function resolveIconSources(siteContent: IconSiteContent): string[] {
   return sources;
 }
 
+/**
+ * The store logo (storage URLs only, same SSRF guard as the icon sources) —
+ * the source image of the generated share card at `/og-fallback.png`.
+ */
+export function resolveLogoSource(siteContent: IconSiteContent): string | null {
+  const url = siteContent?.logoUrl?.trim();
+  return url && isStorageUrl(url) ? url : null;
+}
+
 /** The preferred icon source, or null when the store falls back to SimplePress. */
 export function resolveIconSource(siteContent: IconSiteContent): string | null {
   return resolveIconSources(siteContent)[0] ?? null;

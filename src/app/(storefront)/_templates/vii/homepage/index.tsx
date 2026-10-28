@@ -24,9 +24,20 @@ const homepageHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "vii.homepage.hero-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+  },
+  {
     key: "vii.homepage.hero-overline",
     label: "Small label",
-    description: "Small italic label shown above the hero text. Leave blank to hide.",
+    description:
+      "Small italic label shown above the hero text. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -47,7 +58,8 @@ const homepageHeroData: TemplateField[] = [
   {
     key: "vii.homepage.hero-cta-text",
     label: "Button text",
-    description: "Text for the primary button in the hero. Leave blank to hide it.",
+    description:
+      "Text for the primary button in the hero. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -194,10 +206,19 @@ const homepageVideoData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "vii.homepage.video-poster-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the poster photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-full",
+  },
+  {
     key: "vii.homepage.video-cta-text",
     label: "Link text",
-    description:
-      "Optional link below the body text. Leave blank to hide it.",
+    description: "Optional link below the body text. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "homepage.video",
@@ -237,6 +258,16 @@ const homepageBandData: TemplateField[] = [
     description:
       "Full-width photo break between the video and product sections. A thin divider shows in its place when left blank.",
     type: "image",
+    page: "homepage",
+    group: "homepage.band",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.band-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "homepage",
     group: "homepage.band",
     gridColumn: "col-span-full",
@@ -324,9 +355,18 @@ const homepageTestimonialData: TemplateField[] = [
   {
     key: "vii.homepage.testimonial-image",
     label: "Background photo",
-    description:
-      "Optional photo blended behind the testimonial quote below.",
+    description: "Optional photo blended behind the testimonial quote below.",
     type: "image",
+    page: "homepage",
+    group: "homepage.testimonial",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.testimonial-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "homepage",
     group: "homepage.testimonial",
     gridColumn: "col-span-full",
@@ -459,6 +499,16 @@ const homepageContactData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "vii.homepage.contact-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-full",
+  },
+  {
     key: "vii.homepage.contact-heading",
     label: "Heading",
     description: "Large heading for this closing contact section.",
@@ -552,7 +602,8 @@ const homepageInstagramData: TemplateField[] = [
   {
     key: "vii.homepage.instagram-gallery",
     label: "Photos",
-    description: "Photos shown in the gallery strip at the bottom of the homepage.",
+    description:
+      "Photos shown in the gallery strip at the bottom of the homepage.",
     type: "gallery",
     page: "homepage",
     group: "homepage.instagram",
@@ -611,6 +662,16 @@ const homepageDetroitData: TemplateField[] = [
     description:
       "A meaningful local photo — your storefront, the neighborhood, or the city. Shows your city name in its place when left blank. Portrait orientation works best.",
     type: "image",
+    page: "homepage",
+    group: "homepage.detroit",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.detroit-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "homepage",
     group: "homepage.detroit",
     gridColumn: "col-span-full",
@@ -690,7 +751,8 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.categories",
     title: "Categories",
-    description: "Small label, heading, and tiles linking to your services or shop",
+    description:
+      "Small label, heading, and tiles linking to your services or shop",
     icon: "🧴",
     columns: 2,
   },
@@ -705,7 +767,8 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.band",
     title: "Photo banner",
-    description: "Optional full-width photo break between the video and product sections",
+    description:
+      "Optional full-width photo break between the video and product sections",
     icon: "🖼️",
     columns: 1,
   },
@@ -751,8 +814,7 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.contact",
     title: "Contact",
-    description:
-      "Closing section with heading, body text, phone, and email",
+    description: "Closing section with heading, body text, phone, and email",
     icon: "📞",
     columns: 2,
   },

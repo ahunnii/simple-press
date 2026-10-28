@@ -46,7 +46,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     service.serviceTemplateId,
   );
 
-  const serviceSchema = buildServiceSchema(service, business);
+  const serviceSchema = buildServiceSchema(service, business, service.items);
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },

@@ -5,11 +5,14 @@ import { businessHostFilter } from "~/lib/domain-utils";
 import { upcomingEventWhere } from "~/lib/events/query";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getEffectivePrice } from "~/lib/prices";
+import { isReservedPageSlug } from "~/lib/reserved-page-slugs";
 import {
   buildLlmsTxt,
   LLMS_EVENT_CAP,
   LLMS_FAQ_CAP,
+  LLMS_PAGE_CAP,
   LLMS_PRODUCT_CAP,
+  LLMS_SERVICE_CAP,
 } from "~/lib/seo/llms-txt";
 import { db } from "~/server/db";
 
@@ -78,6 +81,7 @@ export async function GET() {
     testimonials,
     services,
     videos,
+    cmsPages,
   ] = await Promise.all([
     isEnabled("products")
       ? db.product.findMany({
@@ -134,11 +138,41 @@ export async function GET() {
         })
       : Promise.resolve(0),
     isEnabled("services")
-      ? db.service.count({ where: { businessId, published: true } })
-      : Promise.resolve(0),
+      ? db.service.findMany({
+          where: { businessId, published: true },
+          orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+          take: LLMS_SERVICE_CAP,
+          select: {
+            name: true,
+            slug: true,
+            metaDescription: true,
+            description: true,
+          },
+        })
+      : Promise.resolve([]),
     isEnabled("videos")
       ? db.video.count({ where: { businessId, published: true } })
       : Promise.resolve(0),
+    // Custom CMS pages only — blog posts are summarised by count and policies
+    // are boilerplate. No feature flag governs these (same as the sitemap).
+    // Over-fetch a little: slugs shadowed by a built-in route are dropped
+    // below, same as `loadSitemapRows`.
+    db.page.findMany({
+      where: {
+        businessId,
+        published: true,
+        type: { notIn: ["blog", "policy"] },
+      },
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+      take: LLMS_PAGE_CAP * 2,
+      select: {
+        title: true,
+        slug: true,
+        type: true,
+        metaDescription: true,
+        excerpt: true,
+      },
+    }),
   ]);
 
   const body = buildLlmsTxt({
@@ -162,7 +196,11 @@ export async function GET() {
     })),
     events,
     faqs,
-    counts: { collections, blogPosts, testimonials, services, videos },
+    services,
+    pages: cmsPages
+      .filter((p) => !isReservedPageSlug(p.slug, p.type))
+      .slice(0, LLMS_PAGE_CAP),
+    counts: { collections, blogPosts, testimonials, videos },
   });
 
   return new Response(body, {

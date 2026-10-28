@@ -108,7 +108,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
               {image ? (
                 <Image
                   src={image}
-                  alt=""
+                  alt={title.trim()}
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"

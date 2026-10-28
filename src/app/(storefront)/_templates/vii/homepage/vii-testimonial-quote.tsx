@@ -9,16 +9,20 @@ import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
   quoteImage?: string;
+  /** Description of `quoteImage`; blank keeps it decorative (`alt=""`). */
+  quoteImageAlt?: string;
   quoteText: string;
   quoteAuthor: string;
 };
 
 export function ViiTestimonialQuote({
   quoteImage,
+  quoteImageAlt,
   quoteText,
   quoteAuthor,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
+  const imageAlt = quoteImageAlt?.trim() ?? "";
 
   return (
     <section
@@ -39,11 +43,11 @@ export function ViiTestimonialQuote({
       {quoteImage && (
         <Image
           src={quoteImage}
-          alt=""
+          alt={imageAlt}
           fill
           sizes="100vw"
           style={{ objectFit: "cover", mixBlendMode: "overlay", opacity: 0.35 }}
-          aria-hidden="true"
+          aria-hidden={imageAlt ? undefined : "true"}
         />
       )}
 

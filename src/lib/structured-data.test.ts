@@ -6,6 +6,7 @@ import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildProductSchema,
+  buildServiceSchema,
   buildVideoObjectSchema,
   buildWebSiteSchema,
   parseEventPrice,
@@ -1380,5 +1381,116 @@ describe("buildProductSchema — coming-soon (price 0)", () => {
       availability: "https://schema.org/InStock",
       url: expect.any(String) as string,
     });
+  });
+});
+
+describe("buildServiceSchema — provider and areaServed", () => {
+  const baseUrl = buildWebSiteSchema(business).url as string;
+  const service = { name: "Balloons", slug: "balloons" };
+
+  it("carries the shared Organization @id plus a self-describing name/url", () => {
+    const schema = buildServiceSchema(service, business);
+    expect(schema.provider).toEqual({
+      "@type": "Organization",
+      "@id": buildOrganizationSchema(business)["@id"],
+      name: business.name,
+      url: baseUrl,
+    });
+    expect((schema.provider as { "@id": string })["@id"]).toBe(
+      `${baseUrl}/#organization`,
+    );
+    expect(schema.url).toBe(`${baseUrl}/services/balloons`);
+  });
+
+  it("emits normalized areaServed when the business lists areas", () => {
+    const schema = buildServiceSchema(service, {
+      ...business,
+      areaServed: [" Livonia ", "", "Metro Detroit", "livonia"],
+    });
+    expect(schema.areaServed).toEqual(["Livonia", "Metro Detroit"]);
+  });
+
+  it.each([
+    ["empty", []],
+    ["blank entries only", ["  ", ""]],
+    ["null", null],
+    ["undefined", undefined],
+  ])("omits areaServed when it is %s", (_label, areaServed) => {
+    const schema = buildServiceSchema(service, { ...business, areaServed });
+    expect(schema).not.toHaveProperty("areaServed");
+  });
+});
+
+describe("buildServiceSchema — hasOfferCatalog", () => {
+  const service = { name: "Facials", slug: "facials" };
+
+  it("emits one USD Offer per published item with a single-amount price", () => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Signature Facial", priceLabel: "$85" },
+      { name: "Deluxe Facial", priceLabel: " $1,130.5 " },
+      { name: "Draft Facial", priceLabel: "$60", published: false },
+    ]);
+    expect(schema.hasOfferCatalog).toEqual({
+      "@type": "OfferCatalog",
+      name: "Facials",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: "Signature Facial" },
+          price: "85.00",
+          priceCurrency: "USD",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: "Deluxe Facial" },
+          price: "1130.50",
+          priceCurrency: "USD",
+        },
+      ],
+    });
+  });
+
+  it.each([
+    ["a range", "$50-$75"],
+    ["a spaced range", "$50 - 75"],
+    ["an en-dash range", "$50–$75"],
+    ["a 'to' range", "$50 to $75"],
+    ["two choices", "$85 or $130"],
+    ["from pricing", "From $50"],
+    ["starting-at pricing", "Starting at $50"],
+    ["open-ended pricing", "$85+"],
+    ["free", "Free"],
+    ["free text", "Call for a quote"],
+    ["blank", "  "],
+    ["null", null],
+  ])("skips an item priced as %s", (_label, priceLabel) => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Facial", priceLabel },
+    ]);
+    expect(schema).not.toHaveProperty("hasOfferCatalog");
+  });
+
+  it("keeps parseable items when others are skipped", () => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Peel", priceLabel: "From $40" },
+      { name: "Facial", priceLabel: "$85 per session" },
+    ]);
+    const catalog = schema.hasOfferCatalog as {
+      itemListElement: { itemOffered: { name: string }; price: string }[];
+    };
+    expect(catalog.itemListElement).toHaveLength(1);
+    expect(catalog.itemListElement[0]).toMatchObject({
+      itemOffered: { name: "Facial" },
+      price: "85.00",
+    });
+  });
+
+  it.each([
+    ["undefined", undefined],
+    ["null", null],
+    ["empty", []],
+  ])("omits hasOfferCatalog when items are %s", (_label, items) => {
+    const schema = buildServiceSchema(service, business, items);
+    expect(schema).not.toHaveProperty("hasOfferCatalog");
   });
 });

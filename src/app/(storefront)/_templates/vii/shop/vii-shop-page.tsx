@@ -1,13 +1,14 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
+import { ViiH1 } from "../shared/vii-h1";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiReveal } from "../shared/vii-reveal";
 import { ViiShopClient } from "./vii-shop-client";
@@ -79,7 +80,7 @@ export async function ViiShopPage({
       body: f["vii.shop.promo-left-body"] ?? "",
       image: f["vii.shop.promo-left-image"] ?? "",
       buttonLabel: ctaFlagOk(promoLeftButtonLink)
-        ? f["vii.shop.promo-left-button-label"] ?? ""
+        ? (f["vii.shop.promo-left-button-label"] ?? "")
         : "",
       buttonLink: promoLeftButtonLink,
     },
@@ -90,7 +91,7 @@ export async function ViiShopPage({
       body: f["vii.shop.promo-right-body"] ?? "",
       image: f["vii.shop.promo-right-image"] ?? "",
       buttonLabel: ctaFlagOk(promoRightButtonLink)
-        ? f["vii.shop.promo-right-button-label"] ?? ""
+        ? (f["vii.shop.promo-right-button-label"] ?? "")
         : "",
       buttonLink: promoRightButtonLink,
     },
@@ -134,8 +135,9 @@ export async function ViiShopPage({
               {overline}
             </ViiOverline>
           )}
-          <h1
+          <ViiH1
             id="vii-shop-heading"
+            fallback="Shop"
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
@@ -147,7 +149,7 @@ export async function ViiShopPage({
           >
             {heading}
             {heading && accent ? " " : ""}
-            {accent && (
+            {accent.trim() && (
               <em
                 {...fieldAttr("vii.shop.intro-accent")}
                 style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
@@ -155,7 +157,7 @@ export async function ViiShopPage({
                 {accent}
               </em>
             )}
-          </h1>
+          </ViiH1>
           {f["vii.shop.intro-body"] && (
             <p
               {...fieldAttr("vii.shop.intro-body")}

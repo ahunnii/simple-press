@@ -50,6 +50,31 @@ export async function fetchIconSource(url: string): Promise<Buffer> {
 }
 
 /**
+ * Unwrap an ICO to its largest PNG and pick an SVG raster density so the long
+ * edge lands at (or above) `targetPx` instead of being upscaled blurry (SVGs
+ * rasterise at 72dpi by default).
+ */
+async function prepareSource(
+  input: Buffer,
+  targetPx: number,
+): Promise<{ buf: Buffer; density: number | undefined }> {
+  let buf = input;
+  if (isIco(buf)) {
+    const png = readIcoLargestPng(buf);
+    if (!png) throw new Error("ICO has no PNG entries");
+    buf = png;
+  }
+
+  const meta = await sharp(buf, { animated: false }).metadata();
+  let density: number | undefined;
+  if (meta.format === "svg" && meta.width && meta.height) {
+    const scale = targetPx / Math.max(meta.width, meta.height);
+    density = Math.min(2400, Math.max(72, Math.ceil(72 * scale)));
+  }
+  return { buf, density };
+}
+
+/**
  * Render a square `size`×`size` PNG from any image sharp can read (PNG, JPEG,
  * WebP, AVIF, GIF first frame, SVG) or a PNG-bearing ICO. The image is fitted
  * inside `size·(1-2·paddingPct)` and centred on `background`; an opaque
@@ -63,21 +88,7 @@ export async function renderIconPng(
     paddingPct = 0,
   }: { background?: IconBackground; paddingPct?: number } = {},
 ): Promise<Buffer> {
-  let buf = input;
-  if (isIco(buf)) {
-    const png = readIcoLargestPng(buf);
-    if (!png) throw new Error("ICO has no PNG entries");
-    buf = png;
-  }
-
-  // SVGs rasterise at 72dpi by default — raise the density so the long edge
-  // lands at (or above) the target size instead of being upscaled blurry.
-  const meta = await sharp(buf, { animated: false }).metadata();
-  let density: number | undefined;
-  if (meta.format === "svg" && meta.width && meta.height) {
-    const scale = size / Math.max(meta.width, meta.height);
-    density = Math.min(2400, Math.max(72, Math.ceil(72 * scale)));
-  }
+  const { buf, density } = await prepareSource(input, size);
 
   const inner = Math.max(1, Math.round(size * (1 - 2 * paddingPct)));
   const pad = size - inner;
@@ -120,4 +131,68 @@ export async function renderIconVariant(
     return buildIco(pngs);
   }
   return renderIconPng(input, variant.sizes[0]!, opts);
+}
+
+export const OG_CARD_WIDTH = 1200;
+export const OG_CARD_HEIGHT = 630;
+// The logo is fitted inside 70% × 62% of the card: ~180px of air left and right
+// and ~120px above and below a square logo, which survives the crops
+// link-preview UIs apply.
+const OG_LOGO_MAX_W = Math.round(OG_CARD_WIDTH * 0.7);
+const OG_LOGO_MAX_H = Math.round(OG_CARD_HEIGHT * 0.62);
+const WHITE: IconBackground = { r: 255, g: 255, b: 255, alpha: 1 };
+
+/**
+ * The background a logo was designed on: its own top-left pixel when that is
+ * fully opaque (a JPEG/PNG logo exported on a cream or navy square), else
+ * white (transparent PNG/WebP/AVIF/SVG logos, which assume a light page).
+ */
+async function ogBackground(
+  buf: Buffer,
+  density: number | undefined,
+): Promise<IconBackground> {
+  const { data } = await sharp(buf, { animated: false, density })
+    .ensureAlpha()
+    .extract({ left: 0, top: 0, width: 1, height: 1 })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const [r, g, b, a] = data;
+  if (r === undefined || g === undefined || b === undefined || a !== 255) {
+    return WHITE;
+  }
+  return { r, g, b, alpha: 1 };
+}
+
+/**
+ * The share-card fallback for stores with no `og:image`: a 1200×630 PNG with
+ * the logo contain-fitted and centred with generous padding. Accepts anything
+ * sharp reads (PNG, JPEG, WebP, AVIF, GIF first frame, SVG, PNG-bearing ICO) —
+ * the point is turning formats Facebook/iMessage/LinkedIn can't show (AVIF,
+ * SVG) into one they can.
+ */
+export async function renderOgFallbackCard(input: Buffer): Promise<Buffer> {
+  const { buf, density } = await prepareSource(input, OG_LOGO_MAX_W);
+  const background = await ogBackground(buf, density);
+
+  const logo = await sharp(buf, { animated: false, density })
+    .resize(OG_LOGO_MAX_W, OG_LOGO_MAX_H, {
+      fit: "inside",
+      // Logos are often a few hundred px; upscaling beats a postage stamp.
+      withoutEnlargement: false,
+    })
+    .png()
+    .toBuffer();
+
+  return sharp({
+    create: {
+      width: OG_CARD_WIDTH,
+      height: OG_CARD_HEIGHT,
+      channels: 4,
+      background,
+    },
+  })
+    .composite([{ input: logo, gravity: "centre" }])
+    .flatten({ background })
+    .png()
+    .toBuffer();
 }

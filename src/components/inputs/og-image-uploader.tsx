@@ -5,6 +5,7 @@ import { ChevronDown, Images, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { prepareImageForUpload } from "~/lib/image-prep";
+import { isAvifUrl } from "~/lib/image-url";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -24,6 +25,13 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const SPINNER_CLASS =
   "border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2";
+
+const AVIF_MESSAGE =
+  "Use JPG or PNG; some apps (Facebook, iMessage, LinkedIn) can't show AVIF previews.";
+
+function isAvifFile(file: File): boolean {
+  return file.type === "image/avif" || isAvifUrl(file.name);
+}
 
 function isImageFile(file: File): boolean {
   return (
@@ -71,6 +79,10 @@ export function OgImageUploader({
     if (isPreparingRef.current) return;
     if (!isImageFile(f)) {
       toast.error(`Skipped "${f.name}": not an image`);
+      return;
+    }
+    if (isAvifFile(f)) {
+      toast.error(`Skipped "${f.name}": ${AVIF_MESSAGE}`);
       return;
     }
     isPreparingRef.current = true;
@@ -229,7 +241,13 @@ export function OgImageUploader({
           kind="image"
           open={pickerOpen}
           onOpenChange={setPickerOpen}
-          onSelect={onLibrarySelect}
+          onSelect={(url) => {
+            if (isAvifUrl(url)) {
+              toast.error(`That image is an AVIF. ${AVIF_MESSAGE}`);
+              return;
+            }
+            onLibrarySelect(url);
+          }}
         />
       ) : null}
     </div>

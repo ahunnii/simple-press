@@ -44,6 +44,8 @@ type HeroField = {
 type DreamHomepageHeroProps = {
   logoUrl: string;
   logoAlt: string;
+  /** Business name — the sr-only h1 when the owner clears the visible headline. */
+  businessName: string;
   fields: HeroField;
 };
 
@@ -92,6 +94,7 @@ const MIN_LOOP_FRAMES = 8;
 export function DreamHomepageHero({
   logoUrl,
   logoAlt,
+  businessName,
   fields: f,
 }: DreamHomepageHeroProps) {
   const owned = f.shelf;
@@ -152,6 +155,7 @@ export function DreamHomepageHero({
           accentFieldKey="dream.homepage.hero-accent"
           after={f.headingAfter}
           afterFieldKey="dream.homepage.hero-heading-after"
+          fallback={businessName}
         >
           {f.heading}
         </DreamH1>

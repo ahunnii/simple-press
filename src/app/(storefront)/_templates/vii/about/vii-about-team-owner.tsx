@@ -15,6 +15,8 @@ type Props = {
   role: string;
   body: string;
   ownerImage?: string;
+  /** Fallback for the portrait's alt text when the heading has no accent name. */
+  businessName?: string;
 };
 
 export function ViiAboutTeamOwner({
@@ -24,10 +26,13 @@ export function ViiAboutTeamOwner({
   role,
   body,
   ownerImage,
+  businessName,
 }: Props) {
   const { ref: textRef, visible: textVisible } = useViiReveal(0.1);
   const { ref: imgRef, visible: imgVisible } = useViiReveal(0.1);
-  const ownerName = `${heading} ${headingAccent}`.trim();
+  // The accent is the owner's name ("Meet <em>Sevyn</em>"); the heading is
+  // just the lead-in word, so it never joins the alt text.
+  const ownerName = headingAccent.trim() || businessName?.trim() || "";
 
   return (
     <section
@@ -132,7 +137,11 @@ export function ViiAboutTeamOwner({
           {ownerImage?.trim() ? (
             <Image
               src={ownerImage}
-              alt={ownerName ? `Portrait of ${ownerName}` : ""}
+              alt={
+                ownerName
+                  ? `Portrait of ${ownerName}`
+                  : "Portrait of the founder"
+              }
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               style={{ objectFit: "cover" }}

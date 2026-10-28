@@ -25,6 +25,8 @@ type Props = {
   body: string;
   videoSrc?: string;
   posterSrc?: string;
+  /** Description of `posterSrc`; blank keeps it decorative (`alt=""`). */
+  posterAlt?: string;
   ctaText: string;
   ctaHref: string;
   aspectRatio?: string;
@@ -37,6 +39,7 @@ export function ViiVideoFeature({
   body,
   videoSrc,
   posterSrc,
+  posterAlt,
   ctaText,
   ctaHref,
   aspectRatio,
@@ -208,7 +211,7 @@ export function ViiVideoFeature({
               {hasPoster && (
                 <Image
                   src={posterSrc!}
-                  alt=""
+                  alt={posterAlt?.trim() ?? ""}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: "cover" }}

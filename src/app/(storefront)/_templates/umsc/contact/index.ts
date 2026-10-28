@@ -3,6 +3,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
 import { umscHeroPhotoFields } from "../shared/umsc-hero-fields";
+import { UMSC_FULFILLMENT_LINE_DEFAULT } from "./umsc-fulfillment-line";
 
 // design.md "Per-page section concepts › Contact": hero (not hideable) →
 // form + sticky aside (not hideable — gated on the contactForm flag inside
@@ -139,12 +140,13 @@ const contactFormData: TemplateField[] = [
   {
     key: "umsc.contact.expect-line-3",
     label: "What to expect line 3",
-    description: "Third short line in the aside. Leave blank to hide it.",
+    description:
+      'Third short line in the aside. While it still reads "Local pickup and shipping are both available.", the page shows a sentence built from your Shipping settings (pickup, local delivery, shipping) instead. Type your own text to override it. Leave blank to hide it.',
     type: "text",
     page: "contact",
     group: "contact.form",
     gridColumn: "col-span-full",
-    defaultValue: "Local pickup and shipping are both available.",
+    defaultValue: UMSC_FULFILLMENT_LINE_DEFAULT,
   },
 ];
 
@@ -195,6 +197,13 @@ const contactStoresData: TemplateField[] = [
         type: "image",
         description: "The shop's storefront, or a shelf with your pieces.",
         placeholder: "/placeholder.svg",
+      },
+      {
+        key: "alt",
+        label: "Image alt text",
+        type: "text",
+        description:
+          "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
       },
       {
         key: "name",

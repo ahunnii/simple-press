@@ -21389,6 +21389,12 @@ body:has(.olive) [data-slot="dialog-content"] [data-slot="dialog-close"] {
 }
 
 .dream .dream-balloon-studio .dbs-stage-name {
+  /* A <p>, so it restates the display-heading base rule (@layer base, h1–h3). */
+  font-family: var(--font-dream-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--dream-ink);
   font-size: clamp(30px, 3vw, 40px);
   line-height: 1.05;
 }

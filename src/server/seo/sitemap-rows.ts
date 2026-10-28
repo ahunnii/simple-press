@@ -28,6 +28,7 @@ export async function loadSitemapRows(
     policyPages,
     services,
     faqCount,
+    testimonialCount,
     events,
     videoCount,
   ] = await Promise.all([
@@ -66,6 +67,12 @@ export async function loadSitemapRows(
     db.faqItem.count({
       where: { businessId, published: true },
     }),
+    // Same visibility rule as the storefront /testimonials page.
+    isEnabled("testimonials")
+      ? db.testimonial.count({
+          where: { businessId, isApproved: true, isHidden: false },
+        })
+      : Promise.resolve(0),
     isEnabled("events")
       ? db.event.findMany({
           where: { businessId, published: true },
@@ -100,6 +107,7 @@ export async function loadSitemapRows(
     pages,
     services,
     faqCount,
+    testimonialCount,
     events,
     videoCount,
   };

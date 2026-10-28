@@ -23,6 +23,8 @@ type EmbedValue = {
 
 type Props = {
   contactImage?: string;
+  /** Description of `contactImage`; blank keeps it decorative (`alt=""`). */
+  contactImageAlt?: string;
   heading: string;
   subheading: string;
   body: string;
@@ -54,6 +56,7 @@ type Props = {
 
 export function ViiContactCtaSection({
   contactImage,
+  contactImageAlt,
   heading,
   subheading,
   body,
@@ -93,11 +96,11 @@ export function ViiContactCtaSection({
       {contactImage && (
         <Image
           src={contactImage}
-          alt=""
+          alt={contactImageAlt?.trim() ?? ""}
           fill
           sizes="100vw"
           style={{ objectFit: "cover", opacity: 0.3 }}
-          aria-hidden="true"
+          aria-hidden={contactImageAlt?.trim() ? undefined : "true"}
         />
       )}
 

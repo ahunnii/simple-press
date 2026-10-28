@@ -126,8 +126,13 @@ describe("DreamBalloonStudio", () => {
     expect(tile(/Bright Red/)).toHaveAttribute("aria-checked", "true");
     fireEvent.click(tile(/Pearl Gold/));
     expect(tile(/Pearl Gold/)).toHaveAttribute("aria-checked", "true");
+    // The staged name is a styled <p>, not a heading (it would pollute the
+    // page outline), but it still names the tile group.
     expect(
-      screen.getByRole("heading", { level: 3, name: "Pearl Gold" }),
+      screen.queryByRole("heading", { name: "Pearl Gold" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "Pearl Gold" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Pearl finish")).toBeInTheDocument();
     expect(

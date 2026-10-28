@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { UmscButton } from "../shared/umsc-button";
@@ -54,7 +55,7 @@ export function UmscAboutMaker({
           {showImage ? (
             <Image
               src={image!}
-              alt={imageAlt ?? ""}
+              alt={meaningfulAltText(imageAlt) ?? ""}
               fill
               className="object-cover"
               sizes="(min-width: 1024px) 40vw, 90vw"

@@ -11,6 +11,11 @@ type Props = {
   title: string;
   blurb?: string;
   image?: string;
+  /**
+   * Alt text for the photo. Default "" (decorative): the whole card is a
+   * named link. Only owner-entered fallback doors pass a description.
+   */
+  imageAlt?: string;
   /** CSS `aspect-ratio` for the photo. Default "4 / 5" (shop/collections doors use "3 / 2"). */
   aspect?: string;
   titleFieldKey?: string;
@@ -28,6 +33,7 @@ export function UmscCollectionDoor({
   title,
   blurb,
   image,
+  imageAlt = "",
   aspect = "4 / 5",
   titleFieldKey,
   blurbFieldKey,
@@ -42,7 +48,7 @@ export function UmscCollectionDoor({
         {hasCustomImage(image) ? (
           <Image
             src={image!}
-            alt=""
+            alt={imageAlt}
             fill
             className="umsc-product-card-img object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

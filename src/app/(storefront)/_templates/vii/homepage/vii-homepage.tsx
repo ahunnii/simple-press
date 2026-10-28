@@ -1,5 +1,4 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { meaningfulAltText } from "~/lib/images/alt-text";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -13,6 +12,7 @@ import {
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { resolveViiLocationTag } from "../shared/vii-location-tag";
@@ -81,6 +81,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     // Hero
     "vii.homepage.hero-video",
     "vii.homepage.hero-image",
+    "vii.homepage.hero-image-alt",
     "vii.homepage.hero-overline",
     "vii.homepage.hero-heading",
     "vii.homepage.hero-cta-text",
@@ -95,11 +96,13 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.video-body",
     "vii.homepage.video-file",
     "vii.homepage.video-poster",
+    "vii.homepage.video-poster-alt",
     "vii.homepage.video-cta-text",
     "vii.homepage.video-cta-link",
     "vii.homepage.video-aspect",
     // Image Band
     "vii.homepage.band-image",
+    "vii.homepage.band-image-alt",
     "vii.homepage.band-heading",
     "vii.homepage.band-text",
     // Product rail
@@ -110,6 +113,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.product-rail-cta-link",
     // Testimonial
     "vii.homepage.testimonial-image",
+    "vii.homepage.testimonial-image-alt",
     // Brands
     "vii.homepage.brands-overline",
     "vii.homepage.brands-heading",
@@ -125,10 +129,12 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.detroit-heading-accent",
     "vii.homepage.detroit-body",
     "vii.homepage.detroit-image",
+    "vii.homepage.detroit-image-alt",
     "vii.homepage.detroit-cta-text",
     "vii.homepage.detroit-cta-link",
     // Contact
     "vii.homepage.contact-image",
+    "vii.homepage.contact-image-alt",
     "vii.homepage.contact-heading",
     "vii.homepage.contact-subheading",
     "vii.homepage.contact-body",
@@ -251,11 +257,15 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         <ViiHeroSection
           heroVideo={f["vii.homepage.hero-video"] ?? undefined}
           heroImage={f["vii.homepage.hero-image"] ?? undefined}
+          heroImageAlt={
+            meaningfulAltText(f["vii.homepage.hero-image-alt"]) ?? ""
+          }
           heroOverline={f["vii.homepage.hero-overline"] ?? ""}
           heroHeading={f["vii.homepage.hero-heading"] ?? ""}
+          businessName={homepage?.name}
           heroCtaText={
             ctaFlagOk(f["vii.homepage.hero-cta-link"] ?? "")
-              ? f["vii.homepage.hero-cta-text"] ?? ""
+              ? (f["vii.homepage.hero-cta-text"] ?? "")
               : ""
           }
           heroCtaLink={f["vii.homepage.hero-cta-link"] ?? ""}
@@ -279,9 +289,12 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             body={f["vii.homepage.video-body"] ?? ""}
             videoSrc={f["vii.homepage.video-file"] ?? undefined}
             posterSrc={f["vii.homepage.video-poster"] ?? undefined}
+            posterAlt={
+              meaningfulAltText(f["vii.homepage.video-poster-alt"]) ?? ""
+            }
             ctaText={
               ctaFlagOk(f["vii.homepage.video-cta-link"] ?? "")
-                ? f["vii.homepage.video-cta-text"] ?? ""
+                ? (f["vii.homepage.video-cta-text"] ?? "")
                 : ""
             }
             ctaHref={f["vii.homepage.video-cta-link"] ?? ""}
@@ -293,6 +306,9 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         {isSectionVisible(customFields, "vii", "homepage.band") && (
           <ViiImageBand
             bandImage={f["vii.homepage.band-image"] ?? undefined}
+            bandImageAlt={
+              meaningfulAltText(f["vii.homepage.band-image-alt"]) ?? ""
+            }
             bandHeading={f["vii.homepage.band-heading"] ?? ""}
             bandText={f["vii.homepage.band-text"] ?? ""}
           />
@@ -305,7 +321,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             heading={f["vii.homepage.product-rail-heading"] ?? ""}
             ctaText={
               railCtaAllowed
-                ? f["vii.homepage.product-rail-cta-text"] ?? "Shop All"
+                ? (f["vii.homepage.product-rail-cta-text"] ?? "Shop All")
                 : ""
             }
             ctaHref={railCtaHref}
@@ -319,6 +335,9 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         isSectionVisible(customFields, "vii", "homepage.testimonial") ? (
           <ViiTestimonialQuote
             quoteImage={f["vii.homepage.testimonial-image"] ?? undefined}
+            quoteImageAlt={
+              meaningfulAltText(f["vii.homepage.testimonial-image-alt"]) ?? ""
+            }
             quoteText={testimonialQuote}
             quoteAuthor={testimonialAuthor}
           />
@@ -345,7 +364,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             intro={f["vii.homepage.blog-intro"] ?? ""}
             ctaText={
               ctaFlagOk(f["vii.homepage.blog-cta-link"] ?? "")
-                ? f["vii.homepage.blog-cta-text"] ?? "Read the blog"
+                ? (f["vii.homepage.blog-cta-text"] ?? "Read the blog")
                 : ""
             }
             ctaHref={f["vii.homepage.blog-cta-link"] ?? ""}
@@ -373,10 +392,13 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             headingAccent={f["vii.homepage.detroit-heading-accent"] ?? ""}
             body={f["vii.homepage.detroit-body"] ?? ""}
             image={f["vii.homepage.detroit-image"] ?? undefined}
+            imageAlt={
+              meaningfulAltText(f["vii.homepage.detroit-image-alt"]) ?? ""
+            }
             details={detroitDetails}
             ctaText={
               ctaFlagOk(f["vii.homepage.detroit-cta-link"] ?? "")
-                ? f["vii.homepage.detroit-cta-text"] ?? ""
+                ? (f["vii.homepage.detroit-cta-text"] ?? "")
                 : ""
             }
             ctaHref={f["vii.homepage.detroit-cta-link"] ?? ""}
@@ -388,6 +410,9 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         {isSectionVisible(customFields, "vii", "homepage.contact") && (
           <ViiContactCtaSection
             contactImage={f["vii.homepage.contact-image"] ?? undefined}
+            contactImageAlt={
+              meaningfulAltText(f["vii.homepage.contact-image-alt"]) ?? ""
+            }
             heading={f["vii.homepage.contact-heading"] ?? ""}
             subheading={f["vii.homepage.contact-subheading"] ?? ""}
             body={f["vii.homepage.contact-body"] ?? ""}
@@ -395,7 +420,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
             email={homepage?.supportEmail ?? ""}
             buttonLabel={
               ctaFlagOk(f["vii.homepage.contact-cta-link"] ?? "")
-                ? f["vii.homepage.contact-cta-text"] ?? ""
+                ? (f["vii.homepage.contact-cta-text"] ?? "")
                 : ""
             }
             buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}

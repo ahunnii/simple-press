@@ -4,6 +4,7 @@ import {
   resolveMapCoordinates,
 } from "~/lib/address/coordinates";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getRawCustomFieldString } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
@@ -23,6 +24,7 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
   const f = resolveFields(customFields, [
     // Hero
     "vii.contact.hero-image",
+    "vii.contact.hero-image-alt",
     "vii.contact.hero-overline",
     "vii.contact.hero-heading",
     // Main
@@ -76,8 +78,10 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
       {/* 1. Hero */}
       <ViiContactHero
         heroImage={f["vii.contact.hero-image"] ?? undefined}
+        heroImageAlt={meaningfulAltText(f["vii.contact.hero-image-alt"]) ?? ""}
         overline={f["vii.contact.hero-overline"] ?? ""}
         heading={f["vii.contact.hero-heading"] ?? "Contact Us"}
+        headingFallback="Contact"
       />
 
       {/* 2. Intro + contact info + form */}

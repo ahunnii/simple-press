@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 
 import type { UmscHeroImageMode } from "./umsc-hero-fields";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { cn } from "~/lib/utils";
 
 import { UmscHeading } from "./umsc-heading";
@@ -125,7 +126,7 @@ export function UmscPageHero({
           <div className="relative hidden aspect-[4/3] w-full overflow-hidden border border-[var(--umsc-line-gold)] lg:block">
             <Image
               src={image!}
-              alt={imageAlt ?? ""}
+              alt={meaningfulAltText(imageAlt) ?? ""}
               fill
               className="object-cover"
               sizes="40vw"
@@ -137,7 +138,7 @@ export function UmscPageHero({
         <div className="absolute inset-0 z-0">
           <Image
             src={image!}
-            alt={imageAlt?.trim() ?? ""}
+            alt={meaningfulAltText(imageAlt) ?? ""}
             fill
             priority
             sizes="100vw"

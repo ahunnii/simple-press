@@ -1,3 +1,4 @@
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
@@ -9,6 +10,8 @@ export type UmscStore = {
   rowIndex: number;
   name: string;
   image: string;
+  /** Owner-written alt text for the photo; "" = decorative. */
+  alt: string;
   address: string;
   note: string;
   website: string;
@@ -36,6 +39,7 @@ export function resolveUmscStores(
           rowIndex,
           name,
           image: str(row.image),
+          alt: meaningfulAltText(str(row.alt)) ?? "",
           address: str(row.address),
           note: str(row.note),
           website: str(row.website),

@@ -915,28 +915,81 @@ interface ServiceForSchema {
   ogImage?: string | null;
 }
 
+/** One bookable item under a service (a `ServiceItem` row), for price offers. */
+interface ServiceItemForSchema {
+  name: string;
+  /** Free-text price ("$85", "from $50", "$50-$75"), read via `parseSingleServicePrice`. */
+  priceLabel?: string | null;
+  /** Items explicitly marked `false` are skipped; unset counts as published. */
+  published?: boolean;
+}
+
+/**
+ * The USD amount ("85.00") when a service item's free-text `priceLabel` names
+ * exactly one price, else null. Stricter than `parseEventPrice`, which grabs
+ * the first `$` figure it sees: a price range, "from"/"starting at"/"$85+"
+ * and "free" are not one fixed price, so an Offer built from them would state
+ * something the page doesn't promise.
+ */
+function parseSingleServicePrice(
+  label: string | null | undefined,
+): string | null {
+  const text = label?.trim();
+  if (!text) return null;
+  // Two amounts ("$85 or $130") are a choice, not a price.
+  if ((text.match(/\$/g) ?? []).length !== 1) return null;
+  if (
+    /\b(from|starting|starts|up\s+to|as\s+low\s+as|and\s+up)\b/i.test(text) ||
+    // "$50-$75", "$50 - 75" and "$85+"
+    /\$\s*[\d,.]+\s*(?:[-\u2013\u2014]\s*\$?\d|\+)/.test(text) ||
+    /\$\s*[\d,.]+\s*to\s+\$?\d/i.test(text)
+  ) {
+    return null;
+  }
+  const price = parseEventPrice(text);
+  // "free" parses to "0"; that's free text here, not a priced offer.
+  return price === null || Number(price) === 0 ? null : price;
+}
+
 /**
  * Build a schema.org Service object for a service detail page.
  *
- * Includes name, url (canonical `/services/:slug`), provider (Organization),
- * and conditionally description and image.
+ * Includes name, url (canonical `/services/:slug`), provider (carrying the
+ * shared Organization `@id`), and conditionally areaServed (the store's
+ * owner-listed areas, same normalization as LocalBusiness), description and
+ * image.
+ *
+ * `items` adds a `hasOfferCatalog` of USD Offers for the published items
+ * whose `priceLabel` is a single amount (see `parseSingleServicePrice`);
+ * it is omitted when none parse.
  */
 export function buildServiceSchema(
   service: ServiceForSchema,
-  business: CanonicalBusiness & { name: string },
+  business: CanonicalBusiness & { name: string; areaServed?: string[] | null },
+  items?: readonly ServiceItemForSchema[] | null,
 ): Record<string, unknown> {
   const canonicalUrl = getCanonicalUrl(business, `/services/${service.slug}`);
+  const areaServed = normalizeAreaServed(business.areaServed ?? []);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.name,
     url: canonicalUrl,
+    // Same @id as the store's one Organization/LocalBusiness node (emitted on
+    // the homepage and /contact) so the graphs merge; name/url keep this page's
+    // provider self-describing where that node isn't on the page.
     provider: {
       "@type": "Organization",
+      "@id": organizationId(getCanonicalBaseUrl(business)),
       name: business.name,
+      url: getCanonicalBaseUrl(business),
     },
   };
+
+  if (areaServed.length > 0) {
+    schema.areaServed = areaServed;
+  }
 
   if (service.description) {
     schema.description = service.description;
@@ -946,6 +999,30 @@ export function buildServiceSchema(
   const imageUrl = toAbsoluteUrl(service.image ?? service.ogImage);
   if (imageUrl) {
     schema.image = imageUrl;
+  }
+
+  const offers = (items ?? []).flatMap((item) => {
+    const name = nonBlank(item.name);
+    const price =
+      item.published === false
+        ? null
+        : parseSingleServicePrice(item.priceLabel);
+    if (!name || price === null) return [];
+    return [
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name },
+        price,
+        priceCurrency: "USD",
+      },
+    ];
+  });
+  if (offers.length > 0) {
+    schema.hasOfferCatalog = {
+      "@type": "OfferCatalog",
+      name: service.name,
+      itemListElement: offers,
+    };
   }
 
   return schema;

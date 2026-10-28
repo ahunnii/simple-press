@@ -20,6 +20,8 @@ type Props = {
   headingAccent: string;
   body: string;
   image?: string;
+  /** Description of `image`; blank keeps it decorative (`alt=""`). */
+  imageAlt?: string;
   details: TemplateListRow[];
   ctaText: string;
   ctaHref: string;
@@ -36,6 +38,7 @@ export function ViiDetroitSection({
   headingAccent,
   body,
   image,
+  imageAlt,
   details,
   ctaText,
   ctaHref,
@@ -83,7 +86,7 @@ export function ViiDetroitSection({
           {image?.trim() ? (
             <Image
               src={image}
-              alt=""
+              alt={imageAlt?.trim() ?? ""}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               style={{ objectFit: "cover" }}

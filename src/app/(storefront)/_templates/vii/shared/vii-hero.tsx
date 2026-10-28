@@ -54,11 +54,17 @@ import {
   heroRevealStyle,
   useViiHeroMotion,
 } from "../hooks/use-vii-hero-motion";
+import { ViiH1 } from "./vii-h1";
 import { ViiOverline } from "./vii-overline";
 
 export type ViiHeroProps = {
   /** The page's primary h1 text. */
   heading: string;
+  /**
+   * sr-only h1 text used when `heading` is blank (an owner can clear the
+   * visible title). Defaults to the section's `aria-label`.
+   */
+  headingFallback?: string;
   /** Accessible name for the <section>. Defaults to "Hero". */
   "aria-label"?: string;
   /**
@@ -73,6 +79,8 @@ export type ViiHeroProps = {
   videoRef?: React.RefObject<HTMLVideoElement | null>;
   /** Background image URL. Used when no `video` is provided. */
   image?: string;
+  /** Description of `image`; blank keeps it decorative (`alt=""`). */
+  imageAlt?: string;
   /**
    * CSS object-position for the background image.
    * Blog post heroes use "center 30%". Defaults to browser default (center).
@@ -158,10 +166,12 @@ const DEFAULT_HEADING_STYLE: CSSProperties = {
 
 export function ViiHero({
   heading,
+  headingFallback,
   "aria-label": ariaLabel = "Hero",
   video,
   videoRef,
   image,
+  imageAlt,
   imageObjectPosition,
   overline,
   overlineTone = "dark",
@@ -181,6 +191,7 @@ export function ViiHero({
 
   const hasVideo = !!video?.trim();
   const hasImage = !!image?.trim();
+  const resolvedImageAlt = imageAlt?.trim() ?? "";
 
   const scrimBackground =
     scrimVariant === "homepage"
@@ -203,7 +214,11 @@ export function ViiHero({
     >
       {/* Background media — Ken-Burns scale-settle, clipped by overflow:hidden */}
       <div
-        aria-hidden="true"
+        // A described photo stays in the accessibility tree; the video and a
+        // decorative (alt-less) photo are hidden.
+        aria-hidden={
+          hasImage && !hasVideo && resolvedImageAlt ? undefined : "true"
+        }
         style={{
           position: "absolute",
           inset: 0,
@@ -232,7 +247,7 @@ export function ViiHero({
         ) : hasImage ? (
           <Image
             src={image ?? "/fallback"}
-            alt=""
+            alt={resolvedImageAlt}
             fill
             priority
             sizes="100vw"
@@ -294,7 +309,8 @@ export function ViiHero({
           </ViiOverline>
         )}
 
-        <h1
+        <ViiH1
+          fallback={headingFallback ?? ariaLabel}
           {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
           style={{
             ...heroHeadingStyle(shown, reduced),
@@ -303,7 +319,7 @@ export function ViiHero({
           }}
         >
           {heading}
-        </h1>
+        </ViiH1>
 
         {children}
       </div>

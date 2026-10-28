@@ -10,9 +10,14 @@ import type {
   StaticSeoRouteKey,
 } from "~/lib/validators/site-seo";
 import { getCanonicalUrl } from "~/lib/canonical";
-import { rasterImageUrl } from "~/lib/image-url";
+import { shareableImageUrl } from "~/lib/image-url";
 import { paginatedPath } from "~/lib/pagination";
 import { firstNonBlank, preferNonBlank } from "~/lib/seo/blank";
+import {
+  OG_FALLBACK_HEIGHT,
+  OG_FALLBACK_WIDTH,
+  ogFallbackImageUrl,
+} from "~/lib/seo/og-fallback";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { getPageMetaEntry } from "~/lib/validators/site-seo";
 import { api } from "~/trpc/server";
@@ -94,8 +99,8 @@ export interface BuildPageMetadataArgs {
  *
  * Resolution for title / description / ogImage is: the owner's per-route value
  * from `SiteContent.pageMeta` → the record's own SEO field (`entity`) → the
- * caller's fallback → (for the image only) the site-wide OG image, then the
- * logo. Anything still unresolved is simply omitted, so Next merges the root
+ * caller's fallback → (for the image only) the site-wide OG image, then a
+ * generated card from the logo. Anything still unresolved is simply omitted, so Next merges the root
  * layout's value rather than emitting a blank tag.
  *
  * The `<title>` always ships absolute and always carries the brand suffix —
@@ -140,13 +145,16 @@ export function buildPageMetadata({
     entity?.description,
     description,
   );
+  // Facebook, iMessage and LinkedIn don't render AVIF share images, so an AVIF
+  // at any step is skipped and the chain falls through to the next candidate.
+  // The last step is the generated 1200×630 card (`/og-fallback.png`) rather
+  // than the raw logo: logos are often AVIF/SVG and rarely 1.91:1.
   const resolvedOgImage = firstNonBlank(
-    owner.ogImage,
-    entity?.ogImage,
-    ogImage,
-    business?.siteContent?.ogImage,
-    // Share scrapers (Facebook, X, Slack) don't render SVG.
-    rasterImageUrl(business?.siteContent?.logoUrl),
+    shareableImageUrl(owner.ogImage),
+    shareableImageUrl(entity?.ogImage),
+    shareableImageUrl(ogImage),
+    shareableImageUrl(business?.siteContent?.ogImage),
+    ogFallbackImageUrl(business),
   );
 
   const parsedKeywords = keywords
@@ -177,8 +185,8 @@ export function buildPageMetadata({
           images: [
             {
               url: resolvedOgImage,
-              width: 1200,
-              height: 630,
+              width: OG_FALLBACK_WIDTH,
+              height: OG_FALLBACK_HEIGHT,
               alt: ogImageAlt ?? resolvedTitle,
             },
           ],

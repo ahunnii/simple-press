@@ -12,6 +12,7 @@ import { UmscPageHero } from "../shared/umsc-page-hero";
 import { UmscContactForm, UmscContactFormFallback } from "./umsc-contact-form";
 import { UmscContactFollow } from "./umsc-contact-follow";
 import { UmscContactStores } from "./umsc-contact-stores";
+import { resolveUmscFulfillmentLine } from "./umsc-fulfillment-line";
 import { hasVisibleUmscStores, resolveUmscStores } from "./umsc-stores";
 
 const FIELD_KEYS = [
@@ -100,7 +101,10 @@ export function UmscContactPage({ business }: DefaultContactPageTemplateProps) {
                 fieldKey: "umsc.contact.expect-line-2",
               },
               {
-                value: f["umsc.contact.expect-line-3"] ?? "",
+                value: resolveUmscFulfillmentLine(
+                  f["umsc.contact.expect-line-3"] ?? "",
+                  business,
+                ),
                 fieldKey: "umsc.contact.expect-line-3",
               },
             ],

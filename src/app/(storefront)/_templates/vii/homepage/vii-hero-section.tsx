@@ -13,13 +13,18 @@ import {
   heroRevealStyle,
   useViiHeroMotion,
 } from "../hooks/use-vii-hero-motion";
+import { ViiH1 } from "../shared/vii-h1";
 import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   heroVideo?: string;
   heroImage?: string;
+  /** Description of `heroImage`; blank keeps it decorative (`alt=""`). */
+  heroImageAlt?: string;
   heroOverline: string;
   heroHeading: string;
+  /** Business name, used as the sr-only h1 when `heroHeading` is blank. */
+  businessName?: string;
   heroCtaText: string;
   heroCtaLink: string;
 };
@@ -27,8 +32,10 @@ type Props = {
 export function ViiHeroSection({
   heroVideo,
   heroImage,
+  heroImageAlt,
   heroOverline,
   heroHeading,
+  businessName,
   heroCtaText,
   heroCtaLink,
 }: Props) {
@@ -58,6 +65,7 @@ export function ViiHeroSection({
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
+  const imageAlt = heroImageAlt?.trim() ?? "";
 
   return (
     <section
@@ -75,7 +83,9 @@ export function ViiHeroSection({
     >
       {/* ── Background media — slow Ken-Burns scale-settle on load ── */}
       <div
-        aria-hidden="true"
+        // A described photo stays in the accessibility tree; the video and a
+        // decorative (alt-less) photo are hidden.
+        aria-hidden={hasImage && !hasVideo && imageAlt ? undefined : "true"}
         style={{
           position: "absolute",
           inset: 0,
@@ -104,7 +114,7 @@ export function ViiHeroSection({
         ) : hasImage ? (
           <Image
             src={heroImage!}
-            alt=""
+            alt={imageAlt}
             fill
             className="object-cover"
             priority
@@ -191,24 +201,24 @@ export function ViiHeroSection({
           </div>
         )}
 
-        {/* Primary statement — the page's h1 */}
-        {heroHeading && (
-          <h1
-            {...fieldAttr("vii.homepage.hero-heading")}
-            style={{
-              ...heroHeadingStyle(shown, reduced),
-              fontFamily: "var(--font-sans)",
-              fontSize: "clamp(18px, 2.4vw, 28px)",
-              lineHeight: 1.55,
-              color: "var(--vii-paper)",
-              maxWidth: 560,
-              marginBottom: 36,
-              fontWeight: 300,
-            }}
-          >
-            {heroHeading}
-          </h1>
-        )}
+        {/* Primary statement — the page's h1. Always rendered: a blank
+            statement falls back to an sr-only business-name h1. */}
+        <ViiH1
+          fallback={businessName}
+          {...fieldAttr("vii.homepage.hero-heading")}
+          style={{
+            ...heroHeadingStyle(shown, reduced),
+            fontFamily: "var(--font-sans)",
+            fontSize: "clamp(18px, 2.4vw, 28px)",
+            lineHeight: 1.55,
+            color: "var(--vii-paper)",
+            maxWidth: 560,
+            marginBottom: heroHeading.trim() ? 36 : 0,
+            fontWeight: 300,
+          }}
+        >
+          {heroHeading}
+        </ViiH1>
 
         {/* CTA */}
         {heroCtaText && (

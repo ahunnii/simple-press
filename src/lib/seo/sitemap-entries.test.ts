@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { SitemapRows } from "./sitemap-entries";
 
-import { buildSitemapEntries } from "./sitemap-entries";
+import { buildSitemapEntries, EMPTY_SITEMAP_ROWS } from "./sitemap-entries";
 
 const BASE_URL = "https://example.simplepress.co";
 
@@ -21,6 +21,7 @@ function emptyRows(): SitemapRows {
     pages: [],
     services: [],
     faqCount: 0,
+    testimonialCount: 0,
     events: [],
     videoCount: 0,
   };
@@ -39,6 +40,7 @@ function fixtureRows(): SitemapRows {
     ],
     services: [{ slug: "consulting", updatedAt: UPDATED_AT }],
     faqCount: 3,
+    testimonialCount: 2,
     events: [
       { slug: "upcoming-gala", updatedAt: UPDATED_AT, isArchived: false },
       { slug: "past-gala", updatedAt: UPDATED_AT, isArchived: true },
@@ -179,6 +181,29 @@ describe("buildSitemapEntries", () => {
     expect(urls(withoutCount)).not.toContain(`${BASE_URL}/faq`);
   });
 
+  it("testimonials index requires the flag on and at least one approved testimonial", () => {
+    const withCount = buildSitemapEntries({
+      baseUrl: BASE_URL,
+      isEnabled: allEnabled(),
+      rows: { ...emptyRows(), testimonialCount: 1 },
+    });
+    expect(urls(withCount)).toContain(`${BASE_URL}/testimonials`);
+
+    const withoutCount = buildSitemapEntries({
+      baseUrl: BASE_URL,
+      isEnabled: allEnabled(),
+      rows: { ...emptyRows(), testimonialCount: 0 },
+    });
+    expect(urls(withoutCount)).not.toContain(`${BASE_URL}/testimonials`);
+
+    const flagOff = buildSitemapEntries({
+      baseUrl: BASE_URL,
+      isEnabled: noneEnabled(),
+      rows: { ...emptyRows(), testimonialCount: 5 },
+    });
+    expect(urls(flagOff)).not.toContain(`${BASE_URL}/testimonials`);
+  });
+
   it("services index requires both the flag on and at least one published service", () => {
     const flagOffRows = fixtureRows();
     const flagOff = buildSitemapEntries({
@@ -225,5 +250,39 @@ describe("buildSitemapEntries", () => {
     expect(all).not.toContain(`${BASE_URL}/shop/widget`);
     expect(all).not.toContain(`${BASE_URL}/collections`);
     expect(all).not.toContain(`${BASE_URL}/collections/new-arrivals`);
+  });
+});
+
+describe("buildSitemapEntries — maintenance", () => {
+  it("lists only the homepage while the store is in maintenance, whatever rows and flags say", () => {
+    const result = buildSitemapEntries({
+      baseUrl: BASE_URL,
+      isEnabled: allEnabled(),
+      rows: fixtureRows(),
+      maintenanceActive: true,
+    });
+    expect(urls(result)).toEqual([BASE_URL]);
+  });
+
+  it("is unchanged when maintenance is off or unset", () => {
+    const base = { baseUrl: BASE_URL, isEnabled: allEnabled() };
+    const unset = buildSitemapEntries({ ...base, rows: fixtureRows() });
+    const off = buildSitemapEntries({
+      ...base,
+      rows: fixtureRows(),
+      maintenanceActive: false,
+    });
+    expect(off).toEqual(unset);
+    expect(urls(unset).length).toBeGreaterThan(1);
+  });
+
+  it("EMPTY_SITEMAP_ROWS builds only the homepage plus always-on static routes", () => {
+    const result = buildSitemapEntries({
+      baseUrl: BASE_URL,
+      isEnabled: allEnabled(),
+      rows: EMPTY_SITEMAP_ROWS,
+    });
+    expect(urls(result)).toContain(BASE_URL);
+    expect(urls(result).some((u) => u.includes("/shop/"))).toBe(false);
   });
 });
