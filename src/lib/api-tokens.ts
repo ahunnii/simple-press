@@ -116,7 +116,9 @@ export async function verifyApiToken(args: {
     // Best-effort bookkeeping: a failed write must never fail the read.
     void db.businessApiToken
       .update({ where: { id: token.id }, data: { lastUsedAt: new Date(now) } })
-      .catch(() => {});
+      .catch(() => {
+        /* empty */
+      });
   }
 
   return { ok: true, tokenId: token.id, businessId: token.businessId };
