@@ -5,6 +5,7 @@ import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import {
   fieldAttr,
   listItemAttr,
@@ -37,8 +38,11 @@ const FIELD_KEYS = [
   "pink.about.hero-intro",
   "pink.about.story-heading",
   "pink.about.story-image-main",
+  "pink.about.story-image-main-alt",
   "pink.about.story-image-2",
+  "pink.about.story-image-2-alt",
   "pink.about.story-image-3",
+  "pink.about.story-image-3-alt",
   "pink.about.values-heading",
   "pink.about.values-note",
   "pink.about.timeline-heading",
@@ -266,7 +270,10 @@ export async function PinkAboutPage({
                 {hasCustomImage(f["pink.about.story-image-main"]) ? (
                   <Image
                     src={f["pink.about.story-image-main"] ?? ""}
-                    alt=""
+                    alt={
+                      meaningfulAltText(f["pink.about.story-image-main-alt"]) ??
+                      ""
+                    }
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 45vw"
@@ -288,7 +295,9 @@ export async function PinkAboutPage({
                 {hasCustomImage(f["pink.about.story-image-2"]) ? (
                   <Image
                     src={f["pink.about.story-image-2"] ?? ""}
-                    alt=""
+                    alt={
+                      meaningfulAltText(f["pink.about.story-image-2-alt"]) ?? ""
+                    }
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, 22vw"
@@ -310,7 +319,9 @@ export async function PinkAboutPage({
                 {hasCustomImage(f["pink.about.story-image-3"]) ? (
                   <Image
                     src={f["pink.about.story-image-3"] ?? ""}
-                    alt=""
+                    alt={
+                      meaningfulAltText(f["pink.about.story-image-3-alt"]) ?? ""
+                    }
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, 22vw"

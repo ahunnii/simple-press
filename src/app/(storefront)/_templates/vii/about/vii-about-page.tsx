@@ -1,6 +1,6 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -8,6 +8,7 @@ import {
   parseTemplateListRows,
 } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
@@ -32,6 +33,7 @@ export async function ViiAboutPage({
   const f = resolveFields(customFields, [
     // Hero
     "vii.about.hero-image",
+    "vii.about.hero-image-alt",
     "vii.about.hero-overline",
     "vii.about.hero-heading",
     // Mission
@@ -46,6 +48,7 @@ export async function ViiAboutPage({
     "vii.about.steps-intro",
     // Band
     "vii.about.band-image",
+    "vii.about.band-image-alt",
     "vii.about.band-label",
     "vii.about.band-statement",
     // Owner spotlight
@@ -61,6 +64,7 @@ export async function ViiAboutPage({
     "vii.about.team-intro",
     // CTA
     "vii.about.cta-image",
+    "vii.about.cta-image-alt",
     "vii.about.cta-heading",
     "vii.about.cta-subheading",
     "vii.about.cta-body",
@@ -100,8 +104,10 @@ export async function ViiAboutPage({
       {/* 1. Hero */}
       <ViiAboutHero
         heroImage={f["vii.about.hero-image"] ?? undefined}
+        heroImageAlt={meaningfulAltText(f["vii.about.hero-image-alt"]) ?? ""}
         overline={f["vii.about.hero-overline"] ?? ""}
         heading={f["vii.about.hero-heading"] ?? "About"}
+        headingFallback="About"
       />
 
       {/* 2. Mission */}
@@ -129,6 +135,7 @@ export async function ViiAboutPage({
       {isSectionVisible(customFields, "vii", "about.band") && (
         <ViiAboutBand
           bandImage={f["vii.about.band-image"] ?? undefined}
+          bandImageAlt={meaningfulAltText(f["vii.about.band-image-alt"]) ?? ""}
           label={f["vii.about.band-label"] ?? ""}
           statement={f["vii.about.band-statement"] ?? ""}
         />
@@ -143,6 +150,7 @@ export async function ViiAboutPage({
           role={f["vii.about.owner-role"] ?? ""}
           body={f["vii.about.owner-body"] ?? ""}
           ownerImage={f["vii.about.owner-image"] ?? undefined}
+          businessName={business.name}
         />
       )}
 
@@ -160,11 +168,14 @@ export async function ViiAboutPage({
       {isSectionVisible(customFields, "vii", "about.cta") && (
         <ViiContactCtaSection
           contactImage={f["vii.about.cta-image"] ?? undefined}
+          contactImageAlt={
+            meaningfulAltText(f["vii.about.cta-image-alt"]) ?? ""
+          }
           heading={f["vii.about.cta-heading"] ?? ""}
           subheading={f["vii.about.cta-subheading"] ?? ""}
           body={f["vii.about.cta-body"] ?? ""}
           buttonLabel={
-            ctaButtonAllowed ? f["vii.about.cta-button-label"] ?? "" : ""
+            ctaButtonAllowed ? (f["vii.about.cta-button-label"] ?? "") : ""
           }
           buttonHref={ctaButtonLink}
           phone={ctaPhone}

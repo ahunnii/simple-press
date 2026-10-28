@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Check, ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCartEnabled } from "~/hooks/use-cart-enabled";
@@ -47,6 +48,10 @@ export function ViiProductCard({ product, index }: Props) {
   });
 
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
+  // Owner-written image description first; the product name is a safe,
+  // descriptive fallback for a product shot.
+  const productImageAlt =
+    meaningfulAltText(product.images[0]?.altText) ?? product.name;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -83,7 +88,7 @@ export function ViiProductCard({ product, index }: Props) {
         {productImage !== "/placeholder.svg" ? (
           <Image
             src={productImage}
-            alt=""
+            alt={productImageAlt}
             fill
             className="object-contain p-[5%] transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.04] group-hover:opacity-90"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

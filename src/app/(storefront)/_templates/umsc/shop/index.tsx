@@ -98,6 +98,13 @@ const shopDoorsData: TemplateField[] = [
         placeholder: "/placeholder.svg",
       },
       {
+        key: "alt",
+        label: "Image alt text",
+        type: "text",
+        description:
+          "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+      },
+      {
         key: "title",
         label: "Name",
         type: "text",

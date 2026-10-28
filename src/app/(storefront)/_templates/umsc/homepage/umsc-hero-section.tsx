@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
@@ -160,6 +161,7 @@ export function UmscHeroSection({
   const shown = useUmscHeroMotion();
   const hasVideo = !!video?.trim();
   const hasImage = hasCustomImage(image);
+  const altText = meaningfulAltText(imageAlt) ?? "";
   const {
     videoRef,
     sectionRef,
@@ -175,7 +177,11 @@ export function UmscHeroSection({
       className="umsc-hero relative flex min-h-[calc(100svh-106px)] w-full items-end overflow-hidden bg-[var(--umsc-black)] md:min-h-[calc(100svh-122px)]"
     >
       {/* ── Background media ── */}
-      <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+      {/* Hidden from assistive tech except a still image the owner described. */}
+      <div
+        aria-hidden={hasVideo || !altText ? "true" : undefined}
+        className="absolute inset-0 overflow-hidden"
+      >
         {hasVideo ? (
           <video
             ref={videoRef}
@@ -191,7 +197,7 @@ export function UmscHeroSection({
         ) : hasImage ? (
           <Image
             src={image!}
-            alt=""
+            alt={altText}
             fill
             priority
             className="umsc-hero-film umsc-hero-media absolute inset-0 size-full object-cover"
@@ -300,8 +306,10 @@ export function UmscHeroSection({
         data-visible={shown || undefined}
       />
 
-      {imageAlt && hasImage ? (
-        <span className="sr-only">{imageAlt}</span>
+      {/* Video heroes: the poster is inside the aria-hidden layer, so the
+          owner's description is read here instead. */}
+      {hasVideo && altText && hasImage ? (
+        <span className="sr-only">{altText}</span>
       ) : null}
     </section>
   );

@@ -59,7 +59,7 @@ export function UmscStoreCard({ store, fieldKey, className, style }: Props) {
         {hasCustomImage(store.image) ? (
           <Image
             src={store.image}
-            alt=""
+            alt={store.alt}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

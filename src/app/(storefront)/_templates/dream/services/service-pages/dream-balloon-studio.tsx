@@ -816,9 +816,12 @@ export function DreamBalloonStudio({
               </div>
             </div>
             <div className="dbs-stage-info">
-              <h3 className="dbs-stage-name" id={stageNameId}>
+              {/* A styled <p>, not a heading: the tile name is the selected
+                  item's label, and 100+ colors would otherwise each be able to
+                  stand in the page outline as an <h3>. */}
+              <p className="dbs-stage-name" id={stageNameId}>
                 {stagedTile.label}
-              </h3>
+              </p>
               <p className="dbs-stage-meta">
                 <Orb
                   color={stagedTile.color}

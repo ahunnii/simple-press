@@ -304,6 +304,17 @@ const contactStudioData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "pink.contact.studio-image-alt",
+    label: "Image alt text",
+    type: "text",
+    page: "contact",
+    group: "contact.studio",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+  },
+  {
     key: "pink.contact.studio-label",
     label: "Card label",
     type: "text",

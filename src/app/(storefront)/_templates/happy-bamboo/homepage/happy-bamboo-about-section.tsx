@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
@@ -14,7 +15,9 @@ type Props = {
   aboutSmallLabel?: string | null;
   aboutVideoUrl?: string | null;
   aboutVideoPosterUrl?: string | null;
+  aboutVideoPosterAlt?: string | null;
   aboutImageUrl?: string | null;
+  aboutImageAlt?: string | null;
   aboutHeading?: string | null;
   aboutDescription?: TiptapJSON | null;
   aboutButtonText?: string | null;
@@ -30,7 +33,9 @@ export function HappyBambooAboutSection({
   aboutDescription,
   aboutVideoUrl,
   aboutVideoPosterUrl,
+  aboutVideoPosterAlt,
   aboutImageUrl,
+  aboutImageAlt,
   aboutHeading,
   aboutButtonText,
   aboutButtonLink,
@@ -64,7 +69,10 @@ export function HappyBambooAboutSection({
                 <Image
                   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   src={aboutVideoPosterUrl || "/placeholder.svg"}
-                  alt="About video poster"
+                  alt={
+                    meaningfulAltText(aboutVideoPosterAlt) ??
+                    "About video poster"
+                  }
                   fill
                   className="object-cover"
                 />
@@ -76,9 +84,10 @@ export function HappyBambooAboutSection({
                 // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                 src={aboutImageUrl || "/placeholder.svg"}
                 alt={
-                  aboutHeading
+                  meaningfulAltText(aboutImageAlt) ??
+                  (aboutHeading
                     ? `${aboutHeading} — additional image`
-                    : "About section image"
+                    : "About section image")
                 }
                 fill
                 className="object-cover"

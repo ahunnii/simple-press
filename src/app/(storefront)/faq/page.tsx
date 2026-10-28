@@ -9,12 +9,15 @@ import { getTemplate } from "../_templates/registry";
 
 export async function generateMetadata() {
   const business = await loadSeoBusiness("/faq");
+  // An empty FAQ is a thin page: keep it out of the index (and the sitemap).
+  const items = await api.faq.list().catch(() => null);
   return buildPageMetadata({
     business,
     path: "/faq",
     pageMetaKey: "faq",
     title: "FAQ",
     description: `Frequently asked questions about ${business?.name ?? "our store"}.`,
+    noindex: items?.length === 0,
   });
 }
 

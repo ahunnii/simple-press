@@ -136,6 +136,7 @@ export async function DreamHomepage({
         <DreamHomepageHero
           logoUrl={logoUrl}
           logoAlt={logoAlt}
+          businessName={businessName}
           fields={{
             heading: f["dream.homepage.hero-heading"] ?? "",
             accent: f["dream.homepage.hero-accent"] ?? "",

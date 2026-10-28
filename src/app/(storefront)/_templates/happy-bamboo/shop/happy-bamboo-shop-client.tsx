@@ -223,6 +223,7 @@ export function HappyBambooShopClient({
           </FadeIn>
         ) : (
           <>
+            <h2 className="sr-only">Products</h2>
             {/* Product grid */}
             <div className="grid grid-cols-1 gap-6 py-12 md:py-20 lg:grid-cols-2">
               {filtered.map((product, index) => (

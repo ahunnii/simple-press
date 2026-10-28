@@ -107,6 +107,17 @@ const aboutStoryData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "pink.about.story-image-main-alt",
+    label: "Image alt text",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+  },
+  {
     key: "pink.about.story-image-2",
     label: "Image — small 1",
     description: "First small square image (1:1).",
@@ -117,6 +128,17 @@ const aboutStoryData: TemplateField[] = [
     defaultValue: "/placeholder.svg",
   },
   {
+    key: "pink.about.story-image-2-alt",
+    label: "Image alt text",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
+  },
+  {
     key: "pink.about.story-image-3",
     label: "Image — small 2",
     description: "Second small square image (1:1).",
@@ -125,6 +147,17 @@ const aboutStoryData: TemplateField[] = [
     group: "about.story",
     gridColumn: "col-span-1",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "pink.about.story-image-3-alt",
+    label: "Image alt text",
+    type: "text",
+    page: "about",
+    group: "about.story",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    description:
+      "Read aloud by screen readers and read by search engines to describe the image above. Leave blank if the photo is purely decorative.",
   },
 ];
 

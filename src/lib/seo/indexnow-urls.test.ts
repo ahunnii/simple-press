@@ -183,6 +183,7 @@ describe("seedUrls", () => {
     ],
     services: [],
     faqCount: 1,
+    testimonialCount: 0,
     events: [],
     videoCount: 0,
   };

@@ -21,8 +21,7 @@ const blogPageData: TemplateField[] = [
     page: "blog",
     group: "blog.listing",
     gridColumn: "col-span-full",
-    defaultValue:
-      "News, tips, and updates from our team. Use the search box to find a topic.",
+    defaultValue: "News, tips, and updates from our team.",
     placeholder: "A short introduction to your blog...",
   },
   {

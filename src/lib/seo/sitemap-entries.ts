@@ -36,14 +36,34 @@ export interface SitemapRows {
   pages: PageRow[];
   services: SlugRow[];
   faqCount: number;
+  /** Approved, non-hidden testimonials — gates `/testimonials`. */
+  testimonialCount: number;
   events: EventRow[];
   videoCount: number;
 }
+
+/** No rows at all; pairs with `maintenanceActive`, which ignores them. */
+export const EMPTY_SITEMAP_ROWS: SitemapRows = {
+  products: [],
+  collections: [],
+  pages: [],
+  services: [],
+  faqCount: 0,
+  testimonialCount: 0,
+  events: [],
+  videoCount: 0,
+};
 
 export interface BuildSitemapEntriesParams {
   baseUrl: string;
   isEnabled: (key: string) => boolean;
   rows: SitemapRows;
+  /**
+   * The storefront is in maintenance / "coming soon" (business or platform
+   * scope): every page serves `noindex`, so only the homepage is listed. The
+   * other URLs would advertise pages Google is told not to index.
+   */
+  maintenanceActive?: boolean;
 }
 
 // ─── Feature-key lookup ─────────────────────────────────────────────────────
@@ -97,13 +117,19 @@ export function buildSitemapEntries({
   baseUrl,
   isEnabled,
   rows,
+  maintenanceActive = false,
 }: BuildSitemapEntriesParams): MetadataRoute.Sitemap {
+  if (maintenanceActive) {
+    return [{ url: baseUrl, changeFrequency: "daily", priority: 1 }];
+  }
+
   const {
     products,
     collections,
     pages,
     services,
     faqCount,
+    testimonialCount,
     events,
     videoCount,
   } = rows;
@@ -157,7 +183,9 @@ export function buildSitemapEntries({
     priority: 0.4,
   });
 
-  if (testimonialsEnabled) {
+  // Testimonials index — flag on AND at least one approved, visible row. An
+  // empty list is a thin page, and it would also be a noindex page.
+  if (testimonialsEnabled && testimonialCount > 0) {
     staticRoutes.push({
       url: `${baseUrl}/testimonials`,
       changeFrequency: "weekly",

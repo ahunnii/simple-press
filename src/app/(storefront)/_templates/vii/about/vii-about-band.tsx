@@ -10,14 +10,23 @@ import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   bandImage?: string;
+  /** Description of `bandImage`; blank keeps it decorative (`alt=""`). */
+  bandImageAlt?: string;
   label: string;
   statement: string;
 };
 
-export function ViiAboutBand({ bandImage, label, statement }: Props) {
+export function ViiAboutBand({
+  bandImage,
+  bandImageAlt,
+  label,
+  statement,
+}: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
   if (!statement.trim()) return null;
+
+  const imageAlt = bandImageAlt?.trim() ?? "";
 
   return (
     <section
@@ -38,11 +47,11 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
       {bandImage?.trim() && (
         <Image
           src={bandImage}
-          alt=""
+          alt={imageAlt}
           fill
           sizes="100vw"
           style={{ objectFit: "cover", opacity: 0.32 }}
-          aria-hidden="true"
+          aria-hidden={imageAlt ? undefined : "true"}
         />
       )}
 
@@ -79,7 +88,9 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
           </ViiOverline>
         )}
 
-        <h2
+        {/* A pull quote, not a section heading: the page's outline lives in
+            the h1/h2s around it. */}
+        <p
           id="about-band-heading"
           {...fieldAttr("vii.about.band-statement")}
           style={{
@@ -93,7 +104,7 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
           }}
         >
           {statement}
-        </h2>
+        </p>
       </div>
     </section>
   );

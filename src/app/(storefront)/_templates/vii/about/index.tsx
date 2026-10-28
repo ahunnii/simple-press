@@ -1,5 +1,5 @@
-import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
+import { listRowsFromDefaults } from "~/lib/lucide-template-icons";
 
 // ─── Built-in list defaults ─────────────────────────────────────────────────
 
@@ -73,6 +73,16 @@ const aboutHeroData: TemplateField[] = [
     description:
       "Full-width banner photo at the top of the about page. Use a high-quality landscape photo.",
     type: "image",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.about.hero-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
@@ -210,7 +220,8 @@ const aboutStepsData: TemplateField[] = [
         key: "image",
         label: "Photo",
         type: "image",
-        description: "Photo for this step. Shows a plain color fill when blank.",
+        description:
+          "Photo for this step. Shows a plain color fill when blank.",
         placeholder: "Upload a photo for this step",
         optional: true,
       },
@@ -225,7 +236,8 @@ const aboutStepsData: TemplateField[] = [
         key: "body",
         label: "Description",
         type: "textarea",
-        description: "A sentence or two describing this step. Leave blank to hide.",
+        description:
+          "A sentence or two describing this step. Leave blank to hide.",
         placeholder: "Describe what happens during this step",
         optional: true,
       },
@@ -242,6 +254,16 @@ const aboutBandData: TemplateField[] = [
     description:
       "Full-width photo behind the statement below. A calm, atmospheric photo works best.",
     type: "image",
+    page: "about",
+    group: "about.band",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.about.band-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "about",
     group: "about.band",
     gridColumn: "col-span-full",
@@ -364,7 +386,8 @@ const aboutTeamData: TemplateField[] = [
   {
     key: "vii.about.team-intro",
     label: "Intro text",
-    description: "Short paragraph introducing the team grid below. Leave blank to hide.",
+    description:
+      "Short paragraph introducing the team grid below. Leave blank to hide.",
     type: "textarea",
     page: "about",
     group: "about.team",
@@ -413,7 +436,8 @@ const aboutTeamData: TemplateField[] = [
         key: "bio",
         label: "Short bio",
         type: "textarea",
-        description: "A sentence or two about this team member. Leave blank to hide.",
+        description:
+          "A sentence or two about this team member. Leave blank to hide.",
         placeholder: "A sentence or two about this team member",
         optional: true,
       },
@@ -429,6 +453,16 @@ const aboutCtaData: TemplateField[] = [
     label: "Background photo",
     description: "Photo behind this closing contact section.",
     type: "image",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.about.cta-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
     page: "about",
     group: "about.cta",
     gridColumn: "col-span-full",
@@ -467,8 +501,7 @@ const aboutCtaData: TemplateField[] = [
   {
     key: "vii.about.cta-button-label",
     label: "Button text",
-    description:
-      "Text for the primary button. Leave blank to hide it.",
+    description: "Text for the primary button. Leave blank to hide it.",
     type: "text",
     page: "about",
     group: "about.cta",

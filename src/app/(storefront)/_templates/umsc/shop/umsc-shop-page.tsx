@@ -1,6 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { listItemAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -115,6 +116,11 @@ export async function UmscShopPage({
                         title={title}
                         blurb={blurb || undefined}
                         image={image || undefined}
+                        imageAlt={
+                          meaningfulAltText(
+                            typeof door.alt === "string" ? door.alt : "",
+                          ) ?? ""
+                        }
                         aspect="3 / 2"
                       />
                     </div>

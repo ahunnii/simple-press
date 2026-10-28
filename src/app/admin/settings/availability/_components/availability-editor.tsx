@@ -59,6 +59,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
+import { toWallClockInput } from "~/app/admin/events/_components/event-wall-clock";
 
 export type Variant = "maintenance" | "coming_soon";
 
@@ -211,6 +212,19 @@ export function AvailabilityEditor({
   });
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // "Now" as a wall-clock string in the business's zone, comparable with the
+  // launch string. Set after mount so server and client markup match.
+  const [nowWallClock, setNowWallClock] = useState<string | null>(null);
+  useEffect(() => {
+    setNowWallClock(toWallClockInput(new Date(), false, timeZone));
+  }, [timeZone]);
+  // Saved state, not the switch: it is the live store that is still hidden.
+  const launchDatePassed =
+    savedState.maintenanceMode &&
+    !!savedState.launchStart &&
+    nowWallClock !== null &&
+    savedState.launchStart < nowWallClock;
 
   // The CTA the form currently describes — `null` for "none", and the exact
   // object sent to the server on save.
@@ -900,6 +914,17 @@ export function AvailabilityEditor({
                   </Link>
                 </Button>
               </AlertAction>
+            </Alert>
+          )}
+          {launchDatePassed && maintenanceMode && (
+            <Alert variant="warning">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Your launch date has passed</AlertTitle>
+              <AlertDescription>
+                Your launch date has passed. Your site is still hidden from
+                Google and other search engines until you turn maintenance mode
+                off.
+              </AlertDescription>
             </Alert>
           )}
           {!savedState.maintenanceMode && maintenanceMode && (

@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { UmscButton } from "../shared/umsc-button";
@@ -52,13 +53,16 @@ export function UmscStorySection({
           {hasImage ? (
             <Image
               src={image!}
-              alt={imageAlt}
+              alt={meaningfulAltText(imageAlt) ?? ""}
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           ) : (
-            <UmscImageFallback className="border-0" label={imageAlt} />
+            <UmscImageFallback
+              className="border-0"
+              label={meaningfulAltText(imageAlt) ?? ""}
+            />
           )}
         </div>
 

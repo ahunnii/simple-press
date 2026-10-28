@@ -6,8 +6,10 @@ import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildProductSchema,
+  buildServiceSchema,
   buildVideoObjectSchema,
   buildWebSiteSchema,
+  parseEventPrice,
 } from "./structured-data";
 
 const business = {
@@ -18,37 +20,81 @@ const business = {
 };
 
 describe("buildEventSchema", () => {
-  it("never emits an `offers` key, even when priceLabel looks parseable", () => {
-    const schema = buildEventSchema(
-      {
-        name: "Market Day",
-        slug: "market-day",
-        startAt: new Date("2026-08-15T19:00:00.000Z"),
-        endAt: new Date("2026-08-15T21:00:00.000Z"),
-        allDay: false,
-        priceLabel: "$45",
-      },
-      business,
-      "America/Detroit",
-    );
+  const baseEvent = {
+    name: "Market Day",
+    slug: "market-day",
+    startAt: new Date("2026-08-15T19:00:00.000Z"),
+    allDay: false,
+  };
+  const build = (extra: Record<string, unknown>) =>
+    buildEventSchema({ ...baseEvent, ...extra }, business, "America/Detroit");
 
-    expect(schema).not.toHaveProperty("offers");
+  it("emits a priced InStock Offer pointing at the event page when priceLabel has a dollar amount", () => {
+    expect(build({ priceLabel: "$25 per person" }).offers).toEqual({
+      "@type": "Offer",
+      price: "25.00",
+      priceCurrency: "USD",
+      url: "https://testshop.simplepress.test/events/market-day",
+      availability: "https://schema.org/InStock",
+    });
   });
 
-  it("never emits `offers` for a free-text priceLabel like 'Free'", () => {
-    const schema = buildEventSchema(
-      {
-        name: "Community Meetup",
-        slug: "community-meetup",
-        startAt: new Date("2026-08-15T19:00:00.000Z"),
-        allDay: false,
-        priceLabel: "Free",
-      },
-      business,
-      "America/Detroit",
-    );
+  it("uses externalUrl as the Offer url when set", () => {
+    expect(
+      build({
+        priceLabel: "$10",
+        externalUrl: "https://tickets.example.com/market",
+      }).offers,
+    ).toMatchObject({
+      price: "10.00",
+      url: "https://tickets.example.com/market",
+    });
+  });
 
-    expect(schema).not.toHaveProperty("offers");
+  it("reads the first amount of a range label", () => {
+    expect(build({ priceLabel: "$10–$20" }).offers).toMatchObject({
+      price: "10.00",
+    });
+  });
+
+  it("emits price 0 for a free label", () => {
+    expect(build({ priceLabel: "Free" }).offers).toMatchObject({
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    });
+  });
+
+  it("emits a url-only Offer when the label is unparseable but externalUrl exists", () => {
+    expect(
+      build({
+        priceLabel: "Sliding scale",
+        externalUrl: "https://tickets.example.com/market",
+      }).offers,
+    ).toEqual({ "@type": "Offer", url: "https://tickets.example.com/market" });
+  });
+
+  it("omits offers when the label is unparseable/absent and there is no externalUrl", () => {
+    expect(build({ priceLabel: "Sliding scale" })).not.toHaveProperty("offers");
+    expect(build({})).not.toHaveProperty("offers");
+    expect(build({ priceLabel: "  ", externalUrl: " " })).not.toHaveProperty(
+      "offers",
+    );
+  });
+
+  it("sets eventAttendanceMode to offline only when a location is set", () => {
+    expect(build({ location: "Eastern Market" }).eventAttendanceMode).toBe(
+      "https://schema.org/OfflineEventAttendanceMode",
+    );
+    expect(build({})).not.toHaveProperty("eventAttendanceMode");
+    expect(build({ location: null })).not.toHaveProperty("eventAttendanceMode");
+  });
+
+  it("emits image once, from coverImage", () => {
+    const schema = build({
+      coverImage: "https://cdn.example.com/flier.jpg",
+    });
+    expect(schema.image).toBe("https://cdn.example.com/flier.jpg");
   });
 
   it("emits a date-only startDate/endDate for an all-day event, computed in the passed timeZone (west-of-UTC zone catches the endDate-rollover bug)", () => {
@@ -179,6 +225,40 @@ describe("buildEventSchema", () => {
   });
 });
 
+describe("parseEventPrice", () => {
+  it.each([
+    ["$25 per person", "25.00"],
+    ["$25", "25.00"],
+    ["$7.5 at the door", "7.50"],
+    ["$12.99", "12.99"],
+    ["$ 30", "30.00"],
+    ["$10–$20", "10.00"],
+    ["$1,200 per table", "1200.00"],
+    ["Adults $15, kids free", "15.00"],
+    ["Free", "0"],
+    ["FREE admission", "0"],
+    ["No charge", "0"],
+    ["Complimentary", "0"],
+  ])("parses %j as %j", (label, expected) => {
+    expect(parseEventPrice(label)).toBe(expected);
+  });
+
+  it.each([
+    ["Sliding scale"],
+    ["Donation"],
+    ["Ages 5-10"],
+    ["2 for 1"],
+    ["Carefree fun"],
+    ["$"],
+    [""],
+    ["   "],
+    [null],
+    [undefined],
+  ])("returns null for %j", (label) => {
+    expect(parseEventPrice(label)).toBeNull();
+  });
+});
+
 describe("buildVideoObjectSchema", () => {
   it("emits every field when overrides, description, and thumbnail are all present", () => {
     const schema = buildVideoObjectSchema({
@@ -267,9 +347,18 @@ const baseProduct = {
   allowBackorders: false,
 };
 
+/** buildProductSchema for fixtures that are expected to produce a Product. */
+function productSchemaOf(
+  ...args: Parameters<typeof buildProductSchema>
+): Record<string, unknown> {
+  const schema = buildProductSchema(...args);
+  if (!schema) throw new Error("expected a Product schema, got null");
+  return schema;
+}
+
 describe("buildProductSchema", () => {
   it("emits an array of every absolute product image URL", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         images: [
@@ -288,7 +377,7 @@ describe("buildProductSchema", () => {
   });
 
   it("omits image entirely when there are no usable image URLs", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, images: [{ url: "/relative/only.jpg" }] },
       business,
     );
@@ -297,7 +386,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits a single Offer when there is only one variant", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, variants: [{ price: 1500, inventoryQty: 5 }] },
       business,
     );
@@ -312,7 +401,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits a single Offer when multiple variants all resolve to the same effective price", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -331,7 +420,7 @@ describe("buildProductSchema", () => {
   });
 
   it("emits an AggregateOffer with the correct low/high prices when variant prices differ", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -356,7 +445,7 @@ describe("buildProductSchema", () => {
   });
 
   it("treats a variant price of 0 as inheriting the base price when computing the AggregateOffer range", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 1000,
@@ -761,6 +850,33 @@ describe("buildBlogPostingSchema", () => {
 
     expect(schema.publisher).not.toHaveProperty("logo");
   });
+
+  it("prefers ogImage over image", () => {
+    const schema = buildBlogPostingSchema(
+      {
+        ...page,
+        ogImage: "https://cdn.example.com/og.jpg",
+        image: "https://cdn.example.com/cover.jpg",
+      },
+      business,
+    );
+
+    expect(schema.image).toBe("https://cdn.example.com/og.jpg");
+  });
+
+  it("falls back to image when ogImage is null or blank", () => {
+    for (const ogImage of [null, "", "   "]) {
+      const schema = buildBlogPostingSchema(
+        { ...page, ogImage, image: "https://cdn.example.com/cover.jpg" },
+        business,
+      );
+      expect(schema.image).toBe("https://cdn.example.com/cover.jpg");
+    }
+  });
+
+  it("omits image when neither is set", () => {
+    expect(buildBlogPostingSchema(page, business)).not.toHaveProperty("image");
+  });
 });
 
 describe("buildOrganizationSchema", () => {
@@ -775,6 +891,27 @@ describe("buildOrganizationSchema", () => {
     expect(schema.email).toBe("hello@testshop.com");
   });
 
+  it("emits description from siteContent.metaDescription, trimmed", () => {
+    const schema = buildOrganizationSchema({
+      ...business,
+      siteContent: { metaDescription: "  Handmade candles in Detroit.  " },
+    });
+
+    expect(schema.description).toBe("Handmade candles in Detroit.");
+  });
+
+  it("omits description when metaDescription is null, blank, or absent", () => {
+    for (const metaDescription of [null, "", "   "]) {
+      expect(
+        buildOrganizationSchema({
+          ...business,
+          siteContent: { metaDescription },
+        }),
+      ).not.toHaveProperty("description");
+    }
+    expect(buildOrganizationSchema(business)).not.toHaveProperty("description");
+  });
+
   it("omits telephone and email when neither is set", () => {
     const schema = buildOrganizationSchema(business);
 
@@ -785,7 +922,7 @@ describe("buildOrganizationSchema", () => {
 
 describe("buildProductSchema — description and gtin", () => {
   it("emits the description as plain text (tags stripped, entities decoded)", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         description: "<h2>Soft &amp; warm</h2><p>Hand-knit<br/>wool.</p>",
@@ -796,7 +933,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits description when it is blank after stripping tags", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, description: "<p>  </p>" },
       business,
     );
@@ -804,7 +941,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("emits a normalized gtin from a valid product barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, barcode: "0360-00 291452" },
       business,
     );
@@ -812,7 +949,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits gtin for an invalid product barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, barcode: "036000291453" },
       business,
     );
@@ -820,7 +957,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("falls back to the single variant with a valid barcode", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         barcode: null,
@@ -836,7 +973,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("omits gtin when two variants carry different valid barcodes", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         variants: [
@@ -850,7 +987,7 @@ describe("buildProductSchema — description and gtin", () => {
   });
 
   it("prefers the product barcode over variant barcodes", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         barcode: "96385074",
@@ -881,7 +1018,7 @@ describe("buildProductSchema — merchant listing", () => {
   };
 
   it("leaves offers unchanged when merchant is not passed", () => {
-    const schema = buildProductSchema(baseProduct, business);
+    const schema = productSchemaOf(baseProduct, business);
     expect(schema.offers).toEqual({
       "@type": "Offer",
       price: "10.00",
@@ -892,7 +1029,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("adds a single shippingDetails object and hasMerchantReturnPolicy to an Offer", () => {
-    const schema = buildProductSchema(baseProduct, business, [], {
+    const schema = productSchemaOf(baseProduct, business, [], {
       merchant: {
         shipping,
         returns,
@@ -926,7 +1063,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("prices shipping from the AggregateOffer lowPrice", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       {
         ...baseProduct,
         price: 4000,
@@ -948,7 +1085,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("uses the effective price for the free-shipping threshold", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, price: 5000 },
       business,
       [],
@@ -960,7 +1097,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("emits a shippingDetails array for multi-entry zone_weight stores", () => {
-    const schema = buildProductSchema(
+    const schema = productSchemaOf(
       { ...baseProduct, weight: 1, weightUnit: "lb" },
       business,
       [],
@@ -993,7 +1130,7 @@ describe("buildProductSchema — merchant listing", () => {
   });
 
   it("omits shippingDetails when nothing can be priced", () => {
-    const schema = buildProductSchema(baseProduct, business, [], {
+    const schema = productSchemaOf(baseProduct, business, [], {
       merchant: {
         shipping: {
           shippingType: "zone_weight",
@@ -1131,5 +1268,229 @@ describe("buildLocalBusinessSchema — service_area full address", () => {
       postalCode: "48201",
       addressCountry: "US",
     });
+  });
+});
+
+describe("buildProductSchema — coming-soon (price 0)", () => {
+  const review = {
+    rating: 5,
+    customerName: "Sam",
+    comment: "Lovely",
+    reviewDate: new Date("2026-06-01T12:00:00.000Z"),
+  };
+
+  it("returns null for a $0 product with no reviews", () => {
+    expect(
+      buildProductSchema({ ...baseProduct, price: 0 }, business),
+    ).toBeNull();
+  });
+
+  it("returns null for a $0 product with $0/inheriting variants and no reviews", () => {
+    expect(
+      buildProductSchema(
+        {
+          ...baseProduct,
+          price: 0,
+          variants: [
+            { price: 0, inventoryQty: 0 },
+            { price: null, inventoryQty: 0 },
+          ],
+        },
+        business,
+      ),
+    ).toBeNull();
+  });
+
+  it("returns null for $0 even when merchant data is supplied", () => {
+    expect(
+      buildProductSchema({ ...baseProduct, price: 0 }, business, [], {
+        merchant: {
+          shipping: {
+            shippingType: "flat_rate",
+            shippingFlatRate: 599,
+            freeShippingThreshold: null,
+            salesCountries: [],
+            shippingDefaultItemWeightLb: 0,
+            transitDaysMin: 2,
+            transitDaysMax: 5,
+          },
+          returns: {},
+        } as never,
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps the Product but omits offers when a $0 product has an aggregateRating", () => {
+    const schema = productSchemaOf(
+      { ...baseProduct, price: 0, averageRating: 4.5, reviewCount: 2 },
+      business,
+    );
+
+    expect(schema["@type"]).toBe("Product");
+    expect(schema).not.toHaveProperty("offers");
+    expect(schema.aggregateRating).toMatchObject({
+      "@type": "AggregateRating",
+      ratingValue: "4.5",
+      reviewCount: 2,
+    });
+  });
+
+  it("keeps the Product but omits offers when a $0 product has reviews", () => {
+    const schema = productSchemaOf({ ...baseProduct, price: 0 }, business, [
+      review,
+    ]);
+
+    expect(schema).not.toHaveProperty("offers");
+    expect(schema.review).toHaveLength(1);
+  });
+
+  it("returns null when reviews exist but are switched off and the price is $0", () => {
+    expect(
+      buildProductSchema(
+        { ...baseProduct, price: 0, averageRating: 4.5, reviewCount: 2 },
+        business,
+        [review],
+        { includeReviews: false },
+      ),
+    ).toBeNull();
+  });
+
+  it("still emits an Offer for a $0 base price when a variant has its own positive price", () => {
+    const schema = productSchemaOf(
+      {
+        ...baseProduct,
+        price: 0,
+        variants: [
+          { price: 0, inventoryQty: 5 },
+          { price: 1500, inventoryQty: 5 },
+        ],
+      },
+      business,
+    );
+
+    expect(schema.offers).toMatchObject({ "@type": "Offer", price: "15.00" });
+  });
+
+  it("keeps a positive-price product's Offer unchanged", () => {
+    const schema = productSchemaOf({ ...baseProduct, price: 2500 }, business);
+
+    expect(schema.offers).toEqual({
+      "@type": "Offer",
+      price: "25.00",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: expect.any(String) as string,
+    });
+  });
+});
+
+describe("buildServiceSchema — provider and areaServed", () => {
+  const baseUrl = buildWebSiteSchema(business).url as string;
+  const service = { name: "Balloons", slug: "balloons" };
+
+  it("carries the shared Organization @id plus a self-describing name/url", () => {
+    const schema = buildServiceSchema(service, business);
+    expect(schema.provider).toEqual({
+      "@type": "Organization",
+      "@id": buildOrganizationSchema(business)["@id"],
+      name: business.name,
+      url: baseUrl,
+    });
+    expect((schema.provider as { "@id": string })["@id"]).toBe(
+      `${baseUrl}/#organization`,
+    );
+    expect(schema.url).toBe(`${baseUrl}/services/balloons`);
+  });
+
+  it("emits normalized areaServed when the business lists areas", () => {
+    const schema = buildServiceSchema(service, {
+      ...business,
+      areaServed: [" Livonia ", "", "Metro Detroit", "livonia"],
+    });
+    expect(schema.areaServed).toEqual(["Livonia", "Metro Detroit"]);
+  });
+
+  it.each([
+    ["empty", []],
+    ["blank entries only", ["  ", ""]],
+    ["null", null],
+    ["undefined", undefined],
+  ])("omits areaServed when it is %s", (_label, areaServed) => {
+    const schema = buildServiceSchema(service, { ...business, areaServed });
+    expect(schema).not.toHaveProperty("areaServed");
+  });
+});
+
+describe("buildServiceSchema — hasOfferCatalog", () => {
+  const service = { name: "Facials", slug: "facials" };
+
+  it("emits one USD Offer per published item with a single-amount price", () => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Signature Facial", priceLabel: "$85" },
+      { name: "Deluxe Facial", priceLabel: " $1,130.5 " },
+      { name: "Draft Facial", priceLabel: "$60", published: false },
+    ]);
+    expect(schema.hasOfferCatalog).toEqual({
+      "@type": "OfferCatalog",
+      name: "Facials",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: "Signature Facial" },
+          price: "85.00",
+          priceCurrency: "USD",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: "Deluxe Facial" },
+          price: "1130.50",
+          priceCurrency: "USD",
+        },
+      ],
+    });
+  });
+
+  it.each([
+    ["a range", "$50-$75"],
+    ["a spaced range", "$50 - 75"],
+    ["an en-dash range", "$50–$75"],
+    ["a 'to' range", "$50 to $75"],
+    ["two choices", "$85 or $130"],
+    ["from pricing", "From $50"],
+    ["starting-at pricing", "Starting at $50"],
+    ["open-ended pricing", "$85+"],
+    ["free", "Free"],
+    ["free text", "Call for a quote"],
+    ["blank", "  "],
+    ["null", null],
+  ])("skips an item priced as %s", (_label, priceLabel) => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Facial", priceLabel },
+    ]);
+    expect(schema).not.toHaveProperty("hasOfferCatalog");
+  });
+
+  it("keeps parseable items when others are skipped", () => {
+    const schema = buildServiceSchema(service, business, [
+      { name: "Peel", priceLabel: "From $40" },
+      { name: "Facial", priceLabel: "$85 per session" },
+    ]);
+    const catalog = schema.hasOfferCatalog as {
+      itemListElement: { itemOffered: { name: string }; price: string }[];
+    };
+    expect(catalog.itemListElement).toHaveLength(1);
+    expect(catalog.itemListElement[0]).toMatchObject({
+      itemOffered: { name: "Facial" },
+      price: "85.00",
+    });
+  });
+
+  it.each([
+    ["undefined", undefined],
+    ["null", null],
+    ["empty", []],
+  ])("omits hasOfferCatalog when items are %s", (_label, items) => {
+    const schema = buildServiceSchema(service, business, items);
+    expect(schema).not.toHaveProperty("hasOfferCatalog");
   });
 });

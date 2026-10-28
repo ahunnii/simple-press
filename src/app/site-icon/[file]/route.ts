@@ -19,10 +19,12 @@ import type { CachedIcon } from "~/lib/site-icons/cache";
 import type { IconVariantName } from "~/lib/site-icons/variants";
 import { businessHostFilter } from "~/lib/domain-utils";
 import {
-  getCachedIcon,
-  markIconFailed,
-  setCachedIcon,
-} from "~/lib/site-icons/cache";
+  etagFor,
+  imageResponse,
+  loadCachedImage,
+  matchesIfNoneMatch,
+  notModified,
+} from "~/lib/site-icons/http";
 import { fetchIconSource, renderIconVariant } from "~/lib/site-icons/render";
 import { fnv1a, resolveIconSources } from "~/lib/site-icons/source";
 import { ICON_VARIANTS, isIconVariantName } from "~/lib/site-icons/variants";
@@ -30,7 +32,6 @@ import { db } from "~/server/db";
 
 export const runtime = "nodejs";
 
-const CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 const PLATFORM_ICO_PATH = "/simplepress-favicon.ico";
 
 // Keyed by content hash so a replaced file busts browser ETags on deploy.
@@ -48,57 +49,17 @@ function readPlatformIcon() {
   return platformIcon;
 }
 
-function etagFor(cacheKey: string) {
-  return `"${fnv1a(cacheKey)}"`;
-}
-
-function matchesIfNoneMatch(header: string | null, etag: string) {
-  if (!header) return false;
-  return header
-    .split(",")
-    .some((tag) => tag.trim().replace(/^W\//, "") === etag);
-}
-
 async function loadIcon(
   source: string,
   name: IconVariantName,
   load: () => Promise<Buffer>,
 ): Promise<CachedIcon | null> {
-  const key = `${source}|${name}`;
-  const cached = getCachedIcon(key);
-  if (cached === "failed") return null;
-  if (cached) return cached;
-
-  try {
-    const icon: CachedIcon = {
-      body: await renderIconVariant(await load(), name),
-      contentType: ICON_VARIANTS[name].contentType,
-      etag: etagFor(key),
-    };
-    setCachedIcon(key, icon);
-    return icon;
-  } catch (error) {
-    console.warn(`[site-icon] could not render ${name} from ${source}`, error);
-    markIconFailed(key);
-    return null;
-  }
-}
-
-function iconResponse(icon: CachedIcon, ifNoneMatch: string | null) {
-  const headers = { "Cache-Control": CACHE_CONTROL, ETag: icon.etag };
-  if (matchesIfNoneMatch(ifNoneMatch, icon.etag)) {
-    return new Response(null, { status: 304, headers });
-  }
-  return new Response(new Uint8Array(icon.body), {
-    headers: { ...headers, "Content-Type": icon.contentType },
-  });
-}
-
-function notModified(etag: string) {
-  return new Response(null, {
-    status: 304,
-    headers: { "Cache-Control": CACHE_CONTROL, ETag: etag },
-  });
+  return loadCachedImage(
+    `${source}|${name}`,
+    ICON_VARIANTS[name].contentType,
+    async () => renderIconVariant(await load(), name),
+    "[site-icon]",
+  );
 }
 
 async function storeIconSources(): Promise<string[]> {
@@ -132,7 +93,7 @@ export async function GET(
     if (matchesIfNoneMatch(ifNoneMatch, etag)) return notModified(etag);
 
     const icon = await loadIcon(source, file, () => fetchIconSource(source));
-    if (icon) return iconResponse(icon, ifNoneMatch);
+    if (icon) return imageResponse(icon, ifNoneMatch);
   }
 
   if (file === "favicon.ico") {
@@ -153,7 +114,7 @@ export async function GET(
       file,
       async () => platform.body,
     );
-    if (icon) return iconResponse(icon, ifNoneMatch);
+    if (icon) return imageResponse(icon, ifNoneMatch);
   } catch (error) {
     console.warn("[site-icon] could not read the SimplePress icon", error);
   }

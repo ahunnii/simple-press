@@ -31,7 +31,12 @@ export default defineConfig({
           // destructive `db push` in the integration project's globalSetup. It
           // deliberately cannot live in that project: its whole job is to run
           // before that setup, so a failure there must not depend on it.
-          include: ["src/**/*.test.ts", "tests/helpers/**/*.test.ts"],
+          include: [
+            "src/**/*.test.ts",
+            "tests/helpers/**/*.test.ts",
+            // One-off ops scripts keep their pure helpers testable.
+            "scripts/umsc/**/*.test.ts",
+          ],
           setupFiles: ["tests/helpers/setup-node.ts"],
         },
       },

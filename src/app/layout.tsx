@@ -9,9 +9,14 @@ import Script from "next/script";
 import { env } from "~/env";
 import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { checkBusiness } from "~/lib/check-business";
-import { rasterImageUrl } from "~/lib/image-url";
+import { shareableImageUrl } from "~/lib/image-url";
 import { getCachedBusiness } from "~/lib/seo";
 import { firstNonBlank } from "~/lib/seo/blank";
+import {
+  OG_FALLBACK_HEIGHT,
+  OG_FALLBACK_WIDTH,
+  ogFallbackImageUrl,
+} from "~/lib/seo/og-fallback";
 import { renderSeoTitle, resolveSeoBrand } from "~/lib/seo/title";
 import { iconVersion, resolveIconSource } from "~/lib/site-icons/source";
 import {
@@ -79,9 +84,11 @@ export async function generateMetadata() {
   const ogDescription = firstNonBlank(business.siteContent?.metaDescription);
   // No `/placeholder.svg` fallback: a share card with a real image or none at
   // all beats one advertising a missing asset.
-  const ogImageUrl = firstNonBlank(business.siteContent?.ogImage);
+  // An AVIF share image is skipped (Facebook/iMessage/LinkedIn can't show it);
+  // the generated 1200x630 logo card stands in.
   const ogImage =
-    ogImageUrl ?? firstNonBlank(rasterImageUrl(business.siteContent?.logoUrl));
+    firstNonBlank(shareableImageUrl(business.siteContent?.ogImage)) ??
+    ogFallbackImageUrl(business);
 
   // Search-engine ownership tokens. Emit a key only when the owner has actually
   // saved that token — an empty `<meta>` is worse than no tag at all, since
@@ -113,9 +120,10 @@ export async function generateMetadata() {
       // homepage title of just its name rather than "Name | Name".
       default: renderSeoTitle(ogTitle, brand),
     },
-    description:
-      firstNonBlank(business.siteContent?.metaDescription) ??
-      "The simplest way to get started with your online business.",
+    // Omitted rather than falling back to the platform tagline — a blank
+    // description lets Google build the snippet from the page's own text,
+    // which beats SimplePress marketing copy showing up on a tenant's store.
+    ...(ogDescription !== undefined ? { description: ogDescription } : {}),
     keywords:
       business.siteContent?.metaKeywords
         ?.split(",")
@@ -136,12 +144,9 @@ export async function generateMetadata() {
             images: [
               {
                 url: ogImage,
-                // Only declare aspect-ratio dimensions for true OG images.
-                // Logos are typically square; declaring 1200×630 misleads
-                // social platforms about the actual aspect ratio.
-                ...(ogImageUrl !== undefined
-                  ? { width: 1200, height: 630 }
-                  : {}),
+                // True for the generated logo card too.
+                width: OG_FALLBACK_WIDTH,
+                height: OG_FALLBACK_HEIGHT,
                 alt: business.name,
               },
             ],

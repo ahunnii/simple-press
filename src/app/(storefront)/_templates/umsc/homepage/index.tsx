@@ -168,7 +168,7 @@ const homepageCategoriesData: TemplateField[] = [
     group: "homepage.categories",
     gridColumn: "col-span-1",
     defaultValue:
-      "Four clear doors into the catalog. Pick a type; the products carry the details.",
+      "Candles, soaps, body care and home care, made in small batches in Detroit.",
   },
   {
     key: "umsc.homepage.categories-all-label",
@@ -347,8 +347,7 @@ const homepageReviewsData: TemplateField[] = [
     page: "homepage",
     group: "homepage.reviews",
     gridColumn: "col-span-1",
-    defaultValue:
-      "Real reviews from real orders, pulled from the store. Yours can be next.",
+    defaultValue: "What customers say after markets, pop-ups and orders.",
   },
   {
     key: "umsc.homepage.reviews-empty-text",

@@ -14,6 +14,16 @@ const contactHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
   },
   {
+    key: "vii.contact.hero-image-alt",
+    label: "Image description (alt text)",
+    description:
+      "Read aloud by screen readers and used by search engines to describe the background photo above. Leave blank if the photo is purely decorative.",
+    type: "text",
+    page: "contact",
+    group: "contact.hero",
+    gridColumn: "col-span-full",
+  },
+  {
     key: "vii.contact.hero-overline",
     label: "Small label",
     description: "Small label shown above the page title. Leave blank to hide.",

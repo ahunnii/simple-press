@@ -138,12 +138,12 @@ export function HappyBambooBlogPostPage({
                       </div>
                       <div>
                         {ctaHeading ? (
-                          <h3
+                          <h2
                             className="mb-2 text-xl font-bold"
                             {...fieldAttr("happy-bamboo.blog.post-cta-heading")}
                           >
                             {ctaHeading}
-                          </h3>
+                          </h2>
                         ) : null}
                         {ctaBody ? (
                           <p

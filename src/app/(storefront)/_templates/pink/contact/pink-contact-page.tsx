@@ -4,9 +4,9 @@ import Link from "next/link";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkContactTopic } from "./pink-contact-form";
-import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { meaningfulAltText } from "~/lib/images/alt-text";
 import {
   fieldAttr,
   listItemAttr,
@@ -16,6 +16,7 @@ import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { telHref } from "~/lib/tel-href";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { navHrefOffFlag } from "~/app/(storefront)/_components/nav/nav-flags";
 
 import { resolveFields } from "..";
 import { PinkFactRows } from "../shared/pink-fact-rows";
@@ -45,6 +46,7 @@ const FIELD_KEYS = [
   "pink.contact.form-success-body",
   "pink.contact.form-success-again-label",
   "pink.contact.studio-image",
+  "pink.contact.studio-image-alt",
   "pink.contact.studio-label",
   "pink.contact.studio-access-note",
   "pink.contact.shortcuts-heading",
@@ -216,7 +218,11 @@ export async function PinkContactPage({
                     {hasCustomImage(f["pink.contact.studio-image"]) ? (
                       <Image
                         src={f["pink.contact.studio-image"]!}
-                        alt=""
+                        alt={
+                          meaningfulAltText(
+                            f["pink.contact.studio-image-alt"],
+                          ) ?? ""
+                        }
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 33vw"

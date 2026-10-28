@@ -7,11 +7,18 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 type Props = {
   bandImage?: string;
+  /** Description of `bandImage`; blank keeps it decorative (`alt=""`). */
+  bandImageAlt?: string;
   bandHeading?: string;
   bandText?: string;
 };
 
-export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
+export function ViiImageBand({
+  bandImage,
+  bandImageAlt,
+  bandHeading,
+  bandText,
+}: Props) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLDivElement | null>(null);
 
@@ -100,7 +107,7 @@ export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
       >
         <Image
           src={bandImage}
-          alt=""
+          alt={bandImageAlt?.trim() ?? ""}
           fill
           sizes="100vw"
           style={{ objectFit: "cover" }}

@@ -131,7 +131,7 @@ const globalBrandingData: TemplateField[] = [
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Get to know UM Scented Candles",
+    defaultValue: "Get to know Unique Monique",
   },
   {
     key: "umsc.global.footer-shop-links",

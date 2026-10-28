@@ -28,9 +28,8 @@ import {
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { isValidGtin, normalizeGtin } from "~/lib/gtin";
-import { getEffectivePrice } from "~/lib/prices";
-import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { productDescriptionToPlainText } from "~/lib/product-description";
+import { isVideoMedia, photosOnly, primaryPhoto } from "~/lib/products/media";
 import { firstNonBlank } from "~/lib/seo/blank";
 import {
   normalizeAreaServed,
@@ -65,6 +64,8 @@ interface BusinessForOrganization extends CanonicalBusiness {
     logoUrl?: string | null;
     socialLinks?: unknown;
     seoBrandName?: string | null;
+    /** `SiteContent.metaDescription` → Organization `description`. */
+    metaDescription?: string | null;
   } | null;
 }
 
@@ -119,6 +120,8 @@ interface PageForBlogPosting {
   slug: string;
   excerpt?: string | null;
   ogImage?: string | null;
+  /** Fallback when `ogImage` is blank — the post's cover image. */
+  image?: string | null;
   publishedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -328,6 +331,10 @@ function buildProductVideoObjects(
  *   product with 0-1 variants or with ≥2 variants all priced the same; an
  *   AggregateOffer (lowPrice/highPrice/offerCount) when ≥2 variants have
  *   different effective prices
+ * - no offers when no (variant-resolved) price is positive — coming-soon
+ *   products saved at 0 would otherwise read as free
+ * - returns null when the result has no offers, review or aggregateRating
+ *   (Google's Product snippet requires one of them)
  * - aggregateRating — ONLY when reviewCount > 0 (Google rejects zero-review ratings)
  * - gtin — from a valid product barcode, else the single variant with one
  * - offers.shippingDetails / offers.hasMerchantReturnPolicy — only when
@@ -338,72 +345,70 @@ export function buildProductSchema(
   business: CanonicalBusiness & { name: string },
   reviews: ReviewForSchema[] = [],
   options: BuildProductSchemaOptions = {},
-): Record<string, unknown> {
+): Record<string, unknown> | null {
   const includeReviews = options.includeReviews ?? true;
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
   const images = photosOnly(product.images)
     .map((i) => toAbsoluteUrl(i.url))
     .filter((url): url is string => Boolean(url));
 
-  // Prices in the DB are stored in cents. Use the same effective-price
-  // resolution as the rest of the app (variant-aware — a variant price of
-  // 0/null means "inherit the product base price") and convert to a decimal
-  // dollar string for the JSON-LD Offer.
-  const effectivePriceCents = getEffectivePrice({
-    price: product.price,
-    compareAtPrice: null,
-    variants: (product.variants ?? []).map((v) => ({
-      price: v.price ?? null,
-      compareAtPrice: null,
-    })),
-  });
-
-  // Every variant's own effective price (0/null inherits the base price —
-  // same rule as getEffectivePrice/getAvailability), used to decide whether
-  // this product needs an AggregateOffer (a real price range) instead of a
-  // single Offer.
-  const variantPriceCents = (product.variants ?? []).map((v) =>
-    resolveVariantPrice(v.price, product.price),
-  );
+  // Prices in the DB are stored in cents. Every variant's own effective price
+  // (0/null inherits the base price — same rule as getEffectivePrice /
+  // getAvailability) is resolved first; a product with no variants uses its
+  // base price. Only positive prices count: a price of 0 is how "coming soon"
+  // products are saved, and an Offer at "0.00" tells Google the product is
+  // free (Merchant listing / rich result errors). With no positive price there
+  // is no Offer at all.
+  const pricedCents = (
+    (product.variants ?? []).length > 0
+      ? (product.variants ?? []).map((v) =>
+          resolveVariantPrice(v.price, product.price),
+        )
+      : [product.price]
+  ).filter((cents) => cents > 0);
   const hasPriceRange =
-    variantPriceCents.length >= 2 &&
-    Math.min(...variantPriceCents) !== Math.max(...variantPriceCents);
+    pricedCents.length >= 2 &&
+    Math.min(...pricedCents) !== Math.max(...pricedCents);
 
-  const offers: Record<string, unknown> = hasPriceRange
-    ? {
-        "@type": "AggregateOffer",
-        lowPrice: (Math.min(...variantPriceCents) / 100).toFixed(2),
-        highPrice: (Math.max(...variantPriceCents) / 100).toFixed(2),
-        offerCount: variantPriceCents.length,
-        priceCurrency: SCHEMA_CURRENCY,
-        availability: getAvailability(product),
-        url: canonicalUrl,
+  let offers: Record<string, unknown> | null = null;
+  if (pricedCents.length > 0) {
+    offers = hasPriceRange
+      ? {
+          "@type": "AggregateOffer",
+          lowPrice: (Math.min(...pricedCents) / 100).toFixed(2),
+          highPrice: (Math.max(...pricedCents) / 100).toFixed(2),
+          offerCount: pricedCents.length,
+          priceCurrency: SCHEMA_CURRENCY,
+          availability: getAvailability(product),
+          url: canonicalUrl,
+        }
+      : {
+          "@type": "Offer",
+          price: ((pricedCents[0] ?? 0) / 100).toFixed(2),
+          priceCurrency: SCHEMA_CURRENCY,
+          availability: getAvailability(product),
+          url: canonicalUrl,
+        };
+
+    if (options.merchant) {
+      const { shipping, returns, returnPolicyUrl } = options.merchant;
+      const shippingDetails = buildShippingDetails(shipping, {
+        priceCents: Math.min(...pricedCents),
+        weightLb: productWeightLb(
+          product,
+          shipping.shippingDefaultItemWeightLb,
+        ),
+      });
+      if (shippingDetails.length > 0) {
+        offers.shippingDetails =
+          shippingDetails.length === 1 ? shippingDetails[0] : shippingDetails;
       }
-    : {
-        "@type": "Offer",
-        price: (effectivePriceCents / 100).toFixed(2),
-        priceCurrency: SCHEMA_CURRENCY,
-        availability: getAvailability(product),
-        url: canonicalUrl,
-      };
-
-  if (options.merchant) {
-    const { shipping, returns, returnPolicyUrl } = options.merchant;
-    const shippingDetails = buildShippingDetails(shipping, {
-      priceCents: hasPriceRange
-        ? Math.min(...variantPriceCents)
-        : effectivePriceCents,
-      weightLb: productWeightLb(product, shipping.shippingDefaultItemWeightLb),
-    });
-    if (shippingDetails.length > 0) {
-      offers.shippingDetails =
-        shippingDetails.length === 1 ? shippingDetails[0] : shippingDetails;
-    }
-    const returnPolicy = buildMerchantReturnPolicy(returns, {
-      returnPolicyUrl,
-    });
-    if (returnPolicy) {
-      offers.hasMerchantReturnPolicy = returnPolicy;
+      const returnPolicy = buildMerchantReturnPolicy(returns, {
+        returnPolicyUrl,
+      });
+      if (returnPolicy) {
+        offers.hasMerchantReturnPolicy = returnPolicy;
+      }
     }
   }
 
@@ -416,7 +421,7 @@ export function buildProductSchema(
       "@type": "Brand",
       name: business.name,
     },
-    offers,
+    ...(offers ? { offers } : {}),
   };
 
   // Imported descriptions can carry HTML / literal "\n" escapes — JSON-LD
@@ -474,6 +479,12 @@ export function buildProductSchema(
     }));
   }
 
+  // Google's Product snippet needs offers, review or aggregateRating — a
+  // priceless product with none of them has nothing valid to say.
+  if (!schema.offers && !schema.aggregateRating && !schema.review) {
+    return null;
+  }
+
   return schema;
 }
 
@@ -506,6 +517,11 @@ export function buildOrganizationSchema(
     ...(alternateName ? { alternateName } : {}),
     url: baseUrl,
   };
+
+  const description = nonBlank(business.siteContent?.metaDescription);
+  if (description) {
+    schema.description = description;
+  }
 
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
   if (logoUrl) {
@@ -899,28 +915,81 @@ interface ServiceForSchema {
   ogImage?: string | null;
 }
 
+/** One bookable item under a service (a `ServiceItem` row), for price offers. */
+interface ServiceItemForSchema {
+  name: string;
+  /** Free-text price ("$85", "from $50", "$50-$75"), read via `parseSingleServicePrice`. */
+  priceLabel?: string | null;
+  /** Items explicitly marked `false` are skipped; unset counts as published. */
+  published?: boolean;
+}
+
+/**
+ * The USD amount ("85.00") when a service item's free-text `priceLabel` names
+ * exactly one price, else null. Stricter than `parseEventPrice`, which grabs
+ * the first `$` figure it sees: a price range, "from"/"starting at"/"$85+"
+ * and "free" are not one fixed price, so an Offer built from them would state
+ * something the page doesn't promise.
+ */
+function parseSingleServicePrice(
+  label: string | null | undefined,
+): string | null {
+  const text = label?.trim();
+  if (!text) return null;
+  // Two amounts ("$85 or $130") are a choice, not a price.
+  if ((text.match(/\$/g) ?? []).length !== 1) return null;
+  if (
+    /\b(from|starting|starts|up\s+to|as\s+low\s+as|and\s+up)\b/i.test(text) ||
+    // "$50-$75", "$50 - 75" and "$85+"
+    /\$\s*[\d,.]+\s*(?:[-\u2013\u2014]\s*\$?\d|\+)/.test(text) ||
+    /\$\s*[\d,.]+\s*to\s+\$?\d/i.test(text)
+  ) {
+    return null;
+  }
+  const price = parseEventPrice(text);
+  // "free" parses to "0"; that's free text here, not a priced offer.
+  return price === null || Number(price) === 0 ? null : price;
+}
+
 /**
  * Build a schema.org Service object for a service detail page.
  *
- * Includes name, url (canonical `/services/:slug`), provider (Organization),
- * and conditionally description and image.
+ * Includes name, url (canonical `/services/:slug`), provider (carrying the
+ * shared Organization `@id`), and conditionally areaServed (the store's
+ * owner-listed areas, same normalization as LocalBusiness), description and
+ * image.
+ *
+ * `items` adds a `hasOfferCatalog` of USD Offers for the published items
+ * whose `priceLabel` is a single amount (see `parseSingleServicePrice`);
+ * it is omitted when none parse.
  */
 export function buildServiceSchema(
   service: ServiceForSchema,
-  business: CanonicalBusiness & { name: string },
+  business: CanonicalBusiness & { name: string; areaServed?: string[] | null },
+  items?: readonly ServiceItemForSchema[] | null,
 ): Record<string, unknown> {
   const canonicalUrl = getCanonicalUrl(business, `/services/${service.slug}`);
+  const areaServed = normalizeAreaServed(business.areaServed ?? []);
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.name,
     url: canonicalUrl,
+    // Same @id as the store's one Organization/LocalBusiness node (emitted on
+    // the homepage and /contact) so the graphs merge; name/url keep this page's
+    // provider self-describing where that node isn't on the page.
     provider: {
       "@type": "Organization",
+      "@id": organizationId(getCanonicalBaseUrl(business)),
       name: business.name,
+      url: getCanonicalBaseUrl(business),
     },
   };
+
+  if (areaServed.length > 0) {
+    schema.areaServed = areaServed;
+  }
 
   if (service.description) {
     schema.description = service.description;
@@ -930,6 +999,30 @@ export function buildServiceSchema(
   const imageUrl = toAbsoluteUrl(service.image ?? service.ogImage);
   if (imageUrl) {
     schema.image = imageUrl;
+  }
+
+  const offers = (items ?? []).flatMap((item) => {
+    const name = nonBlank(item.name);
+    const price =
+      item.published === false
+        ? null
+        : parseSingleServicePrice(item.priceLabel);
+    if (!name || price === null) return [];
+    return [
+      {
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name },
+        price,
+        priceCurrency: "USD",
+      },
+    ];
+  });
+  if (offers.length > 0) {
+    schema.hasOfferCatalog = {
+      "@type": "OfferCatalog",
+      name: service.name,
+      itemListElement: offers,
+    };
   }
 
   return schema;
@@ -1028,7 +1121,9 @@ export function buildBlogPostingSchema(
     schema.description = page.excerpt;
   }
 
-  const image = toAbsoluteUrl(page.ogImage);
+  // `ogImage` is the owner's dedicated share image; a blank one (the editor
+  // saves "" when cleared) falls through to the post's cover `image`.
+  const image = toAbsoluteUrl(firstNonBlank(page.ogImage, page.image));
   if (image) {
     schema.image = image;
   }
@@ -1050,6 +1145,39 @@ interface EventForSchema {
   allDay: boolean;
   location?: string | null;
   priceLabel?: string | null;
+  externalUrl?: string | null;
+}
+
+/**
+ * Best-effort machine reading of the owner's free-text `Event.priceLabel`.
+ *
+ * - "free" / "no charge" / "no cost" / "complimentary" (as whole words) → "0"
+ * - otherwise the FIRST money amount ("$25 per person", "$10–$20" → "10.00",
+ *   "$1,200", "$7.5") → a 2-decimal string
+ * - anything else ("sliding scale", "Donation", "$") → null
+ *
+ * Only amounts with an explicit "$" are read: a bare number in "2 for 1" or
+ * "Ages 5-10" is not a price. USD is the only currency events have, so this
+ * matches the `priceCurrency` emitted by `buildEventSchema`.
+ */
+export function parseEventPrice(
+  label: string | null | undefined,
+): string | null {
+  const text = label?.trim();
+  if (!text) return null;
+
+  const money = /\$\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?/.exec(text);
+  if (money) {
+    const whole = money[1]!.replace(/,/g, "");
+    const cents = (money[2] ?? "").padEnd(2, "0");
+    return `${whole}.${cents}`;
+  }
+
+  if (/\b(free|no\s+(?:charge|cost)|complimentary)\b/i.test(text)) {
+    return "0";
+  }
+
+  return null;
 }
 
 /**
@@ -1064,14 +1192,16 @@ interface EventForSchema {
  * zone — see src/lib/events/format.ts for why). Timed events emit the full
  * ISO instant, which already carries its own offset.
  *
- * IMPORTANT: `priceLabel` is a free-text display string ("$45 per person",
- * "Free", "sliding scale") entered by the owner, not a structured price. It
- * must NEVER be turned into an `offers` object — doing so would fabricate a
- * machine-readable price/currency/availability that we have no actual data
- * for (no checkout, no inventory, no currency selection exists for events).
- * If a future contributor is tempted to "complete" this schema with offers
- * because priceLabel looks parseable (e.g. "$45"), don't — that's exactly
- * the failure mode this comment exists to head off.
+ * `eventAttendanceMode` is OfflineEventAttendanceMode whenever a physical
+ * `location` is set (the model has no online/virtual signal) and omitted
+ * otherwise.
+ *
+ * `offers` is a best-effort reading of the free-text `priceLabel` via
+ * `parseEventPrice` (events have no checkout, so this is informational): a
+ * parsed price or "free" → a priced Offer (USD, InStock); an unparseable
+ * label with an `externalUrl` → an Offer carrying only that url; otherwise
+ * no `offers`. The Offer url is `externalUrl` when set (where tickets /
+ * signup live), else the event's own page.
  */
 export function buildEventSchema(
   event: EventForSchema,
@@ -1128,6 +1258,23 @@ export function buildEventSchema(
       // free-text location field, so it doubles as both name and address.
       address: event.location,
     };
+    schema.eventAttendanceMode =
+      "https://schema.org/OfflineEventAttendanceMode";
+  }
+
+  const externalUrl = toAbsoluteUrl(nonBlank(event.externalUrl));
+  const price = parseEventPrice(event.priceLabel);
+  const offerUrl = externalUrl ?? canonicalUrl;
+  if (price !== null) {
+    schema.offers = {
+      "@type": "Offer",
+      price,
+      priceCurrency: "USD",
+      url: offerUrl,
+      availability: "https://schema.org/InStock",
+    };
+  } else if (externalUrl) {
+    schema.offers = { "@type": "Offer", url: externalUrl };
   }
 
   return schema;

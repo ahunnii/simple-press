@@ -34,7 +34,10 @@ describe("JsonLd XSS prevention", () => {
       business,
     );
 
-    const output = renderToStaticMarkup(<JsonLd data={maliciousSchema} />);
+    expect(maliciousSchema).not.toBeNull();
+    const output = renderToStaticMarkup(
+      <JsonLd data={maliciousSchema ?? {}} />,
+    );
 
     // Verify the malicious closing tag is escaped and not present as unescaped
     expect(output).not.toContain("</script><script>");
